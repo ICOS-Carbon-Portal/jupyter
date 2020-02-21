@@ -9,6 +9,7 @@ Logos included:
 * ICOS Carbon Observation System
 * BECC
 * MERGE
+* Course logo
 
 
 ## License
