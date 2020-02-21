@@ -8,6 +8,8 @@ The documents in this folder include ancillary information about a station:
   * latitude
   * longitude
 
+<br>
+<br>
 
 and descriptions of the FLUXNET - files used in the course:
   * column name description
