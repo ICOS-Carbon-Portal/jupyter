@@ -1,5 +1,5 @@
 ![im](logos/climbeco_course_logo.png)
-# ClimBEco Graduate Research School - "From CO2 in situ measurements to carbon balance maps as a tool to support national carbon accounting"
+# ClimBEco Course: "From CO2 in situ measurements to carbon balance maps as a tool to support national carbon accounting"
 Exercises and ancillary data for the ClimBEco 2020 course on "From CO2 in situ measurements to carbon balance maps as a tool to support national carbon accounting".
 
 
