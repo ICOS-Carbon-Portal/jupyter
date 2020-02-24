@@ -1,4 +1,4 @@
-![im](logos/climbeco_course_logo.png)
+![im](ancillarydata/logos/climbeco_course_logo.png)
 
 Exercises and ancillary data for the ClimBEco 2020 course on "From CO2 in situ measurements to carbon balance maps as a tool to support national carbon accounting".
 
