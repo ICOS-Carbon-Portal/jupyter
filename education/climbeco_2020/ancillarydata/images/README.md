@@ -1,5 +1,5 @@
 # Images
-This folder contains images that are used in all notebooks for all modules.
+This folder contains images that are used in all notebooks for all exercises.
 
 
 ## Structure
