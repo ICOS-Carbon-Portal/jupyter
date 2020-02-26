@@ -2,7 +2,7 @@
 This folder contains additional information regarding the stations and the FLUXNET-variables.
 
 ## Structure
-The document called "climbeco_course_station_list" includes the following information about stations:
+The document called <font color=blue>climbeco_course_station_list</font> includes the following information about stations:
   * Country
   * Country code
   * Station name (long)
