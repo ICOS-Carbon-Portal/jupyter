@@ -2,7 +2,7 @@
 This folder contains additional information regarding the stations and the FLUXNET-variables.
 
 ## Structure
-The document called <font color=blue>climbeco_course_station_list</font> includes the following information about stations:
+The document called _climbeco_course_station_list_ includes the following information about stations:
   * Country
   * Country code
   * Station name (long)
@@ -12,7 +12,7 @@ The document called <font color=blue>climbeco_course_station_list</font> include
   * Longitude
   
   
-The document called "climbeco_variable_list" includes the following information:
+The document called _climbeco_variable_list_ includes the following information:
   * Explanation of FLUXNET-variable-names for half-hourly measurements
   * Explanation of FLUXNET-variable-names for daily measurements
   * List of differences between FLUXNET datasets with half-hourly vs daily measurements
