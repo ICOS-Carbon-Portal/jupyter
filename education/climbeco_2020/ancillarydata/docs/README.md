@@ -1,20 +1,11 @@
-# Documents
-The documents in this folder include ancillary information about a station:
-  * country name
-  * country code (2 characters)
-  * station name
-  * station code (3 characters)
-  * vegetation type
-  * latitude
-  * longitude
+# Ancillary data
+This folder contains additional information (docs and images) for the notebook exercises.
 
-<br>
-<br>
-
-and descriptions of the FLUXNET - files used in the course:
-  * column name description
-  * description of differences between datasets containing daily vs half-hourly values
-
+## Structure
+Ancillary data is organized in 3 sufolders:
+ * docs   --> contains documents with information regarding the stations & the variables in the FLUXNET-files
+ * logos  --> includes logos presented in the notebooks
+ * images --> includes images presented in the notebooks
 
 
 ## License
