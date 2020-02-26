@@ -16,6 +16,10 @@ This part includes:
   * images (explanatory images of outputs used in the notebooks)
   * logos
 
+* Notebooks
+  * Notebooks containing the course exercises (one notebook per exercise)
+  * Look-up notebooks (to be used as reference for the exercises) 
+  * Notebook including help-functions (i.e. "tools")
 
 # License
 This work is licensed under a
