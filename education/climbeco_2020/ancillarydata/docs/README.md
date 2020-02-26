@@ -2,7 +2,7 @@
 This folder contains additional information (docs and images) for the notebook exercises.
 
 ## Structure
-Ancillary data is organized in 3 sufolders:
+Ancillary data is organized in 3 subfolders:
  * docs   --> contains documents with information regarding the stations & the variables in the FLUXNET-files
  * logos  --> includes logos presented in the notebooks
  * images --> includes images presented in the notebooks
