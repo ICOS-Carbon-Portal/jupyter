@@ -1,11 +1,21 @@
-# Ancillary data
-This folder contains additional information (docs and images) for the notebook exercises.
+# Documents
+This folder contains additional information regarding the stations and the FLUXNET-variables.
 
 ## Structure
-Ancillary data is organized in 3 subfolders:
- * docs   --> contains documents with information regarding the stations & the variables in the FLUXNET-files
- * logos  --> includes logos presented in the notebooks
- * images --> includes images presented in the notebooks
+The document called "climbeco_course_station_list" includes the following information about stations:
+  * Country
+  * Country code
+  * Station name (long)
+  * Station code
+  * Vegetation type
+  * Latitude
+  * Longitude
+  
+  
+The document called "climbeco_variable_list" includes the following information:
+  * Explanation of FLUXNET-variable-names for half-hourly measurements
+  * Explanation of FLUXNET-variable-names for daily measurements
+  * List of differences between FLUXNET datasets with half-hourly vs daily measurements
 
 
 ## License
