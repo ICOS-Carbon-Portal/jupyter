@@ -1,5 +1,5 @@
 # Logos
-This folder contains logos that are used in all notebooks for all modules.
+This folder contains logos that are used in all notebooks for all exercises.
 
 
 ## Description
