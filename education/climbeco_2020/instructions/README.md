@@ -1,4 +1,7 @@
-# This directory includes documentation with instructions for:
+# Instructions
+
+This directory includes documentation with instructions for:
+
 * how to work with Jupyter notebooks
 * every workshop 
   * Workshop 1
