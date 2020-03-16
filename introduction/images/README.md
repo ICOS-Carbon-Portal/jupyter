@@ -11,6 +11,7 @@ The images are organized in subfolders depending the part of a notebook they cor
 * dictionaries
 * control flow (i.e. conditional-statements, loops, etc.)
 * list comprehensions
+* Pandas DataFrames
 
 
 
