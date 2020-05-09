@@ -1,6 +1,6 @@
 # Content
 
-This folder contain files for exectuing curve fitting methods for time series in Python. For a more detailed explanation of the methods visit [NOAA](https://www.esrl.noaa.gov/gmd/ccgg/mbl/crvfit/crvfit.html).
+This folder contain files for exectuing curve fitting methods for time series in Python. For a more detailed explanation of the methods visit [NOAA](https://www.esrl.noaa.gov/gmd/ccgg/mbl/crvfit/crvfit.html). The folder also contains a Jupyter Notebook with help functions in Python for using the curve fitting methods with data from ICOS stations and affiliated stations included in the Drought 2018 project.
 
 
 # References
