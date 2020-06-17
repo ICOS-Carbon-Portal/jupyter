@@ -11,7 +11,7 @@ Introduction to basic principles of programming with Python.
 * **Scientific Computing with Python**
 Examples of how to organize and process data in NumPy arrays and Pandas DataFrames.
 
-
+<br>
 The directory also includes folders with ancillary data:
 * explanatory images (used in the notebooks)
 
@@ -20,6 +20,7 @@ The directory also includes folders with ancillary data:
 
 
 ## Licence
-This work is licensed under a Creative Commons Attribution 4.0 International License (CC BY 4.0).
+This work is licensed under a Creative Commons Attribution 4.0 International License (CC BY 4.0). <br>
+Copyright © 2019-2020 ICOS ERIC
 
 
