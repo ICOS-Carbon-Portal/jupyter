@@ -16,4 +16,4 @@ The notebooks, code files and ancillary data files are divided into subjects. Ev
 
 ## Licence
 This work is licensed under a Creative Commons Attribution 4.0 International License (CC BY 4.0). <br>
-© ICOS ERIC 2020
+Copyright © 2019-2020 ICOS ERIC
