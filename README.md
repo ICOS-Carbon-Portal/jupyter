@@ -2,7 +2,6 @@
 This repository contains code and ancillary data for all jupyter notebooks that are currently available through the ICOS CP "Anonymous" service: https://exploredata.icos-cp.eu
 
 <br>
-<br>
 
 ## Structure
 The notebooks, code files and ancillary data files are divided into subjects. Every subject has its own folder:
@@ -13,7 +12,6 @@ The notebooks, code files and ancillary data files are divided into subjects. Ev
 * **Project-specific Jupyter Notebooks:** includes notebooks presenting the scientific output of projects ICOS has been part of
 * **Pytools:** contains python libraries and modules for retrieving, processing and plotting ICOS data.
 
-<br>
 <br>
 
 ## Licence
