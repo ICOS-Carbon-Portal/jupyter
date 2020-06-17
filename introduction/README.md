@@ -14,9 +14,9 @@ Introduction to basic principles of programming with Python.
 Examples of how to organize and process data in NumPy arrays and Pandas DataFrames.
 
 <br>
+
 The directory also includes folders with ancillary data:
 * explanatory images (used in the notebooks)
-
 * logos
 
 <br>
