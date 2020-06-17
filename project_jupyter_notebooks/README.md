@@ -1,5 +1,5 @@
 # ICOS Project-specific Jupyter Notebooks
-This folder includes notebooks that present the scientific output of projects in which ICOS has took part in. The scientific output is presented in a way that make it easy for users to understand the applied process. Users may interact with the code by altering code in the code cells or by using interactive widgets.
+This folder includes notebooks that present the scientific output of projects in which ICOS has taken part in. The scientific output is presented in a way that make it easy for users to understand the applied process. Users may interact with the code by altering code in the code cells or by using interactive widgets.
 
 <br>
 
