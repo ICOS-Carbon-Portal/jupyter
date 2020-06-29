@@ -33,9 +33,8 @@ from icoscp.sparql.runsparql import RunSparql
 
 # get path to user home directory
 my_home = os.getenv('HOME')
-#sys.path.insert(1,my_home+'/new_jupyter/modules')
 sys.path.insert(1,'modules')
-from extra_sparqls import get_station_class, get_icos_stations_atc_samplingheight, atc_station_tracer_query
+from extra_sparqls import atc_station_tracer_query
 
 from STILT_modules_plus import create_STILT_dictionary, print_STILT_dictionary 
 from STILT_modules_plus import lonlat_2_ixjy, read_emissions

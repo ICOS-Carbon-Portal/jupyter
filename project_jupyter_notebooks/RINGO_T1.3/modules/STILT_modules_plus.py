@@ -20,16 +20,11 @@ sys.path.insert(0,'/data/project/pytools')
 #Import ICOS tools:
 from icoscp.sparql import sparqls
 from icoscp.sparql.runsparql import RunSparql
+from icoscp.cpb.cpbinfile import CpBinFile
 #from icoscp.cpb.dobj import Dobj
 
-my_home = os.getenv('HOME')
-#sys.path.insert(1,my_home+'/new_jupyter/modules')
 sys.path.insert(1,'modules')
 from extra_sparqls import get_station_class, get_icos_stations_atc_samplingheight
-
-#only for testing on test.icos-cp.eu
-sys.path.insert(1,'modules/icoscp/cpb')
-from dobj import Dobj
 
 # paths --- changed for new JupyterHub instance
 path_stiltweb = '/data/stiltweb/'
@@ -42,7 +37,7 @@ path_edgar = '/data/stilt/Emissions/'
 def read_icos_data(f_icos,tracer,flag=True):
     
     if (len(f_icos)>0):
-        df = Dobj(f_icos.dobj.iloc[0]).getColumns()
+        df = CpBinFile(f_icos.dobj.iloc[0]).getColumns()
         df.set_index('TIMESTAMP',inplace=True)
         if flag:
             if (tracer.lower() == 'mto'):
