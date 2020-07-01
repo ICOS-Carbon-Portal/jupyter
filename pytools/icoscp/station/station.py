@@ -27,6 +27,7 @@ __date__        = "2019-08-09"
 
 import json
 import pandas as pd
+import numpy as np
 from icoscp.sparql.runsparql import RunSparql
 from icoscp.sparql import sparqls
 from tqdm import tqdm
@@ -193,13 +194,17 @@ class Station():
         self._country = country
     #-------------------------------------
     def __str__(self):          
-        return json.dumps(self.__dict__, indent=2)
-        #d =  self.__dict__
-        #d.pop('_data', None)
-        #return json.dumps(d, indent=2)
+        return self.info('json')
         
     def data(self, level=None):
-        
+        """
+        return a list of digital objects for the station
+        parameter: level [str | int] default None
+        provide filter to dataobjects
+            1 = raw data
+            2 = QAQC data
+            3 = elaborated products
+        """
         if not isinstance(self._data, pd.DataFrame):
             # _data is not a dataframe but contains a string...
             return self._data
@@ -211,11 +216,27 @@ class Station():
             # return complete pandas data fram
             return self._data
     
-    def products(self):
+    def products(self, fmt='pandas'):
+        """
+        Parameters
+        ----------
+        fmt : str,  optional ['pandas', 'dict']
+                    Return a pandas dataframe of unique data products for
+                    the station. The default is 'pandas'.
+
+        Returns
+        -------
+        [pandas data frame | dict]
+            uniqe list of data products.
+
+        """
         
         if not isinstance(self._products, pd.DataFrame):
             return self._products
-        else:            
+        
+        if fmt == 'dict':
+            return self._products.to_dict()
+        else:
             return self._products
     
     
@@ -283,6 +304,7 @@ class Station():
         newKeys = [k.strip('_') for k in list(self.__dict__)]
         values =  self.__dict__.values()
         dictionary = dict(zip(newKeys,values))
+        
         # remove data and products from the dict to get a shorter
         # summary of information about station
         if 'data' in dictionary:
@@ -298,14 +320,41 @@ class Station():
             return json.dumps(dictionary, indent=4)
                         
         if fmt == 'list':
-            return (list(newKeys), list(values))
+            return (list(dictionary.keys()), list(dictionary.values()))
         
         if fmt == 'pandas':            
             return pd.DataFrame(dictionary, index=[0])
         
-        if fmt == 'html':
-            data = pd.DataFrame(dictionary, index=[0])
-            return data.to_html()
+        if fmt == 'html':           
+            #data = pd.DataFrame(dictionary, index=[0])
+            #return data.to_html()
+	    
+	    #Create and initialize variable to store station info in html table:
+            html_table = '<table>'
+
+            #Loop through all keys of station dictionary:
+            for k in dictionary.keys():
+
+                #Check if current dict key holds the the long name of the station and
+                #if the key to the URL of the station landing page is included:
+                if((k=='name') & ('url' in dictionary.keys())):
+                    
+                    #Create table row and add link with URL to station landing page:
+                    html_table = html_table+'<tr><td>'+k+'</td><td><b>&nbsp;&nbsp;&nbsp;&nbsp;<a href="'+str(dictionary['url'])+'"target="_blank">'+str(dictionary[k])+'</a></b></td></tr>'           
+                
+                #Skip creating table row for 'url' key:
+                elif(k=='url'):
+                    continue
+                
+                #Add table row with station info for current key:
+                else:
+                    html_table = html_table+'<tr><td>'+k+'</td><td><b>&nbsp;&nbsp;&nbsp;&nbsp;'+str(dictionary[k])+'</b></td></tr>'
+            
+            #Add html closing tag for table:
+            html_table = html_table +'</table>'
+            
+            #Return station info as html table:
+            return html_table
         
     def __setData(self):
         
@@ -332,31 +381,64 @@ class Station():
         else:
             self._data = 'no data available'
         
-        # check if data is available and extract the 'unique' data products
-        # and unique sampling heights
+        # check if data is available and extract the 'unique' data products        
         if isinstance(self._data, pd.DataFrame):
             p = self._data['specLabel'].unique()            
             self._products = pd.DataFrame(p)
             
-            sh = self._data['samplingheight'].astype(float)
-            sh = sh.unique().tolist()   
-            sh.sort()
-            self._samplingheight = sh
+            # replace samplingheight=None with empty string
+            self._data.samplingheight.replace(to_replace=[None], value="", inplace=True)
         else:
             self._products = 'no data available'
-            self._samplingheight = []
-     
 
-"""
-        # get all the digital data objects... without extracting the data
-        
-        dobjList = []
-        for pid in self._data['dobj']:
-            dobjList.append(binfile(pid))
-        if dobjList:
-            self.dobjList = dobjList
-"""        
             
+    def sh(self, product = None):
+        """        
+        This function is a short cut to return the getSamplingHeight()        
+        for documentation, please refer to .getSamplingHeight()
+        """
+        return self.getSamplingHeight(product)
+    
+    def getSamplingHeight(self, product = None):
+        """        
+
+        Parameters
+        ----------
+        product : str,  please provide a valid object specification
+                        DESCRIPTION. The default is None.
+
+        Returns
+        -------
+        a list of unique values for sampling for the specified data product\
+        in case of no samplinghights or the product is not found for this
+        station, an empty list is returned.       
+
+        """
+        # default return value is empty list
+        sh = ['']
+        
+        # check if product is availabe for station
+        if not product in self._data.values:
+            return sh
+        
+        # if product is available but no sampling height is defined, return
+        # count returns zero, if no sampling heights found
+        if not self._data['samplingheight'][self._data.specLabel.str.match(product)].count():
+            return sh
+        
+        # finally get all sampling heights and create a unique list        
+        sh = self._data.samplingheight[self._data.specLabel == product].unique()        
+        sh = list(filter(None, sh))
+        if not sh:
+            return['']
+        
+        # at this point we have to assume we have an unsorted list of
+        # samplingheights as strings. cast to float and sort.
+        sh = [float(s) for s in sh]
+        sh.sort()
+        return sh
+        
+        
 # --EOF Station Class-----------------------------------------            
 # ------------------------------------------------------------
 def get(stationId):
