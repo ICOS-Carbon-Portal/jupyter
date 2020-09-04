@@ -9,13 +9,6 @@ import datetime as dt
 import json 
 import requests
 
-#Set path to ICOS tools:
-sys.path.insert(0,'/data/project/pytools')
-#Import ICOS tools:
-from icoscp.sparql import sparqls
-from icoscp.sparql.runsparql import RunSparql
-from icoscp.cpb.cpbinfile import CpBinFile
-
 #-----------------------------------------------------------------------------
 
 def get_station_class():

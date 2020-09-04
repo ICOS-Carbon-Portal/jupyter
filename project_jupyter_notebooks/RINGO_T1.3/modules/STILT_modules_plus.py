@@ -15,15 +15,14 @@ from cartopy.feature import NaturalEarthFeature, LAND, COASTLINE, LAKES
 import json 
 import requests
 
-#Set path to ICOS tools:
-sys.path.insert(0,'/data/project/pytools')
 #Import ICOS tools:
-from icoscp.sparql import sparqls
+from icoscp.cpb.dobj import Dobj
 from icoscp.sparql.runsparql import RunSparql
-from icoscp.cpb.cpbinfile import CpBinFile
+from icoscp.sparql import sparqls
+
 
 my_home = os.getenv('HOME')
-sys.path.insert(1,my_home+'/new_jupyter/modules')
+sys.path.insert(0,my_home+'/new_jupyter/modules')
 from extra_sparqls import get_station_class, get_icos_stations_atc_samplingheight #, atc_station_tracer_query
 
 # paths --- changed for new JupyterHub instance
@@ -37,7 +36,7 @@ path_edgar = '/data/stilt/Emissions/'
 def read_icos_data(f_icos,tracer,flag=True):
     
     if (len(f_icos)>0):
-        df = CpBinFile(f_icos.dobj.iloc[0]).getColumns()
+        df = Dobj(f_icos.dobj.iloc[0]).getColumns()
         df.set_index('TIMESTAMP',inplace=True)
         if flag:
             if (tracer.lower() == 'mto'):
