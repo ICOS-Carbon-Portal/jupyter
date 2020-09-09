@@ -66,7 +66,6 @@ def get_icos_stations_atc_samplingheight():
            ?dset cpmeta:hasColumn ?col .
            ?spec cpmeta:containsDataset ?dset .
            ?spec cpmeta:hasAssociatedProject <http://meta.icos-cp.eu/resources/projects/icos> .
-           ?spec cpmeta:hasDataLevel "1"^^xsd:integer .
            ?dobj cpmeta:hasObjectSpec ?spec .
            ?dobj cpmeta:hasName ?fileName .
            ?dobj cpmeta:hasSizeInBytes ?fileSize .
