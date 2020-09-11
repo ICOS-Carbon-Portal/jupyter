@@ -1317,7 +1317,7 @@ def create_seasonal_table(station, year, save_figs=''):
         df_seasonal_table.loc['GEE'] = pd.Series({'Variable': 'GEE','Unit': 'ppm (uptake)', year_var:("%.2f" % gee_whole), 'Dec-Feb':("%+.2f" % gee_diff_winter+ '%'), 'Mar-May':("%+.2f" % gee_diff_spring+ '%'), 
                                                               'Jun-Aug':("%+.2f" % gee_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % gee_diff_fall+ '%'), 'Unit': 'ppm (uptake)'})
 
-        df_seasonal_table.loc['Respiration'] = pd.Series({'Variable': 'Respiration', year_var:("%.2f" % resp_whole), 'Dec-Feb':("+%.2f" % resp_diff_winter+ '%'), 'Mar-May':("%+.2f" % resp_diff_spring+ '%'), 
+        df_seasonal_table.loc['Respiration'] = pd.Series({'Variable': 'Respiration', year_var:("%.2f" % resp_whole), 'Dec-Feb':("%+.2f" % resp_diff_winter+ '%'), 'Mar-May':("%+.2f" % resp_diff_spring+ '%'), 
                                                               'Jun-Aug':("%+.2f" % resp_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % resp_diff_fall+ '%'), 'Unit': 'ppm'})
 
 
