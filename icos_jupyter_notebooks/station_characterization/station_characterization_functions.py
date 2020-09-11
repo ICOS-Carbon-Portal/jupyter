@@ -30,9 +30,15 @@ from IPython.display import clear_output, display
 # import required libraries
 #%pylab inline
 import netCDF4 as cdf
-import pickle
+#import pickle
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
+import warnings
+warnings.filterwarnings('ignore')
+
+#added - not show the figure that I am saving (different size than the one displayed
+#for land cover bar graph)
+matplotlib.pyplot.ioff()
 
 #stations that have footprints as well as year and months with footprints. Also altitude. 
 
@@ -255,7 +261,7 @@ def create_STILT_dictionary():
     #        print (k,':', stations[ist][k])
 
     # write dictionary to pickle file for further use
-    pickle.dump( stations, open( "stationsDict.pickle", "wb" ) )
+    #pickle.dump( stations, open( "stationsDict.pickle", "wb" ) )
 
     return stations
 
@@ -1013,7 +1019,7 @@ def land_cover_bar_graph(station, date_range, timeselect, title='', save_figs=''
                         'Forests':{'color':'green'}, 'Pastures and grassland':{'color':'yellow'}, 'Other':{'color':'black'}, 'No data':{'color': 'grey'}}
 
     #11,10
-    fig = plt.figure(figsize=(12,11)) 
+    fig = plt.figure(figsize=(11,13)) 
 
     ax = fig.add_subplot(1,1,1)
 
@@ -1079,9 +1085,74 @@ def land_cover_bar_graph(station, date_range, timeselect, title='', save_figs=''
     
     if save_figs=='yes':
         
+        plt.ioff()
+        #different figsize here for the PDF
+        fig = plt.figure(figsize=(12,11)) 
+        
+
+        ax = fig.add_subplot(1,1,1)
+    
+        N = 8
+    
+        ind = np.arange(N)  
+    
+        width = 0.35       
+    
+    
+        p1 = ax.bar(ind, list_land_cover_values[0], width, color=dictionary_color[list_land_cover_name[0]]['color'])
+        p2 = ax.bar(ind, list_land_cover_values[1], width, color=dictionary_color[list_land_cover_name[1]]['color'],
+                     bottom=list_land_cover_values[0])
+    
+        p3 = ax.bar(ind, list_land_cover_values[2], width, color=dictionary_color[list_land_cover_name[2]]['color'],
+                     bottom=list_land_cover_values[0]+list_land_cover_values[1])
+        p4 = ax.bar(ind, list_land_cover_values[3], width, color=dictionary_color[list_land_cover_name[3]]['color'],
+                     bottom=list_land_cover_values[0]+list_land_cover_values[1]+list_land_cover_values[2])
+        p5 = ax.bar(ind, list_land_cover_values[4], width, color=dictionary_color[list_land_cover_name[4]]['color'],
+                     bottom=list_land_cover_values[0]+list_land_cover_values[1]+list_land_cover_values[2]+list_land_cover_values[3])
+        p6 = ax.bar(ind, list_land_cover_values[5], width, color=dictionary_color[list_land_cover_name[5]]['color'],
+                     bottom=list_land_cover_values[0]+list_land_cover_values[1]+list_land_cover_values[2]+list_land_cover_values[3]+list_land_cover_values[4])
+        p7 = ax.bar(ind, list_land_cover_values[6], width, color=dictionary_color[list_land_cover_name[6]]['color'],
+                     bottom=list_land_cover_values[0]+list_land_cover_values[1]+list_land_cover_values[2]+list_land_cover_values[3]+list_land_cover_values[4]+list_land_cover_values[5])
+    
+        #want to reverese the order (ex if oceans at the "bottom" in the graph - ocean label should be furthest down)
+        handles=(p1[0], p2[0], p3[0], p4[0], p5[0], p6[0], p7[0])
+    
+        index=0
+        list_labels=[]
+        for land_cover_name in list_land_cover_name:
+    
+            for_lable= (land_cover_name + ' (' + str("%.1f" % sum(list_land_cover_values[index])) + '%)')
+            list_labels.append(for_lable)
+            index=index+1
+    
+        date_index_number = (len(date_range) - 1)
+        if title=='yes':
+            for_title=('Station: ' + str(station) + '\n' + 'Land cover within average footprint by direction'+
+                     '\n' + str(date_range[0].year) + '-' + str(date_range[0].month) + '-' + str(date_range[0].day)\
+                    + ' to ' + str(date_range[date_index_number].year) + '-' + str(date_range[date_index_number].month) + '-' + str(date_range[date_index_number].day)+\
+                  ' Hour(s): ' + timeselect+ '\n')
+        else:
+            for_title=''
+    
+        labels=[textwrap.fill(text,20) for text in list_labels]
+        #(1,-0.05)
+        #1.3, 0.2
+        #1,1
+        plt.legend(handles[::-1], labels[::-1],bbox_to_anchor=(1, 0.4))
+        #leg = ax.legend(labels, bbox_to_anchor=(1, -0.05), ncol=2)
+    
+        plt.ylabel('Percent')
+        plt.title(for_title)
+        
+        #first one is not north (in rosedata - rather 22.5 to 67.5 (NE). 
+        plt.xticks(ind, ('NE', 'E','SE', 'S', 'SW','W', 'NW', 'N'))
+    
+        ax.yaxis.grid(True)
+        
         plotdir='figures'
         pngfile=station+'_figure_7'
         fig.savefig(plotdir+'/'+pngfile+'.pdf',dpi=100, bbox_inches='tight')
+        plt.close(fig)
 
 #seasonal variations table
 def create_seasonal_table(station, year, save_figs=''):
@@ -2703,7 +2774,7 @@ def station_characterization_widget_selection():
             if station_class!=r'not an ICOS certified station\unskip':
                 
                 display(HTML('<p style="font-size:35px;font-weight:bold;"><br>' + station_name + ' station characterization</p><p style="font-size:18px;"><br>'\
-                + station_name + 'is ' + str(station_class) + station_site_type.lower() + \
+                + station_name + ' is ' + str(station_class) + station_site_type.lower() + \
                 ' located in ' + station_country + ' (latitude: ' + str("%.2f" % station_lat) + degree_sign + 'N, ' + 'longitude: ' + str("%.2f" % station_lon) +\
                 degree_sign + 'E).</p>'))
             
