@@ -863,7 +863,7 @@ def map_representation_polar_graph(station, date_range, timeselect, bin_size, un
                   zoom=zoom, colors=colorbar, pngfile=string_fig)
 
 
-#land cover bar grapg:
+#land cover bar graph:
 def land_cover_bar_graph(station, date_range, timeselect, title='', save_figs=''):
     
     #get all the land cover data
@@ -942,7 +942,8 @@ def land_cover_bar_graph(station, date_range, timeselect, title='', save_figs=''
     df_out_of_domain['landcover_vals'] = out_of_domain_values
     df_out_of_domain['degrees'] = degrees_0_360
     df_out_of_domain['landcover_type'] = 'No data'
-
+    
+    matplotlib.rcParams.update({'font.size': 20})
 
     #into one dataframe
     #possibly add: df_out_of_domain
@@ -1006,13 +1007,13 @@ def land_cover_bar_graph(station, date_range, timeselect, title='', save_figs=''
         list_land_cover_name.append(c2)
         list_land_cover_values.append(rosedata[c2].values)
         
-    matplotlib.rcParams.update({'font.size': 16})
+
     #create the bar graph:
     dictionary_color = {'Urban': {'color': 'red'}, 'Cropland':{'color':'darkgoldenrod'}, 'Oceans':{'color':'blue'}, 
                         'Forests':{'color':'green'}, 'Pastures and grassland':{'color':'yellow'}, 'Other':{'color':'black'}, 'No data':{'color': 'grey'}}
 
     #11,10
-    fig = plt.figure(figsize=(12,12)) 
+    fig = plt.figure(figsize=(12,11)) 
 
     ax = fig.add_subplot(1,1,1)
 
@@ -1062,7 +1063,7 @@ def land_cover_bar_graph(station, date_range, timeselect, title='', save_figs=''
     #(1,-0.05)
     #1.3, 0.2
     #1,1
-    plt.legend(handles[::-1], labels[::-1],bbox_to_anchor=(1, 0.33))
+    plt.legend(handles[::-1], labels[::-1],bbox_to_anchor=(1, 0.4))
     #leg = ax.legend(labels, bbox_to_anchor=(1, -0.05), ncol=2)
 
     plt.ylabel('Percent')
@@ -1227,33 +1228,33 @@ def create_seasonal_table(station, year, save_figs=''):
         anthro_diff_fall=(((df_fall_mean['co2.industry']+df_fall_mean['co2.energy']+ df_fall_mean['co2.transport']+ df_fall_mean['co2.others'])/anthro_whole)*100)-100
 
 
-        year_var='Dec(' + str(year-1) + ')- Dec(' + str(year) +')'
+        year_var='Annual'
         df_seasonal_table = pd.DataFrame(columns=['Variable', year_var, 'Dec-Feb', 'Mar-May', 'Jun-Aug','Sep-Nov', 'Unit'], index=['Sensitivity', 'Population','Point source', 'GEE', 'Respiration', 'Anthropogenic'])
 
 
-        df_seasonal_table.loc['Sensitivity'] = pd.Series({'Variable': 'Sensitivity', year_var:("%.2f" % sensitivity_whole + '            '), 'Dec-Feb':("%.2f" % sensitivity_diff_winter+ '%'), 'Mar-May':("%.2f" % sensitivity_diff_spring+ '%'), 
-                                                              'Jun-Aug':("%.2f" % sensitivity_diff_summer + '%'), 'Sep-Nov':("%.2f" % sensitivity_diff_fall+ '%'), 'Unit': 'ppm / ($\mu$mol / m$^{2}$s)'})
+        df_seasonal_table.loc['Sensitivity'] = pd.Series({'Variable': 'Sensitivity', year_var:("%.2f" % sensitivity_whole), 'Dec-Feb':("%+.2f" % sensitivity_diff_winter+ '%'), 'Mar-May':("%+.2f" % sensitivity_diff_spring+ '%'), 
+                                                              'Jun-Aug':("%+.2f" % sensitivity_diff_summer + '%'), 'Sep-Nov':("%+.2f" % sensitivity_diff_fall+ '%'), 'Unit': 'ppm / ($\mu$mol / m$^{2}$s)'})
 
-        df_seasonal_table.loc['Population'] = pd.Series({'Variable': 'Population', year_var:("%.0f" % population_whole+ '          '), 'Dec-Feb':("%.2f" % population_diff_winter+ '%'), 'Mar-May':("%.2f" % population_diff_spring+ '%'), 
-                                                              'Jun-Aug':("%.2f" % population_diff_summer+ '%'), 'Sep-Nov':("%.2f" % population_diff_fall+ '%'), 'Unit': 'pop*(ppm / ($\mu$mol / m$^{2}$s))'})
+        df_seasonal_table.loc['Population'] = pd.Series({'Variable': 'Population', year_var:("%.0f" % population_whole), 'Dec-Feb':("%+.2f" % population_diff_winter+ '%'), 'Mar-May':("%+.2f" % population_diff_spring+ '%'), 
+                                                              'Jun-Aug':("%+.2f" % population_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % population_diff_fall+ '%'), 'Unit': 'pop*(ppm / ($\mu$mol / m$^{2}$s))'})
 
         
-        df_seasonal_table.loc['Point source'] = pd.Series({'Variable': 'Point source', year_var:("%.2f" % point_source_whole+ '           '), 'Dec-Feb':("%.2f" % pointsource_diff_winter+ '%'), 'Mar-May':("%.2f" % pointsource_diff_spring+ '%'), 
-                                                              'Jun-Aug':("%.2f" % pointsource_diff_summer+ '%'), 'Sep-Nov':("%.2f" % pointsource_diff_fall+ '%'), 'Unit': 'ppm'})
+        df_seasonal_table.loc['Point source'] = pd.Series({'Variable': 'Point source', year_var:("%.2f" % point_source_whole), 'Dec-Feb':("%+.2f" % pointsource_diff_winter+ '%'), 'Mar-May':("%+.2f" % pointsource_diff_spring+ '%'), 
+                                                              'Jun-Aug':("%+.2f" % pointsource_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % pointsource_diff_fall+ '%'), 'Unit': 'ppm'})
 
 
-        df_seasonal_table.loc['GEE'] = pd.Series({'Variable': 'GEE','Unit': 'ppm (uptake)', year_var:("%.2f" % gee_whole+ '           '), 'Dec-Feb':("%.2f" % gee_diff_winter+ '%'), 'Mar-May':("%.2f" % gee_diff_spring+ '%'), 
-                                                              'Jun-Aug':("%.2f" % gee_diff_summer+ '%'), 'Sep-Nov':("%.2f" % gee_diff_fall+ '%'), 'Unit': 'ppm (uptake)'})
+        df_seasonal_table.loc['GEE'] = pd.Series({'Variable': 'GEE','Unit': 'ppm (uptake)', year_var:("%.2f" % gee_whole), 'Dec-Feb':("%+.2f" % gee_diff_winter+ '%'), 'Mar-May':("%+.2f" % gee_diff_spring+ '%'), 
+                                                              'Jun-Aug':("%+.2f" % gee_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % gee_diff_fall+ '%'), 'Unit': 'ppm (uptake)'})
 
-        df_seasonal_table.loc['Respiration'] = pd.Series({'Variable': 'Respiration', year_var:("%.2f" % resp_whole+ '           '), 'Dec-Feb':("%.2f" % resp_diff_winter+ '%'), 'Mar-May':("%.2f" % resp_diff_spring+ '%'), 
-                                                              'Jun-Aug':("%.2f" % resp_diff_summer+ '%'), 'Sep-Nov':("%.2f" % resp_diff_fall+ '%'), 'Unit': 'ppm'})
-
-
-        df_seasonal_table.loc['Anthropogenic'] = pd.Series({'Variable': 'Anthropogenic', year_var:("%.2f" % anthro_whole+ '           '), 'Dec-Feb':("%.2f" % anthro_diff_winter+ '%'), 'Mar-May':("%.2f" % anthro_diff_spring+ '%'), 
-                                                              'Jun-Aug':("%.2f" % anthro_diff_summer+ '%'), 'Sep-Nov':("%.2f" % anthro_diff_fall+ '%'), 'Unit': 'ppm'})
+        df_seasonal_table.loc['Respiration'] = pd.Series({'Variable': 'Respiration', year_var:("%.2f" % resp_whole), 'Dec-Feb':("+%.2f" % resp_diff_winter+ '%'), 'Mar-May':("%+.2f" % resp_diff_spring+ '%'), 
+                                                              'Jun-Aug':("%+.2f" % resp_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % resp_diff_fall+ '%'), 'Unit': 'ppm'})
 
 
-        #display(HTML('<p style="font-size:16px;">Seasonal variation during the start year of specified date range </p>'))
+        df_seasonal_table.loc['Anthropogenic'] = pd.Series({'Variable': 'Anthropogenic', year_var:("%.2f" % anthro_whole), 'Dec-Feb':("%+.2f" % anthro_diff_winter+ '%'), 'Mar-May':("%+.2f" % anthro_diff_spring+ '%'), 
+                                                              'Jun-Aug':("%+.2f" % anthro_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % anthro_diff_fall+ '%'), 'Unit': 'ppm'})
+
+
+        display(HTML('<p style="font-size:16px;">Seasonal variation during the start year of specified date range (including December of the year before to show meteorological seasons) </p>'))
 
         #14 font before
         def render_mpl_table(data, col_width=2, row_height=0.625, font_size=16,
@@ -1266,7 +1267,7 @@ def create_seasonal_table(station, year, save_figs=''):
                 ax.axis('off')
 
 
-            mpl_table = ax.table(cellText=data.values, bbox=bbox, colLabels=data.columns, colWidths=[3,4,2,2,2,2,4])
+            mpl_table = ax.table(cellText=data.values, bbox=bbox, colLabels=data.columns, colWidths=[3,2,2,2,2,2,4])
             #else:
             #mpl_table = ax.table(cellText=data.values, bbox=bbox, colLabels=data.columns, colWidths=[2,1.5,1.5,1.5,1.5,1.5,4.5])
 
@@ -1460,7 +1461,6 @@ def landcover_polar_graph(station, date_range, timeselect, bin_size, label='', t
     
     #remove from here (maybe imported as just matplotlib?):
     #import matplotlib as mpl
-    matplotlib.rcParams.update({'font.size': 16})
     
     directions = np.arange(0, 360, bin_size)
     date_index_number = (len(date_range) - 1)
@@ -1473,6 +1473,8 @@ def landcover_polar_graph(station, date_range, timeselect, bin_size, label='', t
               ' Hour(s): ' + timeselect+ '\n')
     else:
         for_title=''
+        
+    matplotlib.rcParams.update({'font.size': 18})
     
     
     #want to be able to run it with input "rosedata" several times without changing the variable
@@ -1524,7 +1526,7 @@ def landcover_polar_graph(station, date_range, timeselect, bin_size, label='', t
     #bar direction and height
     bar_dir, bar_width = _convert_dir(directions)
 
-    fig, ax = plt.subplots(figsize=(12, 12), subplot_kw=dict(polar=True))
+    fig, ax = plt.subplots(figsize=(12, 10), subplot_kw=dict(polar=True))
     ax.set_theta_direction('clockwise')
     ax.set_theta_zero_location('N')
     
@@ -2591,7 +2593,7 @@ def station_characterization_widget_selection():
             
             if hasattr(station_info, 'siteType'):
 
-                station_site_type=station_info.siteType
+                station_site_type=station_info.siteType.lower()
             else:
                 station_site_type=','
 
@@ -2701,7 +2703,7 @@ def station_characterization_widget_selection():
             if station_class!=r'not an ICOS certified station\unskip':
                 
                 display(HTML('<p style="font-size:35px;font-weight:bold;"><br>' + station_name + ' station characterization</p><p style="font-size:18px;"><br>'\
-                + station_name + str(station_class) + station_site_type.lower() + \
+                + station_name + 'is ' + str(station_class) + station_site_type.lower() + \
                 ' located in ' + station_country + ' (latitude: ' + str("%.2f" % station_lat) + degree_sign + 'N, ' + 'longitude: ' + str("%.2f" % station_lon) +\
                 degree_sign + 'E).</p>'))
             
