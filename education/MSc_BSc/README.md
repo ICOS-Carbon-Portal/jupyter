@@ -1,5 +1,5 @@
 # ICOS Carbon Portal - Jupyter Notebooks for Education at BSc and MSc level
-This repository contains folders with ICOS-related educational material that has been developed for students at BSc and MSc level.
+This repository contains folders with educational material that has been developed for students at BSc and MSc level.
 
 <br>
 
