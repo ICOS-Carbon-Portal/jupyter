@@ -14,8 +14,8 @@ The structure of the folder is the following:
 * Data folder (includes ancillary data files)
 * Logos folder (includes files with logos)
 * CCG folder (includes Python code files for curve fitting methods)
-* atm_obs_tools (includes Python code files for visualizations of ICOS data)
-* atm_stat_tools (includes Python code files for calculating statistics over ICOS atmosphere data products)
+* as_obs_tools (includes Python code files for visualizations of ICOS atmosphere data products)
+* as_stat_tools (includes Python code files for calculating statistics over ICOS atmosphere data products)
 * icos_stilt_tools (includes Python code files for processing ICOS and STILT data)
 
 <br>
