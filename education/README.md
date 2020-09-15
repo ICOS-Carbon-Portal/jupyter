@@ -1,14 +1,15 @@
 # ICOS Carbon Portal - Jupyter Notebooks for Education
-This repository contains code and ancillary data for all jupyter notebooks that have been developed for educational purposes.
+This repository contains folders with educational material based on ICOS data.
 
 <br>
 
 ## Structure
-The notebooks, code files and ancillary data files are divided into projects. Every project has its own folder:
+The educational material is divided into folders baced on the target audience.
 
-* **Drought 2018:** includes notebooks that use ICOS data to introduce students to basic principles of programming whilst exploring the consequences of the drought durng the summer of 2018.
-* **Soil exercise:** contains notebook with a soil exercise for university students
-* **Swedish Science Centers:** contains notebooks and ancillary data that quickly introduce the fundamental principles of Python programming by tackling climate change issues using data from satellites and/or ICOS stations. The notebooks are aimed to be used by visitors at the Swedish Science Centers or by high school students in the classroom.
+* **General:** includes notebooks that use ICOS data to introduce school students and the general public to basic principles of programming whilst learning about the carbon cycle, global warming and drought.
+* **MSc BSc:** contains notebooks with exercises based on ICOS data aimed for university students
+* **PhD:** includes notebooks with exercises based on ICOS data for PhD courses
+* **Swedish Science Centers:** contains notebooks and ancillary data that quickly introduce the fundamental principles of Python programming by tackling climate change issues using data from satellites and/or ICOS stations. The notebooks are aimed to be used by visitors at the Swedish Science Centers or by high school students in the classroom. The notebooks are in Swedish.
 
 <br>
 
