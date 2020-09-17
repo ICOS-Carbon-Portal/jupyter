@@ -16,7 +16,7 @@ q6_prompt = '\n\n6. Which process is responsible for the lower CO\u2082-concentr
 q1_options = ['Carbon dioxide (CO\u2082)', 'Oxygen (O\u2082)', 'Nitrogen (N\u2082)', 'Argon (Ar)']
 q2_options = ['Nitrous oxide (N\u2082O)', 'Carbon dioxide (CO\u2082)', 'Oxygen (O\u2082)', 'Nitrogen (N\u2082)', 'Methane (CH\u2084)']
 q3_options = ['Trees & vegetation', 'Oceanic respiration', 'Reforestation',  'Deforestation', 'Oceanic photosynthesis', 'Plant respiration']
-q4_options = ['Forest fires', 'Volcanic eruptions', 'Decaying animal/plant remains',  'Reforestation', 'Burning fossil fuels', 'Manure']
+q4_options = ['Forest fires', 'Volcanic eruptions', 'Decaying animal/plant remains',  'Reforestation', 'Burning fossil fuels', 'Oceanic photosynthesis']
 q5_options = ['Spring', 'Summer', 'Autumn', 'Winter']
 q6_options = ['Livestock farming', 'Burning fossil fuels', 'Forest fires', 'Photosynthesis']
     
@@ -44,7 +44,7 @@ q4_feedback = ['\033[1;96m'+'Correct! Forest fires release CO\u2082 into the atm
                '\033[1;96m'+'Correct! Decaying dead organic matter releases CO\u2082 into the atmosphere.'+'\033[1;96m',
                '\033[1;93m'+'More plants lead to a larger uptake of atmospheric CO\u2082 from photosynthesis.'+'\033[1;93m', 
                '\033[1;96m'+'Correct! The burning fossil fuels releases CO\u2082 into the atmosphere.'+'\033[1;96m',
-               '\033[1;93m'+'CH\u2084 & N\u2082O are released from livestock manure.'+'\033[1;93m']
+               '\033[1;93m'+'Oceanic plants take up CO\u2082 when they photosynthesize.'+'\033[1;93m']
 
 q5_feedback = ['\033[1;96m'+'Correct!\nCO\u2082 is accumulated during winter.\nTherefore, the highest concentration of CO\u2082 is observed in early spring.'+'\033[1;96m',
                '\033[1;93m'+'Photosynthetic activity increases over summer, increasing the uptake of atmospheric CO\u2082.\nAs a result, the total concentration of CO\u2082 in the atmosphere drops.'+'\033[1;93m',
