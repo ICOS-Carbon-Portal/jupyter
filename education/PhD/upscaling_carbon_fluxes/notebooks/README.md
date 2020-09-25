@@ -16,6 +16,7 @@ This directory includes all the notebooks that are used in the course. The noteb
   
 * examples
   * station example (includes examples on how to use the Station class)
+  * htm eco drought 2018 (introductory notebook on how to read in data files to dataframes, process data in dataframes and visualize results in interactive maps)
 
 <br>
 <br>
