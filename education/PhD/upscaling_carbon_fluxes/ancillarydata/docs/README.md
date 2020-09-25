@@ -1,6 +1,9 @@
 # Ancillary data for PhD course in upscaling carbon fluxes
 This folder includes folders with ancillary data that are used in the course notebooks.
 
+<br>
+<br>
+
 # Structure
 
 * **docs:** includes documents with ancillary information about a station (e.g. station name, code, country, latitude, longitude, vegetation type of surrounding area) and descriptions of the variables used.
