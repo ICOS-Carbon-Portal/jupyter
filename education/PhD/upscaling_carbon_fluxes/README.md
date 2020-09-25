@@ -1,5 +1,5 @@
 # ICOS Carbon Portal - Jupyter Notebooks for PhD courses
-This repository contains folders with educational material for PhD courses based on ICOS data.
+This repository contains folders with educational material for PhD courses that make use of ICOS data.
 
 <br>
 
