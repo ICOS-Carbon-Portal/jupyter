@@ -1,20 +1,16 @@
-# Documents
-The documents in this folder include ancillary information about a station:
-  * country name
-  * country code (2 characters)
-  * station name
-  * station code (3 characters)
-  * vegetation type
-  * latitude
-  * longitude
+# Ancillary data for PhD course in upscaling carbon fluxes
+This folder includes folders with ancillary data that are used in the course notebooks.
+
+# Structure
+
+* **docs:** includes documents with ancillary information about a station (e.g. station name, code, country, latitude, longitude, vegetation type of surrounding area) and descriptions of the variables used.
+
+* **images:** includes image files for all images that appear in the notebooks.
+
+* **logos:** includes files with the logos that appear in the notebooks.
 
 <br>
 <br>
-
-and descriptions of the FLUXNET - files used in the course:
-  * column name description
-  * description of differences between datasets containing daily vs half-hourly values
-
 
 
 ## License
