@@ -7,9 +7,6 @@ Logos included:
 
 * Lund University
 * ICOS Carbon Observation System
-* BECC
-* MERGE
-* Course logo
 
 
 ## License
