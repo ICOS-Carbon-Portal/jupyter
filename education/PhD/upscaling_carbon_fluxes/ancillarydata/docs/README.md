@@ -15,8 +15,11 @@ and descriptions of the FLUXNET - files used in the course:
   * column name description
   * description of differences between datasets containing daily vs half-hourly values
 
-
+<br>
+<br>
 
 ## License
 This work is licensed under a
 Creative Commons Attribution 4.0 International License ([CC BY 4.0](http://creativecommons.org/licenses/by/4.0/)).
+
+© Copyright 2019-2020 ICOS ERIC
