@@ -198,8 +198,9 @@ def create_STILT_dictionary():
     #        print (k,':', stations[ist][k])
 
     # write dictionary to json file for further use
-    with open("stationsDict", "w") as outfile:
-        json.dump(stations, outfile)
+    if os.access('./', os.W_OK):
+        with open("stationsDict", "w") as outfile:
+            json.dump(stations, outfile)
 
     return stations
     
@@ -208,16 +209,22 @@ def create_STILT_dictionary():
 def read_STILT_dictionary():
     # read STILT station dictionary from json file
 
-    with open("stationsDict") as jsonfile:
-        stations = json.load(jsonfile)
-
+    if os.path.exists("stationsDict"):
+        with open("stationsDict") as jsonfile:
+            stations = json.load(jsonfile)
+    else:
+        print("no STILT station dictionary found")
+        stations={}
+        
     return stations
 
 #------------------------------------------------------------------------------------------------
 
-def print_STILT_dictionary():
-    # read STILT station dictionary from json file
-    stations = read_STILT_dictionary()
+def print_STILT_dictionary(stations):
+    
+    if not stations:
+        # read STILT station dictionary from json file
+        stations = read_STILT_dictionary()
 
     # print dictionary
     for ist in sorted(stations):
