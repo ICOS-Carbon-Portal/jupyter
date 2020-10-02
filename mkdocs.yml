@@ -1,0 +1,13 @@
+site_name: ICOS Carbon Portal Jupyter Solutions
+nav:
+    - About: index.md
+    - Jupyter Solutions: jupyter_solutions.md
+    - ICOS Notebooks: icos_notebooks.md
+    - FAQ: faq.md
+
+#markdown extensions:
+    #- attr_list
+
+theme:
+    name: readthedocs
+#   collapse_navigation: False
