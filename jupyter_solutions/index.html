@@ -116,12 +116,23 @@ The Jupyter Hub runs in a Virtual Machine with docker containers. Jupyter Hub re
 <br>
 <br></p>
 <p><center>
-<img src="../img/jupyter_hub.png" width=200>
+<img src="../img/jupyter_hub.png" width=170>
 </center></p>
 <p><br>
 <br></p>
 <h2 id="exploredata">Exploredata</h2>
+<p>Exploredata is a multiple purpose testing platform that is mainly used in presentations and short seminars. It is aimed for all target user groups, to test and discover the potential of IPython notebooks as a mean for presenting scientific output and visualizations of ICOS data. All notebooks on exploredata are open to the public. Exploredata is a Jupyter solution that requires log-in credentials and provides the same functionality as the Jupyter Hub, with the difference that no work is being stored. 
+Every time a user logs in to exploredata a new Jupyter instance is created in a new docker container. The container is deleted after the user logs out or remains inactive for more than 15 minutes. Observe that exploredata can only host a limited number of users logged in at the same time.
+<br>
+<br></p>
+<p><center>
+<img src="../img/exploredata.png" width=170>
+</center></p>
+<p><br>
+<br></p>
 <h2 id="temporary-jupyter-instances">Temporary Jupyter Instances</h2>
+<p>A temporary Jupyter instance can be used for a course, workshop or seminar. This type of solution offers the same functionalities as the Jupyter Hub. It supports multiple users who may or may not have shared directories, though every account is private. Users may upload their own data and create their own code files and directories. All work is stored. The only difference is that this Jupyter instance, including the content from all user accounts, is deleted after the course, workshop or seminar has ended. If users wish to save their work, then they have to download it before the instance is deleted.</p>
+<p>ICOS Carbon Portal has successfully used a temporary Jupyter instance for the purpose of a PhD-course, where all exercise material was made available in the form of IPython notebooks.</p>
               
             </div>
           </div>
