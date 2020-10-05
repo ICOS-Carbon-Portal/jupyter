@@ -32,15 +32,14 @@ Jupyter can support a wide range of programming languages (e.g. Python, Julia, R
 ## IPython Notebooks
 An IPython Notebook is an open-source web application that allows users to create and share interactive documents that contain live code, equations, visualizations and narrative text. 
 
+
 ![Result](img/notebook_example.png)
 
 <br>
 <br>
 
 ## Access to notebooks and documentation
-You can find the openly available ICOS notebooks together with their corresponding ancillary data files and documentation on the ICOS Carbon Portal Jupyter repo on GitHub [https://github.com/ICOS-Carbon-Portal/jupyter](https://github.com/ICOS-Carbon-Portal/jupyter).
+All openly available ICOS notebooks and supporting documentation can be found in the ICOS Carbon Portal Jupyter repo on GitHub [https://icos-carbon-portal.github.io/jupyter/](https://icos-carbon-portal.github.io/jupyter/).
 
 <br>
 <br>
-
-
