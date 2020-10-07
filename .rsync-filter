@@ -1,0 +1,9 @@
+# We're using ansible/rsync to transfer this directory to testing/production.
+# This file controls which files are transferred.
++ /introduction**
++ /education**
++ /icos_jupyter_notebooks**
++ /project_jupyter_notebooks**
++ /pylib_examples**
++ /exploredata**
+- *
