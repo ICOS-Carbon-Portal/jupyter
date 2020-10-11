@@ -14,6 +14,7 @@ RUN conda install -y sparqlwrapper xarray          && conda clean -afy
 RUN conda install -y shapely folium                && conda clean -afy
 
 RUN pip install pangaeapy
+RUN pip install jupyter_module_loader
 
 WORKDIR /home/jovyan
 
@@ -23,7 +24,7 @@ RUN rmdir work
 
 # This package, and the following notebook directories, are the stuff that
 # changes most often, so we add them last.
-RUN pip install icoscp
+RUN pip install icoscp --upgrade
 
 # 1000:100 is jovyan:users
 ADD --chown=1000:100 education ./education
