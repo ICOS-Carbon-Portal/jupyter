@@ -27,7 +27,7 @@ Exploredata is a multiple purpose testing platform that is mainly used in presen
 <br>
 
 <center>
-<img src="img/exploredata.png" width=200>
+<img src="img/exploredata.PNG" width=200>
 </center>
 
 <br>
@@ -41,7 +41,7 @@ ICOS Carbon Portal has successfully used a temporary Jupyter instance for the pu
 <br>
 
 <center>
-<img src="img/temp_jupyter_instances.png" width=200>
+<img src="img/temp_jupyter_instances.PNG" width=200>
 </center>
 
 <br>
