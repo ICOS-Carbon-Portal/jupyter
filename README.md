@@ -11,7 +11,7 @@ The notebooks, code files and ancillary data files are divided into subjects. Ev
 * **Introduction:** contains notebooks that quickly introduce the fundamental principles of Python programming
 * **Project-specific Jupyter Notebooks:** includes notebooks presenting the scientific output of projects ICOS has been part of
 * **pylib_examples:** includes notebooks with examples on how to you the icoscp library (i.e. Python library on how to get access to ICOS data)
-
+* **docs:** includes files for the online [ICOS Jupyter Solutions documentation](https://icos-carbon-portal.github.io/jupyter/).
 
 <br>
 
