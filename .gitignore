@@ -5,8 +5,7 @@
 __pycache__/
 
 noGitHub.py
-project_jupyter_notebooks/RINGO_T1.3/.DS_Store
-icos_jupyter_notebooks/.DS_Store
+.DS_Store
 
 # exclude mkdocs build of documentation
 site/

@@ -1,7 +1,7 @@
 # ICOS Carbon Portal - Jupyter Solutions
 ICOS data and metadata are stored on the ICOS Carbon Portal servers. ICOS goal is to provide standardized, high quality, high precision, long-time observations of greenhouse gases to estimate the carbon balance of Europe. ICOS observations can also be used to monitor the effects of climate change and raise awareness on this global problem. As part of this effort, ICOS Carbon Portal provides a range of services to scientists, policy makers, educators, students and the general public. 
 
-<img src="img/icos_jupyter_solutions.png">
+<img src="../img/icos_jupyter_solutions.png">
 
 
 To make it easier for users to access, process and interact with ICOS data, ICOS Carbon Portal offers several alternative Jupyter solutions. There are implemented solutions that allow collaboration between scientists working on the same project, by sharing data and code. Additionally, there are solutions that address the need of scientists wanting to use ICOS data in combination with their own data. Finally, ICOS Carbon Portal has developed Jupyter solutions for promoting the data, metadata and role of ICOS to people who might not have any direct link to or prior knowledge of ICOS, like researchers, policy makers, educators, students or the general public.
@@ -15,7 +15,7 @@ The Jupyter Hub is a service for registered users. It is aimed for researchers a
 <br>
 
 <center>
-<img src="img/jupyter_hub.png" width=200>
+<img src="../img/jupyter_hub.png" width=200>
 </center>
 
 <br>
@@ -27,7 +27,7 @@ Exploredata is a multiple purpose testing platform that is mainly used in presen
 <br>
 
 <center>
-<img src="img/exploredata.PNG" width=200>
+<img src="../img/exploredata.png" width=200>
 </center>
 
 <br>
@@ -41,7 +41,7 @@ ICOS Carbon Portal has successfully used a temporary Jupyter instance for the pu
 <br>
 
 <center>
-<img src="img/temp_jupyter_instances.PNG" width=200>
+<img src="../img/temp_jupyter_instance.png" width=200>
 </center>
 
 <br>
