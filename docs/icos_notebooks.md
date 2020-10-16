@@ -19,7 +19,7 @@ The introductory notebooks are aimed for users that are new to programing or, on
 <br>
 
 <center>
-<img src="img/introduction_nb.png" width=200>
+<img src="img/introduction_nb.PNG" width=200>
 </center>
 
 <br>
@@ -31,7 +31,7 @@ ICOS Carbon Portal provides notebooks to explore all available ICOS data product
 <br>
 
 <center>
-<img src="img/explore_icos_nb.png" width=200>
+<img src="img/explore_icos_nb.PNG" width=200>
 </center>
 
 <br>
@@ -43,7 +43,7 @@ Scientific notebooks are aimed for researchers and potentially policymakers. The
 <br>
 
 <center>
-<img src="img/scientific_nb.png" width=200>
+<img src="img/scientific_nb.PNG" width=200>
 </center>
 
 <br>
@@ -59,7 +59,7 @@ Notebooks developed for university students include exercises focused on a certa
 <br>
 
 <center>
-<img src="img/educational_nb.png" width=200>
+<img src="img/educational_nb.PNG" width=200>
 </center>
 
 <br>
