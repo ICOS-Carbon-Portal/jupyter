@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>How to - ICOS Carbon Portal Jupyter Solutions</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "How to";
+    var mkdocs_page_input_path = "how_to.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> ICOS Carbon Portal Jupyter Solutions</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="..">About</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../jupyter_solutions/">Jupyter Solutions</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../icos_notebooks/">ICOS Notebooks</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../faq/">FAQ</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">ICOS Carbon Portal Jupyter Solutions</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>How to</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="how-to">How to</h1>
+<p>This part includes some basic instructions on how to login to ICOS Jupyter Hub and start working on your first IPython Notebook. More in particular, you will learn how to:</p>
+<ul>
+<li>login to ICOS CP Jupyter Hub</li>
+<li>get familiar with the existing directory tree and available material</li>
+<li>create and work on your first IPython notebook</li>
+</ul>
+<p><br>
+<br></p>
+<h2 id="log-in-to-icos-cp-jupyter-hub">Log-in to ICOS CP Jupyter Hub</h2>
+<p>Open your browser (Firefox or Chrome) and go to:</p>
+<p><center><b><font color="blue">jupyter.icos-cp.eu</font></b></center></p>
+<p>Enter your login-credentials in the popup window:</p>
+<p><b><u>Username:</b></u> [user_username]
+<b><u>Password:</b></u> [user_password]</p>
+<p>Note that if you wish to access our Jupyter Hub, you will first have to send us an email with your request to jupyter-info@icos-cp.eu. Once your request has been accepted, you will receive an email with log-in credentials to your account. In case you experience any problems with you log-in credentials, send us an email to jupyter-info@icos-cp.eu. </p>
+<p><br>
+<br></p>
+<h2 id="jupyter-hub-directory-tree-and-available-material">Jupyter Hub directory tree and available material</h2>
+<p>Once you have successfully logged-in, you will see a list of directories.</p>
+<p><center>
+<img src="../img/dir_tree.png" width=200>
+</center></p>
+<p><em>Common</em> includes all ICOS notebooks that are openly available through <a href="https://exploredata.icos-cp.eu">https://exploredata.icos-cp.eu</a> (i.e. introduction-to-Python-notebooks, ICOS-notebooks, scientific notebooks and educational notebooks) as well as some additional code snippets. All notebooks that are stored in <em>common</em> are read-only, meaning that you may run the notebooks in there, but you cannot change them (no changes will be stored). In order to modify any of the aforementioned notebooks, you need to first download the notebook in question to your computer and then upload it again to the Jupyter Hub (instructions on how to download and upload a notebook are available below).</p>
+<p><em>Project</em> includes a list of folders with project names. You will only be able to see the project folders that you are associated with.</p>
+<p>If you have worked with ICOS CP before, you will see one directory with notebooks running on Python 2.7 from a previous ICOS CP Jupyter Hub instance. The name of this directory is <em>jupyter</em>.</p>
+<p>If you created any notebooks using the previous ICOS CP Jupyter Hub instance running Python 3.6, you will find those under the directory <em>jupyter3</em>.</p>
+<p><br>
+<br></p>
+<h2 id="create-your-first-ipython-notebook">Create your first IPython Notebook</h2>
+<p>To create you first IPython notebook, click on <strong>New --- &gt; Python 3</strong>.</p>
+<p><center>
+<img src="../img/create_nb.png" width=200>
+</center></p>
+<p>A new tab with your IPython notebook will open in your browser. The notebook is titled <em>Untitled.ipynb</em>. </p>
+<p><br>
+<br></p>
+<h2 id="rename-your-ipython-notebook">Rename your IPython Notebook</h2>
+<p>If you wish to rename your notebook, you will have to go back to the previous tab including your home directory and then select the notebook you just created and  click on <em>Shutdown</em> in the top menu. </p>
+<p><center>
+<img src="../img/shutdown_nb.png" width=200>
+</center></p>
+<p>Then select it again and click on <em>Rename</em>.</p>
+<p><center>
+<img src="../img/rename_nb.png" width=200>
+</center></p>
+<p>Note that you can follow a similar process to rename a folder.</p>
+<p><br>
+<br></p>
+<h2 id="run-the-notebook">Run the Notebook</h2>
+<p>To run all the code included in a Jupyter Notebook, go to the menu at the top of the page and click on <strong>Kernel</strong> and then <strong>Restart &amp; Run All</strong>.</p>
+<p><center>
+<img src="../img/restart_run_all.png" width=200>
+</center></p>
+<p><br>
+<br></p>
+<h2 id="run-a-single-code-cell-in-the-notebook">Run a single code-cell in the Notebook</h2>
+<p>A Jupyter Notebook consists of code-cells. It is possible to write Python code in a code-cell and then run it by clicking on <strong>Run</strong> in the menu at the top of the page.</p>
+<p><center>
+<img src="../img/run_code_cell.png" width=200>
+</center></p>
+<p>Observe that only one code-cell will be executed, and this is the code-cell that was active when you clicked on Run. You can activate a code-cell just by clicking on it. An active code-cell is highlighted in blue or green colour (see image below).</p>
+<p><center>
+<img src="../img/selected_cell_green.png" width=200>
+</center></p>
+<p><br></p>
+<p><center>
+<img src="../img/selected_cell_blue.png" width=200>
+</center></p>
+<p>It is also possible to write markup code in a Jupyter Notebook code-cell. For instance, the text you are reading in the notebooks stored under common are written in markup-cells that include markup text and HTML code. When you are writing Python code in a code-cell make sure that the cell is a Python code-cell. The type of the currently active code-cell is shown in the dropdown list on the menu bar at the top of the page (see figure). A code-cell that includes Python code should be marked as Code.</p>
+<p><center>
+<img src="../img/code_cell.png" width=200>
+</center></p>
+<p><br>
+<br></p>
+<h2 id="add-a-new-code-cell">Add a new code-cell</h2>
+<p>Click on "+" in the menu to add a new code-cell under the current active code-cell.</p>
+<p><center>
+<img src="../img/add_code_cell.png" width=200>
+</center></p>
+<p><br>
+<br></p>
+<h2 id="delete-a-code-cell">Delete a code-cell</h2>
+<p>If you wish to delete a code-cell, select the code-cell by clicking on it and then go to the menu at the top of the page and click on <strong>Edit</strong> --- &gt; <strong>Delete Cells</strong>.</p>
+<p><center>
+<img src="../img/delete_cell.png" width=200>
+</center></p>
+<p><br>
+<br></p>
+<h2 id="stop-execution">Stop Execution</h2>
+<p>If an execution is taking too long, you can stop your notebook from running by clicking on Interrupt kernel in the menu. Alternatively, another choice is to go to Kernel and click on Interrupt.</p>
+<p><center>
+<img src="../img/stop_execution.png" width=200>
+</center></p>
+<p><br>
+<br></p>
+<h2 id="save-notebook">Save Notebook</h2>
+<p>Click on <strong>Save</strong> to save your work.</p>
+<p><center>
+<img src="../img/save_nb.png" width=200>
+</center></p>
+<p><br>
+<br></p>
+<h2 id="download-notebook">Download Notebook</h2>
+<p>If you wish to download the notebook as a Jupyter Notebook, go to the menu at the top of the page, click on <strong>File</strong> --- &gt; <strong>Save As...</strong> --- &gt; <strong>Notebook(.ipynb)</strong>.</p>
+<p><center>
+<img src="../img/download_nb.png" width=200>
+</center></p>
+<p>If you wish to save your work as pure Python code, go the menu at the top of the page, click on <strong>File</strong> --- &gt; <strong>Save As...</strong> --- &gt; <strong>Python(.py)</strong>.</p>
+<p><center>
+<img src="../img/download_py.png" width=200>
+</center></p>
+<p><br>
+<br></p>
+<h2 id="upload-notebook">Upload Notebook</h2>
+<p>If you wish to upload a notebook, click on the <strong>Upload</strong> button on the right. In the window that appears, navigate to the location where the notebook is stored, select it and click on <strong>Open</strong>.</p>
+<p><center>
+<img src="../img/upload.png" width=200>
+</center></p>
+<p><br>
+<br></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
