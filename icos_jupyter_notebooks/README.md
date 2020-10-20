@@ -18,6 +18,7 @@ The structure of the folder is the following:
 * as_stat_tools (includes Python code files for calculating statistics over ICOS atmosphere data products)
 * icos_stilt_tools (includes Python code files for processing ICOS and STILT data)
 * Station characterization folder (includes notebooks and folders with ancillary data that are aimed for providing additional information about ICOS stations)
+* tools folder (includes python modules developed for processing & visualizing ICOS data products - the modules can be used by all icos notebooks)
 
 <br>
 
