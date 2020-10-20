@@ -12,7 +12,7 @@ The notebooks, code files and ancillary data files are divided into subjects. Ev
 * **Project-specific Jupyter Notebooks:** includes notebooks presenting the scientific output of projects ICOS has been part of
 * **pylib_examples:** includes notebooks with examples on how to you the icoscp library (i.e. Python library on how to get access to ICOS data)
 * **docs:** includes files for the online [ICOS Jupyter Solutions documentation](https://icos-carbon-portal.github.io/jupyter/).
-
+* **exploredata:** includes folders with code to update the running instance of exploredata and format the corresponding log-in page.
 <br>
 
 ## Licence
