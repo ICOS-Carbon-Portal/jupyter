@@ -8,7 +8,7 @@
 <br>
 
 # <font color="blue">"From CO2 in situ measurements to carbon balance maps as a tool to support national carbon accounting"</font>
-The exercises in this folder were produced for the purpose of a PhD course titled **"From CO2 in situ measurements to carbon balance maps as a tool support to national carbon accounting"** and run by the Department of Physical Geography and Ecosystem Science at Lund University. The university course code is NGE006F and it corresponds to a third cycle course of 4 credits.
+The exercises in this folder were produced for the purpose of a PhD course titled **"From CO2 in situ measurements to carbon balance maps as a tool support to national carbon accounting"** and run by the Department of Physical Geography and Ecosystem Science at Lund University. The university course code is NGE006F and it corresponds to a third cycle course of 4 credits. Click [here](https://www.nateko.lu.se/sites/nateko.lu.se/files/nng005f-eng.pdf) to view the course syllabus.
 
 The course aims at introducing the concept of assessing the carbon balance of a geographical region from in situ measurements and how the results can be used as a tool to support national carbon accounting. The course is focused on the user perspective and on different ways of upscaling the carbon dioxide exchange to assess the carbon budget of a larger region (e.g. Sweden). This includes scientific motivation of the different types of analyses that are used in the different steps to assess the (terrestrial) carbon balance and knowledge about their uncertainties and limitations. An important part of the course is the need for transparency in the data used and how to handle uncertainty in research results.
 
