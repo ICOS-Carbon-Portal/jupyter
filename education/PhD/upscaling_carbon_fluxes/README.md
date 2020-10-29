@@ -1,7 +1,7 @@
-
-<img src='ancillarydata/logos/LundUniversity_C2line_RGB.png' align='left'>
-<img src='ancillarydata/logos/Icos_Logo_CMYK_Regular_SMpng.png' align='right'>
-
+<img src="ancillarydata/logos/LundUniversity_C2line_RGB.png" width="150" align="left"/>
+<br>
+<img src="ancillarydata/logos/Icos_Logo_CMYK_Regular_SMpng.png" width="327" align="right"/>
+<br>
 <br>
 
 # From CO2 in situ measurements to carbon balance maps as a tool to support national carbon accounting
