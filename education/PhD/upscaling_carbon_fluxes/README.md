@@ -1,5 +1,13 @@
-# Upscaling carbon fluxes
-This directory contains folders with educational material for a PhD course titled: **"From CO2 in situ measurements to carbon balance maps as a tool to support national carbon accounting"**. The course was organized by Lund University dept. of Physical Geography and Ecosystem Science and supported by ICOS Carbon Portal, ICOS Sweden and  Lund University ClimBEco Graduate Research School. The course was held at Lund University campus between March 9th 2020 and March 13th 2020. All developed material includes references to the people involved and the datasets used.
+# From CO2 in situ measurements to carbon balance maps as a tool to support national carbon accounting
+The exercises in this folder were produced for the purpose of a PhD course titled **"From CO2 in situ measurements to carbon balance maps as a tool support to national carbon accounting"** and run by the Department of Physical Geography and Ecosystem Science at Lund University. The university course code is NGE006F and it corresponds to a third cycle course of 4 credits.
+
+The course aims at introducing the concept of assessing the carbon balance of a geographical region from in situ measurements and how the results can be used as a tool to support national carbon accounting. The course is focused on the user perspective and different ways of upscaling the carbon dioxide exchange to assess the carbon budget of a larger region (e.g. Sweden). This includes scientific motivation of the different types of analyses that are used in the different steps to assess the (terrestrial) carbon balance and knowledge about their uncertainties and limitations. An important part of the course is the need for transparency in the data used and how to handle uncertainty in research results.
+
+The course was run for the first time between March 9th 2020 and March 13th 2020, on campus, at Lund University. It was organized by Lund University dept. of Physical Geography and Ecosystem Science and supported by ICOS Carbon Portal, ICOS Sweden, and the ClimBEco Graduate Research School course program. Teachers and developers of the course material were Maj-Lena Linderson ^1,2 (course coordinator), Janne Rinne ^1,2, Lars Eklundh ^1, Lars Harrie ^1, Maggie Hellström ^1,3, Alex Vermeulen ^3, Marko Scholze ^1, Paul Miller ^1, Ute Karstens ^1,3, Harry Lankreijer ^1,3, Jutta Holst ^1,2, Feng Tian ^1, Claudio D' Onofrio^1,3 and Karolina Pantazatou ^1,3. All developed material includes references to the people involved and the datasets used.
+
+1 Department of Physical Geography and Ecosystem Science, Lund University
+2 ICOS Sweden
+3 ICOS Carbon Portal
 
 <br>
 
@@ -11,9 +19,17 @@ The educational material is divided into folders baced on courses.
 
 <br>
 
+## Contact
+For more information about the course, pleace contact:
+Maj-Lena.Linderson@nateko.lu.se 
+
+<br>
+
 ## Licence
 This work is licensed under a Creative Commons Attribution 4.0 International License (CC BY 4.0). <br>
 Copyright © 2019-2020 ICOS ERIC <br>
 Copyright © 2020 Lund University dept. of Physical Geography and Ecosystem Science <br>
 
 You are free to download, use and change any part of all included notebooks as long as you cite the initial source. Note that, in case you wish to use material from the notebooks, you need to cite all the teachers and developers from that notebook as well as from the accompanying tools.ipynb notebook. The tools.ipynb notebook includes all the functions and code that are used in the rest of the notebooks.
+
+
