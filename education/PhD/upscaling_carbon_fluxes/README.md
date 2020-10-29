@@ -3,7 +3,7 @@ The exercises in this folder were produced for the purpose of a PhD course title
 
 The course aims at introducing the concept of assessing the carbon balance of a geographical region from in situ measurements and how the results can be used as a tool to support national carbon accounting. The course is focused on the user perspective and different ways of upscaling the carbon dioxide exchange to assess the carbon budget of a larger region (e.g. Sweden). This includes scientific motivation of the different types of analyses that are used in the different steps to assess the (terrestrial) carbon balance and knowledge about their uncertainties and limitations. An important part of the course is the need for transparency in the data used and how to handle uncertainty in research results.
 
-The course was run for the first time between March 9th 2020 and March 13th 2020, on campus, at Lund University. It was organized by Lund University dept. of Physical Geography and Ecosystem Science and supported by ICOS Carbon Portal, ICOS Sweden, and the ClimBEco Graduate Research School course program. Teachers and developers of the course material were Maj-Lena Linderson ^1,2 (course coordinator), Janne Rinne ^1,2, Lars Eklundh ^1, Lars Harrie ^1, Maggie Hellström ^1,3, Alex Vermeulen ^3, Marko Scholze ^1, Paul Miller ^1, Ute Karstens ^1,3, Harry Lankreijer ^1,3, Jutta Holst ^1,2, Feng Tian ^1, Claudio D' Onofrio^1,3 and Karolina Pantazatou ^1,3. All developed material includes references to the people involved and the datasets used.
+The course was run for the first time between March 9th 2020 and March 13th 2020, on campus, at Lund University. It was organized by Lund University dept. of Physical Geography and Ecosystem Science and supported by ICOS Carbon Portal, ICOS Sweden, and the ClimBEco Graduate Research School course program. Teachers and developers of the course material were Maj-Lena Linderson^1,2 (course coordinator), Janne Rinne ^1,2, Lars Eklundh ^1, Lars Harrie ^1, Maggie Hellström ^1,3, Alex Vermeulen ^3, Marko Scholze ^1, Paul Miller ^1, Ute Karstens ^1,3, Harry Lankreijer ^1,3, Jutta Holst ^1,2, Feng Tian ^1, Claudio D' Onofrio^1,3 and Karolina Pantazatou ^1,3. All developed material includes references to the people involved and the datasets used.
 
 1 Department of Physical Geography and Ecosystem Science, Lund University
 2 ICOS Sweden
@@ -20,7 +20,7 @@ The educational material is divided into folders baced on courses.
 <br>
 
 ## Contact
-For more information about the course, pleace contact:
+For more information about the course, pleace contact: <br>
 Maj-Lena.Linderson@nateko.lu.se 
 
 <br>
