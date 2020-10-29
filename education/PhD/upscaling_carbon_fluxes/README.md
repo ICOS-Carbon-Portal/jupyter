@@ -1,6 +1,6 @@
 <img src="ancillarydata/logos/LundUniversity_C2line_RGB.png" width="110" align="left"/>
 <br>
-<img src="ancillarydata/logos/Icos_Logo_CMYK_Regular_SMpng.png" width="280" align="right"/>
+<img src="ancillarydata/logos/Icos_Logo_CMYK_Regular_SMpng.png" width="270" align="right"/>
 <br>
 <br>
 <br>
