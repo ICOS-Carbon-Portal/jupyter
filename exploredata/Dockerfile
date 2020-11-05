@@ -15,6 +15,7 @@ RUN conda install -y shapely folium                && conda clean -afy
 
 RUN pip install pangaeapy
 RUN pip install jupyter_module_loader
+RUN pip install qgrid
 
 WORKDIR /home/jovyan
 
