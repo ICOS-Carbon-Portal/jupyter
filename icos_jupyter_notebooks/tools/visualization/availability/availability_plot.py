@@ -223,6 +223,8 @@ def plot_table(df_list, layer_list, t_list, plot_attr_obj):
         p.yaxis.axis_label_text_font_style = plot_attr_obj.yaxis_label_font_style
         p.xaxis.axis_label_standoff = plot_attr_obj.xaxis_label_standoff
         p.yaxis.axis_label_standoff = plot_attr_obj.yaxis_label_standoff
+        #p.yaxis.axis_label_text_font_size = '8pt'
+        p.yaxis.major_label_text_font_size = "5pt"
 
         #Set the copyright label position:
         label_opts = dict(x=0, y=10,
@@ -246,7 +248,43 @@ def plot_table(df_list, layer_list, t_list, plot_attr_obj):
         #Add hover-tool:
         p.hover.tooltips = tooltip_ls
 
+        #if ((len(glyph_ls)>3) & (len(glyph_ls)<7)):
+            
+            #Create legend:
+            #legend1 = Legend(items=glyph_ls[:3], location=plot_attr_obj.legend_location)
+            #legend2 = Legend(items=glyph_ls[3:], location=plot_attr_obj.legend_location)
+            
+            #Add legends to figure:
+            #p.add_layout(legend1, plot_attr_obj.legend_position)
+            #p.add_layout(legend2, plot_attr_obj.legend_position)
+        
+        
+        #elif ((len(glyph_ls)>3) & (len(glyph_ls)>6)):
+            
+            #Create legend:
+            #legend1 = Legend(items=glyph_ls[:3], location=plot_attr_obj.legend_location)
+            #legend2 = Legend(items=glyph_ls[3:5], location=plot_attr_obj.legend_location)
+            #legend3 = Legend(items=glyph_ls[5:7], location=plot_attr_obj.legend_location)
+            
+            #Add legends to figure:
+            #p.add_layout(legend1, plot_attr_obj.legend_position)
+            #p.add_layout(legend2, plot_attr_obj.legend_position)
+            #p.add_layout(legend3, plot_attr_obj.legend_position)
+       
 
+        #else:
+            #Create legend:
+            #legend = Legend(items=glyph_ls, location=plot_attr_obj.legend_location)
+
+            #Add legend to figure:
+            #p.add_layout(legend, plot_attr_obj.legend_position)
+
+        #Format legend:
+        #p.legend.orientation = plot_attr_obj.legend_orientation
+        #p.legend.spacing = plot_attr_obj.legend_spacing #space between items
+        #p.legend.click_policy=plot_attr_obj.legend_click_policy
+        
+        
         #Create legend:
         legend = Legend(items=glyph_ls, location=plot_attr_obj.legend_location)
 
@@ -257,6 +295,10 @@ def plot_table(df_list, layer_list, t_list, plot_attr_obj):
         p.legend.orientation = plot_attr_obj.legend_orientation
         p.legend.spacing = plot_attr_obj.legend_spacing #space between items
         p.legend.click_policy=plot_attr_obj.legend_click_policy
+        p.legend.label_text_font_size = "9pt"
+        p.legend.glyph_height= 18
+        p.legend.glyph_width= 18
+        p.legend.label_height= 18
 
         #Deactivate hover-tool, which is by default active:
         p.toolbar.active_inspect = None
