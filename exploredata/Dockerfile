@@ -25,7 +25,7 @@ RUN rmdir work
 
 # This package, and the following notebook directories, are the stuff that
 # changes most often, so we add them last.
-RUN pip install icoscp --upgrade
+RUN pip install icoscp --no-cache-dir
 
 # 1000:100 is jovyan:users
 ADD --chown=1000:100 education ./education
