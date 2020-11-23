@@ -9,3 +9,7 @@ noGitHub.py
 
 # exclude mkdocs build of documentation
 site/
+
+# exclude local testdata from stiltweb
+icos_jupyter_notebooks/station_characterization/data/
+
