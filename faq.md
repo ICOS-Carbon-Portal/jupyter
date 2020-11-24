@@ -1,5 +1,11 @@
 # FAQ
 
+## Is it possible to use Jupyter Lab?
+Yes. After you login to [https://jupyter.icos-cp.eu](https://jupyter.icos-cp.eu) you need to modify the address in your internet browser. Change the **?tree** parameter to **lab**<br>
+jupyter notebook link:`https://jupyter.icos-cp.eu/user/myname/tree?`<br>
+jupyter lab link:`https://jupyter.icos-cp.eu/user/myName/lab`<br>
+
+
 ## Can I install a missing python package?
 
 <a href="../img/installpkg.png" target=_blank>
@@ -7,7 +13,7 @@
 </a>
 
 Yes. You can use pip to install a package into your personal account.
-Open a new Python Notebook and issue the command !pip install myPackage. But please be aware, that if you collaborate with other people, the package is not available to them. If you think it is worthwhile to have this package/module for all users, drop us an email and we will consider the server side installation.
+Open a new Python Notebook and issue the command `!pip install myPackage`. But please be aware, that if you collaborate with other people, the package is not available to them. If you think it is worthwhile to have this package/module for all users, drop us an email and we will consider the server side installation.
 
 ## How to log-in to ICOS CP Jupyter Hub
 Open your internet browser and go to: <b>[https://jupyter.icos-cp.eu](https://jupyter.icos-cp.eu) </b> and enter your login-credentials.
