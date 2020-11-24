@@ -33,9 +33,19 @@ Once you have successfully logged-in, you will see a list of directories.
 
 *Common* includes all ICOS notebooks that are openly available through [https://exploredata.icos-cp.eu](https://exploredata.icos-cp.eu) (i.e. introduction-to-Python-notebooks, ICOS-notebooks, scientific notebooks and educational notebooks) as well as some additional code snippets. All notebooks that are stored in *common* are read-only, meaning that you may run the notebooks in there, but you cannot change them (no changes will be stored). In order to modify any of the aforementioned notebooks, you need to first download the notebook in question to your computer and then upload it again to the Jupyter Hub (instructions on how to download and upload a notebook are available below).
 
-*Project* includes a list of folders with project names. You will only be able to see the project folders that you are associated with.
+
+*Project* includes a list of folders with project names. Users will only be able to see the project folders that they are associated with. In general, all files and folders stored directly under the project group folder are visible and editable by all group members. Every project folder contains a *Store* folder. This folder should only contain stable versions of a group's notebooks. Note that the content of this folder is visible to all group members in *Read only* mode and that only the group administrator is able to update it. *Store* contains a README-file, which, in turn, includes summarized information regarding the:
+
+- aim of the project
+- group manager (responsible for scientific aspect & group organization)
+- group administrator (ICOS CP team member - responsible for technical support)
+
+The group manager is responsible for managing the group and contacting the group administrator for requests of a technical nature (e.g. creating Jupyter accounts for new members of the group, uploading a new standard version of a notebook to *Store*, etc.).  
+The group administrator is an ICOS CP team member that is responsible for the technical support of the project group.
+
 
 If you have worked with ICOS CP before, you will see one directory with notebooks running on Python 2.7 from a previous ICOS CP Jupyter Hub instance. The name of this directory is *jupyter*.
+
 
 If you created any notebooks using the previous ICOS CP Jupyter Hub instance running Python 3.6, you will find those under the directory *jupyter3*.
 
