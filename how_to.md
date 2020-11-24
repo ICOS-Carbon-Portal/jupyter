@@ -34,7 +34,13 @@ Once you have successfully logged-in, you will see a list of directories.
 *Common* includes all ICOS notebooks that are openly available through [https://exploredata.icos-cp.eu](https://exploredata.icos-cp.eu) (i.e. introduction-to-Python-notebooks, ICOS-notebooks, scientific notebooks and educational notebooks) as well as some additional code snippets. All notebooks that are stored in *common* are read-only, meaning that you may run the notebooks in there, but you cannot change them (no changes will be stored). In order to modify any of the aforementioned notebooks, you need to first download the notebook in question to your computer and then upload it again to the Jupyter Hub (instructions on how to download and upload a notebook are available below).
 
 
-*Project* includes a list of folders with project names. Users will only be able to see the project folders that they are associated with. In general, all files and folders stored directly under the project group folder are visible and editable by all group members. Every project folder contains a *Store* folder. This folder should only contain stable versions of a group's notebooks. Note that the content of this folder is visible to all group members in *Read only* mode and that only the group administrator is able to update it. *Store* contains a README-file, which, in turn, includes summarized information regarding the:
+*Project* includes a list of folders with project names. Users will only be able to see the project folders that they are associated with.
+<br>
+<center>
+<img src="../img/project_group_folder.PNG" width=500>
+</center>
+<br>
+In general, all files and folders stored directly under the project group folder are visible and editable by all group members. Every project folder contains a *Store* folder. This folder should only contain stable versions of a group's notebooks. Note that the content of this folder is visible to all group members in *Read only* mode and that only the group administrator is able to update it. *Store* contains a README-file, which, in turn, includes summarized information regarding the:
 
 - aim of the project
 - group manager (responsible for scientific aspect & group organization)
