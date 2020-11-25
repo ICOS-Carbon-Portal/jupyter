@@ -40,7 +40,7 @@ Once you have successfully logged-in, you will see a list of directories.
 <img src="../img/project_group_folder.PNG" width=500>
 </center>
 <br>
-In general, all files and folders stored directly under the project group folder are visible and editable by all group members. Every project folder contains a *Store* folder. This folder should only contain stable versions of a group's notebooks. Note that the content of this folder is visible to all group members in *Read only* mode and that only a person from the ICOS CP Jupyter Team has the right to update it. *Store* contains a README-file, which, in turn, includes summarized information regarding the:
+In general, all files and folders stored directly under the project group folder are visible and editable by all group members. Be aware that this is a true collaborative space. You may interfere with other project partners when working on the same notebook at the same time. Every project folder contains a *Store* folder. This folder should only contain stable versions of a group's notebooks. Note that the content of this folder is visible to all group members in *Read only* mode and that only a person from the ICOS CP Jupyter Team has the right to update it. *Store* contains a README-file, which, in turn, includes summarized information regarding the:
 
 - aim of the project
 - group administrator (responsible for scientific aspect & group administration)
