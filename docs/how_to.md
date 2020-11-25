@@ -46,7 +46,7 @@ In general, all files and folders stored directly under the project group folder
 - group administrator (responsible for scientific aspect & group administration)
 - contact details for technical support
 
-The group manager is responsible for managing the group and contacting the ICOS CP Jupyter Team for requests of a technical nature (e.g. creating Jupyter accounts for new members of the group, uploading a new standard version of a notebook to *Store*, etc.).  
+The group administrator is responsible for managing the group and contacting the ICOS CP Jupyter Team for requests of a technical nature (e.g. creating Jupyter accounts for new members of the group, uploading a new standard version of a notebook to *Store*, etc.).  
 
 
 If you have worked with ICOS CP before, you will see one directory with notebooks running on Python 2.7 from a previous ICOS CP Jupyter Hub instance. The name of this directory is *jupyter*.
