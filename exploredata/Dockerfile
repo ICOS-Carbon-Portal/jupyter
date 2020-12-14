@@ -1,7 +1,7 @@
 # We use a specific hash since :latest has broken spuriously in the past.
-# https://hub.docker.com/r/jupyter/scipy-notebook/tags
-# This hash is jupyter/scipy-notebook:latest on 2020-08-02.
-FROM jupyter/scipy-notebook@sha256:e89b7047155fdf359152cf3fa34140e4ce8158d96eabb15fe42cc8cf587b6635
+# https://hub.docker.com/layers/jupyter/datascience-notebook
+# This hash is jupyter/datascience-notebook:latest on 2020-11-13.
+FROM jupyter/datascience-notebook@sha256:0d04ff6948f8e798fa1e774e09dbdb4f2cd9673a1e548452a63e7f66fa912d4a
 
 # Trying to install all of these at once sometimes causes conda to crash.
 RUN conda install -y basemap basemap-data-hires    && conda clean -afy
@@ -12,10 +12,24 @@ RUN conda install -y geopandas mpld3 pscript       && conda clean -afy
 RUN conda install -y ipyleaflet netcdf-fortran     && conda clean -afy
 RUN conda install -y sparqlwrapper xarray          && conda clean -afy
 RUN conda install -y shapely folium                && conda clean -afy
+RUN conda install -y qgrid                         && conda clean -afy
+
+# this is for the visual debugger in JupyterLab
+RUN conda install -y xeus-python                   && conda clean -afy
+
+# install the standard notebook extenstions
+# and activate the configuratore
+RUN conda install -c conda-forge jupyter_contrib_nbextensions
+RUN jupyter nbextensions_configurator enable
 
 RUN pip install pangaeapy
 RUN pip install jupyter_module_loader
-RUN pip install qgrid
+
+# update jupyter lab and rebuild
+RUN jupyter labextension install @jupyterlab/debugger --no-build
+RUN jupyter labextension install @lckr/jupyterlab_variableinspector --no-build
+RUN jupyter labextension install qgrid2 --no-build
+RUN jupyter lab build
 
 WORKDIR /home/jovyan
 
