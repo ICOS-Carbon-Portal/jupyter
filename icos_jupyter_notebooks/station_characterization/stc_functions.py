@@ -38,6 +38,8 @@ import cartopy.feature as cfeature
 import warnings
 warnings.filterwarnings('ignore')
 
+stcDataPath='./stc_data/'
+
 #added - not show the figure that I am saving (different size than the one displayed
 #for land cover bar graph)
 matplotlib.pyplot.ioff()
@@ -55,10 +57,6 @@ R = 6373.8
 dictionary_color = {'Urban': {'color': 'red'}, 'Cropland':{'color':'darkgoldenrod'}, 'Oceans':{'color':'blue'}, 
                     'Forests':{'color':'green'}, 'Pastures and grassland':{'color':'yellow'}, 'Other':{'color':'black'}, 'No data':{'color': 'grey'}}
 
-#can't go here. will put further down (after functions defined)
-#--> possibly put in stationChar object?
-#fp_point_source_m2_s = import_point_source_data()
-#fp_pop= import_population_data()
 
 #saved distances to the 192 000 cells for all the labeled atmospheric stations
 #if the selected station is not found in this document, the distances are calculated
@@ -95,7 +93,7 @@ def read_aggreg_footprints(station, date_range):
  
         if os.path.isfile(filename):
             f_fp = cdf.Dataset(filename)
-            #f_fp = netCDF4.Dataset(filename)
+          
             if (first):
                 fp=f_fp.variables['foot'][:,:,:]
                 lon=f_fp.variables['lon'][:]
@@ -368,12 +366,12 @@ def date_range_hour_filtered(start_date, end_date, timeselect_list):
     return date_range
 
 def import_landcover():
-    all_corine_classes= Dataset('all_corine_except_ocean.nc')
+    all_corine_classes= Dataset(stcDataPath + 'all_corine_except_ocean.nc')
 
     #the "onceans_finalized" dataset is seperate: CORINE class 523 (oceans) did not extend beyond exclusive zone
     #complemented with Natural Earth data.
     #CORINE does not cover the whole area, "nodata" area is never ocean, rather landbased data.
-    oceans_finalized= Dataset('oceans_finalized.nc')
+    oceans_finalized= Dataset(stcDataPath + 'oceans_finalized.nc')
 
     #access all the different land cover classes in the .nc files:
     fp_111 = all_corine_classes.variables['area_111'][:,:]
@@ -462,7 +460,7 @@ def import_landcover():
     return out_of_domain, urban_aggreg, cropland_aggreg, forests, pastures_grasslands, oceans, other
 
 def import_population_data():
-    pop_data= Dataset('point_with_pop_data.nc')
+    pop_data= Dataset(stcDataPath + 'point_with_pop_data.nc')
     fp_pop=pop_data.variables['Sum_TOT_P'][:,:]
     #fp_pop_lat=pop_data.variables['lat'][:]
     #fp_pop_lon=pop_data.variables['lon'][:]
@@ -470,7 +468,7 @@ def import_population_data():
 
 def import_point_source_data():
     #point source:
-    point_source_data= Dataset('final_netcdf_point_source_emission.nc')
+    point_source_data= Dataset(stcDataPath+ 'final_netcdf_point_source_emission.nc')
 
     #emissions in kg/year in the variable "Sum_Tota_1"
     fp_point_source=point_source_data.variables['Sum_Tota_1'][:,:]
@@ -485,7 +483,7 @@ def import_point_source_data():
     fp_point_source_micromoles_C=fp_point_source_moles_C*1000000
 
     #a NetCDF file with the grid size calues in m2
-    f_gridarea = cdf.Dataset('gridareaSTILT.nc')
+    f_gridarea = cdf.Dataset(stcDataPath + 'gridareaSTILT.nc')
 
     #area stored in "cell_area"
     gridarea = f_gridarea.variables['cell_area'][:]
@@ -1696,11 +1694,11 @@ def multiple_variables_graph_upd(myStation):
     #if the user selection is to use all footprints of 2017 or 2018, use saved values for all the 
     #reference stations (and a few more- all the stations used in Storm(2020))
     if start_date==pd.Timestamp(2018, 1, 1, 0) and end_date==pd.Timestamp(2018,12,31,0) and len(timeselect_list)==8:
-        df_saved=pd.read_csv('condensed_multiple_values_all_2018.csv')
+        df_saved=pd.read_csv(stcDataPath + 'condensed_multiple_values_all_2018.csv')
         predefined=True
         
     elif start_date==pd.Timestamp(2017, 1, 1, 0) and end_date==pd.Timestamp(2017,12,31,0) and len(timeselect_list)==8:
-        df_saved=pd.read_csv('condensed_multiple_values_all_2017_upd.csv')
+        df_saved=pd.read_csv(stcDataPath + 'condensed_multiple_values_all_2017_upd.csv')
         predefined=True
 
     #if different date-range, need to compute variable values for all.
@@ -1876,6 +1874,7 @@ def multiple_variables_graph_upd(myStation):
 
             quartile_dictionary[column] = pdf_text
 
+        #update - into dictionary.
         #create the text-files --> probably change. 
         if not os.path.exists('texts'):
             os.mkdir('texts')

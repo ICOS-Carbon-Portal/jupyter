@@ -34,6 +34,8 @@ import datetime as dt
 import pandas as pd
 import stc_functions
 
+stcDataPath='./stc_data/'
+
 #need settings in an object.
 #second class? BinLabels.. object available within station
 class StationChar():
@@ -156,8 +158,9 @@ class StationChar():
         calculated values are also appended to the csv-files. 
         """
       
-        df_w_distances=pd.read_csv("approved_stations_distances.csv")
-        df_w_degrees=pd.read_csv("approved_stations_degrees.csv")
+        df_w_distances=pd.read_csv(stcDataPath+ "approved_stations_distances.csv")
+        df_w_degrees=pd.read_csv(stcDataPath + "approved_stations_degrees.csv")
+    
         
         #same as degrees
         list_distance_columns=df_w_distances.columns.tolist()
@@ -173,11 +176,11 @@ class StationChar():
         else:
             self.distances=stc_functions.distances_from_point_to_grid_cells(self.lat, self.lon, self.fpLat, self.fpLon)
             df_w_distances[station]=self.distances
-            df_w_distances.to_csv("approved_stations_distances.csv")
+            df_w_distances.to_csv(self.settings['stcDataPath'] + "approved_stations_distances.csv")
             
             self.degrees=stc_functions.degrees_from_point_to_grid_cells(self.lat, self.lon, self.fpLat, self.fpLon)
             df_w_degrees[station]=self.degrees
-            df_w_degrees.to_csv("approved_stations_degrees.csv")
+            df_w_degrees.to_csv(self.settings['stcDataPath'] + "approved_stations_degrees.csv")
             
     #or other class... but belongs to object station characterization as much as distances and degrees to footprint?   
     #can now remove "define_bins_landcover_polar_graph"
