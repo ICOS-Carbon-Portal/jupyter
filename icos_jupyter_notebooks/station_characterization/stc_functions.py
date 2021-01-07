@@ -46,9 +46,7 @@ matplotlib.pyplot.ioff()
 
 #stations that have footprints as well as year and months with footprints. Also altitude. 
 
-
 #path to footprints
-#pathFP='/data/stiltweb/slots/'
 pathFP='/data/stiltweb/stations/'
 
 #Earth's radius in km (for calculating distances between the station and cells)
@@ -75,13 +73,7 @@ def read_aggreg_footprints(station, date_range):
     # path to footprint files in new stiltweb directory structure
     pathFP='/data/stiltweb/stations/'
     
-    
-    # tempCD
-    #pathFP = './data/stiltweb/slots/56.10Nx013.42Ex00030'
-    #pathFP = 'C:\Users\Claudio\Documents\GitHub\station_characterization/data/stiltweb/slots/56.10Nx013.42Ex00030'
-    #station = 'HTM150' 
 
-    # print ('date range: ',date_range)
     fp=[]
     nfp=0
     first = True
@@ -199,11 +191,7 @@ def available_STILT_dictionary():
             if istICOS in ist:
                 available[ist]['stationClass'] = df_datatable['stationClass'][ic]
 
-    # print availability
-    #for ist in sorted(available):
-    #    print ('station:', ist)
-    #    for k in available[ist]:
-    #        print (k,':', available[ist][k])
+
     return available
 
 def create_STILT_dictionary():
@@ -1332,7 +1320,7 @@ def create_seasonal_table_upd(myStation):
         return seasonal_table
     #if not 12 months:
     else:
-        string_footprint_availability='(Dec ' + str(year-1) + ' Dec ' + str(year) +')'
+        string_footprint_availability='(Dec ' + str(year-1) + ' to Dec ' + str(year) +')'
         display(HTML('<p style="font-size:16px;">Footprints not available for the whole year ' + string_footprint_availability+ ' and therefore no seasonal variations table is shown</p>'))
         
 #land cover polar graph:
