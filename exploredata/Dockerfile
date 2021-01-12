@@ -20,6 +20,7 @@ RUN mamba install -qy xeus-python && mamba clean -qafy
 # and activate the configuratore
 RUN mamba install -qy -c conda-forge jupyter_contrib_nbextensions
 RUN jupyter nbextensions_configurator enable
+RUN jupyter nbextension enable toc2/main
 
 RUN pip install pangaeapy
 RUN pip install jupyter_module_loader
