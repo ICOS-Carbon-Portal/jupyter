@@ -8,7 +8,9 @@ The folder is divided by project. Every project has its own folder of notebooks 
 
 * **RINGO_T1.3:** includes notebooks presenting an evaluation of different sampling strategies related to the RINGO project 
 
-<br>
+* **OTC Data Reduction Workshop:** includes notebooks from the Oceant Thematic Centre on how to calibrate and process data for flux measurements
+
+* **envrifair winterschool:** contains notebooks to demonstrate how to create interactive maps, load icos data and create interactive graphs.
 
 ## Licence
 This work is licensed under a Creative Commons Attribution 4.0 International License (CC BY 4.0). <br>
