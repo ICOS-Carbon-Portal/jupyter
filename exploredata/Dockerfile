@@ -1,25 +1,24 @@
 # We use a specific hash since :latest has broken spuriously in the past.
-# https://hub.docker.com/layers/jupyter/datascience-notebook
-# This hash is jupyter/datascience-notebook:latest on 2020-11-13.
-FROM jupyter/datascience-notebook@sha256:0d04ff6948f8e798fa1e774e09dbdb4f2cd9673a1e548452a63e7f66fa912d4a
+# https://hub.docker.com/r/jupyter/datascience-notebook
+# This hash is jupyter/datascience-notebook:latest on 2021-01-12.
+FROM jupyter/datascience-notebook@sha256:a7cd0b731489799fc8cc7b451a8a3d6ee6675691f9658a4b0ff056f9c0f9271b
 
-# Trying to install all of these at once sometimes causes conda to crash.
-RUN conda install -y basemap basemap-data-hires    && conda clean -afy
-RUN conda install -y cartopy geoviews holoviews    && conda clean -afy
-RUN conda install -y panel datashader hvplot param && conda clean -afy
-RUN conda install -y cdo python-cdo netcdf4        && conda clean -afy
-RUN conda install -y geopandas mpld3 pscript       && conda clean -afy
-RUN conda install -y ipyleaflet netcdf-fortran     && conda clean -afy
-RUN conda install -y sparqlwrapper xarray          && conda clean -afy
-RUN conda install -y shapely folium                && conda clean -afy
-RUN conda install -y qgrid                         && conda clean -afy
+# Experimental, use mamba.
+# https://medium.com/@QuantStack/open-software-packaging-for-science-61cecee7fc23
+RUN conda install -y mamba -c conda-forge && conda clean -qafy
+
+RUN mamba install -qy                                                          \
+        basemap basemap-data-hires cartopy geoviews holoviews panel datashader \
+        hvplot param cdo python-cdo netcdf4 geopandas mpld3 pscript ipyleaflet \
+        netcdf-fortran sparqlwrapper xarray shapely folium qgrid               \
+        && mamba clean -qafy
 
 # this is for the visual debugger in JupyterLab
-RUN conda install -y xeus-python                   && conda clean -afy
+RUN mamba install -qy xeus-python && mamba clean -qafy
 
 # install the standard notebook extenstions
 # and activate the configuratore
-RUN conda install -c conda-forge jupyter_contrib_nbextensions
+RUN mamba install -qy -c conda-forge jupyter_contrib_nbextensions
 RUN jupyter nbextensions_configurator enable
 
 RUN pip install pangaeapy
