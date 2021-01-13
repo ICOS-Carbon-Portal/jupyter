@@ -1,7 +1,5 @@
 # Content
-This folder contains everything needed to run the station characterization notebook (station_characterization_one_cell.ipynb).
-
-<br> 
+This folder contains everything needed to run the station characterization notebook <b>station_characterization.ipynb</b>.
 
 ## Background
 
@@ -10,24 +8,16 @@ the tracer concentrations at the station and to support them in the selection of
 influence regions, also called footprints. Footprints are calculated by atmospheric transport models – the STILT (Stochastic Time Inverted Lagrangian 
 Transport model) model in this case – and indicate the contribution of the surface exchange fluxes to the atmospheric concentration of the tracer.
 
-<br> 
-
 As these footprints can be computed on demand in the ICOS footprint tool ([on demand calculator](https://stilt.icos-cp.eu/worker/)), the characterization 
 can be produced also for hypothetical stations, e.g. to aid in the process of picking a station location. 
 
-<br>
-
 The idea is that these footprints can be used to characterize the average sensitivity of a station to different influences, i.a.: 
-
-<br>
 
 * anthropogenic CO2 emissions based on the EDGAR (Emission Database for Global Atmospheric Research) emission inventory,
 * biospheric CO2 uptake and respiration based on the VPRM (Vegetation Photosynthesis and Respiration Model) model,
 * land cover (e.g. forest, crop land, pastures, urban, ocean) based on the CORINE (Coordination of Information on the Environment) classification,
 * population density based on GEOSTAT, 
 * emissions from point sources based on the E-PRTR (The European Pollutant Release and Transfer Register) database
-
-<br>
 
 ## Output figures
 
@@ -39,12 +29,8 @@ seasonal variations table. Averages for a whole meterological year (December of 
 are compared to the different seasons. The same influencers are also included in the multiple variables graph where a handful of ICOS stations are used used as reference
 for the user-selected station. The selected station is placed on the y-axis in relation to the minimum and maximum influencer values of the ICOS stations. 
 
-<br>
-
 The figures can be saved, and in the future there will be an option to use the saved figures to generate the same type of station characterization PDFs as on the 
 station landing pages.
-
-
 
 ## License
 * Copyright © 2019-2020 ICOS ERIC
