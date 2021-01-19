@@ -16,11 +16,21 @@ RUN mamba install -qy                                                          \
 # this is for the visual debugger in JupyterLab
 RUN mamba install -qy xeus-python && mamba clean -qafy
 
-# install the standard notebook extenstions
-# and activate the configuratore
+# install the standard notebook extensions
+# and activate the configurator
 RUN mamba install -qy -c conda-forge jupyter_contrib_nbextensions
 RUN jupyter nbextensions_configurator enable
+
+# patch the default configuration for toc, 
+# such that headers are NOT numbered by default
+# and activate the extension
+
 RUN jupyter nbextension enable toc2/main
+# Add the diff to the image
+COPY nbextensionDefault/toc2.diff /tmp/.
+# Modify the config file in-place.
+RUN patch /opt/conda/share/jupyter/nbextensions/toc2/toc2.yaml /tmp/toc2.diff
+
 
 RUN pip install pangaeapy
 RUN pip install jupyter_module_loader
