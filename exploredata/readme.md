@@ -35,7 +35,6 @@ $ diff -u old.yaml new.yaml
 
 # Save the diff to file
 $ diff -u old.yaml new.yaml > toc2.diff
-# A minimal Dockerfile that can be used for testing looks like this
 ```
 ### Step 2
 Adapt the Dockerfile, which (after testing) should be uploaded to this directory on GitHub. Similar to the following lines of code, you need to add your diff file, and then patch the existing configuration
