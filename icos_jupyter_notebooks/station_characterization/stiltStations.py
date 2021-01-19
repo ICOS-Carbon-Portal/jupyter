@@ -25,6 +25,7 @@ def getStilt():
     url="https://stilt.icos-cp.eu/viewer/stationinfo"
     df = pd.read_csv(url)
     
+    
     # add ICOS flag to the station
     icosStations = cpstation.getIdList()
     icosStations = list(icosStations['id'][icosStations.theme=='AS'])
@@ -34,6 +35,10 @@ def getStilt():
 
     # fill dictionary with ICOS station id, latitude, longitude and altitude
     for ist in sorted(allStations):
+  
+        if not ist in df['STILT id'].values:
+            continue
+        
         stations[ist] = {}
         # get filename of link (original stiltweb directory structure) and extract location information
        
