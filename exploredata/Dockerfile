@@ -1,7 +1,7 @@
 # We use a specific hash since :latest has broken spuriously in the past.
 # https://hub.docker.com/r/jupyter/datascience-notebook
-# This hash is jupyter/datascience-notebook:latest on 2021-01-12.
-FROM jupyter/datascience-notebook@sha256:a7cd0b731489799fc8cc7b451a8a3d6ee6675691f9658a4b0ff056f9c0f9271b
+# This hash is jupyter/datascience-notebook:latest on 2021-01-20.
+FROM jupyter/datascience-notebook@sha256:ed6c44b7b513783e541e251fa057ced63e91887179c16ae5c535fe103c86c3f4
 
 # Experimental, use mamba.
 # https://medium.com/@QuantStack/open-software-packaging-for-science-61cecee7fc23
