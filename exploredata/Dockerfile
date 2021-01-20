@@ -25,11 +25,8 @@ RUN jupyter nbextensions_configurator enable
 # such that headers are NOT numbered by default
 # and activate the extension
 
+COPY exploredata/nbextensionDefault/toc2.yaml /opt/conda/share/jupyter/nbextensions/toc2/.
 RUN jupyter nbextension enable toc2/main
-# Add the diff to the image
-COPY nbextensionDefault/toc2.diff /tmp/.
-# Modify the config file in-place.
-RUN patch /opt/conda/share/jupyter/nbextensions/toc2/toc2.yaml /tmp/toc2.diff
 
 
 RUN pip install pangaeapy
