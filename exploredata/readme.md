@@ -5,11 +5,11 @@ How to build the image which is deployed to exploredata.
 
 ## Makefile
 
-- make pushtest deploy the image to exploretest
+- make pushtest deploy the image to *exploretest*
 - make pushprod deploy to production *exploredata*
 
 ## templates
-contains `login.html` creating an ICOS CP branded login page, overriding the out of the box login page. [https://github.com/jupyterhub/jupyterhub/tree/master/share/jupyterhub/templates](https://github.com/jupyterhub/jupyterhub/tree/master/share/jupyterhub/templates)
+contains `login.html` . An ICOS CP branded login page, overriding the out of the box login page. [https://github.com/jupyterhub/jupyterhub/tree/master/share/jupyterhub/templates](https://github.com/jupyterhub/jupyterhub/tree/master/share/jupyterhub/templates)
 
 ## nbextensionDefault
 By default we install the conda-forge jupyter_contrib_nbextensions. The global defaults
