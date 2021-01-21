@@ -1,5 +1,3 @@
-# Content:
-
 ## Dockerfile
 How to build the image which is deployed to exploredata.
 
