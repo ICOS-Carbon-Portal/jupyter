@@ -22,7 +22,7 @@ Parameters:
     Skip h1 headings from numbering, so that they can serve as a notebook title.
     See the README for details, caveats and alternatives
   input_type: checkbox
-  default: false
+  default: true
 
 - name: toc2.toc_cell
   description: Add a Table of Contents cell at the top of the notebook
