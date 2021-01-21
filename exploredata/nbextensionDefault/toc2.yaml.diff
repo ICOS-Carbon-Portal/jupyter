@@ -1,0 +1,20 @@
+--- toc2.yaml.old	2021-01-20 16:30:06.797815791 +0100
++++ toc2.yaml.new	2021-01-21 20:55:32.231722809 +0100
+@@ -9,7 +9,7 @@
+ - name: toc2.number_sections
+   description: Automatically number notebook's sections
+   input_type: checkbox
+-  default: true
++  default: false
+ - name: toc2.threshold
+   description: Maximum level of nested sections to display on the tables of contents
+   input_type: number
+@@ -22,7 +22,7 @@
+     Skip h1 headings from numbering, so that they can serve as a notebook title.
+     See the README for details, caveats and alternatives
+   input_type: checkbox
+-  default: false
++  default: true
+ 
+ - name: toc2.toc_cell
+   description: Add a Table of Contents cell at the top of the notebook
