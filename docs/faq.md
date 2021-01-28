@@ -1,5 +1,24 @@
 # FAQ
 
+## I am a member of 'project XYZ', but I don't see the project folder.
+<a href="../img/launch.png" target=_blank>
+<img style="float: right; padding: 5px" src="../img/launch.png" width="200" align="right"/></a>
+The docker image, and the user permissions (including access to project folders) are regularly updated. To reflect these updates and changes, you need to restart your server. Top right (after login to the Jupyter Hub), click on control panel and click on 'Stop my Server'. Then click on 'Start My Server' and 'Launch Server' until you see a dropdown list (see image). Select python3 and start.
+
+## Can I get my github repository files?
+<a href="../img/git.png" target=_blank>
+<img style="float: right; padding: 5px" src="../img/git.png" width="200" align="right"/></a>
+Absolutely. After login to the jupyter hub, we recommend you create a new folder, for example 'github'. Then you can open a new terminal (top right, in the dropdown 'new' select terminal). This brings up a terminal window in your home directory. Change directory into github 'cd github' and clone your desired github repository. For example to have a look at the source code for the icoscp python library, you can do: `git clone https://github.com/ICOS-Carbon-Portal/pylib.git`. Inside the pylib folder you can use the usual git commands ([https://git-scm.com/docs/gittutorial](https://git-scm.com/docs/gittutorial)).
+
+## x-axis with DateTime from Matplotlib is 'wrong'
+
+<a href="../img/xaxis_man.png" target=_blank>
+<img style="float: right; padding: 5px" src="../img/xaxis_man.png" width="200" align="right"/>
+<a href="../img/xaxis.png" target=_blank>
+<img style="float: centre; padding: 5px" src="../img/xaxis.png" width="150" align="right"/></a>
+If you plot with matplotlib.pyplot or the pandas convenience function of dataframe.plot(x, y) and you have date/time objects on the x-axis, there is a chance that the x-axis labels are shifted..... There is a lot of 'magic' happening inside Matplotlib to display date time objects with as little effort as possible from the user. This behaviour is using a operating system file which considers time zones and the dates displayed etc..... So, very often the results from Matplotlib are satisfying and good enough for a quick glance at time series data, but depending on operating system, and the time zone your computer lives in and 'when' the time series start strange things are possible to happen. See the example picture. Hence, if you want to 'guarantee' the outcome of the plot, you need to skip the magic, and 'hardcode' the labels from the data set. 
+
+
 ## Is it possible to use Jupyter Lab?
 Yes. After you login to [https://jupyter.icos-cp.eu](https://jupyter.icos-cp.eu) you need to modify the address in your internet browser. Change the **?tree** parameter to **lab**<br>
 jupyter notebook link:`https://jupyter.icos-cp.eu/user/myname/tree?`<br>
