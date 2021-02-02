@@ -1,21 +1,44 @@
 # We use a specific hash since :latest has broken spuriously in the past.
-# https://hub.docker.com/r/jupyter/scipy-notebook/tags
-# This hash is jupyter/scipy-notebook:latest on 2020-08-02.
-FROM jupyter/scipy-notebook@sha256:e89b7047155fdf359152cf3fa34140e4ce8158d96eabb15fe42cc8cf587b6635
+# https://hub.docker.com/r/jupyter/datascience-notebook
+# This hash is jupyter/datascience-notebook:latest on 2021-01-20.
+FROM jupyter/datascience-notebook@sha256:ed6c44b7b513783e541e251fa057ced63e91887179c16ae5c535fe103c86c3f4
 
-# Trying to install all of these at once sometimes causes conda to crash.
-RUN conda install -y basemap basemap-data-hires    && conda clean -afy
-RUN conda install -y cartopy geoviews holoviews    && conda clean -afy
-RUN conda install -y panel datashader hvplot param && conda clean -afy
-RUN conda install -y cdo python-cdo netcdf4        && conda clean -afy
-RUN conda install -y geopandas mpld3 pscript       && conda clean -afy
-RUN conda install -y ipyleaflet netcdf-fortran     && conda clean -afy
-RUN conda install -y sparqlwrapper xarray          && conda clean -afy
-RUN conda install -y shapely folium                && conda clean -afy
+# Experimental, use mamba.
+# https://medium.com/@QuantStack/open-software-packaging-for-science-61cecee7fc23
+RUN conda install -y mamba -c conda-forge && conda clean -qafy
+
+RUN mamba install -qy                                                          \
+        basemap basemap-data-hires cartopy geoviews holoviews panel datashader \
+        hvplot param cdo python-cdo netcdf4 geopandas mpld3 pscript ipyleaflet \
+        netcdf-fortran sparqlwrapper xarray shapely folium qgrid               \
+        && mamba clean -qafy
+
+# this is for the visual debugger in JupyterLab
+RUN mamba install -qy xeus-python && mamba clean -qafy
+
+# install the standard notebook extensions
+# and activate the configurator
+RUN mamba install -qy -c conda-forge jupyter_contrib_nbextensions
+RUN jupyter nbextensions_configurator enable
+
+# patch the default configuration for toc, 
+# such that headers are NOT numbered by default
+# and activate the extension
+
+COPY exploredata/nbextensionDefault/*.diff /tmp/
+RUN patch /opt/conda/share/jupyter/nbextensions/toc2/toc2.yaml /tmp/toc2.yaml.diff
+RUN patch /opt/conda/share/jupyter/nbextensions/toc2/toc2.js /tmp/toc2.js.diff
+RUN jupyter nbextension enable toc2/main
+
 
 RUN pip install pangaeapy
 RUN pip install jupyter_module_loader
-RUN pip install qgrid
+
+# update jupyter lab and rebuild
+RUN jupyter labextension install @jupyterlab/debugger --no-build
+RUN jupyter labextension install @lckr/jupyterlab_variableinspector --no-build
+RUN jupyter labextension install qgrid2 --no-build
+RUN jupyter lab build
 
 WORKDIR /home/jovyan
 

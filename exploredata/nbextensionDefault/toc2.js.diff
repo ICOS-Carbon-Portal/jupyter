@@ -1,0 +1,14 @@
+--- toc2.js.old	2021-01-20 16:30:06.797815791 +0100
++++ toc2.js.new	2021-01-21 20:54:50.891982444 +0100
+@@ -34,9 +34,9 @@
+     // default values for per-notebook configurable parameters
+     var metadata_settings = {
+         nav_menu: {},
+-        number_sections: true,
++        number_sections: false,
+         sideBar: true,
+-        skip_h1_title: false,
++        skip_h1_title: true,
+         base_numbering: 1,
+         title_cell: 'Table of Contents',
+         title_sidebar: 'Contents',
