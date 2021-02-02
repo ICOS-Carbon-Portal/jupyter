@@ -34,7 +34,6 @@ path_edgar = '/data/stilt/Emissions/'
 #------------------------------------------------------------------------------------------------------------------
 
 def read_icos_data(f_icos,tracer,flag=True):
-    
     if (len(f_icos)>0):
         df = Dobj(f_icos.dobj.iloc[0]).getColumns()
         df.set_index('TIMESTAMP',inplace=True)
@@ -46,6 +45,10 @@ def read_icos_data(f_icos,tracer,flag=True):
             else:
                 df[tracer.lower()].loc[df['Flag']!='O']=np.nan
                 df['Stdev'].loc[df['Flag']!='O']=np.nan
+        else:
+            if (tracer.lower() != 'mto'):
+                df[tracer.lower()].loc[df[tracer.lower()]<0.0]=np.nan
+                df['Stdev'].loc[df['Stdev']<0.0]=np.nan
     else:
         df = pd.DataFrame(None)
     return df
@@ -215,29 +218,42 @@ def read_STILT_dictionary():
     else:
         print("no STILT station dictionary found")
         stations={}
-        
+
     return stations
 
 #------------------------------------------------------------------------------------------------
 
-def print_STILT_dictionary(stations):
+def print_STILT_dictionary(stilt_stations):
     
-    if not stations:
+    if not stilt_stations:
         # read STILT station dictionary from json file
-        stations = read_STILT_dictionary()
+        stilt_stations = read_STILT_dictionary()
 
     # print dictionary
-    for ist in sorted(stations):
+    for ist in sorted(stilt_stations):
         print ('station:', ist)
-        for k in stations[ist]:
-            print (k,':', stations[ist][k])
+        for k in stilt_stations[ist]:
+            print (k,':', stilt_stations[ist][k])
         print(' ')
 
 #------------------------------------------------------------------------------
-
 # function to read STILT time series with hourly concentrations for RINGO T1.3
 def read_stilt_timeseries_RINGO_T13(station,year,loc_ident):
-    filename=path_stilt+'Results_RINGO_T1.3/'+station+'/stiltresult'+str(year)+'x'+loc_ident+'.csv'
+    filename=path_stilt+'Results_RINGO_T1.3_test/'+station+'/stiltresult'+str(year)+'x'+loc_ident+'.csv'
+    df= pd.read_csv(filename,delim_whitespace=True)
+    df.date = pd.to_datetime(df[['year', 'month', 'day', 'hour']])
+    df.name = station
+    df.model = 'STILT'
+    df['wind.speed']=np.sqrt((df['wind.u']**2)+(df['wind.v']**2))
+    df['co2.ff']=df['co2.fuel.coal']+df['co2.fuel.oil']+df['co2.fuel.gas']
+    df.set_index(['date'],inplace=True)
+    #print(df)
+    return df
+
+#------------------------------------------------------------------------------
+# function to read STILT time series with hourly concentrations for RINGO T1.3, updated with more STILT runs
+def read_stilt_timeseries_RINGO_T13_update(station,year,loc_ident):
+    filename=path_stilt+'Results_RINGO_T1.3_test/'+station+'/stiltresult'+str(year)+'x'+loc_ident+'.csv'
     df= pd.read_csv(filename,delim_whitespace=True)
     df.date = pd.to_datetime(df[['year', 'month', 'day', 'hour']])
     df.name = station
