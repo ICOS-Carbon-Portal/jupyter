@@ -25,7 +25,7 @@ RUN jupyter nbextensions_configurator enable
 # such that headers are NOT numbered by default
 # and activate the extension
 
-COPY exploredata/nbextensionDefault/*.diff /tmp/
+COPY nbextensionDefault/*.diff /tmp/
 RUN patch /opt/conda/share/jupyter/nbextensions/toc2/toc2.yaml /tmp/toc2.yaml.diff
 RUN patch /opt/conda/share/jupyter/nbextensions/toc2/toc2.js /tmp/toc2.js.diff
 RUN jupyter nbextension enable toc2/main
@@ -49,10 +49,3 @@ RUN rmdir work
 # This package, and the following notebook directories, are the stuff that
 # changes most often, so we add them last.
 RUN pip install icoscp --no-cache-dir
-
-# 1000:100 is jovyan:users
-ADD --chown=1000:100 education ./education
-ADD --chown=1000:100 icos_jupyter_notebooks ./icos_jupyter_notebooks
-ADD --chown=1000:100 project_jupyter_notebooks ./project_jupyter_notebooks
-ADD --chown=1000:100 introduction ./introduction
-ADD --chown=1000:100 pylib_examples ./pylib_examples
