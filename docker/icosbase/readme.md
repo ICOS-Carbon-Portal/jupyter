@@ -1,3 +1,8 @@
+<img src="https://www.icos-cp.eu/sites/default/files/2017-11/ICOS_CP_logo.png" width="300" align="right"/>
+<br>
+<br>
+<br> 
+
 ## Dockerfile
 How to build the image which is deployed to exploredata.
 
