@@ -1,7 +1,36 @@
 # We use a specific hash since :latest has broken spuriously in the past.
 # https://hub.docker.com/r/jupyter/datascience-notebook
-# This hash is jupyter/datascience-notebook:latest on 2021-01-20.
-FROM jupyter/datascience-notebook@sha256:ed6c44b7b513783e541e251fa057ced63e91887179c16ae5c535fe103c86c3f4
+# This hash is jupyter/datascience-notebook:latest on 2021-01-28.
+FROM jupyter/datascience-notebook@sha256:e6d5c7d595d25f6ec7a894d8fcc7cb4b542c28f65fb71cdf0cb9b77f0ce0ddd0
+
+# -------------------------
+# this block is added to the top of the Dockerfile
+# because it takes about 45 minutes to install TL2020, so be patient.
+# Install a full version of Texlive2020 (https://tug.org/texlive/)
+# switch to root for texlive installation
+USER root
+
+# Remove old texlive installation
+RUN rm -rf /usr/share/texlive
+
+# Add texlive2020 installer and unpack
+# http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
+
+RUN wget -O /tmp/install-tl-unx.tar.gz http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
+RUN tar -xf /tmp/install-tl-unx.tar.gz --strip-components=1 -C /tmp/
+
+# add profile and start intallation
+
+COPY exploredata/Texlive2020/texlive.profile /tmp/.
+RUN /tmp/install-tl --profile=/tmp/texlive.profile
+
+# export path to texlive2020
+ENV PATH="/usr/local/texlive/2020/bin/x86_64-linux:${PATH}"
+
+# switch back to normal user
+USER jovyan
+
+# -------------------------
 
 # Experimental, use mamba.
 # https://medium.com/@QuantStack/open-software-packaging-for-science-61cecee7fc23
@@ -25,20 +54,21 @@ RUN jupyter nbextensions_configurator enable
 # such that headers are NOT numbered by default
 # and activate the extension
 
-COPY nbextensionDefault/*.diff /tmp/
+COPY exploredata/nbextensionDefault/*.diff /tmp/
 RUN patch /opt/conda/share/jupyter/nbextensions/toc2/toc2.yaml /tmp/toc2.yaml.diff
 RUN patch /opt/conda/share/jupyter/nbextensions/toc2/toc2.js /tmp/toc2.js.diff
 RUN jupyter nbextension enable toc2/main
 
+# update jupyter lab and rebuild
+RUN jupyter labextension install @jupyterlab/debugger --no-build
+RUN jupyter labextension install @lckr/jupyterlab_variableinspector --no-build
+# jupter lab build fails with this base-notebook
+#RUN jupyter labextension install qgrid2 --no-build
+RUN jupyter lab build
 
 RUN pip install pangaeapy
 RUN pip install jupyter_module_loader
 
-# update jupyter lab and rebuild
-RUN jupyter labextension install @jupyterlab/debugger --no-build
-RUN jupyter labextension install @lckr/jupyterlab_variableinspector --no-build
-RUN jupyter labextension install qgrid2 --no-build
-RUN jupyter lab build
 
 WORKDIR /home/jovyan
 
