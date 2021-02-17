@@ -1,3 +1,8 @@
+<img src="https://www.icos-cp.eu/sites/default/files/2017-11/ICOS_CP_logo.png" width="300" align="left"/>
+<br>
+<br>
+<br> 
+
 # ICOS Carbon Portal - Jupyter Notebooks
 This repository contains code and ancillary data for all jupyter notebooks that are currently available through the ICOS CP "Anonymous" service: https://exploredata.icos-cp.eu
 
