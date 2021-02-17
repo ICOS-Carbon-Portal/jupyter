@@ -1,3 +1,8 @@
+<img src="https://www.icos-cp.eu/sites/default/files/2017-11/ICOS_CP_logo.png" width="300" align="right"/>
+<br>
+<br>
+<br> 
+
 # ICOS Project-specific Jupyter Notebooks
 This folder includes notebooks that present the scientific output of projects in which ICOS has collaborated with other partners. The scientific output is presented in a way that enhances the user's understanding of the applied processes and methods. Users may interact with the content and test alternative theories by altering code in the code cells or by using interactive widgets.
 
