@@ -1,3 +1,8 @@
+<img src="https://www.icos-cp.eu/sites/default/files/2017-11/ICOS_CP_logo.png" width="300" align="left"/>
+<br>
+<br>
+<br>
+
 # ICOS Carbon Portal - General Educational Jupyter Notebooks
 This folder includes subfolders with educational material based on ICOS data. The target audience are high school students , university students and the general public.
 The notebooks in this folder make use of ICOS data to introduce users to basic principles of programming whilst learning about the carbon cycle, global warming and drought.
