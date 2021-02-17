@@ -1,10 +1,10 @@
 # ICOS Carbon Portal - General Educational Jupyter Notebooks
-This repository contains folders with educational material based on ICOS data. The target audience are high school students , university students and the general public.
+This folder includes subfolders with educational material based on ICOS data. The target audience are high school students , university students and the general public.
 The notebooks in this folder make use of ICOS data to introduce users to basic principles of programming whilst learning about the carbon cycle, global warming and drought.
 <br>
 
 ## Structure
-This folder includes folders with ancillary data and notebooks:
+This folder contains subfolders with ancillary data files and notebooks:
 - data 
 - images
 - notebooks
