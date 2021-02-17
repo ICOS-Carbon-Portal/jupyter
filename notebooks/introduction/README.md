@@ -10,7 +10,7 @@ The notebooks are aimed for people who have no prior knowledge in programming bu
 <br>
 
 ## Structure
-The directory includes two jupyter notebooks:
+The folder includes two jupyter notebooks:
 
 * **Quickstart to Python**
 Introduction to basic principles of programming with Python.
