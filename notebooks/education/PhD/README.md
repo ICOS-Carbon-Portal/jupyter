@@ -1,5 +1,10 @@
+<img src="https://www.icos-cp.eu/sites/default/files/2017-11/ICOS_CP_logo.png" width="300" align="left"/>
+<br>
+<br>
+<br>
+
 # ICOS Carbon Portal - Jupyter Notebooks for PhD courses
-This repository contains folders with educational material for PhD courses that make use of ICOS data.
+This folder contains subfolders with educational material for PhD courses that make use of ICOS data.
 
 <br>
 
