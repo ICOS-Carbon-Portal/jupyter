@@ -34,7 +34,7 @@ import datetime as dt
 import pandas as pd
 import stc_functions
 
-stcDataPath='./stc_data/'
+stcDataPath='/data/project/stc/'
 
 #need settings in an object.
 #second class? BinLabels.. object available within station
@@ -84,6 +84,10 @@ class StationChar():
         self.dirBins = None             # numpy array with the direction bins for the maps
         self.dirLabels = None           # list with the direction labels for the maps
         
+        self.figures = {}               # dictionary to store figures and captions
+                                        # use figures['1'] = [fig, caption] to get figure 1....
+                                        # to add, see function add_figure() 
+                                        
         # fucntions to generate the object attributes
         self._setStationData()
         self._setDateRange()
@@ -194,6 +198,24 @@ class StationChar():
         km_intervals = self.settings['binInterval']
         bin_size = self.settings['binSize']
         self.intervalBins, self.intervalLabels, self.dirBins, self.dirLabels = stc_functions.define_bins_maprose(km_intervals, bin_size)
+        
+    def add_figure(self, key, figure, caption):
+        """
+        add figures in the dictionary self.figures. To retrieve the figures
+        you can use object.figure        
+
+        Parameters
+        ----------
+        key : INT|STR :     figure number
+        figure : OBjECT :   Matplotlib figure or smilar, needs to have a function
+                            Object.show() and object.save('filename')            
+        caption : STR :     String to be used as a caption text for example when
+                            creating a pdf output
+        Returns: None.
+        
+        """
+        self.figures[str(key)]=[figure, caption]
+        
     
 if __name__ == "__main__":
     """

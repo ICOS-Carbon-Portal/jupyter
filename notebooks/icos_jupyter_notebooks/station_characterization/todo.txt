@@ -1,0 +1,9 @@
+simplify function and variable names
+remove unused functions
+remove unused imports
+store figures & captions in stc
+automate and create pdf output
+move buttons and progressbar into a horizontal box?
+remove 'please polulate the widgets'
+
+plot_maps returns plt not fig ?

@@ -15,36 +15,33 @@ import matplotlib.pyplot as plt
 import math
 import numpy as np
 from netCDF4 import Dataset
-#import h5netcdf.legacyapi as netCDF4
-#import h5netcdf.legacyapi as netCDF4
 import textwrap
 import datetime as dt
 import os
 import six
 import requests
-from icoscp.station import station as station_data
+
 
 #for the widgets
 from IPython.core.display import display, HTML 
-from ipywidgets import Dropdown, SelectMultiple, HBox, VBox, Button, Output, IntText, RadioButtons,IntProgress, GridspecLayout
-from IPython.display import clear_output, display
 
 # import required libraries
-#%pylab inline
+
 import netCDF4 as cdf
-#import pickle
+
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import warnings
 warnings.filterwarnings('ignore')
 
-stcDataPath='./stc_data/'
+import json
+
+stcDataPath='/data/project/stc/'
 
 #added - not show the figure that I am saving (different size than the one displayed
 #for land cover bar graph)
 matplotlib.pyplot.ioff()
 
-#stations that have footprints as well as year and months with footprints. Also altitude. 
 
 #path to footprints
 pathFP='/data/stiltweb/stations/'
@@ -56,14 +53,6 @@ dictionary_color = {'Urban': {'color': 'red'}, 'Cropland':{'color':'darkgoldenro
                     'Forests':{'color':'green'}, 'Pastures and grassland':{'color':'yellow'}, 'Other':{'color':'black'}, 'No data':{'color': 'grey'}}
 
 
-#saved distances to the 192 000 cells for all the labeled atmospheric stations
-#if the selected station is not found in this document, the distances are calculated
-#approved_stations_distances = pd.read_csv('approved_stations_distances.csv')
-
-#saved degree angles from the stations to all 192 000 cells for all the labeled atmospheric stations
-#approved_stations_degrees = pd.read_csv('approved_stations_degrees.csv')
-
-#functions from Ute 
 
 #function to read and aggregate footprints for given date range
 def read_aggreg_footprints(station, date_range):
@@ -73,7 +62,6 @@ def read_aggreg_footprints(station, date_range):
     # path to footprint files in new stiltweb directory structure
     pathFP='/data/stiltweb/stations/'
     
-
     fp=[]
     nfp=0
     first = True
@@ -190,8 +178,6 @@ def available_STILT_dictionary():
             ic = int(df_datatable[df_datatable['stationId']==istICOS].index.values)
             if istICOS in ist:
                 available[ist]['stationClass'] = df_datatable['stationClass'][ic]
-
-
     return available
 
 def create_STILT_dictionary():
@@ -494,7 +480,7 @@ def date_and_time_string_for_title(date_range, timeselect_list):
     timeselect_string=' '.join(timeselect_string)
     date_and_time_string=('\n' + str(date_range[0].year) + '-' + str(date_range[0].month) + '-' + str(date_range[0].day)\
                 + ' to ' + str(date_range[date_index_number].year) + '-' + str(date_range[date_index_number].month) + '-' \
-                + str(date_range[date_index_number].day)+ ' Hour(s): ' + timeselect_string+ '\n')
+                + str(date_range[date_index_number].day)+ ', Hour(s): ' + timeselect_string+ '\n')
     return date_and_time_string
 
 #function to generate maps with cells binned by defined intervals and direction
@@ -514,7 +500,7 @@ def nondirection_labels(bins, units):
 
     return list(labels)
 
-def calculate_initial_compass_bearing(pointA, pointB):
+def compass_bearing(pointA, pointB):
     """
     Calculates the bearing between two points.
     The formulae used is the following:
@@ -595,113 +581,9 @@ def lonlat_2_ixjy(slon,slat,mlon,mlat):
     jy = (np.abs(mlat-slat)).argmin()
     return ix,jy
 
-# function to plot maps (show station location if station is provided and zoom in second plot if zoom is provided)
-def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', station='', zoom='', 
-              vmin=0.0001, vmax=None, colors='GnBu',pngfile=''): 
 
-    mcolor='m'
-    
-    # Set scale for features from Natural Earth
-    NEscale = '50m'
 
-    # Create a feature for Countries at 1:50m from Natural Earth
-    countries = cfeature.NaturalEarthFeature(
-        category='cultural',
-        name='admin_0_countries',
-        scale=NEscale,
-        facecolor='none')
-
-    fig = plt.figure(figsize=(18,10))
-
-    # set up a map
-    ax = plt.subplot(1, 2, 1, projection=ccrs.PlateCarree())
-    img_extent = (lon.min(), lon.max(), lat.min(), lat.max())
-    ax.set_extent([lon.min(), lon.max(), lat.min(), lat.max()],crs=ccrs.PlateCarree())
-    ax.add_feature(countries, edgecolor='black', linewidth=0.3)
-
-    cmap = plt.get_cmap(colors)
-    
-    cmap.set_under(color='white')  
-    
-    if linlog == 'linear':
-        
-        im = ax.imshow(field[:,:],interpolation=None,origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
-        cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='both')
-        cbar.set_label(label+'  '+unit)
-
-    else:
-        
-        im = ax.imshow(np.log10(field)[:,:],interpolation='none',origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
-        cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='both')
-        cbar.set_label(label+'  log$_{10}$ '+unit)
-    
-    plt.title(title)
-    
-    ax.text(0.01, -0.25, 'min: %.2f' % np.min(field[:,:]), horizontalalignment='left',transform=ax.transAxes)
-    ax.text(0.99, -0.25, 'max: %.2f' % np.max(field[:,:]), horizontalalignment='right',transform=ax.transAxes)
-    
-    #show station location if station is provided
-    if station != '':
-        station_lon=[]
-        station_lat=[]
-        station_lon.append(stations[station]['lon'])
-        station_lat.append(stations[station]['lat'])
-        ax.plot(station_lon,station_lat,'+',color=mcolor,ms=10,markeredgewidth=1,transform=ccrs.PlateCarree())
-        
-    zoom=str(zoom)
-    if zoom != '':
-        
-        #grid cell index of station 
-        ix,jy = lonlat_2_ixjy(stations[zoom]['lon'],stations[zoom]['lat'],lon,lat)
- 
-        # define zoom area 
-        i1 = np.max([ix-35,0])
-        i2 = np.min([ix+35,400])
-        j1 = np.max([jy-42,0])
-        j2 = np.min([jy+42,480])
-
-        lon_z=lon[i1:i2]
-        lat_z=lat[j1:j2]
-
-        field_z=field[j1:j2,i1:i2]
-
-        # set up a map
-        ax = plt.subplot(1, 2, 2, projection=ccrs.PlateCarree())
-        img_extent = (lon_z.min(), lon_z.max(), lat_z.min(), lat_z.max())
-        ax.set_extent([lon_z.min(), lon_z.max(), lat_z.min(), lat_z.max()],crs=ccrs.PlateCarree())
-        ax.add_feature(countries, edgecolor='black', linewidth=0.3)
-    
-        if linlog == 'linear':
-            im = ax.imshow(field_z,interpolation='none',origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
-            cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='both')
-            cbar.set_label(label+'  '+unit)
-        else:
-            im = ax.imshow(np.log10(field_z),interpolation='none',origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
-            cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='both')
-            cbar.set_label(label+'  log$_{10}$ '+unit)
-
-        #show station location if station is provided
-        if station != '':
-            station_lon=[]
-            station_lat=[]
-            station_lon.append(stations[station]['lon'])
-            station_lat.append(stations[station]['lat'])
-            ax.plot(station_lon,station_lat,'+',color=mcolor,ms=10,markeredgewidth=1,transform=ccrs.PlateCarree())
-        plt.title(title)
-        ax.text(0.01, -0.25, 'min: %.2f' % np.min(field[j1:j2,i1:i2]), horizontalalignment='left',transform=ax.transAxes)
-        ax.text(0.99, -0.25, 'max: %.2f' % np.max(field[j1:j2,i1:i2]), horizontalalignment='right',transform=ax.transAxes)
-  
-    plt.show()
-    if len(pngfile)>0:
-        plotdir='figures'
-        if not os.path.exists(plotdir):
-            os.mkdir(plotdir)
-        
-        fig.savefig(plotdir+'/'+pngfile+'.pdf',dpi=100,bbox_inches='tight')
-        
-    plt.close()
-
-def plot_maps_upd(myStation, field, title='', label='', linlog='linear', zoom='', 
+def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='', 
               vmin=0.0001, vmax=None, colors='GnBu',pngfile=''): 
 
     station=myStation.stationId
@@ -804,14 +686,12 @@ def plot_maps_upd(myStation, field, title='', label='', linlog='linear', zoom=''
         ax.text(0.01, -0.25, 'min: %.2f' % np.min(field[j1:j2,i1:i2]), horizontalalignment='left',transform=ax.transAxes)
         ax.text(0.99, -0.25, 'max: %.2f' % np.max(field[j1:j2,i1:i2]), horizontalalignment='right',transform=ax.transAxes)
 
-    if len(pngfile)>0:
-        plotdir='figures'
-        if not os.path.exists(plotdir):
-            os.mkdir(plotdir)
+    if len(pngfile)>0:        
+        output_folder = myStation.settings['output_folder']        
+        fig.savefig(output_folder + '/' + pngfile + '.pdf',dpi=100,bbox_inches='tight')
         
-        fig.savefig(plotdir+'/'+pngfile+'.pdf',dpi=100,bbox_inches='tight')
-    return plt 
-    plt.close()
+    return fig 
+    
 #or min_lat, max_lat, step (in degrees)    
 def distances_from_point_to_grid_cells(station_lat, station_lon, grid_lat, grid_lon):
     
@@ -826,13 +706,13 @@ def distances_from_point_to_grid_cells(station_lat, station_lon, grid_lat, grid_
 
 def degrees_from_point_to_grid_cells(station_lat, station_lon, grid_lat, grid_lon):
     
-    degrees_0_360=[calculate_initial_compass_bearing((station_lat, station_lon), (lat, lon)) for lat in grid_lat for lon in grid_lon]
+    degrees_0_360=[compass_bearing((station_lat, station_lon), (lat, lon)) for lat in grid_lat for lon in grid_lon]
         
     #return list with degrees
     return degrees_0_360
 
 
-def map_representation_polar_graph_upd(myStation, rose_type, colorbar='gist_heat_r', zoom=''):   
+def polar_graph(myStation, rose_type, colorbar='gist_heat_r', zoom=''):   
     
     """
     function contained - can make shorter. not global. 
@@ -844,12 +724,6 @@ def map_representation_polar_graph_upd(myStation, rose_type, colorbar='gist_heat
     dir_labels=myStation.dirLabels
     fp=myStation.fp
     unit=myStation.settings['unit']
-    date_range=myStation.dateRange
-    title=myStation.settings['titles']
-    station_name=myStation.stationName
-    bin_size=myStation.settings['binSize']
-    km_intervals=myStation.settings['binInterval']
-    timeselect=myStation.settings['timeOfDay']
     save_figs=myStation.settings['saveFigs']
     station_id=myStation.stationId
     
@@ -934,16 +808,6 @@ def map_representation_polar_graph_upd(myStation, rose_type, colorbar='gist_heat
     #numpy array works to display in map
     rosedata_distance_degrees_binned_unique_combo_join_sorted_list_of_lists_array=np.array(rosedata_distance_degrees_binned_unique_combo_join_sorted_list_of_lists) 
 
-    #added
-    date_index_number = (len(date_range) - 1)
-    
-    if title=='yes':
-        date_and_time_string= date_and_time_string_for_title(date_range, timeselect)
-        for_title=('Station: ' + station_name + ' (' + station_id + ')' + '<br>' + unit.capitalize() + ' ' + rose_type + ' given direction and distance: ' + '<br>' + str(bin_size) + \
-                   ' degree bins and ' + str(km_intervals) +' km increments <br>' + date_and_time_string)
-    else:
-        for_title=''
-
     if save_figs=='yes':
         
         if rose_type=='sensitivity':
@@ -954,27 +818,26 @@ def map_representation_polar_graph_upd(myStation, rose_type, colorbar='gist_heat
             figure_number='_figure_3'
             
         string_fig=station_id+figure_number
+        
     else:
         string_fig=''
-
+        
+    caption=(unit.capitalize() + ' ' + rose_type + ' given direction and distance')
           
-    returned_map=plot_maps_upd(myStation, rosedata_distance_degrees_binned_unique_combo_join_sorted_list_of_lists_array, title=for_title, label=rose_type, 
+    polar_map=plot_maps(myStation, rosedata_distance_degrees_binned_unique_combo_join_sorted_list_of_lists_array, title=caption, label=rose_type, 
                    linlog='linear', zoom='', vmin=0.0001, vmax=None, colors=colorbar,pngfile=string_fig)
-    
-    return returned_map, for_title
+        
+    return polar_map, caption
 
 def land_cover_bar_graph_upd(myStation):
     
     station=myStation.stationId
-    station_name=myStation.stationName
-    date_range=myStation.dateRange
-    timeselect=myStation.settings['timeOfDay']
     fp_lon=myStation.fpLon
     fp_lat=myStation.fpLat
     degrees=myStation.degrees
     fp=myStation.fp
     save_figs=myStation.settings['saveFigs']
-    title=myStation.settings['titles']
+
     
     #get all the land cover data from netcdfs 
     out_of_domain, urban_aggreg, cropland_aggreg, forests, pastures_grasslands, oceans, other= import_landcover()
@@ -1096,46 +959,39 @@ def land_cover_bar_graph_upd(myStation):
         list_labels.append(for_lable)
         index=index+1
 
-    date_index_number = (len(date_range) - 1)
-    if title=='yes':
-        date_and_time_string=date_and_time_string_for_title(date_range, timeselect)
-        for_title=('Station: ' + str(station_name) + ' (' + station + ')' + '<br>' + 'Land cover within average footprint by direction<br>'+date_and_time_string)
-    else:
-        for_title=''
-
     labels=[textwrap.fill(text,20) for text in list_labels]
 
     plt.legend(handles[::-1], labels[::-1],bbox_to_anchor=(1, 0.4))
  
     plt.ylabel('Percent')
-    #plt.title(for_title)
+    
     
     #first one is not north (in rosedata - rather 22.5 to 67.5 (NE). 
     plt.xticks(ind, ('NE', 'E','SE', 'S', 'SW','W', 'NW', 'N'))
 
     ax.yaxis.grid(True)
 
-    #plt.show()
-    
-    
     #the land cover bar graph going into the PDF has different dimensions
     if save_figs=='yes':
+        
+        output_folder = myStation.settings['output_folder']
         
         plt.ioff()
         #different figsize here for the PDF, all else the same as outout figure
         fig.set_size_inches(12, 11)
-
-        plotdir='figures'
         pngfile=station+'_figure_7'
-        fig.savefig(plotdir+'/'+pngfile+'.pdf',dpi=100, bbox_inches='tight')
+        fig.savefig(output_folder +'/'+pngfile+'.pdf',dpi=100, bbox_inches='tight')
+        
+    for_caption=('Land cover within average footprint aggregated by direction')
+
 
     fig.set_size_inches(11, 13)
-    return plt, for_title
+    return fig, for_caption
 
 
 
 #14 font before
-def render_mpl_seasonal_table(data, station, save_figs, col_width=2, row_height=0.625, font_size=16,
+def render_mpl_seasonal_table(myStation, data, station, save_figs, col_width=2, row_height=0.625, font_size=16,
              header_color='#40466e', row_colors=['#f1f1f2', 'w'], edge_color='w',
              bbox=[0, 0, 1, 1], header_columns=0, 
              ax=None):
@@ -1158,16 +1014,17 @@ def render_mpl_seasonal_table(data, station, save_figs, col_width=2, row_height=
             cell.set_facecolor(row_colors[k[0]%len(row_colors) ])
 
     if save_figs=='yes':
+        
+        output_folder = myStation.settings['output_folder']
 
-        plotdir='figures'
         pngfile=station+'_figure_6'
-        fig.savefig(plotdir+'/'+pngfile+'.pdf',dpi=100, bbox_inches='tight')
+        fig.savefig(output_folder +'/' + pngfile + '.pdf',dpi=100, bbox_inches='tight')
 
-    return plt
+    return fig
 
        
 #seasonal variations table
-def create_seasonal_table_upd(myStation):
+def seasonal_table(myStation):
 
     #station_id
     station=myStation.stationId
@@ -1198,9 +1055,6 @@ def create_seasonal_table_upd(myStation):
         summer_date_range=pd.date_range(dt.datetime(year,6,1,0), (dt.datetime(year, 9, 1,0)-dt.timedelta(hours=3)), freq='3H')
         fall_date_range=pd.date_range(dt.datetime(year,9,1,0), (dt.datetime(year, 12, 1,0)-dt.timedelta(hours=3)), freq='3H')
 
-        #always all footprints for the year
-        timeselect='0, 3, 6, 9, 12, 15, 18, 21'
-
         #the average footprints given the selected date range
         nfp_winter, fp_winter, fp_lon, fp_lat, title_not_used = read_aggreg_footprints(station, winter_date_range)
         nfp_spring, fp_spring, fp_lon, fp_lat, title_not_used = read_aggreg_footprints(station, spring_date_range)
@@ -1215,7 +1069,6 @@ def create_seasonal_table_upd(myStation):
         part_summer = nfp_summer/nfp_total
         part_fall = nfp_fall/nfp_total
  
-        #sensitivity_whole=(fp_winter[0].sum()* part_winter)+(fp_spring[0].sum()*part_spring)+(fp_summer[0].sum()*part_summer)+(fp_fall[0].sum()*part_fall)
         
         fp_whole=(fp_winter*part_winter)+ (fp_spring*part_spring)+(fp_summer*part_summer)+(fp_fall*part_fall)
         
@@ -1243,14 +1096,12 @@ def create_seasonal_table_upd(myStation):
 
         #get the modelled concentration values
         timeselect_list=[0, 3, 6, 9, 12, 15, 18, 21]
-        df_whole = read_stilt_timeseries_upd(station, date_range, timeselect_list)
         df_winter = read_stilt_timeseries_upd(station, winter_date_range, timeselect_list)
         df_spring = read_stilt_timeseries_upd(station, spring_date_range, timeselect_list)
         df_summer = read_stilt_timeseries_upd(station, summer_date_range, timeselect_list)
         df_fall = read_stilt_timeseries_upd(station, fall_date_range, timeselect_list)
 
         #averages of the modelled concentration values.
-        #df_whole_mean=df_whole.mean()
         df_winter_mean=df_winter.mean()
         df_spring_mean=df_spring.mean()
         df_summer_mean=df_summer.mean()
@@ -1267,7 +1118,6 @@ def create_seasonal_table_upd(myStation):
         gee_diff_summer=((df_summer_mean['co2.bio.gee']/gee_whole)*100)-100
         gee_diff_fall=((df_fall_mean['co2.bio.gee']/gee_whole)*100)-100
         
-
 
         #respiration
         resp_whole=df_whole_mean['co2.bio.resp']
@@ -1313,15 +1163,15 @@ def create_seasonal_table_upd(myStation):
                                                               'Jun-Aug':("%+.2f" % anthro_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % anthro_diff_fall+ '%'), 'Unit': 'ppm'})
 
 
-        display(HTML('<p style="font-size:16px;">Seasonal variation during the start year of specified date range (including December of the year before to show meteorological seasons) </p>'))
-
-        seasonal_table=render_mpl_seasonal_table(df_seasonal_table, station, save_figs, header_columns=0, col_width=2.5)
+        caption = 'Seasonal variation during the start year of specified date range (including December of the year before to show meteorological seasons)'
+        seasonal_table=render_mpl_seasonal_table(myStation, df_seasonal_table, station, save_figs, header_columns=0, col_width=2.5)
       
-        return seasonal_table
+        return seasonal_table, caption
     #if not 12 months:
-    else:
-        string_footprint_availability='(Dec ' + str(year-1) + ' to Dec ' + str(year) +')'
-        display(HTML('<p style="font-size:16px;">Footprints not available for the whole year ' + string_footprint_availability+ ' and therefore no seasonal variations table is shown</p>'))
+    else:        
+        seasonal_table = None
+        caption = 'No seasonal table, footprints are not available for the whole year'
+        return seasonal_table, caption 
         
 #land cover polar graph:
 def define_bins_landcover_polar_graph(bin_size):
@@ -1352,18 +1202,14 @@ def _convert_dir(directions, N=None):
     barWidth = 2 * np.pi / N
     return barDir, barWidth
 
-def landcover_polar_graph_upd(myStation):
+def landcover_polar_graph(myStation):
     
     #station, date_range, timeselect, bin_size, label='', title='', percent_label='', save_figs=''
     station=myStation.stationId
-    station_name=myStation.stationName
-    date_range=myStation.dateRange
-    timeselect=myStation.settings['timeOfDay']
     fp_lon=myStation.fpLon
     fp_lat=myStation.fpLat
     fp=myStation.fp
     save_figs=myStation.settings['saveFigs']
-    title=myStation.settings['titles']
     bin_size=myStation.settings['binSize']
     degrees=myStation.degrees
     polargraph_label= myStation.settings['labelPolar']
@@ -1449,15 +1295,7 @@ def landcover_polar_graph_upd(myStation):
     rosedata= rosedata.applymap(lambda x: x / total_all * 100)
        
     directions = np.arange(0, 360, bin_size)
-    date_index_number = (len(date_range) - 1)
-    
-    if title=='yes':
-        
-        date_and_time_string= date_and_time_string_for_title(date_range, timeselect)
-        for_title=('Station: ' + station_name + ' (' + station + ')' + '<br>' + 'Area corresponding to land cover sensitivity (%)<br>' + date_and_time_string)
-        
-    else:
-        for_title=''
+
         
     matplotlib.rcParams.update({'font.size': 18})
     
@@ -1547,21 +1385,21 @@ def landcover_polar_graph_upd(myStation):
        
     
     ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])
-    
-    #ax.set_title(for_title)
-    
- 
-    #plt.show(fig)
+
     
     if save_figs=='yes':
+        output_folder = myStation.settings['output_folder']
+        
         ax.legend(labels, bbox_to_anchor=(1.9, 0.25), ncol=2)
-        plotdir='figures'
         pngfile=station+'_figure_4'
-        fig.savefig(plotdir+'/'+pngfile+'.pdf',dpi=100, bbox_inches='tight')
+        fig.savefig(output_folder + '/' + pngfile + '.pdf',dpi=100, bbox_inches='tight')
+
+    for_caption=('Area corresponding to land cover sensitivity (%)')
+
     
     #different from the saved legend
     ax.legend(labels, bbox_to_anchor=(1.4, 0), ncol=1, loc=4)
-    return plt, for_title
+    return fig, for_caption
     
     
 #multiple variables graph
@@ -1660,13 +1498,11 @@ def compute_normalized(df_saved_for_normalized, station, column, min_value, rang
         
     return df_saved_for_normalized
             
-def multiple_variables_graph_upd(myStation):
+def multiple_variables_graph(myStation):
     
     selected_station=myStation.stationId
     station_name=[myStation.stationName]
     timeselect_list=myStation.settings['timeOfDay']
-    timeselect=[str(value) for value in timeselect_list]
-    title=myStation.settings['titles']
     save_figs=myStation.settings['saveFigs']
     date_range=myStation.dateRange
     
@@ -1726,7 +1562,7 @@ def multiple_variables_graph_upd(myStation):
     #these lists (list_sensitivity, list_population, list_point_source) will be used to generate texts 
     #for the station characterization PDFs (if choose to create a PDF)
     #--> hence into list here, and not for GEE, respiration and anthropogenic contribution
-    list_sensitivity=df_saved_upd['Sensitivity'].tolist()
+    
 
     min_gee=max(df_saved_upd['GEE'])
     range_gee=abs(min_gee-min(df_saved_upd['GEE']))
@@ -1739,11 +1575,9 @@ def multiple_variables_graph_upd(myStation):
     
     min_pointsource=min(df_saved_upd['Point source'])
     range_pointsource=max(df_saved_upd['Point source'])-min_pointsource
-    list_point_source=df_saved_upd['Point source'].tolist()
     
     min_population=min(df_saved_upd['Population'])
     range_population=max(df_saved_upd['Population'])-min_population
-    list_population=df_saved_upd['Population'].tolist()
 
     df_saved_for_normalized=df_saved_upd.copy()
 
@@ -1806,15 +1640,6 @@ def multiple_variables_graph_upd(myStation):
         
         place_on_axis=place_on_axis+10
 
-    if title=='yes':
-        if predefined:
-            for_title=(station_name[0] + ' (' + selected_station + ')'  + ' relative to reference atmospheric stations' + '<br>' + 'Year ' + str(start_date.year))
-   
-        else:
-            date_and_time_string = date_and_time_string_for_title(date_range, timeselect)
-            for_title=(station_name[0] + ' (' + selected_station + ')'  + ' relative to reference atmospheric stations<br>' + date_and_time_string)
-    else:
-        for_title=''
     ax.set_ylabel('% of max')
 
     ax.tick_params(axis='y')
@@ -1832,12 +1657,11 @@ def multiple_variables_graph_upd(myStation):
 
     if save_figs=='yes':
         
-        plotdir='figures'
-        pngfile=station+'_figure_5'
-        fig.savefig(plotdir+'/'+pngfile+'.pdf',dpi=100, bbox_inches='tight')
+        output_folder = myStation.settings['output_folder']
+        pngfile=station + '_figure_5'
+        fig.savefig(output_folder+'/'+pngfile+'.pdf',dpi=100, bbox_inches='tight')
         
         columns_need_quartiles=['Sensitivity','Population','Point source']
-        quartile_dictionary={}
         
         for column in columns_need_quartiles:
             
@@ -1858,193 +1682,20 @@ def multiple_variables_graph_upd(myStation):
             elif value_selected_station>=q2 and value_selected_station<q3:
                 pdf_text='third quartile'
             else:
-                pdf_text='fourht quartile'
+                pdf_text='fourth quartile'
 
-            quartile_dictionary[column] = pdf_text
+            myStation.settings[column] = pdf_text
 
-        #update - into dictionary.
-        #create the text-files --> probably change. 
-        if not os.path.exists('texts'):
-            os.mkdir('texts')
-        #possibily into dictionary or similar. One file for latex. 
-        file_sensitivity='texts/' + selected_station + '_text_7.txt'
-        open_file= open(file_sensitivity, "w")
-        open_file.write(quartile_dictionary['Sensitivity'])
-        open_file.close() 
-
-        file_population='texts/' + selected_station + '_text_8.txt'
-        open_file= open(file_population, "w")
-        open_file.write(quartile_dictionary['Population'])
-        open_file.close() 
-
-        file_point_source_1='texts/' + selected_station + '_text_9.txt'
-        open_file= open(file_point_source_1, "w")
-        open_file.write(quartile_dictionary['Point source'])
-        open_file.close() 
+        settings_dict = myStation.settings
         
-    return plt, for_title
-
-#How should the saving be implemented? 
-#info mainly from stationchar object. after displayed all figures in widget... 
-#also some text files in different part (1st, 2nd etc quartile among labeled atm stations.
-#Claudio suggestion - into one file. Dictionary. Use in latex instead of 10ish files.
-
-
-# Create widgets for selection (ICOS data only)
-def run(station):
-    
-    import settings
-    s = settings.read(station)
+        settings_json = json.dumps(settings_dict, indent = 4)
         
-    #define a function instead - something change, change only in one place. 
-    selected_station=s['stationCode']
-    
-    station_code_stripped=selected_station[0:3]
-    
-    station_info = station_data.get(station_code_stripped)
-    station_name=station_info.name
+        file_settings = output_folder + '/' + selected_station + '_settings.json'
         
-    start_date=dt.datetime(s['startYear'],s['startMonth'],s['startDay'],0)
-    end_date=dt.datetime(s['endYear'],s['endMonth'],s['endDay'],0)
+        open_file= open(file_settings, "w")
+        open_file.write(settings_json)
+        open_file.close()
         
-    timeselect_list = s['timeOfDay']
-    date_range=date_range_hour_filtered(start_date, end_date, timeselect_list)
-    
-    timeselect=[str(value) for value in timeselect_list]
-    
-    timeselect=' '.join(timeselect)
+    caption=('Selected station relative to reference atmospheric stations')
 
-    
-    nfp, fp, fp_lon, fp_lat, title_not_used = read_aggreg_footprints(station, date_range) 
-
-    #using Claudio's station class to reterive necessary station information that will go
-    #in the station characterization PDFs
-    if station_info.valid==True:
-
-        station_lat=float(station_info.lat)
-
-        station_lon=float(station_info.lon)
-
-        station_country_code=station_info.country
-        
-        if hasattr(station_info, 'siteType'):
-
-            station_site_type=station_info.siteType.lower()
-        else:
-            station_site_type=','
-
-        if station_country_code is not None:
-
-            #API to reterive country name using country code. 
-            url='https://restcountries.eu/rest/v2/alpha/' + station_country_code
-
-            resp = requests.get(url=url)
-
-            country_information=resp.json()
-
-            station_country=country_information['name']
-
-        #text fits into the document. Long text because different with not an ICOS certified station
-        #possibly check if not none
-
-        #encapsulate as small as possible... top these are the variables I need. 
-        if station_info.icosclass is not None:
-        
-            station_class='a class ' + station_info.icosclass + ' ICOS atmospheric station of the type '
-            
-        else:
-            station_class=r'not an ICOS certified station\unskip'
-
-        
-    #check if folder "texts" exists, else create it. 
-    if not os.path.exists('texts'):
-        os.mkdir('texts')
-    
-    #save all the text files
-    file_station_name='texts/' + selected_station + '_text_1.txt'
-    open_file= open(file_station_name, "w")
-    open_file.write(station_name)
-    open_file.close() 
-    
-    file_station_class='texts/' + selected_station + '_text_2.txt'
-    open_file= open(file_station_class, "w")
-    open_file.write(str(station_class))
-    open_file.close() 
-
-    file_station_type='texts/' + selected_station + '_text_3.txt'
-    open_file= open(file_station_type, "w")
-    open_file.write(station_site_type)
-    open_file.close() 
-
-    file_station_country='texts/' + selected_station + '_text_4.txt'
-    open_file= open(file_station_country, "w")
-    open_file.write(station_country)
-    open_file.close() 
-                
-    file_station_lat='texts/' + selected_station + '_text_5.txt'
-    open_file= open(file_station_lat, "w")
-    open_file.write(str("%.2f" %station_lat))
-    open_file.close() 
-    
-    file_station_lon='texts/' + selected_station + '_text_6.txt'
-    open_file= open(file_station_lon, "w")
-    open_file.write(str("%.2f" %station_lon))
-    open_file.close()        
-        
-
-    binSize = s['binSize']
-    binInterval = s['binInterval']
-    unit = s['unit']
-    save_figs = 'yes'
-    include_labels = 'yes'
-    landcover_windrose_label = 'yes'
-    
-    tstart = time.time()
-    #sensitivity       
-    map_representation_polar_graph(selected_station, date_range, fp, fp_lon, fp_lat, timeselect, bin_size=binSize, unit=unit, 
-                                    rose_type='sensitivity', colorbar='gist_heat_r', km_intervals=binInterval, title=include_labels,
-                                   save_figs=save_figs)
-    
-    tt = time.time() - tstart
-    print ('time for map_representation_polar_graph(): ',tt)
-        
-        
-    #pointsource
-    map_representation_polar_graph(selected_station, date_range,fp, fp_lon, fp_lat, timeselect, bin_size=binSize, unit=unit, 
-                                    rose_type='point source contribution', colorbar='Purples', km_intervals=binInterval, title=include_labels,
-                                   save_figs=save_figs)
-
-          
-    tstart = time.time()
-    # population:
-    map_representation_polar_graph(selected_station, date_range, fp, fp_lon, fp_lat, timeselect, bin_size=binSize, unit=unit, rose_type='population sensitivity', 
-                                    colorbar='Greens', km_intervals=binInterval, title=include_labels,
-                                   save_figs=save_figs)
-    
-    tt = time.time() - tstart
-    print ('time for map_representation_polar_graph() second: ',tt)
-
-       
-    # land_cover_bar_graph:
-    land_cover_bar_graph(selected_station, date_range, timeselect, title=include_labels, save_figs=save_figs)
-        
-        
-    # seasonal_table:
-    #timeselect automatically all hours
-    create_seasonal_table(selected_station, s['startYear'], save_figs=save_figs)
-        
-        
-    # landcover_windrose:
-    landcover_polar_graph(selected_station, date_range, timeselect, bin_size=binSize, title=include_labels, percent_label=landcover_windrose_label, save_figs=save_figs)
-    
-    # multiple_variables_graph:
-    #"reference stations" choosen by Ute
-    all_stations=['TRN180', 'SVB150', 'TOH147', 'SMR125', 'LUT', 'KRE250', 'IPR100', 'JFJ', 'KIT200', 'GAT344']
-       
-    #if selected_station not in above list, append it.
-    if selected_station not in all_stations:
-            all_stations.append(selected_station)
-            
-    selected_station_list=[]
-    selected_station_list.append(selected_station)
-    #multiple_variables_graph(all_stations, selected_station_list, station_name, date_range, start_date, end_date, timeselect_list, timeselect, title=include_labels, save_figs=save_figs)
+    return fig, caption
