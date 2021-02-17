@@ -4,7 +4,7 @@
 <br> 
 
 # Content
-This folder contains python modules to process and visualize ICOS data products.
+This folder contains python modules that process and visualize ICOS data products.
 
 <br>
 
