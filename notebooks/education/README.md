@@ -1,4 +1,4 @@
-<img src=\"https://www.icos-cp.eu/sites/default/files/2017-11/ICOS_CP_logo.png\" width=\"300\" align=\"right\"/>
+<img src="https://www.icos-cp.eu/sites/default/files/2017-11/ICOS_CP_logo.png" width="300" align="right"/>
 <br>
 <br>
 
