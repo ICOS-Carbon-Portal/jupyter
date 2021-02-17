@@ -4,7 +4,7 @@
 <br> 
 
 # Content
-This folder includes image files with the logos that are used in the ICOS Jupyter Notebooks.
+This folder includes image files with the logos that are used in the ICOS Jupyter notebooks.
 
 <br>
 
