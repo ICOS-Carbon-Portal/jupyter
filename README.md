@@ -4,12 +4,12 @@
 <br> 
 
 # ICOS Carbon Portal - Jupyter Notebooks
-This repository contains code and ancillary data for all jupyter notebooks that are currently available through the ICOS CP "Anonymous" service: https://exploredata.icos-cp.eu
+This folder contains code and ancillary data for all jupyter notebooks that are currently available through the ICOS CP "Anonymous" service: https://exploredata.icos-cp.eu
 
 <br>
 
 ## Structure
-The notebooks, code files and ancillary data files are divided into subjects. Every subject has its own folder:
+The notebooks, code files and ancillary data files are divided into subjects. Every subject has its own subfolder:
 
 * **Education:** includes notebooks that use ICOS data to introduce students to basic principles of climate science and programming 
 * **ICOS Jupyter Notebooks:** contains notebooks processing and presenting ICOS data in interactive visualizations
