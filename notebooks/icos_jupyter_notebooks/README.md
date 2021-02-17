@@ -4,7 +4,7 @@
 <br> 
 
 # Content
-This folder contains Jupyter notebooks that process ICOS data and folders with Python help functions and ancillary data.
+This folder contains Jupyter notebooks that process ICOS data and folders with Python help functions and ancillary data files.
 
 <br>
 
