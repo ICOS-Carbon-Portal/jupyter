@@ -1,12 +1,17 @@
+<img src="https://www.icos-cp.eu/sites/default/files/2017-11/ICOS_CP_logo.png" width="300" align="left"/>
+<br>
+<br>
+<br> 
+
 # Content
-This folder contains Jupyter Notebooks that process ICOS data and folders with Python help functions and ancillary data.
+This folder contains Jupyter notebooks that process ICOS data and folders with Python help functions and ancillary data.
 
 <br>
 
 ## Structure
 The structure of the folder is the following:
 
-* Jupyter Notebooks processing ICOS data:
+* Jupyter notebooks processing ICOS data:
   * Explore ICOS Atmosphere data products: includes interactive maps and plots of ICOS atmosphere data products
   * Compare atmospheric model results (STILT) to ICOS Atmospheric Data
   * Calculate statistics over ICOS Atmosphere data: includes statistics and interactive plots & visualizations of ICOS atmosphere data products
