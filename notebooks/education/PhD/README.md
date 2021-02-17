@@ -9,7 +9,7 @@ This folder contains subfolders with educational material for PhD courses that m
 <br>
 
 ## Structure
-The educational material is divided into folders baced on courses.
+The educational material is divided into subfolders baced on courses.
 
 * **upscaling carbon fluxes:** includes notebooks that where used as exercise material in a PhD course titled: **"From CO2 in situ measurements to carbon balance maps as a tool to support national carbon accounting"**. The course was organized by Lund University dept. of Physical Geography and Ecosystem Science and supported by ICOS Carbon Portal, ICOS Sweden and  Lund University ClimBEco Graduate Research School. The course was held at Lund University campus between March 9th 2020 and March 13th 2020. All developed material includes references to the people involved and the datasets used.
 
