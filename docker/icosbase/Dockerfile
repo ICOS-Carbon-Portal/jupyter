@@ -21,7 +21,7 @@ RUN tar -xf /tmp/install-tl-unx.tar.gz --strip-components=1 -C /tmp/
 
 # add profile and start intallation
 
-COPY exploredata/Texlive2020/texlive.profile /tmp/.
+COPY Texlive2020/texlive.profile /tmp/.
 RUN /tmp/install-tl --profile=/tmp/texlive.profile
 
 # export path to texlive2020
@@ -54,7 +54,7 @@ RUN jupyter nbextensions_configurator enable
 # such that headers are NOT numbered by default
 # and activate the extension
 
-COPY exploredata/nbextensionDefault/*.diff /tmp/
+COPY nbextensionDefault/*.diff /tmp/
 RUN patch /opt/conda/share/jupyter/nbextensions/toc2/toc2.yaml /tmp/toc2.yaml.diff
 RUN patch /opt/conda/share/jupyter/nbextensions/toc2/toc2.js /tmp/toc2.js.diff
 RUN jupyter nbextension enable toc2/main
