@@ -1,3 +1,8 @@
+<img src="https://www.icos-cp.eu/sites/default/files/2017-11/ICOS_CP_logo.png" width="300" align="left"/>
+<br>
+<br>
+<br>
+
 # ICOS Carbon Portal - Jupyter Notebooks for Education at BSc and MSc level
 This folder contains subfolders with educational material that has been developed for university students (BSc & MSc).
 
