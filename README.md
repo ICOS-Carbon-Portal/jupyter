@@ -9,15 +9,12 @@ This folder contains code and ancillary data for all jupyter notebooks that are 
 <br>
 
 ## Structure
-The notebooks, code files and ancillary data files are divided into subjects. Every subject has its own subfolder:
+The folder includes subfolders with notebooks, documentation wikis and code files used to update docker images 
 
-* **Education:** includes notebooks that use ICOS data to introduce students to basic principles of climate science and programming 
-* **ICOS Jupyter Notebooks:** contains notebooks processing and presenting ICOS data in interactive visualizations
-* **Introduction:** contains notebooks that quickly introduce the fundamental principles of Python programming
-* **Project-specific Jupyter Notebooks:** includes notebooks presenting the scientific output of projects ICOS has been part of
-* **pylib_examples:** includes notebooks with examples on how to you the icoscp library (i.e. Python library on how to get access to ICOS data)
-* **docs:** includes files for the online [ICOS Jupyter Solutions documentation](https://icos-carbon-portal.github.io/jupyter/).
-* **exploredata:** includes folders with code to update the running instance of exploredata and format the corresponding log-in page.
+* **docker:** includes data files that are used to update a docker image which is, in turn, used to create a new Jupyter instance (i.e. exploredata) 
+* **docs:** contains files for a documentation wiki, explaining ICOS Jupyter solutions and ICOS Jupyter notebooks.
+* **notebooks:** includes notebooks that process and visualize ICOS data. The notebooks are divided into categories based on the intended target user groups.
+
 <br>
 
 ## Licence
