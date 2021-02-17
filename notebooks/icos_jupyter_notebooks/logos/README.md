@@ -1,3 +1,8 @@
+<img src="https://www.icos-cp.eu/sites/default/files/2017-11/ICOS_CP_logo.png" width="300" align="right"/>
+<br>
+<br>
+<br> 
+
 # Content
 This folder includes image files with the logos that are used in the ICOS Jupyter Notebooks.
 
