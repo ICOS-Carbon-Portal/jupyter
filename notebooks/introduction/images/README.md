@@ -1,5 +1,10 @@
+<img src="https://www.icos-cp.eu/sites/default/files/2017-11/ICOS_CP_logo.png" width="300" align="right"/>
+<br>
+<br>
+<br> 
+
 # Introduction
-This folder includes folder of explanatory images. All images are used in the introductory Python Jupyter notebooks.
+This folder includes subfolders with explanatory images. All images are used in the introductory Python Jupyter notebooks.
 
 <br>
 
