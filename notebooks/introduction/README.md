@@ -4,7 +4,7 @@
 <br> 
 
 # Introduction
-This directory icludes introductory tutorials to Python programming and scientific computing.
+This folder icludes introductory tutorials to Python programming and scientific computing.
 The notebooks are aimed for people who have no prior knowledge in programming but also for people who wish to brush up their memory in programmng with Python or are already familiar with programming in another programming language and want to become acquainted with Python.
 
 <br>
@@ -20,7 +20,7 @@ Examples of how to organize and process data in NumPy arrays and Pandas DataFram
 
 <br>
 
-The directory also includes folders with ancillary data:
+The folder also includes subfolders with ancillary data:
 * explanatory images (used in the notebooks)
 * logos
 
