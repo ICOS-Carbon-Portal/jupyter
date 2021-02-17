@@ -1,3 +1,8 @@
+<img src="https://www.icos-cp.eu/sites/default/files/2017-11/ICOS_CP_logo.png" width="300" align="right"/>
+<br>
+<br>
+<br> 
+
 # ICOS Project-specific Jupyter Notebooks - RINGO T1.3
 This folder includes notebooks and ancillary data files for presenting an evaluation of different sampling strategies related to the RINGO project. The notebook supports the analysis presented in Levin et al., A dedicated flask sampling strategy developed for ICOS stations based on CO2 and CO measurements and STILT footprint modelling, Atmos. Chem. Phys., https://doi.org/10.5194/acp-2020-185, 2020.
 
