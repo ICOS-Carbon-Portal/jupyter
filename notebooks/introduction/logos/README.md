@@ -1,5 +1,10 @@
+<img src="https://www.icos-cp.eu/sites/default/files/2017-11/ICOS_CP_logo.png" width="300" align="right"/>
+<br>
+<br>
+<br> 
+
 # Structure
-Folder including logos used in the notebooks
+Folder including the logos used in the notebooks
 
 <br>
 
