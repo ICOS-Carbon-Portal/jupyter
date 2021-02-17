@@ -2,9 +2,6 @@
 <br>
 <br>
 <br>
-<br>
-<br>
-<br>
 
 # ICOS Carbon Portal - Jupyter Notebooks for Education
 This repository contains folders with educational material based on ICOS data.
