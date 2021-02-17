@@ -1,3 +1,8 @@
+<img src="https://www.icos-cp.eu/sites/default/files/2017-11/ICOS_CP_logo.png" width="300" align="right"/>
+<br>
+<br>
+<br> 
+
 # Introduction
 This directory icludes introductory tutorials to Python programming and scientific computing.
 The notebooks are aimed for people who have no prior knowledge in programming but also for people who wish to brush up their memory in programmng with Python or are already familiar with programming in another programming language and want to become acquainted with Python.
