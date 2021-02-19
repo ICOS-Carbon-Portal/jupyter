@@ -95,156 +95,6 @@ def read_aggreg_footprints(station, date_range):
 
         return 0, None, None, None, None
 
-def get_station_class():
-    # Query the ICOS SPARQL endpoint for a station list
-    # query stationId, class, lng name and country
-    # output is an object "data" containing the results in JSON
-
-    url = 'https://meta.icos-cp.eu/sparql'
-
-    query = """
-    prefix st: <http://meta.icos-cp.eu/ontologies/stationentry/>
-    select distinct ?stationId ?stationClass ?country ?longName
-    from <http://meta.icos-cp.eu/resources/stationentry/>
-    where{
-      ?s a st:AS .
-      ?s st:hasShortName ?stationId .
-      ?s st:hasStationClass ?stationClass .
-      ?s st:hasCountry ?country .
-      ?s st:hasLongName ?longName .
-      filter (?stationClass = "1" || ?stationClass = "2")
-    }
-    ORDER BY ?stationClass ?stationId 
-    """
-    r = requests.get(url, params = {'format': 'json', 'query': query})
-    data = r.json()
-
-    # convert the the result into a table
-    # output is an array, where each row contains 
-    # information about the station
-
-    cols = data['head']['vars']
-    datatable = []
-
-    for row in data['results']['bindings']:
-        item = []
-        for c in cols:
-            item.append(row.get(c, {}).get('value'))
-        
-        datatable.append(item)
-
-    # print the table 
-    df_datatable = pd.DataFrame(datatable, columns=cols)
-    #df_datatable.head(5)
-    return df_datatable
-
-def available_STILT_dictionary():
-    # store availability of STILT footprints in a dictionary 
-
-    # get all ICOS station IDs by listing subdirectories in stiltweb
-    # extract availability from directory structure
-    
- 
-    #pathStations='./data/stiltweb/slots/56.10Nx013.42Ex00030/'    
-    #pathStations='/opt/stiltdata/fsicos2/stiltweb/stations/'
-    allStations = os.listdir(pathFP)
-    
-
-    # empty dictionary
-    available = {}
-
-    # fill dictionary with station name, years and months for each year
-    for ist in sorted(list(set(allStations))):
-        if os.path.exists(pathFP+'/'+ist):
-            #print ('directory '+pathStations+'/'+ist+' exits')
-            available[ist] = {}
-            years = os.listdir(pathFP+'/'+ist)
-            available[ist]['years'] = years
-            for yy in sorted(available[ist]['years']):
-                available[ist][yy] = {}
-                months = os.listdir(pathFP+'/'+ist+'/'+yy)
-                available[ist][yy]['months'] = months
-                available[ist][yy]['nmonths'] = len(available[ist][yy]['months'])
-        #else:
-        #    print ('directory '+pathStations+'/'+ist+' does not exit')
-
-    # Get list of ICOS class 1 and class 2 stations from Carbon Portal
-    df_datatable = get_station_class()
-
-    # add information if ICOS class 1 or class 2 site
-    for ist in sorted(available):
-        available[ist]['stationClass'] = np.nan
-        for istICOS in df_datatable['stationId']:
-            ic = int(df_datatable[df_datatable['stationId']==istICOS].index.values)
-            if istICOS in ist:
-                available[ist]['stationClass'] = df_datatable['stationClass'][ic]
-    return available
-
-def create_STILT_dictionary():
-    # store all STILT station information in a dictionary 
-
-    # get all ICOS station IDs by listing subdirectories in stiltweb
-    # extract location from filename of link
-    
-    #UPDATE
-    pathStations='/data/stiltweb/stations/'
-    
-    allStations = os.listdir(pathStations)
-
-    # empty dictionary
-    stations = {}
-
-    # fill dictionary with ICOS station id, latitude, longitude and altitude
-    for ist in sorted(list(set(allStations))):
-        stations[ist] = {}
-        # get filename of link (original stiltweb directory structure) 
-        # and extract location information
-        if os.path.exists(pathStations+ist):
-            #loc_ident = os.readlink(pathStations+ist)
-            loc_ident = '56.10Nx013.42Ex00030'
-            clon = loc_ident[-13:-6]
-            lon = np.float(clon[:-1])
-            if clon[-1:] == 'W':
-                lon = -lon
-            clat = loc_ident[-20:-14]
-            lat = np.float(clat[:-1])
-            if clat[-1:] == 'S':
-                lat = -lat
-            alt = np.int(loc_ident[-5:])
-
-            stations[ist]['lat']=lat
-            stations[ist]['lon']=lon
-            stations[ist]['alt']=alt
-            stations[ist]['locIdent']=os.path.split(loc_ident)[-1]
-
-        
-    # add information on station name (and new STILT station id) from stations.csv file used in stiltweb 
-
-    url="https://stilt.icos-cp.eu/viewer/stationinfo"
-    df = pd.read_csv(url)
-
-    for ist in sorted(list(set(stations))):
-        stationName = df.loc[df['STILT id'] == ist]['STILT name']
-        if len(stationName.value_counts()) > 0:
-            stations[ist]['name'] = stationName.item()
-        else:
-            stations[ist]['name'] = ''
-
-    # Get list of ICOS class 1 and class 2 stations from Carbon Portal
-    df_datatable = get_station_class()
-
-    # add information if ICOS class 1 or class 2 site
-    for ist in sorted(list(set(stations))):
-        stations[ist]['stationClass'] = np.nan
-        for istICOS in df_datatable['stationId']:
-            ic = int(df_datatable[df_datatable['stationId']==istICOS].index.values)
-            if istICOS in ist:
-                stations[ist]['stationClass'] = df_datatable['stationClass'][ic]
-
-    return stations
-
-#previously up top
-stations = create_STILT_dictionary()
 
 #updated --> take the timeselect list and returns the "correct" dataframe
 #otherwise - not correct hours!
@@ -447,10 +297,12 @@ def import_point_source_data():
     #emissions in kg/year in the variable "Sum_Tota_1"
     fp_point_source=point_source_data.variables['Sum_Tota_1'][:,:]
 
-    #different from population data: can translate the emissions within each stilt cell to the effect it will have to the final CO2 concentrations at the stations.
-    #just need to get it in the right unit (micromole/m2s) and multiply by the individual or aggregated footprints
+    # different from population data: can translate the emissions within each stilt cell
+    # to the effect it will have to the final CO2 concentrations at the stations.
+    # just need to get it in the right unit (micromole/m2s) and multiply by the individual or aggregated footprints
 
-    #divide by the molar weight in kg. 12 (C)+16(O)+16(O) =44 0.044 in kg. get number of moles of C this way. Want it in micromole though: 1 mole= 1000000 micromole
+    # divide by the molar weight in kg. 12 (C)+16(O)+16(O) =44 0.044 in kg.
+    # get number of moles of C this way. Want it in micromole though: 1 mole= 1000000 micromole
     fp_point_source_moles_C=fp_point_source/0.044
 
     #how many micro-mole is that? multiply by 1000000
@@ -829,7 +681,7 @@ def polar_graph(myStation, rose_type, colorbar='gist_heat_r', zoom=''):
         
     return polar_map, caption
 
-def land_cover_bar_graph_upd(myStation):
+def land_cover_bar_graph(myStation):
     
     station=myStation.stationId
     fp_lon=myStation.fpLon
@@ -1034,14 +886,24 @@ def seasonal_table(myStation):
     
     #update here - already have this information in mystation
     #get the stilt information from stationChar class - to be updated.
-    available_STILT= available_STILT_dictionary()
+    #available_STILT= available_STILT_dictionary()
 
     #check what months available for the year (and December the year before - seasons rather than full year)
-    months= available_STILT[station][str(year)]['months']
-    years=available_STILT[station]['years']
+    #months= available_STILT[station][str(year)]['months']
+    #years=available_STILT[station]['years']
+    
+    
+    
+    available_STILT= myStation.settings['stilt']
+
+    #check what months available for the year (and December the year before - seasons rather than full year)
+    months= available_STILT[str(year)]['months']
+    years=available_STILT['years']
+    
+    
     
     if str(year-1) in years:
-        months_year_before = available_STILT[station][str(year-1)]['months'] 
+        months_year_before = available_STILT[str(year-1)]['months'] 
     else:
         months_year_before=''
    
@@ -1174,42 +1036,18 @@ def seasonal_table(myStation):
         return seasonal_table, caption 
         
 #land cover polar graph:
-def define_bins_landcover_polar_graph(bin_size):
-    
-   
-    #direction: using the input (bin_size) to set the bins so that the first bin has "north (0 degrees) in the middle"
-    #"from_degree" becomes a negative value (half of the degree value "to the left" of 0)
-    from_degree=-(bin_size/2)
-
-    #"to_degree" is a vale to indicate the last bins ending. Must check values all the way to 360 which means the last bin 
-    #will go past 360 and later be joined with the "0" bin (replace function in next cell)
-    to_degree= 360 + (bin_size/2) 
-
-    #the "degree_bin" is the "step".
-    dir_bins = np.arange(from_degree, (to_degree+1), bin_size)
-
-    #the direction bin is the first bin + the next bin divided by two:
-    dir_labels = (dir_bins[:-1] + dir_bins[1:]) / 2
-    
-    return dir_bins, dir_labels
-
-#given the directions (and number of them), get the direction of the bars and their width
-#function used in the final step of generating a graph
-def _convert_dir(directions, N=None):
-    if N is None:
-        N = directions.shape[0]
-    barDir = directions * np.pi/180. - np.pi/N
-    barWidth = 2 * np.pi / N
-    return barDir, barWidth
-
 def landcover_polar_graph(myStation):
     
     #station, date_range, timeselect, bin_size, label='', title='', percent_label='', save_figs=''
     station=myStation.stationId
+    station_name=myStation.stationName
+    date_range=myStation.dateRange
+    timeselect=myStation.settings['timeOfDay']
     fp_lon=myStation.fpLon
     fp_lat=myStation.fpLat
     fp=myStation.fp
     save_figs=myStation.settings['saveFigs']
+    title=myStation.settings['titles']
     bin_size=myStation.settings['binSize']
     degrees=myStation.degrees
     polargraph_label= myStation.settings['labelPolar']
@@ -1295,7 +1133,15 @@ def landcover_polar_graph(myStation):
     rosedata= rosedata.applymap(lambda x: x / total_all * 100)
        
     directions = np.arange(0, 360, bin_size)
-
+    date_index_number = (len(date_range) - 1)
+    
+    if title=='yes':
+        
+        date_and_time_string= date_and_time_string_for_title(date_range, timeselect)
+        for_title=('Station: ' + station_name + ' (' + station + ')' + '<br>' + 'Area corresponding to land cover sensitivity (%)<br>' + date_and_time_string)
+        
+    else:
+        for_title=''
         
     matplotlib.rcParams.update({'font.size': 18})
     
@@ -1385,26 +1231,52 @@ def landcover_polar_graph(myStation):
        
     
     ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])
-
+    
     
     if save_figs=='yes':
-        output_folder = myStation.settings['output_folder']
-        
         ax.legend(labels, bbox_to_anchor=(1.9, 0.25), ncol=2)
+        plotdir='figures'
         pngfile=station+'_figure_4'
-        fig.savefig(output_folder + '/' + pngfile + '.pdf',dpi=100, bbox_inches='tight')
-
-    for_caption=('Area corresponding to land cover sensitivity (%)')
-
+        fig.savefig(plotdir+'/'+pngfile+'.pdf',dpi=100, bbox_inches='tight')
     
     #different from the saved legend
     ax.legend(labels, bbox_to_anchor=(1.4, 0), ncol=1, loc=4)
-    return fig, for_caption
+    return fig, for_title
+
     
+#given the directions (and number of them), get the direction of the bars and their width
+#function used in the final step of generating a graph
+def _convert_dir(directions, N=None):
+    if N is None:
+        N = directions.shape[0]
+    barDir = directions * np.pi/180. - np.pi/N
+    barWidth = 2 * np.pi / N
+    return barDir, barWidth
+
+    
+def define_bins_landcover_polar_graph(bin_size):
+    
+   
+    #direction: using the input (bin_size) to set the bins so that the first bin has "north (0 degrees) in the middle"
+    #"from_degree" becomes a negative value (half of the degree value "to the left" of 0)
+    from_degree=-(bin_size/2)
+
+    #"to_degree" is a vale to indicate the last bins ending. Must check values all the way to 360 which means the last bin 
+    #will go past 360 and later be joined with the "0" bin (replace function in next cell)
+    to_degree= 360 + (bin_size/2) 
+
+    #the "degree_bin" is the "step".
+    dir_bins = np.arange(from_degree, (to_degree+1), bin_size)
+
+    #the direction bin is the first bin + the next bin divided by two:
+    dir_labels = (dir_bins[:-1] + dir_bins[1:]) / 2
+    
+    return dir_bins, dir_labels
+
     
 #multiple variables graph
 
-def compute_values_multiple_variable_graph_upd(all_stations, selected_station, date_range, timeselect_list, df_saved):
+def values_multiple_variable_graph(all_stations, selected_station, date_range, timeselect_list, df_saved):
 
     df_new_values = pd.DataFrame(columns=['Station','Sensitivity','GEE','Respiration','Anthro','Point source','Population'])
 
@@ -1533,7 +1405,7 @@ def multiple_variables_graph(myStation):
         df_saved=pd.DataFrame(columns=['Station','Sensitivity','GEE','Respiration','Anthro','Point source','Population'])
         
         #"all_stations" contains all reference stations as well as the selected station (possibly one of the reference stations). Selected station needed seperate also. 
-        df_saved= compute_values_multiple_variable_graph_upd(all_stations, selected_station, date_range, timeselect_list, df_saved)
+        df_saved= values_multiple_variable_graph(all_stations, selected_station, date_range, timeselect_list, df_saved)
         
         predefined=False
            
@@ -1549,7 +1421,7 @@ def multiple_variables_graph(myStation):
             if station not in list_stations_from_saved:
                 
                 #also update df_saved... used for 1st, 2nd, 3rd quartile
-                df_saved= compute_values_multiple_variable_graph_upd([station],selected_station,date_range, timeselect_list, df_saved)
+                df_saved= values_multiple_variable_graph([station],selected_station,date_range, timeselect_list, df_saved)
           
     #only the selected station (and later append selected station if not already among the saved. 
     df_saved_upd = df_saved[df_saved['Station'].isin(all_stations)]

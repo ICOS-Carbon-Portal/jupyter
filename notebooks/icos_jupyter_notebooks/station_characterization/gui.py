@@ -287,19 +287,6 @@ def update_func(button_c):
                      str(maps_bin_interval) + ' km increments</p>'))
 
 
-    """
-    for i in range(1,8):
-        stc.add_figure(i, stc_functions.polar_graph(stc, 'sensitivity'))
-        stc_functions.polar_graph(stc, 'point source contribution', colorbar='Purples')
-        stc_functions.polar_graph(stc, 'population sensitivity', colorbar='Greens')
-        stc_functions.land_cover_bar_graph_upd(stc)
-        stc_functions.create_seasonal_table_upd(stc)
-        stc_functions.landcover_polar_graph(stc)
-        stc_functions.multiple_variables_graph_upd(stc)
-    """
-
-
-
     updateProgress(f, 'calculate sensitivity')
     with result_sensitivity:
 
@@ -328,7 +315,7 @@ def update_func(button_c):
     updateProgress(f, 'get landcover')
     with result_land_cover_bar_graph:
         result_land_cover_bar_graph.clear_output()
-        fig, caption=stc_functions.land_cover_bar_graph_upd(stc)
+        fig, caption=stc_functions.land_cover_bar_graph(stc)
         stc.add_figure(4, fig, caption)
         display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
         display(fig)
