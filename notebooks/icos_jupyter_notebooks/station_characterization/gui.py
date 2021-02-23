@@ -11,7 +11,7 @@ from IPython.core.display import display, HTML
 import settings
 from icoscp.station import station as cpstation
 
-#added
+
 import stationchar
 import stc_functions
 
@@ -36,7 +36,7 @@ stiltlist.sort(key=lambda x:x[0])
 
 # read or set the parameters
 
-def getSettings():
+def get_settings():
     s = settings.getDict()    
     try:
         s['stationCode'] = station_choice.value
@@ -61,7 +61,7 @@ def getSettings():
     
     return s
 
-def setSettings(s):
+def set_settings(s):
     station_choice.value = s['stationCode']   
     s_year.value = s['startYear'] 
     s_month.value = s['startMonth']
@@ -76,19 +76,6 @@ def setSettings(s):
     landcover_windrose_label.value = s['labelPolar']
     save_figs.value = s['saveFigs']
 
-def setCaptions(captions, sensitivity_caption, pointsource_caption, population_caption, landcover_windrose_caption,\
-               multiple_variables_graph_caption, seasonal_caption, landcover_bar_graph_caption):
-    
-    #these varies depending on unit user has chosen. 
-    captions['figure_1'] = sensitivity_caption
-    captions['figure_2'] = pointsource_caption
-    captions['figure_3'] = population_caption
-    captions['figure_4'] = landcover_windrose_caption
-    captions['figure_5'] = multiple_variables_graph_caption
-    captions['figure_6'] = seasonal_caption
-    captions['figure_7'] = landcover_bar_graph_caption
-    
-    return captions
 
 # observer functions
 #---------------------------------------------------------
@@ -214,7 +201,7 @@ def update_func_file(button_c):
         with open(settings_file, 'r') as f:
             settings_dict = json.load(f)
             
-        setSettings(settings_dict)
+        set_settings(settings_dict)
         
 
 def updateProgress(f, desc=''):
@@ -236,8 +223,8 @@ def update_func(button_c):
         updateProgress(f, 'read footprint')
         
 
-    #before also passed settings['stationCode']
-    stc=stationchar.StationChar(getSettings()  )
+    global stc
+    stc=stationchar.StationChar(get_settings()  )
 
     if stc.settings['saveFigs'] == 'yes':
         now = datetime.now()
@@ -286,7 +273,7 @@ def update_func(button_c):
         display(HTML('<p style="font-size:18px;">The map bins are ' + str(maps_bin_size) + ' degrees at ' +\
                      str(maps_bin_interval) + ' km increments</p>'))
 
-
+    
     updateProgress(f, 'calculate sensitivity')
     with result_sensitivity:
 
@@ -311,7 +298,7 @@ def update_func(button_c):
         stc.add_figure(3, fig, caption)
         display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
         display(fig)
-
+        
     updateProgress(f, 'get landcover')
     with result_land_cover_bar_graph:
         result_land_cover_bar_graph.clear_output()
@@ -334,8 +321,9 @@ def update_func(button_c):
 
     with header_advanced:
         header_advanced.clear_output()
-        display(HTML('<p style="font-size:35px;font-weight:bold;">Advanced figures</p><p style="font-size:16px;"><br>\
-            We advice careful reading of the specifications to understand the following figures.</p>'))
+        display(HTML('<h2>Advanced figures</h2><br>\
+            Please read the <a href="./output/specification.pdf" target="_blank">\
+                specification.pdf</a> (output folder) to interpret the following figures.'))
 
     updateProgress(f, 'landcover windrose')
     with result_landcover_windrose:
@@ -354,30 +342,13 @@ def update_func(button_c):
         display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
         display(fig)
         
-        #to see the time it takes to run the whole station characterization
-        #print(time.time() - start_time)
-
+    if stc.settings['saveFigs'] == 'yes':
+        updateProgress(f, 'saving')        
+        stc_functions.save(stc)
+    
     # make sure the progress bar is filled..
     updateProgress(f, 'finished')
     f.value = 10
-
-   
-    """    
-    captions_dict_empty = {}
-    cptions_dict= setCaptions(captions_dict_empty, sensitivity_caption, pointsource_caption, population_caption, landcover_windrose_caption,\
-           multiple_variables_graph_caption, seasonal_caption, landcover_bar_graph_caption)
-
-    
-    captions_json = json.dumps(captions_dict, indent = 4)
-
-    output_folder = stc.settings['output_folder']
-
-    file_captions = output_folder + '/' + station_code + '_captions.json'
-
-    open_file= open(file_captions, "w")
-    open_file.write(captions_json)
-    open_file.close()
-    """    
         
         
 #-----------widgets definition -----------------

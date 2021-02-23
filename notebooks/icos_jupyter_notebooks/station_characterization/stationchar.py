@@ -206,15 +206,28 @@ class StationChar():
 
         Parameters
         ----------
-        key : INT|STR :     figure number
+        key : INT|STR :     figure number (1 = sensitivity, 2 = pointsource
+                            3 = population, 4 = landcover_rose, 5 = multiple_variables
+                            6 = seasonal, 7 = landcover_bar
+
         figure : OBjECT :   Matplotlib figure or smilar, needs to have a function
-                            Object.show() and object.save('filename')            
+                            Object.show() and object.savefig('filename')            
         caption : STR :     String to be used as a caption text for example when
                             creating a pdf output
         Returns: None.
         
         """
-        self.figures[str(key)]=[figure, caption]
+        
+        # humean readable key to value assignment
+        short = {'1': 'sensitivity',
+                 '2': 'pointsource',
+                 '3': 'population',
+                 '4': 'landcover_bar',
+                 '5': 'seasonal',
+                 '6': 'landcover_windrose',                 
+                 '7': 'multivar'}
+               
+        self.figures[str(key)]=[figure, caption, short[str(key)]]
         
     
 if __name__ == "__main__":

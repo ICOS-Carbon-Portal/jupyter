@@ -8,7 +8,6 @@ Functions to run the station characterization notebook on exploredata.
 
 """
 
-import time
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
@@ -436,7 +435,7 @@ def lonlat_2_ixjy(slon,slat,mlon,mlat):
 
 
 def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='', 
-              vmin=0.0001, vmax=None, colors='GnBu',pngfile=''): 
+              vmin=0.0001, vmax=None, colors='GnBu'): 
 
     station=myStation.stationId
     lon=myStation.lon
@@ -533,14 +532,9 @@ def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='',
         #show station location if station is provided
         if station != '':
             ax.plot(lon,lat,'+',color=mcolor,ms=10,markeredgewidth=1,transform=ccrs.PlateCarree())
-        #removed
-        #plt.title(title)
+
         ax.text(0.01, -0.25, 'min: %.2f' % np.min(field[j1:j2,i1:i2]), horizontalalignment='left',transform=ax.transAxes)
         ax.text(0.99, -0.25, 'max: %.2f' % np.max(field[j1:j2,i1:i2]), horizontalalignment='right',transform=ax.transAxes)
-
-    if len(pngfile)>0:        
-        output_folder = myStation.settings['output_folder']        
-        fig.savefig(output_folder + '/' + pngfile + '.pdf',dpi=100,bbox_inches='tight')
         
     return fig 
     
@@ -576,7 +570,6 @@ def polar_graph(myStation, rose_type, colorbar='gist_heat_r', zoom=''):
     dir_labels=myStation.dirLabels
     fp=myStation.fp
     unit=myStation.settings['unit']
-    save_figs=myStation.settings['saveFigs']
     station_id=myStation.stationId
     
     #same function used to all three types of map
@@ -659,37 +652,21 @@ def polar_graph(myStation, rose_type, colorbar='gist_heat_r', zoom=''):
 
     #numpy array works to display in map
     rosedata_distance_degrees_binned_unique_combo_join_sorted_list_of_lists_array=np.array(rosedata_distance_degrees_binned_unique_combo_join_sorted_list_of_lists) 
-
-    if save_figs=='yes':
-        
-        if rose_type=='sensitivity':
-            figure_number='_figure_1'
-        if rose_type=='point source contribution':
-            figure_number='_figure_2'
-        if rose_type=='population sensitivity':
-            figure_number='_figure_3'
-            
-        string_fig=station_id+figure_number
-        
-    else:
-        string_fig=''
         
     caption=(unit.capitalize() + ' ' + rose_type + ' given direction and distance')
           
     polar_map=plot_maps(myStation, rosedata_distance_degrees_binned_unique_combo_join_sorted_list_of_lists_array, title=caption, label=rose_type, 
-                   linlog='linear', zoom='', vmin=0.0001, vmax=None, colors=colorbar,pngfile=string_fig)
+                   linlog='linear', zoom='', vmin=0.0001, vmax=None, colors=colorbar)
         
     return polar_map, caption
 
-def land_cover_bar_graph(myStation):
+def land_cover_bar_graph(myStation):    
     
-    station=myStation.stationId
     fp_lon=myStation.fpLon
     fp_lat=myStation.fpLat
     degrees=myStation.degrees
     fp=myStation.fp
-    save_figs=myStation.settings['saveFigs']
-
+    
     
     #get all the land cover data from netcdfs 
     out_of_domain, urban_aggreg, cropland_aggreg, forests, pastures_grasslands, oceans, other= import_landcover()
@@ -822,28 +799,15 @@ def land_cover_bar_graph(myStation):
     plt.xticks(ind, ('NE', 'E','SE', 'S', 'SW','W', 'NW', 'N'))
 
     ax.yaxis.grid(True)
-
-    #the land cover bar graph going into the PDF has different dimensions
-    if save_figs=='yes':
-        
-        output_folder = myStation.settings['output_folder']
-        
-        plt.ioff()
-        #different figsize here for the PDF, all else the same as outout figure
-        fig.set_size_inches(12, 11)
-        pngfile=station+'_figure_7'
-        fig.savefig(output_folder +'/'+pngfile+'.pdf',dpi=100, bbox_inches='tight')
-        
-    for_caption=('Land cover within average footprint aggregated by direction')
-
-
+    
+    caption='Land cover within average footprint aggregated by direction'
     fig.set_size_inches(11, 13)
-    return fig, for_caption
+    return fig, caption
 
 
 
 #14 font before
-def render_mpl_seasonal_table(myStation, data, station, save_figs, col_width=2, row_height=0.625, font_size=16,
+def render_mpl_seasonal_table(myStation, data, station, col_width=2, row_height=0.625, font_size=16,
              header_color='#40466e', row_colors=['#f1f1f2', 'w'], edge_color='w',
              bbox=[0, 0, 1, 1], header_columns=0, 
              ax=None):
@@ -865,13 +829,6 @@ def render_mpl_seasonal_table(myStation, data, station, save_figs, col_width=2, 
         else:
             cell.set_facecolor(row_colors[k[0]%len(row_colors) ])
 
-    if save_figs=='yes':
-        
-        output_folder = myStation.settings['output_folder']
-
-        pngfile=station+'_figure_6'
-        fig.savefig(output_folder +'/' + pngfile + '.pdf',dpi=100, bbox_inches='tight')
-
     return fig
 
        
@@ -882,24 +839,12 @@ def seasonal_table(myStation):
     station=myStation.stationId
     date_range=myStation.dateRange
     year=min(date_range).year
-    save_figs=myStation.settings['saveFigs']
-    
-    #update here - already have this information in mystation
-    #get the stilt information from stationChar class - to be updated.
-    #available_STILT= available_STILT_dictionary()
-
-    #check what months available for the year (and December the year before - seasons rather than full year)
-    #months= available_STILT[station][str(year)]['months']
-    #years=available_STILT[station]['years']
-    
-    
     
     available_STILT= myStation.settings['stilt']
 
     #check what months available for the year (and December the year before - seasons rather than full year)
     months= available_STILT[str(year)]['months']
     years=available_STILT['years']
-    
     
     
     if str(year-1) in years:
@@ -1026,7 +971,7 @@ def seasonal_table(myStation):
 
 
         caption = 'Seasonal variation during the start year of specified date range (including December of the year before to show meteorological seasons)'
-        seasonal_table=render_mpl_seasonal_table(myStation, df_seasonal_table, station, save_figs, header_columns=0, col_width=2.5)
+        seasonal_table=render_mpl_seasonal_table(myStation, df_seasonal_table, station, header_columns=0, col_width=2.5)
       
         return seasonal_table, caption
     #if not 12 months:
@@ -1046,7 +991,7 @@ def landcover_polar_graph(myStation):
     fp_lon=myStation.fpLon
     fp_lat=myStation.fpLat
     fp=myStation.fp
-    save_figs=myStation.settings['saveFigs']
+    
     title=myStation.settings['titles']
     bin_size=myStation.settings['binSize']
     degrees=myStation.degrees
@@ -1133,7 +1078,6 @@ def landcover_polar_graph(myStation):
     rosedata= rosedata.applymap(lambda x: x / total_all * 100)
        
     directions = np.arange(0, 360, bin_size)
-    date_index_number = (len(date_range) - 1)
     
     if title=='yes':
         
@@ -1230,16 +1174,7 @@ def landcover_polar_graph(myStation):
                linewidth=0)
        
     
-    ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])
-    
-    
-    if save_figs=='yes':
-        ax.legend(labels, bbox_to_anchor=(1.9, 0.25), ncol=2)
-        plotdir='figures'
-        pngfile=station+'_figure_4'
-        fig.savefig(plotdir+'/'+pngfile+'.pdf',dpi=100, bbox_inches='tight')
-    
-    #different from the saved legend
+    ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])    
     ax.legend(labels, bbox_to_anchor=(1.4, 0), ncol=1, loc=4)
     return fig, for_title
 
@@ -1374,8 +1309,7 @@ def multiple_variables_graph(myStation):
     
     selected_station=myStation.stationId
     station_name=[myStation.stationName]
-    timeselect_list=myStation.settings['timeOfDay']
-    save_figs=myStation.settings['saveFigs']
+    timeselect_list=myStation.settings['timeOfDay']    
     date_range=myStation.dateRange
     
 
@@ -1525,49 +1459,85 @@ def multiple_variables_graph(myStation):
     ax.text(0, -10, 'Station', fontsize=15,weight = 'bold')
 
     ax.yaxis.grid(True)
+        
+    columns_need_quartiles=['Sensitivity','Population','Point source']
+    
+    for column in columns_need_quartiles:
+        
+        #df saved - the original values. 
+        quartile_df=df_saved[column].quantile([0.25,0.5,0.75])
 
+        q1=quartile_df[0.25]
+        q2=quartile_df[0.5]
+        q3=quartile_df[0.75]
+        
+        value_selected_station = df_saved.loc[df_saved['Station'] == selected_station, column]
+        value_selected_station= value_selected_station.values[0]
+        
+        if value_selected_station<q1:
+            pdf_text='first quartile'
+        elif value_selected_station>=q1 and value_selected_station<q2:
+            pdf_text='second quartile'
+        elif value_selected_station>=q2 and value_selected_station<q3:
+            pdf_text='third quartile'
+        else:
+            pdf_text='fourth quartile'
 
-    if save_figs=='yes':
-        
-        output_folder = myStation.settings['output_folder']
-        pngfile=station + '_figure_5'
-        fig.savefig(output_folder+'/'+pngfile+'.pdf',dpi=100, bbox_inches='tight')
-        
-        columns_need_quartiles=['Sensitivity','Population','Point source']
-        
-        for column in columns_need_quartiles:
-            
-            #df saved - the original values. 
-            quartile_df=df_saved[column].quantile([0.25,0.5,0.75])
-
-            q1=quartile_df[0.25]
-            q2=quartile_df[0.5]
-            q3=quartile_df[0.75]
-            
-            value_selected_station = df_saved.loc[df_saved['Station'] == selected_station, column]
-            value_selected_station= value_selected_station.values[0]
-            
-            if value_selected_station<q1:
-                pdf_text='first quartile'
-            elif value_selected_station>=q1 and value_selected_station<q2:
-                pdf_text='second quartile'
-            elif value_selected_station>=q2 and value_selected_station<q3:
-                pdf_text='third quartile'
-            else:
-                pdf_text='fourth quartile'
-
-            myStation.settings[column] = pdf_text
-
-        settings_dict = myStation.settings
-        
-        settings_json = json.dumps(settings_dict, indent = 4)
-        
-        file_settings = output_folder + '/' + selected_station + '_settings.json'
-        
-        open_file= open(file_settings, "w")
-        open_file.write(settings_json)
-        open_file.close()
+        myStation.settings[column] = pdf_text
         
     caption=('Selected station relative to reference atmospheric stations')
 
     return fig, caption
+
+def save(stc, fmt='pdf'):
+    """
+    provide a station characterisation object, with all the figures.
+    all figures will be saved
+    
+
+    Parameters
+    ----------
+    stc : station characterisation object format. Instance of class(stationchar)
+    fmt : STR, image filename ending, used to infer format ('pdf' | 'png')
+
+    Returns
+    -------
+    None.
+
+    """
+    # stc.figures is a dictionary...like  {1: [fig, caption, shortname]}
+    captions = {}
+    
+    for f in stc.figures:
+        fig, cap, name = stc.figures[f]  
+        
+        if not fig: continue
+        
+        filename = os.path.join(stc.settings['output_folder'], (name + '.' + fmt))
+        # keep the captions for json output
+        captions[name] = cap
+        
+        # special settings for individual figures
+        if f==4:  #'landcover_rose'
+            ax = fig.gca()
+            ax.legend(bbox_to_anchor=(1.9, 0.25), ncol=2)
+            
+        if f==7: #'landcover_bar'
+            fig.set_size_inches(12, 11)        
+            
+        #common for all figures
+        fig.savefig(filename,dpi=100,bbox_inches='tight')
+        captions[name] = cap
+    
+    # save captions as json file    
+    file = os.path.join(stc.settings['output_folder'],'captions.json')
+    with open(file, 'w') as f:
+        json.dump(captions, f, indent=4)
+    
+    # save settings as json file
+    file = os.path.join(stc.settings['output_folder'],'settings.json')
+    with open(file, 'w') as f:
+        json.dump(stc.settings, f, indent=4)
+        
+        
+        
