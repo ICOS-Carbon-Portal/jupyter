@@ -634,7 +634,6 @@ def polar_graph(myStation, rose_type, colorbar='gist_heat_r', zoom=''):
     #lists of lists - the first list is all tha values that has "the first" latitude value and all 400 different longitude values)
     #calculate the % sensitivity - can be changed to absolute sensitivity
     if unit=='percent':
-        rosedata_distance_degrees_binned_unique_combo_join_sorted_list=[(sensitivity_value/total_sensitivity)*100 for sensitivity_value in rosedata_distance_degrees_binned_unique_combo_join_sorted_list]
         rosedata_list=[(sensitivity_value/total_sensitivity)*100 for sensitivity_value in rosedata_list]
 
     #the "netcdf simulation" (see text above)
