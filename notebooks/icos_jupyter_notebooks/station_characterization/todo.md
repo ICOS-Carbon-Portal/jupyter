@@ -25,8 +25,13 @@
 - *open*
 
 **remove 'please polulate the widgets'**
-- *open*
+- done
 
 **titles in settings....and then used def landcover_polar_graph(myStation):  **
 - titles are always empty, never assigned in the gui or stc_functions..
+- *open*
+
+
+**specifications.pdf not found:  **
+- In advanced figures user interface
 - *open*
