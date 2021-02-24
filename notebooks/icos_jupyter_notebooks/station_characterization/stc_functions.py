@@ -1512,8 +1512,11 @@ def save(stc, fmt='pdf'):
         fig, cap, name = stc.figures[f]  
         
         if not fig: continue
+        #replace shortname with fullname (depends on fmt)
+        name = name + '.' + fmt
+        stc.figures[f][2] = name
         
-        filename = os.path.join(stc.settings['output_folder'], (name + '.' + fmt))
+        filename = os.path.join(stc.settings['output_folder'], (name))
         # keep the captions for json output
         captions[name] = cap
         
