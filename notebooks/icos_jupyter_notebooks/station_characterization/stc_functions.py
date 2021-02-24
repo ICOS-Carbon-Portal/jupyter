@@ -1513,7 +1513,11 @@ def save(stc, fmt='pdf'):
         
         if not fig: continue
         
-        filename = os.path.join(stc.settings['output_folder'], (name + '.' + fmt))
+        #replace shortname with fullname (depends on fmt)
+        name = name + '.' + fmt
+        stc.figures[f][2] = name
+        
+        filename = os.path.join(stc.settings['output_folder'], name)
         # keep the captions for json output
         captions[name] = cap
         
@@ -1538,6 +1542,11 @@ def save(stc, fmt='pdf'):
     file = os.path.join(stc.settings['output_folder'],'settings.json')
     with open(file, 'w') as f:
         json.dump(stc.settings, f, indent=4)
+    
+    # create pdf from tex if stc is icos
+    #import tex
+    #pdf = tex.icosTex(stc)
+    
         
         
         
