@@ -2,7 +2,7 @@
 """
 Created on Wed Sep  9 08:04:31 2020
 
-@author: Ida Storm
+@author: Ida Storm 
 
 Functions to run the station characterization notebook on exploredata.
 
@@ -601,43 +601,44 @@ def polar_graph(myStation, rose_type, colorbar='gist_heat_r', zoom=''):
     total_sensitivity= df_sensitivity_map['sensitivity'].sum()
     
     #binning - by the distace intervals and degree intervals. Summarize these. 
-    rosedata_distance_binned=df_sensitivity_map.assign(Interval_bins=lambda df: pd.cut(df['distance'], bins=interval_bins, labels=interval_labels, right=True))
+    rosedata=df_sensitivity_map.assign(Interval_bins=lambda df: pd.cut(df['distance'], bins=interval_bins, labels=interval_labels, right=True))
 
-    rosedata_distance_degrees_binned=rosedata_distance_binned.assign(Degree_bins=lambda df: pd.cut(df['degrees'], bins=dir_bins, labels=dir_labels, right=False))
+    rosedata=rosedata.assign(Degree_bins=lambda df: pd.cut(df['degrees'], bins=dir_bins, labels=dir_labels, right=False))
    
     #the 360 degree are the same as 0:
-    rosedata_distance_degrees_binned=rosedata_distance_degrees_binned.replace({'Degree_bins': {360: 0}})
+    rosedata=rosedata.replace({'Degree_bins': {360: 0}})
 
     #the combination of the distance and direction columns is used to create a unique column value for all cells
     #with certain direction/distance combination.
     #make it to string to be able to combine.
-    rosedata_distance_degrees_binned['key']=rosedata_distance_degrees_binned['Interval_bins'].astype(str) + ' ' + rosedata_distance_degrees_binned['Degree_bins'].astype(str) 
+    rosedata['key']=rosedata['Interval_bins'].astype(str) + ' ' + rosedata['Degree_bins'].astype(str) 
 
     #group by the unique combination of direction and distance
-    rosedata_distance_degrees_binned_unique_combo=rosedata_distance_degrees_binned.groupby(by=['key'], as_index=False)['sensitivity'].sum().reset_index()
+    rosedata_groupby=rosedata.groupby(by=['key'], as_index=False)['sensitivity'].sum().reset_index()
 
     #merge between the 192000 cells and the "groupedby" values: each cell in a specific direction and distance will
     #get the sum of the cells in that same specific bin. Same color on the map corresponing to % or absolute sensitivity.
     #reset_index() creates a column with the original index of the dataframes that are joined. Needed to sort the dataframe
     #in the next spted because default is to sort by the key used. 
-    rosedata_distance_degrees_binned_unique_combo_join=rosedata_distance_degrees_binned.reset_index().merge(rosedata_distance_degrees_binned_unique_combo, left_on='key', right_on='key', sort=False)
+    rosedata=rosedata.reset_index().merge(rosedata_groupby, left_on='key', right_on='key', sort=False)
 
     #sort by the original index of the 192000 cells: 
-    rosedata_distance_degrees_binned_unique_combo_join_sorted=rosedata_distance_degrees_binned_unique_combo_join.sort_values(by=['index_x'])
+    rosedata=rosedata.sort_values(by=['index_x'])
 
     #x is the "fist" (rosedata.merge) dataframe that was merged (the 192000 individual cells) 
     #y is the dataframe that is merged to the first. Both columns name "sensitivity". 
     #sensitivity_y is the merged data - the summarized sensitivity value for the whole bin (direction and distance bin)
-    rosedata_distance_degrees_binned_unique_combo_join_sorted_list=rosedata_distance_degrees_binned_unique_combo_join_sorted['sensitivity_y'].tolist()
+    rosedata_list=rosedata['sensitivity_y'].tolist()
 
     #now starts the process of "packing it back up" so that it can be displayed as a map (same format as the netCDF files with 480
     #lists of lists - the first list is all tha values that has "the first" latitude value and all 400 different longitude values)
     #calculate the % sensitivity - can be changed to absolute sensitivity
     if unit=='percent':
         rosedata_distance_degrees_binned_unique_combo_join_sorted_list=[(sensitivity_value/total_sensitivity)*100 for sensitivity_value in rosedata_distance_degrees_binned_unique_combo_join_sorted_list]
+        rosedata_list=[(sensitivity_value/total_sensitivity)*100 for sensitivity_value in rosedata_list]
 
     #the "netcdf simulation" (see text above)
-    rosedata_distance_degrees_binned_unique_combo_join_sorted_list_of_lists=[]
+    rosedata_list_of_lists=[]
 
     index=0
     while index<192000:
@@ -645,17 +646,17 @@ def polar_graph(myStation, rose_type, colorbar='gist_heat_r', zoom=''):
 
         #for each list: need to grab the 400 values that are the combination of the same latitude value
         #but different longitude values
-        rosedata_distance_degrees_binned_unique_combo_join_sorted_list_of_lists.append(rosedata_distance_degrees_binned_unique_combo_join_sorted_list[index:index_to])
+        rosedata_list_of_lists.append(rosedata_list[index:index_to])
 
         #start at the next 400 in the list in the next turn of the loop:
         index=index+400
 
     #numpy array works to display in map
-    rosedata_distance_degrees_binned_unique_combo_join_sorted_list_of_lists_array=np.array(rosedata_distance_degrees_binned_unique_combo_join_sorted_list_of_lists) 
+    rosedata_array=np.array(rosedata_list_of_lists) 
         
     caption=(unit.capitalize() + ' ' + rose_type + ' given direction and distance')
           
-    polar_map=plot_maps(myStation, rosedata_distance_degrees_binned_unique_combo_join_sorted_list_of_lists_array, title=caption, label=rose_type, 
+    polar_map=plot_maps(myStation, rosedata_array, title=caption, label=rose_type, 
                    linlog='linear', zoom='', vmin=0.0001, vmax=None, colors=colorbar)
         
     return polar_map, caption
@@ -1513,11 +1514,7 @@ def save(stc, fmt='pdf'):
         
         if not fig: continue
         
-        #replace shortname with fullname (depends on fmt)
-        name = name + '.' + fmt
-        stc.figures[f][2] = name
-        
-        filename = os.path.join(stc.settings['output_folder'], name)
+        filename = os.path.join(stc.settings['output_folder'], (name + '.' + fmt))
         # keep the captions for json output
         captions[name] = cap
         
@@ -1542,11 +1539,6 @@ def save(stc, fmt='pdf'):
     file = os.path.join(stc.settings['output_folder'],'settings.json')
     with open(file, 'w') as f:
         json.dump(stc.settings, f, indent=4)
-    
-    # create pdf from tex if stc is icos
-    #import tex
-    #pdf = tex.icosTex(stc)
-    
         
         
         
