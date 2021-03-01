@@ -162,30 +162,20 @@ class StationChar():
         calculated values are also appended to the csv-files. 
         """
       
+        #saved distances and degrees for ICOS stations:
         df_w_distances=pd.read_csv(stcDataPath+ "approved_stations_distances.csv")
-        df_w_degrees=pd.read_csv(stcDataPath + "approved_stations_degrees.csv")
-    
-        
-        #same as degrees
-        list_distance_columns=df_w_distances.columns.tolist()
-
-        station_reduced = self.stationId[0:3]
-        matched_station = [idx for idx in list_distance_columns if idx[0:3] == station_reduced]    
+        df_w_degrees=pd.read_csv(stcDataPath + "approved_stations_degrees.csv") 
     
         #if not saved distances to all 192000 cells, calculate it. 
-        if matched_station:
+        try:
             self.distances=df_w_distances[matched_station[0]]
             self.degrees=df_w_degrees[matched_station[0]]
         
-        else:
+        except:
             self.distances=stc_functions.distances_from_point_to_grid_cells(self.lat, self.lon, self.fpLat, self.fpLon)
-            df_w_distances[station]=self.distances
-            df_w_distances.to_csv(stcDataPath + "approved_stations_distances.csv")
-            
+
             self.degrees=stc_functions.degrees_from_point_to_grid_cells(self.lat, self.lon, self.fpLat, self.fpLon)
-            df_w_degrees[station]=self.degrees
-            df_w_degrees.to_csv(stcDataPath + "approved_stations_degrees.csv")
-            
+
     #or other class... but belongs to object station characterization as much as distances and degrees to footprint?   
     #can now remove "define_bins_landcover_polar_graph"
     def _setBinsAndLabels(self):

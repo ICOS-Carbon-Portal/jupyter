@@ -189,12 +189,12 @@ def date_range_hour_filtered(start_date, end_date, timeselect_list):
     return date_range
 
 def import_landcover():
-    all_corine_classes= Dataset(stcDataPath + 'all_corine_except_ocean.nc')
+    all_corine_classes= Dataset(stcDataPath + 'CLC_2018_landcover.nc')
 
-    #the "onceans_finalized" dataset is seperate: CORINE class 523 (oceans) did not extend beyond exclusive zone
+    #the "CLC_naturalearth_oceans.nc" is seperate: CORINE class 523 (oceans) did not extend beyond exclusive zone
     #complemented with Natural Earth data.
     #CORINE does not cover the whole area, "nodata" area is never ocean, rather landbased data.
-    oceans_finalized= Dataset(stcDataPath + 'oceans_finalized.nc')
+    oceans= Dataset(stcDataPath + 'CLC_naturalearth_oceans.nc')
 
     #access all the different land cover classes in the .nc files:
     fp_111 = all_corine_classes.variables['area_111'][:,:]
@@ -242,7 +242,7 @@ def import_landcover():
     fp_522 = all_corine_classes.variables['area_522'][:,:]
 
     #CORINE combined with natural earth data for oceans:
-    fp_523 = oceans_finalized.variables['ocean_ar2'][:,:]
+    fp_523 = oceans.variables['ocean_ar2'][:,:]
 
     #have a variable that represents the whole area of the cell,
     #used to get a percentage breakdown of each corine class.
@@ -283,13 +283,14 @@ def import_landcover():
     return out_of_domain, urban_aggreg, cropland_aggreg, forests, pastures_grasslands, oceans, other
 
 def import_population_data():
-    pop_data= Dataset(stcDataPath + 'point_with_pop_data.nc')
+   
+    pop_data= Dataset(stcDataPath + 'GEOSTAT_population_2011.nc')
     fp_pop=pop_data.variables['Sum_TOT_P'][:,:]
     return fp_pop
 
 def import_point_source_data():
 
-    point_source_data= Dataset(stcDataPath+ 'final_netcdf_point_source_emission.nc')
+    point_source_data= Dataset(stcDataPath+ 'E_PRTR_pointsource_2017.nc')
 
     #emissions in kg/year in the variable "Sum_Tota_1"
     fp_point_source=point_source_data.variables['Sum_Tota_1'][:,:]
@@ -657,13 +658,11 @@ def polar_graph(myStation, rose_type, colorbar='gist_heat_r', zoom=''):
     return polar_map, caption
 
 def land_cover_bar_graph(myStation):    
-    
     fp_lon=myStation.fpLon
     fp_lat=myStation.fpLat
     degrees=myStation.degrees
     fp=myStation.fp
-    
-    
+
     #get all the land cover data from netcdfs 
     out_of_domain, urban_aggreg, cropland_aggreg, forests, pastures_grasslands, oceans, other= import_landcover()
     
@@ -675,14 +674,15 @@ def land_cover_bar_graph(myStation):
     oceans=fp*oceans
     other=fp*other
     out_of_domain=fp*out_of_domain
-    
-    cropland_values=[cropland[0][lat_value][lon_value] for lat_value in range(len(fp_lat)) for lon_value in range(len(fp_lon))]
-    urban_values=[urban[0][lat_value][lon_value] for lat_value in range(len(fp_lat)) for lon_value in range(len(fp_lon))]
-    forests_values=[forests[0][lat_value][lon_value] for lat_value in range(len(fp_lat)) for lon_value in range(len(fp_lon))]
-    pastures_grasslands_values=[pastures_grasslands[0][lat_value][lon_value] for lat_value in range(len(fp_lat)) for lon_value in range(len(fp_lon))]
-    oceans_values=[oceans[0][lat_value][lon_value] for lat_value in range(len(fp_lat)) for lon_value in range(len(fp_lon))]
-    others_values=[other[0][lat_value][lon_value] for lat_value in range(len(fp_lat)) for lon_value in range(len(fp_lon))]
-    out_of_domain_values=[out_of_domain[0][lat_value][lon_value] for lat_value in range(len(fp_lat)) for lon_value in range(len(fp_lon))]
+            
+    #lists of these values
+    cropland_values = [item for sublist in cropland[0] for item in sublist]
+    urban_values = [item for sublist in urban[0] for item in sublist]
+    forests_values = [item for sublist in forests[0] for item in sublist]
+    pastures_grasslands_values = [item for sublist in pastures_grasslands[0] for item in sublist]
+    oceans_values = [item for sublist in oceans[0] for item in sublist]
+    others_values = [item for sublist in other[0] for item in sublist]
+    out_of_domain_values = [item for sublist in out_of_domain[0] for item in sublist]
         
     #putting it into a dataframe: initially 192000 values (one per cell) for each of the aggregated land cover classes
     #into same dataframe - have the same coulmn heading. "landcover_type" will be used in "groupby" together with the "slice" (in degrees)
@@ -717,6 +717,7 @@ def land_cover_bar_graph(myStation):
 
     #into one dataframe
     df_all = df_cropland.append([df_urban, df_forests, df_pastures_grassland, df_oceans, df_others, df_out_of_domain])
+    
 
     #not change with user input
     dir_bins = np.arange(22.5, 383.5, 45)
@@ -745,7 +746,7 @@ def land_cover_bar_graph(myStation):
     total_all=sum(rosedata_sum)
 
     rosedata= rosedata.applymap(lambda x: x / total_all * 100)
-     
+
     list_land_cover_values=[]
     for land_cover_type in list_land_cover_names_sorted:
         list_land_cover_values.append(rosedata[land_cover_type].values)
@@ -797,8 +798,8 @@ def land_cover_bar_graph(myStation):
     
     caption='Land cover within average footprint aggregated by direction'
     fig.set_size_inches(11, 13)
-    return fig, caption
 
+    return fig, caption
 
 
 #14 font before
@@ -972,17 +973,6 @@ def seasonal_table(myStation):
         
 #land cover polar graph:
 
-def update_yticks(x, pos):
-    area=x*x*math.pi
-    area_part=area/area_max
-    label=max_radius*area_part
-    #value=math.sqrt(value/math.pi)
-
-    return (str("%.2f" % label) + '%')
-
-def update_yticks_none(x, pos):
-    return (str('')) 
-
 def landcover_polar_graph(myStation):
     
     station=myStation.stationId
@@ -1003,21 +993,22 @@ def landcover_polar_graph(myStation):
     dir_bins, dir_labels=define_bins_landcover_polar_graph(bin_size=bin_size)
     
     #land cover classes (imported in the land cover section):
-    cropland_fp=fp*cropland_aggreg
-    urban_fp=fp*urban_aggreg
-    forests_fp=fp*forests
-    pastures_grasslands_fp=fp*pastures_grasslands
-    oceans_fp=fp*oceans
-    other_fp=fp*other
-    out_of_domain_fp=fp*out_of_domain
+    cropland=fp*cropland_aggreg
+    urban=fp*urban_aggreg
+    forests=fp*forests
+    pastures_grasslands=fp*pastures_grasslands
+    oceans=fp*oceans
+    other=fp*other
+    out_of_domain=fp*out_of_domain
 
-    cropland_values=[cropland_fp[0][lat_value][lon_value] for lat_value in range(len(fp_lat)) for lon_value in range(len(fp_lon))]
-    urban_values=[urban_fp[0][lat_value][lon_value] for lat_value in range(len(fp_lat)) for lon_value in range(len(fp_lon))]
-    forests_values=[forests_fp[0][lat_value][lon_value] for lat_value in range(len(fp_lat)) for lon_value in range(len(fp_lon))]
-    pastures_grasslands_values=[pastures_grasslands_fp[0][lat_value][lon_value] for lat_value in range(len(fp_lat)) for lon_value in range(len(fp_lon))]
-    oceans_values=[oceans_fp[0][lat_value][lon_value] for lat_value in range(len(fp_lat)) for lon_value in range(len(fp_lon))]
-    others_values=[other_fp[0][lat_value][lon_value] for lat_value in range(len(fp_lat)) for lon_value in range(len(fp_lon))]
-    out_of_domain_values=[out_of_domain_fp[0][lat_value][lon_value] for lat_value in range(len(fp_lat)) for lon_value in range(len(fp_lon))]
+    cropland_values = [item for sublist in cropland[0] for item in sublist]
+    urban_values = [item for sublist in urban[0] for item in sublist]
+    forests_values = [item for sublist in forests[0] for item in sublist]
+    pastures_grasslands_values = [item for sublist in pastures_grasslands[0] for item in sublist]
+    oceans_values = [item for sublist in oceans[0] for item in sublist]
+    others_values = [item for sublist in other[0] for item in sublist]
+    out_of_domain_values = [item for sublist in out_of_domain[0] for item in sublist]
+        
 
    #putting it into a dataframe: initially 192000 values (one per cell) for each of the aggregated land cover classes
     #into same dataframe - have the same coulmn heading. "landcover_type" will be used in "groupby" together with the "slice" (in degrees)
@@ -1123,6 +1114,16 @@ def landcover_polar_graph(myStation):
     ax.set_theta_direction('clockwise')
     ax.set_theta_zero_location('N')
     
+    def update_yticks(x, pos):
+        area=x*x*math.pi
+        area_part=area/area_max
+        label=max_radius*area_part
+
+        return (str("%.2f" % label) + '%')
+
+    def update_yticks_none(x, pos):
+        return (str('')) 
+    
     if polargraph_label=='yes':
         ax.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(update_yticks))
 
@@ -1162,6 +1163,7 @@ def landcover_polar_graph(myStation):
     
     ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])    
     ax.legend(labels, bbox_to_anchor=(1.4, 0), ncol=1, loc=4)
+    
     return fig, for_title
 
     
@@ -1177,7 +1179,6 @@ def _convert_dir(directions, N=None):
     
 def define_bins_landcover_polar_graph(bin_size):
     
-   
     #direction: using the input (bin_size) to set the bins so that the first bin has "north (0 degrees) in the middle"
     #"from_degree" becomes a negative value (half of the degree value "to the left" of 0)
     from_degree=-(bin_size/2)
@@ -1311,11 +1312,11 @@ def multiple_variables_graph(myStation):
     #if the user selection is to use all footprints of 2017 or 2018, use saved values for all the 
     #reference stations (and a few more- all the stations used in Storm(2020))
     if start_date==pd.Timestamp(2018, 1, 1, 0) and end_date==pd.Timestamp(2018,12,31,0) and len(timeselect_list)==8:
-        df_saved=pd.read_csv(stcDataPath + 'condensed_multiple_values_all_2018.csv')
+        df_saved=pd.read_csv(stcDataPath + 'multiple_variables_graph_values_2018.csv')
         predefined=True
         
     elif start_date==pd.Timestamp(2017, 1, 1, 0) and end_date==pd.Timestamp(2017,12,31,0) and len(timeselect_list)==8:
-        df_saved=pd.read_csv(stcDataPath + 'condensed_multiple_values_all_2017_upd.csv')
+        df_saved=pd.read_csv(stcDataPath + 'multiple_variables_graph_values_2017.csv')
         predefined=True
 
     #if different date-range, need to compute variable values for all.

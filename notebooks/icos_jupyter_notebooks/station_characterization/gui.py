@@ -5,7 +5,7 @@ Created on Mon Dec  7 08:38:51 2020
 @author: Claudio and Ida
 """
 
-from ipywidgets import Dropdown, SelectMultiple, HBox, Text, VBox, Button, Output, IntText, RadioButtons,IntProgress, GridspecLayout
+from ipywidgets import Dropdown, SelectMultiple, FileUpload, HBox, Text, VBox, Button, Output, IntText, RadioButtons,IntProgress, GridspecLayout
 import stiltStations
 from IPython.core.display import display, HTML 
 import settings
@@ -191,19 +191,13 @@ def change_month_end(c):
 
 def update_func_file(button_c):
 
-    settings_file=file_name.value
-
-    if len(settings_file)>0:
-        
-        if settings_file[-5:]!='.json':
-            settings_file=settings_file + '.json'
-        
-        with open(settings_file, 'r') as f:
-            settings_dict = json.load(f)
+    uploaded_file = file_name.value
+    settings_file=uploaded_file['HTM150_settings.json']['content']
+    settings_json = settings_file.decode('utf8').replace("'", '"')
+    settings_dict = json.loads(settings_json)
+    
+    set_settings(settings_dict)
             
-        set_settings(settings_dict)
-        
-
 def updateProgress(f, desc=''):
     # custom progressbar updates
     f.value += 1
@@ -222,9 +216,8 @@ def update_func(button_c):
         display(f)
         updateProgress(f, 'read footprint')
         
-
     global stc
-    stc=stationchar.StationChar(get_settings()  )
+    stc=stationchar.StationChar(get_settings())
 
     if stc.settings['saveFigs'] == 'yes':
         now = datetime.now()
@@ -358,20 +351,20 @@ style_bin = {'description_width': 'initial'}
 header_filename = Output()
 
 with header_filename:
-    display(HTML('<p style="font-size:15px;font-weight:bold;">Load settings to populate selection (optional): </p>'))
+    display(HTML('<p style="font-size:15px;font-weight:bold;">Load settings from file (optional): </p>'))
 
-file_name= Text(
-    value='',
-    placeholder='station_settings.json',
-    description='',
-    disabled=False)
 
-update_button_file = Button(description='Populate widgets',
+file_name= FileUpload(
+    accept='.json',  # Accepted file extension e.g. '.txt', '.pdf', 'image/*', 'image/*,.pdf'
+    multiple=False  # True to accept multiple files upload else False
+)
+
+update_button_file = Button(description='Load settings',
                        disabled=False,
                        button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
                        tooltip='Click me',)
 
-update_button_file.layout.margin = '20px 0px 0px 10px' #top, right, bottom, left
+update_button_file.layout.margin = '0px 0px 0px 20px' #top, right, bottom, left
 
 update_button_file.style.button_color='orange'
 
@@ -468,10 +461,14 @@ save_figs=RadioButtons(
 
 
 #Create a Button widget to control execution:
-update_button = Button(description='Update',
+update_button = Button(description='Run selection',
                        disabled=False,
                        button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
                        tooltip='Click me',)
+
+royal='#4169E1'
+update_button.style.button_color=royal
+update_button.layout.margin = '0px 0px 0px 160px' #top, right, bottom, left
 
 
 #this is just text that is put in a Vbox (vertical box) ABOVE (verticla) the station selection
@@ -532,9 +529,7 @@ bin_box_2 = HBox([v_box_1, v_box_2, v_box_3])
 station_choice.layout.width = '603px'
 time_box.layout.margin = '25px 0px 10px 0px'
 year_box.layout.margin = '0px 0px 0px 0px'
-update_button.layout.margin = '20px 0px 0px 10px' #top, right, bottom, left
-royal='#4169E1'
-update_button.style.button_color=royal
+
 
 #selection_menu = Output()
 
@@ -587,8 +582,6 @@ observe()
 #Open form object:
 with form_out:
     
-    #form = VBox([header_filename, file_name, update_button_file, update_button])
-
     h_box_1=HBox([header_output])
     grid=GridspecLayout(2, 2)
     grid[0:1, 0:1] = result_sensitivity
@@ -603,8 +596,8 @@ with form_out:
     grid_2[0:1, 0:2] = result_landcover_windrose
     grid_2[0:1, 2:4] = result_multiple_variables_graph
     
-    
-    selection_menu = VBox([station_box, time_box, time_selection, header_bin_specifications, bin_box_1,bin_box_2, header_filename, file_name, update_button_file, update_button])
+    update_buttons = HBox([file_name, update_button_file, update_button])
+    selection_menu = VBox([station_box, time_box, time_selection, header_bin_specifications, bin_box_1,bin_box_2, header_filename, update_buttons])
 
     display(selection_menu, progress_bar, h_box_1, grid, h_box_2, h_box_3, grid_2)
 
