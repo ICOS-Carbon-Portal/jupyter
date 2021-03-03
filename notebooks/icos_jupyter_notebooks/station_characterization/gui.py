@@ -222,7 +222,10 @@ def update_func(button_c):
     if stc.settings['saveFigs'] == 'yes':
         now = datetime.now()
         stc.settings['date/time generated'] =  now.strftime("%Y%m%d_%H%M%S_")
-        stc.settings['output_folder'] = stc.settings['date/time generated'] + stc.stationId
+        stc.settings['output_folder'] = os.path.join('output', (stc.settings['date/time generated']+stc.stationId))
+        if not os.path.exists('output'):
+            os.makedirs('output')
+
         os.mkdir(stc.settings['output_folder'])
 
     
