@@ -126,8 +126,9 @@ class StationChar():
             # API to reterive country name using reverse geocoding of station lat/lon
             self.lat=self.settings['stilt']['lat'] 
             self.lon=self.settings['stilt']['lon']
+
             
-            url='https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + str(self.lon) + '&longitude=' + str(self.lat) + '12&localityLanguage=en'
+            url='https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + str(self.lat) + '&longitude=' + str(self.lon) + '12&localityLanguage=en'
             resp = requests.get(url=url)
             country_information=resp.json()
             self.country=country_information['countryName']
@@ -168,8 +169,8 @@ class StationChar():
     
         #if not saved distances to all 192000 cells, calculate it. 
         try:
-            self.distances=df_w_distances[matched_station[0]]
-            self.degrees=df_w_degrees[matched_station[0]]
+            self.distances=df_w_distances[self.stationId[0:3]]
+            self.degrees=df_w_degrees[self.stationId[0:3]]
         
         except:
             self.distances=stc_functions.distances_from_point_to_grid_cells(self.lat, self.lon, self.fpLat, self.fpLon)
