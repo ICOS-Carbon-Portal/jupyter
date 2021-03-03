@@ -831,10 +831,10 @@ def render_mpl_seasonal_table(myStation, data, station, col_width=2, row_height=
 #seasonal variations table
 def seasonal_table(myStation):
 
-    #station_id
     station=myStation.stationId
     date_range=myStation.dateRange
-    year=min(date_range).year
+    year=int(myStation.settings['startYear'])
+    year_before=year-1
     available_STILT= myStation.settings['stilt']
     
     fp_pop= import_population_data()
@@ -960,8 +960,8 @@ def seasonal_table(myStation):
         df_seasonal_table.loc['Anthropogenic'] = pd.Series({'Variable': 'Anthropogenic', year_var:("%.2f" % anthro_whole), 'Dec-Feb':("%+.2f" % anthro_diff_winter+ '%'), 'Mar-May':("%+.2f" % anthro_diff_spring+ '%'), 
                                                               'Jun-Aug':("%+.2f" % anthro_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % anthro_diff_fall+ '%'), 'Unit': 'ppm'})
 
+        caption = 'Seasonal variation December ' + str(year_before) + ' to December ' + str(year)
 
-        caption = 'Seasonal variation during the start year of specified date range (including December of the year before to show meteorological seasons)'
         seasonal_table=render_mpl_seasonal_table(myStation, df_seasonal_table, station, header_columns=0, col_width=2.5)
       
         return seasonal_table, caption
