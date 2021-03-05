@@ -19,6 +19,7 @@ import datetime as dt
 import os
 import six
 import requests
+import tex
 
 
 #for the widgets
@@ -1526,6 +1527,14 @@ def save(stc, fmt='pdf'):
     file = os.path.join(stc.settings['output_folder'],'settings.json')
     with open(file, 'w') as f:
         json.dump(stc.settings, f, indent=4)
+        
+    # save PDF
+    tex_string=tex.generate_full(stc)
+    
+    tex_file=os.path.join(stc.settings['output_folder'], (stc.settings['date/time generated']+stc.stationId+'.tex'))
+               
+    with open(tex_file,"w") as file:
+        file.write(tex_string) 
         
         
         

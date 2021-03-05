@@ -192,10 +192,9 @@ def change_month_end(c):
 def update_func_file(button_c):
 
     uploaded_file = file_name.value
-    settings_file=uploaded_file['HTM150_settings.json']['content']
+    settings_file=uploaded_file[list(uploaded_file.keys())[0]]['content']
     settings_json = settings_file.decode('utf8').replace("'", '"')
     settings_dict = json.loads(settings_json)
-    
     set_settings(settings_dict)
             
 def updateProgress(f, desc=''):
@@ -318,8 +317,8 @@ def update_func(button_c):
     with header_advanced:
         header_advanced.clear_output()
         display(HTML('<h2>Advanced figures</h2><br>\
-            Please read the <a href="./output/specification.pdf" target="_blank">\
-                specification.pdf</a> (output folder) to interpret the following figures.'))
+            Please read the <a href="specifications.pdf" target="_blank">\
+                specification.pdf</a> to interpret the following figures.'))
 
     updateProgress(f, 'landcover windrose')
     with result_landcover_windrose:
@@ -450,7 +449,7 @@ unit_value=RadioButtons(
 landcover_windrose_label =RadioButtons(
         options=['yes', 'no'],
         value='yes',
-        description='Add labels to the land cover polar graph:',
+        description='Labels to the land cover polar graph:',
         style=style_bin,
         disabled=False)
 
@@ -458,8 +457,8 @@ landcover_windrose_label =RadioButtons(
 save_figs=RadioButtons(
         options=['yes', 'no'],
         style=style_bin,
-        value='no',
-        description= 'Do you want to save the figures:',
+        value='yes',
+        description= 'Save the output:',
         disabled=False)
 
 
