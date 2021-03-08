@@ -1536,5 +1536,14 @@ def save(stc, fmt='pdf'):
     with open(tex_file,"w") as file:
         file.write(tex_string) 
         
-        
+    output_folder = stc.settings['output_folder']
+
+    os.system(('pdflatex -output-directory=' + output_folder + ' ' + tex_file))
+
+    files_to_remove = ['.aux', '.log', '.out']
+    for file_ext in files_to_remove:
+        remove = stc.settings['date/time generated']+stc.stationId+ file_ext
+        os.remove(output_folder + '/' + remove)
+
+                
         

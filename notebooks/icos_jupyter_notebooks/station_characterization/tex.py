@@ -5,6 +5,7 @@ by pdflatex
 """
 
 import os
+import os.path
 
 def _template_specifications(standalone=False):
     
@@ -158,7 +159,7 @@ Station characterization based on STILT model footprints, an anthropogenic emiss
         \\includegraphics[width=0.85\\linewidth]{**pointsource**}
         \\centering
         \\captionsetup{width=.8\\linewidth}
-        \\caption{\\begin{small}The \\textbf{point source contribution map} is the result of the average sensitivity map multiplied by the {\\ensuremath{\\mathrm{CO_2}}} emissions within each footprint cell which in turn have been translated into expected influence of the {\\ensuremath{\\mathrm{CO_2}}} concentration at the station. Relative to the reference atmospheric stations, **name** is in the **quartile_pointsource**when it comes to contibution from point sources.\\end{small}}
+        \\caption{\\begin{small}The \\textbf{point source contribution map} is the result of the average sensitivity map multiplied by the {\\ensuremath{\\mathrm{CO_2}}} emissions within each footprint cell which in turn have been translated into expected influence of the {\\ensuremath{\\mathrm{CO_2}}} concentration at the station. Relative to the reference atmospheric stations, **name** is in the **quartile_pointsource** when it comes to contibution from point sources.\\end{small}}
         \\end{subfigure}
         \\end{figure}\n
         
@@ -180,7 +181,7 @@ Station characterization based on STILT model footprints, an anthropogenic emiss
         \\end{textblock}
         
         \\begin{flushleft}
-        \\begin{small}The first three variables in the \\textbf{seasonal variations table} are the results of summarizing average footprints from December **dec_year** to December **year** for sensitivity, population and point source. These values are found in the ``Annual'' column. Average footprints for the different parts of the year have in turn been computed, multiplied by the ancillary datalayers, and calculate relative (\\%) to the average for the whole year. The remaining three variables – gross ecosystem exchange (GEE), respiration and anthropogenic contribution – are the modelled averages. 
+        \\begin{small}**no_seasonal**
         \\end{small}
         \\end{flushleft}
         
@@ -251,7 +252,15 @@ def generate_pdf_tex(stc):
     tex=tex.replace('**pointsource**', os.path.join(output, stc.figures['2'][2]))
     tex=tex.replace('**population**', os.path.join(output, stc.figures['3'][2]))
     tex=tex.replace('**landcover_bar**', os.path.join(output, stc.figures['4'][2]))
-    tex=tex.replace('**seasonal**', os.path.join(output, stc.figures['5'][2]))
+    
+    string_seasonal='./' + os.path.join(output, stc.figures['5'][2]) + '.pdf'
+    if os.path.isfile(string_seasonal):
+        tex=tex.replace('**seasonal**', os.path.join(output, stc.figures['5'][2]))
+        tex=tex.replace('**no_seasonal**', 'The first three variables in the \\textbf{seasonal variations table} are the results of summarizing average footprints from December **dec_year** to December **year** for sensitivity, population and point source. These values are found in the ``Annual'' column. Average footprints for the different parts of the year have in turn been computed, multiplied by the ancillary datalayers, and calculate relative (\\%) to the average for the whole year. The remaining three variables – gross ecosystem exchange (GEE), respiration and anthropogenic contribution – are the modelled averages. ')
+    else:     
+        tex=tex.replace('**seasonal**', 'Icos_cp_Logo_RGB')
+        tex=tex.replace('**no_seasonal**', 'no seasonal table: footprints not available for the whole year. ')
+        
     tex=tex.replace('**landcover_windrose**', os.path.join(output, stc.figures['6'][2]))
     tex=tex.replace('**multivar**', os.path.join(output, stc.figures['7'][2]))
     
