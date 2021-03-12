@@ -168,11 +168,11 @@ class StationChar():
         df_w_degrees=pd.read_csv(stcDataPath + "approved_stations_degrees.csv") 
     
         #if not saved distances to all 192000 cells, calculate it. 
-        try:
-            self.distances=df_w_distances[self.stationId[0:3]]
-            self.degrees=df_w_degrees[self.stationId[0:3]]
+        if self.stationId in df_w_degrees.keys().tolist():
+            self.distances=df_w_distances[self.stationId]
+            self.degrees=df_w_degrees[self.stationId]
         
-        except:
+        else:
             self.distances=stc_functions.distances_from_point_to_grid_cells(self.lat, self.lon, self.fpLat, self.fpLon)
 
             self.degrees=stc_functions.degrees_from_point_to_grid_cells(self.lat, self.lon, self.fpLat, self.fpLon)

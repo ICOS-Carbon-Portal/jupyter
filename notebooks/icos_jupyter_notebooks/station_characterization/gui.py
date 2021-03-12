@@ -55,6 +55,7 @@ def get_settings():
         s['unit'] = unit_value.value
         s['labelPolar'] = landcover_windrose_label.value
         s['saveFigs'] = save_figs.value
+        s['figFormat'] = fig_format.value
         
     except:
         return    
@@ -75,6 +76,7 @@ def set_settings(s):
     unit_value.value = s['unit']
     landcover_windrose_label.value = s['labelPolar']
     save_figs.value = s['saveFigs']
+    fig_format.value = s['figFormat']
 
 
 # observer functions
@@ -121,8 +123,7 @@ def change_yr(c):
     month = [int(x) for x in month]
     s_month.options= month
     
-    e_month.options = month
-    
+    e_month.options = month    
 
 def change_mt(c):
     
@@ -318,7 +319,7 @@ def update_func(button_c):
         header_advanced.clear_output()
         display(HTML('<h2>Advanced figures</h2><br>\
             Please read the <a href="specifications.pdf" target="_blank">\
-                specification.pdf</a> to interpret the following figures.'))
+                specifications document</a> before attempting to interpret the following figures.'))
 
     updateProgress(f, 'landcover windrose')
     with result_landcover_windrose:
@@ -338,8 +339,9 @@ def update_func(button_c):
         display(fig)
         
     if stc.settings['saveFigs'] == 'yes':
-        updateProgress(f, 'saving')        
-        stc_functions.save(stc)
+        updateProgress(f, 'saving')   
+        fmt=fig_format.value
+        stc_functions.save(stc, fmt)
     
     # make sure the progress bar is filled..
     updateProgress(f, 'finished')
@@ -461,6 +463,13 @@ save_figs=RadioButtons(
         description= 'Save the output:',
         disabled=False)
 
+fig_format=RadioButtons(
+        options=['pdf', 'png'],
+        style=style_bin,
+        value='pdf',
+        description= 'Format figures:',
+        disabled=False)
+
 
 #Create a Button widget to control execution:
 update_button = Button(description='Run selection',
@@ -521,7 +530,7 @@ bin_box_1 = HBox([bin_size, interval])
 h_box_1 = HBox([header_unit, header_style])
 v_box_1 = VBox([header_unit, unit_value])
 v_box_2 = VBox([header_style, landcover_windrose_label])
-v_box_3 = VBox([header_save_figs, save_figs])
+v_box_3 = VBox([header_save_figs, save_figs, fig_format])
 bin_box_2 = HBox([v_box_1, v_box_2, v_box_3])
 
 #Add all widgets to a VBox:

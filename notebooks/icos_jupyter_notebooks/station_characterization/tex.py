@@ -44,7 +44,7 @@ def _template_specifications(standalone=False):
         
         tex_settings="""
 
-                To re-generate this PDF in the interactive Notebook, use the following settings. Copy and save the information as a JSON-file and use the optional setting "Load settings from file".
+                To re-generate this PDF in the interactive Notebook, use the following settings. Copy and save the information as a JSON-file and use the option to "Load settings from file".
 
              \\begin{verbatim}
                {
@@ -170,10 +170,11 @@ Station characterization based on STILT model footprints, an anthropogenic emiss
 
         \\pagebreak\n
         
-        \\begin{figure}[!h]
-        \\centering
-        \\includegraphics[width=1\\textwidth]{**seasonal**}
-        \\end{figure}
+        **seasonal**
+        %\\begin{figure}[!h]
+        %\\centering
+        %\\includegraphics[width=1\\textwidth]{**seasonal**}
+        %\\end{figure}
         
         %text in margin
         \\begin{textblock}{70}(115,280)
@@ -181,7 +182,7 @@ Station characterization based on STILT model footprints, an anthropogenic emiss
         \\end{textblock}
         
         \\begin{flushleft}
-        \\begin{small}**no_seasonal**
+        \\begin{small}**seasonal_text**
         \\end{small}
         \\end{flushleft}
         
@@ -253,13 +254,18 @@ def generate_pdf_tex(stc):
     tex=tex.replace('**population**', os.path.join(output, stc.figures['3'][2]))
     tex=tex.replace('**landcover_bar**', os.path.join(output, stc.figures['4'][2]))
     
-    string_seasonal='./' + os.path.join(output, stc.figures['5'][2]) + '.pdf'
+    string_seasonal='./' + os.path.join(output, stc.figures['5'][2]) 
+    
     if os.path.isfile(string_seasonal):
-        tex=tex.replace('**seasonal**', os.path.join(output, stc.figures['5'][2]))
-        tex=tex.replace('**no_seasonal**', 'The first three variables in the \\textbf{seasonal variations table} are the results of summarizing average footprints from December **dec_year** to December **year** for sensitivity, population and point source. These values are found in the ``Annual'' column. Average footprints for the different parts of the year have in turn been computed, multiplied by the ancillary datalayers, and calculate relative (\\%) to the average for the whole year. The remaining three variables – gross ecosystem exchange (GEE), respiration and anthropogenic contribution – are the modelled averages. ')
+        #tex=tex.replace('**seasonal**', os.path.join(output, stc.figures['5'][2]))
+        tex=tex.replace('**seasonal**', '\\begin{figure}[!h]\\centering\\includegraphics[width=1\\textwidth]{**seasonal_fig**}\\end{figure}')
+        tex=tex.replace('**seasonal_fig**', os.path.join(output, stc.figures['5'][2]))
+                        
+        tex=tex.replace('**seasonal_text**', 'The first three variables in the \\textbf{seasonal variations table} are the results of summarizing average footprints from December **dec_year** to December **year** for sensitivity, population and point source. These values are found in the ``Annual'' column. Average footprints for the different parts of the year have in turn been computed, multiplied by the ancillary datalayers, and calculate relative (\\%) to the average for the whole year. The remaining three variables – gross ecosystem exchange (GEE), respiration and anthropogenic contribution – are the modelled averages. ')
+    
     else:     
-        tex=tex.replace('**seasonal**', 'Icos_cp_Logo_RGB')
-        tex=tex.replace('**no_seasonal**', 'no seasonal table: footprints not available for the whole year. ')
+        tex=tex.replace('**seasonal**', '')
+        tex=tex.replace('**seasonal_text**', '\\textbf{No seasonal table}: footprints from December **dec_year** to December **year** are not avaialble for **name** (**station_code**). Use the \\href{https://stilt.icos-cp.eu/worker/}{STILT on demand calculator} to create the remaining footprints.')
         
     tex=tex.replace('**landcover_windrose**', os.path.join(output, stc.figures['6'][2]))
     tex=tex.replace('**multivar**', os.path.join(output, stc.figures['7'][2]))
@@ -269,6 +275,8 @@ def generate_pdf_tex(stc):
     tex=tex.replace('**quartile_pointsource**', stc.settings['Point source'])
     
     tex=tex.replace('**country**', stc.country)
+    
+    tex=tex.replace('**station_code**', stc.settings['stationCode'])
     
     tex=tex.replace('**year**', str(stc.settings['startYear']))
     tex=tex.replace('**dec_year**', str(int(stc.settings['startYear'])-1))
