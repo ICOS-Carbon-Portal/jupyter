@@ -250,7 +250,7 @@ def update_func(button_c):
             station_site_type=stc.siteType
 
             display(HTML('<p style="font-size:35px;font-weight:bold;"><br>' + station_name +  \
-                     ' station characterization</p><p style="font-size:18px;"><br>'+ station_name + ' (' + station_code +\
+                     ' station characterisation</p><p style="font-size:18px;"><br>'+ station_name + ' (' + station_code +\
                          ') is a class ' + str(station_class) + ' ICOS atmospheric station of the type ' + station_site_type.lower() + \
                          ' located in ' + station_country + ' (latitude: ' + str("%.2f" % station_lat) +\
                          degree_sign + 'N, ' + 'longitude: ' + str("%.2f" % station_lon) +\
@@ -259,7 +259,7 @@ def update_func(button_c):
         else:
 
             display(HTML('<p style="font-size:35px;font-weight:bold;"><br>' + station_name + \
-                     ' station characterization</p><p style="font-size:16px;">' + station_name + ' (' + station_code +\
+                     ' station characterisation</p><p style="font-size:16px;">' + station_name + ' (' + station_code +\
                          ') is located in ' + station_country + ' (latitude: ' + str("%.2f" % station_lat) +\
                          degree_sign + 'N, ' + 'longitude: ' + str("%.2f" % station_lon) + degree_sign + 'E).<br></p>'))
 

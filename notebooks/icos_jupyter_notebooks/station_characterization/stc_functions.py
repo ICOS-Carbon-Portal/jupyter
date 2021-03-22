@@ -992,10 +992,10 @@ def seasonal_table(myStation):
     df_seasonal_table = pd.DataFrame(columns=['Variable', year_var, 'Dec-Feb', 'Mar-May', 'Jun-Aug','Sep-Nov', 'Unit'], index=['Sensitivity', 'Population','Point source', 'GEE', 'Respiration', 'Anthropogenic'])
 
     df_seasonal_table.loc['Sensitivity'] = pd.Series({'Variable': 'Sensitivity', year_var:("%.2f" % sens_whole), 'Dec-Feb':("%+.2f" % sens_diff_winter+ '%'), 'Mar-May':("%+.2f" % sens_diff_spring+ '%'), 
-                                                          'Jun-Aug':("%+.2f" % sens_diff_summer + '%'), 'Sep-Nov':("%+.2f" % sens_diff_fall+ '%'), 'Unit': 'ppm / ($\mu$mol / m$^{2}$s)'})
+                                                          'Jun-Aug':("%+.2f" % sens_diff_summer + '%'), 'Sep-Nov':("%+.2f" % sens_diff_fall+ '%'), 'Unit': 'ppm / ($\mu$mol / (m$^{2}$s))'})
 
     df_seasonal_table.loc['Population'] = pd.Series({'Variable': 'Population', year_var:("%.0f" % pop_whole), 'Dec-Feb':("%+.2f" % pop_diff_winter+ '%'), 'Mar-May':("%+.2f" % pop_diff_spring+ '%'), 
-                                                          'Jun-Aug':("%+.2f" % pop_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % pop_diff_fall+ '%'), 'Unit': 'pop*(ppm / ($\mu$mol / m$^{2}$s))'})
+                                                          'Jun-Aug':("%+.2f" % pop_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % pop_diff_fall+ '%'), 'Unit': 'pop*(ppm / ($\mu$mol / (m$^{2}$s)))'})
 
 
     df_seasonal_table.loc['Point source'] = pd.Series({'Variable': 'Point source', year_var:("%.2f" % point_whole), 'Dec-Feb':("%+.2f" % point_diff_winter+ '%'), 'Mar-May':("%+.2f" % point_diff_spring+ '%'), 
