@@ -143,7 +143,7 @@ The station characterisation is based on STILT model footprints, an anthropogeni
         \\hspace{-0.35cm}%
         \\captionsetup{labelformat=empty}
         
-        \\parbox{7.9cm}{\\caption{\\begin{small}\\textbf{Model height:} **model_height**\\\\
+        \\parbox{7.9cm}{\\caption{\\begin{small}\\\\\\\\\\textbf{Model height:} **model_height**\\\\
         \\textbf{Date range:} **date_range**\\\\
         \\textbf{Hour(s):} **hours**\\\\
         The map bins are **degrees** degrees at **increment** km increments.\\\\\\\\
@@ -262,7 +262,7 @@ def generate_pdf_tex(stc):
     
     if os.path.isfile(string_seasonal):
         tex=tex.replace('**seasonal**', ('\\includegraphics[width=1\\textwidth]{' + os.path.join(output, stc.figures['5'][2]) + '}'))
-        tex=tex.replace('**seasonal_text**', 'The \\textbf{seasonal variations table} summarizes the results for the year **year** (Dec **dec_year** - Dec **year**) and lists for each season the relative difference compared to the annual average. Gross ecosystem exchange (GEE), respiration and anthropogenic emission contributions to the {\ensuremath{\mathrm{CO_2}}} concentration are calculated online in the STILT model (see detailed specifications at the end of this document).')
+        tex=tex.replace('**seasonal_text**', 'The \\textbf{seasonal variations table} summarizes the results for the year **year** (Dec **dec_year** - Dec **year**) and lists for each season the relative difference compared to the annual average. Gross ecosystem exchange (GEE), respiration and anthropogenic emission contributions to the {\ensuremath{\mathrm{CO_2}}} concentration are calculated online in the STILT model (see detailed specifications at the end of this document). A positive GEE value means that there is more {\\ensuremath{\\mathrm{CO_2}}} uptake from the vegitation compared to the average uptake from plants over the whole year, which is generally true for the growing seasons.')
      
     else:     
         tex=tex.replace('**seasonal**', '%\\includegraphics[width=1\\textwidth]{no table- this line will not run}')
@@ -294,10 +294,10 @@ def generate_pdf_tex(stc):
     tex=tex.replace('**date_range**', date_string)
     tex=tex.replace('**hours**', hours_string)
     
-    tex=tex.replace('**model_height**', (str(stc.settings['stilt']['alt']) + 'm **mountain_message**'))
+    tex=tex.replace('**model_height**', (str(stc.settings['stilt']['alt']) + 'm above ground **mountain_message**'))
     
     if stc.settings['stilt']['icos']:
-        if stc.settings['icos']['siteType']=='mountain':
+        if stc.settings['icos']['siteType']=='mountain' or stc.settings['icos']['siteType']=='Mountain':
             tex=tex.replace('**mountain_message**', '(might be different from station intake height since mountain station, see \\href{https://www.icos-cp.eu/about-stilt-calculator}{link})')
         else:
             tex=tex.replace('**mountain_message**', '')
