@@ -321,10 +321,12 @@ def import_point_source_data():
     return fp_point_source_m2_s
 
 def date_and_time_string_for_title(date_range, timeselect_list):
+    
     date_index_number=len(date_range) - 1
     
     timeselect_string=[str(value) for value in timeselect_list]
-    timeselect_string=' '.join(timeselect_string)
+    timeselect_string =':00, '.join(timeselect_string) + ':00'
+
     date_and_time_string=('\n' + str(date_range[0].year) + '-' + str(date_range[0].month) + '-' + str(date_range[0].day)\
                 + ' to ' + str(date_range[date_index_number].year) + '-' + str(date_range[date_index_number].month) + '-' \
                 + str(date_range[date_index_number].day)+ ', Hour(s): ' + timeselect_string+ '\n')
@@ -813,7 +815,7 @@ def render_mpl_seasonal_table(myStation, data, station, col_width=2, row_height=
         fig, ax = plt.subplots(figsize=size)
         ax.axis('off')
 
-    mpl_table = ax.table(cellText=data.values, bbox=bbox, colLabels=data.columns, colWidths=[3,2,2,2,2,2,4])
+    mpl_table = ax.table(cellText=data.values, cellLoc='center', bbox=bbox, colLabels=data.columns, colWidths=[3,3.5,1.75,1.75,1.75,1.75,3.5])
 
     mpl_table.auto_set_font_size(True)
     mpl_table.set_fontsize(font_size)
@@ -988,7 +990,7 @@ def seasonal_table(myStation):
             caption = 'No seasonal table, footprints are not available for the whole year'
             return seasonal_table, caption 
     #here have values either from loaded file or calculated
-    year_var='Whole year'
+    year_var='Dec (' + str(year-1) + ') - ' + 'Nov (' + str(year) + ')'
     df_seasonal_table = pd.DataFrame(columns=['Variable', year_var, 'Dec-Feb', 'Mar-May', 'Jun-Aug','Sep-Nov', 'Unit'], index=['Sensitivity', 'Population','Point source', 'GEE', 'Respiration', 'Anthropogenic'])
 
     df_seasonal_table.loc['Sensitivity'] = pd.Series({'Variable': 'Sensitivity', year_var:("%.2f" % sens_whole), 'Dec-Feb':("%+.2f" % sens_diff_winter+ '%'), 'Mar-May':("%+.2f" % sens_diff_spring+ '%'), 
@@ -1012,7 +1014,7 @@ def seasonal_table(myStation):
     df_seasonal_table.loc['Anthropogenic'] = pd.Series({'Variable': 'Anthropogenic', year_var:("%.2f" % anthro_whole), 'Dec-Feb':("%+.2f" % anthro_diff_winter+ '%'), 'Mar-May':("%+.2f" % anthro_diff_spring+ '%'), 
                                                           'Jun-Aug':("%+.2f" % anthro_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % anthro_diff_fall+ '%'), 'Unit': 'ppm'})
 
-    caption = 'Seasonal variation December ' + str(year_before) + ' to December ' + str(year)
+    caption = 'Seasonal variation December ' + str(year_before) + ' - November ' + str(year)
 
     seasonal_table=render_mpl_seasonal_table(myStation, df_seasonal_table, station, header_columns=0, col_width=2.5)
 

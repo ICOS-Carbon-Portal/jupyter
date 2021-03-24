@@ -193,10 +193,16 @@ def change_month_end(c):
 def update_func_file(button_c):
 
     uploaded_file = file_name.value
-    settings_file=uploaded_file[list(uploaded_file.keys())[0]]['content']
-    settings_json = settings_file.decode('utf8').replace("'", '"')
-    settings_dict = json.loads(settings_json)
-    set_settings(settings_dict)
+    
+    #check if there is content in the dictionary (uploaded file)
+    if bool(uploaded_file):
+        settings_file=uploaded_file[list(uploaded_file.keys())[0]]['content']
+        settings_json = settings_file.decode('utf8').replace("'", '"')
+        settings_dict = json.loads(settings_json)
+        set_settings(settings_dict)
+    else:
+        print('Upload file before pushing the "Load settings" button.')
+    
             
 def updateProgress(f, desc=''):
     # custom progressbar updates
@@ -248,13 +254,21 @@ def update_func(button_c):
         if 'icos' in stc.settings:
             station_class=stc.stationClass
             station_site_type=stc.siteType
+            model_height=stc.settings['stilt']['alt']
+            
+            ##
+            if stc.settings['icos']['siteType']=='mountain' or stc.settings['icos']['siteType']=='Mountain':
+                mountain_string = ' (might be different from station intake height since mountain station.'
+            else:
+                mountain_string = '.'
+            
 
             display(HTML('<p style="font-size:35px;font-weight:bold;"><br>' + station_name +  \
                      ' station characterisation</p><p style="font-size:18px;"><br>'+ station_name + ' (' + station_code +\
                          ') is a class ' + str(station_class) + ' ICOS atmospheric station of the type ' + station_site_type.lower() + \
                          ' located in ' + station_country + ' (latitude: ' + str("%.2f" % station_lat) +\
                          degree_sign + 'N, ' + 'longitude: ' + str("%.2f" % station_lon) +\
-                         degree_sign + 'E).<br></p>'))
+                         degree_sign + 'E). The model height is ' + str(model_height)+ ' meters above ground' + mountain_string + '<br></p>'))
 
         else:
 
