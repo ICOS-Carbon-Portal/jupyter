@@ -34,7 +34,7 @@ import datetime as dt
 import pandas as pd
 import stc_functions
 
-stcDataPath='./stc_data/'
+stcDataPath='/data/project/stc/'
 
 #need settings in an object.
 #second class? BinLabels.. object available within station
@@ -84,6 +84,10 @@ class StationChar():
         self.dirBins = None             # numpy array with the direction bins for the maps
         self.dirLabels = None           # list with the direction labels for the maps
         
+        self.figures = {}               # dictionary to store figures and captions
+                                        # use figures['1'] = [fig, caption] to get figure 1....
+                                        # to add, see function add_figure() 
+                                        
         # fucntions to generate the object attributes
         self._setStationData()
         self._setDateRange()
@@ -122,8 +126,9 @@ class StationChar():
             # API to reterive country name using reverse geocoding of station lat/lon
             self.lat=self.settings['stilt']['lat'] 
             self.lon=self.settings['stilt']['lon']
+
             
-            url='https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + str(self.lon) + '&longitude=' + str(self.lat) + '12&localityLanguage=en'
+            url='https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + str(self.lat) + '&longitude=' + str(self.lon) + '12&localityLanguage=en'
             resp = requests.get(url=url)
             country_information=resp.json()
             self.country=country_information['countryName']
@@ -158,30 +163,20 @@ class StationChar():
         calculated values are also appended to the csv-files. 
         """
       
+        #saved distances and degrees for ICOS stations:
         df_w_distances=pd.read_csv(stcDataPath+ "approved_stations_distances.csv")
-        df_w_degrees=pd.read_csv(stcDataPath + "approved_stations_degrees.csv")
-    
-        
-        #same as degrees
-        list_distance_columns=df_w_distances.columns.tolist()
-
-        station_reduced = self.stationId[0:3]
-        matched_station = [idx for idx in list_distance_columns if idx[0:3] == station_reduced]    
+        df_w_degrees=pd.read_csv(stcDataPath + "approved_stations_degrees.csv") 
     
         #if not saved distances to all 192000 cells, calculate it. 
-        if matched_station:
-            self.distances=df_w_distances[matched_station[0]]
-            self.degrees=df_w_degrees[matched_station[0]]
+        if self.stationId in df_w_degrees.keys().tolist():
+            self.distances=df_w_distances[self.stationId]
+            self.degrees=df_w_degrees[self.stationId]
         
         else:
             self.distances=stc_functions.distances_from_point_to_grid_cells(self.lat, self.lon, self.fpLat, self.fpLon)
-            df_w_distances[station]=self.distances
-            df_w_distances.to_csv(stcDataPath + "approved_stations_distances.csv")
-            
+
             self.degrees=stc_functions.degrees_from_point_to_grid_cells(self.lat, self.lon, self.fpLat, self.fpLon)
-            df_w_degrees[station]=self.degrees
-            df_w_degrees.to_csv(stcDataPath + "approved_stations_degrees.csv")
-            
+
     #or other class... but belongs to object station characterization as much as distances and degrees to footprint?   
     #can now remove "define_bins_landcover_polar_graph"
     def _setBinsAndLabels(self):
@@ -194,6 +189,37 @@ class StationChar():
         km_intervals = self.settings['binInterval']
         bin_size = self.settings['binSize']
         self.intervalBins, self.intervalLabels, self.dirBins, self.dirLabels = stc_functions.define_bins_maprose(km_intervals, bin_size)
+        
+    def add_figure(self, key, figure, caption):
+        """
+        add figures in the dictionary self.figures. To retrieve the figures
+        you can use object.figure        
+
+        Parameters
+        ----------
+        key : INT|STR :     figure number (1 = sensitivity, 2 = pointsource
+                            3 = population, 4 = landcover_rose, 5 = multiple_variables
+                            6 = seasonal, 7 = landcover_bar
+
+        figure : OBjECT :   Matplotlib figure or smilar, needs to have a function
+                            Object.show() and object.savefig('filename')            
+        caption : STR :     String to be used as a caption text for example when
+                            creating a pdf output
+        Returns: None.
+        
+        """
+        
+        # humean readable key to value assignment
+        short = {'1': 'sensitivity',
+                 '2': 'pointsource',
+                 '3': 'population',
+                 '4': 'landcover_bar',
+                 '5': 'seasonal',
+                 '6': 'landcover_windrose',                 
+                 '7': 'multivar'}
+               
+        self.figures[str(key)]=[figure, caption, short[str(key)]]
+        
     
 if __name__ == "__main__":
     """
