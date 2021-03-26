@@ -90,6 +90,17 @@ th, td {
       id="password_input"
       tabindex="2"
     />
+    <br>
+    <input    
+      type="checkbox"      
+      name="licence"
+      id="licence_check"
+      onchange="document.getElementById('login_submit').disabled = !this.checked;"
+      tabindex="3"
+    />
+    <label for='licence'>
+    &nbsp I accept that ICOS data is under a<br><a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">&nbsp CC BY 4.0 licence</a> &nbsp <img src="https://www.icos-cp.eu/sites/default/files/inline-images/creativecommons.png">
+    </label>  
 
     <div class="feedback-container">
       <input
@@ -97,7 +108,8 @@ th, td {
         type="submit"
         class='btn btn-jupyter'
         value='Sign In'
-        tabindex="3"
+        tabindex="4"
+        disabled='true'
         />
       <div class="feedback-widget hidden">
         <i class="fa fa-spinner"></i>
