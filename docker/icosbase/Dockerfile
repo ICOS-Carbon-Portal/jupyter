@@ -79,3 +79,18 @@ RUN rmdir work
 # This package, and the following notebook directories, are the stuff that
 # changes most often, so we add them last.
 RUN pip install icoscp --no-cache-dir
+
+
+# -----start temp fix---2021-03-26 CD-------------------
+
+# temporary fixes to the icos base image
+# current version of jupyter/datascience-notebook
+# has updated version of pandas which needs openpyxl to read excel files
+RUN mamba install -qy openpyxl
+
+# gdal 3.2.1 can't be loaded.. downgrade to last version we 
+# know is working
+
+RUN mamba install -qy gdal=3.1.4
+
+# -----eof temp fix------------------------------------
