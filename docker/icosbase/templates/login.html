@@ -49,14 +49,14 @@ th, td {
 </div>
 <br>
 <table>
-	<tr><td width= '30%'>
+	<tr><td colspan="3">
 
 {% block login %}
 
 <div >
 <form action="{{login_url}}?next={{next}}" method="post" role="form">
   <div class='info-txt'>
-    <p><h2>Sign in to Exploredata</h2></p>
+    <h2>Sign in to Exploredata</h2>
   </div>
   <div class='auth-form-body'>
 
@@ -64,7 +64,8 @@ th, td {
     Warning: JupyterHub seems to be served over an unsecured HTTP connection.
     We strongly recommend enabling HTTPS for JupyterHub.
     </p>
-
+    </td></tr>
+    <tr><td width= '40%'>
     {% if login_error %}
     <p class="login_error">
       {{login_error}}
@@ -90,7 +91,8 @@ th, td {
       id="password_input"
       tabindex="2"
     />
-    <br>
+    </td></tr>
+    <tr><td>
     <input    
       type="checkbox"      
       name="licence"
@@ -101,7 +103,7 @@ th, td {
     <label for='licence'>
     &nbsp I accept that ICOS data is under a<br><a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">&nbsp CC BY 4.0 licence</a> &nbsp <img src="https://www.icos-cp.eu/sites/default/files/inline-images/creativecommons.png">
     </label>  
-
+    </td><td>
     <div class="feedback-container">
       <input
         id="login_submit"
@@ -125,7 +127,7 @@ th, td {
 	<td width =200>&nbsp</td>
 	</tr>
 	<tr>
-	<td colspan="2">
+	<td colspan="3">
 		<div class='info-txt'>
 			<p>This is a service from the ICOS Carbon Portal to showcase how Python Notebooks with Jupyter can be used to access the ICOS data products. Once you login, you will find the following structure with examples to play with:</p>
 			<ul>
@@ -139,7 +141,7 @@ th, td {
 			</ul>
 			</div>
 	</td></tr>
-	<tr ><td colspan="2">
+	<tr ><td colspan="3">
 			<div class='info-txt'>
 			<p>Please be aware, that this service is <b>restricted</b>. We allow only a limited amount of users to login and <b>data is not persistent</b>. After inactivity you will be logged out automatically. If you want to save a file you have created/changed, you need to download the file to your computer.</p>
 
