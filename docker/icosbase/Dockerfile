@@ -78,7 +78,7 @@ RUN rmdir work
 
 # This package, and the following notebook directories, are the stuff that
 # changes most often, so we add them last.
-RUN pip install icoscp --no-cache-dir
+RUN pip install icoscp --no-cache-dir --upgrade
 
 
 # -----start temp fix---2021-03-26 CD-------------------
