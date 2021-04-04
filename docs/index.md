@@ -30,4 +30,4 @@ An IPython Notebook is an open-source web application that allows users to creat
 <br>
 
 ## Access to notebooks and documentation
-All openly available ICOS notebooks and supporting documentation can be found in the ICOS Carbon Portal Jupyter repository on GitHub [https://github.com/ICOS-Carbon-Portal/jupyter](https://github.com/ICOS-Carbon-Portal/jupyter).
+All openly available ICOS notebooks and supporting documentation can be found in the ICOS Carbon Portal Jupyter repository on [GitHub](https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks).
