@@ -10,7 +10,9 @@ The docker image, and the user permissions (including access to project folders)
 <img style="float: right; padding: 5px" src="../img/git.png" width="200" align="right"/></a>
 Absolutely. After login to the jupyter hub, we recommend you create a new folder, for example 'github'. Then you can open a new terminal (top right, in the dropdown 'new' select terminal). This brings up a terminal window in your home directory. Change directory into github 'cd github' and clone your desired github repository. For example to have a look at the source code for the icoscp python library, you can do: `git clone https://github.com/ICOS-Carbon-Portal/pylib.git`. Inside the pylib folder you can use the usual git commands ([https://git-scm.com/docs/gittutorial](https://git-scm.com/docs/gittutorial)).
 
-## x-axis with DateTime from Matplotlib is 'wrong'
+## x-axis with DateTime from Matplotlib is 'wrong' [RESOLVED] 
+
+Update 2021-04-02. We have changed the default behaviour of our jupyter hub to run in UTC. The bug mentioned below does exist only if Timezone is different from UTC. But please be aware, the bug of matplotlib is not resolved. If you run your local instance of jupyter hub, you still might get wrong xticks. [<a href="../files/mpl_bug_timezone.ipynb">notebook</a> | <a href="../files/mpl_bug_timezone_CEST.pdf">result CEST</a> | <a href="../files/mpl_bug_timezone_UTC.pdf">result UTC</a> ]
 
 <a href="../img/xaxis_man.png" target=_blank>
 <img style="float: right; padding: 5px" src="../img/xaxis_man.png" width="200" align="right"/>
