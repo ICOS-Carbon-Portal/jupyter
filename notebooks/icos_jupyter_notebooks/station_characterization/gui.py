@@ -76,7 +76,10 @@ def set_settings(s):
     unit_value.value = s['unit']
     landcover_windrose_label.value = s['labelPolar']
     save_figs.value = s['saveFigs']
-    fig_format.value = s['figFormat']
+    try:
+        fig_format.value = s['figFormat']
+    except:
+        fig_format.value = 'pdf'
 
 
 # observer functions
@@ -186,12 +189,10 @@ def change_month_end(c):
 
         else:
             e_day.options=list(range(1,29))
-
+ 
+        
+def file_set_widgets(c):
     
-#----------- start processing -----------------
-
-def update_func_file(button_c):
-
     uploaded_file = file_name.value
     
     #check if there is content in the dictionary (uploaded file)
@@ -200,10 +201,9 @@ def update_func_file(button_c):
         settings_json = settings_file.decode('utf8').replace("'", '"')
         settings_dict = json.loads(settings_json)
         set_settings(settings_dict)
-    else:
-        print('Upload file before pushing the "Load settings" button.')
     
-            
+#----------- start processing -----------------
+     
 def updateProgress(f, desc=''):
     # custom progressbar updates
     f.value += 1
@@ -216,7 +216,6 @@ def update_func(button_c):
     # Define update function
     # This starts the process of creating the graphs
     # and, depending on the parameters, saving figures and pdf
-    
     with progress_bar:
         f = IntProgress(min=0, max=10, style=style_bin)
         display(f)
@@ -233,8 +232,7 @@ def update_func(button_c):
             os.makedirs('output')
 
         os.mkdir(stc.settings['output_folder'])
-
-    
+        
     with header_output:
         header_output.clear_output()
         degree_sign=u'\N{DEGREE SIGN}'
@@ -278,7 +276,6 @@ def update_func(button_c):
                          degree_sign + 'N, ' + 'longitude: ' + str("%.2f" % station_lon) + degree_sign + 'E).<br></p>'))
 
         #added information that is redundant in the titles
-
         display(HTML('<p style="font-size:18px;">Date range: ' + date_and_time_string + '<br></p>'))
         display(HTML('<p style="font-size:18px;">The map bins are ' + str(maps_bin_size) + ' degrees at ' +\
                      str(maps_bin_interval) + ' km increments</p>'))
@@ -377,20 +374,6 @@ file_name= FileUpload(
     multiple=False  # True to accept multiple files upload else False
 )
 
-update_button_file = Button(description='Load settings',
-                       disabled=False,
-                       button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
-                       tooltip='Click me',)
-
-update_button_file.layout.margin = '0px 0px 0px 20px' #top, right, bottom, left
-
-update_button_file.style.button_color='orange'
-
-
-#Create a Dropdown widget with station names:
-#maybe let it be coded (ex GAT344), but shown options 
-
-#added
 station_type=RadioButtons(
         options=['ICOS stations', 'STILT stations'],
         value='ICOS stations',
@@ -398,7 +381,6 @@ station_type=RadioButtons(
         disabled=False)
 
 
-#prev: station_name_code_for_dropdown
 station_choice = Dropdown(options = icoslist,
                    description = 'Station',
                    value=None,
@@ -468,7 +450,6 @@ landcover_windrose_label =RadioButtons(
         description='Labels to the land cover polar graph:',
         style=style_bin,
         disabled=False)
-
 
 save_figs=RadioButtons(
         options=['yes', 'no'],
@@ -547,16 +528,10 @@ v_box_2 = VBox([header_style, landcover_windrose_label])
 v_box_3 = VBox([header_save_figs, save_figs, fig_format])
 bin_box_2 = HBox([v_box_1, v_box_2, v_box_3])
 
-#Add all widgets to a VBox:
-#form = VBox([station_box, time_box, time_selection, header_bin_specifications, bin_box_1,bin_box_2])
-
 #Set font of all widgets in the form:
 station_choice.layout.width = '603px'
 time_box.layout.margin = '25px 0px 10px 0px'
 year_box.layout.margin = '0px 0px 0px 0px'
-
-
-#selection_menu = Output()
 
 #Initialize form output:
 form_out = Output()
@@ -586,9 +561,11 @@ def observe():
     e_year.observe(change_yr_end, 'value')
     e_month.observe(change_month_end, 'value')
     
+    file_name.observe(file_set_widgets, 'value')
+    
     #Call update-function when button is clicked:
     #added
-    update_button_file.on_click(update_func_file)
+    #update_button_file.on_click(update_func_file)
     update_button.on_click(update_func)
 
 def unobserve():    
@@ -621,7 +598,7 @@ with form_out:
     grid_2[0:1, 0:2] = result_landcover_windrose
     grid_2[0:1, 2:4] = result_multiple_variables_graph
     
-    update_buttons = HBox([file_name, update_button_file, update_button])
+    update_buttons = HBox([file_name, update_button])
     selection_menu = VBox([station_box, time_box, time_selection, header_bin_specifications, bin_box_1,bin_box_2, header_filename, update_buttons])
 
     display(selection_menu, progress_bar, h_box_1, grid, h_box_2, h_box_3, grid_2)
