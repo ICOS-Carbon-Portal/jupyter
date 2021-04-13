@@ -1,5 +1,11 @@
 # FAQ
 
+## Do I have the latest version of .... ?
+<a href="../img/launch.png" target=_blank>
+<img style="float: right; padding: 5px" src="../img/launch.png" width="200" align="right"/></a>
+We update regularly our libraries and notebooks. To reflect these changes, you need to restart your server. Top right (after login to the Jupyter Hub), click on control panel and click on 'Stop my Server'. Then click on 'Start My Server' and 'Launch Server' until you see a dropdown list (see image). Select python3 and start.<br>
+We recommend you do this regularly.
+
 ## I am a member of 'project XYZ', but I don't see the project folder.
 <a href="../img/launch.png" target=_blank>
 <img style="float: right; padding: 5px" src="../img/launch.png" width="200" align="right"/></a>
