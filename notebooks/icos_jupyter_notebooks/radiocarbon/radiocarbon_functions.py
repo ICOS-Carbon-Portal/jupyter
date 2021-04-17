@@ -333,7 +333,7 @@ def plotmap(stations, selected_facility, basemap, d_icon='cloud', icon_col='blue
     tooltip = 'Click to view station info'
 
     #keep in here since using items passed to the plotmap() function.
-    def add_marker(map_obj, marker_txt, marker_color, lat_station, lon_station):
+    def add_marker(map_obj, marker_txt, marker_color, lat_station, lon_station, name_station):
 
         #Add popup text:
         popup=folium.Popup(marker_txt,
@@ -341,26 +341,31 @@ def plotmap(stations, selected_facility, basemap, d_icon='cloud', icon_col='blue
                            max_width=400)
 
         #Create marker and add it to the map:
+        
         folium.Marker(location=[lat_station,
                                 lon_station],
                       popup=popup,
-                      icon=folium.Icon(color='blue', icon=d_icon),
-                      tooltip=tooltip).add_to(map_obj)
+                      icon=folium.CustomIcon('marker_stations.png', icon_size=(16,25)),
+                      tooltip=(name_station + ': station information')).add_to(map_obj)
         
-    def add_marker_radiocarbon(map_obj, latitude, longitude, emission, marker_txt, marker_color):
+    def add_marker_radiocarbon(map_obj, latitude, longitude, emission, marker_txt, name_facility, big_icon=False):
         
         popup=folium.Popup(marker_txt,
                        parse_html=True,
                        max_width=400)
 
 
+        if big_icon:
+            icon_size = (33,40)
+                
+        else:
+            icon_size = (16.6,20)
         #Create marker and add it to the map:
         folium.Marker(location=[float(latitude),
                                 float(longitude)],
-                      #popup=folium.Popup(str(emission)),
                       popup=popup,
-                      icon=folium.Icon(color=marker_color, icon='circle'),
-                      tooltip='Click here to see emission').add_to(map_obj)
+                      icon=folium.CustomIcon('marker_nuclear_facilities.png', icon_size=icon_size),
+                      tooltip=(name_facility + ': click to see emissions')).add_to(map_obj)
 
 
     #Create markers for all stations except selected station:
@@ -373,7 +378,7 @@ def plotmap(stations, selected_facility, basemap, d_icon='cloud', icon_col='blue
         
     
         #Add marker for current station to map:
-        add_marker(m, iframe, icon_col, lat_station=float(st[1][4]), lon_station=float(st[1][5]))
+        add_marker(m, iframe, icon_col, lat_station=float(st[1][4]), lon_station=float(st[1][5]), name_station=st[1][2])
             
     for dictionary_item in dictionary_radiocarbon_emissions:
         
@@ -387,12 +392,14 @@ def plotmap(stations, selected_facility, basemap, d_icon='cloud', icon_col='blue
         
         emissions=dictionary_radiocarbon_emissions[dictionary_item]['2018']
         
-        if dictionary_radiocarbon_emissions[dictionary_item]['name'] == selected_facility:
+        name_facility=dictionary_radiocarbon_emissions[dictionary_item]['name']
         
-            add_marker_radiocarbon(m, latitude, longitude, emissions, iframe, 'darkred')
+        if name_facility == selected_facility:
+        
+            add_marker_radiocarbon(m, latitude, longitude, emissions, iframe, name_facility, big_icon=True)
         else:
             
-            add_marker_radiocarbon(m, latitude, longitude, emissions, iframe, 'lightred')
+            add_marker_radiocarbon(m, latitude, longitude, emissions, iframe, name_facility, big_icon=False)
 
     #Show map:
     display(m)
