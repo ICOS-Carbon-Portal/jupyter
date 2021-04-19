@@ -1834,7 +1834,9 @@ def download_result(radiocarbonObject, df_type='Station'):
     stilt_station_lon=radiocarbonObject.settings['stilt']['lon']
     background_filename=radiocarbonObject.settings['backgroundFilename']
     timeselect=radiocarbonObject.settings['timeOfDay']
-    timeselect_list_string=', '.join(str(x) for x in timeselect)
+    #timeselect_list_string=', '.join(str(x) for x in timeselect)
+    
+    timeselect_list_string =':00, '.join(str(x) for x in timeselect) + ':00 (UTC)'
     date_today=date_today= current_date.today()
     
     #open a new file with that name and first write some metadata to the top of the file
@@ -1850,7 +1852,8 @@ def download_result(radiocarbonObject, df_type='Station'):
     f.write('# STILT altitude above ground: ' + str(stilt_station_alt) + 'm\n')
     f.write('# STILT position latitude: ' + str(stilt_station_lat) + '°N\n')
     f.write('# STILT position longitude: ' + str(stilt_station_lon) + '°E\n')
-    f.write('# Footprint selection: ' + timeselect_list_string + '\n')
+    f.write('# Footprint selection (date range): ' + str(min(radiocarbonObject.dateRange)) + ' to ' + str(max(radiocarbonObject.dateRange)) + '\n')
+    f.write('# Footprint selection (hour(s)): ' + timeselect_list_string + '\n')
     f.write('# Date of analysis: ' + str(date_today) + '\n')
     f.write('# ∆14C background file: ' + background_filename + '\n')
     
@@ -1907,6 +1910,8 @@ def download_result(radiocarbonObject, df_type='Station'):
             dfDelta14CFacilityResample = dfDelta14CFacilityResample[dfDelta14CFacilityResample_columns]
 
             dfDelta14CFacilityResample.to_csv(f, index=False)
+        else:
+            f.write('No nuclear facilities contributing > ' + str(radiocarbonObject.settings['threshold']) +' permil')
 
     elif df_type=='FacilityMap':
         
@@ -1915,6 +1920,8 @@ def download_result(radiocarbonObject, df_type='Station'):
             dfFacilitiesOverThreshold = radiocarbonObject.dfFacilitiesOverThreshold
 
             dfFacilitiesOverThreshold.to_csv(f, index=False)
+        else:
+            f.write('No nuclear facilities contributing > ' + str(radiocarbonObject.settings['threshold']) +' permil')
     
     elif df_type=='CP_data':
         
@@ -1974,16 +1981,20 @@ def display_info_html_table(radiocarbonObject, meas_data=False):
     background_filename = radiocarbonObject.settings['backgroundFilename']
     
     if meas_data==False:
+
+        html_date_range = '<b>Footprint selection (date range):</b> ' + str(min(radiocarbonObject.dateRange)) + ' to ' + str(max(radiocarbonObject.dateRange)) + '<br>'
+        
         timeselect_list = radiocarbonObject.settings['timeOfDay']
         timeselect_string=[str(value) for value in timeselect_list]
         timeselect_string =':00, '.join(timeselect_string) + ':00 (UTC)<br>'
-        html_timeselect_string = '<b>Footprint selection:</b> ' + timeselect_string 
+        html_timeselect_string = '<b>Footprint selection (hour(s)):</b> ' + timeselect_string
         
         html_meas_station = ''
         
     else:
         
         html_timeselect_string = ''
+        html_date_range = ''
         meas_station = radiocarbonObject.settings['icos']['stationId']
         meas_sampling_height = radiocarbonObject.settings['icos']['eag']
         html_meas_station = '<br><br><b>Location (measurements):</b> ' + meas_station + '<br><b>Sampling height, elevation above ground (measurements):</b> ' + str(meas_sampling_height) + 'm<br>'
@@ -1994,7 +2005,7 @@ def display_info_html_table(radiocarbonObject, meas_data=False):
     'Yearly average radiocarbon emissions data downloaded 2020-08-25 from <a href="https://europa.eu/radd/" target="_blank">European Commission RAdioactive Discharges Database</a>.<br><br>' + \
     '<b>STILT transport model used to generate footprints:</b><br><ul><li>10 days backward simulation</li><li>1/8° longitude x 1/12° latitude resolution</li><li>Meteorological data from ECMWF: 3 hourly operational analysis/forecasts on 0.25 x 0.25 degree</li></ul>' +\
     '<b>STILT footprints code:</b> ' + stilt_station + '<br><b>STILT altitude above ground:</b> ' + str(stilt_station_alt) + 'm<br>' + \
-    '<b>STILT position latitude:</b> ' + str(stilt_station_lat) + '°N<br>' + '<b>STILT position longitude:</b> ' + str(stilt_station_lon) + '°E<br>' + html_timeselect_string + html_meas_station + '<b>Date of analysis:</b> ' + str(date_today) +  \
+    '<b>STILT position latitude:</b> ' + str(stilt_station_lat) + '°N<br>' + '<b>STILT position longitude:</b> ' + str(stilt_station_lon) + '°E<br>' + html_date_range + html_timeselect_string + html_meas_station + '<b>Date of analysis:</b> ' + str(date_today) +  \
     '<br><br><b>∆14C background file</b>: ' + background_filename + '</p>'))
 
 
