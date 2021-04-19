@@ -84,7 +84,10 @@ def set_settings(s):
 
 # observer functions
 #---------------------------------------------------------
-def change_stn_type(c):    
+def change_stn_type(c): 
+    
+    
+    update_button.disabled = True
     
     # make sure the new 'options' are not selected..
     unobserve()    
@@ -104,7 +107,11 @@ def change_stn_type(c):
     # make sure future changes are observed again
     observe()
     
-def change_stn(c):    
+def change_stn(c): 
+ 
+    update_button.disabled = False
+
+        
     stn = c['new']
     years = sorted(stiltstations[stn]['years'])    
     years = [int(x) for x in years] 
@@ -213,9 +220,23 @@ def updateProgress(f, desc=''):
         f.description = str(desc)
 
 def update_func(button_c):
+    
     # Define update function
     # This starts the process of creating the graphs
     # and, depending on the parameters, saving figures and pdf
+   
+    progress_bar.clear_output()
+    header_no_footprints.clear_output()
+    header_output.clear_output()
+    result_sensitivity.clear_output()
+    result_population.clear_output()
+    result_pointsource.clear_output()
+    result_land_cover_bar_graph.clear_output()
+    result_seasonal_table.clear_output()
+    header_advanced.clear_output()
+    result_landcover_windrose.clear_output()
+    result_multiple_variables_graph.clear_output()
+    
     with progress_bar:
         f = IntProgress(min=0, max=10, style=style_bin)
         display(f)
@@ -223,142 +244,141 @@ def update_func(button_c):
         
     global stc
     stc=stationchar.StationChar(get_settings())
-
-    if stc.settings['saveFigs'] == 'yes':
-        now = datetime.now()
-        stc.settings['date/time generated'] =  now.strftime("%Y%m%d_%H%M%S_")
-        stc.settings['output_folder'] = os.path.join('output', (stc.settings['date/time generated']+stc.stationId))
-        if not os.path.exists('output'):
-            os.makedirs('output')
-
-        os.mkdir(stc.settings['output_folder'])
-        
-    with header_output:
-        header_output.clear_output()
-        degree_sign=u'\N{DEGREE SIGN}'
-        station_name=stc.stationName 
-        station_code=stc.settings['stationCode']
-        station_country=stc.country
-        station_lat=stc.lat
-        station_lon=stc.lon
     
-        maps_bin_size=stc.settings['binSize']
-        maps_bin_interval=stc.settings['binInterval'] 
+    if stc.fp is None:
+        
+        with header_no_footprints:
+            display(HTML('<p style="font-size:16px">No footprints for selected date range.</p>'))
+            f.value = 10
+    else:
 
 
-        #date and time:
-        date_and_time_string=stc_functions.date_and_time_string_for_title(stc.dateRange, stc.settings['timeOfDay'])
+        if stc.settings['saveFigs'] == 'yes':
+            now = datetime.now()
+            stc.settings['date/time generated'] =  now.strftime("%Y%m%d_%H%M%S_")
+            stc.settings['output_folder'] = os.path.join('output', (stc.settings['date/time generated']+stc.stationId))
+            if not os.path.exists('output'):
+                os.makedirs('output')
 
-        if 'icos' in stc.settings:
-            station_class=stc.stationClass
-            station_site_type=stc.siteType
-            model_height=stc.settings['stilt']['alt']
-            
-            ##
-            if stc.settings['icos']['siteType']=='mountain' or stc.settings['icos']['siteType']=='Mountain':
-                mountain_string = ' (might be different from station intake height since mountain station.'
+            os.mkdir(stc.settings['output_folder'])
+
+        with header_output:
+            degree_sign=u'\N{DEGREE SIGN}'
+            station_name=stc.stationName 
+            station_code=stc.settings['stationCode']
+            station_country=stc.country
+            station_lat=stc.lat
+            station_lon=stc.lon
+
+            maps_bin_size=stc.settings['binSize']
+            maps_bin_interval=stc.settings['binInterval'] 
+
+
+            #date and time:
+            date_and_time_string=stc_functions.date_and_time_string_for_title(stc.dateRange, stc.settings['timeOfDay'])
+
+            if 'icos' in stc.settings:
+                station_class=stc.stationClass
+                station_site_type=stc.siteType
+                model_height=stc.settings['stilt']['alt']
+
+                ##
+                if stc.settings['icos']['siteType']=='mountain' or stc.settings['icos']['siteType']=='Mountain':
+                    mountain_string = ' (might be different from station intake height since mountain station.'
+                else:
+                    mountain_string = '.'
+
+
+                display(HTML('<p style="font-size:35px;font-weight:bold;"><br>' + station_name +  \
+                         ' station characterisation</p><p style="font-size:18px;"><br>'+ station_name + ' (' + station_code +\
+                             ') is a class ' + str(station_class) + ' ICOS atmospheric station of the type ' + station_site_type.lower() + \
+                             ' located in ' + station_country + ' (latitude: ' + str("%.2f" % station_lat) +\
+                             degree_sign + 'N, ' + 'longitude: ' + str("%.2f" % station_lon) +\
+                             degree_sign + 'E). The model height is ' + str(model_height)+ ' meters above ground' + mountain_string + '<br></p>'))
+
             else:
-                mountain_string = '.'
-            
 
-            display(HTML('<p style="font-size:35px;font-weight:bold;"><br>' + station_name +  \
-                     ' station characterisation</p><p style="font-size:18px;"><br>'+ station_name + ' (' + station_code +\
-                         ') is a class ' + str(station_class) + ' ICOS atmospheric station of the type ' + station_site_type.lower() + \
-                         ' located in ' + station_country + ' (latitude: ' + str("%.2f" % station_lat) +\
-                         degree_sign + 'N, ' + 'longitude: ' + str("%.2f" % station_lon) +\
-                         degree_sign + 'E). The model height is ' + str(model_height)+ ' meters above ground' + mountain_string + '<br></p>'))
+                display(HTML('<p style="font-size:35px;font-weight:bold;"><br>' + station_name + \
+                         ' station characterisation</p><p style="font-size:16px;">' + station_name + ' (' + station_code +\
+                             ') is located in ' + station_country + ' (latitude: ' + str("%.2f" % station_lat) +\
+                             degree_sign + 'N, ' + 'longitude: ' + str("%.2f" % station_lon) + degree_sign + 'E).<br></p>'))
 
-        else:
+            #added information that is redundant in the titles
+            display(HTML('<p style="font-size:18px;">Date range: ' + date_and_time_string + '<br></p>'))
+            display(HTML('<p style="font-size:18px;">The map bins are ' + str(maps_bin_size) + ' degrees at ' +\
+                         str(maps_bin_interval) + ' km increments</p>'))
 
-            display(HTML('<p style="font-size:35px;font-weight:bold;"><br>' + station_name + \
-                     ' station characterisation</p><p style="font-size:16px;">' + station_name + ' (' + station_code +\
-                         ') is located in ' + station_country + ' (latitude: ' + str("%.2f" % station_lat) +\
-                         degree_sign + 'N, ' + 'longitude: ' + str("%.2f" % station_lon) + degree_sign + 'E).<br></p>'))
 
-        #added information that is redundant in the titles
-        display(HTML('<p style="font-size:18px;">Date range: ' + date_and_time_string + '<br></p>'))
-        display(HTML('<p style="font-size:18px;">The map bins are ' + str(maps_bin_size) + ' degrees at ' +\
-                     str(maps_bin_interval) + ' km increments</p>'))
-
-    
-    updateProgress(f, 'calculate sensitivity')
-    with result_sensitivity:
-
-        result_sensitivity.clear_output()            
-        fig, caption = stc_functions.polar_graph(stc, 'sensitivity')
-        stc.add_figure(1, fig, caption)
-        display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
-        display(fig)
-
-    updateProgress(f, 'process pointsource')
-    with result_population:
-        result_population.clear_output()
-        fig, caption=stc_functions.polar_graph(stc, 'point source contribution', colorbar='Purples')
-        stc.add_figure(2, fig, caption)
-        display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
-        display(fig)
-
-    updateProgress(f, 'process population')
-    with result_pointsource:
-        result_pointsource.clear_output()
-        fig, caption =stc_functions.polar_graph(stc, 'population sensitivity', colorbar='Greens')
-        stc.add_figure(3, fig, caption)
-        display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
-        display(fig)
-        
-    updateProgress(f, 'get landcover')
-    with result_land_cover_bar_graph:
-        result_land_cover_bar_graph.clear_output()
-        fig, caption=stc_functions.land_cover_bar_graph(stc)
-        stc.add_figure(4, fig, caption)
-        display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
-        display(fig)
-
-    updateProgress(f, 'seasonal table')
-    with result_seasonal_table:
-        result_seasonal_table.clear_output()
-        fig, caption=stc_functions.seasonal_table(stc)
-        stc.add_figure(5, fig, caption)
-        display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
-
-        try:
+        updateProgress(f, 'calculate sensitivity')
+        with result_sensitivity:
+          
+            fig, caption = stc_functions.polar_graph(stc, 'sensitivity')
+            stc.add_figure(1, fig, caption)
+            display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
             display(fig)
-        except:
-            pass
 
-    with header_advanced:
-        header_advanced.clear_output()
-        display(HTML('<h2>Advanced figures</h2><br>\
-            Please read the <a href="specifications.pdf" target="_blank">\
-                specifications document</a> before attempting to interpret the following figures.'))
+        updateProgress(f, 'process pointsource')
+        with result_population:
+            fig, caption=stc_functions.polar_graph(stc, 'point source contribution', colorbar='Purples')
+            stc.add_figure(2, fig, caption)
+            display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
+            display(fig)
 
-    updateProgress(f, 'landcover windrose')
-    with result_landcover_windrose:
-        result_landcover_windrose.clear_output()
-        fig, caption=stc_functions.landcover_polar_graph(stc)
-        stc.add_figure(6, fig, caption)
-        display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
-        display(fig)
+        updateProgress(f, 'process population')
+        with result_pointsource:
+            fig, caption =stc_functions.polar_graph(stc, 'population sensitivity', colorbar='Greens')
+            stc.add_figure(3, fig, caption)
+            display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
+            display(fig)
+
+        updateProgress(f, 'get landcover')
+        with result_land_cover_bar_graph:
+            fig, caption=stc_functions.land_cover_bar_graph(stc)
+            stc.add_figure(4, fig, caption)
+            display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
+            display(fig)
+
+        updateProgress(f, 'seasonal table')
+        with result_seasonal_table:
+            fig, caption=stc_functions.seasonal_table(stc)
+            stc.add_figure(5, fig, caption)
+            display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
+
+            try:
+                display(fig)
+            except:
+                pass
+
+        with header_advanced:
+            display(HTML('<h2>Advanced figures</h2><br>\
+                Please read the <a href="specifications.pdf" target="_blank">\
+                    specifications document</a> before attempting to interpret the following figures.'))
+
+        updateProgress(f, 'landcover windrose')
+        with result_landcover_windrose:
+            fig, caption=stc_functions.landcover_polar_graph(stc)
+            stc.add_figure(6, fig, caption)
+            display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
+            display(fig)
 
 
-    updateProgress(f, 'multiple variables')
-    with result_multiple_variables_graph:
-        result_multiple_variables_graph.clear_output()
-        fig, caption= stc_functions.multiple_variables_graph(stc)
-        stc.add_figure(7, fig, caption)
-        display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
-        display(fig)
+        updateProgress(f, 'multiple variables')
+        with result_multiple_variables_graph:
+            fig, caption= stc_functions.multiple_variables_graph(stc)
+            stc.add_figure(7, fig, caption)
+            display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
+            display(fig)
+
+        if stc.settings['saveFigs'] == 'yes':
+            updateProgress(f, 'saving')   
+            fmt=fig_format.value
+            stc_functions.save(stc, fmt)
+
+        # make sure the progress bar is filled..
+        updateProgress(f, 'finished')
+        f.value = 10
         
-    if stc.settings['saveFigs'] == 'yes':
-        updateProgress(f, 'saving')   
-        fmt=fig_format.value
-        stc_functions.save(stc, fmt)
-    
-    # make sure the progress bar is filled..
-    updateProgress(f, 'finished')
-    f.value = 10
-        
-        
+
 #-----------widgets definition -----------------
     
 style_bin = {'description_width': 'initial'}
@@ -468,7 +488,7 @@ fig_format=RadioButtons(
 
 #Create a Button widget to control execution:
 update_button = Button(description='Run selection',
-                       disabled=False,
+                       disabled=True,
                        button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
                        tooltip='Click me',)
 
@@ -538,6 +558,7 @@ form_out = Output()
 
 #Initialize results output widgets:
 progress_bar = Output()
+header_no_footprints = Output()
 header_output = Output()    
 result_sensitivity = Output()    
 result_population = Output()    
@@ -601,7 +622,7 @@ with form_out:
     update_buttons = HBox([file_name, update_button])
     selection_menu = VBox([station_box, time_box, time_selection, header_bin_specifications, bin_box_1,bin_box_2, header_filename, update_buttons])
 
-    display(selection_menu, progress_bar, h_box_1, grid, h_box_2, h_box_3, grid_2)
+    display(selection_menu, progress_bar, header_no_footprints, h_box_1, grid, h_box_2, h_box_3, grid_2)
 
 #Display form:
 display(form_out)    
