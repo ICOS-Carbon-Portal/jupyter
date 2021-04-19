@@ -35,6 +35,9 @@ import json
 import cartopy.feature as cfeature
 import cartopy.crs as ccrs
 
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 import stiltStations
 stiltstations = stiltStations.getStilt()
 icoslist = sorted([(v['name'],k) for k,v in stiltstations.items() if v['icos']])
