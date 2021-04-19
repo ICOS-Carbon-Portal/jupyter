@@ -73,6 +73,9 @@ class RadiocarbonObject():
         #specified in function plot_nuclear_contamination_by_facility_bokhe (radiocarbon_functions)
         self.dfFacilitiesOverThreshold= None
         
+        self.dfDelta14CFacilityResample= None
+        self.dfDelta14CFacilityResampleBokeh=None
+        
 
         # fucntions to generate the object attributes
         self._setStationData()

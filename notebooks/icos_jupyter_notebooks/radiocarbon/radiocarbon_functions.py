@@ -1056,11 +1056,6 @@ def plot_nuclear_contamination_by_facility_bokhe(radiocarbonObject):
     # line with nuclear 
     p.line('date','delta14C_nuclear', source=source_total, line_width=1, color='red', legend_label='Total ∆14C nuclear')
 
-    facilities_over_threshold=[]
-    averages_facilities_over_threshold=[]
-    
-    list_latitude=[]
-    list_longitude=[]
 
     colors= seaborn.color_palette('colorblind', n_colors=25)
 
@@ -1070,6 +1065,8 @@ def plot_nuclear_contamination_by_facility_bokhe(radiocarbonObject):
     dfFacilitiesOverThreshold = pd.DataFrame(columns=['facility', 'lat', 'lon', 'permil contam.'])
 
     index=0
+    
+    first=True
 
     for key in dictionary_radiocarbon_emissions:
 
@@ -1078,6 +1075,9 @@ def plot_nuclear_contamination_by_facility_bokhe(radiocarbonObject):
         #only facilities that are over the threshold in dfDelta14CFacility
         if not column_name in dfDelta14CFacility.columns:
             continue
+        
+        #set to false if at least one facility contributes over the threshold. 
+        first=False
             
         average_contamination = dfDelta14CFacility[column_name].mean()
 
@@ -1096,7 +1096,7 @@ def plot_nuclear_contamination_by_facility_bokhe(radiocarbonObject):
 
     #only show visualisations if there are any facilities over the theshold. Otherwise print message that there is no
     #facilities contaminating more than the threshold.
-    if len(list_tuples_for_tooltip)>1:
+    if len(list_tuples_for_tooltip)>1 and first==False:
 
         #Set title attributes:
         p.title.align = 'center'
@@ -1177,6 +1177,7 @@ def nuclear_contamination_by_facility_map(radiocarbonObject):
                   popup=popup_station,
                   icon=folium.Icon(color='blue', icon='cloud')).add_to(m)
 
+    
     for index, row in dfFacilitiesOverThreshold.iterrows():
 
         marker_text_nuclear= branca.element.IFrame(html_table_radiocarbon_contribution_facility(row['facility'], \
@@ -1887,30 +1888,33 @@ def download_result(radiocarbonObject, df_type='Station'):
         
     elif df_type=='FacilityResample':
         
-        dfDelta14CFacilityResample = radiocarbonObject.dfDelta14CFacilityResample
-        
-        dfDelta14CFacilityResample_columns = dfDelta14CFacilityResample.columns.tolist()
-        dfDelta14CFacilityResample_columns.remove('date_start')
-        dfDelta14CFacilityResample_columns.remove('date_end')
-        dfDelta14CFacilityResample_columns.remove('count')
-        dfDelta14CFacilityResample_columns.remove('count_nan')
-        dfDelta14CFacilityResample_columns.remove('for_index')
-        dfDelta14CFacilityResample_columns.insert(0, 'date_start')
-        dfDelta14CFacilityResample_columns.insert(1, 'date_end')
-        dfDelta14CFacilityResample_columns.insert(2, 'count')
-        dfDelta14CFacilityResample_columns.insert(3, 'count_nan')
-        
-        dfDelta14CFacilityResample = dfDelta14CFacilityResample.drop(columns='for_index')
-        
-        dfDelta14CFacilityResample = dfDelta14CFacilityResample[dfDelta14CFacilityResample_columns]
-        
-        dfDelta14CFacilityResample.to_csv(f, index=False)
-        
+        if radiocarbonObject.dfFacilitiesOverThreshold is not None:
+            dfDelta14CFacilityResample = radiocarbonObject.dfDelta14CFacilityResample
+
+            dfDelta14CFacilityResample_columns = dfDelta14CFacilityResample.columns.tolist()
+            dfDelta14CFacilityResample_columns.remove('date_start')
+            dfDelta14CFacilityResample_columns.remove('date_end')
+            dfDelta14CFacilityResample_columns.remove('count')
+            dfDelta14CFacilityResample_columns.remove('count_nan')
+            dfDelta14CFacilityResample_columns.remove('for_index')
+            dfDelta14CFacilityResample_columns.insert(0, 'date_start')
+            dfDelta14CFacilityResample_columns.insert(1, 'date_end')
+            dfDelta14CFacilityResample_columns.insert(2, 'count')
+            dfDelta14CFacilityResample_columns.insert(3, 'count_nan')
+
+            dfDelta14CFacilityResample = dfDelta14CFacilityResample.drop(columns='for_index')
+
+            dfDelta14CFacilityResample = dfDelta14CFacilityResample[dfDelta14CFacilityResample_columns]
+
+            dfDelta14CFacilityResample.to_csv(f, index=False)
+
     elif df_type=='FacilityMap':
         
-        dfFacilitiesOverThreshold = radiocarbonObject.dfFacilitiesOverThreshold
+        if radiocarbonObject.dfFacilitiesOverThreshold is not None:
         
-        dfFacilitiesOverThreshold.to_csv(f, index=False)
+            dfFacilitiesOverThreshold = radiocarbonObject.dfFacilitiesOverThreshold
+
+            dfFacilitiesOverThreshold.to_csv(f, index=False)
     
     elif df_type=='CP_data':
         

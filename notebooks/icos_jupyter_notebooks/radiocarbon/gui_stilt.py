@@ -295,8 +295,8 @@ def update_func(button_c):
                 updateProgress(f, 'nuclear by facility')
                 radiocarbonObject = radiocarbon_functions.plot_nuclear_contamination_by_facility_bokhe(radiocarbonObject)
 
-                #if there are facilities with average contribution over the user-defined threshold
-                if  hasattr(radiocarbonObject, 'dfFacilitiesOverThreshold'):
+                #if there are facilities with average contribution over the user-defined threshold    
+                if radiocarbonObject.dfFacilitiesOverThreshold is not None:
 
                     updateProgress(f, 'nuclear by facility map')
                     radiocarbon_functions.nuclear_contamination_by_facility_map(radiocarbonObject)
