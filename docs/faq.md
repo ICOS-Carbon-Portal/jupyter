@@ -51,8 +51,8 @@ If you wish to access our Jupyter Hub, please apply for a personal account (<a h
 ## How to log-in to Exploredata
 
 Open your internet browser and go to: <b>[https://exploredata.icos-cp.eu](https://exploredata.icos-cp.eu) </b> and enter your login-credentials.<br>
-<u>Username:</u> email address (e.g. kim.nilsson@icos.com)<br>
-<u>Password:</u> will be provided with our webinar. Or you can write us an email to jupyter-info@icos-cp.eu to get a new one.<br>
+<b><u>Username:</b></u> myEmailAddress (e.g. kim.nilsson@icos.com)<br>
+<b><u>Password:</b></u> **msa**
 
 This is a public service and is supposed to give you a first glance what a Jupyter Notebook looks like and to explore our example notebooks. Be aware that your work is not saved, but you can download your notebook. 
 
