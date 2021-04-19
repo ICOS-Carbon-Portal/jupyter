@@ -140,32 +140,33 @@ class RadiocarbonObject():
     
     def _setDfs(self):
         
-        #no need to return, but makes more clear that assigns to the radiocarbon object
-        if self.settings['facilityInclusion']:
-            self.dfDelta14CStation, self.dfDelta14CFacility = radiocarbon_functions.delta_radiocarbon_dataframes(self)
-        else:
-            self.dfDelta14CStation = radiocarbon_functions.delta_radiocarbon_dataframes(self)
-        
-        if self.settings['resample'][0]!= 'M':
-            
-            days_resample = int(self.settings['resample'][0])
-            
-        else:
-            days_resample = -1
+        if self.fp is not None:
+            #no need to return, but makes more clear that assigns to the radiocarbon object
+            if self.settings['facilityInclusion']:
+                self.dfDelta14CStation, self.dfDelta14CFacility = radiocarbon_functions.delta_radiocarbon_dataframes(self)
+            else:
+                self.dfDelta14CStation = radiocarbon_functions.delta_radiocarbon_dataframes(self)
 
-        if days_resample > 0 or self.settings['resample'][0]== 'M':
+            if self.settings['resample'][0]!= 'M':
+
+                days_resample = int(self.settings['resample'][0])
+
+            else:
+                days_resample = -1
+
+            if days_resample > 0 or self.settings['resample'][0]== 'M':
 
 
-            self.dfDelta14CStationResample, self.dfDelta14CStationResampleBokeh = radiocarbon_functions.resampled_modelled_radiocarbon(self)
+                self.dfDelta14CStationResample, self.dfDelta14CStationResampleBokeh = radiocarbon_functions.resampled_modelled_radiocarbon(self)
 
-        #resample only if set to resample, and facilities over the specified threshold (by facility)
-        if self.settings['resample'][0]== 'M'or (days_resample>0 and self.dfDelta14CFacility is not None):
-            
-            if self.settings['facilityInclusion']: 
+            #resample only if set to resample, and facilities over the specified threshold (by facility)
+            if self.settings['resample'][0]== 'M'or (days_resample>0 and self.dfDelta14CFacility is not None):
 
-                self.dfDelta14CFacilityResample, self.dfDelta14CFacilityResampleBokeh = radiocarbon_functions.resampled_modelled_radiocarbon_facility(self)
-                
-                #dfDelta14CStationResampleBokeh 
+                if self.settings['facilityInclusion']: 
+
+                    self.dfDelta14CFacilityResample, self.dfDelta14CFacilityResampleBokeh = radiocarbon_functions.resampled_modelled_radiocarbon_facility(self)
+
+
             
 if __name__ == "__main__":
     """

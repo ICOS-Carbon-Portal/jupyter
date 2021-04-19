@@ -101,7 +101,9 @@ def set_settings(s):
 # observer functions
 
 #---------------------------------------------------------
-def change_stn_type(c):    
+def change_stn_type(c):  
+    
+    update_button.disabled = True
     
     # make sure the new 'options' are not selected..
     unobserve()    
@@ -121,7 +123,9 @@ def change_stn_type(c):
     # make sure future changes are observed again
     observe()
     
-def change_stn(c):    
+def change_stn(c):   
+    
+    update_button.disabled = False
     stn = c['new']
     years = sorted(stiltstations[stn]['years'])    
     years = [int(x) for x in years] 
@@ -249,6 +253,8 @@ def updateProgress(f, desc=''):
 def update_func(button_c):
     
     progress_bar.clear_output()
+    header_no_footprints.clear_output()
+    output_per_station.clear_output()
 
     with progress_bar:
         f = IntProgress(min=0, max=6, style=style_bin)
@@ -259,49 +265,58 @@ def update_func(button_c):
 
     #possible to access in the notebook with the GUI using "global". 
     global radiocarbonObject
+    
+
 
     with output_per_station:
-        
-        output_per_station.clear_output()
-        
+
         radiocarbonObject=radiocarbon_object.RadiocarbonObject(settings) 
-        
-        radiocarbon_functions.display_info_html_table(radiocarbonObject, meas_data=False)
-        
-        updateProgress(f, 'nuclear contamination')
-       
-        radiocarbon_functions.plot_radiocarbon_bokhe(radiocarbonObject)
-        
-        if radiocarbonObject.settings['facilityInclusion']:
-            
-            #radiocarbonObject updated with dataframe "dfFacilitiesOverThreshold".
-            #contains name of facilities contamining over "threshold", latitude of facility, longitude of facility
-            #and the average contamination from it for the user specified parameters ("dateRange" and "timeOfDay" etc)
-            updateProgress(f, 'nuclear by facility')
-            radiocarbonObject = radiocarbon_functions.plot_nuclear_contamination_by_facility_bokhe(radiocarbonObject)
 
-            #if there are facilities with average contribution over the user-defined threshold
-            if  hasattr(radiocarbonObject, 'dfFacilitiesOverThreshold'):
-                
-                updateProgress(f, 'nuclear by facility map')
-                radiocarbon_functions.nuclear_contamination_by_facility_map(radiocarbonObject)
-            else:
-                display(HTML('<p style="font-size:15px;">No nuclear facilities contributing > ' + str(radiocarbonObject.settings['threshold']) +' permil</p>'))
-        
-        
-        #move this to radiocarbon_object.py
-        if radiocarbonObject.settings['downloadOption'] == 'yes':
-            now = datetime.now()
-            radiocarbonObject.settings['date/time generated'] =  now.strftime("%Y%m%d_%H%M%S_")
-            radiocarbonObject.settings['output_folder'] = os.path.join('output', (radiocarbonObject.settings['date/time generated']+radiocarbonObject.stationId))
-            if not os.path.exists('output'):
-                os.makedirs('output')
 
-            os.mkdir(radiocarbonObject.settings['output_folder'])
+        if radiocarbonObject.fp is None:
 
- 
-            radiocarbon_functions.save_data(radiocarbonObject)
-            
+            with header_no_footprints:
+                display(HTML('<p style="font-size:16px">No footprints for selected date range.</p>'))
+                f.value = 6
+
+        else:
+
+            radiocarbon_functions.display_info_html_table(radiocarbonObject, meas_data=False)
+
+            updateProgress(f, 'nuclear contamination')
+
+            radiocarbon_functions.plot_radiocarbon_bokhe(radiocarbonObject)
+
+            if radiocarbonObject.settings['facilityInclusion']:
+
+                #radiocarbonObject updated with dataframe "dfFacilitiesOverThreshold".
+                #contains name of facilities contamining over "threshold", latitude of facility, longitude of facility
+                #and the average contamination from it for the user specified parameters ("dateRange" and "timeOfDay" etc)
+                updateProgress(f, 'nuclear by facility')
+                radiocarbonObject = radiocarbon_functions.plot_nuclear_contamination_by_facility_bokhe(radiocarbonObject)
+
+                #if there are facilities with average contribution over the user-defined threshold
+                if  hasattr(radiocarbonObject, 'dfFacilitiesOverThreshold'):
+
+                    updateProgress(f, 'nuclear by facility map')
+                    radiocarbon_functions.nuclear_contamination_by_facility_map(radiocarbonObject)
+                else:
+                    display(HTML('<p style="font-size:15px;">No nuclear facilities contributing > ' + str(radiocarbonObject.settings['threshold']) +' permil</p>'))
+
+
+            #move this to radiocarbon_object.py
+            if radiocarbonObject.settings['downloadOption'] == 'yes':
+                now = datetime.now()
+                radiocarbonObject.settings['date/time generated'] =  now.strftime("%Y%m%d_%H%M%S_")
+                radiocarbonObject.settings['output_folder'] = os.path.join('output', (radiocarbonObject.settings['date/time generated']+radiocarbonObject.stationId))
+                if not os.path.exists('output'):
+                    os.makedirs('output')
+
+                os.mkdir(radiocarbonObject.settings['output_folder'])
+
+
+                radiocarbon_functions.save_data(radiocarbonObject)
+
     updateProgress(f, 'finished')
     f.value = 6           
         
@@ -445,7 +460,7 @@ file_name= FileUpload(
 
 #Create a Button widget to control execution:
 update_button = Button(description='Run selection',
-                       disabled=False,
+                       disabled=True,
                        button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
                        tooltip='Click me',)
 update_button.layout.margin = '0px 0px 0px 260px' #top, right, bottom, left
@@ -494,6 +509,7 @@ form = VBox([header_station,station_type,station_choice, header_date_time, time_
 #Initialize form output:
 form_out = Output()
 
+header_no_footprints = Output()
 output_per_station = Output()
 output_per_station_per_facility = Output()
 #output_county_breakdown = Output()
@@ -536,7 +552,7 @@ with form_out:
 
     #prev. also output_county_breakdown
     h_box_footprints=HBox([output_per_station, output_per_station_per_facility])
-    display(form, progress_bar, h_box_footprints)
+    display(form, progress_bar, header_no_footprints, h_box_footprints)
 
 #Display form:
 display(form_out)    
