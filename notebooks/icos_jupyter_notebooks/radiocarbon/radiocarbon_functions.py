@@ -35,6 +35,8 @@ import json
 import cartopy.feature as cfeature
 import cartopy.crs as ccrs
 
+from folium.plugins import MarkerCluster
+
 import stiltStations
 stiltstations = stiltStations.getStilt()
 icoslist = sorted([(v['name'],k) for k,v in stiltstations.items() if v['icos']])
@@ -331,6 +333,8 @@ def plotmap(stations, selected_facility, basemap, d_icon='cloud', icon_col='blue
 
     #Add marker-tooltip:
     tooltip = 'Click to view station info'
+    
+    mc_facilities = MarkerCluster()
 
     #keep in here since using items passed to the plotmap() function.
     def add_marker(map_obj, marker_txt, marker_color, lat_station, lon_station, name_station):
@@ -361,13 +365,14 @@ def plotmap(stations, selected_facility, basemap, d_icon='cloud', icon_col='blue
         else:
             icon_size = (16.6,20)
         #Create marker and add it to the map:
-        folium.Marker(location=[float(latitude),
+        facility_marker=folium.Marker(location=[float(latitude),
                                 float(longitude)],
                       popup=popup,
                       icon=folium.CustomIcon('marker_nuclear_facilities.png', icon_size=icon_size),
-                      tooltip=(name_facility + ': click to see emissions')).add_to(map_obj)
+                      tooltip=(name_facility + ': click to see emissions'))
 
-
+        return facility_marker
+     
     #Create markers for all stations except selected station:
     for st in stations.iterrows():
         
@@ -396,11 +401,14 @@ def plotmap(stations, selected_facility, basemap, d_icon='cloud', icon_col='blue
         
         if name_facility == selected_facility:
         
-            add_marker_radiocarbon(m, latitude, longitude, emissions, iframe, name_facility, big_icon=True)
+            facility_marker=add_marker_radiocarbon(m, latitude, longitude, emissions, iframe, name_facility, big_icon=True)
         else:
             
-            add_marker_radiocarbon(m, latitude, longitude, emissions, iframe, name_facility, big_icon=False)
+            facility_marker=add_marker_radiocarbon(m, latitude, longitude, emissions, iframe, name_facility, big_icon=False)
 
+        mc_facilities.add_child(facility_marker)
+
+    m.add_child(mc_facilities)
     #Show map:
     display(m)
 
