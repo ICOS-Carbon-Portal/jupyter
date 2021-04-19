@@ -86,7 +86,7 @@ def _template():
     tex = """
         \\documentclass[a4paper,11pt]{article}
         \\usepackage{graphicx,caption}
-        \\usepackage[bottom=1in,top=1in, left=1in, right=1in]{geometry}
+        \\usepackage[bottom=2.1cm,top=2.1cm, left=1in, right=1in]{geometry}
         \\usepackage{subcaption}
         \\usepackage{geometry}
         \\pagenumbering{gobble}
@@ -124,7 +124,7 @@ def _template():
            \\makebox[\paperwidth][r]{#1}}}
 
         \\AddToShipoutPictureBG*{%
-          \\AtPageUpperRight{\\raisebox{-\height}{\includegraphics[trim={0 0 10cm 0},clip, width=8cm]{Icos_cp_Logo_RGB}}}}
+          \\AtPageUpperRight{\\raisebox{-\height}{\includegraphics[trim={0 0 10cm 0},clip, width=8cm]{**logo**}}}}
 
         \\begin{flushleft}
         \\begin{huge}
@@ -253,6 +253,7 @@ def generate_pdf_tex(stc):
         
     tex = _template()
 
+    tex=tex.replace('**logo**', os.path.join('station_characterization', 'Icos_cp_Logo_RGB.pdf'))
     tex=tex.replace('**sensitivity**', os.path.join(output, stc.figures['1'][2])) 
     tex=tex.replace('**pointsource**', os.path.join(output, stc.figures['2'][2]))
     tex=tex.replace('**population**', os.path.join(output, stc.figures['3'][2]))

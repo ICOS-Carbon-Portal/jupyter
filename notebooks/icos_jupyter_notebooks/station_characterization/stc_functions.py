@@ -894,7 +894,9 @@ def seasonal_table(myStation):
         years=[int(year) for year in available_STILT['years']]
         
         if year_before in years:
-            months_year_before = available_STILT[year_before]['months'] 
+            try:
+                months_year_before = available_STILT[year_before]['months'] 
+            except: months_year_before=''
         else:
             months_year_before=''
 
