@@ -1846,7 +1846,7 @@ def download_result(radiocarbonObject, df_type='Station'):
         date_range_text=('# Footprint selection (date range): ' + str(min(radiocarbonObject.dateRange)) + ' to ' + str(max(radiocarbonObject.dateRange)) + '\n')
     else:
         f = open(os.path.join(radiocarbonObject.settings['output_folder'], df_type + '.csv'), 'a')
-        date_range_text=''
+        date_range_text= ''
 
     f.write('# Yearly average radiocarbon emissions data from RADD (downloaded 2020-08-25 from https://europa.eu/radd/). See what yearly average was used in column "radd_year".\n')
     f.write('# STILT transport model used to generate footprints:\n# -->10 days backward simulation\n# -->1/8° longitude x 1/12° latitude resolution\n# -->Meteorological data from ECMWF: 3 hourly operational analysis/forecasts on 0.25 x 0.25 degree\n')
@@ -1855,9 +1855,9 @@ def download_result(radiocarbonObject, df_type='Station'):
     f.write('# STILT position latitude: ' + str(stilt_station_lat) + '°N\n')
     f.write('# STILT position longitude: ' + str(stilt_station_lon) + '°E\n')
     f.write(date_range_text)
-    f.write('# Footprint selection (hour(s)): ' + timeselect_list_string + '\n')
-    f.write('# Date of analysis: ' + str(date_today) + '\n')
+    f.write('# Footprint hours: ' + timeselect_list_string + '\n')
     f.write('# ∆14C background file: ' + background_filename + '\n')
+    f.write('# Date of analysis: ' + str(date_today) + '\n')
     
     if df_type=='Station':
         
@@ -1989,26 +1989,30 @@ def display_info_html_table(radiocarbonObject, meas_data=False):
         timeselect_list = radiocarbonObject.settings['timeOfDay']
         timeselect_string=[str(value) for value in timeselect_list]
         timeselect_string =':00, '.join(timeselect_string) + ':00 (UTC)<br>'
+        
         html_timeselect_string = '<b>Footprint selection (hour(s)):</b> ' + timeselect_string
         
         html_meas_station = ''
+        
+        html_date_range_meas = ''
         
     else:
         
         html_timeselect_string = ''
         html_date_range = ''
+        
         meas_station = radiocarbonObject.settings['icos']['stationId']
         meas_sampling_height = radiocarbonObject.settings['icos']['eag']
         html_meas_station = '<br><br><b>Location (measurements):</b> ' + meas_station + '<br><b>Sampling height, elevation above ground (measurements):</b> ' + str(meas_sampling_height) + 'm<br>'
-        
-        html_timeselect_string = ''
+        html_date_range_meas = '<b>Date start of first measurement</b>: ' + str(min(radiocarbonObject.measuredData['TIMESTAMP'])) + '<br>' + \
+        '<b>Date start of last measurement</b>: ' + str(max(radiocarbonObject.measuredData['TIMESTAMP'])) + '<br>'
 
     display(HTML('<p style="font-size:15px;"><b>Information relevant for analysis (also included in csv-file if chosen to download)</b><br><br> '\
     'Yearly average radiocarbon emissions data downloaded 2020-08-25 from <a href="https://europa.eu/radd/" target="_blank">European Commission RAdioactive Discharges Database</a>.<br><br>' + \
     '<b>STILT transport model used to generate footprints:</b><br><ul><li>10 days backward simulation</li><li>1/8° longitude x 1/12° latitude resolution</li><li>Meteorological data from ECMWF: 3 hourly operational analysis/forecasts on 0.25 x 0.25 degree</li></ul>' +\
     '<b>STILT footprints code:</b> ' + stilt_station + '<br><b>STILT altitude above ground:</b> ' + str(stilt_station_alt) + 'm<br>' + \
-    '<b>STILT position latitude:</b> ' + str(stilt_station_lat) + '°N<br>' + '<b>STILT position longitude:</b> ' + str(stilt_station_lon) + '°E<br>' + html_date_range + html_timeselect_string + html_meas_station + '<b>Date of analysis:</b> ' + str(date_today) +  \
-    '<br><br><b>∆14C background file</b>: ' + background_filename + '</p>'))
+    '<b>STILT position latitude:</b> ' + str(stilt_station_lat) + '°N<br>' + '<b>STILT position longitude:</b> ' + str(stilt_station_lon) + '°E<br>' + html_date_range + html_timeselect_string + html_meas_station  + html_date_range_meas +  \
+    '<br><br><b>∆14C background file</b>: ' + background_filename + '<br><br><b>Date of analysis:</b> ' + str(date_today) + '</p>'))
 
 
  
