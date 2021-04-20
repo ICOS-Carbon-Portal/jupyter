@@ -344,11 +344,10 @@ def plotmap(stations, selected_facility, basemap, d_icon='cloud', icon_col='blue
                            max_width=400)
 
         #Create marker and add it to the map:
-        
         folium.Marker(location=[lat_station,
                                 lon_station],
                       popup=popup,
-                      icon=folium.CustomIcon('marker_stations.png', icon_size=(16,25)),
+                      icon=folium.CustomIcon(os.path.join('radiocarbon', 'marker_stations.png'), icon_size=(16,25)),
                       tooltip=(name_station + ': station information')).add_to(map_obj)
         
     def add_marker_radiocarbon(map_obj, latitude, longitude, emission, marker_txt, name_facility, big_icon=False):
@@ -367,7 +366,7 @@ def plotmap(stations, selected_facility, basemap, d_icon='cloud', icon_col='blue
         folium.Marker(location=[float(latitude),
                                 float(longitude)],
                       popup=popup,
-                      icon=folium.CustomIcon('marker_nuclear_facilities.png', icon_size=icon_size),
+                      icon=folium.CustomIcon(os.path.join('radiocarbon', 'marker_nuclear_facilities.png'), icon_size=icon_size),
                       tooltip=(name_facility + ': click to see emissions')).add_to(map_obj)
 
 
@@ -417,7 +416,7 @@ def plotmap_static(atm_stations, year):
         facecolor='lightblue')
 
     #for extent of map:
-    radiocarbon_grid = Dataset('radd_data.nc')
+    radiocarbon_grid = Dataset(os.path.join('radiocarbon', 'radd_data.nc'))
     lon=radiocarbon_grid.variables['lon'][:]
     lat=radiocarbon_grid.variables['lat'][:]
 
@@ -574,7 +573,7 @@ def html_table_radiocarbon_contribution_facility(name_facility, date_range, cont
 #different grid with radiocarbon emissions to import depending on the argument year.
 def import_radiocarbon_data(year):
     
-    radiocarbon_grid = Dataset('radd_data.nc')
+    radiocarbon_grid = Dataset(os.path.join('radiocarbon', 'radd_data.nc'))
 
     fp_radiocarbon = radiocarbon_grid.variables[year][:,:]
 
@@ -584,7 +583,7 @@ def import_radiocarbon_data(year):
     fp_radiocarbon_bq_s=fp_radiocarbon_bq_yr/31536000
 
     #Emission distributed evenly within the STILT cell it is emitted: 
-    f_gridarea = cdf.Dataset('gridareaSTILT.nc')
+    f_gridarea = cdf.Dataset(os.path.join('radiocarbon', 'gridareaSTILT.nc'))
     gridarea = f_gridarea.variables['cell_area'][:]
 
     fp_radiocarbon_bq_s_m2= fp_radiocarbon_bq_s/gridarea
@@ -593,8 +592,8 @@ def import_radiocarbon_data(year):
 
 #FUNCTIONS TO MODEL delta14C.
 def get_background_values_nuclear_corrected(background_filename):
-    bg_values= pd.read_csv(background_filename)
-    #bg_values= pd.read_csv("JFJ_MHD_2020_36_0_fit_monthly_upd.csv")
+    bg_values= pd.read_csv(os.path.join('radiocarbon', background_filename))
+
     bg_values.dropna(inplace = True) 
 
     bg_values_upd = bg_values['DateTime;FIT;Nuclear;CorrectedFIT;ffCO2'].str.split(";", n = 5, expand = True) 
@@ -1365,7 +1364,7 @@ def list_station_tuples_w_radiocarbon_data():
        
     sparql = RunSparql()
     sparql.format = 'pandas'
-    sparql.query = open('./c14.sparql', 'r').read()
+    sparql.query = open(os.path.join('radiocarbon', 'c14.sparql'), 'r').read()
     df_stations_w_radiocarbon_data_cp = sparql.run() 
     
     list_of_tuples_for_dropdown=[]
