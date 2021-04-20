@@ -1843,8 +1843,10 @@ def download_result(radiocarbonObject, df_type='Station'):
     
     if df_type!='CP_data':
         f = open(os.path.join(radiocarbonObject.settings['output_folder'],'dfDelta14C' + df_type + '.csv'), 'a')
+        date_range_text=('# Footprint selection (date range): ' + str(min(radiocarbonObject.dateRange)) + ' to ' + str(max(radiocarbonObject.dateRange)) + '\n')
     else:
         f = open(os.path.join(radiocarbonObject.settings['output_folder'], df_type + '.csv'), 'a')
+        date_range_text=''
 
     f.write('# Yearly average radiocarbon emissions data from RADD (downloaded 2020-08-25 from https://europa.eu/radd/). See what yearly average was used in column "radd_year".\n')
     f.write('# STILT transport model used to generate footprints:\n# -->10 days backward simulation\n# -->1/8° longitude x 1/12° latitude resolution\n# -->Meteorological data from ECMWF: 3 hourly operational analysis/forecasts on 0.25 x 0.25 degree\n')
@@ -1852,7 +1854,7 @@ def download_result(radiocarbonObject, df_type='Station'):
     f.write('# STILT altitude above ground: ' + str(stilt_station_alt) + 'm\n')
     f.write('# STILT position latitude: ' + str(stilt_station_lat) + '°N\n')
     f.write('# STILT position longitude: ' + str(stilt_station_lon) + '°E\n')
-    f.write('# Footprint selection (date range): ' + str(min(radiocarbonObject.dateRange)) + ' to ' + str(max(radiocarbonObject.dateRange)) + '\n')
+    f.write(date_range_text)
     f.write('# Footprint selection (hour(s)): ' + timeselect_list_string + '\n')
     f.write('# Date of analysis: ' + str(date_today) + '\n')
     f.write('# ∆14C background file: ' + background_filename + '\n')
