@@ -12,11 +12,11 @@ __email__       = ['info@icos-cp.eu', 'karolina.pantazatou@nateko.lu.se', 'claud
 __date__        = "2021-02-25"
 
 
-def _zk():
+def __zk():
     import os
     import codecs    
-    f = os.path.join(os.path.dirname(os.path.abspath(__file__)),'.zk')
-    c=-6
+    f = os.path.join(os.path.dirname(os.path.abspath(__file__)),'.zksand')
+    c=3
     with open(f)as f:
         k=f.read()
-        return codecs.decode(k[:c], k[c:])
+        return codecs.decode(k[:-c**c], 'rot_13')
