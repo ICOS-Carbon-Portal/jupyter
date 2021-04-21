@@ -10,13 +10,3 @@ __version__     = "0.1.0"
 __maintainer__  = "ICOS Carbon Portal, Elaborated Products Team"
 __email__       = ['info@icos-cp.eu', 'karolina.pantazatou@nateko.lu.se', 'claudio.donofrio@nateko.lu.se']
 __date__        = "2021-02-25"
-
-
-def __zk():
-    import os
-    import codecs    
-    f = os.path.join(os.path.dirname(os.path.abspath(__file__)),'./zen/.zksand')
-    c=3
-    with open(f)as f:
-        k=f.read()
-        return codecs.decode(k[:-c**c], 'rot_13')
