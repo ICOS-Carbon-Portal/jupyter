@@ -101,6 +101,9 @@ def set_settings(s):
 # observer functions
 
 #---------------------------------------------------------
+
+ 
+    
 def change_stn_type(c):  
     
     update_button.disabled = True
@@ -124,8 +127,7 @@ def change_stn_type(c):
     observe()
     
 def change_stn(c):   
-    
-    update_button.disabled = False
+
     stn = c['new']
     years = sorted(stiltstations[stn]['years'])    
     years = [int(x) for x in years] 
@@ -133,10 +135,15 @@ def change_stn(c):
     s_year.options=years            
     e_year.options=years
     
+    if s_year.value!=e_year.value or s_month.value != e_month.value or e_day.value != s_day.value:
+
+        update_button.disabled = False
+    
     #triggers "change_yr" --> months populated
     
 
 def change_yr(c):
+    
     
     years = [x for x in s_year.options if x >= c['new']]
     e_year.options = years
@@ -149,6 +156,29 @@ def change_yr(c):
     
     #added
     e_month.options = month
+    
+    if s_year.value==e_year.value and s_month.value == e_month.value and e_day.value == s_day.value:
+        update_button.disabled = True
+    else:
+        update_button.disabled = False
+        
+def change_yr_end(c):
+
+    
+    if s_year.value==e_year.value:
+        month = [x for x in s_month.options if x >= s_month.value]        
+        e_month.options = month
+    else:
+        # if different from start year, all months are up for choice!
+        month = sorted(stiltstations[station_choice.value][str(s_year.value)]['months'][:-1])
+        month = [int(x) for x in month]
+        e_month.options = month
+
+    if s_year.value==e_year.value and s_month.value == e_month.value and e_day.value == s_day.value:
+        update_button.disabled = True
+    else:
+        update_button.disabled = False
+        
     
 
 def change_mt(c):
@@ -174,29 +204,18 @@ def change_mt(c):
     if s_year.value==e_year.value and s_month.value==e_month.value:
         day = [x for x in s_day.options if x >= s_day.value]
         e_day.options=day
-
-def change_yr_end(c):
-    
-    if s_year.value==e_year.value:
-        month = [x for x in s_month.options if x >= s_month.value]        
-        e_month.options = month
+        
+    if s_year.value==e_year.value and s_month.value == e_month.value and e_day.value == s_day.value:
+  
+        update_button.disabled = True
     else:
-        # if different from start year, all months are up for choice!
-        month = sorted(stiltstations[station_choice.value][str(s_year.value)]['months'][:-1])
-        month = [int(x) for x in month]
-        e_month.options = month
 
-def change_day(c):
-    
-    #when change the day... if the same month and year (start) - update
-    if s_year.value==e_year.value and s_month.value==e_month.value:
-
-        day = [int(x) for x in s_day.options if x >= s_day.value]
-        e_day.options = day
-    
+        update_button.disabled = False
+        
 
 def change_month_end(c):
     
+
     if s_year.value==e_year.value and e_month.value==s_month.value:
         day = [x for x in s_day.options if x >= s_day.value]
         e_day.options= day
@@ -213,6 +232,32 @@ def change_month_end(c):
         else:
             e_day.options=list(range(1,29))
             
+    if s_year.value==e_year.value and s_month.value == e_month.value and e_day.value == s_day.value:
+        update_button.disabled = True
+    else:
+        update_button.disabled = False
+    
+
+def change_day(c):
+  
+    #when change the day... if the same month and year (start) - update
+    if s_year.value==e_year.value and s_month.value==e_month.value:
+
+        day = [int(x) for x in s_day.options if x >= s_day.value]
+        e_day.options = day
+        
+    if s_year.value==e_year.value and s_month.value == e_month.value and e_day.value == s_day.value:
+        update_button.disabled = True
+    else:
+        update_button.disabled = False
+    
+def change_day_end(c):
+    
+    if s_year.value==e_year.value and s_month.value == e_month.value and e_day.value == s_day.value:
+        update_button.disabled = True
+    else:
+        update_button.disabled = False
+
 def change_resample_monthly(c):
     
     if resample_monthly.value==True:
@@ -443,9 +488,7 @@ resample_monthly = Checkbox(
     indent=False
 )
 
-
 resample_monthly.layout.margin = '0px 0px 0px 20px' #top, right, bottom, left
-
 
 header_upload = Output()
 
@@ -457,14 +500,15 @@ file_name= FileUpload(
     multiple=False  # True to accept multiple files upload else False
 )
 
-
 #Create a Button widget to control execution:
 update_button = Button(description='Run selection',
                        disabled=True,
                        button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
                        tooltip='Click me',)
 update_button.layout.margin = '0px 0px 0px 260px' #top, right, bottom, left
+
 royal='#4169E1'
+
 update_button.style.button_color=royal
 
 #this is just text that is put in a Vbox (vertical box) ABOVE (verticla) the station selection
@@ -524,6 +568,7 @@ def observe():
     s_year.observe(change_yr, 'value')
     s_month.observe(change_mt, 'value')    
     s_day.observe(change_day, 'value')
+    e_day.observe(change_day_end, 'value')
     e_year.observe(change_yr_end, 'value')
     e_month.observe(change_month_end, 'value')
     resample_monthly.observe(change_resample_monthly, 'value')
