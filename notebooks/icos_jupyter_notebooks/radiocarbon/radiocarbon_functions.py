@@ -345,6 +345,7 @@ def plotmap(stations, selected_facility, basemap, d_icon='cloud', icon_col='blue
                            parse_html=True,
                            max_width=400)
 
+        
         #Create marker and add it to the map:
         folium.Marker(location=[lat_station,
                                 lon_station],
@@ -1178,10 +1179,13 @@ def nuclear_contamination_by_facility_map(radiocarbonObject):
                max_width=400)
 
 
+    #icon=folium.CustomIcon(os.path.join(folder_w_data, 'marker_stations.png'), icon_size=(16,25))
+    #icon=folium.CustomIcon(os.path.join(folder_w_data, 'marker_nuclear_facilities.png'), icon_size=(16.6,20))
+    #icon_size = (16.6,20)
     #Create marker and add it to the map:
     folium.Marker(location=[station_lat,station_lon],
                   popup=popup_station,
-                  icon=folium.Icon(color='blue', icon='cloud')).add_to(m)
+                  icon=folium.CustomIcon(os.path.join(folder_w_data, 'marker_stations.png'), icon_size=(16,25))).add_to(m)
 
     
     for index, row in dfFacilitiesOverThreshold.iterrows():
@@ -1194,7 +1198,7 @@ def nuclear_contamination_by_facility_map(radiocarbonObject):
         #Create marker and add it to the map:
         folium.Marker(location=[row['lat'],row['lon']],
                                 popup=popup_nuclear_facility,
-                                icon=folium.Icon(color='red', icon='circle')).add_to(m)
+                                icon=folium.CustomIcon(os.path.join(folder_w_data, 'marker_nuclear_facilities.png'), icon_size=(16.6,20))).add_to(m)
 
     display(m)
 
