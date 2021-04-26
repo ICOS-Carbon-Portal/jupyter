@@ -1019,7 +1019,8 @@ def plot_nuclear_contamination_by_facility_bokhe(radiocarbonObject):
     
     station = radiocarbonObject.stationId
     
-    if hasattr(radiocarbonObject, 'dfDelta14CFacilityResampleBokeh'):
+    #if hasattr(radiocarbonObject, 'dfDelta14CFacilityResampleBokeh'):
+    if radiocarbonObject.dfDelta14CStationResampleBokeh is not None:
         
         dfDelta14CFacility = radiocarbonObject.dfDelta14CFacilityResampleBokeh
         dfDelta14CStation = radiocarbonObject.dfDelta14CStationResampleBokeh
@@ -1059,7 +1060,7 @@ def plot_nuclear_contamination_by_facility_bokhe(radiocarbonObject):
                tools='pan,box_zoom,wheel_zoom,undo,redo,reset,save')
 
     # line with nuclear 
-    p.line('date','delta14C_nuclear', source=source_total, line_width=1, color='red', legend_label=('Total ∆14C nuclear' + str( round(average_nuclear_total,4)) + ' permil'))
+    p.line('date','delta14C_nuclear', source=source_total, line_width=1, color='red', legend_label=('Total ∆14C nuclear (' + str( round(average_nuclear_total,4)) + ' permil)'))
 
     colors= seaborn.color_palette('colorblind', n_colors=71)
 
