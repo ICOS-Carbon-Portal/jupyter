@@ -432,7 +432,7 @@ station_type=RadioButtons(
         disabled=False)
 
 
-list_tuples_background=[('JFJ (720m model corrected) and MHD', 'JFJ720_MHD_1.csv'), ('JFJ (960m model corrected) and MHD', 'JFJ960_MHD_1.csv'), ('IZO and MHD', 'IZO_MHD_1.csv')]
+list_tuples_background=[('JFJ and MHD', 'JFJ720_MHD_1.csv'), ('IZO and MHD', 'IZO_MHD_1.csv')]
 
 background_choice = RadioButtons(
            options = list_tuples_background,
