@@ -1440,11 +1440,11 @@ def radiocarbon_cp_results(radiocarbonObjectMeas):
     for (radiocarbon_measurement, measurement_start_date, integration_time, std_deviation) in zip(radiocarbon_data['14C'], radiocarbon_data['TIMESTAMP'], radiocarbon_data['IntegrationTime'], radiocarbon_data['Stdev']):
 
         #prev - if not in list_hours.
-        if measurement_start_date.hour not in timeselect_list:
+        if measurement_start_date.hour not in timeselect_list or measurement_start_date.minute>0:
 
             updated_hour=min(timeselect_list, key=lambda x:abs(x-measurement_start_date.hour))
 
-            measurement_start_date = dt.datetime(int(measurement_start_date.year), int(measurement_start_date.month), int(measurement_start_date.day), updated_hour)
+            measurement_start_date = dt.datetime(int(measurement_start_date.year), int(measurement_start_date.month), int(measurement_start_date.day), updated_hour, 0)
 
         measurement_end_date=measurement_start_date + timedelta(days=int(integration_time))
 

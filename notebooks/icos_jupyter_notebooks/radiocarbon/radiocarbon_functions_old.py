@@ -1822,8 +1822,121 @@ def radiocarbon_file_result(radiocarbonObjectFile):
                 
     return df_for_export, df_for_plot
 
-
 def download_result(radiocarbonObject, df_type='Station'):
+   
+    station=radiocarbonObject.stationId
+    stilt_station_alt=radiocarbonObject.settings['stilt']['alt']
+    stilt_station_lat=radiocarbonObject.settings['stilt']['lat']
+    stilt_station_lon=radiocarbonObject.settings['stilt']['lon']
+    background_filename=radiocarbonObject.settings['backgroundFilename']
+    timeselect=radiocarbonObject.settings['timeOfDay']
+    #timeselect_list_string=', '.join(str(x) for x in timeselect)
+    
+    timeselect_list_string =':00, '.join(str(x) for x in timeselect) + ':00 (UTC)'
+    date_today=date_today= current_date.today()
+    
+    #open a new file with that name and first write some metadata to the top of the file
+    
+    if df_type=='CP_data' or df_type=='HEI_data':
+        f = open(os.path.join(radiocarbonObject.settings['output_folder'], df_type + '.csv'), 'a')
+        date_range_text= ''
+        
+    else:
+
+        f = open(os.path.join(radiocarbonObject.settings['output_folder'],'dfDelta14C' + df_type + '.csv'), 'a')
+        date_range_text=('# Footprint selection (date range): ' + str(min(radiocarbonObject.dateRange)) + ' to ' + str(max(radiocarbonObject.dateRange)) + '\n')
+
+    f.write('# Yearly average radiocarbon emissions data from RADD (downloaded 2020-08-25 from https://europa.eu/radd/). See what yearly average was used in column "radd_year".\n')
+    f.write('# STILT transport model used to generate footprints:\n# -->10 days backward simulation\n# -->1/8° longitude x 1/12° latitude resolution\n# -->Meteorological data from ECMWF: 3 hourly operational analysis/forecasts on 0.25 x 0.25 degree\n')
+    f.write('# STILT footprints code: ' + station + '\n')
+    f.write('# STILT altitude above ground: ' + str(stilt_station_alt) + 'm\n')
+    f.write('# STILT position latitude: ' + str(stilt_station_lat) + '°N\n')
+    f.write('# STILT position longitude: ' + str(stilt_station_lon) + '°E\n')
+    f.write(date_range_text)
+    f.write('# Footprint hours: ' + timeselect_list_string + '\n')
+    f.write('# ∆14C background file: ' + background_filename + '\n')
+    
+    #only data from heidelberg will have this
+    if 'atcSampler' in radiocarbonObject.settings:
+        f.write('# ATC Sampler: ' + radiocarbonObject.settings['atcSampler'] + '\n')
+
+    f.write('# Date of analysis: ' + str(date_today) + '\n')
+    
+    if df_type=='Station':
+        
+        dfDelta14CStation = radiocarbonObject.dfDelta14CStation
+        dfDelta14CStation.to_csv(f,index=False)
+        
+    elif df_type=='Facility':
+        dfDelta14CFacility = radiocarbonObject.dfDelta14CFacility
+        dfDelta14CFacility.to_csv(f,index=False)
+        
+    elif df_type=='StationResample':
+        
+        dfDelta14CStationResample = radiocarbonObject.dfDelta14CStationResample
+        
+        
+        dfDelta14CStationResample_columns = dfDelta14CStationResample.columns.tolist()
+
+        dfDelta14CStationResample_columns.remove('date_start')
+        dfDelta14CStationResample_columns.remove('date_end')
+        dfDelta14CStationResample_columns.remove('count')
+        dfDelta14CStationResample_columns.remove('count_nan')
+        dfDelta14CStationResample_columns.remove('for_index')
+        dfDelta14CStationResample_columns.insert(0, 'date_start')
+        dfDelta14CStationResample_columns.insert(1, 'date_end')
+        dfDelta14CStationResample_columns.insert(2, 'count')
+        dfDelta14CStationResample_columns.insert(3, 'count_nan')
+        
+        dfDelta14CStationResample = dfDelta14CStationResample.drop(columns='for_index')
+        
+        dfDelta14CStationResample = dfDelta14CStationResample[dfDelta14CStationResample_columns]
+        
+        dfDelta14CStationResample.to_csv(f, index=False)
+        
+    elif df_type=='FacilityResample':
+        
+        if radiocarbonObject.dfFacilitiesOverThreshold is not None:
+            dfDelta14CFacilityResample = radiocarbonObject.dfDelta14CFacilityResample
+
+            dfDelta14CFacilityResample_columns = dfDelta14CFacilityResample.columns.tolist()
+            dfDelta14CFacilityResample_columns.remove('date_start')
+            dfDelta14CFacilityResample_columns.remove('date_end')
+            dfDelta14CFacilityResample_columns.remove('count')
+            dfDelta14CFacilityResample_columns.remove('count_nan')
+            dfDelta14CFacilityResample_columns.remove('for_index')
+            dfDelta14CFacilityResample_columns.insert(0, 'date_start')
+            dfDelta14CFacilityResample_columns.insert(1, 'date_end')
+            dfDelta14CFacilityResample_columns.insert(2, 'count')
+            dfDelta14CFacilityResample_columns.insert(3, 'count_nan')
+
+            dfDelta14CFacilityResample = dfDelta14CFacilityResample.drop(columns='for_index')
+
+            dfDelta14CFacilityResample = dfDelta14CFacilityResample[dfDelta14CFacilityResample_columns]
+
+            dfDelta14CFacilityResample.to_csv(f, index=False)
+        else:
+            f.write('No nuclear facilities contributing > ' + str(radiocarbonObject.settings['threshold']) +' permil')
+
+    elif df_type=='FacilityMap':
+        
+        if radiocarbonObject.dfFacilitiesOverThreshold is not None:
+        
+            dfFacilitiesOverThreshold = radiocarbonObject.dfFacilitiesOverThreshold
+
+            dfFacilitiesOverThreshold.to_csv(f, index=False)
+        else:
+            f.write('No nuclear facilities contributing > ' + str(radiocarbonObject.settings['threshold']) +' permil')
+    
+    elif df_type=='CP_data' or df_type=='HEI_data':
+        
+        #think about naming
+        dfDataFromCP = radiocarbonObject.df_for_export
+        dfDataFromCP.to_csv(f, index=False)
+
+    f.close()
+
+def download_result_old(radiocarbonObject, df_type='Station'):
    
     station=radiocarbonObject.stationId
     stilt_station_alt=radiocarbonObject.settings['stilt']['alt']
@@ -1969,6 +2082,12 @@ def save_data_cp(radiocarbonObject):
     #if works - change name
     download_result(radiocarbonObject, df_type='CP_data')
     
+def save_data_meas(radiocarbonObject, df_type):
+    
+    save_settings(radiocarbonObject)
+    
+    #if works - change name
+    download_result(radiocarbonObject, df_type)
     
 def display_info_html_table(radiocarbonObject, meas_data=False):
     
