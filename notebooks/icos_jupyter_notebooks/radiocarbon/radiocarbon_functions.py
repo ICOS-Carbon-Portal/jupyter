@@ -907,6 +907,7 @@ def plot_radiocarbon_bokhe(radiocarbonObject, include_meas=False):
             source = ColumnDataSource(data = radiocarbonObject.dfDelta14CStationResampleBokeh)
 
         else:
+
             source = ColumnDataSource(data = radiocarbonObject.dfDelta14CStation)
     
     if station_name!='':
@@ -975,7 +976,8 @@ def plot_radiocarbon_bokhe(radiocarbonObject, include_meas=False):
         list_tuples_for_tooltip.append(tuple(('Measured ∆14C',  '@{Measurement_value}{0.2f}' )))
         list_tuples_for_tooltip.append(tuple(('Standard deviation measurement',  '@{Std_deviation_measurement}{0.2f}' )))
 
-    if hasattr(radiocarbonObject.settings, 'resample') or include_meas:
+    if 'resample' in radiocarbonObject.settings or include_meas:   
+    #if hasattr(radiocarbonObject.settings, 'resample') or include_meas:
     #if radiocarbonObject.settings['resample'][0] == 'M' or int(radiocarbonObject.settings['resample'][0])>0 or include_meas:
         p.add_tools(HoverTool(
             names=['nuclear'],
