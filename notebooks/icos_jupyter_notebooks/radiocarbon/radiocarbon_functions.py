@@ -361,15 +361,17 @@ def plotmap(stations, selected_facility, basemap, d_icon='cloud', icon_col='blue
 
 
         if big_icon:
-            icon_size = (33,40)
+            icon_size = (28,40)
+            file_icon = 'marker_nuclear_facilities_selected.png'
                 
         else:
             icon_size = (16.6,20)
+            file_icon = 'marker_nuclear_facilities.png'
         #Create marker and add it to the map:
         folium.Marker(location=[float(latitude),
                                 float(longitude)],
                       popup=popup,
-                      icon=folium.CustomIcon(os.path.join(folder_w_data, 'marker_nuclear_facilities.png'), icon_size=icon_size),
+                      icon=folium.CustomIcon(os.path.join(folder_w_data, file_icon), icon_size=icon_size),
                       tooltip=(name_facility + ': click to see emissions')).add_to(map_obj)
 
 
@@ -897,11 +899,21 @@ def plot_radiocarbon_bokhe(radiocarbonObject, include_meas=False):
     station = radiocarbonObject.stationId
     
     if include_meas:
-        source = ColumnDataSource(data = radiocarbonObject.df_for_plot)
         
-        #not in the object when processing measured data, hence add it here for the rest of the function to work.
-        radiocarbonObject.settings['resample'] = 'None'
         
+        if 'flask' in radiocarbonObject.settings and radiocarbonObject.settings['flask']==True:
+            source = ColumnDataSource(data = radiocarbonObject.df_for_export)
+        else:
+        
+            source = ColumnDataSource(data = radiocarbonObject.df_for_plot)
+            
+        start_date_start = min(radiocarbonObject.df_for_export['date_start_model'])
+        end_date_end = max(radiocarbonObject.df_for_export['date_end_model'])
+        
+        #use year, month, day... don't want the hour in the title 
+        string_start_end_date =  ', ' + str(start_date_start.year) + '-' + str(start_date_start.month) + '-' + str(start_date_start.day) + ' to ' + str(end_date_end.year) + '-' + str(end_date_end.month) + '-' + str(end_date_end.day)
+          
+    #will happen when it is only modelled data (gui_stilt) - for date range in title
     else:
     
         if radiocarbonObject.settings['resample'][0] == 'M' or int(radiocarbonObject.settings['resample'][0])>0:
@@ -910,11 +922,13 @@ def plot_radiocarbon_bokhe(radiocarbonObject, include_meas=False):
 
         else:
             source = ColumnDataSource(data = radiocarbonObject.dfDelta14CStation)
-    
+
+        string_start_end_date =  ', ' + str(radiocarbonObject.settings['startYear']) + '-' + str(radiocarbonObject.settings['startMonth']) + '-' + str(radiocarbonObject.settings['startDay']) + ' to ' + str(radiocarbonObject.settings['endYear']) + '-'+str(radiocarbonObject.settings['endMonth']) + '-'+str(radiocarbonObject.settings['endDay'])
+        
     if station_name!='':
-        for_title='∆14C at ' + station_name + ' (' + station + ')'
+        for_title='∆14C at ' + station_name + ' (' + station + ')' + string_start_end_date
     else:
-        for_title='∆14C at ' + station
+        for_title='∆14C at ' + station + string_start_end_date
     
     #Create a figure object:
     p = bokeh_figure(plot_width=1000,
@@ -924,19 +938,113 @@ def plot_radiocarbon_bokhe(radiocarbonObject, include_meas=False):
                x_axis_type='datetime',
                title = for_title,
                tools='pan,box_zoom,wheel_zoom,undo,redo,reset,save')
-
-    #Create line glyph:
-    nuclear = p.line('date','delta14C_nuclear', source=source, name='nuclear', line_width=1, color='red', legend_label='Nuclear ∆14C') 
-    fossil= p.line('date','delta14C_fossil_fuel', source=source, line_width=1, color='black', legend_label='Fossil fuel ∆14C') 
-    background =  p.line('date','delta14C_background', source=source, line_width=1, color='darkorange', legend_label='Background ∆14C')
-    modelled =  p.line('date','delta14C_modelled', source=source, line_width=3, color='blue', legend_label=('Modelled ∆14C'))
-     
     
-    if include_meas:
-        #maybe update name of this column
-        measured =  p.line('date','Measurement_value', source=source, line_width=3, color='green', legend_label=('Measured ∆14C'))
+
+    #if hasattr(radiocarbonObject, 'dfDelta14CStationResampleBokeh'):
+    #will happen for model data (gui_stilt)
+    if include_meas == False:
         
-    #Set title attributes:
+        nuclear = p.line('date','delta14C_nuclear', source=source, name='nuclear', line_width=1, color='#e41a1c', legend_label='Nuclear ∆14C') 
+        fossil= p.line('date','delta14C_fossil_fuel', source=source, line_width=1, color='black', legend_label='Fossil fuel ∆14C') 
+        background =  p.line('date','delta14C_background', source=source, line_width=1, color='#984ea3', legend_label='Background ∆14C')
+        modelled =  p.line('date','delta14C_modelled', source=source, line_width=3, color='#0072B2', legend_label=('Modelled ∆14C'))
+        
+        list_tuples_for_tooltip_daterange =  [( 'Start UTC', '@date_start{%Y-%m-%d}'),
+            ( 'End UTC', '@date_end{%Y-%m-%d}'),
+            ( 'Nuclear ∆14C',  '@{delta14C_nuclear}{0.2f}' ),
+            ( 'Fossil fuel ∆14C',  '@{delta14C_fossil_fuel}{0.2f}' ),
+            ( 'Background ∆14C',  '@{delta14C_background}{0.2f}' ),
+            ( 'Modelled ∆14C',  '@{delta14C_modelled}{0.2f}' ),
+            ( '# footprints',  '@{count}{0f}' ),
+            ( '# NaN footprints',  '@{count_nan}{0f}' )]
+    
+        list_tuples_for_tooltip_singledate = [( 'UTC',   '@date{%Y-%m-%d}'),
+            ( 'Nuclear ∆14C',  '@{delta14C_nuclear}{0.2f}' ),
+            ( 'Fossil fuel ∆14C',  '@{delta14C_fossil_fuel}{0.2f}' ),
+            ( 'Background ∆14C',  '@{delta14C_background}{0.2f}' ),
+            ( 'Modelled ∆14C',  '@{delta14C_modelled}{0.2f}' )]
+
+           
+        #date range only if resampled data 
+        if radiocarbonObject.dfDelta14CStationResampleBokeh is not None:
+
+            p.add_tools(HoverTool(names=['nuclear'],
+                tooltips=list_tuples_for_tooltip_daterange,
+                formatters={'@date_start': 'datetime', '@date_end':'datetime'},
+                mode='vline'))
+            
+        else:
+            
+            p.add_tools(HoverTool(
+            names=['nuclear'],
+            tooltips=list_tuples_for_tooltip_singledate,
+            formatters={'@date': 'datetime'},
+            mode='vline'))
+            
+    #when measured date, either from CP or uploaded      
+    else:
+        
+        #when uploaded it is sometimes standard deviation and sometimes standard error. 
+        #this if statement will happen in case of uploaded data. 
+        if 'stdValue' in radiocarbonObject.settings:
+            
+            std_value_text = radiocarbonObject.settings['stdValue']
+        
+        else: 
+            
+            #In case of uploaded data from the CP, always standard deviation.
+            std_value_text = 'Std Dev meas'
+
+        if 'flask' in radiocarbonObject.settings and radiocarbonObject.settings['flask']==True:
+            
+            #shuld be points rather than lines
+            nuclear = p.triangle('date_start_model','delta14C_nuclear', source=source, name='nuclear', size=5, color='#e41a1c', legend_label='Nuclear ∆14C') 
+            fossil= p.diamond('date_start_model','delta14C_fossil_fuel', source=source, size=5, color='black', legend_label='Fossil fuel ∆14C') 
+            background =  p.cross('date_start_model','delta14C_background', source=source, size=5, color='#984ea3', legend_label='Background ∆14C')
+            modelled =  p.circle('date_start_model','delta14C_modelled', source=source, size=8, color='#0072B2', legend_label=('Modelled ∆14C'))
+        
+            measured =  p.square('date_start_model','Measurement_value', source=source, size=8, color='#4daf4a', legend_label=('Measured ∆14C'))
+            
+
+            p.add_tools(HoverTool(names=['nuclear'],
+                tooltips=[( 'UTC',   '@date_start_model{%Y-%m-%d}'),
+                ( 'Nuclear ∆14C',  '@{delta14C_nuclear}{0.2f}' ),
+                ( 'Fossil fuel ∆14C',  '@{delta14C_fossil_fuel}{0.2f}' ),
+                ( 'Background ∆14C',  '@{delta14C_background}{0.2f}' ),
+                ( 'Modelled ∆14C',  '@{delta14C_modelled}{0.2f}' ),
+                ('Measured ∆14C',  '@{Measurement_value}{0.2f}' ),
+                (std_value_text,'@{Std_deviation_measurement}{0.2f}' ),
+                ('# footprints',  '@{count}{0f}' ),
+                ( '# NaN footprints',  '@{count_nan}{0f}' )],
+                formatters={'@date_start_model': 'datetime'},
+                mode='vline'))
+
+        else:
+
+            nuclear = p.line('date','delta14C_nuclear', source=source, name='nuclear', line_width=1, color='#e41a1c', legend_label='Nuclear ∆14C') 
+            fossil= p.line('date','delta14C_fossil_fuel', source=source, line_width=1, color='black', legend_label='Fossil fuel ∆14C') 
+            background =  p.line('date','delta14C_background', source=source, line_width=1, color='#984ea3', legend_label='Background ∆14C')
+            modelled =  p.line('date','delta14C_modelled', source=source, line_width=3, color='#0072B2', legend_label=('Modelled ∆14C'))
+        
+            measured =  p.line('date','Measurement_value', source=source, line_width=3, color='#4daf4a', legend_label=('Measured ∆14C'))
+ 
+            
+            p.add_tools(HoverTool(names=['nuclear'],
+                    tooltips=[( 'Start UTC', '@date_start{%Y-%m-%d}'),
+                        ( 'End UTC', '@date_end{%Y-%m-%d}'),
+                        ( 'Nuclear ∆14C',  '@{delta14C_nuclear}{0.2f}' ),
+                        ( 'Fossil fuel ∆14C',  '@{delta14C_fossil_fuel}{0.2f}' ),
+                        ( 'Background ∆14C',  '@{delta14C_background}{0.2f}' ),
+                        ( 'Modelled ∆14C',  '@{delta14C_modelled}{0.2f}' ),
+                        ('Measured ∆14C',  '@{Measurement_value}{0.2f}' ),
+                        (std_value_text,'@{Std_deviation_measurement}{0.2f}'),
+                        ( '# footprints',  '@{count}{0f}' ),
+                        ( '# NaN footprints',  '@{count_nan}{0f}' )],
+                    formatters={'@date_start': 'datetime', '@date_end':'datetime'},
+                    mode='vline'))
+        
+        
+   #Set title attributes:
     p.title.align = 'center'
     p.title.text_font_size = '13pt'
     p.title.offset = 15
@@ -962,55 +1070,6 @@ def plot_radiocarbon_bokhe(radiocarbonObject, include_meas=False):
 
     p.legend.location = "top_left"
     p.legend.click_policy="hide"
-    
-    list_tuples_for_tooltip =  [( 'Time (UTC)',   ('@date_start{%Y-%m-%d}' + ' to ' + '@date_end{%Y-%m-%d}')),
-                ( 'Nuclear ∆14C',  '@{delta14C_nuclear}{0.2f}' ),
-                ( 'Fossil fuel ∆14C',  '@{delta14C_fossil_fuel}{0.2f}' ),
-                ( 'Background ∆14C',  '@{delta14C_background}{0.2f}' ),
-                ( 'Modelled ∆14C',  '@{delta14C_modelled}{0.2f}' ),
-                ( 'Count averaged footprints',  '@{count}{0f}' ),
-                ( 'Count NaN footprints',  '@{count_nan}{0f}' )]
-    
-
-    if include_meas:
-        
-        list_tuples_for_tooltip.append(tuple(('Measured ∆14C',  '@{Measurement_value}{0.2f}' )))
-        list_tuples_for_tooltip.append(tuple(('Standard deviation measurement',  '@{Std_deviation_measurement}{0.2f}' )))
-
-    if hasattr(radiocarbonObject.settings, 'resample') or include_meas:
-    #if radiocarbonObject.settings['resample'][0] == 'M' or int(radiocarbonObject.settings['resample'][0])>0 or include_meas:
-        p.add_tools(HoverTool(
-            names=['nuclear'],
-            tooltips=list_tuples_for_tooltip,
-            formatters={
-            '@date_start'      : 'datetime',
-            '@date_end'      : 'datetime'
-        },
-
-
-            # display a tooltip whenever the cursor is vertically in line with a glyph
-            mode='vline'
-        ))
-    
-    #when not integration time. 
-    else:
-        p.add_tools(HoverTool(
-        names=['nuclear'],
-        tooltips=[
-            ( 'Time (UTC)',   '@date{%Y-%m-%d}'),
-            ( 'Nuclear ∆14C',  '@{delta14C_nuclear}{0.2f}' ),
-            ( 'Fossil fuel ∆14C',  '@{delta14C_fossil_fuel}{0.2f}' ),
-            ( 'Background ∆14C',  '@{delta14C_background}{0.2f}' ),
-            ( 'Modelled ∆14C',  '@{delta14C_modelled}{0.2f}' )
-        ],
-
-        formatters={
-            '@date'      : 'datetime'
-        },
-        # display a tooltip whenever the cursor is vertically in line with a glyph
-        mode='vline'
-    ))
-    
 
     show(p)
     
@@ -1019,13 +1078,14 @@ def plot_nuclear_contamination_by_facility_bokhe(radiocarbonObject):
     
     station_name = radiocarbonObject.settings['stilt']['name']
     
-    station = radiocarbonObject.stationId
+    station = radiocarbonObject.stationId  
+
     
-    if radiocarbonObject.dfDelta14CStationResampleBokeh is not None:
+    if radiocarbonObject.dfDelta14CFacilityResampleBokeh is not None:
         
         dfDelta14CFacility = radiocarbonObject.dfDelta14CFacilityResampleBokeh
         dfDelta14CStation = radiocarbonObject.dfDelta14CStationResampleBokeh
-        list_tuples_for_tooltip=[('Time (UTC)', '@date_start{%Y-%m-%d}' + ' to ' + '@date_end{%Y-%m-%d}'), ('Count averaged footprints',  '@{count}{0f}'), ('Count NaN footprints',  '@{count_nan}{0f}')]
+        list_tuples_for_tooltip=[('Start UTC', '@date_start{%Y-%m-%d}'), ('End UTC', '@date_end{%Y-%m-%d}'), ('# footprints',  '@{count}{0f}'), ('# NaN footprints',  '@{count_nan}{0f}')]
         
         formatters = {'@date_start':'datetime','@date_end':'datetime'}
     
@@ -1034,7 +1094,7 @@ def plot_nuclear_contamination_by_facility_bokhe(radiocarbonObject):
     
         dfDelta14CStation = radiocarbonObject.dfDelta14CStation
         
-        list_tuples_for_tooltip=[('Time (UTC)', '@date{%Y-%m-%d %H:%M:%S}')]
+        list_tuples_for_tooltip=[('UTC', '@date{%Y-%m-%d}')]
         
         formatters = {'@date':'datetime'}
 
@@ -1046,10 +1106,13 @@ def plot_nuclear_contamination_by_facility_bokhe(radiocarbonObject):
     
     source_total = ColumnDataSource(data = dfDelta14CStation)
     
+    
+    string_start_end_date =  ', ' + str(radiocarbonObject.settings['startYear']) + '-' + str(radiocarbonObject.settings['startMonth']) + '-' + str(radiocarbonObject.settings['startDay']) + ' to ' + str(radiocarbonObject.settings['endYear']) + '-'+str(radiocarbonObject.settings['endMonth']) + '-'+str(radiocarbonObject.settings['endDay'])
+    
     if station_name!='':
-        for_title='∆14C at ' + station_name + ' (' + station + ') by nuclear facility (>' + str(threshold) + ' permil)'
+        for_title='∆14C at ' + station_name + ' (' + station + ') by nuclear facility (>' + str(threshold) + ' permil)' + string_start_end_date
     else:
-        for_title='∆14C at ' + station + 'by nuclear facility (>' + str(threshold) + ' permil)'
+        for_title='∆14C at ' + station + 'by nuclear facility (>' + str(threshold) + ' permil) ' + string_start_end_date
 
     #Create a figure object:
     p = bokeh_figure(plot_width=1000,
@@ -1061,7 +1124,9 @@ def plot_nuclear_contamination_by_facility_bokhe(radiocarbonObject):
                tools='pan,box_zoom,wheel_zoom,undo,redo,reset,save')
 
     # line with nuclear 
-    p.line('date','delta14C_nuclear', source=source_total, line_width=1, color='red', legend_label=('Total ∆14C nuclear (' + str( round(average_nuclear_total,4)) + ' permil)'))
+    
+
+    p.line('date','delta14C_nuclear', source=source_total, line_width=1, color='#e41a1c', legend_label=('∆14C total (' + str( round(average_nuclear_total,2)) + ' permil)'))
 
     colors= seaborn.color_palette('colorblind', n_colors=71)
 
@@ -1089,7 +1154,7 @@ def plot_nuclear_contamination_by_facility_bokhe(radiocarbonObject):
         average_contamination = dfDelta14CFacility[column_name].mean()
         
 
-        by_facility= p.line('date', column_name, source=source_facility, line_width=1, color=colors[index],legend_label=(column_name + ' (average ' + str(round(average_contamination,4)) + ' permil)'))
+        by_facility= p.line('date', column_name, source=source_facility, line_width=1, color=colors[index],legend_label=(column_name + ' (' + str(round(average_contamination,2)) + ' permil)'))
 
         average_contamination = dfDelta14CFacility[column_name].mean()
         
@@ -1386,9 +1451,9 @@ def list_station_tuples_w_radiocarbon_data():
         
         station_name = row['stationName']
         station_id = row['stationId']
-        sampling_height = row['samplingHeight']
+        sampling_height = int(float(row['samplingHeight']))
         
-        display = station_name + ' (' + str(sampling_height) + ')'
+        display = station_name + ' (' + str(sampling_height) + 'm)'
         
         values_dictionary = {'station_code': station_id, 'sampling_height':sampling_height}
         
@@ -1422,7 +1487,7 @@ def radiocarbon_cp_results(radiocarbonObjectMeas):
     bg_values=get_background_values_nuclear_corrected(background_filename)
 
     #before SamplingStartDate and SamplingEndDate (date_start, date_end)
-    df_for_export = pd.DataFrame(columns=['date_start','date_end','Measurement_value','Std_deviation_measurement','delta14C_background', 'delta14C_nuclear','delta14C_fossil_fuel', 'delta14C_modelled','radd_year','count', 'count_nan'])
+    df_for_export = pd.DataFrame(columns=['date_start_model','date_end_model','date_start_meas','date_end_meas','Measurement_value','Std_deviation_measurement','delta14C_background', 'delta14C_nuclear','delta14C_fossil_fuel', 'delta14C_modelled','radd_year','count', 'count_nan'])
     
     #this dataframe is added to twice for each measurement (since integrated - start and end data)
     #the 'date' column will first get the same value as SamplingStartDate and the second time the 
@@ -1435,159 +1500,173 @@ def radiocarbon_cp_results(radiocarbonObjectMeas):
     #the plot dataframe will be added to twice in each loop (start - and end time same values for line in graph
     #across integration time. 
     index_plot=0
+    
+    if 'dateStart' in radiocarbonObjectMeas.settings:
+        user_date_range_start = pd.to_datetime(radiocarbonObjectMeas.settings['dateStart'])
+        user_date_range_end = pd.to_datetime(radiocarbonObjectMeas.settings['dateEnd'])
+    else:
+        user_date_range_start=pd.Timestamp(2006, 1, 1)
+        user_date_range_end=pd.Timestamp(2030, 1, 1)
+        
 
     #access many at the same time (all the entries - one for each radiocarbon measurement)
     #for each entry at the carbon portal (not all will be used - only when footprints for the same time period)
     first=True
     for (radiocarbon_measurement, measurement_start_date, integration_time, std_deviation) in zip(radiocarbon_data['14C'], radiocarbon_data['TIMESTAMP'], radiocarbon_data['IntegrationTime'], radiocarbon_data['Stdev']):
+               
+    
+        #want to keep the original date for the export.
+        measurement_start_date_model = measurement_start_date
 
         #prev - if not in list_hours.
         if measurement_start_date.hour not in timeselect_list or measurement_start_date.minute>0:
 
             updated_hour=min(timeselect_list, key=lambda x:abs(x-measurement_start_date.hour))
 
-            measurement_start_date = dt.datetime(int(measurement_start_date.year), int(measurement_start_date.month), int(measurement_start_date.day), updated_hour, 0)
+            measurement_start_date_model = dt.datetime(int(measurement_start_date.year), int(measurement_start_date.month), int(measurement_start_date.day), updated_hour, 0)
 
-        measurement_end_date=measurement_start_date + timedelta(days=int(integration_time))
+        measurement_end_date_model = measurement_start_date_model + timedelta(days=int(integration_time))
+        measurement_end_date = measurement_start_date + timedelta(days=int(integration_time))
+        
+        if measurement_start_date>user_date_range_start and measurement_end_date<user_date_range_end:
 
-        #now filtered date_range_measured.
-        date_range_measured = date_range_hour_filtered(measurement_start_date, measurement_end_date, timeselect_list)
+            #now filtered date_range_measured.
+            date_range_measured = date_range_hour_filtered(measurement_start_date_model, measurement_end_date_model, timeselect_list)
 
-        if date_range_measured.empty:
-            print('no footprints for date range of measured concentration (',min(date_range_measured), 'to', max(date_range_measured), ')')
-            continue
-
-        modelled_concentration = read_stilt_timeseries(stilt_station, date_range_measured)
-
-        #which radd-year(s) - radiocarbon data - used for each sample. Max 2... integration time about 14 days.
-        year_list=[]
-
-        #rather df_each_footprint? 
-        df_each_meas = pd.DataFrame(columns=['delta14C_background', 'delta14C_nuclear','delta14C_fossil_fuel', 'delta14C_modelled'])
-
-        index_each_meas = 0
-        count_nan = 0
-    
-        #now will print a warning for each measurement. 
-        for date in date_range_measured:
-
-            filename=(pathFP+stilt_station+'/'+str(date.year)+'/'+str(date.month).zfill(2)+'/'
-             +str(date.year)+'x'+str(date.month).zfill(2)+'x'+str(date.day).zfill(2)+'x'+str(date.hour).zfill(2)+'/foot')
-
-            if os.path.isfile(filename)==False:
-                count_nan = count_nan + 1
+            if date_range_measured.empty:
+                print('no footprints for date range of measured concentration (',min(date_range_measured), 'to', max(date_range_measured), ')')
                 continue
 
-            f_fp = cdf.Dataset(filename)
+            modelled_concentration = read_stilt_timeseries(stilt_station, date_range_measured)
 
-            fp_current=f_fp.variables['foot'][:,:,:]
+            #which radd-year(s) - radiocarbon data - used for each sample. Max 2... integration time about 14 days.
+            year_list=[]
 
-            modelled_concentration_value=modelled_concentration['co2.stilt'][date]/1000000
+            #rather df_each_footprint? 
+            df_each_meas = pd.DataFrame(columns=['delta14C_background', 'delta14C_nuclear','delta14C_fossil_fuel', 'delta14C_modelled'])
 
-            #in micromol for fossil fuel
-            modelled_concentration_date_time=modelled_concentration['co2.stilt'][date]
+            index_each_meas = 0
+            count_nan = 0
 
-            try:
-                if not isinstance(modelled_concentration_value, float) and math.isnan(modelled_concentration_value)==False:
-                    continue 
+            #now will print a warning for each measurement. 
+            for date in date_range_measured:
 
-            #happen for ex date 2017-01-01 00:00. A series because two are matched with the date. 
-            except:
+                filename=(pathFP+stilt_station+'/'+str(date.year)+'/'+str(date.month).zfill(2)+'/'
+                 +str(date.year)+'x'+str(date.month).zfill(2)+'x'+str(date.day).zfill(2)+'x'+str(date.hour).zfill(2)+'/foot')
 
-                continue
+                if os.path.isfile(filename)==False:
+                    count_nan = count_nan + 1
+                    continue
 
-            date_for_fit_JFJ=pd.Timestamp(date.year, date.month, date.day)
+                f_fp = cdf.Dataset(filename)
 
-            try:
-                background_value=bg_values.loc[bg_values['DateTime'] == date_for_fit_JFJ, 'CorrectedFIT'].iloc[0]
+                fp_current=f_fp.variables['foot'][:,:,:]
 
-            #when no match with date in bg_values, find closest and match
-            except:
+                modelled_concentration_value=modelled_concentration['co2.stilt'][date]/1000000
 
-                nearest_date_test=nearest_date(bg_values.DateTime, date)
+                #in micromol for fossil fuel
+                modelled_concentration_date_time=modelled_concentration['co2.stilt'][date]
 
-                background_value=bg_values.loc[bg_values['DateTime'] == nearest_date_test, 'CorrectedFIT'].iloc[0]
+                try:
+                    if not isinstance(modelled_concentration_value, float) and math.isnan(modelled_concentration_value)==False:
+                        continue 
 
-            try:    
-                JFJ_foss = bg_values.loc[bg_values['DateTime'] == date_for_fit_JFJ, 'ffCO2'].iloc[0]
-            except:
-                nearest_date_test=nearest_date(bg_values.DateTime, date)
-                JFJ_foss = bg_values.loc[bg_values['DateTime'] == nearest_date_test, 'ffCO2'].iloc[0]
+                #happen for ex date 2017-01-01 00:00. A series because two are matched with the date. 
+                except:
 
-            #correct for fossil fuel emissions in the at supposedly clean background site
-            #if smaller component at the selected station, the fossil fuel component (delta 14C) will be positive rather than negative.
-            foss_fuel_station_minus_jfj_ppm=(modelled_concentration['co2.fuel.oil'][date]+modelled_concentration['co2.fuel.gas'][date]+\
-                                 modelled_concentration['co2.fuel.coal'][date]-JFJ_foss)
+                    continue
 
-            modelled_delta_c14_not_nuclear_corrected=(foss_fuel_station_minus_jfj_ppm/modelled_concentration_date_time)*(background_value+1000)-background_value
+                date_for_fit_JFJ=pd.Timestamp(date.year, date.month, date.day)
 
-            modelled_delta_c14_not_nuclear_corrected=-modelled_delta_c14_not_nuclear_corrected
+                try:
+                    background_value=bg_values.loc[bg_values['DateTime'] == date_for_fit_JFJ, 'CorrectedFIT'].iloc[0]
 
-            fossil_fuel_component=modelled_delta_c14_not_nuclear_corrected-background_value
+                #when no match with date in bg_values, find closest and match
+                except:
 
+                    nearest_date_test=nearest_date(bg_values.DateTime, date)
 
-            #if first time (first defined out of loop)- access the radiocarbon data for specific year.
-            #also, if the year of the "current" date is new (ex jan 1 2016). Access the data for the current year instead. 
-            if first==True or date.year!=int(year):
+                    background_value=bg_values.loc[bg_values['DateTime'] == nearest_date_test, 'CorrectedFIT'].iloc[0]
 
-                year=date.year
+                try:    
+                    JFJ_foss = bg_values.loc[bg_values['DateTime'] == date_for_fit_JFJ, 'ffCO2'].iloc[0]
+                except:
+                    nearest_date_test=nearest_date(bg_values.DateTime, date)
+                    JFJ_foss = bg_values.loc[bg_values['DateTime'] == nearest_date_test, 'ffCO2'].iloc[0]
 
-                fp_radiocarbon_bq_s_m2, radd_year = access_best_nuclear_emission_data(year)
+                #correct for fossil fuel emissions in the at supposedly clean background site
+                #if smaller component at the selected station, the fossil fuel component (delta 14C) will be positive rather than negative.
+                foss_fuel_station_minus_jfj_ppm=(modelled_concentration['co2.fuel.oil'][date]+modelled_concentration['co2.fuel.gas'][date]+\
+                                     modelled_concentration['co2.fuel.coal'][date]-JFJ_foss)
 
-                first=False
+                modelled_delta_c14_not_nuclear_corrected=(foss_fuel_station_minus_jfj_ppm/modelled_concentration_date_time)*(background_value+1000)-background_value
 
-            #keeping nuclear contamination it a grid (fp_radiocarbon_bq_s_m2*fp_current) to see the resulting shift in radiocarbon caused by each individual cell
-            delta_radiocarbon_contribution_grid=(((fp_radiocarbon_bq_s_m2*fp_current) / (modelled_concentration_value* Mc * Aabs)) ) *1000
+                modelled_delta_c14_not_nuclear_corrected=-modelled_delta_c14_not_nuclear_corrected
 
-            #get one value summed value of this grid for each date/time. What is used in the time series output from running this cell
-            delta_radiocarbon_contribution_summed= delta_radiocarbon_contribution_grid[:][:].sum()
-
-            #modelled delta 14C - nuclear corrected (not included in the Levin et al paper)
-            modelled_delta_c14_nuclear_corrected=modelled_delta_c14_not_nuclear_corrected+delta_radiocarbon_contribution_summed
-
-            #'delta14C_background', 'delta14C_nuclear','delta14C_fossil_fuel', 'delta14C_modelled'
-            df_each_meas.loc[index_each_meas] = [background_value, delta_radiocarbon_contribution_summed, fossil_fuel_component, modelled_delta_c14_nuclear_corrected]
-
-            index_each_meas=index_each_meas + 1
-
-            #if always using the same RADD year for all footprints in integrated sample (not ex dec 20 to jan 4)
-            if radd_year not in year_list:
-                year_list.append(radd_year)
-
-        #average given date-time. If there are values to average (not division by 0)
-        #shift per integrated time is nuclear contamination (delta 14C)
-        if len(df_each_meas)>0:
+                fossil_fuel_component=modelled_delta_c14_not_nuclear_corrected-background_value
 
 
-            #get the correct information with regards to what RADD data has been used. 
-            if len(year_list)>1:
-                radd_data_year_export=(year_list[0] + '&' + year_list[1])   
-            elif len(year_list)==1:
-                radd_data_year_export=year_list[0]
-            else:
-                radd_data_year_export='no data'
+                #if first time (first defined out of loop)- access the radiocarbon data for specific year.
+                #also, if the year of the "current" date is new (ex jan 1 2016). Access the data for the current year instead. 
+                if first==True or date.year!=int(year):
 
-            shift_nuclear=df_each_meas["delta14C_nuclear"].mean()
-            shift_fossil_fuel=df_each_meas["delta14C_fossil_fuel"].mean()
-            shift_background=df_each_meas["delta14C_background"].mean()
-            shift_modelled=df_each_meas["delta14C_modelled"].mean()
-            
-            count=len(date_range_measured)
-            #count_nan=
+                    year=date.year
 
-            #dataframe already created at the top. here append whole row with values for export. one row per integrated sample
-            df_for_export.loc[index] = [measurement_start_date, measurement_end_date, radiocarbon_measurement, std_deviation,shift_background, shift_nuclear, shift_fossil_fuel, shift_modelled, radd_year, count, count_nan]
+                    fp_radiocarbon_bq_s_m2, radd_year = access_best_nuclear_emission_data(year)
 
-            #index to move to the next row for the next integrated sample 
-            index=index+1  
+                    first=False
 
-            df_for_plot.loc[index_plot] = [measurement_start_date, measurement_start_date, measurement_end_date, radiocarbon_measurement, std_deviation,shift_background, shift_nuclear, shift_fossil_fuel, shift_modelled, radd_year, count, count_nan]
+                #keeping nuclear contamination it a grid (fp_radiocarbon_bq_s_m2*fp_current) to see the resulting shift in radiocarbon caused by each individual cell
+                delta_radiocarbon_contribution_grid=(((fp_radiocarbon_bq_s_m2*fp_current) / (modelled_concentration_value* Mc * Aabs)) ) *1000
 
-            index_plot = index_plot + 1
+                #get one value summed value of this grid for each date/time. What is used in the time series output from running this cell
+                delta_radiocarbon_contribution_summed= delta_radiocarbon_contribution_grid[:][:].sum()
 
-            #measurement_end_date into date column. otherwise same values as above record.
-            df_for_plot.loc[index_plot] = [measurement_end_date, measurement_start_date, measurement_end_date, radiocarbon_measurement, std_deviation,shift_background, shift_nuclear, shift_fossil_fuel, shift_modelled, radd_year, count, count_nan]
-            index_plot = index_plot + 1
+                #modelled delta 14C - nuclear corrected (not included in the Levin et al paper)
+                modelled_delta_c14_nuclear_corrected= modelled_delta_c14_not_nuclear_corrected + delta_radiocarbon_contribution_summed
+
+                #'delta14C_background', 'delta14C_nuclear','delta14C_fossil_fuel', 'delta14C_modelled'
+                df_each_meas.loc[index_each_meas] = [background_value, delta_radiocarbon_contribution_summed, fossil_fuel_component, modelled_delta_c14_nuclear_corrected]
+
+                index_each_meas=index_each_meas + 1
+
+                #if always using the same RADD year for all footprints in integrated sample (not ex dec 20 to jan 4)
+                if radd_year not in year_list:
+                    year_list.append(radd_year)
+
+            #average given date-time. If there are values to average (not division by 0)
+            #shift per integrated time is nuclear contamination (delta 14C)
+            if len(df_each_meas)>0:
+
+
+                #get the correct information with regards to what RADD data has been used. 
+                if len(year_list)>1:
+                    radd_data_year_export=(year_list[0] + '&' + year_list[1])   
+                elif len(year_list)==1:
+                    radd_data_year_export=year_list[0]
+                else:
+                    radd_data_year_export='no data'
+
+                shift_nuclear=df_each_meas["delta14C_nuclear"].mean()
+                shift_fossil_fuel=df_each_meas["delta14C_fossil_fuel"].mean()
+                shift_background=df_each_meas["delta14C_background"].mean()
+                shift_modelled=df_each_meas["delta14C_modelled"].mean()
+
+                count=len(date_range_measured)
+
+                #dataframe already created at the top. here append whole row with values for export. one row per integrated sample
+                df_for_export.loc[index] = [measurement_start_date_model, measurement_end_date_model,measurement_start_date, measurement_end_date, radiocarbon_measurement, std_deviation,shift_background, shift_nuclear, shift_fossil_fuel, shift_modelled, radd_year, count, count_nan]
+
+                #index to move to the next row for the next integrated sample 
+                index=index+1  
+
+                df_for_plot.loc[index_plot] = [measurement_start_date_model, measurement_start_date_model, measurement_end_date, radiocarbon_measurement, std_deviation,shift_background, shift_nuclear, shift_fossil_fuel, shift_modelled, radd_year, count, count_nan]
+
+                index_plot = index_plot + 1
+
+                #measurement_end_date into date column. otherwise same values as above record.
+                df_for_plot.loc[index_plot] = [measurement_end_date_model, measurement_start_date_model, measurement_end_date_model, radiocarbon_measurement, std_deviation,shift_background, shift_nuclear, shift_fossil_fuel, shift_modelled, radd_year, count, count_nan]
+                index_plot = index_plot + 1
                 
     return df_for_export, df_for_plot
                
@@ -1628,6 +1707,7 @@ def dropdown_stations_from_file(radiocarbon_data, location, sampling_height, crl
         
     return list_of_tuples_for_dropdown
 
+"""
 #will this be needed? use the same as radiocarbon_cp_results? 
 def radiocarbon_file_result(radiocarbonObjectFile):
     
@@ -1823,7 +1903,26 @@ def radiocarbon_file_result(radiocarbonObjectFile):
             index_plot = index_plot + 1
                 
     return df_for_export, df_for_plot
+"""
+import warnings
 
+from pandas.core.common import SettingWithCopyWarning
+
+warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
+                      
+def round_df(df):
+    
+    df_columns = df.columns.tolist()
+    list_except = ['radd_year', 'nan_for_count', 'nan_for_graph', 'count', 'count_nan']
+    for column in df_columns:
+        if column not in list_except:
+            try:
+                
+                df[column] = df[column].astype(float).round(2)
+            except:
+                continue
+    return df
+    
 def download_result(radiocarbonObject, df_type='Station'):
    
     station=radiocarbonObject.stationId
@@ -1832,21 +1931,23 @@ def download_result(radiocarbonObject, df_type='Station'):
     stilt_station_lon=radiocarbonObject.settings['stilt']['lon']
     background_filename=radiocarbonObject.settings['backgroundFilename']
     timeselect=radiocarbonObject.settings['timeOfDay']
-    #timeselect_list_string=', '.join(str(x) for x in timeselect)
-    
     timeselect_list_string =':00, '.join(str(x) for x in timeselect) + ':00 (UTC)'
     date_today=date_today= current_date.today()
     
     #open a new file with that name and first write some metadata to the top of the file
     
-    if df_type=='CP_data' or df_type=='HEI_data':
+    if df_type=='CP_data' or df_type=='file_data':
         f = open(os.path.join(radiocarbonObject.settings['output_folder'], radiocarbonObject.settings['date/time generated'] + radiocarbonObject.stationId + '_' + df_type + '_analysis_results.csv'), 'a')
         date_range_text= ''
         
     else:
 
+        min_date_range = min(radiocarbonObject.dateRange)
+        max_date_range = max(radiocarbonObject.dateRange)
+        sting_min_date_range = str(min_date_range.year) + '-' + str(min_date_range.month) + '-' + str(min_date_range.day)
+        sting_max_date_range = str(max_date_range.year) + '-' + str(max_date_range.month) + '-' + str(max_date_range.day)
         f = open(os.path.join(radiocarbonObject.settings['output_folder'],'dfDelta14C' + df_type + '.csv'), 'a')
-        date_range_text=('# Footprint selection (date range): ' + str(min(radiocarbonObject.dateRange)) + ' to ' + str(max(radiocarbonObject.dateRange)) + '\n')
+        date_range_text=('# Footprint selection (date range): ' + sting_min_date_range + ' to ' + sting_max_date_range + '\n')
 
     f.write('# Yearly average radiocarbon emissions data from RADD (downloaded 2020-08-25 from https://europa.eu/radd/). See what yearly average was used in column "radd_year".\n')
     f.write('# STILT transport model used to generate footprints:\n# -->10 days backward simulation\n# -->1/8 degrees longitude x 1/12 degrees latitude resolution\n# -->Meteorological data from ECMWF: 3 hourly operational analysis/forecasts on 0.25 x 0.25 degree\n')
@@ -1870,10 +1971,21 @@ def download_result(radiocarbonObject, df_type='Station'):
     if df_type=='Station':
         
         dfDelta14CStation = radiocarbonObject.dfDelta14CStation
+        
+        dfDelta14CStation_columns = dfDelta14CStation.columns.tolist()
+        
+        dfDelta14CStation_columns.remove('nan_for_graph')
+        
+        dfDelta14CStation = dfDelta14CStation[dfDelta14CStation_columns]
+
+        
+        dfDelta14CStation = round_df(dfDelta14CStation)
+
         dfDelta14CStation.to_csv(f,index=False)
         
     elif df_type=='Facility':
         dfDelta14CFacility = radiocarbonObject.dfDelta14CFacility
+        dfDelta14CFacility = round_df(dfDelta14CFacility)
         dfDelta14CFacility.to_csv(f,index=False)
         
     elif df_type=='StationResample':
@@ -1897,6 +2009,9 @@ def download_result(radiocarbonObject, df_type='Station'):
         
         dfDelta14CStationResample = dfDelta14CStationResample[dfDelta14CStationResample_columns]
         
+        dfDelta14CStationResample = round_df(dfDelta14CStationResample)
+
+        
         dfDelta14CStationResample.to_csv(f, index=False)
         
     elif df_type=='FacilityResample':
@@ -1918,6 +2033,8 @@ def download_result(radiocarbonObject, df_type='Station'):
             dfDelta14CFacilityResample = dfDelta14CFacilityResample.drop(columns='for_index')
 
             dfDelta14CFacilityResample = dfDelta14CFacilityResample[dfDelta14CFacilityResample_columns]
+            
+            dfDelta14CFacilityResample = round_df(dfDelta14CFacilityResample)
 
             dfDelta14CFacilityResample.to_csv(f, index=False)
         else:
@@ -1928,16 +2045,20 @@ def download_result(radiocarbonObject, df_type='Station'):
         if radiocarbonObject.dfFacilitiesOverThreshold is not None:
         
             dfFacilitiesOverThreshold = radiocarbonObject.dfFacilitiesOverThreshold
+            
+            dfFacilitiesOverThreshold = round_df(dfFacilitiesOverThreshold)
+
 
             dfFacilitiesOverThreshold.to_csv(f, index=False)
         else:
             f.write('No nuclear facilities contributing > ' + str(radiocarbonObject.settings['threshold']) +' permil')
     
-    elif df_type=='CP_data' or df_type=='HEI_data':
+    elif df_type=='CP_data' or df_type=='file_data':
         
-        #think about naming
-        dfDataFromCP = radiocarbonObject.df_for_export
-        dfDataFromCP.to_csv(f, index=False)
+        dfWMeasData = radiocarbonObject.df_for_export
+        
+        dfWMeasData = round_df(dfWMeasData)
+        dfWMeasData.to_csv(f, index=False)
 
     f.close()
     
@@ -1987,7 +2108,7 @@ def save_data_meas(radiocarbonObject, df_type):
 
     download_result(radiocarbonObject, df_type)
     
-def display_info_html_table(radiocarbonObject, meas_data=False):
+def display_info_html_table(radiocarbonObject, meas_data=False, cp_private=False):
     
     stilt_station = radiocarbonObject.stationId
     stilt_station_alt = radiocarbonObject.settings['stilt']['alt']
@@ -1997,22 +2118,30 @@ def display_info_html_table(radiocarbonObject, meas_data=False):
     background_filename = radiocarbonObject.settings['backgroundFilename']
     
     if meas_data==False:
+        
+        min_date_range = min(radiocarbonObject.dateRange)
+        max_date_range = max(radiocarbonObject.dateRange)
+        sting_min_date_range = str(min_date_range.year) + '-' + str(min_date_range.month) + '-' + str(min_date_range.day)
+        sting_max_date_range = str(max_date_range.year) + '-' + str(max_date_range.month) + '-' + str(max_date_range.day)
 
-        html_date_range = '<b>Footprint selection (date range):</b> ' + str(min(radiocarbonObject.dateRange)) + ' to ' + str(max(radiocarbonObject.dateRange)) + '<br>'
+        html_date_range = '<b>Footprint selection (date range):</b> ' + sting_min_date_range + ' to ' + sting_max_date_range + '<br>'
         
         timeselect_list = radiocarbonObject.settings['timeOfDay']
         timeselect_string=[str(value) for value in timeselect_list]
         timeselect_string =':00, '.join(timeselect_string) + ':00 (UTC)<br>'
         
-        html_timeselect_string = '<b>Footprint selection (hour(s)):</b> ' + timeselect_string
+        html_timeselect_string = '<b>Footprint selection (hours):</b> ' + timeselect_string
         
         html_meas_station = ''
-        
-        html_date_range_meas = ''
         
         flask_string = ''
         
         clr_string = ''
+        
+        string_start_end_date = ''
+        
+        background_info_string = ''
+        
         
     else:
         
@@ -2023,8 +2152,14 @@ def display_info_html_table(radiocarbonObject, meas_data=False):
             clr_string= '<b>CLR Sampler</b>: ' + radiocarbonObject.settings['clrSampler'] 
         else:
             clr_string = ''
+    
+        if cp_private:
+            meas_station = radiocarbonObject.settings['icos']['name']
+            background_info_string = '<br>The background represents the natural ∆14C levels and is based on measurements at stations supposedly not influenced by nuclear power plants and fossil fuel emissions. The measurements have been used to establish harmonic fit curves. The fitted data was provided by Ingeborg Levin at <a href="https://www.icos-cal.eu/crl" target="_blank">the Central Radiocarbon Laboratory in Heidelberg</a>. The curve is based on measurements from IZO (Izana) and MHD (Mace Head) and it is an ongoing discussion what background is best to use.'
 
-        meas_station = stilt_station[0:3]
+        else:
+            background_info_string = ''
+            meas_station = stilt_station[0:3]
         try:
             meas_sampling_height = radiocarbonObject.settings['samplingHeightMeas']
             
@@ -2040,22 +2175,51 @@ def display_info_html_table(radiocarbonObject, meas_data=False):
             
             start_date_column = radiocarbonObject.settings['startDateColumn']
             
+            
         if 'flask' in radiocarbonObject.settings:
             
             flask_string = '<br><b>Measurements from flask</b>: ' + str(radiocarbonObject.settings['flask']) 
             
         else:
             flask_string = ''
-                
-        html_date_range_meas = '<b>Date start of first measurement</b>: ' + str(min(radiocarbonObject.measuredData[start_date_column])) + '<br>' + \
-        '<b>Date start of last measurement</b>: ' + str(max(radiocarbonObject.measuredData[start_date_column])) + '<br>'
+            
+        
+        #will happen for ICOS CP data - for date range in title
+        #use this for the HTML display instead. 
+        if 'TIMESTAMP' in radiocarbonObject.measuredData.columns:
+            start_date_start = pd.Timestamp(min(radiocarbonObject.measuredData['TIMESTAMP']))
+            end_date_start = max(radiocarbonObject.measuredData['TIMESTAMP'])
+            
+            #need to locate the correct integrationtime to know when the last sample ENDED. .
+            end_date_start_integration_time = radiocarbonObject.measuredData.loc[radiocarbonObject.measuredData['TIMESTAMP'] == end_date_start, 'IntegrationTime']
+
+            end_date_end =  pd.Timestamp(end_date_start) + timedelta(days=int(end_date_start_integration_time))
+            #no end date column, rather column "IntegrationTime". End date = start_date + IntegrationTime
+            
+           
+        #will happen for uploaded data - for date range in title
+        else:
+            
+            start_date_column = radiocarbonObject.settings['startDateColumn']
+            end_date_column = radiocarbonObject.settings['endDateColumn']
+            
+            start_date_start = pd.Timestamp(min(radiocarbonObject.measuredData[start_date_column]))
+            end_date_end = pd.Timestamp(max(radiocarbonObject.measuredData[end_date_column]))
+            
+        #use year, month, day... don't want the hour in the title 
+        if cp_private:
+            string_start_end_date =  '<br><b>Date range measurements</b>: ' + str(start_date_start.year) + '-' + str(start_date_start.month) + '-' + str(start_date_start.day) + ' to ' + str(end_date_end.year) + '-' + str(end_date_end.month) + '-' + str(end_date_end.day)  + '<br>If the date range in graph is different, footprints are missing. Compute footprints <a href="https://stilt.icos-cp.eu/worker/" target="_blank">here</a>.'
+            
+        else:
+            string_start_end_date =  '<br><b>Date range measurements</b>: ' + str(start_date_start.year) + '-' + str(start_date_start.month) + '-' + str(start_date_start.day) + ' to ' + str(end_date_end.year) + '-' + str(end_date_end.month) + '-' + str(end_date_end.day)  + '<br>If the date range in graph is different, "Pick start date" and "Pick end date" is the restricting factor or footprints are missing. Compute footprints <a href="https://stilt.icos-cp.eu/worker/" target="_blank">here</a>.'
+          
 
     display(HTML('<p style="font-size:15px;"><b>Information relevant for analysis (also included in csv-file if chosen to download)</b><br><br> '\
     'Yearly average radiocarbon emissions data downloaded 2020-08-25 from <a href="https://europa.eu/radd/" target="_blank">European Commission RAdioactive Discharges Database</a>.<br><br>' + \
     '<b>STILT transport model used to generate footprints:</b><br><ul><li>10 days backward simulation</li><li>1/8° longitude x 1/12° latitude resolution</li><li>Meteorological data from ECMWF: 3 hourly operational analysis/forecasts on 0.25 x 0.25 degree</li></ul>' +\
     '<b>STILT footprints code:</b> ' + stilt_station + '<br><b>STILT altitude above ground:</b> ' + str(stilt_station_alt) + 'm<br>' + \
-    '<b>STILT position latitude:</b> ' + str(stilt_station_lat) + '°N<br>' + '<b>STILT position longitude:</b> ' + str(stilt_station_lon) + '°E<br>' + html_date_range + html_timeselect_string + flask_string + html_meas_station  + html_date_range_meas +  clr_string + \
-    '<br><br><b>∆14C background file</b>: ' + background_filename + '<br><br><b>Date of analysis:</b> ' + str(date_today) + '</p>'))
+    '<b>STILT position latitude:</b> ' + str(stilt_station_lat) + '°N<br>' + '<b>STILT position longitude:</b> ' + str(stilt_station_lon) + '°E<br>' + html_date_range + html_timeselect_string + flask_string + html_meas_station +  clr_string + string_start_end_date +\
+    '<br><b>∆14C background file</b>: ' + background_filename + background_info_string + '<br><br><b>Date of analysis:</b> ' + str(date_today) + '</p>'))
     
     
 ###########################################
@@ -2087,6 +2251,11 @@ def radiocarbon_hei_results(radiocarbonObjectMeas):
 
     #dataframe with all the measurements. Loop over.
     radiocarbon_data= radiocarbonObjectMeas.measuredData
+    
+    #to limit the results of df_for_plot and df_for_export to the date range specified in the GUI
+    user_date_range_start= pd.to_datetime(radiocarbonObjectMeas.settings['dateStart']) 
+    user_date_range_end = pd.to_datetime(radiocarbonObjectMeas.settings['dateEnd'])
+    
 
     #the information needed to calculate modelled delta C14 and fossil fuel component
     bg_values=get_background_values_nuclear_corrected(background_filename)
@@ -2094,16 +2263,16 @@ def radiocarbon_hei_results(radiocarbonObjectMeas):
     #'flask' in settings only if from hei... can be true or false. If true, need additional columns
     #(for "surrounding" nuclear comtamination)
     if radiocarbonObjectMeas.settings['flask']:
-        df_for_export = pd.DataFrame(columns=['date_start','date_end','meas_date_start', 'meas_date_end', 'Measurement_value','Std_deviation_measurement','delta14C_background', 'delta14C_nuclear', 'delta14Cnuclear_plus3', 'delta14Cnuclear_plus6', 'delta14Cnuclear_plus9', 'delta14Cnuclear_minus3', 'delta14Cnuclear_minus6', 'delta14Cnuclear_minus9', 'delta14C_fossil_fuel', 'delta14C_modelled','radd_year','count', 'count_nan'])
+        df_for_export = pd.DataFrame(columns=['date_start_model','date_end_model','meas_date_start', 'meas_date_end', 'Measurement_value','Std_deviation_measurement','delta14C_background', 'delta14C_nuclear', 'delta14Cnuclear_plus3', 'delta14Cnuclear_plus6', 'delta14Cnuclear_plus9', 'delta14Cnuclear_minus3', 'delta14Cnuclear_minus6', 'delta14Cnuclear_minus9', 'delta14C_fossil_fuel', 'delta14C_modelled','radd_year','count', 'count_nan'])
         
     else:
             
-        df_for_export = pd.DataFrame(columns=['date_start','date_end','meas_date_start', 'meas_date_end', 'Measurement_value','Std_deviation_measurement','delta14C_background', 'delta14C_nuclear','delta14C_fossil_fuel', 'delta14C_modelled','radd_year','count', 'count_nan'])
+        df_for_export = pd.DataFrame(columns=['date_start_model','date_end_model','meas_date_start', 'meas_date_end', 'Measurement_value','Std_deviation_measurement','delta14C_background', 'delta14C_nuclear','delta14C_fossil_fuel', 'delta14C_modelled','radd_year','count', 'count_nan'])
     
     #this dataframe is added to twice for each measurement (since integrated - start and end data)
     #the 'date' column will first get the same value as SamplingStartDate and the second time the 
     #same value as SamplingEndDate
-    df_for_plot = pd.DataFrame(columns=['date', 'date_start','date_end', 'meas_date_start', 'meas_date_end', 'Measurement_value','Std_deviation_measurement','delta14C_background', 'delta14C_nuclear','delta14C_fossil_fuel', 'delta14C_modelled','radd_year', 'count', 'count_nan'])
+    df_for_plot = pd.DataFrame(columns=['date', 'date_start','date_end', 'Measurement_value','Std_deviation_measurement','delta14C_background', 'delta14C_nuclear','delta14C_fossil_fuel', 'delta14C_modelled','radd_year', 'count', 'count_nan'])
     
     index=0
     #the plot dataframe will be added to twice in each loop (start - and end time same values for line in graph
@@ -2113,88 +2282,162 @@ def radiocarbon_hei_results(radiocarbonObjectMeas):
     #access many at the same time (all the entries - one for each radiocarbon measurement)
     #for each entry at the carbon portal (not all will be used - only when footprints for the same time period)
     first=True
+    
     for (radiocarbon_measurement, measurement_start_date, measurement_end_date, std_deviation) in zip(radiocarbon_data[measurement_column], radiocarbon_data[start_date_column], radiocarbon_data[end_date_column], radiocarbon_data[std_error_column]):
         
-
         measurement_start_date=pd.Timestamp(measurement_start_date)
-               
         measurement_end_date=pd.Timestamp(measurement_end_date)
         
-        # the model start date must match the STILT model hours (0, 3, 6, 9, 12, 15, 18, 21)
-        # want to keep the orignal date/times though (measurement_start_date/measurement_end_date)
-        measurement_start_date_model = measurement_start_date
-        measurement_end_date_model = measurement_end_date
- 
-        if measurement_start_date.hour not in timeselect_list or measurement_start_date.minute>0:
 
-            updated_hour=min(timeselect_list, key=lambda x:abs(x-measurement_start_date.hour))
+        if measurement_start_date>user_date_range_start and measurement_end_date<user_date_range_end:
 
-            measurement_start_date_model = dt.datetime(int(measurement_start_date.year), int(measurement_start_date.month), int(measurement_start_date.day), updated_hour, 0)
-        
-        #measurement_start_date here previously 
-        if measurement_end_date.hour not in timeselect_list or measurement_end_date.minute>0:
-            
-            updated_hour=min(timeselect_list, key=lambda x:abs(x-measurement_end_date.hour))
-            
-            measurement_end_date_model = dt.datetime(int(measurement_end_date.year), int(measurement_end_date.month), int(measurement_end_date.day), updated_hour, 0)
-            
-        #now filtered date_range_measured.
-        
-        date_range_measured = date_range_hour_filtered(measurement_start_date_model, measurement_end_date_model, timeselect_list)
+            # the model start date must match the STILT model hours (0, 3, 6, 9, 12, 15, 18, 21)
+            # want to keep the orignal date/times though (measurement_start_date/measurement_end_date)
+            measurement_start_date_model = measurement_start_date
+            measurement_end_date_model = measurement_end_date
 
-        if date_range_measured.empty:
+            if measurement_start_date.hour not in timeselect_list or measurement_start_date.minute>0:
 
-            print('no footprints for date range of measured concentration (' + str(measurement_start_date) + ' to ' + str(measurement_end_date))
-            
-            continue
-        if radiocarbonObjectMeas.settings['flask']==False:
-            modelled_concentration = read_stilt_timeseries(stilt_station, date_range_measured)
-        else:
-            date_range_flask = pd.date_range((measurement_start_date_model - timedelta(hours=9)), (measurement_end_date_model + timedelta(hours=9)), freq='3H')
-            modelled_concentration = read_stilt_timeseries(stilt_station, date_range_flask)
-            
 
-        #which radd-year(s) - radiocarbon data - used for each sample. Max 2... integration time about 14 days.
-        year_list=[]
+                updated_hour=min(timeselect_list, key=lambda x:abs(x-measurement_start_date.hour))
 
-        #rather df_each_footprint? 
-        df_each_meas = pd.DataFrame(columns=['delta14C_background', 'delta14C_nuclear','delta14C_fossil_fuel', 'delta14C_modelled'])
-
-        index_each_meas = 0
-        count_nan = 0
-        
-        if radiocarbonObjectMeas.settings['flask']:
-            
-            measurement_start_date_model_plus3 = measurement_start_date_model+timedelta(hours=3)
-            measurement_start_date_model_plus6 = measurement_start_date_model+timedelta(hours=6)
-            measurement_start_date_model_plus9 = measurement_start_date_model+timedelta(hours=9)
-            measurement_end_date_model_minus3 = measurement_end_date_model-timedelta(hours=3)
-            measurement_end_date_model_minus6 = measurement_end_date_model-timedelta(hours=6)
-            measurement_end_date_model_minus9 = measurement_end_date_model-timedelta(hours=9)
-            
-            list_dates_flask = [measurement_start_date_model_plus3, measurement_start_date_model_plus6, measurement_start_date_model_plus9, measurement_end_date_model_minus3,measurement_end_date_model_minus6, measurement_end_date_model_minus9]
-            
-            list_plus_minus_nuclear_values = []
-            first_in_flask=True
-            for date_flask in list_dates_flask:
                 
-                filename=(pathFP+stilt_station+'/'+str(date_flask.year)+'/'+str(date_flask.month).zfill(2)+ '/'
-                 +str(date_flask.year) + 'x'+ str(date_flask.month).zfill(2) + 'x' + str(date_flask.day).zfill(2) + 'x' + str(date_flask.hour).zfill(2) +'/foot')
+                measurement_start_date_model = dt.datetime(int(measurement_start_date.year), int(measurement_start_date.month), int(measurement_start_date.day), updated_hour, 0)
 
+            #measurement_start_date here previously 
+            if measurement_end_date.hour not in timeselect_list or measurement_end_date.minute>0:
+
+                updated_hour=min(timeselect_list, key=lambda x:abs(x-measurement_end_date.hour))
+
+                measurement_end_date_model = dt.datetime(int(measurement_end_date.year), int(measurement_end_date.month), int(measurement_end_date.day), updated_hour, 0)
+
+
+            #now filtered date_range_measured.
+
+            date_range_measured = date_range_hour_filtered(measurement_start_date_model, measurement_end_date_model, timeselect_list)
+            
+
+            if date_range_measured.empty:
+
+                print('no footprints for date range of measured concentration (' + str(measurement_start_date) + ' to ' + str(measurement_end_date))
+
+                continue
+            if radiocarbonObjectMeas.settings['flask']==False:
+                modelled_concentration = read_stilt_timeseries(stilt_station, date_range_measured)
+            else:
+                date_range_flask = pd.date_range((measurement_start_date_model - timedelta(hours=9)), (measurement_end_date_model + timedelta(hours=9)), freq='3H')
+                modelled_concentration = read_stilt_timeseries(stilt_station, date_range_flask)
+
+
+            #which radd-year(s) - radiocarbon data - used for each sample. Max 2... integration time about 14 days.
+            year_list=[]
+
+            #rather df_each_footprint? 
+            df_each_meas = pd.DataFrame(columns=['delta14C_background', 'delta14C_nuclear','delta14C_fossil_fuel', 'delta14C_modelled'])
+
+            index_each_meas = 0
+            count_nan = 0
+
+            if radiocarbonObjectMeas.settings['flask']:
+                
+                measurement_start_date_model_plus3 = measurement_start_date_model+timedelta(hours=3)
+                measurement_start_date_model_plus6 = measurement_start_date_model+timedelta(hours=6)
+                measurement_start_date_model_plus9 = measurement_start_date_model+timedelta(hours=9)
+                measurement_end_date_model_minus3 = measurement_end_date_model-timedelta(hours=3)
+                measurement_end_date_model_minus6 = measurement_end_date_model-timedelta(hours=6)
+                measurement_end_date_model_minus9 = measurement_end_date_model-timedelta(hours=9)
+
+                list_dates_flask = [measurement_start_date_model_plus3, measurement_start_date_model_plus6, measurement_start_date_model_plus9, measurement_end_date_model_minus3,measurement_end_date_model_minus6, measurement_end_date_model_minus9]
+    
+                list_plus_minus_nuclear_values = []
+                first_in_flask=True
+            
+                for date_flask in list_dates_flask:
+
+                    filename=(pathFP+stilt_station+'/'+str(date_flask.year)+'/'+str(date_flask.month).zfill(2)+ '/'
+                     +str(date_flask.year) + 'x'+ str(date_flask.month).zfill(2) + 'x' + str(date_flask.day).zfill(2) + 'x' + str(date_flask.hour).zfill(2) +'/foot')
+
+                    if os.path.isfile(filename)==False:
+
+                        list_plus_minus_nuclear_values.append(np.nan)
+
+                        continue
+
+                    f_fp = cdf.Dataset(filename)
+
+                    fp_current=f_fp.variables['foot'][:,:,:]
+
+                    modelled_concentration_value=modelled_concentration['co2.stilt'][date_flask]/1000000
+
+                    #in micromol for fossil fuel
+                    modelled_concentration_date_time=modelled_concentration['co2.stilt'][date_flask]
+
+                    try:
+                        if not isinstance(modelled_concentration_value, float) and math.isnan(modelled_concentration_value)==False:
+                            continue 
+
+                    #happen for ex date 2017-01-01 00:00. A series because two are matched with the date. 
+                    except:
+
+                        continue
+
+                    date_for_fit_JFJ=pd.Timestamp(date_flask.year, date_flask.month, date_flask.day)
+
+                    try:
+                        background_value=bg_values.loc[bg_values['DateTime'] == date_for_fit_JFJ, 'CorrectedFIT'].iloc[0]
+
+                    #when no match with date in bg_values, find closest and match
+                    except:
+
+                        nearest_date_test=nearest_date(bg_values.DateTime, date_flask)
+
+                        background_value=bg_values.loc[bg_values['DateTime'] == nearest_date_test, 'CorrectedFIT'].iloc[0]
+
+                    try:    
+                        JFJ_foss = bg_values.loc[bg_values['DateTime'] == date_for_fit_JFJ, 'ffCO2'].iloc[0]
+                    except:
+                        nearest_date_test=nearest_date(bg_values.DateTime, date_flask)
+                        JFJ_foss = bg_values.loc[bg_values['DateTime'] == nearest_date_test, 'ffCO2'].iloc[0]
+
+                    #correct for fossil fuel emissions in the at supposedly clean background site
+                    #if smaller component at the selected station, the fossil fuel component (delta 14C) will be positive rather than negative.
+                    foss_fuel_station_minus_jfj_ppm=(modelled_concentration['co2.fuel.oil'][date_flask]+modelled_concentration['co2.fuel.gas'][date_flask]+\
+                                         modelled_concentration['co2.fuel.coal'][date_flask]-JFJ_foss)
+
+
+                    if first_in_flask==True or date_flask.year!=int(year):
+
+                        year=date_flask.year
+
+                        fp_radiocarbon_bq_s_m2, radd_year = access_best_nuclear_emission_data(year, display_message=False)
+
+                        first_in_flask=False
+
+                    #keeping nuclear contamination it a grid (fp_radiocarbon_bq_s_m2*fp_current) to see the resulting shift in radiocarbon caused by each individual cell
+                    delta_radiocarbon_contribution_grid=(((fp_radiocarbon_bq_s_m2*fp_current) / (modelled_concentration_value* Mc * Aabs)) ) *1000
+
+                    #get one value summed value of this grid for each date/time. What is used in the time series output from running this cell
+                    delta_radiocarbon_contribution_summed= delta_radiocarbon_contribution_grid[:][:].sum()
+
+                    list_plus_minus_nuclear_values.append(delta_radiocarbon_contribution_summed)
+
+            for date in date_range_measured:
+
+                filename=(pathFP+stilt_station+'/'+str(date.year)+'/'+str(date.month).zfill(2)+'/'
+                 +str(date.year)+'x'+str(date.month).zfill(2)+'x'+str(date.day).zfill(2)+'x'+str(date.hour).zfill(2)+'/foot')
+                
                 if os.path.isfile(filename)==False:
-                    
-                    list_plus_minus_nuclear_values.append(np.nan)
-                    
+                    count_nan = count_nan + 1
                     continue
-
+                    
                 f_fp = cdf.Dataset(filename)
 
                 fp_current=f_fp.variables['foot'][:,:,:]
 
-                modelled_concentration_value=modelled_concentration['co2.stilt'][date_flask]/1000000
-
-                #in micromol for fossil fuel
-                modelled_concentration_date_time=modelled_concentration['co2.stilt'][date_flask]
+                modelled_concentration_value=modelled_concentration['co2.stilt'][date]/1000000
+                
+                  #in micromol for fossil fuel
+                modelled_concentration_date_time=modelled_concentration['co2.stilt'][date]
 
                 try:
                     if not isinstance(modelled_concentration_value, float) and math.isnan(modelled_concentration_value)==False:
@@ -2205,7 +2448,7 @@ def radiocarbon_hei_results(radiocarbonObjectMeas):
 
                     continue
 
-                date_for_fit_JFJ=pd.Timestamp(date_flask.year, date_flask.month, date_flask.day)
+                date_for_fit_JFJ=pd.Timestamp(date.year, date.month, date.day)
 
                 try:
                     background_value=bg_values.loc[bg_values['DateTime'] == date_for_fit_JFJ, 'CorrectedFIT'].iloc[0]
@@ -2213,162 +2456,95 @@ def radiocarbon_hei_results(radiocarbonObjectMeas):
                 #when no match with date in bg_values, find closest and match
                 except:
 
-                    nearest_date_test=nearest_date(bg_values.DateTime, date_flask)
+                    nearest_date_test=nearest_date(bg_values.DateTime, date)
 
                     background_value=bg_values.loc[bg_values['DateTime'] == nearest_date_test, 'CorrectedFIT'].iloc[0]
 
                 try:    
                     JFJ_foss = bg_values.loc[bg_values['DateTime'] == date_for_fit_JFJ, 'ffCO2'].iloc[0]
                 except:
-                    nearest_date_test=nearest_date(bg_values.DateTime, date_flask)
+                    nearest_date_test=nearest_date(bg_values.DateTime, date)
                     JFJ_foss = bg_values.loc[bg_values['DateTime'] == nearest_date_test, 'ffCO2'].iloc[0]
 
                 #correct for fossil fuel emissions in the at supposedly clean background site
                 #if smaller component at the selected station, the fossil fuel component (delta 14C) will be positive rather than negative.
-                foss_fuel_station_minus_jfj_ppm=(modelled_concentration['co2.fuel.oil'][date_flask]+modelled_concentration['co2.fuel.gas'][date_flask]+\
-                                     modelled_concentration['co2.fuel.coal'][date_flask]-JFJ_foss)
+                foss_fuel_station_minus_jfj_ppm=(modelled_concentration['co2.fuel.oil'][date]+modelled_concentration['co2.fuel.gas'][date]+\
+                                     modelled_concentration['co2.fuel.coal'][date]-JFJ_foss)
 
-                
-                if first_in_flask==True or date_flask.year!=int(year):
+                modelled_delta_c14_not_nuclear_corrected=(foss_fuel_station_minus_jfj_ppm/modelled_concentration_date_time)*(background_value+1000)-background_value
 
-                    year=date_flask.year
+                modelled_delta_c14_not_nuclear_corrected=-modelled_delta_c14_not_nuclear_corrected
 
-                    fp_radiocarbon_bq_s_m2, radd_year = access_best_nuclear_emission_data(year, display_message=False)
+                fossil_fuel_component=modelled_delta_c14_not_nuclear_corrected-background_value
 
-                    first_in_flask=False
-                    
+
+                #if first time (first defined out of loop)- access the radiocarbon data for specific year.
+                #also, if the year of the "current" date is new (ex jan 1 2016). Access the data for the current year instead. 
+                if first==True or date.year!=int(year):
+
+                    year=date.year
+
+                    fp_radiocarbon_bq_s_m2, radd_year = access_best_nuclear_emission_data(year)
+
+                    first=False
+
                 #keeping nuclear contamination it a grid (fp_radiocarbon_bq_s_m2*fp_current) to see the resulting shift in radiocarbon caused by each individual cell
                 delta_radiocarbon_contribution_grid=(((fp_radiocarbon_bq_s_m2*fp_current) / (modelled_concentration_value* Mc * Aabs)) ) *1000
 
                 #get one value summed value of this grid for each date/time. What is used in the time series output from running this cell
                 delta_radiocarbon_contribution_summed= delta_radiocarbon_contribution_grid[:][:].sum()
-                
-                list_plus_minus_nuclear_values.append(delta_radiocarbon_contribution_summed)
 
-        #now will print a warning for each measurement. 
-        for date in date_range_measured:
+                #modelled delta 14C - nuclear corrected (not included in the Levin et al paper)
+                modelled_delta_c14_nuclear_corrected=modelled_delta_c14_not_nuclear_corrected+delta_radiocarbon_contribution_summed
 
-            filename=(pathFP+stilt_station+'/'+str(date.year)+'/'+str(date.month).zfill(2)+'/'
-             +str(date.year)+'x'+str(date.month).zfill(2)+'x'+str(date.day).zfill(2)+'x'+str(date.hour).zfill(2)+'/foot')
+                #'delta14C_background', 'delta14C_nuclear','delta14C_fossil_fuel', 'delta14C_modelled'
+                df_each_meas.loc[index_each_meas] = [background_value, delta_radiocarbon_contribution_summed, fossil_fuel_component, modelled_delta_c14_nuclear_corrected]
 
-            if os.path.isfile(filename)==False:
-                count_nan = count_nan + 1
-                continue
+                index_each_meas=index_each_meas + 1
 
-            f_fp = cdf.Dataset(filename)
+                #if always using the same RADD year for all footprints in integrated sample (not ex dec 20 to jan 4)
+                if radd_year not in year_list:
+                    year_list.append(radd_year)
 
-            fp_current=f_fp.variables['foot'][:,:,:]
-
-            modelled_concentration_value=modelled_concentration['co2.stilt'][date]/1000000
-
-            #in micromol for fossil fuel
-            modelled_concentration_date_time=modelled_concentration['co2.stilt'][date]
-
-            try:
-                if not isinstance(modelled_concentration_value, float) and math.isnan(modelled_concentration_value)==False:
-                    continue 
-
-            #happen for ex date 2017-01-01 00:00. A series because two are matched with the date. 
-            except:
-
-                continue
-
-            date_for_fit_JFJ=pd.Timestamp(date.year, date.month, date.day)
-
-            try:
-                background_value=bg_values.loc[bg_values['DateTime'] == date_for_fit_JFJ, 'CorrectedFIT'].iloc[0]
-
-            #when no match with date in bg_values, find closest and match
-            except:
-
-                nearest_date_test=nearest_date(bg_values.DateTime, date)
-
-                background_value=bg_values.loc[bg_values['DateTime'] == nearest_date_test, 'CorrectedFIT'].iloc[0]
-
-            try:    
-                JFJ_foss = bg_values.loc[bg_values['DateTime'] == date_for_fit_JFJ, 'ffCO2'].iloc[0]
-            except:
-                nearest_date_test=nearest_date(bg_values.DateTime, date)
-                JFJ_foss = bg_values.loc[bg_values['DateTime'] == nearest_date_test, 'ffCO2'].iloc[0]
-
-            #correct for fossil fuel emissions in the at supposedly clean background site
-            #if smaller component at the selected station, the fossil fuel component (delta 14C) will be positive rather than negative.
-            foss_fuel_station_minus_jfj_ppm=(modelled_concentration['co2.fuel.oil'][date]+modelled_concentration['co2.fuel.gas'][date]+\
-                                 modelled_concentration['co2.fuel.coal'][date]-JFJ_foss)
-
-            modelled_delta_c14_not_nuclear_corrected=(foss_fuel_station_minus_jfj_ppm/modelled_concentration_date_time)*(background_value+1000)-background_value
-
-            modelled_delta_c14_not_nuclear_corrected=-modelled_delta_c14_not_nuclear_corrected
-
-            fossil_fuel_component=modelled_delta_c14_not_nuclear_corrected-background_value
+            #average given date-time. If there are values to average (not division by 0)
+            #shift per integrated time is nuclear contamination (delta 14C)
+            if len(df_each_meas)>0:
 
 
-            #if first time (first defined out of loop)- access the radiocarbon data for specific year.
-            #also, if the year of the "current" date is new (ex jan 1 2016). Access the data for the current year instead. 
-            if first==True or date.year!=int(year):
+                #get the correct information with regards to what RADD data has been used. 
+                if len(year_list)>1:
+                    radd_data_year_export=(year_list[0] + '&' + year_list[1])   
+                elif len(year_list)==1:
+                    radd_data_year_export=year_list[0]
+                else:
+                    radd_data_year_export='no data'
 
-                year=date.year
+                shift_nuclear=df_each_meas["delta14C_nuclear"].mean()
+                shift_fossil_fuel=df_each_meas["delta14C_fossil_fuel"].mean()
+                shift_background=df_each_meas["delta14C_background"].mean()
+                shift_modelled=df_each_meas["delta14C_modelled"].mean()
 
-                fp_radiocarbon_bq_s_m2, radd_year = access_best_nuclear_emission_data(year)
+                count=len(date_range_measured)
+                #count_nan=
 
-                first=False
+                #dataframe already created at the top. here append whole row with values for export. one row per integrated sample
+                if radiocarbonObjectMeas.settings['flask']:
 
-            #keeping nuclear contamination it a grid (fp_radiocarbon_bq_s_m2*fp_current) to see the resulting shift in radiocarbon caused by each individual cell
-            delta_radiocarbon_contribution_grid=(((fp_radiocarbon_bq_s_m2*fp_current) / (modelled_concentration_value* Mc * Aabs)) ) *1000
+                    df_for_export.loc[index] = [measurement_start_date_model, measurement_end_date_model,measurement_start_date, measurement_end_date, radiocarbon_measurement, std_deviation,shift_background, shift_nuclear, list_plus_minus_nuclear_values[0], list_plus_minus_nuclear_values[1], list_plus_minus_nuclear_values[2], list_plus_minus_nuclear_values[3], list_plus_minus_nuclear_values[4],list_plus_minus_nuclear_values[5], shift_fossil_fuel, shift_modelled, radd_year, count, count_nan]
 
-            #get one value summed value of this grid for each date/time. What is used in the time series output from running this cell
-            delta_radiocarbon_contribution_summed= delta_radiocarbon_contribution_grid[:][:].sum()
+                else: 
+                    df_for_export.loc[index] = [measurement_start_date_model, measurement_end_date_model,measurement_start_date, measurement_end_date, radiocarbon_measurement, std_deviation,shift_background, shift_nuclear, shift_fossil_fuel, shift_modelled, radd_year, count, count_nan]
 
-            #modelled delta 14C - nuclear corrected (not included in the Levin et al paper)
-            modelled_delta_c14_nuclear_corrected=modelled_delta_c14_not_nuclear_corrected+delta_radiocarbon_contribution_summed
+                #index to move to the next row for the next integrated sample 
+                index=index+1  
 
-            #'delta14C_background', 'delta14C_nuclear','delta14C_fossil_fuel', 'delta14C_modelled'
-            df_each_meas.loc[index_each_meas] = [background_value, delta_radiocarbon_contribution_summed, fossil_fuel_component, modelled_delta_c14_nuclear_corrected]
+                df_for_plot.loc[index_plot] = [measurement_start_date_model, measurement_start_date_model, measurement_end_date_model, radiocarbon_measurement, std_deviation,shift_background, shift_nuclear, shift_fossil_fuel, shift_modelled, radd_year, count, count_nan]
 
-            index_each_meas=index_each_meas + 1
+                index_plot = index_plot + 1
 
-            #if always using the same RADD year for all footprints in integrated sample (not ex dec 20 to jan 4)
-            if radd_year not in year_list:
-                year_list.append(radd_year)
-
-        #average given date-time. If there are values to average (not division by 0)
-        #shift per integrated time is nuclear contamination (delta 14C)
-        if len(df_each_meas)>0:
-
-
-            #get the correct information with regards to what RADD data has been used. 
-            if len(year_list)>1:
-                radd_data_year_export=(year_list[0] + '&' + year_list[1])   
-            elif len(year_list)==1:
-                radd_data_year_export=year_list[0]
-            else:
-                radd_data_year_export='no data'
-
-            shift_nuclear=df_each_meas["delta14C_nuclear"].mean()
-            shift_fossil_fuel=df_each_meas["delta14C_fossil_fuel"].mean()
-            shift_background=df_each_meas["delta14C_background"].mean()
-            shift_modelled=df_each_meas["delta14C_modelled"].mean()
-            
-            count=len(date_range_measured)
-            #count_nan=
-
-            #dataframe already created at the top. here append whole row with values for export. one row per integrated sample
-            if radiocarbonObjectMeas.settings['flask']:
-                df_for_export.loc[index] = [measurement_start_date_model, measurement_end_date_model,measurement_start_date, measurement_end_date, radiocarbon_measurement, std_deviation,shift_background, shift_nuclear, list_plus_minus_nuclear_values[0], list_plus_minus_nuclear_values[1], list_plus_minus_nuclear_values[2], list_plus_minus_nuclear_values[3], list_plus_minus_nuclear_values[4],list_plus_minus_nuclear_values[5], shift_fossil_fuel, shift_modelled, radd_year, count, count_nan]
-                
-            else: 
-                df_for_export.loc[index] = [measurement_start_date_model, measurement_end_date_model,measurement_start_date, measurement_end_date, radiocarbon_measurement, std_deviation,shift_background, shift_nuclear, shift_fossil_fuel, shift_modelled, radd_year, count, count_nan]
-
-            #index to move to the next row for the next integrated sample 
-            index=index+1  
-
-            df_for_plot.loc[index_plot] = [measurement_start_date_model, measurement_start_date_model, measurement_end_date_model, measurement_start_date, measurement_end_date, radiocarbon_measurement, std_deviation,shift_background, shift_nuclear, shift_fossil_fuel, shift_modelled, radd_year, count, count_nan]
-
-            index_plot = index_plot + 1
-
-            #measurement_end_date into date column. otherwise same values as above record.
-            df_for_plot.loc[index_plot] = [measurement_end_date_model, measurement_start_date_model, measurement_end_date_model, measurement_start_date, measurement_end_date, radiocarbon_measurement, std_deviation,shift_background, shift_nuclear, shift_fossil_fuel, shift_modelled, radd_year, count, count_nan]
-            index_plot = index_plot + 1
+                #measurement_end_date into date column. otherwise same values as above record.
+                df_for_plot.loc[index_plot] = [measurement_end_date_model, measurement_start_date_model, measurement_end_date_model, radiocarbon_measurement, std_deviation,shift_background, shift_nuclear, shift_fossil_fuel, shift_modelled, radd_year, count, count_nan]
+                index_plot = index_plot + 1
                 
     return df_for_export, df_for_plot
                

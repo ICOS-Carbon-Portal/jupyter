@@ -50,9 +50,8 @@ def getSettings():
         s['endYear'] = e_year.value
         s['endMonth'] = e_month.value
         s['endDay'] = e_day.value
-        s['timeOfDay'] = time_selection.value
-        
-        s['backgroundFilename'] = background_choice.value
+        s['timeOfDay'] = [0, 3, 6, 9, 12, 15, 18, 21]
+        s['backgroundFilename'] = 'IZOMHd24.csv'
         s['downloadOption'] = download_choice.value
         s['facilityInclusion'] = facility_choice.value
         s['threshold'] = threshold_facility_inclusions.value
@@ -63,8 +62,6 @@ def getSettings():
         else: 
             
             s['resample'] = str(resample.value) + 'D'
-        
-
    
     except:
         return    
@@ -80,9 +77,6 @@ def set_settings(s):
     e_year.value = s['endYear'] 
     e_month.value = s['endMonth']
     e_day.value = s['endDay']
-    time_selection.value = s['timeOfDay']
-    
-    background_choice.value = s['backgroundFilename']
     download_choice.value = s['downloadOption']
     facility_choice.value = s['facilityInclusion']
     threshold_facility_inclusions.value = s['threshold']
@@ -101,8 +95,6 @@ def set_settings(s):
 # observer functions
 
 #---------------------------------------------------------
-
- 
     
 def change_stn_type(c):  
     
@@ -138,12 +130,8 @@ def change_stn(c):
     if s_year.value!=e_year.value or s_month.value != e_month.value or e_day.value != s_day.value:
 
         update_button.disabled = False
-    
-    #triggers "change_yr" --> months populated
-    
 
-def change_yr(c):
-    
+def change_yr(c): 
     
     years = [x for x in s_year.options if x >= c['new']]
     e_year.options = years
@@ -179,8 +167,6 @@ def change_yr_end(c):
     else:
         update_button.disabled = False
         
-    
-
 def change_mt(c):
     
     #the day widget populated depending on what month it is (different number of days)
@@ -353,12 +339,11 @@ def update_func(button_c):
             if radiocarbonObject.settings['downloadOption'] == 'yes':
                 now = datetime.now()
                 radiocarbonObject.settings['date/time generated'] =  now.strftime("%Y%m%d_%H%M%S_")
-                radiocarbonObject.settings['output_folder'] = os.path.join('output', (radiocarbonObject.settings['date/time generated']+radiocarbonObject.stationId))
-                if not os.path.exists('output'):
-                    os.makedirs('output')
+                radiocarbonObject.settings['output_folder'] = os.path.join('radiocarbon_model_result', (radiocarbonObject.settings['date/time generated']+radiocarbonObject.stationId))
+                if not os.path.exists('radiocarbon_model_result'):
+                    os.makedirs('radiocarbon_model_result')
 
                 os.mkdir(radiocarbonObject.settings['output_folder'])
-
 
                 radiocarbon_functions.save_data(radiocarbonObject)
 
@@ -415,16 +400,6 @@ e_day = Dropdown(options = [],
             description = 'End Day',
             disabled = False,)
 
-options_time_selection=[('0:00', 0), ('3:00', 3), ('06:00', 6), ('09:00', 9), ('12:00', 12), ('15:00', 15), ('18:00', 18), ('21:00', 21)]
-
-time_selection= SelectMultiple(
-    options=options_time_selection,
-    value=[0, 3, 6, 9, 12, 15, 18, 21],
-    style=style_bin,
-    description='Time of day',
-    disabled=False)
-
-
 station_type=RadioButtons(
         options=['ICOS stations', 'STILT stations'],
         value='ICOS stations',
@@ -432,19 +407,13 @@ station_type=RadioButtons(
         disabled=False)
 
 
-list_tuples_background=[('JFJ and MHD', 'JFJ720_MHD_1.csv'), ('IZO and MHD', 'IZO_MHD_1.csv')]
-
-background_choice = RadioButtons(
-           options = list_tuples_background,
-           value='JFJ720_MHD_1.csv',
-           description=' ',
-           disabled= False,)
-
-background_choice.layout.width = '603px'
-
 header_download = Output()
 with header_download:
-    display(HTML('<p style="font-size:15px;font-weight:bold;">Download output:</p>'))
+    display(HTML('<p style="font-size:15px;font-weight:bold;">Download output:</p><p style="font-size:14px;">\
+    If the user wishes to download the result, it will end up in a folder on the same level as this notebook \
+    called "radiocarbon_model_result" (created once something has been downloaded). \
+    It will include csv-files with data presented in the output timeseries as well as a file settings file which ends with\
+    "_settings.json". The settings file can be uploaded to populate the widgets (see "Load settings from file") with the same selection as the current run. </p>'))
 
 download_choice = RadioButtons(
     options=['yes', 'no'],
@@ -455,9 +424,11 @@ download_choice = RadioButtons(
 header_by_facility = Output()
 
 with header_by_facility:
-    display(HTML('<p style="font-size:15px;font-weight:bold;"><br>Nuclear contribution by facility:</p><br><p style="font-size:14px;">Should the contributions also be broken down by nuclear facility. If "yes", please specify the threshold (in permil) for inclusion.'))
+    display(HTML('<p style="font-size:15px;font-weight:bold;">Nuclear contribution by facility:</p><p style="font-size:14px;">Choose "yes" to include an additional timeseries plot where the nuclear contribution by facility is displayed in \
+    accordance with specified resampling method. A map showing the locations of the contributing facilities will \
+    also be output.'))
     
-facility_choice = RadioButtons(
+facility_choice = RadioButtons(  
     options=[('yes', True), ('no', False)],
     description=' ',
     value=True,
@@ -472,7 +443,8 @@ threshold_facility_inclusions = BoundedFloatText(
 
 header_resample = Output()
 with header_resample:
-    display(HTML('<p style="font-size:15px;font-weight:bold;"><br>Number of days to resample:</p><br><p style="font-size:14px;">0 means that the values will be displayed for the individual footprints'))
+    display(HTML('<p style="font-size:15px;font-weight:bold;"><br>Number of days to resample:</p><p style="font-size:14px;">0 means that the values will be displayed for the individual footprints (0:00, 3:00, 6:00, 9:00, 12:00, 15:00, 18:00, and 21:00 UCT). <br>Any other number than 0 specifies the number of days over which the results will be averaged. <br>If the box "Monthly" is checked the results will be averaged on the monthly timescale. It will disable the option to specify number of days to resample.<br></p>'))
+    
 resample = BoundedIntText(
     value=7,
     min=0,
@@ -493,7 +465,8 @@ resample_monthly.layout.margin = '0px 0px 0px 20px' #top, right, bottom, left
 header_upload = Output()
 
 with header_upload:
-    display(HTML('<p style="font-size:15px;font-weight:bold;">Load settings from file (optional): </p>'))
+    display(HTML('<p style="font-size:15px;font-weight:bold;">Load settings from file (optional): </p><p style="font-size:14px;">It is optional to upload a settings file (see "Download output"). It will populate all the widgets and it \
+    will be possible to run the tool ("Run selection") directly upon upload or after making changes to the selections. </p>'))
 
 file_name= FileUpload(
     accept='.json',  # Accepted file extension e.g. '.txt', '.pdf', 'image/*', 'image/*,.pdf'
@@ -515,15 +488,14 @@ update_button.style.button_color=royal
 #("Select here station and time range")
 header_station = Output()
 with header_station:
-    display(HTML('<p style="font-size:15px;font-weight:bold;">Select STILT footprints: </p>'))
+    display(HTML('<p style="font-size:15px;font-weight:bold;">Select STILT footprints:</p><p style="font-size:14px;">\
+    The user can choose to do the analysis for any of the ICOS certified stations (ICOS stations), alternatively any point within the STILT domain with footprints (STILT stations). </p>'))
 
 header_date_time = Output()
 with header_date_time:
-    display(HTML('<p style="font-size:15px;font-weight:bold;"><br>Select date and time: </p>'))
-
-header_background = Output()
-with header_background:
-    display(HTML('<p style="font-size:15px;font-weight:bold;">Select background fit: </p>'))
+    display(HTML('<p style="font-size:15px;font-weight:bold;"><br>Select date range: </p><p style="font-size:14px;">\
+    Specify the date range for the analysis. The options in the dropdown will change in accordance\
+    with what footprints are available. Footprints can be generated with the <a href="https://stilt.icos-cp.eu/worker/" target="_blank">on demand calculator</a> at the Carbon Portal website. </p>'))
 
 #NOTE vertical - start year above end year
 year_box = VBox([s_year, e_year])
@@ -541,13 +513,10 @@ year_box.layout.margin = '0px 0px 0px 0px'
 
 h_box_facility = HBox([facility_choice, threshold_facility_inclusions])
 
-#Add all widgets to a VBox:
-#form = VBox([station_box, time_box, time_selection, update_button])
-
 resample_choices = HBox([resample, resample_monthly])
 update_buttons = HBox([file_name, update_button])
-form = VBox([header_station,station_type,station_choice, header_date_time, time_box, time_selection,  header_resample, resample_choices, header_background,\
-             background_choice, header_by_facility, \
+form = VBox([header_station,station_type,station_choice, header_date_time, time_box, header_resample,\
+             resample_choices, header_by_facility, \
              h_box_facility, header_download, download_choice, header_upload, update_buttons])
 
 #Initialize form output:

@@ -49,7 +49,7 @@ def getSettings():
             s['icos'] = cpstation.get(s['stationCode'][0:3].upper()).info()
         s['stilt'] = stiltstations[s['stationCode']]
         s['timeOfDay'] = [0, 3, 6, 9, 12, 15, 18, 21]
-        s['backgroundFilename'] = background_choice.value
+        s['backgroundFilename'] = 'IZOMHd24.csv'
         s['downloadOption'] = download_choice.value
         
         s['samplingHeightMeas'] = station_choice_meas.value['sampling_height']
@@ -60,24 +60,9 @@ def getSettings():
     
     return s
 
-def set_settings(s):
-    
-    station_choice_meas.value = {'station_code': s['stationCode'][0:3], 'sampling_height': s['samplingHeightMeas']}
-    background_choice.value = s['backgroundFilename']
-    download_choice.value = s['downloadOption']
-
 #----------- start processing -----------------
 
-def file_set_widgets(c):
-    
-    uploaded_file = file_name.value
-    
-    #check if there is content in the dictionary (uploaded file)
-    if bool(uploaded_file):
-        settings_file=uploaded_file[list(uploaded_file.keys())[0]]['content']
-        settings_json = settings_file.decode('utf8').replace("'", '"')
-        settings_dict = json.loads(settings_json)
-        set_settings(settings_dict)
+
     
 def updateProgress(f, desc=''):
     # custom progressbar updates
@@ -91,7 +76,7 @@ style_bin = {'description_width': 'initial'}
 
 header_station = Output()
 with header_station:
-    display(HTML('<p style="font-size:15px;font-weight:bold;">Select station (meas): </p>'))
+    display(HTML('<p style="font-size:15px;font-weight:bold;">Select station: </p>'))
 
 #depending on what is available at the carbon portal
 stations_with_data = radiocarbon_functions.list_station_tuples_w_radiocarbon_data()
@@ -101,27 +86,11 @@ station_choice_meas = Dropdown(options = stations_with_data,
                    value=None,
                    disabled= False,)
 
-header_background = Output()
-
-with header_background:
-    display(HTML('<p style="font-size:15px;font-weight:bold;">Select background fit: </p>'))
-
-background_choice_output = Output()
-
-
-list_tuples_background=[('JFJ (720m model corrected) and MHD', 'JFJ720_MHD_1.csv'), ('JFJ (960m model corrected) and MHD', 'JFJ960_MHD_1.csv'), ('IZO and MHD', 'IZO_MHD_1.csv')]
-
-background_choice = RadioButtons(
-           options = list_tuples_background,
-           value='JFJ720_MHD_1.csv',
-           description=' ',
-           disabled= False,)
-
-background_choice.layout.width = '603px'
-
 header_download = Output()
 with header_download:
     display(HTML('<p style="font-size:15px;font-weight:bold;">Download output:</p>'))
+    
+header_download.layout.margin = '0px 0px 0px 200px' #top, right, bottom, left
 
 download_choice = RadioButtons(
     options=['yes', 'no'],
@@ -130,35 +99,22 @@ download_choice = RadioButtons(
     disabled=False)
 
 download_choice.layout.width = '603px'
-
-
-header_upload = Output()
-
-with header_upload:
-    display(HTML('<p style="font-size:15px;font-weight:bold;">Load settings from file (optional): </p>'))
-
-file_name= FileUpload(
-    accept='.json',  # Accepted file extension e.g. '.txt', '.pdf', 'image/*', 'image/*,.pdf'
-    multiple=False  # True to accept multiple files upload else False
-)
+download_choice.layout.margin = '-10px 0px 0px -40px' #top, right, bottom, left
 
 update_button = Button(description='Run selection',
                        disabled=False,
                        button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
                        tooltip='Click me',)
-update_button.layout.margin = '0px 0px 0px 260px' #top, right, bottom, left
+#update_button.layout.margin = '0px 0px 0px 260px' #top, right, bottom, left
 
 royal='#4169E1'
 update_button.style.button_color=royal
 
-station_selection=VBox([header_station, station_choice_meas])
+h_box_1=HBox([header_station, header_download])
 
-#prev station_selection_model after
-station_selections=HBox([station_selection])
+h_box_2=HBox([station_choice_meas,download_choice])
 
-update_buttons = HBox([file_name, update_button])
-
-form = VBox([station_selections,header_background, background_choice, header_download, download_choice, header_upload, update_buttons])
+form = VBox([h_box_1, h_box_2, update_button])
 
 #Initialize form output:
 form_out = Output()
@@ -186,18 +142,19 @@ def update_func(button_c):
  
         radiocarbonObject=radiocarbon_object_cp.RadiocarbonObjectMeasCp(settings) 
     
-        radiocarbon_functions.display_info_html_table(radiocarbonObject, meas_data=True)
+        radiocarbon_functions.display_info_html_table(radiocarbonObject, meas_data=True, cp_private=True)
     
         updateProgress(f, 'create the Bokeh plot')
     
         radiocarbon_functions.plot_radiocarbon_bokhe(radiocarbonObject, include_meas=True)
         
         if radiocarbonObject.settings['downloadOption'] == 'yes':
+      
             now = datetime.now()
             radiocarbonObject.settings['date/time generated'] =  now.strftime("%Y%m%d_%H%M%S_")
-            radiocarbonObject.settings['output_folder'] = os.path.join('output_cp', (radiocarbonObject.settings['date/time generated']+radiocarbonObject.stationId))
-            if not os.path.exists('output_cp'):
-                os.makedirs('output_cp')
+            radiocarbonObject.settings['output_folder'] = os.path.join('radiocarbon_cp_result', (radiocarbonObject.settings['date/time generated']+radiocarbonObject.stationId))
+            if not os.path.exists('radiocarbon_cp_result'):
+                os.makedirs('radiocarbon_cp_result')
 
             os.mkdir(radiocarbonObject.settings['output_folder'])
 
@@ -210,7 +167,6 @@ def update_func(button_c):
 
 update_button.on_click(update_func)
 
-file_name.observe(file_set_widgets, 'value')
 
 #Open form object:
 with form_out:
