@@ -410,10 +410,7 @@ station_type=RadioButtons(
 header_download = Output()
 with header_download:
     display(HTML('<p style="font-size:15px;font-weight:bold;">Download output:</p><p style="font-size:14px;">\
-    If the user wishes to download the result, it will end up in a folder on the same level as this notebook \
-    called "radiocarbon_model_result" (created once something has been downloaded). \
-    It will include csv-files with data presented in the output timeseries as well as a file settings file which ends with\
-    "_settings.json". The settings file can be uploaded to populate the widgets (see "Load settings from file") with the same selection as the current run. </p>'))
+    If the user wishes to download the result, the file will end up in a folder on the same level as this notebook called "radiocarbon_output_model" (created once something has been downloaded). It will include csv-files with data presented in the output time series as well as a file settings file, which ends with "_settings.json". The settings file can be uploaded to populate the widgets (see "Load settings from file") with the same parameter selection as the current run. </p>'))
 
 download_choice = RadioButtons(
     options=['yes', 'no'],
@@ -424,7 +421,7 @@ download_choice = RadioButtons(
 header_by_facility = Output()
 
 with header_by_facility:
-    display(HTML('<p style="font-size:15px;font-weight:bold;">Nuclear contribution by facility:</p><p style="font-size:14px;">Choose "yes" to include an additional timeseries plot where the nuclear contribution by facility is displayed in \
+    display(HTML('<p style="font-size:15px;font-weight:bold;">Nuclear contribution by facility:</p><p style="font-size:14px;">Choose "yes" to include an additional time series plot where the nuclear contribution by facility is displayed in \
     accordance with specified resampling method. A map showing the locations of the contributing facilities will \
     also be output.'))
     
@@ -443,7 +440,7 @@ threshold_facility_inclusions = BoundedFloatText(
 
 header_resample = Output()
 with header_resample:
-    display(HTML('<p style="font-size:15px;font-weight:bold;"><br>Number of days to resample:</p><p style="font-size:14px;">0 means that the values will be displayed for the individual footprints (0:00, 3:00, 6:00, 9:00, 12:00, 15:00, 18:00, and 21:00 UCT). <br>Any other number than 0 specifies the number of days over which the results will be averaged. <br>If the box "Monthly" is checked the results will be averaged on the monthly timescale. It will disable the option to specify number of days to resample.<br></p>'))
+    display(HTML('<p style="font-size:15px;font-weight:bold;"><br>Number of days to resample:</p><p style="font-size:14px;">0 means that the values will be displayed for the individual footprints (0:00, 3:00, 6:00, 9:00, 12:00, 15:00, 18:00, and 21:00 UTC). <br>Any other number than 0 specifies the number of days over which the results will be averaged. <br>If the box "Monthly" is checked the results will be averaged on the monthly timescale. It will disable the option to specify the number of days to resample.<br></p>'))
     
 resample = BoundedIntText(
     value=7,
@@ -489,7 +486,7 @@ update_button.style.button_color=royal
 header_station = Output()
 with header_station:
     display(HTML('<p style="font-size:15px;font-weight:bold;">Select STILT footprints:</p><p style="font-size:14px;">\
-    The user can choose to do the analysis for any of the ICOS certified stations (ICOS stations), alternatively any point within the STILT domain with footprints (STILT stations). </p>'))
+    The user can choose to do the analysis for any of the ICOS certified stations (ICOS stations), alternatively any point within the STILT domain with footprints (STILT stations) can be chosen. </p>'))
 
 header_date_time = Output()
 with header_date_time:

@@ -2155,7 +2155,7 @@ def display_info_html_table(radiocarbonObject, meas_data=False, cp_private=False
     
         if cp_private:
             meas_station = radiocarbonObject.settings['icos']['name']
-            background_info_string = '<br>The background represents the natural ∆14C levels and is based on measurements at stations supposedly not influenced by nuclear power plants and fossil fuel emissions. The measurements have been used to establish harmonic fit curves. The fitted data was provided by Ingeborg Levin at <a href="https://www.icos-cal.eu/crl" target="_blank">the Central Radiocarbon Laboratory in Heidelberg</a>. The curve is based on measurements from IZO (Izana) and MHD (Mace Head) and it is an ongoing discussion what background is best to use.'
+            background_info_string = '<br>The background represents the marinenatural ∆14C levels and is based on measurements at stations supposedly not influenced directly by nuclear power plants and fossil fuel emissions. The measurements have been used to establish harmonic fit curves. The fitted data was provided by Ingeborg Levin at <a href="https://www.icos-cal.eu/crl" target="_blank">the Central Radiocarbon Laboratory in Heidelberg</a>. The curve is based on measurements from IZO (Izana) and MHD (Mace Head). Improved background curves may become available in the future and it is an ongoing discussion what background is best to use.'
 
         else:
             background_info_string = ''
@@ -2208,10 +2208,10 @@ def display_info_html_table(radiocarbonObject, meas_data=False, cp_private=False
             
         #use year, month, day... don't want the hour in the title 
         if cp_private:
-            string_start_end_date =  '<br><b>Date range measurements</b>: ' + str(start_date_start.year) + '-' + str(start_date_start.month) + '-' + str(start_date_start.day) + ' to ' + str(end_date_end.year) + '-' + str(end_date_end.month) + '-' + str(end_date_end.day)  + '<br>If the date range in graph is different, footprints are missing. Compute footprints <a href="https://stilt.icos-cp.eu/worker/" target="_blank">here</a>.'
+            string_start_end_date =  '<br><b>Date range measurements</b>: ' + str(start_date_start.year) + '-' + str(start_date_start.month) + '-' + str(start_date_start.day) + ' to ' + str(end_date_end.year) + '-' + str(end_date_end.month) + '-' + str(end_date_end.day)  + '<br>If the date range in the graph is different, footprints are missing. Compute footprints <a href="https://stilt.icos-cp.eu/worker/" target="_blank">here</a>.'
             
         else:
-            string_start_end_date =  '<br><b>Date range measurements</b>: ' + str(start_date_start.year) + '-' + str(start_date_start.month) + '-' + str(start_date_start.day) + ' to ' + str(end_date_end.year) + '-' + str(end_date_end.month) + '-' + str(end_date_end.day)  + '<br>If the date range in graph is different, "Pick start date" and "Pick end date" is the restricting factor or footprints are missing. Compute footprints <a href="https://stilt.icos-cp.eu/worker/" target="_blank">here</a>.'
+            string_start_end_date =  '<br><b>Date range measurements</b>: ' + str(start_date_start.year) + '-' + str(start_date_start.month) + '-' + str(start_date_start.day) + ' to ' + str(end_date_end.year) + '-' + str(end_date_end.month) + '-' + str(end_date_end.day)  + '<br>If the date range in the graph is different, "Pick start date" and "Pick end date" is the restricting factor or footprints are missing. Compute footprints <a href="https://stilt.icos-cp.eu/worker/" target="_blank">here</a>.'
           
 
     display(HTML('<p style="font-size:15px;"><b>Information relevant for analysis (also included in csv-file if chosen to download)</b><br><br> '\
