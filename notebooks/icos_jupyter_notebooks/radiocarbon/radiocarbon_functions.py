@@ -958,7 +958,7 @@ def plot_radiocarbon_bokhe(radiocarbonObject, include_meas=False):
             ( '# footprints',  '@{count}{0f}' ),
             ( '# NaN footprints',  '@{count_nan}{0f}' )]
     
-        list_tuples_for_tooltip_singledate = [( 'UTC',   '@date{%Y-%m-%d}'),
+        list_tuples_for_tooltip_singledate = [( 'UTC',   '@date{%Y-%m-%d %H:%M}'),
             ( 'Nuclear ∆14C',  '@{delta14C_nuclear}{0.2f}' ),
             ( 'Fossil fuel ∆14C',  '@{delta14C_fossil_fuel}{0.2f}' ),
             ( 'Background ∆14C',  '@{delta14C_background}{0.2f}' ),
