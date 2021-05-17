@@ -44,9 +44,7 @@ class RadiocarbonObjectMeasCp():
     def _setStationData(self):
         
         self.stationId = self.settings['stationCode']  
-        
-        #if True that it is an ICOS station.
-        #if self.settings['icos']:
+
         if 'icos' in self.settings.keys():
             
             self.stationName=self.settings['icos']['name']

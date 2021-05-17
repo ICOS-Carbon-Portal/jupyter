@@ -21,12 +21,16 @@ list_facility_names_sorted=[x for _,x in sorted(zip(list_emissions_2018,list_fac
 
 header_interactive_map = Output()
 with header_interactive_map:
-    display(HTML('<p style="font-size:16px;font-weight:bold;">Interactive map nuclear facilities and ICOS stations</p>'))
+    display(HTML('<p style="font-size:16px;font-weight:bold;">Interactive map showing nuclear facilities and ICOS stations</p>'))
 
 header_select_facility = Output()
 
 with header_select_facility:
-    display(HTML('<p style="font-size:15px;">Select nuclear facility (sorted by emissions 2018) to highlight:</p>'))
+    display(HTML('<p style="font-size:15px;"><ul><li>All European nuclear facilities will be shown on the map</li>\
+    <li>This dropdown lists all the facilities sorted by emissions in 2018 with the highest emitters listed first</li>\
+    <li>The selected facility will be highlighted on the map with a yellow marker whereas the other facilities are represented with red markers. Blue markers represent the ICOS stations.</li>\
+    <li>Hoover over the markers to show the names of the facilities and stations</li>\
+    <li>Click on the markers to see information on emissions and information about the stations respectively</li></ul></p>'))
 
 select_facility = Dropdown(options = list_facility_names_sorted,
 
@@ -47,7 +51,7 @@ with header_year_data:
     
 header_static_map = Output()
 with header_static_map:
-    display(HTML('<p style="font-size:16px;font-weight:bold;"><br>Static map nuclear facilities emissions and ICOS stations</p>'))
+    display(HTML('<p style="font-size:16px;font-weight:bold;"><br>Static map showing nuclear facilities\' emissions and ICOS atmospheric stations</p>'))
 
 
 year_data=RadioButtons(
