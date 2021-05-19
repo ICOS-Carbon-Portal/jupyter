@@ -351,7 +351,7 @@ def update_func(button_c):
 
         with header_advanced:
             display(HTML('<h2>Advanced figures</h2><br>\
-                Please read the <a href="specifications.pdf" target="_blank">\
+                Please read the <a href="./station_characterization/specifications.pdf" target="_blank">\
                     specifications document</a> before attempting to interpret the following figures.'))
 
         updateProgress(f, 'landcover windrose')
