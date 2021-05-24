@@ -151,12 +151,15 @@ def update_func(button_c):
         if radiocarbonObject.settings['downloadOption'] == 'yes':
       
             now = datetime.now()
+        
             radiocarbonObject.settings['date/time generated'] =  now.strftime("%Y%m%d_%H%M%S_")
-            radiocarbonObject.settings['output_folder'] = os.path.join('radiocarbon_cp_result', (radiocarbonObject.settings['date/time generated']+radiocarbonObject.stationId))
-            if not os.path.exists('radiocarbon_cp_result'):
-                os.makedirs('radiocarbon_cp_result')
+            
+            output = os.path.join(os.path.expanduser('~'), 'output/radiocarbon_cp_result', radiocarbonObject.settings['date/time generated']+radiocarbonObject.stationId) 
+            if not os.path.exists(output):
+                os.makedirs(output)
+                
+            radiocarbonObject.settings['output_folder'] = output
 
-            os.mkdir(radiocarbonObject.settings['output_folder'])
 
             #possibly add format also (input to function save_model)
             radiocarbon_functions.save_data_cp(radiocarbonObject)
