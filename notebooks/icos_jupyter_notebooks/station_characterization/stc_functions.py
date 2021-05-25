@@ -283,10 +283,10 @@ def import_landcover():
 
     return out_of_domain, urban_aggreg, cropland_aggreg, forests, pastures_grasslands, oceans, other
 
-def import_population_data():
+def import_population_data(year=2018):
    
-    pop_data= Dataset(stcDataPath + 'GEOSTAT_population_2011.nc')
-    fp_pop=pop_data.variables['Sum_TOT_P'][:,:]
+    pop_data= Dataset(stcDataPath + 'GEOSTAT_population_2011_2018.nc')
+    fp_pop=pop_data.variables[str(year)][:,:]
     return fp_pop
 
 def import_point_source_data():
@@ -569,7 +569,12 @@ def polar_graph(myStation, rose_type, colorbar='gist_heat_r', zoom=''):
     fp=myStation.fp
     unit=myStation.settings['unit']
     
-    fp_pop= import_population_data()
+    if myStation.settings['startYear']<2015:
+        pop_data_year=2011
+    else:
+        pop_data_year=2018
+    
+    fp_pop= import_population_data(year=pop_data_year)
     fp_point= import_point_source_data()
     
     #same function used to all three types of map
@@ -885,8 +890,14 @@ def seasonal_table(myStation):
         anthro_diff_fall = var_load.loc[var_load['station_year'] == station_year, 'anthro_diff_fall'].iloc[0]
 
     else:
+        
+        if myStation.settings['startYear']<2015:
+            pop_data_year=2011
+        else:
+            pop_data_year=2018
+    
+        fp_pop= import_population_data(year=pop_data_year)
 
-        fp_pop= import_population_data()
         fp_point = import_point_source_data()
 
         #check what months available for the year (and December the year before - seasons rather than full year)
@@ -1253,7 +1264,14 @@ def values_multiple_variable_graph(all_stations, selected_station, date_range, t
 
     df_new_values = pd.DataFrame(columns=['Station','Sensitivity','GEE','Respiration','Anthro','Point source','Population'])
     
-    fp_pop= import_population_data()
+    start_date = min(date_range)
+    if start_date.year<2015:
+        pop_data_year=2011
+    else:
+        pop_data_year=2018
+    
+    fp_pop= import_population_data(year=pop_data_year)
+
     fp_point= import_point_source_data()
 
     list_stations_without_footprints=[]
