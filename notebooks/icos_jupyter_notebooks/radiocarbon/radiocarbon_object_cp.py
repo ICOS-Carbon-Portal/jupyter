@@ -22,6 +22,8 @@ class RadiocarbonObjectMeasCp():
         """
         Initialize your Footprint object
         """
+        
+
         #needed in ex C++ else not variable within class. also ex is a string. type.
         self.settings = settings        # dictionary from the GUI 
         self.stationId = None           # string with the station id
@@ -42,7 +44,7 @@ class RadiocarbonObjectMeasCp():
     #possibly add to stilt and cpstation - full country name. Only code from cplibrary,
     #only lat and lon from stilt
     def _setStationData(self):
-        
+            
         self.stationId = self.settings['stationCode']  
 
         if 'icos' in self.settings.keys():
@@ -76,18 +78,17 @@ class RadiocarbonObjectMeasCp():
             
     def _setMeasuredData(self):
         
-        selected_station_all=station_data.get(self.settings['icos']['stationId'])
-
+        
         #only get the 14C release:
+        selected_station_all=station_data.get(self.settings['codeMeasCP'])
+        
         radiocarbon_data= selected_station_all.data()[selected_station_all.data().specLabel=='ICOS ATC 14C Release']
-
+        
         self.measuredData=Dobj(radiocarbon_data.dobj.values[0]).data
         
         #modelled data for the same date ranges:
         self.df_for_export, self.df_for_plot = radiocarbon_functions.radiocarbon_cp_results(self)
 
-        
-    
 if __name__ == "__main__":
     """
     execute only if run as a script

@@ -42,9 +42,17 @@ def getSettings():
     
     try:
         
-        dictionary_meas_to_stilt={'HPB': 'HPB131', 'HTM':'HTM150', 'JFJ':'JFJ', 'LIN': 'LIN099', 'NOR':'NOR100', 'OPE':'OPE120', 'PAL': 'PAL', 'SAC': 'SAC100', 'SVB':'SVB150', 'KRE':'KRE250'}
+        dictionary_meas_to_stilt={'HPB': 'HPB131', 'HTM':'HTM150', 'JFJ':'JFJ', 'LIN': 'LIN099', 'NOR':'NOR100', 'OPE':'OPE120', 'PAL': 'PAL', 'SAC': 'SAC100', 'SVB':'SVB150', 'KRE':'KRE250', 'KIT':'KIT200', 'STE':'STE252'}
         
-        s['stationCode'] = dictionary_meas_to_stilt[station_choice_meas.value['station_code']]
+        if not station_choice_meas.value['station_code'] in dictionary_meas_to_stilt:
+
+            guess_stilt_code = station_choice_meas.value['station_code'] + str(station_choice_meas.value['sampling_height'])
+
+            s['stationCode'] = guess_stilt_code
+            
+        else:
+        
+            s['stationCode'] = dictionary_meas_to_stilt[station_choice_meas.value['station_code']]
         if stiltstations[s['stationCode']]['icos']:
             s['icos'] = cpstation.get(s['stationCode'][0:3].upper()).info()
         s['stilt'] = stiltstations[s['stationCode']]
@@ -52,6 +60,7 @@ def getSettings():
         s['backgroundFilename'] = 'IZOMHd24.csv'
         s['downloadOption'] = download_choice.value
         
+        s['codeMeasCP'] = station_choice_meas.value['station_code']
         s['samplingHeightMeas'] = station_choice_meas.value['sampling_height']
 
     except:
