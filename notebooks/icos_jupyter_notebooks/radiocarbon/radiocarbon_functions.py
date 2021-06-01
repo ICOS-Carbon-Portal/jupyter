@@ -1448,7 +1448,6 @@ def list_station_tuples_w_radiocarbon_data():
     list_of_tuples_for_dropdown=[]
     
     for index, row in df_stations_w_radiocarbon_data_cp.iterrows():
-        
         station_name = row['stationName']
         station_id = row['stationId']
         sampling_height = int(float(row['samplingHeight']))
@@ -1512,7 +1511,7 @@ def radiocarbon_cp_results(radiocarbonObjectMeas):
     #access many at the same time (all the entries - one for each radiocarbon measurement)
     #for each entry at the carbon portal (not all will be used - only when footprints for the same time period)
     first=True
-    for (radiocarbon_measurement, measurement_start_date, integration_time, std_deviation) in zip(radiocarbon_data['14C'], radiocarbon_data['TIMESTAMP'], radiocarbon_data['IntegrationTime'], radiocarbon_data['Stdev']):
+    for (radiocarbon_measurement, measurement_start_date, integration_time, std_deviation) in zip(radiocarbon_data['14C'], radiocarbon_data['TIMESTAMP'], radiocarbon_data['IntegrationTime'], radiocarbon_data['WeightedStdErr']):
                
     
         #want to keep the original date for the export.
@@ -2208,7 +2207,7 @@ def display_info_html_table(radiocarbonObject, meas_data=False, cp_private=False
             
         #use year, month, day... don't want the hour in the title 
         if cp_private:
-            string_start_end_date =  '<br><b>Date range measurements</b>: ' + str(start_date_start.year) + '-' + str(start_date_start.month) + '-' + str(start_date_start.day) + ' to ' + str(end_date_end.year) + '-' + str(end_date_end.month) + '-' + str(end_date_end.day)  + '<br>If the date range in the graph is different, footprints are missing. Compute footprints <a href="https://stilt.icos-cp.eu/worker/" target="_blank">here</a>.'
+            string_start_end_date =  '<br><b>Date range measurements</b>: ' + str(start_date_start.year) + '-' + str(start_date_start.month) + '-' + str(start_date_start.day) + ' to ' + str(end_date_end.year) + '-' + str(end_date_end.month) + '-' + str(end_date_end.day)  + '<br>If the date range in the graph is different, footprints are missing. Compute footprints <a href="https://stilt.icos-cp.eu/worker/" target="_blank">here</a>.<br>'
             
         else:
             string_start_end_date =  '<br><b>Date range measurements</b>: ' + str(start_date_start.year) + '-' + str(start_date_start.month) + '-' + str(start_date_start.day) + ' to ' + str(end_date_end.year) + '-' + str(end_date_end.month) + '-' + str(end_date_end.day)  + '<br>If the date range in the graph is different, "Pick start date" and "Pick end date" is the restricting factor or footprints are missing. Compute footprints <a href="https://stilt.icos-cp.eu/worker/" target="_blank">here</a>.'
