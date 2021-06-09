@@ -57,3 +57,6 @@ Open your internet browser and go to: <b>[https://exploredata.icos-cp.eu](https:
 This is a public service and is supposed to give you a first glance what a Jupyter Notebook looks like and to explore our example notebooks. Be aware that your work is not saved, but you can download your notebook. 
 
 If you experience any problems logging-in to exploredata, send us an email to jupyter-info@icos-cp.eu. 
+
+## Data Licence
+https://data.icos-cp.eu/licence
