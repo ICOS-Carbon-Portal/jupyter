@@ -52,7 +52,7 @@ If you wish to access our Jupyter Hub, please apply for a personal account (<a h
 
 Open your internet browser and go to: <b>[https://exploredata.icos-cp.eu](https://exploredata.icos-cp.eu) </b> and enter your login-credentials.<br>
 <b><u>Username:</b></u> myEmailAddress (e.g. kim.nilsson@icos.com)<br>
-<b><u>Password:</b></u> **msa**
+<b><u>Password:</b></u> please get in touch to get one
 
 This is a public service and is supposed to give you a first glance what a Jupyter Notebook looks like and to explore our example notebooks. Be aware that your work is not saved, but you can download your notebook. 
 
