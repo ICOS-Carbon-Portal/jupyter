@@ -113,11 +113,6 @@ class StationChar():
             self.stationClass=self.settings['icos']['icosclass']
             self.siteType=self.settings['icos']['siteType']
             
-            # API to reterive country name using country code. 
-            url='https://restcountries.eu/rest/v2/alpha/' + self.settings['icos']['country']
-            resp = requests.get(url=url)
-            country_information=resp.json()
-            self.country=country_information['name']
         
         #only STILT station:
         else:
@@ -126,12 +121,30 @@ class StationChar():
             # API to reterive country name using reverse geocoding of station lat/lon
             self.lat=self.settings['stilt']['lat'] 
             self.lon=self.settings['stilt']['lon']
-
             
-            url='https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + str(self.lat) + '&longitude=' + str(self.lon) + '12&localityLanguage=en'
+        #UPDATE:
+        countries = {'AMS': 'Netherlands', 'AMS_DW': 'Netherlands', 'ARR': 'Norway', 'BAL': 'location in ocean', 'BAN112': 'Switzerland', 'BAN953': 'Switzerland', 'BER': 'Germany', 'BER_DW': 'Germany', 'BER_UW': 'Germany', 'BGU': 'Spain', 'BIK300': 'Poland', 'BIR': 'Norway', 'BOR': 'France', 'BOR_DW': 'France', 'BOR_UW': 'France', 'BRM212': 'Switzerland', 'BRM213': 'Switzerland', 'BSC': 'Romania', 'CBW': 'Netherlands', 'CBW027': 'Netherlands', 'CBW067': 'Netherlands', 'CBW127': 'Netherlands', 'CBW207': 'Netherlands', 'CES020': 'Netherlands', 'CES050': 'Netherlands', 'CES200': 'Nederland', 'CGR': 'Italy', 'CMN': 'Italy', 'CMN760': 'Italy', 'DAO': 'Switzerland', 'DAV': 'Switzerland', 'DEC': 'Spain', 'DRX': 'France', 'EGH': 'United Kingdom', 'ERERER': 'Sweden', 'FIK': 'Greece', 'FRE': 'Germany', 'GAT030': 'Germany', 'GAT060': 'Germany', 'GAT132': 'Germany', 'GAT344': 'Germany', 'GIF': 'France', 'GIF010': 'France', 'GIF050': 'France', 'GOL': 'Germany', 'HAM': 'Germany', 'HAM_DW': 'Germany', 'HAM_UW': 'Germany', 'HEI': 'Germany', 'HEL': 'Germany', 'HFD': 'United Kingdom', 'HPB010': 'Germany', 'HPB093': 'Germany', 'HPB131': 'Germany', 'HTM030': 'Sweden', 'HTM150': 'Sweden', 'HUN096': 'Hungary', 'IDA': 'Latvia', 'IDS': 'Sweden', 'IPR015': 'Italy', 'IPR100': 'Italy', 'ISEN': 'Germany', 'ISN': 'Germany', 'IZN': 'Spain', 'JENA': 'Germany', 'JFJ': 'Switzerland', 'JFJ960': 'Switzerland', 'JUE': 'Germany', 'KAS': 'Poland', 'KIT030': 'Germany', 'KIT050': 'Germany', 'KIT100': 'Germany', 'KIT200': 'Germany', 'KRE010': 'Czechia', 'KRE125': 'Czechia', 'KRE250': 'Czechia', 'LIL': 'France', 'LIL_DW': 'Belgium', 'LIL_UW': 'France', 'LIN099': 'Germany', 'LMP': 'Italy', 'LPO': 'France', 'LUT': 'Nederland', 'LUX': 'Luxembourg', 'LUX_DW': 'Germany', 'LUX_UW': 'France', 'LYO': 'France', 'LYO_DW': 'France', 'LYO_UW': 'France', 'MAH': 'Ireland', 'MED-1': 'Spain', 'MED-2': 'location in ocean', 'MED-3': 'location in ocean', 'MED-4': 'location in ocean', 'MED-5': 'location in ocean', 'MHD': 'Ireland', 'MIL': 'Italy', 'MUN': 'Germany', 'MUN_DW': 'Germany', 'MUN_UW': 'Germany', 'NOR100': 'Sweden', 'OES': 'Sweden', 'OPE010': 'France', 'OPE050': 'France', 'OPE120': 'France', 'OPO': 'Portugal', 'OST': 'Denmark', 'OTTA': 'Norway', 'OXK163': 'Germany', 'PAL': 'Finland', 'PAR': 'France', 'PAR_DW': 'France', 'PDM': 'France', 'POING': 'Germany', 'POING5': 'Germany', 'POLAND': 'Poland', 'POTT': 'Germany', 'PRA': 'Czechia', 'PRA_DW': 'Czechia', 'PRS': 'Italy', 'PTL': 'Italy', 'PUI': 'Finland', 'PUY': 'France', 'RGL': 'United Kingdom', 'RIS': 'Denmark', 'RMS': 'France', 'ROM1': 'Romania', 'ROT': 'Nederland', 'ROT_UW': 'Nederland', 'RUH': 'Germany', 'RUH_UW': 'Germany', 'SAC060': 'France', 'SAC100': 'France', 'SCHOEN': 'Germany', 'SET': 'Belgium', 'SKK': 'United Kingdom', 'SMR125': 'Finland', 'SMR127': 'Finland', 'SSL': 'Germany', 'STE252': 'Germany', 'STH': 'Sweden', 'STH_DW': 'Sweden', 'STK200': 'Germany', 'STR': 'Italy', 'SVB150': 'Sweden', 'TAC191': 'United Kingdom', 'TEST': 'Norway', 'THRB': 'location in ocean', 'TOH147': 'Germany', 'TRN050': 'France', 'TRN100': 'France', 'TRN180': 'France', 'TST': 'location in ocean', 'TTA050': 'United Kingdom', 'TTA222': 'United Kingdom', 'UTO': 'Finland', 'VIE': 'Austria', 'VIE_DW': 'Austria', 'VIE_UW': 'Austria', 'VND': 'Italy', 'VOI': 'Russia', 'WAO': 'United Kingdom', 'WES': 'Germany', 'ZRK': 'Germany', 'ZSF': 'Austria'}
+        
+        if self.stationId in countries.keys():
+            
+            self.country = countries[self.stationId ]
+            
+        else:
+            
+            url='http://nominatim.openstreetmap.org/reverse?format=json&lat=' + str(self.lat) + '&lon=' + str(self.lon) + '&zoom=18&addressdetails=1'
+        
+
             resp = requests.get(url=url)
             country_information=resp.json()
-            self.country=country_information['countryName']
+            if 'address' in country_information.keys():
+                if 'country' in country_information['address'].keys():
+
+                    self.country = country_information['address']['country']
+                else:
+                    self.country = 'ZZ location in ocean'
+
+            else:
+                self.country = 'ZZ location in ocean'
 
     def _setDateRange(self):
         """
