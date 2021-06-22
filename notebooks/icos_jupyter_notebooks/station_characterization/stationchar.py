@@ -20,15 +20,13 @@
 __author__      = ["Ida Storm"]
 __credits__     = "ICOS Carbon Portal"
 __license__     = "GPL-3.0"
-__version__     = "0.1.1"
+__version__     = "0.1.2"
 __maintainer__  = "ICOS Carbon Portal, elaborated products team"
 __email__       = ['info@icos-cp.eu', 'ida.storm@nateko.lu.se']
 __status__      = "rc1"
-__date__        = "2020-12-03"
+__date__        = "2021-06-22"
 
-import settings
-import json
-from icoscp.station import station
+
 import requests
 import datetime as dt
 import pandas as pd
@@ -54,21 +52,21 @@ class StationChar():
     
     all object attributes are listed in def __init__
     """
-    #could pass only settings - has stationId
-    #forced to put in
+ 
     def __init__(self, settings):
         
         """
         Initialize your Station Characterization object
       
         """
-        #needed in ex C++ else not variable within class. also ex is a string. type.
+        
         self.settings = settings        # dictionary from the GUI with 
         self.stationId = None           # string with the station id
         self.stationName = None         # full name of station
         self.lat = None                 # float with latitude of station
         self.lon = None                 # float with longitude of station
         self.country = None             # string with the station's country name
+        self.country_code = None             # string with the station's country name
         self.stationClass = None        # string with station class (1 or 2 or none)
         self.siteType = None            # string with station type (mountain etc. or none) 
         self.dateRange = None           # date range for average footprint specified by users
@@ -95,43 +93,43 @@ class StationChar():
         self._setDistancesAndDegrees()
         self._setBinsAndLabels()
     
-    #possibly add to stilt and cpstation - full country name. Only code from cplibrary,
-    #only lat and lon from stilt
+
     def _setStationData(self):
         
-        self.stationId = self.settings['stationCode']  
-        
-        #if True that it is an ICOS station.
-        #if self.settings['icos']:
+        self.stationId = self.settings['stationCode']
         if 'icos' in self.settings.keys():
+            # ICOS station
             
             self.stationName=self.settings['icos']['name']
             self.lat=self.settings['icos']['lat']
             self.lon=self.settings['icos']['lon']
+            self.country_code = self.settings['icos']['country']
             
             #only going to be set for icos stations, not when only a STILT station
             self.stationClass=self.settings['icos']['icosclass']
-            self.siteType=self.settings['icos']['siteType']
-            
-            # API to reterive country name using country code. 
-            url='https://restcountries.eu/rest/v2/alpha/' + self.settings['icos']['country']
-            resp = requests.get(url=url)
-            country_information=resp.json()
-            self.country=country_information['name']
+            self.siteType=self.settings['icos']['siteType']            
         
-        #only STILT station:
-        else:
-            self.stationName=self.settings['stilt']['name']  
             
-            # API to reterive country name using reverse geocoding of station lat/lon
+        else:
+            # STILT station:
+            self.stationName=self.settings['stilt']['name']            
             self.lat=self.settings['stilt']['lat'] 
             self.lon=self.settings['stilt']['lon']
-
             
-            url='https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + str(self.lat) + '&longitude=' + str(self.lon) + '12&localityLanguage=en'
+            # revers geocoding
+            baseurl = 'https://nominatim.openstreetmap.org/reverse?format=json&'
+            url = baseurl + 'lat=' + str(self.lat) + '&lon=' + str(self.lon) + '&zoom=3'
+            r = requests.get(url=url)
+            c = r.json()
+            if not 'error' in c.keys():
+                self.country_code = c['address']['country_code']
+            
+        if self.country_code:
+            # API to reterive country information using country code. 
+            url='https://restcountries.eu/rest/v2/alpha/' + self.country_code
             resp = requests.get(url=url)
-            country_information=resp.json()
-            self.country=country_information['countryName']
+            self.country_information = resp.json()
+            self.country=self.country_information['name']
 
     def _setDateRange(self):
         """
