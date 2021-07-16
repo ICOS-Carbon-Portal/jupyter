@@ -82,7 +82,7 @@ class RadiocarbonObjectMeasCp():
         #only get the 14C release:
         selected_station_all=station_data.get(self.settings['codeMeasCP'])
         
-        radiocarbon_data= selected_station_all.data()[selected_station_all.data().specLabel=='ICOS ATC 14C Release']
+        radiocarbon_data= selected_station_all.data()[selected_station_all.data().spec=='http://meta.icos-cp.eu/resources/cpmeta/atcC14L2DataObject']
         
         self.measuredData=Dobj(radiocarbon_data.dobj.values[0]).data
         

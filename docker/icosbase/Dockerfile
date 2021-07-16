@@ -69,6 +69,11 @@ RUN jupyter lab build
 RUN pip install pangaeapy
 RUN pip install jupyter_module_loader
 
+# convert kml files to geojson
+RUN pip install kml2geojson
+
+# simplify polygons 
+RUN pip install simplification
 
 WORKDIR /home/jovyan
 
@@ -78,7 +83,7 @@ RUN rmdir work
 
 # This package, and the following notebook directories, are the stuff that
 # changes most often, so we add them last.
-RUN pip install icoscp --no-cache-dir --upgrade
+RUN pip install icoscp==0.1.7
 
 
 # -----start temp fix---2021-03-26 CD-------------------
