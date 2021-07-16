@@ -69,6 +69,11 @@ RUN jupyter lab build
 RUN pip install pangaeapy
 RUN pip install jupyter_module_loader
 
+# convert kml files to geojson
+RUN pip install kml2geojson
+
+# simplify polygons 
+RUN pip install simplification
 
 WORKDIR /home/jovyan
 
