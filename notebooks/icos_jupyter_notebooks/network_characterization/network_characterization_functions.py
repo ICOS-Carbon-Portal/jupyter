@@ -29,6 +29,7 @@ from bokeh.models import HoverTool
 
 from datetime import datetime
 from matplotlib.colors import LogNorm
+import json
 
 now = datetime.now()
 date_time = now.strftime("%Y%m%d_%H%M%S")
@@ -1553,9 +1554,7 @@ def save_map_texts(list_footprint_choice, threshold, list_additional_footprints)
     else:
         
         string_station_info_additional = ''
-        
-    
-        
+ 
         
     date_generated = date.today()
     
@@ -1578,5 +1577,16 @@ def save_map_texts(list_footprint_choice, threshold, list_additional_footprints)
     open_file.write(string_station_info)
     open_file.close() 
 
+def save_settings(settings):
 
+    output = os.path.join(os.path.expanduser('~'), 'output/network_characterization', date_time)
+
+    if not os.path.exists(output):
+        os.makedirs(output)
+
+    export_file=output + '/settings.json'
+
+    # save settings as json file
+    with open(export_file, 'w') as f:
+        json.dump(settings, f, indent=4)
                   

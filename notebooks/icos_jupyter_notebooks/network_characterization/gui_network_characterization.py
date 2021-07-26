@@ -17,6 +17,8 @@ import pandas as pd
 
 import network_characterization_functions as functions
 
+import json
+
 stiltstations = stiltStations.getStilt()
 
 #for base network it is only possible to choose between ICOS stations:
@@ -25,6 +27,17 @@ icos_list = sorted([((v['country'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,
 #for the compare network any site with STILT runs is possible
 #however, it must have 12 months worth of data to show up in the dropdown
 all_list = sorted([((v['country'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items() if '2018' in v['years'] if len(v['2018']['months'])>12])
+
+def set_settings(s):
+
+    sites_base_network_options.value = s['baseNetwork']   
+    sites_compare_network_options.value = s['compareNetwork'] 
+    colorbar_choice.value = s['colorBar']
+    threshold_option.value = s['percent']
+    area_type.value = s['countryDefinition'] 
+    country_options.value = s['countries']
+    breakdown_type.value = s['weighing']
+    download_output_option.value = s['download']
 
 def change_selected_stations(c): 
  
@@ -61,7 +74,17 @@ def change_stations_base_network(c):
     
     list_selected_base_network.value= list_base_network_string
 
-
+def file_set_widgets(c):
+    
+    uploaded_file = file_name.value
+    
+    #check if there is content in the dictionary (uploaded file)
+    if bool(uploaded_file):
+        settings_file=uploaded_file[list(uploaded_file.keys())[0]]['content']
+        settings_json = settings_file.decode('utf8').replace("'", '"')
+        settings_dict = json.loads(settings_json)
+        set_settings(settings_dict)
+        
 #----------- start processing -----------------
 
 #clear all the output
@@ -144,6 +167,11 @@ def update_func(button_c):
             #only do this once for the three maps (text file with info about what footprints have been aggregated
             #as well as threshold
             functions.save_map_texts(sites_base_network, threshold_int, sites_compare_network)
+
+            settings = {"baseNetwork": list(sites_base_network_options.value), "compareNetwork": list(sites_compare_network_options.value), "colorBar": colorbar_choice.value, "percent": threshold_option.value, "countryDefinition": area_type.value , "countries": list(country_options.value), "weighing": breakdown_type.value, "download": download_output_option.value, "settingsFile": "to be added"}
+            
+            functions.save_settings(settings)
+
         else:
             pngfile = ''
         #vmin - 0.001
@@ -375,13 +403,25 @@ download_output_option=RadioButtons(
         description=' ',
         disabled=False)
 
+header_filename = Output()
+
+with header_filename:
+    display(HTML('<p style="font-size:16px;font-weight:bold;">Load settings from file (optional)</p>'))
+
+
+file_name= FileUpload(
+    accept='.json',  # Accepted file extension e.g. '.txt', '.pdf', 'image/*', 'image/*,.pdf'
+    multiple=False  # True to accept multiple files upload else False
+)
+
+
 #Create a Button widget to control execution:
-update_button = Button(description='Update',
+update_button = Button(description='Run selection',
                        disabled=True,
                        button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
                        tooltip='Click me',)
 
-update_button.layout.margin = '50px 0px 0px 50px' #top, right, bottom, left
+update_button.layout.margin = '0px 0px 0px 160px' #top, right, bottom, left
 royal='#4169E1'
 update_button.style.button_color=royal
 
@@ -395,9 +435,9 @@ box_map_settings = HBox([colorbar_choice, threshold_option])
 box_land_cover_headings = HBox([header_area_type, heading_country_options])
 box_land_cover_choices = HBox([area_type, country_options])
 
-
+final_row = HBox([file_name, update_button])
 #Add all widgets to a VBox:
-form = VBox([base_compare_combined, heading_map_specifications, box_map_settings, header_land_cover, box_land_cover_headings, box_land_cover_choices, heading_breakdown_choice, breakdown_type, download_output_heading, download_output_option, update_button])
+form = VBox([base_compare_combined, heading_map_specifications, box_map_settings, header_land_cover, box_land_cover_headings, box_land_cover_choices, heading_breakdown_choice, breakdown_type, download_output_heading, download_output_option, header_filename, final_row])
 
 #Initialize form output:
 form_out = Output()
@@ -424,7 +464,7 @@ sites_base_network_options.observe(change_stations_base_network, 'value')
 
 sites_compare_network_options.observe(change_stations_compare_network, 'value')
 
-
+file_name.observe(file_set_widgets, 'value')
 
 update_button.on_click(update_func)
 
