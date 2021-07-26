@@ -1527,4 +1527,56 @@ def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg
 def export_fp(summed_fp_sens):
 
     np.savetxt(path_data + 'fp_export.csv',summed_fp_sens,delimiter=',',fmt='%.15f')
+    
+    
+#needs to be updated
+def save_map_texts(list_footprint_choice, threshold, list_additional_footprints):
+
+    string_station_info='The following stations 2018 footprint(s) were aggregated to generate the network maps: ' 
+    
+    
+    for station in list_footprint_choice:
+        
+        string_station_info+=station + ', '
+        
+    string_station_info = string_station_info[:-2]
+    if len(list_additional_footprints)>0:
+        
+        string_station_info_additional='\nThe following additional stations 2018 footprint(s) were aggregated to generate the network maps that show also additional stations (_additional): ' 
+        
+        for station in list_additional_footprints:
+            
+            string_station_info_additional += station + ', '
+            
+        string_station_info_additional = string_station_info_additional[:-2]
+        
+    else:
+        
+        string_station_info_additional = ''
+        
+    
+        
+        
+    date_generated = date.today()
+    
+    threshold_percent=threshold*100
+    
+    string_station_info+= string_station_info_additional
+    
+    string_station_info+= '\nThredhold footprint: ' + str(threshold_percent) + '%'
+    
+    string_station_info+= '\nDate generated: ' + str(date_generated)
+    
+    #move up to top (+ remove in other places)
+    output = os.path.join(os.path.expanduser('~'), 'output/network_characterization', date_time)
+                          
+    if not os.path.exists(output):
+        os.makedirs(output)
+        
+    export_file=output + '/map_information.txt'
+    open_file= open(export_file, "w")
+    open_file.write(string_station_info)
+    open_file.close() 
+
+
                   
