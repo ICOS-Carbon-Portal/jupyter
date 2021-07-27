@@ -120,6 +120,15 @@ def update_func(button_c):
     breakdown = breakdown_type.value
 
     fp_combined_base_network, fp_mask_count_base_network, fp_mask_base_network, lon, lat = functions.aggreg_2018_footprints_base_network(sites_base_network, threshold_int)
+    
+    
+    if download_output:
+
+        functions.save_map_texts(sites_base_network, threshold_int, sites_compare_network)
+
+        settings = {"baseNetwork": list(sites_base_network_options.value), "compareNetwork": list(sites_compare_network_options.value), "colorBar": colorbar_choice.value, "percent": threshold_option.value, "countryDefinition": area_type.value , "countries": list(country_options.value), "weighing": breakdown_type.value, "download": download_output_option.value}
+
+        functions.save_settings(settings)
 
     if len(sites_compare_network)>0:      
         
@@ -139,7 +148,7 @@ def update_func(button_c):
         display(HTML('<p style="font-size:16px;text-align:center">Base network footprint (' + threshold_percent  + '%)</p>'))
 
         if download_output:
-            pngfile = 'map1_combined_sensitivity'
+            pngfile = 'base_network_footprint'
         
         else:
             pngfile = ''
@@ -151,7 +160,7 @@ def update_func(button_c):
         display(HTML('<p style="font-size:16px;text-align:center">Base network footprint mask (' + threshold_percent + '%)</p>'))
 
         if download_output:
-            pngfile = 'map3_influence_area_map'
+            pngfile = 'base_network_footprint_mask'
 
         else:
             pngfile = ''
@@ -163,14 +172,8 @@ def update_func(button_c):
         display(HTML('<p style="font-size:16px;text-align:center">Base network footprint mask count (' + threshold_percent + '%)</p>'))
 
         if download_output:
-            pngfile = 'map2_count_overlap'
-            #only do this once for the three maps (text file with info about what footprints have been aggregated
-            #as well as threshold
-            functions.save_map_texts(sites_base_network, threshold_int, sites_compare_network)
+            pngfile = 'base_network_footprint_mask_count'
 
-            settings = {"baseNetwork": list(sites_base_network_options.value), "compareNetwork": list(sites_compare_network_options.value), "colorBar": colorbar_choice.value, "percent": threshold_option.value, "countryDefinition": area_type.value , "countries": list(country_options.value), "weighing": breakdown_type.value, "download": download_output_option.value, "settingsFile": "to be added"}
-            
-            functions.save_settings(settings)
 
         else:
             pngfile = ''
@@ -183,7 +186,7 @@ def update_func(button_c):
         with output_summed_sens_fp_uploaded_fp:
             
             if download_output:
-                pngfile = 'map1_combined_sensitivity_additional'
+                pngfile = 'compare_network_footprint'
 
             else:
                 pngfile = ''
@@ -196,14 +199,12 @@ def update_func(button_c):
         with output_aggreg_fp_see_not_see_uploaded_fp:
             
             if download_output:
-                pngfile = 'map3_influence_area_map_additional'
+                pngfile = 'compare_network_footprint_mask'
 
 
             else:
                 pngfile = ''
-
-            
-            
+     
             display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint mask (' + threshold_percent + '%)</p>'))
 
             functions.plot_maps(fp_mask_compare_network, lon, lat, vmin=0.001, colors=colorbar, pngfile=pngfile,directory='figures_2018', mask=True)
@@ -213,7 +214,7 @@ def update_func(button_c):
             
             
             if download_output:
-                pngfile = 'map2_count_overlap_additional'
+                pngfile = 'compare_network_footprint_mask_count'
 
 
             else:

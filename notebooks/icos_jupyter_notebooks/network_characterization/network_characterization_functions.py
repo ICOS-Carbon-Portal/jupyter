@@ -31,8 +31,6 @@ from datetime import datetime
 from matplotlib.colors import LogNorm
 import json
 
-now = datetime.now()
-date_time = now.strftime("%Y%m%d_%H%M%S")
 
 reset_output()
 output_notebook()
@@ -199,7 +197,7 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
                 vmax=None
             norm = matplotlib.colors.BoundaryNorm(ticks, cmap.N, extend='both')
             
-            im = ax.imshow(field[:,:], norm=norm, interpolation=None,origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
+            im = ax.imshow(field[:,:], norm=norm, interpolation='none',origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
             
             cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='neither', format='%.0f', ticks=ticks)
 
@@ -213,7 +211,7 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
 
         else:
     
-            im = ax.imshow(field[:,:], interpolation=None, origin='lower', extent=img_extent,cmap=cmap, vmin=0.0001, vmax=vmax, alpha=.5)
+            im = ax.imshow(field[:,:], interpolation='none', origin='lower', extent=img_extent,cmap=cmap, vmin=0.0001, vmax=vmax, alpha=.5)
         
     else:
 
@@ -624,6 +622,12 @@ def load_fp(station):
 
 def aggreg_2018_footprints_base_network(sites_base_network, threshold):
    
+    #this will run once per tool run - define it here as opposed to up top so re-defined date_time 
+    #every time the update button is pressed
+    now = datetime.now()
+    global date_time
+    date_time = now.strftime("%Y%m%d_%H%M%S")
+    
     load_lat=loadtxt(path_footprints + 'latitude.csv', delimiter=',')
     load_lon=loadtxt(path_footprints + 'longitude.csv', delimiter=',')
     
@@ -1572,7 +1576,7 @@ def save_map_texts(list_footprint_choice, threshold, list_additional_footprints)
     if not os.path.exists(output):
         os.makedirs(output)
         
-    export_file=output + '/map_information.txt'
+    export_file=output + '/description_folder_content.txt'
     open_file= open(export_file, "w")
     open_file.write(string_station_info)
     open_file.close() 
