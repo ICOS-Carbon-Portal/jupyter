@@ -465,7 +465,7 @@ def breakdown_countries_compare_network(footprint_see_not_see, aggreg_fp_see_not
         display(HTML('<p style="font-size:16px;">The footprint covers none of the ICOS membership countries.</p>'))
         
         
-def footprint_show_percentages(footprint_code, input_footprint, fp_lat, fp_lon):
+def footprint_show_percentages(footprint_code, input_footprint, fp_lat, fp_lon, return_fp=False):
     
     
     sum_sensitivity_values=sum(input_footprint.flatten())
@@ -530,7 +530,11 @@ def footprint_show_percentages(footprint_code, input_footprint, fp_lat, fp_lon):
 
     footprint_0_90=np.array(list_aggreg_footprint).reshape((len(fp_lat), len(fp_lon)))
     
-    plot_maps(footprint_0_90, fp_lon, fp_lat, colors='Blues_r', vmin=10, vmax=90, percent = True, unit='%', title=(footprint_code + ' 2018'))
+    if return_fp:
+        return footprint_0_90
+    
+    else:
+        plot_maps(footprint_0_90, fp_lon, fp_lat, colors='Blues_r', vmin=10, vmax=90, percent = True, unit='%', title=(footprint_code + ' 2018'))
     
     
     
@@ -1537,7 +1541,7 @@ def export_fp(summed_fp_sens):
 #needs to be updated
 def save_map_texts(list_footprint_choice, threshold, list_additional_footprints):
 
-    string_station_info='The following stations 2018 footprint(s) were aggregated to generate the network maps: ' 
+    string_station_info='The following stations 2018 footprint(s) were aggregated to generate the base network: ' 
     
     
     for station in list_footprint_choice:
@@ -1547,7 +1551,7 @@ def save_map_texts(list_footprint_choice, threshold, list_additional_footprints)
     string_station_info = string_station_info[:-2]
     if len(list_additional_footprints)>0:
         
-        string_station_info_additional='\nThe following additional stations 2018 footprint(s) were aggregated to generate the network maps that show also additional stations (_additional): ' 
+        string_station_info_additional='\nThe following additional stations 2018 footprint(s) compare network maps: ' 
         
         for station in list_additional_footprints:
             
