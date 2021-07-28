@@ -157,7 +157,7 @@ def update_func(button_c):
     
 
     ###added: orig:
-    functions.plot_maps(fp[0], load_lon, load_lat, colors='Blues', unit='[ppm / ($\mu$mol / m$^{2}$s)]', title=map_title1, pngfile=pngfile1, date_time_predefined=date_time, linlog='log10')
+    functions.plot_maps(fp[0], load_lon, load_lat, colors='Blues', unit='[ppm / ($\mu$mol / (m$^{2}$s))]', title=map_title1, pngfile=pngfile1, date_time_predefined=date_time, linlog='log10')
     
     functions.plot_maps(footprint_0_90, load_lon, load_lat, colors='Blues_r', vmin=10, vmax=90, percent = True, unit='%', title=map_title2, pngfile=pngfile2, date_time_predefined=date_time)
  
