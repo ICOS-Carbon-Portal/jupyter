@@ -30,8 +30,6 @@ from bokeh.models import HoverTool
 from datetime import datetime
 from matplotlib.colors import LogNorm
 import json
-
-
 reset_output()
 output_notebook()
 
@@ -135,7 +133,7 @@ def date_range_hour_filtered(start_date, end_date, timeselect_list):
 
 # footprint_show_percentages() is used to with argument percent=True to generate an aggregated % sensitivity map. 
 def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', station='', zoom='', 
-              vmin=None, vmax=None, colors='GnBu',pngfile='', directory='figures', mask=False, percent=False): 
+              vmin=None, vmax=None, colors='GnBu',pngfile='', directory='figures', mask=False, percent=False, date_time_predefined=''): 
 
     mcolor='m'
 
@@ -182,14 +180,14 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
 
         if percent:
 
-            ticks = [10,20,30,40,50,60,70,80,90, 100]
+            ticks = [10,20,30,40,50,60,70,80,90,100]
 
             ticklabels = ticks[:-1]
             
             ticklabels.append(' ')
             
             vmin =10
-        
+ 
         if not mask:
 
             #different color if use "neither"
@@ -236,17 +234,24 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
     zoom=str(zoom)
   
     plt.show()
+   
     if len(pngfile)>0:
  
-        output = os.path.join(os.path.expanduser('~'), 'output/network_characterization', date_time)
+        if percent:
+            #date_time defined globally for the else option
+            output = os.path.join(os.path.expanduser('~'), 'output/footprint_percent', date_time_predefined)
+        else:
+            output = os.path.join(os.path.expanduser('~'), 'output/network_characterization', date_time)
 
         if not os.path.exists(output):
             os.makedirs(output)
   
         fig.savefig(output+'/'+pngfile+'.png',dpi=100,bbox_inches='tight')
-   
-    plt.close()
+    if percent:
+        
+        return plt
 
+    
 
 name_correct_dictionary= {'ICOS_memb':'ICOS membership countries','Czech_Rep': 'Czech Republic', 'Switzerlan':'Switzerland', 'Netherland': 'Netherlands'}
 
@@ -536,7 +541,45 @@ def footprint_show_percentages(footprint_code, input_footprint, fp_lat, fp_lon, 
     else:
         plot_maps(footprint_0_90, fp_lon, fp_lat, colors='Blues_r', vmin=10, vmax=90, percent = True, unit='%', title=(footprint_code + ' 2018'))
     
+def percent_of_potential(input_footprint, fp_lat, fp_lon):
     
+    max_fp_value = input_footprint.max()
+    
+    update_values = pd.DataFrame()
+    
+    update_values['flattened_fp'] = input_footprint.flatten()
+    
+    ten_percent = max_fp_value*0.1
+    twenty_percent = max_fp_value*0.2
+    thirty_percent = max_fp_value*0.3
+    forty_percent = max_fp_value*0.4
+    fifty_percent = max_fp_value*0.5
+    sixty_percent = max_fp_value*0.6
+    seventy_percent = max_fp_value*0.7
+    eighty_percent = max_fp_value*0.8
+    ninty_percent = max_fp_value*0.9
+    
+    #one is true here, in the other function (consum) 0 was true
+    update_values['ten_percent']= np.where(update_values['flattened_fp']>=ten_percent, 1, 0)
+    update_values['twenty_percent']= np.where(update_values['flattened_fp']>=twenty_percent, 1, 0)
+    update_values['thirty_percent']= np.where(update_values['flattened_fp']>=thirty_percent, 1, 0)
+    update_values['forty_percent']= np.where(update_values['flattened_fp']>=forty_percent, 1, 0)
+    update_values['fifty_percent']= np.where(update_values['flattened_fp']>=fifty_percent, 1, 0)  
+    update_values['sixty_percent']= np.where(update_values['flattened_fp']>=sixty_percent, 1, 0)
+    update_values['seventy_percent']= np.where(update_values['flattened_fp']>=seventy_percent, 1, 0)
+    update_values['eighty_percent']= np.where(update_values['flattened_fp']>=eighty_percent, 1, 0)
+    update_values['ninty_percent']= np.where(update_values['flattened_fp']>=ninty_percent, 1, 0)
+    
+    update_values['aggreg'] = update_values['ten_percent'] + update_values['twenty_percent']+update_values['thirty_percent']+update_values['forty_percent']+update_values['fifty_percent'] + update_values['sixty_percent'] + update_values['seventy_percent'] + update_values['eighty_percent'] + update_values['ninty_percent']
+    
+    update_values['aggreg']=update_values['aggreg']*10
+     
+    list_updated_values=update_values['aggreg'].tolist()
+
+    footprint_0_90=np.array(list_updated_values).reshape((len(fp_lat), len(fp_lon)))
+    
+    return footprint_0_90
+
     
 def update_footprint_based_on_threshold(input_footprint, fp_lat, fp_lon, threshold):
 
@@ -1597,4 +1640,49 @@ def save_settings(settings):
     # save settings as json file
     with open(export_file, 'w') as f:
         json.dump(settings, f, indent=4)
+        
+        
+#given the input - create an updated pandas date range with only hours in timeselect_list
+def date_range_hour_filtered(date_range, timeselect_list):
+   
+
+    #depending on how many input (max 8 for 0 3 6 9 12 15 18 21), filter to include hours.
+    for time_value in timeselect_list:
+        if len(timeselect_list)==1:
+            date_range = date_range[(timeselect_list[0] == date_range.hour)]
+            #df_nine = df.loc[(timeselect_list[count_timeselect] == df.index.hour)]
+        if len(timeselect_list)==2:
+            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]
+        if len(timeselect_list)==3:
+            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
+            | date_range[(timeselect_list[2] == date_range.hour)]
+
+        if len(timeselect_list)==4:
+            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
+            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]
+
+        if len(timeselect_list)==5:
+            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
+            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
+            | date_range[(timeselect_list[4] == date_range.hour)]
+
+        if len(timeselect_list)==6:
+            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
+            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
+            | date_range[(timeselect_list[4] == date_range.hour)] | date_range[(timeselect_list[5] == date_range.hour)]
+
+        if len(timeselect_list)==7:
+            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
+            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
+            | date_range[(timeselect_list[4] == date_range.hour)] | date_range[(timeselect_list[5] == date_range.hour)]\
+            | date_range[(timeselect_list[6] == date_range.hour)]
+        
+        if len(timeselect_list)==8:
+            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
+            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
+            | date_range[(timeselect_list[4] == date_range.hour)] | date_range[(timeselect_list[5] == date_range.hour)]\
+            | date_range[(timeselect_list[6] == date_range.hour)] | date_range[(timeselect_list[7] == date_range.hour)]
+          
+    #consider return timeselect
+    return date_range
                   
