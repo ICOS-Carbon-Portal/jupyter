@@ -129,9 +129,9 @@ def update_func(button_c):
     timeselect_string=[str(value) for value in timeselect_list]
     timeselect_string =':00, '.join(timeselect_string) + ':00'
     
-    map_title1 = station + ': percent of the footprint sensitivity' + '\n ' + str(s_year.value) + '-' + str(s_month.value)  + '-' + str(s_day.value) + ' to ' + (str(e_year.value) + '-' + str(e_month.value)  + '-' + str(e_day.value) + '\nHours: ' + timeselect_string)
+    map_title1 = station + ':  average footprint logarithmic scale' + '\n ' + str(s_year.value) + '-' + str(s_month.value)  + '-' + str(s_day.value) + ' to ' + (str(e_year.value) + '-' + str(e_month.value)  + '-' + str(e_day.value) + '\nHours: ' + timeselect_string)
     
-    map_title2 = station + ': percent of the maximum influence' + '\n ' + str(s_year.value) + '-' + str(s_month.value)  + '-' + str(s_day.value) + ' to ' + (str(e_year.value) + '-' + str(e_month.value)  + '-' + str(e_day.value) + '\nHours: ' + timeselect_string)
+    map_title2 = station + ': percent of the average footprint sensitivity' + '\n ' + str(s_year.value) + '-' + str(s_month.value)  + '-' + str(s_day.value) + ' to ' + (str(e_year.value) + '-' + str(e_month.value)  + '-' + str(e_day.value) + '\nHours: ' + timeselect_string)
     
     date_range = functions.date_range_hour_filtered(date_range, timeselect_list)
 
@@ -146,23 +146,23 @@ def update_func(button_c):
 
     footprint_0_90 = functions.footprint_show_percentages(station, fp, load_lat, load_lon, return_fp=True)
 
-    footprint_0_90_total_potential= functions.percent_of_potential(fp, load_lat, load_lon)
+    #footprint_0_90_total_potential= functions.percent_of_potential(fp, load_lat, load_lon)
 
     if download:
-        pngfile1='percent_footprint_sensitivity'
-        pngfile2='percent_maximum_influence'
+        pngfile1='log_scale_footprint'
+        pngfile2='percent_footprint_sensitivity'
     else:
         pngfile1=''
         pngfile2=''
     
-    display(HTML('<p style="font-size:15px;">Method one: % of the footprint sensitivity</p>'))
-    
-    functions.plot_maps(footprint_0_90, load_lon, load_lat, colors='Blues_r', vmin=10, vmax=90, percent = True, unit='%', title=map_title1, pngfile=pngfile1, date_time_predefined=date_time)
-    
-    display(HTML('<p style="font-size:15px;">Method two: % of the maximum influence</p>'))
-    
 
-    functions.plot_maps(footprint_0_90_total_potential, load_lon, load_lat, colors='Blues', vmin=10, vmax=90, percent = True, unit='%', title=map_title2, pngfile=pngfile2, date_time_predefined=date_time)
+    ###added: orig:
+    functions.plot_maps(fp[0], load_lon, load_lat, colors='Blues', unit='[ppm / ($\mu$mol / m$^{2}$s)]', title=map_title1, pngfile=pngfile1, date_time_predefined=date_time, linlog='log10')
+    
+    functions.plot_maps(footprint_0_90, load_lon, load_lat, colors='Blues_r', vmin=10, vmax=90, percent = True, unit='%', title=map_title2, pngfile=pngfile2, date_time_predefined=date_time)
+ 
+
+    #functions.plot_maps(footprint_0_90_total_potential, load_lon, load_lat, colors='Blues', vmin=10, vmax=90, percent = True, unit='%', title=map_title2, pngfile=pngfile2, date_time_predefined=date_time)
 
 
 style_bin = {'description_width': 'initial'}
@@ -185,7 +185,7 @@ header_download = Output()
 
 with header_download:
     display(HTML('<p style="font-size:15px;font-weight:bold;"><br>Download output:</p><p style="font-size:14px;">\
-    If the user wishes to download the map it will end up in the "Output" folder on the home directory in a subfolder called "percentage_maps". </p>'))
+    If the user wishes to download the map it will end up in the "Output" folder on the home directory in a subfolder called "vis_average_footprints". </p>'))
 
 
 download_choice = RadioButtons(

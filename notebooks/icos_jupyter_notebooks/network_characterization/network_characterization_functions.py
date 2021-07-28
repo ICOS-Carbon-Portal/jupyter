@@ -182,9 +182,11 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
 
             ticks = [10,20,30,40,50,60,70,80,90,100]
 
-            ticklabels = ticks[:-1]
+            #ticklabels = ticks[:-1]
             
-            ticklabels.append(' ')
+            #ticklabels.append(' ')
+            
+            ticklabels = [' ', 10, 20, 30, 40, 50, 60, 70, 80, 90]
             
             vmin =10
  
@@ -239,9 +241,12 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
  
         if percent:
             #date_time defined globally for the else option
-            output = os.path.join(os.path.expanduser('~'), 'output/footprint_percent', date_time_predefined)
+            output = os.path.join(os.path.expanduser('~'), 'output/vis_average_footprints', date_time_predefined)
         else:
-            output = os.path.join(os.path.expanduser('~'), 'output/network_characterization', date_time)
+            try:
+                output = os.path.join(os.path.expanduser('~'), 'output/network_characterization', date_time)
+            except:
+                output = os.path.join(os.path.expanduser('~'), 'output/vis_average_footprints', date_time_predefined)
 
         if not os.path.exists(output):
             os.makedirs(output)
