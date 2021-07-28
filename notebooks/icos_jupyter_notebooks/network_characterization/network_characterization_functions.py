@@ -166,8 +166,7 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
             ticks = [*range(1, (vmax+2), 1)]
 
             ticklabels = ticks[:-1]
-            
-            ticklabels.append(' ')
+            ticklabels.insert(0, ' ')
 
         else:
 
@@ -175,16 +174,11 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
             ticks = [*range(1, (np.max(field[:,:])+2),1)]
 
             ticklabels = ticks[:-1]
-            
-            ticklabels.append(' ')
+            ticklabels.insert(0, ' ')
 
         if percent:
 
             ticks = [10,20,30,40,50,60,70,80,90,100]
-
-            #ticklabels = ticks[:-1]
-            
-            #ticklabels.append(' ')
             
             ticklabels = [' ', 10, 20, 30, 40, 50, 60, 70, 80, 90]
             

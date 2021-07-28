@@ -116,6 +116,7 @@ def change_month_end(c):
 
 def update_func(button_c):
 
+    update_button.disabled = True
     now = datetime.now()
     date_time = now.strftime("%Y%m%d_%H%M%S")
     #add options:
@@ -164,7 +165,7 @@ def update_func(button_c):
 
     #functions.plot_maps(footprint_0_90_total_potential, load_lon, load_lat, colors='Blues', vmin=10, vmax=90, percent = True, unit='%', title=map_title2, pngfile=pngfile2, date_time_predefined=date_time)
 
-
+    update_button.disabled = False
 style_bin = {'description_width': 'initial'}
 
 header_station = Output()
