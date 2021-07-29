@@ -45,17 +45,6 @@ def change_selected_stations(c):
         update_button.disabled = False
     else:
         update_button.disabled = True
-
-
-def change_area_type(c):
-
-    if area_type.value=='Land':
-
-        country_options.options=country_land_choice
-
-    else:
-        country_options.options=country_land_eez_choice
-        
         
 def change_stations_compare_network(c):
     
@@ -116,7 +105,24 @@ def update_func(button_c):
     colorbar=colorbar_choice.value
     
     #countries for combination with ancillary data
-    countries=list(country_options.value)
+    countries_keys=list(country_options.value)
+    countries = []
+    if area_type.value == 'Land':
+
+        dictionary_land={'Belgium': 'Belgium', 'Czech Republic':'Czech_Rep', 'Denmark': 'Denmark', 'Estonia':'Estonia', 'Finland':'Finland', 'France':'France','Germany':'Germany', 'Hungary':'Hungary', 'Italy':'Italy', 'Netherlands':'Netherland','Norway':'Norway', 'Poland':'Poland','Spain':'Spain','Sweden':'Sweden', 'Switzerland':'Switzerlan','UK':'UK'}
+        
+        for country in countries_keys:
+            countries.append(dictionary_land[country])
+            
+    #land + eez:
+    else:
+        
+        dictionary_land_eez={'Belgium': 'Belgiu_eez', 'Czech Republic':'Czech_Rep', 'Denmark': 'Denmar_eez', 'Estonia':'Estoni_eez', 'Finland':'Finlan_eez', 'France':'France_eez','Germany':'Germa_eez', 'Hungary':'Hungary', 'Italy':'Italy_eez', 'Netherlands':'Nether_eez','Norway':'Norway_eez', 'Poland':'Poland_eez','Spain':'Spain_eez','Sweden':'Swe_eez', 'Switzerland':'Switzerlan','UK':'UK_eez'}
+                
+        for country in countries_keys:
+            countries.append(dictionary_land_eez[country])
+                   
+
     breakdown = breakdown_type.value
 
     fp_combined_base_network, fp_mask_count_base_network, fp_mask_base_network, lon, lat = functions.aggreg_2018_footprints_base_network(sites_base_network, threshold_int)
@@ -268,17 +274,6 @@ def update_func(button_c):
 style_bin = {'description_width': 'initial'}
 
 
-country_land_choice=[('Belgium', 'Belgium'), ('Czech Republic','Czech_Rep'), \
-                                ('Denmark', 'Denmark'), ('Estonia','Estonia'), ('Finland', 'Finland'), ('France', 'France'), \
-                                ('Germany', 'Germany'), ('Hungary', 'Hungary'), ('Italy', 'Italy'), ('Netherlands', 'Netherland'),\
-                                ('Norway', 'Norway'), ('Poland', 'Poland'),('Spain','Spain'),('Sweden', 'Sweden'), ('Switzerland', 'Switzerlan'), \
-                                 ('UK', 'UK')]
-
-country_land_eez_choice=[('Belgium', 'Belgiu_eez'), ('Czech Republic','Czech_Rep'), \
-                                ('Denmark', 'Denmar_eez'), ('Estonia','Estoni_eez'), ('Finland', 'Finlan_eez'), ('France', 'France_eez'), \
-                                ('Germany', 'Germa_eez'), ('Italy', 'Italy_eez'), ('Netherlands', 'Nether_eez'),\
-                                ('Norway', 'Norway_eez'), ('Poland', 'Poland_eez'), ('Spain', 'Spain_eez'), ('Sweden', 'Swe_eez'), ('Switzerland', 'Switzerlan'), \
-                                 ('UK', 'UK_eez')]
 colorbar_choice_list= ['GnBu', 'Greys', 'Purples', 'Blues', 'Greens', 'Oranges', 'Reds',\
                          'YlOrBr', 'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu','PuBu', 'YlGnBu', \
                          'PuBuGn', 'BuGn', 'YlGn']
@@ -310,7 +305,7 @@ threshold_option = BoundedIntText(
     max=99,
     step=1,
     style=style_bin,
-    description='Perect footprint(s):',
+    description='Percent footprint(s):',
     disabled=False
 )
 
@@ -360,20 +355,23 @@ heading_country_options = Output()
 with heading_country_options:
     display(HTML('<p style="font-size:14px;">Choose what country/countries run the analysis for: </p>'))
 
-heading_country_options.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
+#heading_country_options.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
 
+
+countries = ['Belgium', 'Czech Republic','Denmark', 'Estonia','Finland','France', 'Germany','Hungary', 'Italy', 'Netherlands', 'Norway','Poland','Spain','Sweden','Switzerland', 'UK']
 country_options= SelectMultiple(
-    options=country_land_choice,
+    options=countries,
     style=style_bin,
     description='',
     disabled=False)
 
-country_options.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
+#country_options.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
 
 header_area_type = Output()
 with header_area_type:
     display(HTML('<p style="font-size:14px;">Choose between getting the land cover<br>breakdown of the land covered, or to include<br>the EEZ (exclusive economic zone): </p>'))
-    
+
+header_area_type.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
 
 area_type=RadioButtons(
         options=['Land', 'Land + EEZ'],
@@ -381,17 +379,21 @@ area_type=RadioButtons(
         description=' ',
         disabled=False)
 
+area_type.layout.margin = '0px 0px 0px 50px' #top, right, bottom, left
+
 heading_breakdown_choice = Output()
 with heading_breakdown_choice:
     display(HTML('<p style="font-size:14px;">Choose between using the footprint masks and<br>sensitivity weighted footprints to compute the<br>ancillary data values:</p>'))
 
-heading_breakdown_choice.layout.margin = '20px 0px 0px 0px' #top, right, bottom, left
+heading_breakdown_choice.layout.margin = '30px 0px 0px 0px' #top, right, bottom, left
 
 breakdown_type=RadioButtons(
         options=[('Footprint', 'sens'), ('Footprint mask', 'mask')],
         value='sens',
         description=' ',
         disabled=False)
+
+#breakdown_type.layout.margin = '0px 0px 0px 330px' #top, right, bottom, left
 
 download_output_heading = Output()
 
@@ -433,8 +435,8 @@ base_compare_combined = HBox([box_base_network, box_compare_network])
 
 box_map_settings = HBox([colorbar_choice, threshold_option])
 
-box_land_cover_headings = HBox([header_area_type, heading_country_options])
-box_land_cover_choices = HBox([area_type, country_options])
+box_land_cover_headings = HBox([heading_country_options, header_area_type])
+box_land_cover_choices = HBox([country_options, area_type])
 
 final_row = HBox([file_name, update_button])
 #Add all widgets to a VBox:
@@ -458,7 +460,7 @@ output_header_landcover_section = Output()
 #--------------------------------------------------------------------
 
 # OBSERVERS - what happens when change area type (between land and land + eez)
-area_type.observe(change_area_type, 'value')
+#area_type.observe(change_area_type, 'value')
 
 sites_base_network_options.observe(change_selected_stations, 'value')
 sites_base_network_options.observe(change_stations_base_network, 'value')
