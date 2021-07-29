@@ -93,6 +93,7 @@ def clear_all_output():
     
 def update_func(button_c):
     
+    update_button.disabled = True
     clear_all_output()
 
     sites_base_network=list(sites_base_network_options.value)
@@ -268,7 +269,7 @@ def update_func(button_c):
             
             functions.breakdown_landcover(countries, fp_combined_base_network, fp_mask_base_network, breakdown)
             
-
+    update_button.disabled = False
 #-----------widgets definition ----------------
     
 style_bin = {'description_width': 'initial'}
@@ -355,17 +356,12 @@ heading_country_options = Output()
 with heading_country_options:
     display(HTML('<p style="font-size:14px;">Choose what country/countries run the analysis for: </p>'))
 
-#heading_country_options.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
-
-
 countries = ['Belgium', 'Czech Republic','Denmark', 'Estonia','Finland','France', 'Germany','Hungary', 'Italy', 'Netherlands', 'Norway','Poland','Spain','Sweden','Switzerland', 'UK']
 country_options= SelectMultiple(
     options=countries,
     style=style_bin,
     description='',
     disabled=False)
-
-#country_options.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
 
 header_area_type = Output()
 with header_area_type:
@@ -392,8 +388,6 @@ breakdown_type=RadioButtons(
         value='sens',
         description=' ',
         disabled=False)
-
-#breakdown_type.layout.margin = '0px 0px 0px 330px' #top, right, bottom, left
 
 download_output_heading = Output()
 
