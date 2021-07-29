@@ -130,6 +130,8 @@ def update_func(button_c):
     timeselect_string=[str(value) for value in timeselect_list]
     timeselect_string =':00, '.join(timeselect_string) + ':00'
     
+    colorbar=colorbar_choice.value
+    
     map_title1 = station + ':  average footprint logarithmic scale' + '\n ' + str(s_year.value) + '-' + str(s_month.value)  + '-' + str(s_day.value) + ' to ' + (str(e_year.value) + '-' + str(e_month.value)  + '-' + str(e_day.value) + '\nHours: ' + timeselect_string)
     
     map_title2 = station + ': percent of the average footprint sensitivity' + '\n ' + str(s_year.value) + '-' + str(s_month.value)  + '-' + str(s_day.value) + ' to ' + (str(e_year.value) + '-' + str(e_month.value)  + '-' + str(e_day.value) + '\nHours: ' + timeselect_string)
@@ -158,9 +160,9 @@ def update_func(button_c):
     
 
     ###added: orig:
-    functions.plot_maps(fp[0], load_lon, load_lat, colors='Blues', unit='[ppm / ($\mu$mol / (m$^{2}$s))]', title=map_title1, pngfile=pngfile1, date_time_predefined=date_time, linlog='log10')
+    functions.plot_maps(fp[0], load_lon, load_lat, colors=colorbar, unit='[ppm / ($\mu$mol / (m$^{2}$s))]', title=map_title1, pngfile=pngfile1, date_time_predefined=date_time, linlog='log10')
     
-    functions.plot_maps(footprint_0_90, load_lon, load_lat, colors='Blues_r', vmin=10, vmax=90, percent = True, unit='%', title=map_title2, pngfile=pngfile2, date_time_predefined=date_time)
+    functions.plot_maps(footprint_0_90, load_lon, load_lat, colors=(colorbar + '_r'), vmin=10, vmax=90, percent = True, unit='%', title=map_title2, pngfile=pngfile2, date_time_predefined=date_time)
  
 
     #functions.plot_maps(footprint_0_90_total_potential, load_lon, load_lat, colors='Blues', vmin=10, vmax=90, percent = True, unit='%', title=map_title2, pngfile=pngfile2, date_time_predefined=date_time)
@@ -194,7 +196,24 @@ download_choice = RadioButtons(
     description=' ',
     value=True,
     disabled=False)
-   
+
+colorbar_choice_list= ['GnBu', 'Greys', 'Purples', 'Blues', 'Greens', 'Oranges', 'Reds',\
+                         'YlOrBr', 'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu','PuBu', 'YlGnBu', \
+                         'PuBuGn', 'BuGn', 'YlGn']
+
+heading_map_specifications = Output()
+
+with heading_map_specifications:
+    
+    display(HTML('<p style="font-size:16px;font-weight:bold;"><br>Map settings</p>'))
+    
+colorbar_choice = Dropdown(
+    description='Colorbar:', 
+    style=style_bin,
+    options=colorbar_choice_list,
+    disabled=False,
+)
+
 
 #Create a Button widget to control execution:
 update_button = Button(description='Run selection',
@@ -288,7 +307,7 @@ time_box = HBox([year_box, month_box, day_box])
 
 
 
-form = VBox([header_station, station_choice, header_timeselect, time_box, time_selection, header_download, download_choice, update_button])
+form = VBox([header_station, station_choice, header_timeselect, time_box, time_selection, heading_map_specifications, colorbar_choice, header_download, download_choice, update_button])
 
 
 form_out = Output()
