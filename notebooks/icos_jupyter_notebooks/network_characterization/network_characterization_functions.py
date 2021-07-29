@@ -33,13 +33,9 @@ import json
 reset_output()
 output_notebook()
 
-HOME = os.path.expanduser("~")+'/'
 
- 
-path_input=HOME+'icos_jupyter_notebooks/'
-#path_input=HOME+'project/stilt_notebooks/footprint_area_analysis/'
-path_data=path_input + 'network_characterization/'
-path_footprints = path_data + 'footprints_2018_averaged/'
+folder_tool = 'network_characterization' 
+folder_tool_fps = 'footprints_2018_averaged'
 
 dictionary_area_choice = {'Belgium':'Belgium','Belgiu_eez':'Belgium (EEZ included)', 'Czech_Rep':'Czech Republic', 'Denmark':'Denmark','Denmar_eez':'Denmark (EEZ included)', 'Estonia':'Estonia', 'Estoni_eez':'Estonia (EEZ included)','Finland':'Finland', 'Finlan_eez':'Finland (EEZ included)', 'France':'France', 'France_eez':'France (EEZ included)','Germany':'Germany','Germa_eez':'Germany (EEZ included)', 'Hungary':'Hungary', 'Italy':'Italy', 'Italy_eez':'Italy', 'Netherland':'Netherlands', 'Nether_eez':'Netherlands (EEZ included)', 'Norway':'Norway', 'Norway_eez':'Norway (EEZ included)', 'Poland':'Poland', 'Poland_eez':'Poland (EEZ included)', 'Spain':'Spain', 'Spain_eez':'Spain (EEZ included)', 'Sweden':'Sweden', 'Swe_eez':'Sweden (EEZ included)', 'Switzerlan':'Switzerland', 'UK':'UK',  'UK_eez':'UK (EEZ included)'}
 
@@ -250,18 +246,18 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
         
         return plt
 
-    
 
 name_correct_dictionary= {'ICOS_memb':'ICOS membership countries','Czech_Rep': 'Czech Republic', 'Switzerlan':'Switzerland', 'Netherland': 'Netherlands'}
 
 def breakdown_countries_base_network(footprint_see_not_see, summed_fp_sens):
 
-    f_gridarea = cdf.Dataset(path_data + 'gridareaSTILT.nc')
+
+    f_gridarea = cdf.Dataset(os.path.join(folder_tool, 'gridareaSTILT.nc'))
 
     #area stored in "cell_area" in m2
     gridarea = f_gridarea.variables['cell_area'][:]
 
-    all_area_masks= cdf.Dataset(path_data + 'land_and_land_plus_eez_country_masks_icos_members.nc')
+    all_area_masks= cdf.Dataset(os.path.join(folder_tool, 'land_and_land_plus_eez_country_masks_icos_members.nc'))
 
     list_areas=['Sweden', 'Belgium', 'Czech_Rep', 'Denmark', 'Estonia', 'Finland',  'France',  'Germany', 'Hungary', 'Italy', 'Netherland',  'Norway', 'Poland', 'Spain', 'Switzerlan', 'UK', 'ICOS_memb']
     list_areas_eez_included=['Swe_eez', 'Belgiu_eez', '', 'Denmar_eez', 'Estoni_eez', 'Finlan_eez', 'France_eez', 'Germa_eez','', 'Italy_eez',  'Nether_eez', 'Norway_eez', 'Poland_eez', 'Spain_eez', '', 'UK_eez', 'ICOS_m_eez']
@@ -358,12 +354,12 @@ def breakdown_countries_base_network(footprint_see_not_see, summed_fp_sens):
 
 def breakdown_countries_compare_network(footprint_see_not_see, aggreg_fp_see_not_see_uploaded_fp):
 
-    f_gridarea = cdf.Dataset(path_data + 'gridareaSTILT.nc')
+    f_gridarea = cdf.Dataset(os.path.join(folder_tool, 'gridareaSTILT.nc'))
 
     #area stored in "cell_area" in m2
     gridarea = f_gridarea.variables['cell_area'][:]
 
-    all_area_masks= cdf.Dataset(path_data + 'land_and_land_plus_eez_country_masks_icos_members.nc')
+    all_area_masks= cdf.Dataset(os.path.join(folder_tool, 'land_and_land_plus_eez_country_masks_icos_members.nc'))
 
     list_areas=['Sweden', 'Belgium', 'Czech_Rep', 'Denmark', 'Estonia', 'Finland',  'France',  'Germany', 'Hungary', 'Italy', 'Netherland',  'Norway', 'Poland', 'Spain', 'Switzerlan', 'UK', 'ICOS_memb']
     
@@ -645,7 +641,7 @@ def load_fp(station):
     name_load_footprint_csv='fp_' + station + '.csv'
     
     try:
-        loaded_fp=loadtxt((path_footprints + name_load_footprint_csv), delimiter=',')
+        loaded_fp=loadtxt(os.path.join(folder_tool, folder_tool_fps, name_load_footprint_csv), delimiter=',')
     except:
 
         date_range = pd.date_range(start='2018-01-01', end='2019-01-01', freq='3H')
@@ -660,9 +656,10 @@ def load_fp(station):
             
             loaded_fp = 'no footprint'
 
-        np.savetxt((path_footprints + name_load_footprint_csv),fp[0],delimiter=',',fmt='%.15f')
+        
+        np.savetxt(os.path.join(folder_tool, folder_tool_fps, name_load_footprint_csv),fp[0],delimiter=',',fmt='%.15f')
 
-        loaded_fp=loadtxt((path_footprints+ name_load_footprint_csv), delimiter=',')
+        loaded_fp=loadtxt(os.path.join(folder_tool, folder_tool_fps, name_load_footprint_csv), delimiter=',')
 
     return loaded_fp
 
@@ -674,8 +671,9 @@ def aggreg_2018_footprints_base_network(sites_base_network, threshold):
     global date_time
     date_time = now.strftime("%Y%m%d_%H%M%S")
     
-    load_lat=loadtxt(path_footprints + 'latitude.csv', delimiter=',')
-    load_lon=loadtxt(path_footprints + 'longitude.csv', delimiter=',')
+    load_lat=loadtxt(os.path.join(folder_tool, folder_tool_fps, 'latitude.csv'), delimiter=',')
+    load_lon=loadtxt(os.path.join(folder_tool, folder_tool_fps, 'longitude.csv'), delimiter=',')
+    
     
     first=True
     for station in sites_base_network:
@@ -712,8 +710,8 @@ def aggreg_2018_footprints_base_network(sites_base_network, threshold):
 
 def aggreg_2018_footprints_compare_network(sites_base_network, list_additional_footprints, threshold):
     
-    load_lat=loadtxt(path_footprints + 'latitude.csv', delimiter=',')
-    load_lon=loadtxt(path_footprints + 'longitude.csv', delimiter=',')
+    load_lat=loadtxt(os.path.join(folder_tool, folder_tool_fps, 'latitude.csv'), delimiter=',')
+    load_lon=loadtxt(os.path.join(folder_tool, folder_tool_fps, 'longitude.csv'), delimiter=',')
     
     first=True
     for station in sites_base_network:
@@ -770,12 +768,13 @@ def aggreg_2018_footprints_compare_network(sites_base_network, list_additional_f
     
 
 def import_landcover():
-    all_corine_classes= Dataset(path_data + 'all_corine_except_ocean.nc')
+    all_corine_classes= Dataset(os.path.join(folder_tool, 'all_corine_except_ocean.nc'))
+
 
     #the "onceans_finalized" dataset is seperate: CORINE class 523 (oceans) did not extend beyond exclusive zone
     #complemented with Natural Earth data.
     #CORINE does not cover the whole area, "nodata" area is never ocean, rather landbased data.
-    oceans_finalized= Dataset(path_data + 'oceans_finalized.nc')
+    oceans_finalized= Dataset(os.path.join(folder_tool, 'oceans_finalized.nc'))
 
     #access all the different land cover classes in the .nc files:
     fp_111 = all_corine_classes.variables['area_111'][:,:]
@@ -865,7 +864,8 @@ def import_landcover():
 
 def import_population_data():
 
-    pop_data= Dataset(path_data + 'GEOSTAT_population_2011_2018.nc')
+    pop_data= Dataset(os.path.join(folder_tool, 'GEOSTAT_population_2011_2018.nc'))
+    
     fp_pop=pop_data.variables['2018'][:,:]
     return fp_pop
 
@@ -878,13 +878,13 @@ def breakdown_landcover(list_area_choice, summed_fp_sens, aggreg_fp_see_not_see,
     fp_pop = import_population_data()
 
     #gridarea - to calculate how much footprint covers.
-    f_gridarea = cdf.Dataset(path_data + 'gridareaSTILT.nc')
+    f_gridarea = cdf.Dataset(os.path.join(folder_tool, 'gridareaSTILT.nc'))
 
     #area stored in "cell_area" in m2
     #test divide by 1000000 here instead
     gridarea = f_gridarea.variables['cell_area'][:]
     
-    all_area_masks= Dataset(path_data + 'land_and_land_plus_eez_country_masks_icos_members.nc')
+    all_area_masks= Dataset(os.path.join(folder_tool, 'land_and_land_plus_eez_country_masks_icos_members.nc'))
 
     countries = []
     urban = []
@@ -1181,11 +1181,11 @@ def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg
     
     fp_pop = import_population_data()
     
-    f_gridarea = cdf.Dataset(path_data + 'gridareaSTILT.nc')
+    f_gridarea = cdf.Dataset(os.path.join(folder_tool, 'gridareaSTILT.nc'))
 
     gridarea = f_gridarea.variables['cell_area'][:]
     
-    all_area_masks= Dataset(path_data + 'land_and_land_plus_eez_country_masks_icos_members.nc')
+    all_area_masks= Dataset(os.path.join(folder_tool, 'land_and_land_plus_eez_country_masks_icos_members.nc'))
 
     countries = []
     urban = []
@@ -1577,7 +1577,7 @@ def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg
 #not used in tool on exploredata          
 def export_fp(summed_fp_sens):
 
-    np.savetxt(path_data + 'fp_export.csv',summed_fp_sens,delimiter=',',fmt='%.15f')
+    np.savetxt(os.path.join(folder_tool, 'fp_export.csv'),summed_fp_sens,delimiter=',',fmt='%.15f')
     
     
 #needs to be updated
