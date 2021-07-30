@@ -126,7 +126,8 @@ def update_func(button_c):
 
     breakdown = breakdown_type.value
 
-    fp_combined_base_network, fp_mask_count_base_network, fp_mask_base_network, lon, lat = functions.aggreg_2018_footprints_base_network(sites_base_network, threshold_int)
+    #new --> fp_max_base_network
+    fp_combined_base_network, fp_mask_count_base_network, fp_mask_base_network, fp_max_base_network, lon, lat = functions.aggreg_2018_footprints_base_network(sites_base_network, threshold_int)
     
     
     if download_output:
@@ -139,7 +140,7 @@ def update_func(button_c):
 
     if len(sites_compare_network)>0:      
         
-        fp_combined_compare_network, fp_mask_count_compare_network, fp_mask_compare_network, lon, lat = functions.aggreg_2018_footprints_compare_network(sites_base_network, sites_compare_network, threshold_int)
+        fp_combined_compare_network, fp_mask_count_compare_network, fp_mask_compare_network, fp_max_compare_network, lon, lat = functions.aggreg_2018_footprints_compare_network(sites_base_network, sites_compare_network, threshold_int)
        
         vmax_see_not_see = np.max(fp_mask_count_compare_network)
         vmax_sens = np.max(fp_combined_compare_network)
@@ -247,9 +248,11 @@ def update_func(button_c):
 
         with breakdown_landcover_output:
            
-            functions.breakdown_landcover_compare_network(countries, fp_combined_base_network, fp_mask_base_network, fp_combined_compare_network, fp_mask_compare_network, breakdown)
-
+            #functions.breakdown_landcover_compare_network(countries, fp_combined_base_network, fp_mask_base_network, fp_combined_compare_network, fp_mask_compare_network, breakdown)
             
+            functions.breakdown_landcover_compare_network(countries, fp_max_base_network, fp_mask_base_network, fp_max_compare_network, fp_mask_compare_network, breakdown)
+            
+       
     else:
         with output_breakdown_countries:
             
@@ -266,8 +269,9 @@ def update_func(button_c):
 
 
         with breakdown_landcover_output:
-            
-            functions.breakdown_landcover(countries, fp_combined_base_network, fp_mask_base_network, breakdown)
+
+            #functions.breakdown_landcover(countries, fp_combined_base_network, fp_mask_base_network, breakdown)
+            functions.breakdown_landcover(countries, fp_max_base_network, fp_mask_base_network, breakdown)
             
     update_button.disabled = False
 #-----------widgets definition ----------------

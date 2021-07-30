@@ -674,7 +674,9 @@ def aggreg_2018_footprints_base_network(sites_base_network, threshold):
     load_lat=loadtxt(os.path.join(folder_tool, folder_tool_fps, 'latitude.csv'), delimiter=',')
     load_lon=loadtxt(os.path.join(folder_tool, folder_tool_fps, 'longitude.csv'), delimiter=',')
     
+    df_max_base_network = pd.DataFrame()
     
+    index=1
     first=True
     for station in sites_base_network:
 
@@ -687,8 +689,7 @@ def aggreg_2018_footprints_base_network(sites_base_network, threshold):
      
         upd_fp_sens, upd_fp_see_not_see=update_footprint_based_on_threshold(loaded_fp, load_lat, load_lon, threshold)
         
-        #based on threshold - get
-        #footprint_show_percentages(station, loaded_fp, load_lat, load_lon)
+        df_max_base_network[('fp_' + str(index))]=upd_fp_sens.flatten()
 
         if first==True:
             #sensitivity values
@@ -703,16 +704,26 @@ def aggreg_2018_footprints_base_network(sites_base_network, threshold):
 
             #values 0 - x depending on how many stations "sees" each cell
             summed_fp_see_not_see=summed_fp_see_not_see+upd_fp_see_not_see
+            
+        #for new column values
+        index=index+1
+    
+    df_max_base_network = df_max_base_network[df_max_base_network.columns].max(axis=1)
+    
+    fp_max_base_network=np.array(df_max_base_network.tolist()).reshape((len(load_lat), len(load_lon)))
 
     aggreg_fp_see_not_see = one_or_zero_mask_x(summed_fp_see_not_see)
 
-    return summed_fp_sens, summed_fp_see_not_see, aggreg_fp_see_not_see, load_lon, load_lat
+    return summed_fp_sens, summed_fp_see_not_see, aggreg_fp_see_not_see, fp_max_base_network, load_lon, load_lat
 
 def aggreg_2018_footprints_compare_network(sites_base_network, list_additional_footprints, threshold):
     
     load_lat=loadtxt(os.path.join(folder_tool, folder_tool_fps, 'latitude.csv'), delimiter=',')
     load_lon=loadtxt(os.path.join(folder_tool, folder_tool_fps, 'longitude.csv'), delimiter=',')
     
+    df_max_compare_network = pd.DataFrame()
+    
+    index = 1
     first=True
     for station in sites_base_network:
 
@@ -723,6 +734,8 @@ def aggreg_2018_footprints_compare_network(sites_base_network, list_additional_f
         #based on threshold - get 
         upd_fp_sens, upd_fp_see_not_see=update_footprint_based_on_threshold(loaded_fp, load_lat, load_lon, threshold)
 
+        df_max_compare_network[('fp_' + str(index))]=upd_fp_sens.flatten()
+        
         if first==True:
             #sensitivity values
             summed_fp_sens=upd_fp_sens
@@ -736,6 +749,8 @@ def aggreg_2018_footprints_compare_network(sites_base_network, list_additional_f
 
             #values 0 - x depending on how many stations "sees" each cell
             summed_fp_see_not_see = summed_fp_see_not_see + upd_fp_see_not_see
+            
+        index = index+1
         
     aggreg_fp_see_not_see = one_or_zero_mask_x(summed_fp_see_not_see) 
     
@@ -757,14 +772,21 @@ def aggreg_2018_footprints_compare_network(sites_base_network, list_additional_f
         
         upd_fp_sens, upd_fp_see_not_see=update_footprint_based_on_threshold(loaded_fp, load_lat, load_lon, threshold)
         
+        df_max_compare_network[('fp_' + str(index))]=upd_fp_sens.flatten()
+        
         summed_fp_sens_additional = summed_fp_sens_additional + upd_fp_sens
         
         summed_fp_see_not_see_additional = summed_fp_see_not_see_additional + upd_fp_see_not_see
+        
+        index = index + 1
 
+    df_max_compare_network = df_max_compare_network[df_max_compare_network.columns].max(axis=1)
+
+    fp_max_compare_network=np.array(df_max_compare_network.tolist()).reshape((len(load_lat), len(load_lon)))
+    
     aggreg_fp_see_not_see_additional = one_or_zero_mask_x(summed_fp_see_not_see_additional) 
-
-
-    return summed_fp_sens_additional, summed_fp_see_not_see_additional, aggreg_fp_see_not_see_additional, load_lon, load_lat
+   
+    return summed_fp_sens_additional, summed_fp_see_not_see_additional, aggreg_fp_see_not_see_additional,fp_max_compare_network, load_lon, load_lat
     
 
 def import_landcover():
@@ -869,7 +891,7 @@ def import_population_data():
     fp_pop=pop_data.variables['2018'][:,:]
     return fp_pop
 
-
+#summed_fp_sens: now takes the max footprint (update 2021-07-30)
 def breakdown_landcover(list_area_choice, summed_fp_sens, aggreg_fp_see_not_see, breakdown_type = 'sens'):
     
     #import the necessary data
@@ -1072,7 +1094,7 @@ def breakdown_landcover(list_area_choice, summed_fp_sens, aggreg_fp_see_not_see,
                     
                     df_landcover_breakdown = df_landcover_breakdown.astype(float)
 
-                    df_landcover_breakdown = df_landcover_breakdown.round(1)
+                    df_landcover_breakdown = df_landcover_breakdown.round(0)
 
                     df_landcover_breakdown = df_landcover_breakdown.astype(int)
                     
@@ -1173,7 +1195,8 @@ def breakdown_landcover(list_area_choice, summed_fp_sens, aggreg_fp_see_not_see,
             show(p)
 
         display(population_by_country)
-    
+
+#summed_fp_sens and summed_fp_sens_uploaded footprint: now takes the max footprint (update 2021-07-30)
 def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg_fp_see_not_see, summed_fp_sens_uploaded_fp, aggreg_fp_see_not_see_uploaded_fp, breakdown_type='sens'):
     
     #import the necessary data
