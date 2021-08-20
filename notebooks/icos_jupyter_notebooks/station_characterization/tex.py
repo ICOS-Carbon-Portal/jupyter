@@ -211,7 +211,7 @@ The following figures present more advanced syntheses, so please carefully read 
         
         \\begin{figure}[!h]
         \\includegraphics[width=0.75\\textwidth]{**landcover_windrose**}
-        \\raisebox{6.5cm}[0pt][0pt]{%
+        \\raisebox{6.8cm}[0pt][0pt]{%
         \\hspace{9.05cm}%
         \\captionsetup{labelformat=empty}
         \\parbox{7.9cm}{\\caption{\\begin{small}The \\textbf{land cover polar graph} summarizes the distribution of land cover types in the average footprint around the station (located in the centre of the graph). Note that the area of a land cover type in the graph corresponds its relative contribution with the highest contributing type located closest to the centre. \\end{small}}}}
@@ -258,10 +258,9 @@ def generate_pdf_tex(stc):
     tex=tex.replace('**pointsource**', os.path.join(output, stc.figures['2'][2]))
     tex=tex.replace('**population**', os.path.join(output, stc.figures['3'][2]))
     tex=tex.replace('**landcover_bar**', os.path.join(output, stc.figures['4'][2]))
-    
-    string_seasonal='./' + os.path.join(output, stc.figures['5'][2]) 
-    
-    if os.path.isfile(string_seasonal):
+
+    if os.path.isfile(os.path.join(output, stc.figures['5'][2])):
+
         tex=tex.replace('**seasonal**', ('\\includegraphics[width=1\\textwidth]{' + os.path.join(output, stc.figures['5'][2]) + '}'))
         tex=tex.replace('**seasonal_text**', 'The \\textbf{seasonal variations table} summarizes the results for the year **year** (Dec **dec_year** - Nov **year**) and lists for each season the relative difference compared to the annual average. Gross ecosystem exchange (GEE), respiration and anthropogenic emission contributions to the {\ensuremath{\mathrm{CO_2}}} concentration are calculated online in the STILT model (see detailed specifications at the end of this document). A positive GEE value means that there is more {\\ensuremath{\\mathrm{CO_2}}} uptake from the vegitation compared to the average uptake from plants over the whole year, which is generally true for the growing seasons.')
      
