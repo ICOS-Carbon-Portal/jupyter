@@ -49,10 +49,7 @@ pathFP='/data/stiltweb/stations/'
 #Earth's radius in km (for calculating distances between the station and cells)
 R = 6373.8
 
-dictionary_color = {'Urban': {'color': 'red'}, 'Cropland':{'color':'darkgoldenrod'}, 'Oceans':{'color':'blue'}, 
-                    'Forests':{'color':'green'}, 'Pastures and grassland':{'color':'yellow'}, 'Other':{'color':'black'}, 'No data':{'color': 'grey'}}
-
-
+dictionary_color = {'Broad leaf forest': {'color': '#4EB265'}, 'Coniferous forest':{'color':'#CAE0AB'}, 'Mixed forest':{'color':'#90C987'}, 'Ocean':{'color':'#1964B0'}, 'Other':{'color':'#882E72'}, 'Natural grassland':{'color':'#F1932D'}, 'Cropland':{'color': '#521A13'}, 'Pasture':{'color':'#F7F056'}, 'Urban':{'color':'#DC050C'}, 'Unknown':{'color':'#777777'}}
 
 #function to read and aggregate footprints for given date range
 def read_aggreg_footprints(station, date_range):
@@ -189,99 +186,92 @@ def date_range_hour_filtered(start_date, end_date, timeselect_list):
     #consider return timeselect
     return date_range
 
-def import_landcover():
-    all_corine_classes= Dataset(stcDataPath + 'CLC_2018_landcover.nc')
 
-    #the "CLC_naturalearth_oceans.nc" is seperate: CORINE class 523 (oceans) did not extend beyond exclusive zone
-    #complemented with Natural Earth data.
-    #CORINE does not cover the whole area, "nodata" area is never ocean, rather landbased data.
-    oceans= Dataset(stcDataPath + 'CLC_naturalearth_oceans.nc')
+def import_landcover_HILDA(year='2019'):
+    
+    name_data = 'hilda_lulc_'+ year +'.nc' 
+    
+    all_hilda_classes= Dataset(stcDataPath + name_data)
 
     #access all the different land cover classes in the .nc files:
-    fp_111 = all_corine_classes.variables['area_111'][:,:]
-    fp_112 = all_corine_classes.variables['area_112'][:,:]
-    fp_121 = all_corine_classes.variables['area_121'][:,:]
-    fp_122 = all_corine_classes.variables['area_122'][:,:]
-    fp_123 = all_corine_classes.variables['area_123'][:,:]
-    fp_124 = all_corine_classes.variables['area_124'][:,:]
-    fp_131 = all_corine_classes.variables['area_131'][:,:]
-    fp_132 = all_corine_classes.variables['area_132'][:,:]
-    fp_133 = all_corine_classes.variables['area_133'][:,:]
-    fp_141 = all_corine_classes.variables['area_141'][:,:]
-    fp_142 = all_corine_classes.variables['area_142'][:,:]
-    fp_211 = all_corine_classes.variables['area_211'][:,:]
-    fp_212 = all_corine_classes.variables['area_212'][:,:]
-    fp_213 = all_corine_classes.variables['area_213'][:,:]
-    fp_221 = all_corine_classes.variables['area_221'][:,:]
-    fp_222 = all_corine_classes.variables['area_222'][:,:]
-    fp_223 = all_corine_classes.variables['area_223'][:,:]
-    fp_231 = all_corine_classes.variables['area_231'][:,:]
-    fp_241 = all_corine_classes.variables['area_241'][:,:]
-    fp_242 = all_corine_classes.variables['area_242'][:,:]
-    fp_243 = all_corine_classes.variables['area_243'][:,:]
-    fp_244 = all_corine_classes.variables['area_244'][:,:]
-    fp_311 = all_corine_classes.variables['area_311'][:,:]
-    fp_312 = all_corine_classes.variables['area_312'][:,:]
-    fp_313 = all_corine_classes.variables['area_313'][:,:]
-    fp_321 = all_corine_classes.variables['area_321'][:,:]
-    fp_322 = all_corine_classes.variables['area_322'][:,:]
-    fp_323 = all_corine_classes.variables['area_323'][:,:]
-    fp_324 = all_corine_classes.variables['area_324'][:,:]
-    fp_331 = all_corine_classes.variables['area_331'][:,:]
-    fp_332 = all_corine_classes.variables['area_332'][:,:]
-    fp_333 = all_corine_classes.variables['area_333'][:,:]
-    fp_334 = all_corine_classes.variables['area_334'][:,:]
-    fp_335 = all_corine_classes.variables['area_335'][:,:]
-    fp_411 = all_corine_classes.variables['area_411'][:,:]
-    fp_412 = all_corine_classes.variables['area_412'][:,:]
-    fp_421 = all_corine_classes.variables['area_421'][:,:]
-    fp_422 = all_corine_classes.variables['area_422'][:,:]
-    fp_423 = all_corine_classes.variables['area_423'][:,:]
-    fp_511 = all_corine_classes.variables['area_511'][:,:]
-    fp_512 = all_corine_classes.variables['area_512'][:,:]
-    fp_521 = all_corine_classes.variables['area_521'][:,:]
-    fp_522 = all_corine_classes.variables['area_522'][:,:]
+    cropland = all_hilda_classes.variables['cropland'][:,:]
+    ocean = all_hilda_classes.variables['ocean'][:,:]
+    f_de_br_le = all_hilda_classes.variables['f_de_br_le'][:,:]
+    f_de_ne_le = all_hilda_classes.variables['f_de_ne_le'][:,:]
+    f_eg_br_le = all_hilda_classes.variables['f_eg_br_le'][:,:]
+    f_eg_ne_le = all_hilda_classes.variables['f_eg_ne_le'][:,:]
+    forest_mix = all_hilda_classes.variables['forest_mix'][:,:]
+    forest_unk = all_hilda_classes.variables['forest_unk'][:,:]
+    grass_shru = all_hilda_classes.variables['grass_shru'][:,:]
+    other_land = all_hilda_classes.variables['other_land'][:,:]
+    pasture = all_hilda_classes.variables['pasture'][:,:]
+    urban = all_hilda_classes.variables['urban'][:,:]
+    water = all_hilda_classes.variables['water'][:,:]
+    unknown = all_hilda_classes.variables['unknown'][:,:]
+    try:
+        total_area = all_hilda_classes.variables['area_total'][:,:]
+    except:
+        total_area = all_hilda_classes.variables['total_area'][:,:] 
 
-    #CORINE combined with natural earth data for oceans:
-    fp_523 = oceans.variables['ocean_ar2'][:,:]
+    return ocean, cropland, f_de_br_le, f_de_ne_le, f_eg_br_le, f_eg_ne_le, forest_mix, forest_unk, other_land, pasture, urban, grass_shru, water, total_area, unknown
 
-    #have a variable that represents the whole area of the cell,
-    #used to get a percentage breakdown of each corine class.
-    fp_total_area = all_corine_classes.variables['area_stilt'][:,:]
+def import_landcover_CORINE_2018():
 
-    #19 aggregated classes (these are used in the current bar graphs but can be updated by each user)
-    urban = fp_111+fp_112+fp_141+fp_142
-    industrial = fp_131 + fp_133 + fp_121 
-    road_and_rail = fp_122 
-    ports_and_apirports= fp_123+fp_124
-    dump_sites = fp_132
-    staple_cropland_not_rice = fp_211 + fp_212 + fp_241 + fp_242 + fp_243
-    rice_fields = fp_213
-    cropland_fruit_berry_grapes_olives = fp_221 + fp_222 + fp_223
-    pastures = fp_231
-    broad_leaved_forest = fp_311
-    coniferous_forest = fp_312
-    mixed_forest = fp_313 + fp_244
-    natural_grasslands = fp_321 + fp_322
-    transitional_woodland_shrub= fp_323 + fp_324
-    bare_natural_areas = fp_331 + fp_332 + fp_333 + fp_334
-    glaciers_prepetual_snow = fp_335
-    wet_area= fp_411 + fp_412 + fp_421 + fp_422
-    inland_water_bodies = fp_423 + fp_511 + fp_512 + fp_521 + fp_522
-    oceans = fp_523
+    # imports land cover data from HILDA and CORINE and returns aggregated land cover classes
+    # to the land cover functions
+    # The CORINE data contains two masks that are used here ('use_hilda' and 'use_corine')
+    # each cell in the STILT domain has either a zero or a one. 
+    # multiplying the two datasets with the masks allow us to finally add the data
+    # together.
+    
+    # Note that the CORINE data cannot be used on its own currently: there would be cells 
+    # with no data assigned in the area that is beyond the CORINE extent. 
+    
+    # CORINE data
+    aggregated_corine_classes = Dataset(stcDataPath + 'CORINE_land_cover_2018.nc')
+    
+    # one for all cells that should get HILDA land cover values, zero for the rest
+    use_hilda_mask = aggregated_corine_classes.variables['use_hilda'][:,:]
+    
+    # one for all cells that should get CORINE land cover values, zero for the rest
+    use_corine_mask = aggregated_corine_classes.variables['use_corine'][:,:]
 
-    #added: the "missing area" is out of the CORINE domain. Alltogether add upp to "fp_total_area"
-    out_of_domain=fp_total_area-oceans-inland_water_bodies-wet_area-glaciers_prepetual_snow-bare_natural_areas-transitional_woodland_shrub-natural_grasslands-mixed_forest-coniferous_forest-broad_leaved_forest-pastures-cropland_fruit_berry_grapes_olives-rice_fields-staple_cropland_not_rice-dump_sites-ports_and_apirports-road_and_rail-industrial-urban
-
-    #further aggregated classes for the land cover wind polar graph and land cover bar graph
-    urban_aggreg= urban + industrial + road_and_rail + dump_sites + ports_and_apirports
-    cropland_aggreg= staple_cropland_not_rice + rice_fields + cropland_fruit_berry_grapes_olives
-    forests= broad_leaved_forest + coniferous_forest + mixed_forest
-    pastures_grasslands= pastures + natural_grasslands
-    oceans=oceans
-    other=transitional_woodland_shrub+bare_natural_areas+glaciers_prepetual_snow +wet_area + inland_water_bodies
-
-    return out_of_domain, urban_aggreg, cropland_aggreg, forests, pastures_grasslands, oceans, other
+    broad_leaf_forest = aggregated_corine_classes.variables['br_le_for'][:,:] * use_corine_mask
+    coniferous_forest = aggregated_corine_classes.variables['con_for'][:,:] * use_corine_mask
+    mixed_forest = aggregated_corine_classes.variables['mix_for'][:,:] * use_corine_mask
+    ocean = aggregated_corine_classes.variables['oceans'][:,:] * use_corine_mask
+    other = aggregated_corine_classes.variables['other'][:,:] * use_corine_mask
+    natural_grassland = aggregated_corine_classes.variables['nat_grass'][:,:] * use_corine_mask
+    cropland = aggregated_corine_classes.variables['cropland'][:,:] * use_corine_mask
+    pasture = aggregated_corine_classes.variables['pastures'][:,:] * use_corine_mask
+    urban = aggregated_corine_classes.variables['urban'][:,:] * use_corine_mask
+    
+    # HILDA data
+    ocean_hilda, cropland_hilda, f_de_br_le_hilda, f_de_ne_le_hilda, f_eg_br_le_hilda, f_eg_ne_le_hilda, forest_mix_hilda, forest_unk_hilda, other_land_hilda, pasture_hilda, urban_hilda, grass_shru_hilda, water_hilda, total_area_hilda, unknown_hilda = import_landcover_HILDA('2019')
+    
+    broad_leaf_forest_hilda = (f_eg_br_le_hilda + f_de_br_le_hilda)  * use_hilda_mask
+    coniferous_forest_hilda = (f_eg_ne_le_hilda + f_de_ne_le_hilda) * use_hilda_mask
+    mixed_forest_hilda = (forest_unk_hilda + forest_mix_hilda) * use_hilda_mask
+    ocean_hilda = ocean_hilda * use_hilda_mask
+    other_hilda = (other_land_hilda + water_hilda) * use_hilda_mask
+    natural_grassland_hilda = grass_shru_hilda * use_hilda_mask
+    cropland_hilda = cropland_hilda * use_hilda_mask
+    pasture_hilda = pasture_hilda * use_hilda_mask
+    urban_hilda = urban_hilda * use_hilda_mask
+    unknown_hilda = unknown_hilda * use_hilda_mask
+   
+    broad_leaf_forest = broad_leaf_forest + broad_leaf_forest_hilda
+    coniferous_forest = coniferous_forest + coniferous_forest_hilda
+    mixed_forest = mixed_forest + mixed_forest_hilda
+    ocean = ocean + ocean_hilda
+    other = other + other_hilda
+    natural_grassland = natural_grassland + natural_grassland_hilda
+    cropland = cropland + cropland_hilda
+    pasture = pasture + pasture_hilda
+    urban = urban + urban_hilda
+    unknown = unknown_hilda
+    
+    return broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, natural_grassland, cropland, pasture, urban, unknown
 
 def import_population_data(year=2018):
    
@@ -664,67 +654,88 @@ def polar_graph(myStation, rose_type, colorbar='gist_heat_r', zoom=''):
                    linlog='linear', zoom='', vmin=0.0001, vmax=None, colors=colorbar)
         
     return polar_map, caption
+    
 
 def land_cover_bar_graph(myStation):    
+    
     fp_lon=myStation.fpLon
     fp_lat=myStation.fpLat
     degrees=myStation.degrees
     fp=myStation.fp
 
     #get all the land cover data from netcdfs 
-    out_of_domain, urban_aggreg, cropland_aggreg, forests, pastures_grasslands, oceans, other= import_landcover()
+    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, natural_grassland, cropland, pasture, urban, unknown = import_landcover_CORINE_2018()
     
     #land cover classes (imported in the land cover section):
-    cropland=fp*cropland_aggreg
-    urban=fp*urban_aggreg
-    forests=fp*forests
-    pastures_grasslands=fp*pastures_grasslands
-    oceans=fp*oceans
+    broad_leaf_forest=fp*broad_leaf_forest
+    coniferous_forest=fp*coniferous_forest
+    mixed_forest=fp*mixed_forest
+    ocean=fp*ocean
     other=fp*other
-    out_of_domain=fp*out_of_domain
-            
+    natural_grassland=fp*natural_grassland
+    cropland=fp*cropland
+    pasture=fp*pasture
+    urban=fp*urban
+    unknown=fp*unknown
+                
     #lists of these values
+    broad_leaf_forest_values = [item for sublist in broad_leaf_forest[0] for item in sublist]
+    coniferous_forest_values = [item for sublist in coniferous_forest[0] for item in sublist]
+    mixed_forest_values = [item for sublist in mixed_forest[0] for item in sublist]
+    ocean_values = [item for sublist in ocean[0] for item in sublist]
+    other_values = [item for sublist in other[0] for item in sublist]
+    natural_grassland_values = [item for sublist in natural_grassland[0] for item in sublist]
     cropland_values = [item for sublist in cropland[0] for item in sublist]
+    pasture_values = [item for sublist in pasture[0] for item in sublist]
     urban_values = [item for sublist in urban[0] for item in sublist]
-    forests_values = [item for sublist in forests[0] for item in sublist]
-    pastures_grasslands_values = [item for sublist in pastures_grasslands[0] for item in sublist]
-    oceans_values = [item for sublist in oceans[0] for item in sublist]
-    others_values = [item for sublist in other[0] for item in sublist]
-    out_of_domain_values = [item for sublist in out_of_domain[0] for item in sublist]
+    unknown_values = [item for sublist in unknown[0] for item in sublist]
+        
         
     #putting it into a dataframe: initially 192000 values (one per cell) for each of the aggregated land cover classes
     #into same dataframe - have the same coulmn heading. "landcover_type" will be used in "groupby" together with the "slice" (in degrees)
-    df_cropland = pd.DataFrame({'landcover_vals': cropland_values,
+    df_broad_leaf_forest = pd.DataFrame({'landcover_vals': broad_leaf_forest_values,
                                'degrees': degrees,
-                               'landcover_type':'Cropland'})
+                               'landcover_type':'Broad leaf forest'})
     
-    df_urban = pd.DataFrame({'landcover_vals': urban_values,
+    df_coniferous_forest = pd.DataFrame({'landcover_vals': coniferous_forest_values,
                            'degrees': degrees,
-                           'landcover_type':'Urban'})
+                           'landcover_type':'Coniferous forest'})
     
-    df_forests = pd.DataFrame({'landcover_vals': forests_values,
+    df_mixed_forest = pd.DataFrame({'landcover_vals': mixed_forest_values,
                            'degrees': degrees,
-                           'landcover_type':'Forests'})
+                           'landcover_type':'Mixed forest'})
     
-    df_pastures_grassland = pd.DataFrame({'landcover_vals': pastures_grasslands_values,
+    df_ocean = pd.DataFrame({'landcover_vals': ocean_values,
                            'degrees': degrees,
-                           'landcover_type':'Pastures and grassland'})
+                           'landcover_type':'Ocean'})
     
-    df_oceans = pd.DataFrame({'landcover_vals': oceans_values,
-                           'degrees': degrees,
-                           'landcover_type':'Oceans'})
-    
-    df_others = pd.DataFrame({'landcover_vals':  others_values,
+    df_other = pd.DataFrame({'landcover_vals': other_values,
                            'degrees': degrees,
                            'landcover_type':'Other'})
     
-    df_out_of_domain = pd.DataFrame({'landcover_vals':  out_of_domain_values,
+    df_natural_grassland = pd.DataFrame({'landcover_vals':  natural_grassland_values,
                            'degrees': degrees,
-                           'landcover_type':'No data'})
+                           'landcover_type':'Natural grassland'})
+    
+    df_cropland = pd.DataFrame({'landcover_vals':  cropland_values,
+                           'degrees': degrees,
+                           'landcover_type':'Cropland'})
+    
+    df_pasture = pd.DataFrame({'landcover_vals': pasture_values,
+                           'degrees': degrees,
+                           'landcover_type':'Pasture'})
+    
+    df_urban = pd.DataFrame({'landcover_vals':  urban_values,
+                           'degrees': degrees,
+                           'landcover_type':'Urban'})
+    
+    df_unknown = pd.DataFrame({'landcover_vals':  unknown_values,
+                           'degrees': degrees,
+                           'landcover_type':'Unknown'})
     
 
     #into one dataframe
-    df_all = df_cropland.append([df_urban, df_forests, df_pastures_grassland, df_oceans, df_others, df_out_of_domain])
+    df_all = df_cropland.append([df_broad_leaf_forest, df_coniferous_forest, df_mixed_forest, df_ocean, df_other, df_natural_grassland, df_pasture, df_urban, df_unknown])
     
 
     #not change with user input
@@ -781,9 +792,19 @@ def land_cover_bar_graph(myStation):
     p7 = ax.bar(ind, list_land_cover_values[6], width, color=dictionary_color[list_land_cover_names_sorted[6]]['color'],
                  bottom=list_land_cover_values[0]+list_land_cover_values[1]+list_land_cover_values[2]+list_land_cover_values[3]+\
                  list_land_cover_values[4]+list_land_cover_values[5])
+    
+    p8 = ax.bar(ind, list_land_cover_values[7], width, color=dictionary_color[list_land_cover_names_sorted[7]]['color'], 
+                bottom=list_land_cover_values[0]+list_land_cover_values[1]+list_land_cover_values[2]+list_land_cover_values[3]+\
+                 list_land_cover_values[4]+list_land_cover_values[5]+list_land_cover_values[6])
+    
+    p9 = ax.bar(ind, list_land_cover_values[8], width, color=dictionary_color[list_land_cover_names_sorted[8]]['color'], bottom=list_land_cover_values[0]+list_land_cover_values[1]+list_land_cover_values[2]+list_land_cover_values[3]+\
+                 list_land_cover_values[4]+list_land_cover_values[5]+list_land_cover_values[6]+list_land_cover_values[7])
+    
+    p10 = ax.bar(ind, list_land_cover_values[9], width, color=dictionary_color[list_land_cover_names_sorted[9]]['color'], bottom=list_land_cover_values[0]+list_land_cover_values[1]+list_land_cover_values[2]+list_land_cover_values[3]+\
+                 list_land_cover_values[4]+list_land_cover_values[5]+list_land_cover_values[6]+ list_land_cover_values[7]+list_land_cover_values[8])
 
     #want to reverese the order (ex if oceans at the "bottom" in the graph - ocean label should be furthest down)
-    handles=(p1[0], p2[0], p3[0], p4[0], p5[0], p6[0], p7[0])
+    handles=(p1[0], p2[0], p3[0], p4[0], p5[0], p6[0], p7[0], p8[0], p9[0], p10[0])
 
     index=0
     list_labels=[]
@@ -795,7 +816,7 @@ def land_cover_bar_graph(myStation):
 
     labels=[textwrap.fill(text,20) for text in list_labels]
 
-    plt.legend(handles[::-1], labels[::-1],bbox_to_anchor=(1, 0.4))
+    plt.legend(handles[::-1], labels[::-1],bbox_to_anchor=(1, 0.52))
  
     plt.ylabel('Percent')
     
@@ -840,15 +861,13 @@ def render_mpl_seasonal_table(myStation, data, station, col_width=2, row_height=
 def seasonal_table(myStation):
  
     var_load=pd.read_csv(stcDataPath + 'seasonal_table_values.csv') 
-    
 
     station=myStation.stationId
     year=myStation.settings['startYear']
     year_before=year-1
     available_STILT= myStation.settings['stilt']
     months= available_STILT[str(year)]['months']
-    
-    
+
     station_year= station +'_' + str(year)
 
     if station_year in set(var_load.station_year):
@@ -1035,9 +1054,8 @@ def seasonal_table(myStation):
   
 #land cover polar graph:
 
-def landcover_polar_graph(myStation):
+def land_cover_polar_graph(myStation):
     
-   
     station=myStation.stationId
     station_name=myStation.stationName
     date_range=myStation.dateRange
@@ -1050,62 +1068,84 @@ def landcover_polar_graph(myStation):
     bin_size=myStation.settings['binSize']
     degrees=myStation.degrees
     polargraph_label= myStation.settings['labelPolar']
-    
-    out_of_domain, urban_aggreg, cropland_aggreg, forests, pastures_grasslands, oceans, other= import_landcover()
+
+    #get all the land cover data from netcdfs 
+    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, natural_grassland, cropland, pasture, urban, unknown = import_landcover_CORINE_2018()
     
     dir_bins, dir_labels=define_bins_landcover_polar_graph(bin_size=bin_size)
     
     #land cover classes (imported in the land cover section):
-    cropland=fp*cropland_aggreg
-    urban=fp*urban_aggreg
-    forests=fp*forests
-    pastures_grasslands=fp*pastures_grasslands
-    oceans=fp*oceans
+    broad_leaf_forest=fp*broad_leaf_forest
+    coniferous_forest=fp*coniferous_forest
+    mixed_forest=fp*mixed_forest
+    ocean=fp*ocean
     other=fp*other
-    out_of_domain=fp*out_of_domain
-
+    natural_grassland=fp*natural_grassland
+    cropland=fp*cropland
+    pasture=fp*pasture
+    urban=fp*urban
+    unknown=fp*unknown
+    
+            
+    #lists of these values
+    broad_leaf_forest_values = [item for sublist in broad_leaf_forest[0] for item in sublist]
+    coniferous_forest_values = [item for sublist in coniferous_forest[0] for item in sublist]
+    mixed_forest_values = [item for sublist in mixed_forest[0] for item in sublist]
+    ocean_values = [item for sublist in ocean[0] for item in sublist]
+    other_values = [item for sublist in other[0] for item in sublist]
+    natural_grassland_values = [item for sublist in natural_grassland[0] for item in sublist]
     cropland_values = [item for sublist in cropland[0] for item in sublist]
+    pasture_values = [item for sublist in pasture[0] for item in sublist]
     urban_values = [item for sublist in urban[0] for item in sublist]
-    forests_values = [item for sublist in forests[0] for item in sublist]
-    pastures_grasslands_values = [item for sublist in pastures_grasslands[0] for item in sublist]
-    oceans_values = [item for sublist in oceans[0] for item in sublist]
-    others_values = [item for sublist in other[0] for item in sublist]
-    out_of_domain_values = [item for sublist in out_of_domain[0] for item in sublist]
+    unknown_values = [item for sublist in unknown[0] for item in sublist]
         
-
-   #putting it into a dataframe: initially 192000 values (one per cell) for each of the aggregated land cover classes
+        
+    #putting it into a dataframe: initially 192000 values (one per cell) for each of the aggregated land cover classes
     #into same dataframe - have the same coulmn heading. "landcover_type" will be used in "groupby" together with the "slice" (in degrees)
-    df_cropland = pd.DataFrame({'landcover_vals': cropland_values,
+    df_broad_leaf_forest = pd.DataFrame({'landcover_vals': broad_leaf_forest_values,
                                'degrees': degrees,
-                               'landcover_type':'Cropland'})
+                               'landcover_type':'Broad leaf forest'})
     
-    df_urban = pd.DataFrame({'landcover_vals': urban_values,
+    df_coniferous_forest = pd.DataFrame({'landcover_vals': coniferous_forest_values,
                            'degrees': degrees,
-                           'landcover_type':'Urban'})
+                           'landcover_type':'Coniferous forest'})
     
-    df_forests = pd.DataFrame({'landcover_vals': forests_values,
+    df_mixed_forest = pd.DataFrame({'landcover_vals': mixed_forest_values,
                            'degrees': degrees,
-                           'landcover_type':'Forests'})
+                           'landcover_type':'Mixed forest'})
     
-    df_pastures_grassland = pd.DataFrame({'landcover_vals': pastures_grasslands_values,
+    df_ocean = pd.DataFrame({'landcover_vals': ocean_values,
                            'degrees': degrees,
-                           'landcover_type':'Pastures and grassland'})
+                           'landcover_type':'Ocean'})
     
-    df_oceans = pd.DataFrame({'landcover_vals': oceans_values,
-                           'degrees': degrees,
-                           'landcover_type':'Oceans'})
-    
-    df_others = pd.DataFrame({'landcover_vals':  others_values,
+    df_other = pd.DataFrame({'landcover_vals': other_values,
                            'degrees': degrees,
                            'landcover_type':'Other'})
     
-    df_out_of_domain = pd.DataFrame({'landcover_vals':  out_of_domain_values,
+    df_natural_grassland = pd.DataFrame({'landcover_vals':  natural_grassland_values,
                            'degrees': degrees,
-                           'landcover_type':'No data'})
-
+                           'landcover_type':'Natural grassland'})
+    
+    df_cropland = pd.DataFrame({'landcover_vals':  cropland_values,
+                           'degrees': degrees,
+                           'landcover_type':'Cropland'})
+    
+    df_pasture = pd.DataFrame({'landcover_vals': pasture_values,
+                           'degrees': degrees,
+                           'landcover_type':'Pasture'})
+    
+    df_urban = pd.DataFrame({'landcover_vals':  urban_values,
+                           'degrees': degrees,
+                           'landcover_type':'Urban'})
+    
+    df_unknown = pd.DataFrame({'landcover_vals':  unknown_values,
+                           'degrees': degrees,
+                           'landcover_type':'Unknown'})
+    
+    
 
     #into one dataframe
-    df_all = df_cropland.append([df_urban, df_forests, df_pastures_grassland, df_oceans, df_others, df_out_of_domain])
+    df_all = df_cropland.append([df_broad_leaf_forest, df_coniferous_forest, df_mixed_forest, df_ocean, df_other, df_natural_grassland, df_pasture, df_urban, df_unknown])
 
     #already have the different land cover classes in one cell (no need to use "pandas.cut" to generate new column with information for groupby)
     #still need a column with the different direction bins - defined in last cell - to use for the groupby (slice)
@@ -1225,7 +1265,7 @@ def landcover_polar_graph(myStation):
        
     
     ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])    
-    ax.legend(labels, bbox_to_anchor=(1.4, 0), ncol=1, loc=4)
+    ax.legend(labels, bbox_to_anchor=(1.5, 0), ncol=1, loc=4)
     
     return fig, for_title
 
