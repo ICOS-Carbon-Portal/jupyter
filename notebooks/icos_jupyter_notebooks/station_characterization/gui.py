@@ -357,7 +357,7 @@ def update_func(button_c):
 
         updateProgress(f, 'landcover windrose')
         with result_landcover_windrose:
-            fig, caption=stc_functions.landcover_polar_graph(stc)
+            fig, caption=stc_functions.land_cover_polar_graph(stc)
             stc.add_figure(6, fig, caption)
             display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
             display(fig)
