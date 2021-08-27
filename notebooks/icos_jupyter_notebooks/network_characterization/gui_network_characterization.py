@@ -21,6 +21,7 @@ import json
 
 stiltstations = stiltStations.getStilt()
 
+
 #for base network it is only possible to choose between ICOS stations:
 icos_list = sorted([((v['country'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items() if '2018' in v['years'] if len(v['2018']['months'])>12 if v['icos']])
 
@@ -78,6 +79,9 @@ def file_set_widgets(c):
 
 #clear all the output
 def clear_all_output():
+    output_same_station_base_compare.clear_output()
+    output_no_footprints.clear_output()
+    output_no_footprints_compare.clear_output()
     output_summed_sens_fp.clear_output()
     output_aggreg_fp_see_not_see.clear_output()
     output_summed_fp_see_not_see.clear_output()
@@ -89,8 +93,15 @@ def clear_all_output():
     output_header_landcover_section.clear_output()
     output_aggreg_fp_see_not_see_uploaded_fp.clear_output()
     output_summed_fp_see_not_see_uploaded_fp.clear_output()
-    output_summed_sens_fp_uploaded_fp.clear_output()
+
+def clear_selection_base(button_c):
     
+    sites_base_network_options.value = ()
+    
+def clear_selection_compare(button_c):
+    
+    sites_compare_network_options.value = ()
+       
 def update_func(button_c):
     
     update_button.disabled = True
@@ -122,25 +133,60 @@ def update_func(button_c):
                 
         for country in countries_keys:
             countries.append(dictionary_land_eez[country])
-                   
 
     breakdown = breakdown_type.value
 
     #new --> fp_max_base_network
-    fp_combined_base_network, fp_mask_count_base_network, fp_mask_base_network, fp_max_base_network, lon, lat = functions.aggreg_2018_footprints_base_network(sites_base_network, threshold_int)
+    fp_combined_base_network, fp_mask_count_base_network, fp_mask_base_network, fp_max_base_network, lon, lat, list_none_footprints = functions.aggreg_2018_footprints_base_network(sites_base_network, threshold_int)
     
+    string_list_none_footprints = ', '.join([str(elem) for elem in list_none_footprints])
+ 
+    #in case no footprints at all in base network --> nothing after in case true
+    if len(list_none_footprints) == len(sites_base_network):
+
+        with output_no_footprints:
     
+            display(HTML('<p style="font-size:16px;text-align:center">No footprints available for base network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints.</p>'))
+        
+        update_button.disabled = False
+        
+        return
+    else:
+      
+        with output_no_footprints:
+    
+            if len(list_none_footprints)>0:
+                
+                display(HTML('<p style="font-size:16px;text-align:center">No footprints available for base network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints.</p>'))
+           
     if download_output:
-
-        functions.save_map_texts(sites_base_network, threshold_int, sites_compare_network)
-
+        
         settings = {"baseNetwork": list(sites_base_network_options.value), "compareNetwork": list(sites_compare_network_options.value), "colorBar": colorbar_choice.value, "percent": threshold_option.value, "countryDefinition": area_type.value , "countries": list(country_options.value), "weighing": breakdown_type.value, "download": download_output_option.value}
 
-        functions.save_settings(settings)
+        functions.save_settings(settings, directory='network_characterization/network_characterization_2018')
 
     if len(sites_compare_network)>0:      
         
-        fp_combined_compare_network, fp_mask_count_compare_network, fp_mask_compare_network, fp_max_compare_network, lon, lat = functions.aggreg_2018_footprints_compare_network(sites_base_network, sites_compare_network, threshold_int)
+        fp_combined_compare_network, fp_mask_count_compare_network, fp_mask_compare_network, fp_max_compare_network, lon, lat, list_none_footprints = functions.aggreg_2018_footprints_compare_network(sites_base_network, sites_compare_network, threshold_int)
+        
+        string_list_none_footprints = ', '.join([str(elem) for elem in list_none_footprints])
+        
+        if len(list_none_footprints) == len(sites_compare_network):
+
+            with output_no_footprints_compare:
+
+                display(HTML('<p style="font-size:16px">No footprints available for compare network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints. Base network selection is fine. </p>'))
+            update_button.disabled = False
+
+            return
+        else:
+
+            with output_no_footprints_compare:
+
+                if len(list_none_footprints)>0:
+
+                    display(HTML('<p style="font-size:16px">No footprints available for base network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints. Base network selection is fine. </p>'))
+                    
        
         vmax_see_not_see = np.max(fp_mask_count_compare_network)
         vmax_sens = np.max(fp_combined_compare_network)
@@ -161,7 +207,7 @@ def update_func(button_c):
         else:
             pngfile = ''
             
-        functions.plot_maps(fp_combined_base_network, lon, lat, linlog='', colors=colorbar, pngfile=pngfile, directory='figures_2018', unit = 'ppm /(μmol / (m²s)))', vmax=vmax_sens) 
+        functions.plot_maps(fp_combined_base_network, lon, lat, linlog='', colors=colorbar, pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s)))', vmax=vmax_sens) 
 
     with output_aggreg_fp_see_not_see:
 
@@ -173,7 +219,7 @@ def update_func(button_c):
         else:
             pngfile = ''
 
-        functions.plot_maps(fp_mask_base_network, lon, lat, vmax=1, vmin=0.001, colors=colorbar, pngfile=pngfile,directory='figures_2018', mask=True)
+        functions.plot_maps(fp_mask_base_network, lon, lat, vmax=1, vmin=0.001, colors=colorbar, pngfile=pngfile,directory='network_characterization/network_characterization_2018', mask=True)
         
     with output_summed_fp_see_not_see:
 
@@ -186,8 +232,35 @@ def update_func(button_c):
         else:
             pngfile = ''
         #vmin - 0.001
-        functions.plot_maps(fp_mask_count_base_network, lon, lat, vmax=vmax_see_not_see, vmin=0.001, colors=colorbar, pngfile=pngfile, directory='figures_2018', unit='count')
+        functions.plot_maps(fp_mask_count_base_network, lon, lat, vmax=vmax_see_not_see, vmin=0.001, colors=colorbar, pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit='count')
 
+    #should not be able to add the same stations to the compare network
+    sites_compare_network_upd = []
+    sites_duplicate = []
+    for site in sites_compare_network:
+        if site in sites_base_network:
+            sites_duplicate.append(site)
+            continue
+        else:
+            sites_compare_network_upd.append(site)
+    
+    if len(sites_duplicate)>0:
+        
+        string_same_station_base_compare = ', '.join([str(elem) for elem in sites_duplicate])
+        
+        with output_same_station_base_compare:
+            
+            #plural in output text
+            if len(sites_duplicate)>1:
+                display(HTML('<p style="font-size:16px">Sites selected for the compare network which are already included in the base network: ' + string_same_station_base_compare + '. These are not included in the analyzed compare network. </p>'))
+            
+            #singular in output text
+            else:
+                display(HTML('<p style="font-size:16px">Site selected for the compare network which is already included in the base network: ' + string_same_station_base_compare + '. This site is not included in the analyzed compare network. </p>'))
+   
+   
+    sites_compare_network = sites_compare_network_upd
+    
     #HERE IF there is a compare network in addition to base network
     if len(sites_compare_network)>0:
 
@@ -201,7 +274,7 @@ def update_func(button_c):
     
             display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint (' + threshold_percent + '%)</p>'))
             
-            functions.plot_maps(fp_combined_compare_network, lon, lat, linlog='', colors=colorbar,pngfile=pngfile, directory='figures_2018', unit= 'ppm /(μmol / (m²s)))')        
+            functions.plot_maps(fp_combined_compare_network, lon, lat, linlog='', colors=colorbar,pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit= 'ppm /(μmol / (m²s)))')        
 
        
         with output_aggreg_fp_see_not_see_uploaded_fp:
@@ -215,7 +288,7 @@ def update_func(button_c):
      
             display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint mask (' + threshold_percent + '%)</p>'))
 
-            functions.plot_maps(fp_mask_compare_network, lon, lat, vmin=0.001, colors=colorbar, pngfile=pngfile,directory='figures_2018', mask=True)
+            functions.plot_maps(fp_mask_compare_network, lon, lat, vmin=0.001, colors=colorbar, pngfile=pngfile,directory='network_characterization/network_characterization_2018', mask=True)
 
 
         with output_summed_fp_see_not_see_uploaded_fp:
@@ -230,7 +303,7 @@ def update_func(button_c):
             
             display(HTML('<p style="font-size:16px;text-align:center;">Compare network footprint mask count (' + threshold_percent + '%)</p>'))
 
-            functions.plot_maps(fp_mask_count_compare_network, lon, lat, vmin=1, colors=colorbar, pngfile=pngfile, directory='figures_2018', unit='count')
+            functions.plot_maps(fp_mask_count_compare_network, lon, lat, vmin=1, colors=colorbar, pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit='count')
 
         with output_breakdown_countries:
 
@@ -248,13 +321,13 @@ def update_func(button_c):
 
         with breakdown_landcover_output:
            
-            #functions.breakdown_landcover_compare_network(countries, fp_combined_base_network, fp_mask_base_network, fp_combined_compare_network, fp_mask_compare_network, breakdown)
             
-            functions.breakdown_landcover_compare_network(countries, fp_max_base_network, fp_mask_base_network, fp_max_compare_network, fp_mask_compare_network, breakdown)
+            functions.breakdown_landcover_compare_network(countries, fp_max_base_network, fp_mask_base_network, fp_max_compare_network, fp_mask_compare_network, breakdown, download_output)
             
        
     else:
         with output_breakdown_countries:
+            
             
             functions.breakdown_countries_base_network(fp_mask_base_network, fp_combined_base_network) 
 
@@ -270,9 +343,8 @@ def update_func(button_c):
 
         with breakdown_landcover_output:
 
-            #functions.breakdown_landcover(countries, fp_combined_base_network, fp_mask_base_network, breakdown)
-            functions.breakdown_landcover(countries, fp_max_base_network, fp_mask_base_network, breakdown)
-            
+            functions.breakdown_landcover_base_network(countries, fp_max_base_network, fp_mask_base_network, breakdown)
+
     update_button.disabled = False
 #-----------widgets definition ----------------
     
@@ -293,6 +365,7 @@ with heading_sites_base_network_options:
 sites_base_network_options= SelectMultiple(
     options=icos_list,
     style=style_bin,
+    rows=14,
     description='',
     disabled=False) 
 
@@ -303,6 +376,12 @@ list_selected_base_network=Textarea(
     description='Base network stations:',
     disabled=False
 )
+
+clear_selection_base_button = Button(description='Clear selection',
+                       button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
+                       tooltip='Clear',)
+
+clear_selection_base_button.style.button_color='darkred'
 
 threshold_option = BoundedIntText(
     value=50,
@@ -324,7 +403,7 @@ with heading_file_upload:
 heading_file_upload.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
     
 sites_compare_network_options = SelectMultiple(options = all_list,
-                   disabled= False)
+                                               rows=14)
 
 sites_compare_network_options.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
 
@@ -337,6 +416,14 @@ list_selected_compare_network =Textarea(
 )
 
 list_selected_compare_network.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
+
+clear_selection_compare_button = Button(description='Clear selection',
+                       button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
+                       tooltip='Clear',)
+
+clear_selection_compare_button.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
+
+clear_selection_compare_button.style.button_color='darkred'
 
 
 heading_map_specifications = Output()
@@ -426,8 +513,8 @@ update_button.layout.margin = '0px 0px 0px 160px' #top, right, bottom, left
 royal='#4169E1'
 update_button.style.button_color=royal
 
-box_base_network = VBox([heading_sites_base_network_options, sites_base_network_options, list_selected_base_network])
-box_compare_network = VBox([heading_file_upload, sites_compare_network_options, list_selected_compare_network])
+box_base_network = VBox([heading_sites_base_network_options, sites_base_network_options, list_selected_base_network, clear_selection_base_button])
+box_compare_network = VBox([heading_file_upload, sites_compare_network_options, list_selected_compare_network, clear_selection_compare_button])
 
 base_compare_combined = HBox([box_base_network, box_compare_network])
 
@@ -443,6 +530,9 @@ form = VBox([base_compare_combined, heading_map_specifications, box_map_settings
 #Initialize form output:
 form_out = Output()
 
+output_same_station_base_compare = Output()
+output_no_footprints = Output()
+output_no_footprints_compare = Output()
 output_summed_sens_fp = Output()
 output_summed_sens_fp_uploaded_fp = Output()
 
@@ -469,6 +559,9 @@ file_name.observe(file_set_widgets, 'value')
 
 update_button.on_click(update_func)
 
+clear_selection_base_button.on_click(clear_selection_base)
+clear_selection_compare_button.on_click(clear_selection_compare)
+
 
 #--------------------------------------------------------------------
 
@@ -481,11 +574,11 @@ with form_out:
         box_footprints_summed = HBox([output_summed_fp_see_not_see, output_summed_fp_see_not_see_uploaded_fp])
         box_footprints_aggreg = HBox([output_aggreg_fp_see_not_see, output_aggreg_fp_see_not_see_uploaded_fp])
 
-        display(form, box_footprints_sens, box_footprints_summed, box_footprints_aggreg, output_breakdown_countries, output_header_landcover_section, breakdown_landcover_output)
+        display(form, output_same_station_base_compare, box_footprints_sens, output_no_footprints, output_no_footprints_compare, box_footprints_summed, box_footprints_aggreg, output_breakdown_countries, output_header_landcover_section, breakdown_landcover_output)
         
     else:
         
-        display(form, output_summed_sens_fp, output_summed_fp_see_not_see, output_aggreg_fp_see_not_see, output_breakdown_countries, output_header_landcover_section, breakdown_landcover_output)
+        display(form, output_same_station_base_compare, output_no_footprints, output_summed_sens_fp, output_summed_fp_see_not_see, output_aggreg_fp_see_not_see, output_breakdown_countries, output_header_landcover_section, breakdown_landcover_output)
 
 
 
