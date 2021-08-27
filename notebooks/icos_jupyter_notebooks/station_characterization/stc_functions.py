@@ -187,7 +187,7 @@ def date_range_hour_filtered(start_date, end_date, timeselect_list):
     return date_range
 
 
-def import_landcover_HILDA(year='2019'):
+def import_landcover_HILDA(year='2018'):
     
     name_data = 'hilda_lulc_'+ year +'.nc' 
     
@@ -208,17 +208,15 @@ def import_landcover_HILDA(year='2019'):
     urban = all_hilda_classes.variables['urban'][:,:]
     water = all_hilda_classes.variables['water'][:,:]
     unknown = all_hilda_classes.variables['unknown'][:,:]
-    try:
-        total_area = all_hilda_classes.variables['area_total'][:,:]
-    except:
-        total_area = all_hilda_classes.variables['total_area'][:,:] 
 
-    return ocean, cropland, f_de_br_le, f_de_ne_le, f_eg_br_le, f_eg_ne_le, forest_mix, forest_unk, other_land, pasture, urban, grass_shru, water, total_area, unknown
+    return ocean, cropland, f_de_br_le, f_de_ne_le, f_eg_br_le, f_eg_ne_le, forest_mix, forest_unk, other_land, pasture, urban, grass_shru, water, unknown
 
-def import_landcover_CORINE_2018():
+def import_landcover_CORINE(year='2018'):
 
     # imports land cover data from HILDA and CORINE and returns aggregated land cover classes
     # to the land cover functions
+    # takes year as an argument: years where both HILDA and CORINE data is available: 1990, 2000, 2018
+    
     # The CORINE data contains two masks that are used here ('use_hilda' and 'use_corine')
     # each cell in the STILT domain has either a zero or a one. 
     # multiplying the two datasets with the masks allow us to finally add the data
@@ -227,8 +225,9 @@ def import_landcover_CORINE_2018():
     # Note that the CORINE data cannot be used on its own currently: there would be cells 
     # with no data assigned in the area that is beyond the CORINE extent. 
     
+  
     # CORINE data
-    aggregated_corine_classes = Dataset(stcDataPath + 'CORINE_land_cover_2018.nc')
+    aggregated_corine_classes = Dataset(stcDataPath + 'CORINE_land_cover_' + year + '.nc')
     
     # one for all cells that should get HILDA land cover values, zero for the rest
     use_hilda_mask = aggregated_corine_classes.variables['use_hilda'][:,:]
@@ -247,7 +246,7 @@ def import_landcover_CORINE_2018():
     urban = aggregated_corine_classes.variables['urban'][:,:] * use_corine_mask
     
     # HILDA data
-    ocean_hilda, cropland_hilda, f_de_br_le_hilda, f_de_ne_le_hilda, f_eg_br_le_hilda, f_eg_ne_le_hilda, forest_mix_hilda, forest_unk_hilda, other_land_hilda, pasture_hilda, urban_hilda, grass_shru_hilda, water_hilda, total_area_hilda, unknown_hilda = import_landcover_HILDA('2019')
+    ocean_hilda, cropland_hilda, f_de_br_le_hilda, f_de_ne_le_hilda, f_eg_br_le_hilda, f_eg_ne_le_hilda, forest_mix_hilda, forest_unk_hilda, other_land_hilda, pasture_hilda, urban_hilda, grass_shru_hilda, water_hilda, unknown_hilda = import_landcover_HILDA(year)
     
     broad_leaf_forest_hilda = (f_eg_br_le_hilda + f_de_br_le_hilda)  * use_hilda_mask
     coniferous_forest_hilda = (f_eg_ne_le_hilda + f_de_ne_le_hilda) * use_hilda_mask
@@ -664,7 +663,7 @@ def land_cover_bar_graph(myStation):
     fp=myStation.fp
 
     #get all the land cover data from netcdfs 
-    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, natural_grassland, cropland, pasture, urban, unknown = import_landcover_CORINE_2018()
+    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, natural_grassland, cropland, pasture, urban, unknown = import_landcover_CORINE(year='2018')
     
     #land cover classes (imported in the land cover section):
     broad_leaf_forest=fp*broad_leaf_forest
@@ -1070,7 +1069,7 @@ def land_cover_polar_graph(myStation):
     polargraph_label= myStation.settings['labelPolar']
 
     #get all the land cover data from netcdfs 
-    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, natural_grassland, cropland, pasture, urban, unknown = import_landcover_CORINE_2018()
+    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, natural_grassland, cropland, pasture, urban, unknown = import_landcover_CORINE(year='2018')
     
     dir_bins, dir_labels=define_bins_landcover_polar_graph(bin_size=bin_size)
     
