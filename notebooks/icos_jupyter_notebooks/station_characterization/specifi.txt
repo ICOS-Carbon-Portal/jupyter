@@ -1,0 +1,47 @@
+Specifications
+All the visualizations and information in this document are based on footprints generated
+by STILT, a lagrangian atmospheric transport model, implemented as online tool at the ICOS
+Carbon Portal. Output footprints are presented on a grid with 1/12×1/8 degrees cells (approximately
+10km x 10km) where the cell values represent the cell area’s estimated surface influence
+(“sensitivity”) in ppm / (μmol/ (m²s)) on the atmospheric tracer concentration at the station.
+The footprints for a given station vary in time according to meteorological conditions. Combining
+individual footprints with an anthropogenic emission inventory (EDGAR) and a biogenic
+model (VPRM), which models the exchange of the tracer between the atmosphere and the natural
+surface vegetation, results in estimates of the anthropogenic emissions contribution, and
+the biogenic component, on the CO2 mole fraction at the station.
+For all maps and the land cover polar graph, an average footprint for the specified date range
+has been used. In the sensitivity area map the 192 000 cells have been aggregated depending
+on their distance to, and direction of, the station. The same aggregation principles were used for
+the population sensitivity map and point source contribution map, where the average
+footprint cells were multiplied by underlying ancillary data layers. The population data are from
+GEOSTAT (2011) and point source emissions data from E-PRTR (2017). The resulting values
+in the population map are mainly interesting for intercomparisons between areas, whereas the
+point source emissions were converted to estimated contribution to the CO2 mole fraction at
+the station. The descriptions of the maps include what quartiles the station falls into in terms
+of absolute ranking among selected ICOS atmospheric stations. The first quartile includes the
+stations with the lowest total average values.
+The land cover polar graphs are similar to the maps in that the centre represents the
+location of the station and the direction bins have been used to aggregate data but do not represent
+the distance of the land cover type to the station. Each land cover type of the CORINE
+(2018) dataset is weighted by the average footprint. The legend shows the breakdown of the
+influence area to the major land cover types, and the area of a land cover type in the figure
+represents its presence in each direction of the station. The dominant land cover type is closest
+to the centre, with the less significant land cover types displayed in descending order. The land
+cover bar graph is a simpler way to visualize land cover type by direction. Eight 45 degrees
+bins around the station are represented by stacked bars.
+The seasonal variations table shows the average anthropogenic and biogenic contributions
+during the different seasons of the year. The biogenic contributions include respiration
+(CO2 input to the atmosphere) and Gross Ecosystem Exchange (GEE, CO2 uptake by the biosphere).
+Individual footprints with associated estimates of CO2 concentration components from
+respiration and GEE, as well as from anthropogenic emissions are displayed on the STILT result
+visualization page. The values for sensitivity, point source contribution and population are
+produced by summarizing the cells of maps where these layers have been multiplied by average
+footprints for the different parts of the year. The seasonal values are shown relative to the yearly
+averages. A positive relative difference of the seasonal GEE means more uptake of CO2, which
+is usually true for the growing seasons.
+The same type of values that are presented in the seasonal variations table but for the average
+footprint of the selected data range are used in the extbfmultiple variable graph to place the
+selected station relative to reference atmospheric stations in the ICOS network. The placement
+on the y-axis is determined relative to the minimum and maximum variable values of these
+stations and the selected station. 0% indicates the station with the lowest variable value, and
+100% the highest.
