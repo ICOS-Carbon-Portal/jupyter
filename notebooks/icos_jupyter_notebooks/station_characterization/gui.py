@@ -237,6 +237,8 @@ def update_func(button_c):
     result_landcover_windrose.clear_output()
     result_multiple_variables_graph.clear_output()
     
+    update_button.disabled = True
+    
     with progress_bar:
         f = IntProgress(min=0, max=10, style=style_bin)
         display(f)
@@ -378,7 +380,9 @@ def update_func(button_c):
         # make sure the progress bar is filled..
         updateProgress(f, 'finished')
         f.value = 10
-        
+    
+    update_button.disabled = False
+    
 
 #-----------widgets definition -----------------
     
