@@ -6,7 +6,7 @@ Created on Mon Dec  7 08:38:51 2020
 
 """
 
-from ipywidgets import Dropdown, SelectMultiple, HBox, VBox, Button, Output, IntText, RadioButtons,IntProgress,IntSlider, GridspecLayout,FileUpload, BoundedIntText, Textarea
+from ipywidgets import Dropdown, SelectMultiple, HBox, VBox, Button, Output, IntText, RadioButtons,IntProgress,IntSlider, GridspecLayout,FileUpload, BoundedIntText
 import stiltStations
 from IPython.core.display import display, HTML 
 from icoscp.station import station as cpstation
@@ -21,13 +21,13 @@ import json
 
 stiltstations = stiltStations.getStilt()
 
-
 #for base network it is only possible to choose between ICOS stations:
 icos_list = sorted([((v['country'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items() if '2018' in v['years'] if len(v['2018']['months'])>12 if v['icos']])
 
 #for the compare network any site with STILT runs is possible
 #however, it must have 12 months worth of data to show up in the dropdown
 all_list = sorted([((v['country'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items() if '2018' in v['years'] if len(v['2018']['months'])>12])
+
 
 def set_settings(s):
 
@@ -48,22 +48,26 @@ def change_selected_stations(c):
         update_button.disabled = True
         
 def change_stations_compare_network(c):
+    current_selection = [station_tuple[1] for station_tuple in selected_compare_network_stations.options]
+    compare_network_selection = set(list(sites_compare_network_options.value) + current_selection)     
+    compare_network_selection_tuplelist = [station for station in all_list if station[1] in compare_network_selection]
+    selected_compare_network_stations.options = sorted(compare_network_selection_tuplelist)
+
+def change_selected_compare_network_stations(c):
     
-    list_compare_network = list(sites_compare_network_options.value)
-    
-    list_compare_network_string = ', '.join([str(station_code) for station_code in list_compare_network])
-    
-    list_selected_compare_network.value= list_compare_network_string
-    
-    
+    selected_compare_network_stations.options = [station_tuple for station_tuple in selected_compare_network_stations.options if station_tuple[1] not in selected_compare_network_stations.value]
+        
 def change_stations_base_network(c):
     
-    list_base_network = list(sites_base_network_options.value)
+    current_selection = [station_tuple[1] for station_tuple in selected_base_network_stations.options]
+    base_network_selection = set(list(sites_base_network_options.value) + current_selection)     
+    base_network_selection_tuplelist = [station for station in all_list if station[1] in base_network_selection]
+    selected_base_network_stations.options = sorted(base_network_selection_tuplelist)
     
-    list_base_network_string = ', '.join([str(station_code) for station_code in list_base_network])
+def change_selected_base_network_stations(c):
     
-    list_selected_base_network.value= list_base_network_string
-
+    selected_base_network_stations.options = [station_tuple for station_tuple in selected_base_network_stations.options if station_tuple[1] not in selected_base_network_stations.value]
+    
 def file_set_widgets(c):
     
     uploaded_file = file_name.value
@@ -107,9 +111,9 @@ def update_func(button_c):
     update_button.disabled = True
     clear_all_output()
 
-    sites_base_network=list(sites_base_network_options.value)
-    sites_compare_network = list(sites_compare_network_options.value)
-    
+    sites_base_network = [station_tuple[1] for station_tuple in selected_base_network_stations.options]
+    sites_compare_network=[station_tuple[1] for station_tuple in selected_compare_network_stations.options]
+
     threshold_percent = str(threshold_option.value)
     threshold_int = threshold_option.value/100
     
@@ -361,7 +365,6 @@ with heading_sites_base_network_options:
     display(HTML('<p style="font-size:16px;font-weight:bold;">Select sites for base network</p>'))
     
 
-
 sites_base_network_options= SelectMultiple(
     options=icos_list,
     style=style_bin,
@@ -369,19 +372,16 @@ sites_base_network_options= SelectMultiple(
     description='',
     disabled=False) 
 
-list_selected_base_network=Textarea(
-    value='',
+heading_selected_base_network_stations  = Output()
+with heading_selected_base_network_stations:
+    display(HTML('<p style="font-size:16px;font-weight:bold;">Current selection (click to deselect):</p>'))
+
+selected_base_network_stations = SelectMultiple(
+    options=(),
     style=style_bin,
-    placeholder='',
-    description='Base network stations:',
-    disabled=False
-)
-
-clear_selection_base_button = Button(description='Clear selection',
-                       button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
-                       tooltip='Clear',)
-
-clear_selection_base_button.style.button_color='darkred'
+    rows=8,
+    description='',
+    disabled=False) 
 
 threshold_option = BoundedIntText(
     value=50,
@@ -395,36 +395,29 @@ threshold_option = BoundedIntText(
 
 threshold_option.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
 
-heading_file_upload = Output()
-with heading_file_upload:
+heading_sites_compare_network_options = Output()
+with heading_sites_compare_network_options:
     
     display(HTML('<p style="font-size:16px;font-weight:bold;">Select sites/points of interests for compare network (optional)</p>'))
     
-heading_file_upload.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
+heading_sites_compare_network_options.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
     
 sites_compare_network_options = SelectMultiple(options = all_list,
                                                rows=14)
 
 sites_compare_network_options.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
 
-list_selected_compare_network =Textarea(
-    value='',
-    style=style_bin,
-    placeholder='',
-    description='Compare network stations:',
-    disabled=False
-)
+heading_selected_compare_network_stations  = Output()
 
-list_selected_compare_network.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
+with heading_selected_compare_network_stations:
+    display(HTML('<p style="font-size:16px;font-weight:bold;">Current selection (click to deselect):</p>'))
+    
+heading_selected_compare_network_stations.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
+    
+selected_compare_network_stations = SelectMultiple(options = (),
+                                               rows=8)
 
-clear_selection_compare_button = Button(description='Clear selection',
-                       button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
-                       tooltip='Clear',)
-
-clear_selection_compare_button.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
-
-clear_selection_compare_button.style.button_color='darkred'
-
+selected_compare_network_stations.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
 
 heading_map_specifications = Output()
 
@@ -513,8 +506,8 @@ update_button.layout.margin = '0px 0px 0px 160px' #top, right, bottom, left
 royal='#4169E1'
 update_button.style.button_color=royal
 
-box_base_network = VBox([heading_sites_base_network_options, sites_base_network_options, list_selected_base_network, clear_selection_base_button])
-box_compare_network = VBox([heading_file_upload, sites_compare_network_options, list_selected_compare_network, clear_selection_compare_button])
+box_base_network = VBox([heading_sites_base_network_options, sites_base_network_options, heading_selected_base_network_stations, selected_base_network_stations])
+box_compare_network = VBox([heading_sites_compare_network_options, sites_compare_network_options, heading_selected_compare_network_stations, selected_compare_network_stations])
 
 base_compare_combined = HBox([box_base_network, box_compare_network])
 
@@ -550,17 +543,18 @@ output_header_landcover_section = Output()
 # OBSERVERS - what happens when change area type (between land and land + eez)
 #area_type.observe(change_area_type, 'value')
 
+#needed? 
 sites_base_network_options.observe(change_selected_stations, 'value')
 sites_base_network_options.observe(change_stations_base_network, 'value')
+selected_base_network_stations.observe(change_selected_base_network_stations, 'value')
 
 sites_compare_network_options.observe(change_stations_compare_network, 'value')
+selected_compare_network_stations.observe(change_selected_compare_network_stations, 'value')
 
 file_name.observe(file_set_widgets, 'value')
 
 update_button.on_click(update_func)
 
-clear_selection_base_button.on_click(clear_selection_base)
-clear_selection_compare_button.on_click(clear_selection_compare)
 
 
 #--------------------------------------------------------------------
