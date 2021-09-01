@@ -63,11 +63,25 @@ def change_stations_base_network(c):
     base_network_selection = set(list(sites_base_network_options.value) + current_selection)     
     base_network_selection_tuplelist = [station for station in all_list if station[1] in base_network_selection]
     selected_base_network_stations.options = sorted(base_network_selection_tuplelist)
+    
+    # exclude the selected base network stations from the options in the compare network list:
+    sites_compare_network_options.options = [station for station in all_list if not station[1] in base_network_selection]
+    
+    # exclude the selected base network stations from list of selected compare network stations:
+    selected_compare_network_stations.options = [station for station in selected_compare_network_stations.options if not station[1] in base_network_selection]
+    
     disable_enable_update_button()
     
 def change_selected_base_network_stations(c):
     
     selected_base_network_stations.options = [station_tuple for station_tuple in selected_base_network_stations.options if station_tuple[1] not in selected_base_network_stations.value]
+    
+    # exclude the selected base network stations from the options in the compare network list:
+    sites_compare_network_options.options = [station for station in all_list if not station[1] in selected_base_network_stations.options]
+    
+    # exclude the selected base network stations from list of selected compare network stations:
+    selected_compare_network_stations.options = [station for station in selected_compare_network_stations.options if not station[1] in selected_base_network_stations.options]
+    
     disable_enable_update_button()
     
 def file_set_widgets(c):
