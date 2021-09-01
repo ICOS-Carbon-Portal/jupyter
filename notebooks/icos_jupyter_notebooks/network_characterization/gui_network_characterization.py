@@ -39,14 +39,14 @@ def set_settings(s):
     country_options.value = s['countries']
     breakdown_type.value = s['weighing']
     download_output_option.value = s['download']
+    
+def disable_enable_update_button():
 
-def change_selected_stations(c): 
- 
-    if len(sites_base_network_options.value)>0:
-        update_button.disabled = False
+    if len(selected_base_network_stations.options)>0:
+        update_button.disabled = False          
     else:
         update_button.disabled = True
-        
+
 def change_stations_compare_network(c):
     current_selection = [station_tuple[1] for station_tuple in selected_compare_network_stations.options]
     compare_network_selection = set(list(sites_compare_network_options.value) + current_selection)     
@@ -56,17 +56,19 @@ def change_stations_compare_network(c):
 def change_selected_compare_network_stations(c):
     
     selected_compare_network_stations.options = [station_tuple for station_tuple in selected_compare_network_stations.options if station_tuple[1] not in selected_compare_network_stations.value]
-        
+
 def change_stations_base_network(c):
     
     current_selection = [station_tuple[1] for station_tuple in selected_base_network_stations.options]
     base_network_selection = set(list(sites_base_network_options.value) + current_selection)     
     base_network_selection_tuplelist = [station for station in all_list if station[1] in base_network_selection]
     selected_base_network_stations.options = sorted(base_network_selection_tuplelist)
+    disable_enable_update_button()
     
 def change_selected_base_network_stations(c):
     
     selected_base_network_stations.options = [station_tuple for station_tuple in selected_base_network_stations.options if station_tuple[1] not in selected_base_network_stations.value]
+    disable_enable_update_button()
     
 def file_set_widgets(c):
     
@@ -539,12 +541,7 @@ breakdown_landcover_output = Output()
 output_header_landcover_section = Output()
 
 #--------------------------------------------------------------------
-
-# OBSERVERS - what happens when change area type (between land and land + eez)
-#area_type.observe(change_area_type, 'value')
-
-#needed? 
-sites_base_network_options.observe(change_selected_stations, 'value')
+# Observers
 sites_base_network_options.observe(change_stations_base_network, 'value')
 selected_base_network_stations.observe(change_selected_base_network_stations, 'value')
 
