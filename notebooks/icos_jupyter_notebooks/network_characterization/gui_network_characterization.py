@@ -379,7 +379,6 @@ heading_sites_base_network_options = Output()
 
 with heading_sites_base_network_options:
     display(HTML('<p style="font-size:16px;font-weight:bold;">Select sites for base network</p>'))
-    
 
 sites_base_network_options= SelectMultiple(
     options=icos_list,
@@ -387,6 +386,8 @@ sites_base_network_options= SelectMultiple(
     rows=14,
     description='',
     disabled=False) 
+
+sites_base_network_options.layout.margin = '0px 0px 0px 0px' #top, right, bottom, left
 
 heading_selected_base_network_stations  = Output()
 with heading_selected_base_network_stations:
@@ -398,6 +399,8 @@ selected_base_network_stations = SelectMultiple(
     rows=8,
     description='',
     disabled=False) 
+
+selected_base_network_stations.layout.margin = '0px 0px 0px 0px'
 
 threshold_option = BoundedIntText(
     value=50,
