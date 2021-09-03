@@ -36,7 +36,7 @@ output_notebook()
 
 folder_tool = 'network_characterization' 
 
-folder_tool_fps = 'footprints_2018_averaged'
+folder_tool_fps = '/data/project/stc/footprints_2018_averaged'
 
 #added 
 folder_data = '/data/project/stc/'
@@ -235,15 +235,12 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
  
         if percent:
             #date_time defined globally for the else option
-            #output = os.path.join(os.path.expanduser('~'), 'output/vis_average_footprints', date_time_predefined)
             output = os.path.join(os.path.expanduser('~'), 'output/vis_average_footprints', date_time_predefined)
         else:
 
             try:
-                #output = os.path.join(os.path.expanduser('~'), 'output/network_characterization', date_time)
                 output = os.path.join(os.path.expanduser('~'), 'output', directory, date_time)
             except:
-                #output = os.path.join(os.path.expanduser('~'), 'output/vis_average_footprints', date_time_predefined)
                 output = os.path.join(os.path.expanduser('~'), 'output', directory, date_time_predefined)
 
 
