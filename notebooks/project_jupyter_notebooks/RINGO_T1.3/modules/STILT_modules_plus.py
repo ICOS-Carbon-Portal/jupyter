@@ -9,6 +9,8 @@ import datetime as dt
 import netCDF4 as cdf
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
+import cartopy
+cartopy.config['data_dir'] = '/data/project/cartopy/'
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from cartopy.feature import NaturalEarthFeature, LAND, COASTLINE, LAKES
