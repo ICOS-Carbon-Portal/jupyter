@@ -32,6 +32,8 @@ from icoscp.sparql.runsparql import RunSparql
 
 import json
 
+import cartopy
+cartopy.config['data_dir'] = '/data/project/cartopy/'
 import cartopy.feature as cfeature
 import cartopy.crs as ccrs
 
