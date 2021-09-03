@@ -646,9 +646,9 @@ def load_fp(station):
     
     name_load_footprint_csv='fp_' + station + '.csv'
     
-    try:
+    if os.path.isfile(os.path.join(folder_tool, folder_tool_fps, name_load_footprint_csv)):
         loaded_fp=loadtxt(os.path.join(folder_tool, folder_tool_fps, name_load_footprint_csv), delimiter=',')
-    except:
+    else:
 
         date_range = pd.date_range(start='2018-01-01', end='2019-01-01', freq='3H')
 
@@ -661,11 +661,9 @@ def load_fp(station):
             display(HTML('<p style="font-size:15px;">Not all footprints for ' + station + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to compute footprints for year 2018.</p>'))
             
             loaded_fp = None
-
-            
-        np.savetxt(os.path.join(folder_tool, folder_tool_fps, name_load_footprint_csv),fp[0],delimiter=',',fmt='%.15f')
-
-        loaded_fp=loadtxt(os.path.join(folder_tool, folder_tool_fps, name_load_footprint_csv), delimiter=',')
+        else:
+ 
+           loaded_fp=fp[0]
 
     return loaded_fp
 
