@@ -84,6 +84,18 @@ def change_selected_base_network_stations(c):
     
     disable_enable_update_button()
     
+def change_countries(c):
+    
+    #selected_countries.options = country_options.value
+    a = set(list(country_options.value) + list(selected_countries.options))    
+    selected_countries.options = sorted(a)
+
+    #update here
+def change_selected_countries(c):
+    
+    selected_countries.options = [o for o in selected_countries.options if o not in selected_countries.value]
+
+
 def file_set_widgets(c):
     
     uploaded_file = file_name.value
@@ -137,7 +149,7 @@ def update_func(button_c):
     colorbar=colorbar_choice.value
     
     #countries for combination with ancillary data
-    countries_keys=list(country_options.value)
+    countries_keys=list(selected_countries.options)
     countries = []
     if area_type.value == 'Land':
 
@@ -181,7 +193,7 @@ def update_func(button_c):
            
     if download_output:
         
-        settings = {"baseNetwork": sites_base_network, "compareNetwork": sites_compare_network, "colorBar": colorbar_choice.value, "percent": threshold_option.value, "countryDefinition": area_type.value , "countries": list(country_options.value), "weighing": breakdown_type.value, "download": download_output_option.value}
+        settings = {"baseNetwork": sites_base_network, "compareNetwork": sites_compare_network, "colorBar": colorbar_choice.value, "percent": threshold_option.value, "countryDefinition": area_type.value , "countries": countries_keys, "weighing": breakdown_type.value, "download": download_output_option.value}
 
         functions.save_settings(settings, directory='network_characterization/network_characterization_2018')
 
@@ -375,10 +387,16 @@ colorbar_choice_list= ['GnBu', 'Greys', 'Purples', 'Blues', 'Greens', 'Oranges',
                          'YlOrBr', 'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu','PuBu', 'YlGnBu', \
                          'PuBuGn', 'BuGn', 'YlGn']
 
+
+heading_network_selection = Output()
+
+with heading_network_selection:
+    display(HTML('<p style="font-size:20px;font-weight:bold;">Define site network(s)</p>'))
+
 heading_sites_base_network_options = Output()
 
 with heading_sites_base_network_options:
-    display(HTML('<p style="font-size:16px;font-weight:bold;">Select sites for base network</p>'))
+    display(HTML('<p style="font-size:16px;">Select sites for base network</p>'))
 
 sites_base_network_options= SelectMultiple(
     options=icos_list,
@@ -391,7 +409,7 @@ sites_base_network_options.layout.margin = '0px 0px 0px 0px' #top, right, bottom
 
 heading_selected_base_network_stations  = Output()
 with heading_selected_base_network_stations:
-    display(HTML('<p style="font-size:16px;font-weight:bold;">Current selection (click to deselect):</p>'))
+    display(HTML('<p style="font-size:16px;">Current selection (click to deselect):</p>'))
 
 selected_base_network_stations = SelectMultiple(
     options=(),
@@ -417,7 +435,7 @@ threshold_option.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
 heading_sites_compare_network_options = Output()
 with heading_sites_compare_network_options:
     
-    display(HTML('<p style="font-size:16px;font-weight:bold;">Select sites/points of interests for compare network (optional)</p>'))
+    display(HTML('<p style="font-size:16px;">Select sites/points of interests for compare network (optional)</p>'))
     
 heading_sites_compare_network_options.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
     
@@ -429,7 +447,7 @@ sites_compare_network_options.layout.margin = '0px 0px 0px 70px' #top, right, bo
 heading_selected_compare_network_stations  = Output()
 
 with heading_selected_compare_network_stations:
-    display(HTML('<p style="font-size:16px;font-weight:bold;">Current selection (click to deselect):</p>'))
+    display(HTML('<p style="font-size:16px;">Current selection (click to deselect):</p>'))
     
 heading_selected_compare_network_stations.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
     
@@ -451,32 +469,49 @@ colorbar_choice = Dropdown(
     disabled=False,
 )
 
-header_land_cover = Output()
-with header_land_cover:
-    display(HTML('<p style="font-size:16px;font-weight:bold;"><br>Land cover and population within <br>network(s)</p>'))
-    
+heading_analysis_ancillary_data = Output()
+
+with heading_analysis_ancillary_data:
+    display(HTML('<p style="font-size:20px;font-weight:bold;"><br>Make choices for land cover and population breakdown within the network(s) (optional)</p>'))
+
 heading_country_options = Output()
 with heading_country_options:
-    display(HTML('<p style="font-size:14px;">Choose what country/countries run the analysis for: </p>'))
+    display(HTML('<p style="font-size:16px;">Countries of interest: </p>'))
 
 countries = ['Belgium', 'Czech Republic','Denmark', 'Estonia','Finland','France', 'Germany','Hungary', 'Italy', 'Netherlands', 'Norway','Poland','Spain','Sweden','Switzerland', 'UK']
+
 country_options= SelectMultiple(
     options=countries,
     style=style_bin,
-    description='',
-    disabled=False)
+    rows=10,
+    description='')
 
-header_area_type = Output()
-with header_area_type:
+country_options.layout.margin = '0px 0px 0px 0px'
+
+heading_selected_countries = Output()
+with heading_selected_countries:
+    display(HTML('<p style="font-size:16px;">Current selection (click to deselect):</p>'))
+    
+heading_selected_countries.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
+
+selected_countries = SelectMultiple(
+    options='',
+    style=style_bin,
+    rows=10,
+    description='')
+
+selected_countries.layout.margin = '0px 0px 0px 70px'
+
+heading_area_type = Output()
+with heading_area_type:
     display(HTML('<p style="font-size:14px;">Choose between getting the land cover<br>breakdown of the land covered, or to include<br>the EEZ (exclusive economic zone): </p>'))
 
-header_area_type.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
+heading_area_type.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
 
 area_type=RadioButtons(
         options=['Land', 'Land + EEZ'],
         value='Land',
-        description=' ',
-        disabled=False)
+        description=' ')
 
 area_type.layout.margin = '0px 0px 0px 50px' #top, right, bottom, left
 
@@ -484,13 +519,12 @@ heading_breakdown_choice = Output()
 with heading_breakdown_choice:
     display(HTML('<p style="font-size:14px;">Choose between using the footprint masks and<br>sensitivity weighted footprints to compute the<br>ancillary data values:</p>'))
 
-heading_breakdown_choice.layout.margin = '30px 0px 0px 0px' #top, right, bottom, left
+heading_breakdown_choice.layout.margin = '0px 0px 0px 0px' #top, right, bottom, left
 
 breakdown_type=RadioButtons(
         options=[('Footprint', 'sens'), ('Footprint mask', 'mask')],
         value='sens',
-        description=' ',
-        disabled=False)
+        description=' ')
 
 download_output_heading = Output()
 
@@ -500,8 +534,7 @@ with download_output_heading:
       
 download_output_option=RadioButtons(
         options=[('No', False), ('Yes', True)],
-        description=' ',
-        disabled=False)
+        description=' ')
 
 header_filename = Output()
 
@@ -532,12 +565,22 @@ base_compare_combined = HBox([box_base_network, box_compare_network])
 
 box_map_settings = HBox([colorbar_choice, threshold_option])
 
-box_land_cover_headings = HBox([heading_country_options, header_area_type])
-box_land_cover_choices = HBox([country_options, area_type])
+
+box_country_options = VBox([heading_country_options, country_options])
+
+box_country_selection = VBox([heading_selected_countries, selected_countries])
+
+country_selection_combined = HBox([box_country_options, box_country_selection])
+
+breakdown_choice = VBox([heading_breakdown_choice, breakdown_type])
+
+area_type_choice = VBox([heading_area_type, area_type])
+
+box_additional_selections_combined = HBox([breakdown_choice, area_type_choice])
 
 final_row = HBox([file_name, update_button])
 #Add all widgets to a VBox:
-form = VBox([base_compare_combined, heading_map_specifications, box_map_settings, header_land_cover, box_land_cover_headings, box_land_cover_choices, heading_breakdown_choice, breakdown_type, download_output_heading, download_output_option, header_filename, final_row])
+form = VBox([heading_network_selection, base_compare_combined, heading_map_specifications, box_map_settings, heading_analysis_ancillary_data, country_selection_combined, box_additional_selections_combined, download_output_heading, download_output_option, header_filename, final_row])
 
 #Initialize form output:
 form_out = Output()
@@ -564,6 +607,9 @@ selected_base_network_stations.observe(change_selected_base_network_stations, 'v
 
 sites_compare_network_options.observe(change_stations_compare_network, 'value')
 selected_compare_network_stations.observe(change_selected_compare_network_stations, 'value')
+
+country_options.observe(change_countries, 'value')
+selected_countries.observe(change_selected_countries, 'value')
 
 file_name.observe(file_set_widgets, 'value')
 
