@@ -8,6 +8,8 @@ import pandas as pd
 import os
 import netCDF4 as cdf
 import numpy as np
+import cartopy
+cartopy.config['data_dir'] = '/data/project/cartopy'
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib
