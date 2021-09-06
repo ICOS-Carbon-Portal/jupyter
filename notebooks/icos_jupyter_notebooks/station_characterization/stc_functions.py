@@ -28,7 +28,8 @@ from IPython.core.display import display, HTML
 # import required libraries
 
 import netCDF4 as cdf
-
+import cartopy
+cartopy.config['data_dir'] = '/data/project/cartopy/'
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import warnings
