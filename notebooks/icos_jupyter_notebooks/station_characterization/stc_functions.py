@@ -187,7 +187,6 @@ def date_range_hour_filtered(start_date, end_date, timeselect_list):
     #consider return timeselect
     return date_range
 
-
 def import_landcover_HILDA(year='2018'):
     
     name_data = 'hilda_lulc_'+ year +'.nc' 
@@ -197,81 +196,26 @@ def import_landcover_HILDA(year='2018'):
     #access all the different land cover classes in the .nc files:
     cropland = all_hilda_classes.variables['cropland'][:,:]
     ocean = all_hilda_classes.variables['ocean'][:,:]
-    f_de_br_le = all_hilda_classes.variables['f_de_br_le'][:,:]
-    f_de_ne_le = all_hilda_classes.variables['f_de_ne_le'][:,:]
-    f_eg_br_le = all_hilda_classes.variables['f_eg_br_le'][:,:]
-    f_eg_ne_le = all_hilda_classes.variables['f_eg_ne_le'][:,:]
-    forest_mix = all_hilda_classes.variables['forest_mix'][:,:]
-    forest_unk = all_hilda_classes.variables['forest_unk'][:,:]
-    grass_shru = all_hilda_classes.variables['grass_shru'][:,:]
+    forest_decidious_broad_leaf = all_hilda_classes.variables['f_de_br_le'][:,:]
+    forest_decidious_needle_leaf = all_hilda_classes.variables['f_de_ne_le'][:,:]
+    forest_evergreen_broad_leaf = all_hilda_classes.variables['f_eg_br_le'][:,:]
+    forest_evergreen_needle_leaf = all_hilda_classes.variables['f_eg_ne_le'][:,:]
+    mixed_forest = all_hilda_classes.variables['forest_mix'][:,:]
+    forest_unknown = all_hilda_classes.variables['forest_unk'][:,:]
+    grass_shrub = all_hilda_classes.variables['grass_shru'][:,:]
     other_land = all_hilda_classes.variables['other_land'][:,:]
     pasture = all_hilda_classes.variables['pasture'][:,:]
     urban = all_hilda_classes.variables['urban'][:,:]
     water = all_hilda_classes.variables['water'][:,:]
     unknown = all_hilda_classes.variables['unknown'][:,:]
-
-    return ocean, cropland, f_de_br_le, f_de_ne_le, f_eg_br_le, f_eg_ne_le, forest_mix, forest_unk, other_land, pasture, urban, grass_shru, water, unknown
-
-def import_landcover_CORINE(year='2018'):
-
-    # imports land cover data from HILDA and CORINE and returns aggregated land cover classes
-    # to the land cover functions
-    # takes year as an argument: years where both HILDA and CORINE data is available: 1990, 2000, 2018
     
-    # The CORINE data contains two masks that are used here ('use_hilda' and 'use_corine')
-    # each cell in the STILT domain has either a zero or a one. 
-    # multiplying the two datasets with the masks allow us to finally add the data
-    # together.
-    
-    # Note that the CORINE data cannot be used on its own currently: there would be cells 
-    # with no data assigned in the area that is beyond the CORINE extent. 
-    
-  
-    # CORINE data
-    aggregated_corine_classes = Dataset(stcDataPath + 'CORINE_land_cover_' + year + '.nc')
-    
-    # one for all cells that should get HILDA land cover values, zero for the rest
-    use_hilda_mask = aggregated_corine_classes.variables['use_hilda'][:,:]
-    
-    # one for all cells that should get CORINE land cover values, zero for the rest
-    use_corine_mask = aggregated_corine_classes.variables['use_corine'][:,:]
-
-    broad_leaf_forest = aggregated_corine_classes.variables['br_le_for'][:,:] * use_corine_mask
-    coniferous_forest = aggregated_corine_classes.variables['con_for'][:,:] * use_corine_mask
-    mixed_forest = aggregated_corine_classes.variables['mix_for'][:,:] * use_corine_mask
-    ocean = aggregated_corine_classes.variables['oceans'][:,:] * use_corine_mask
-    other = aggregated_corine_classes.variables['other'][:,:] * use_corine_mask
-    natural_grassland = aggregated_corine_classes.variables['nat_grass'][:,:] * use_corine_mask
-    cropland = aggregated_corine_classes.variables['cropland'][:,:] * use_corine_mask
-    pasture = aggregated_corine_classes.variables['pastures'][:,:] * use_corine_mask
-    urban = aggregated_corine_classes.variables['urban'][:,:] * use_corine_mask
-    
-    # HILDA data
-    ocean_hilda, cropland_hilda, f_de_br_le_hilda, f_de_ne_le_hilda, f_eg_br_le_hilda, f_eg_ne_le_hilda, forest_mix_hilda, forest_unk_hilda, other_land_hilda, pasture_hilda, urban_hilda, grass_shru_hilda, water_hilda, unknown_hilda = import_landcover_HILDA(year)
-    
-    broad_leaf_forest_hilda = (f_eg_br_le_hilda + f_de_br_le_hilda)  * use_hilda_mask
-    coniferous_forest_hilda = (f_eg_ne_le_hilda + f_de_ne_le_hilda) * use_hilda_mask
-    mixed_forest_hilda = (forest_unk_hilda + forest_mix_hilda) * use_hilda_mask
-    ocean_hilda = ocean_hilda * use_hilda_mask
-    other_hilda = (other_land_hilda + water_hilda) * use_hilda_mask
-    natural_grassland_hilda = grass_shru_hilda * use_hilda_mask
-    cropland_hilda = cropland_hilda * use_hilda_mask
-    pasture_hilda = pasture_hilda * use_hilda_mask
-    urban_hilda = urban_hilda * use_hilda_mask
-    unknown_hilda = unknown_hilda * use_hilda_mask
+    # aggregated classes:
+    broad_leaf_forest = forest_decidious_broad_leaf + forest_evergreen_broad_leaf 
+    coniferous_forest = forest_decidious_needle_leaf+ forest_evergreen_needle_leaf
+    mixed_forest = mixed_forest + forest_unknown
+    other = other_land + water
    
-    broad_leaf_forest = broad_leaf_forest + broad_leaf_forest_hilda
-    coniferous_forest = coniferous_forest + coniferous_forest_hilda
-    mixed_forest = mixed_forest + mixed_forest_hilda
-    ocean = ocean + ocean_hilda
-    other = other + other_hilda
-    natural_grassland = natural_grassland + natural_grassland_hilda
-    cropland = cropland + cropland_hilda
-    pasture = pasture + pasture_hilda
-    urban = urban + urban_hilda
-    unknown = unknown_hilda
-    
-    return broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, natural_grassland, cropland, pasture, urban, unknown
+    return broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown
 
 def import_population_data(year=2018):
    
@@ -664,7 +608,7 @@ def land_cover_bar_graph(myStation):
     fp=myStation.fp
 
     #get all the land cover data from netcdfs 
-    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, natural_grassland, cropland, pasture, urban, unknown = import_landcover_CORINE(year='2018')
+    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018')
     
     #land cover classes (imported in the land cover section):
     broad_leaf_forest=fp*broad_leaf_forest
@@ -672,7 +616,7 @@ def land_cover_bar_graph(myStation):
     mixed_forest=fp*mixed_forest
     ocean=fp*ocean
     other=fp*other
-    natural_grassland=fp*natural_grassland
+    grass_shrub=fp*grass_shrub
     cropland=fp*cropland
     pasture=fp*pasture
     urban=fp*urban
@@ -684,7 +628,7 @@ def land_cover_bar_graph(myStation):
     mixed_forest_values = [item for sublist in mixed_forest[0] for item in sublist]
     ocean_values = [item for sublist in ocean[0] for item in sublist]
     other_values = [item for sublist in other[0] for item in sublist]
-    natural_grassland_values = [item for sublist in natural_grassland[0] for item in sublist]
+    grass_shrub_values = [item for sublist in grass_shrub[0] for item in sublist]
     cropland_values = [item for sublist in cropland[0] for item in sublist]
     pasture_values = [item for sublist in pasture[0] for item in sublist]
     urban_values = [item for sublist in urban[0] for item in sublist]
@@ -713,7 +657,7 @@ def land_cover_bar_graph(myStation):
                            'degrees': degrees,
                            'landcover_type':'Other'})
     
-    df_natural_grassland = pd.DataFrame({'landcover_vals':  natural_grassland_values,
+    df_grass_shrub = pd.DataFrame({'landcover_vals':  grass_shrub_values,
                            'degrees': degrees,
                            'landcover_type':'Natural grassland'})
     
@@ -735,7 +679,7 @@ def land_cover_bar_graph(myStation):
     
 
     #into one dataframe
-    df_all = df_cropland.append([df_broad_leaf_forest, df_coniferous_forest, df_mixed_forest, df_ocean, df_other, df_natural_grassland, df_pasture, df_urban, df_unknown])
+    df_all = df_cropland.append([df_broad_leaf_forest, df_coniferous_forest, df_mixed_forest, df_ocean, df_other, df_grass_shrub, df_pasture, df_urban, df_unknown])
     
 
     #not change with user input
@@ -1070,7 +1014,7 @@ def land_cover_polar_graph(myStation):
     polargraph_label= myStation.settings['labelPolar']
 
     #get all the land cover data from netcdfs 
-    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, natural_grassland, cropland, pasture, urban, unknown = import_landcover_CORINE(year='2018')
+    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018')
     
     dir_bins, dir_labels=define_bins_landcover_polar_graph(bin_size=bin_size)
     
@@ -1080,7 +1024,7 @@ def land_cover_polar_graph(myStation):
     mixed_forest=fp*mixed_forest
     ocean=fp*ocean
     other=fp*other
-    natural_grassland=fp*natural_grassland
+    grass_shrub=fp*grass_shrub
     cropland=fp*cropland
     pasture=fp*pasture
     urban=fp*urban
@@ -1093,7 +1037,7 @@ def land_cover_polar_graph(myStation):
     mixed_forest_values = [item for sublist in mixed_forest[0] for item in sublist]
     ocean_values = [item for sublist in ocean[0] for item in sublist]
     other_values = [item for sublist in other[0] for item in sublist]
-    natural_grassland_values = [item for sublist in natural_grassland[0] for item in sublist]
+    grass_shrub_values = [item for sublist in grass_shrub[0] for item in sublist]
     cropland_values = [item for sublist in cropland[0] for item in sublist]
     pasture_values = [item for sublist in pasture[0] for item in sublist]
     urban_values = [item for sublist in urban[0] for item in sublist]
@@ -1122,7 +1066,7 @@ def land_cover_polar_graph(myStation):
                            'degrees': degrees,
                            'landcover_type':'Other'})
     
-    df_natural_grassland = pd.DataFrame({'landcover_vals':  natural_grassland_values,
+    df_grass_shrub = pd.DataFrame({'landcover_vals':  grass_shrub_values,
                            'degrees': degrees,
                            'landcover_type':'Natural grassland'})
     
@@ -1141,11 +1085,10 @@ def land_cover_polar_graph(myStation):
     df_unknown = pd.DataFrame({'landcover_vals':  unknown_values,
                            'degrees': degrees,
                            'landcover_type':'Unknown'})
-    
-    
+  
 
     #into one dataframe
-    df_all = df_cropland.append([df_broad_leaf_forest, df_coniferous_forest, df_mixed_forest, df_ocean, df_other, df_natural_grassland, df_pasture, df_urban, df_unknown])
+    df_all = df_cropland.append([df_broad_leaf_forest, df_coniferous_forest, df_mixed_forest, df_ocean, df_other, df_grass_shrub, df_pasture, df_urban, df_unknown])
 
     #already have the different land cover classes in one cell (no need to use "pandas.cut" to generate new column with information for groupby)
     #still need a column with the different direction bins - defined in last cell - to use for the groupby (slice)
@@ -1278,7 +1221,6 @@ def _convert_dir(directions, N=None):
     barDir = directions * np.pi/180. - np.pi/N
     barWidth = 2 * np.pi / N
     return barDir, barWidth
-
     
 def define_bins_landcover_polar_graph(bin_size):
     
@@ -1297,8 +1239,7 @@ def define_bins_landcover_polar_graph(bin_size):
     dir_labels = (dir_bins[:-1] + dir_bins[1:]) / 2
     
     return dir_bins, dir_labels
-
-    
+   
 #multiple variables graph
 def values_multiple_variable_graph(all_stations, selected_station, date_range, timeselect_list, df_saved):
 
@@ -1377,7 +1318,6 @@ def values_multiple_variable_graph(all_stations, selected_station, date_range, t
     
     #these are returned to the function "multiple_variables_graph"
     return df_saved
-
       
 def compute_normalized(df_saved_for_normalized, station, column, min_value, range_value):
 
@@ -1466,8 +1406,6 @@ def multiple_variables_graph(myStation):
     #these lists (list_sensitivity, list_population, list_point_source) will be used to generate texts 
     #for the station characterization PDFs (if choose to create a PDF)
     #--> hence into list here, and not for GEE, respiration and anthropogenic contribution
-    
-
     min_gee=max(df_saved_upd['GEE'])
     range_gee=abs(min_gee-min(df_saved_upd['GEE']))
 
