@@ -1,5 +1,17 @@
 # FAQ
 
+## I get a `DownloadWarning` and a `TimeoutError` when working with cartopy maps.
+All the cartopy maps used in our notebooks are stored locally on our data server. Accessing a 
+cartopy map in any of these notebooks is actually a request to pre-downloaded local resources. 
+This means that there are specific cartopy maps that can be used with a notebook. We are 
+currently working to have a greater range of cartopy maps offline in order to assist as many users 
+as possible.  
+**Workaround**: If you need to work with a map that currently is not in on our data server, you 
+can **comment out** this line of code in the notebook
+`cartopy.config['data_dir'] = '/data/project/cartopy/'`    
+The `cartopy` module will then try to find the requested resource online. Be advised that this 
+request might fail too if the online resources are not available at that moment.
+
 ## Do I have the latest version of .... ?
 <a href="../img/launch.png" target=_blank>
 <img style="float: right; padding: 5px" src="../img/launch.png" width="200" align="right"/></a>
