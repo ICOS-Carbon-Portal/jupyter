@@ -11,6 +11,7 @@ Functions to run the station characterization notebook on exploredata.
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import math
 import numpy as np
 from netCDF4 import Dataset
@@ -20,36 +21,31 @@ import os
 import six
 import requests
 import tex
-
-
-#for the widgets
 from IPython.core.display import display, HTML 
-
-# import required libraries
-
 import netCDF4 as cdf
 import cartopy
 cartopy.config['data_dir'] = '/data/project/cartopy/'
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
+import cartopy.io.shapereader as shpreader
+from cartopy.feature import ShapelyFeature
 import warnings
 warnings.filterwarnings('ignore')
-
 import json
 
+#path to data such as population data and land cover data
 stcDataPath='/data/project/stc/'
-
-#added - not show the figure that I am saving (different size than the one displayed
-#for land cover bar graph)
-matplotlib.pyplot.ioff()
-
 
 #path to footprints
 pathFP='/data/stiltweb/stations/'
 
+#added to not show the land cover bar graph that is being saved for the PDF which is different size than the one displayed
+matplotlib.pyplot.ioff()
+
 #Earth's radius in km (for calculating distances between the station and cells)
 R = 6373.8
 
+#Colors for the land cover plots
 dictionary_color = {'Broad leaf forest': {'color': '#4EB265'}, 'Coniferous forest':{'color':'#CAE0AB'}, 'Mixed forest':{'color':'#90C987'}, 'Ocean':{'color':'#1964B0'}, 'Other':{'color':'#882E72'}, 'Natural grassland':{'color':'#F1932D'}, 'Cropland':{'color': '#521A13'}, 'Pasture':{'color':'#F7F056'}, 'Urban':{'color':'#DC050C'}, 'Unknown':{'color':'#777777'}}
 
 #function to read and aggregate footprints for given date range
@@ -64,8 +60,7 @@ def read_aggreg_footprints(station, date_range):
     nfp=0
     first = True
     for date in date_range:
-        
-  
+
         filename=(pathFP+station+'/'+str(date.year)+'/'+str(date.month).zfill(2)+'/'
              +str(date.year)+'x'+str(date.month).zfill(2)+'x'+str(date.day).zfill(2)+'x'+str(date.hour).zfill(2)+'/foot')
  
@@ -93,15 +88,11 @@ def read_aggreg_footprints(station, date_range):
 
         return 0, None, None, None, None
 
-
-#updated --> take the timeselect list and returns the "correct" dataframe
-#otherwise - not correct hours!
 # function to read STILT concentration time series (new format of STILT results)
 def read_stilt_timeseries(station,date_range,timeselect_list):
     url = 'https://stilt.icos-cp.eu/viewer/stiltresult'
     headers = {'Content-Type': 'application/json', 'Accept-Charset': 'UTF-8'}
-    # check if STILT results exist
-    #pathFP='/data/stiltweb/stations/'
+
     new_range=[]
     
     for date in date_range:
@@ -364,10 +355,8 @@ def lonlat_2_ixjy(slon,slat,mlon,mlat):
     jy = (np.abs(mlat-slat)).argmin()
     return ix,jy
 
-
-
 def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='', 
-              vmin=0.0001, vmax=None, colors='GnBu'): 
+              vmin=0.0001, vmax=None, colors='GnBu', map_type=''): 
 
     station=myStation.stationId
     lon=myStation.lon
@@ -401,10 +390,34 @@ def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='',
     ax = plt.subplot(1, 2, 1, projection=ccrs.PlateCarree())
     img_extent = (fp_lon.min(), fp_lon.max(), fp_lat.min(), fp_lat.max())
     ax.set_extent([fp_lon.min(), fp_lon.max(), fp_lat.min(), fp_lat.max()],crs=ccrs.PlateCarree())
-    ax.add_feature(countries, edgecolor='black', linewidth=0.3)
-
-    cmap = plt.get_cmap(colors)
     
+    ax.add_feature(countries, edgecolor='black', linewidth=0.3)
+   
+    reader = shpreader.Reader('/data/project/cartopy/shapefiles/natural_earth/cultural/ne_10m_admin_0_countries.shp')
+    
+    # Color countries that miss data for population and point source respectively
+    if map_type == 'point source contribution':   
+        list_countries_to_add = ['Russian Federation', 'Belarus', 'Ukraine', 'Moldova', 'Turkey', 'Tunisia', 'Algeria', 'Morocco','Bosnia and Herzegovina', 'Serbia', 'Montenegro', 'Kosovo', 'Albania', 'Macedonia']
+        legend_title= 'Countries with no point source data'
+        
+    if map_type == 'population sensitivity':
+    
+        list_countries_to_add = ['Russian Federation', 'Belarus', 'Ukraine', 'Moldova', 'Turkey', 'Tunisia', 'Algeria', 'Morocco']
+        legend_title= 'Countries with no population data'
+    
+    if map_type == 'point source contribution' or map_type == 'population sensitivity':
+        
+        for country_to_add in list_countries_to_add:
+
+            country_information = [country for country in reader.records() if country.attributes["NAME_LONG"] == country_to_add][0]
+            country_shape = ShapelyFeature([country_information.geometry], ccrs.PlateCarree(), facecolor="lightgrey", edgecolor='black', lw=0.5)                     
+            ax.add_feature(country_shape)
+        
+        # add a legend 
+        proxy_artist = mpatches.Rectangle((0, 0), 1, 0.1, facecolor="lightgrey", edgecolor='black', lw=0.5)
+        ax.legend([proxy_artist], [legend_title], loc='upper left', fancybox=True)
+            
+    cmap = plt.get_cmap(colors)
     cmap.set_under(color='white')  
     
     if linlog == 'linear':
@@ -419,8 +432,6 @@ def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='',
         cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='both')
         cbar.set_label(label+'  log$_{10}$ '+unit)
     
-    #plt.title(title)
-    
     ax.text(0.01, -0.25, 'min: %.2f' % np.min(field[:,:]), horizontalalignment='left',transform=ax.transAxes)
     ax.text(0.99, -0.25, 'max: %.2f' % np.max(field[:,:]), horizontalalignment='right',transform=ax.transAxes)
     
@@ -428,45 +439,7 @@ def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='',
     if station != '':
 
         ax.plot(lon,lat,'+',color=mcolor,ms=10,markeredgewidth=1,transform=ccrs.PlateCarree())
-        
-    zoom=str(zoom)
-    if zoom != '':
-        
-        #grid cell index of station 
-        ix,jy = lonlat_2_ixjy(lon,lat,fp_lon,fp_lat)
- 
-        # define zoom area 
-        i1 = np.max([ix-35,0])
-        i2 = np.min([ix+35,400])
-        j1 = np.max([jy-42,0])
-        j2 = np.min([jy+42,480])
 
-        lon_z=fp_lon[i1:i2]
-        lat_z=fp_lat[j1:j2]
-
-        field_z=field[j1:j2,i1:i2]
-
-        # set up a map
-        ax = plt.subplot(1, 2, 2, projection=ccrs.PlateCarree())
-        img_extent = (lon_z.min(), lon_z.max(), lat_z.min(), lat_z.max())
-        ax.set_extent([lon_z.min(), lon_z.max(), lat_z.min(), lat_z.max()],crs=ccrs.PlateCarree())
-        ax.add_feature(countries, edgecolor='black', linewidth=0.3)
-    
-        if linlog == 'linear':
-            im = ax.imshow(field_z,interpolation='none',origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
-            cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='both')
-            cbar.set_label(label+'  '+unit)
-        else:
-            im = ax.imshow(np.log10(field_z),interpolation='none',origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
-            cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='both')
-            cbar.set_label(label+'  log$_{10}$ '+unit)
-
-        #show station location if station is provided
-        if station != '':
-            ax.plot(lon,lat,'+',color=mcolor,ms=10,markeredgewidth=1,transform=ccrs.PlateCarree())
-
-        ax.text(0.01, -0.25, 'min: %.2f' % np.min(field[j1:j2,i1:i2]), horizontalalignment='left',transform=ax.transAxes)
-        ax.text(0.99, -0.25, 'max: %.2f' % np.max(field[j1:j2,i1:i2]), horizontalalignment='right',transform=ax.transAxes)
         
     return fig 
     
@@ -595,7 +568,7 @@ def polar_graph(myStation, rose_type, colorbar='gist_heat_r', zoom=''):
     caption=(unit.capitalize() + ' ' + rose_type + ' given direction and distance')
           
     polar_map=plot_maps(myStation, rosedata_array, title=caption, label=rose_type, 
-                   linlog='linear', zoom='', vmin=0.0001, vmax=None, colors=colorbar)
+                   linlog='linear', zoom='', vmin=0.0001, vmax=None, colors=colorbar, map_type=rose_type)
         
     return polar_map, caption
     
