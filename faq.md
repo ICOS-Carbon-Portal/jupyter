@@ -5,10 +5,11 @@ All the cartopy maps used in our notebooks are stored locally on our data server
 cartopy map in any of these notebooks is actually a request to pre-downloaded local resources. 
 This means that there are specific cartopy maps that can be used with a notebook. We are 
 currently working to have a greater range of cartopy maps offline in order to assist as many users 
-as possible.  
-**Workaround**: If you need to work with a map that currently is not in on our data server, you 
-can **comment out** this line of code in the notebook
-`cartopy.config['data_dir'] = '/data/project/cartopy/'`    
+as possible.<br><br>
+**Workaround**<br>
+If you need to work with a map that currently is not in on our data server, you 
+can **comment out** this line of code in the notebook &#10140;
+`cartopy.config['data_dir'] = '/data/project/cartopy/'`  
 The `cartopy` module will then try to find the requested resource online. Be advised that this 
 request might fail too if the online resources are not available at that moment.
 
