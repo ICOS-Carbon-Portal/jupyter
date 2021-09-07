@@ -263,11 +263,11 @@ def generate_pdf_tex(stc):
     if os.path.isfile(os.path.join(output, stc.figures['5'][2])):
 
         tex=tex.replace('**seasonal**', ('\\includegraphics[width=1\\textwidth]{' + os.path.join(output, stc.figures['5'][2]) + '}'))
-        tex=tex.replace('**seasonal_text**', 'The \\textbf{seasonal variations table} summarizes the results for the year **year** (Dec **dec_year** - Nov **year**) and lists for each season the relative difference compared to the annual average. Gross ecosystem exchange (GEE), respiration and anthropogenic emission contributions to the {\ensuremath{\mathrm{CO_2}}} concentration are calculated online in the STILT model (see detailed specifications at the end of this document). A positive GEE value means that there is more {\\ensuremath{\\mathrm{CO_2}}} uptake from the vegetation compared to the average uptake from plants over the whole year, which is generally true for the growing seasons.')
+        tex=tex.replace('**seasonal_text**', 'The \\textbf{seasonal variations table} summarizes the results for the year **year** and lists for each season the relative difference compared to the annual average. Gross ecosystem exchange (GEE), respiration and anthropogenic emission contributions to the {\ensuremath{\mathrm{CO_2}}} concentration are calculated online in the STILT model (see detailed specifications at the end of this document). A positive GEE value means that there is more {\\ensuremath{\\mathrm{CO_2}}} uptake from the vegetation compared to the average uptake from plants over the whole year, which is generally true for the growing seasons.')
      
     else:     
         tex=tex.replace('**seasonal**', '%\\includegraphics[width=1\\textwidth]{no table- this line will not run}')
-        tex=tex.replace('**seasonal_text**', '\\textbf{No seasonal table}: footprints from December **dec_year** to November **year** are not avaialble for **name** (**station_code**). Use the \\href{https://stilt.icos-cp.eu/worker/}{STILT on demand calculator} to create the remaining footprints.')
+        tex=tex.replace('**seasonal_text**', '\\textbf{No seasonal table}: footprints are not available for the full year (**year**). Use the \\href{https://stilt.icos-cp.eu/worker/}{STILT on demand calculator} to generate the remaining footprints.')
         
     tex=tex.replace('**landcover_windrose**', os.path.join(output, stc.figures['6'][2]))
     tex=tex.replace('**multivar**', os.path.join(output, stc.figures['7'][2]))
@@ -286,7 +286,6 @@ def generate_pdf_tex(stc):
         tex=tex.replace('**station_code**', stc.settings['stationCode'])
     
     tex=tex.replace('**year**', str(stc.settings['startYear']))
-    tex=tex.replace('**dec_year**', str(int(stc.settings['startYear'])-1))
     
     tex=tex.replace('**degrees**', str(stc.settings['binSize']))
     tex=tex.replace('**increment**', str(stc.settings['binInterval']))
