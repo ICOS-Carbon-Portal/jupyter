@@ -423,13 +423,13 @@ def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='',
     if linlog == 'linear':
         
         im = ax.imshow(field[:,:],interpolation=None,origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
-        cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='both')
+        cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='neither')
         cbar.set_label(label+'  '+unit)
 
     else:
         
         im = ax.imshow(np.log10(field)[:,:],interpolation='none',origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
-        cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='both')
+        cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='neither')
         cbar.set_label(label+'  log$_{10}$ '+unit)
     
     ax.text(0.01, -0.25, 'min: %.2f' % np.min(field[:,:]), horizontalalignment='left',transform=ax.transAxes)
