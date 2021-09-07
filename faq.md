@@ -1,6 +1,6 @@
 # FAQ
 
-## I get a `DownloadWarning` and a `TimeoutError` when working with cartopy maps.
+## Cartopy maps
 All the cartopy maps used in our notebooks are stored locally on our data server. Accessing a 
 cartopy map in any of these notebooks is actually a request to pre-downloaded local resources. 
 This means that there are specific cartopy maps that can be used with a notebook. We are 
