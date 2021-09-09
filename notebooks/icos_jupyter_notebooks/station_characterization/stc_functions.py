@@ -410,11 +410,11 @@ def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='',
         for country_to_add in list_countries_to_add:
 
             country_information = [country for country in reader.records() if country.attributes["NAME_LONG"] == country_to_add][0]
-            country_shape = ShapelyFeature([country_information.geometry], ccrs.PlateCarree(), facecolor="lightgrey", edgecolor='black', lw=0.3)                     
+            country_shape = ShapelyFeature([country_information.geometry], ccrs.PlateCarree(), facecolor="white", hatch="/", edgecolor='black', lw=0.3)                     
             ax.add_feature(country_shape)
         
         # add a legend 
-        proxy_artist = mpatches.Rectangle((0, 0), 1, 0.1, facecolor="lightgrey", edgecolor='black', lw=0.5)
+        proxy_artist = mpatches.Rectangle((0, 0), 1, 0.1, facecolor="white", hatch="/", edgecolor='black', lw=0.5)
         ax.legend([proxy_artist], [legend_title], loc='upper left', fancybox=True)
             
     cmap = plt.get_cmap(colors)
@@ -781,9 +781,6 @@ def seasonal_table(myStation):
     year_before=year-1
     available_STILT= myStation.settings['stilt']
     months= available_STILT[str(year)]['months']
-    
-    #this needs to be updated - new files based on updated way of classifying winter (Jan + Feb + Dec of "year")
-    """
     var_load=pd.read_csv(stcDataPath + 'seasonal_table_values.csv') 
     station_year= station +'_' + str(year)
     
@@ -824,109 +821,108 @@ def seasonal_table(myStation):
         anthro_diff_spring = var_load.loc[var_load['station_year'] == station_year, 'anthro_diff_spring'].iloc[0]
         anthro_diff_summer = var_load.loc[var_load['station_year'] == station_year, 'anthro_diff_summer'].iloc[0]
         anthro_diff_fall = var_load.loc[var_load['station_year'] == station_year, 'anthro_diff_fall'].iloc[0]
-    """
-    #else:
-    
-    fp_pop= import_population_data(year=2018)
 
-    fp_point = import_point_source_data()
-
-    # if full year avaialbe - go ahead and create the tabel - else a message will be sent to the user
-    if len(months)==13:
-
-        #all hours for the date ranges... could update with date_range_hour_filtered
-        winter_date_range1=pd.date_range(dt.datetime(year,1,1,0), (dt.datetime(year, 3, 1,0)-dt.timedelta(hours=3)), freq='3H')
-        winter_date_range2=pd.date_range(dt.datetime(year,12,1,0), (dt.datetime(year+1, 1, 1,0)-dt.timedelta(hours=3)), freq='3H')
-        spring_date_range=pd.date_range(dt.datetime(year,3,1,0), (dt.datetime(year, 6, 1,0)-dt.timedelta(hours=3)), freq='3H')
-        summer_date_range=pd.date_range(dt.datetime(year,6,1,0), (dt.datetime(year, 9, 1,0)-dt.timedelta(hours=3)), freq='3H')
-        fall_date_range=pd.date_range(dt.datetime(year,9,1,0), (dt.datetime(year, 12, 1,0)-dt.timedelta(hours=3)), freq='3H')
-
-        #the average footprints given the selected date range
-        nfp_winter1, fp_winter1, fp_lon, fp_lat, title_not_used = read_aggreg_footprints(station, winter_date_range1)
-        nfp_winter2, fp_winter2, fp_lon, fp_lat, title_not_used = read_aggreg_footprints(station, winter_date_range2)
-        nfp_winter = nfp_winter1 + nfp_winter2
-        fp_winter = (fp_winter1 * (nfp_winter1/nfp_winter)) + (fp_winter2 * (nfp_winter2/nfp_winter))
-        nfp_spring, fp_spring, fp_lon, fp_lat, title_not_used = read_aggreg_footprints(station, spring_date_range)
-        nfp_summer, fp_summer, fp_lon, fp_lat, title_not_used = read_aggreg_footprints(station, summer_date_range)
-        nfp_fall, fp_fall, fp_lon, fp_lat, title_not_used = read_aggreg_footprints(station, fall_date_range)
-
-        #want also the whole year - get from the footprints of the seasons.
-        nfp_total = nfp_winter + nfp_spring + nfp_summer + nfp_fall
-
-        part_winter = nfp_winter/nfp_total
-        part_spring = nfp_spring/nfp_total
-        part_summer = nfp_summer/nfp_total
-        part_fall = nfp_fall/nfp_total
-
-        fp_whole=(fp_winter*part_winter)+ (fp_spring*part_spring)+(fp_summer*part_summer)+(fp_fall*part_fall)
-
-        sens_whole = fp_whole[0].sum()
-
-        sens_diff_winter=((fp_winter[0].sum()/sens_whole)*100)-100
-        sens_diff_spring=((fp_spring[0].sum()/sens_whole)*100)-100
-        sens_diff_summer=((fp_summer[0].sum()/sens_whole)*100)-100
-        sens_diff_fall=((fp_fall[0].sum()/sens_whole)*100)-100
-
-        #point source 
-        point_whole=(fp_whole*fp_point)[0].sum()
-
-        point_diff_winter=(((fp_winter*fp_point)[0].sum()/point_whole)*100)-100
-        point_diff_spring=(((fp_spring*fp_point)[0].sum()/point_whole)*100)-100
-        point_diff_summer=(((fp_summer*fp_point)[0].sum()/point_whole)*100)-100
-        point_diff_fall=(((fp_fall*fp_point)[0].sum()/point_whole)*100)-100
-
-        #population 
-        pop_whole=(fp_whole*fp_pop)[0].sum()
-        pop_diff_winter=(((fp_winter*fp_pop)[0].sum()/pop_whole)*100)-100
-        pop_diff_spring=(((fp_spring*fp_pop)[0].sum()/pop_whole)*100)-100
-        pop_diff_summer=(((fp_summer*fp_pop)[0].sum()/pop_whole)*100)-100
-        pop_diff_fall=(((fp_fall*fp_pop)[0].sum()/pop_whole)*100)-100
-
-        #get the modelled concentration values
-        timeselect_list=[0, 3, 6, 9, 12, 15, 18, 21]
-        df_winter1 = read_stilt_timeseries(station, winter_date_range1, timeselect_list)
-        df_winter2 = read_stilt_timeseries(station, winter_date_range2, timeselect_list)
-        df_winter = df_winter1.append(df_winter2)
-        df_spring = read_stilt_timeseries(station, spring_date_range, timeselect_list)
-        df_summer = read_stilt_timeseries(station, summer_date_range, timeselect_list)
-        df_fall = read_stilt_timeseries(station, fall_date_range, timeselect_list)
-
-        #averages of the modelled concentration values.
-        df_winter_mean=df_winter.mean()
-        df_spring_mean=df_spring.mean()
-        df_summer_mean=df_summer.mean()
-        df_fall_mean=df_fall.mean()
-
-        df_whole_mean=(df_winter_mean*part_winter)+(df_spring_mean*part_spring)+(df_summer_mean*part_summer)+(df_fall_mean*part_fall)
-
-        gee_whole=df_whole_mean['co2.bio.gee']
-
-        gee_diff_winter=((df_winter_mean['co2.bio.gee']/gee_whole)*100)-100
-        gee_diff_spring=((df_spring_mean['co2.bio.gee']/gee_whole)*100)-100
-        gee_diff_summer=((df_summer_mean['co2.bio.gee']/gee_whole)*100)-100
-        gee_diff_fall=((df_fall_mean['co2.bio.gee']/gee_whole)*100)-100
-
-        #respiration
-        resp_whole=df_whole_mean['co2.bio.resp']
-
-        resp_diff_winter=((df_winter_mean['co2.bio.resp']/resp_whole)*100)-100
-        resp_diff_spring=((df_spring_mean['co2.bio.resp']/resp_whole)*100)-100
-        resp_diff_summer=((df_summer_mean['co2.bio.resp']/resp_whole)*100)-100
-        resp_diff_fall=((df_fall_mean['co2.bio.resp']/resp_whole)*100)-100
-
-        #anthropogenic
-        anthro_whole=df_whole_mean['co2.industry']+df_whole_mean['co2.energy']+ df_whole_mean['co2.transport']+ df_whole_mean['co2.others']
-
-        anthro_diff_winter=(((df_winter_mean['co2.industry']+df_winter_mean['co2.energy']+ df_winter_mean['co2.transport']+ df_winter_mean['co2.others'])/anthro_whole)*100)-100
-        anthro_diff_spring=(((df_spring_mean['co2.industry']+df_spring_mean['co2.energy']+ df_spring_mean['co2.transport']+ df_spring_mean['co2.others'])/anthro_whole)*100)-100
-        anthro_diff_summer=(((df_summer_mean['co2.industry']+df_summer_mean['co2.energy']+ df_summer_mean['co2.transport']+ df_summer_mean['co2.others'])/anthro_whole)*100)-100
-        anthro_diff_fall=(((df_fall_mean['co2.industry']+df_fall_mean['co2.energy']+ df_fall_mean['co2.transport']+ df_fall_mean['co2.others'])/anthro_whole)*100)-100
-
-    #where there is no information in loaded file, and not all footpritns 
     else:
-        seasonal_table = None
-        caption = 'No seasonal table, footprints are not available for the whole year'
-        return seasonal_table, caption 
+    
+        fp_pop= import_population_data(year=2018)
+
+        fp_point = import_point_source_data()
+
+        # if full year avaialbe - go ahead and create the tabel - else a message will be sent to the user
+        if len(months)==13:
+            #all hours for the date ranges... could update with date_range_hour_filtered
+            winter_date_range1=pd.date_range(dt.datetime(year,1,1,0), (dt.datetime(year, 3, 1,0)-dt.timedelta(hours=3)), freq='3H')
+            winter_date_range2=pd.date_range(dt.datetime(year,12,1,0), (dt.datetime(year+1, 1, 1,0)-dt.timedelta(hours=3)), freq='3H')
+            spring_date_range=pd.date_range(dt.datetime(year,3,1,0), (dt.datetime(year, 6, 1,0)-dt.timedelta(hours=3)), freq='3H')
+            summer_date_range=pd.date_range(dt.datetime(year,6,1,0), (dt.datetime(year, 9, 1,0)-dt.timedelta(hours=3)), freq='3H')
+            fall_date_range=pd.date_range(dt.datetime(year,9,1,0), (dt.datetime(year, 12, 1,0)-dt.timedelta(hours=3)), freq='3H')
+
+            #the average footprints given the selected date range
+            x, test_fp, y, z, t = read_aggreg_footprints(station, test)
+            nfp_winter1, fp_winter1, fp_lon, fp_lat, title_not_used = read_aggreg_footprints(station, winter_date_range1)
+            nfp_winter2, fp_winter2, fp_lon, fp_lat, title_not_used = read_aggreg_footprints(station, winter_date_range2)
+            nfp_winter = nfp_winter1 + nfp_winter2
+            fp_winter = (fp_winter1 * (nfp_winter1/nfp_winter)) + (fp_winter2 * (nfp_winter2/nfp_winter))
+            nfp_spring, fp_spring, fp_lon, fp_lat, title_not_used = read_aggreg_footprints(station, spring_date_range)
+            nfp_summer, fp_summer, fp_lon, fp_lat, title_not_used = read_aggreg_footprints(station, summer_date_range)
+            nfp_fall, fp_fall, fp_lon, fp_lat, title_not_used = read_aggreg_footprints(station, fall_date_range)
+
+            #want also the whole year - get from the footprints of the seasons.
+            nfp_total = nfp_winter + nfp_spring + nfp_summer + nfp_fall
+
+            part_winter = nfp_winter/nfp_total
+            part_spring = nfp_spring/nfp_total
+            part_summer = nfp_summer/nfp_total
+            part_fall = nfp_fall/nfp_total
+
+            fp_whole=(fp_winter*part_winter)+ (fp_spring*part_spring)+(fp_summer*part_summer)+(fp_fall*part_fall)
+            sens_whole = fp_whole[0].sum()
+
+            sens_diff_winter=((fp_winter[0].sum()/sens_whole)*100)-100
+            sens_diff_spring=((fp_spring[0].sum()/sens_whole)*100)-100
+            sens_diff_summer=((fp_summer[0].sum()/sens_whole)*100)-100
+            sens_diff_fall=((fp_fall[0].sum()/sens_whole)*100)-100
+
+            #point source 
+            point_whole=(fp_whole*fp_point)[0].sum()
+
+            point_diff_winter=(((fp_winter*fp_point)[0].sum()/point_whole)*100)-100
+            point_diff_spring=(((fp_spring*fp_point)[0].sum()/point_whole)*100)-100
+            point_diff_summer=(((fp_summer*fp_point)[0].sum()/point_whole)*100)-100
+            point_diff_fall=(((fp_fall*fp_point)[0].sum()/point_whole)*100)-100
+
+            #population 
+            pop_whole=(fp_whole*fp_pop)[0].sum()
+            pop_diff_winter=(((fp_winter*fp_pop)[0].sum()/pop_whole)*100)-100
+            pop_diff_spring=(((fp_spring*fp_pop)[0].sum()/pop_whole)*100)-100
+            pop_diff_summer=(((fp_summer*fp_pop)[0].sum()/pop_whole)*100)-100
+            pop_diff_fall=(((fp_fall*fp_pop)[0].sum()/pop_whole)*100)-100
+
+            #get the modelled concentration values
+            timeselect_list=[0, 3, 6, 9, 12, 15, 18, 21]
+            df_winter1 = read_stilt_timeseries(station, winter_date_range1, timeselect_list)
+            df_winter2 = read_stilt_timeseries(station, winter_date_range2, timeselect_list)
+            df_winter = df_winter1.append(df_winter2)
+            df_spring = read_stilt_timeseries(station, spring_date_range, timeselect_list)
+            df_summer = read_stilt_timeseries(station, summer_date_range, timeselect_list)
+            df_fall = read_stilt_timeseries(station, fall_date_range, timeselect_list)
+
+            #averages of the modelled concentration values.
+            df_winter_mean=df_winter.mean()
+            df_spring_mean=df_spring.mean()
+            df_summer_mean=df_summer.mean()
+            df_fall_mean=df_fall.mean()
+
+            df_whole_mean=(df_winter_mean*part_winter)+(df_spring_mean*part_spring)+(df_summer_mean*part_summer)+(df_fall_mean*part_fall)
+
+            gee_whole=df_whole_mean['co2.bio.gee']
+
+            gee_diff_winter=((df_winter_mean['co2.bio.gee']/gee_whole)*100)-100
+            gee_diff_spring=((df_spring_mean['co2.bio.gee']/gee_whole)*100)-100
+            gee_diff_summer=((df_summer_mean['co2.bio.gee']/gee_whole)*100)-100
+            gee_diff_fall=((df_fall_mean['co2.bio.gee']/gee_whole)*100)-100
+
+            #respiration
+            resp_whole=df_whole_mean['co2.bio.resp']
+
+            resp_diff_winter=((df_winter_mean['co2.bio.resp']/resp_whole)*100)-100
+            resp_diff_spring=((df_spring_mean['co2.bio.resp']/resp_whole)*100)-100
+            resp_diff_summer=((df_summer_mean['co2.bio.resp']/resp_whole)*100)-100
+            resp_diff_fall=((df_fall_mean['co2.bio.resp']/resp_whole)*100)-100
+
+            #anthropogenic
+            anthro_whole=df_whole_mean['co2.industry']+df_whole_mean['co2.energy']+ df_whole_mean['co2.transport']+ df_whole_mean['co2.others']
+
+            anthro_diff_winter=(((df_winter_mean['co2.industry']+df_winter_mean['co2.energy']+ df_winter_mean['co2.transport']+ df_winter_mean['co2.others'])/anthro_whole)*100)-100
+            anthro_diff_spring=(((df_spring_mean['co2.industry']+df_spring_mean['co2.energy']+ df_spring_mean['co2.transport']+ df_spring_mean['co2.others'])/anthro_whole)*100)-100
+            anthro_diff_summer=(((df_summer_mean['co2.industry']+df_summer_mean['co2.energy']+ df_summer_mean['co2.transport']+ df_summer_mean['co2.others'])/anthro_whole)*100)-100
+            anthro_diff_fall=(((df_fall_mean['co2.industry']+df_fall_mean['co2.energy']+ df_fall_mean['co2.transport']+ df_fall_mean['co2.others'])/anthro_whole)*100)-100
+
+        #where there is no information in loaded file, and not all footpritns 
+        else:
+            seasonal_table = None
+            caption = 'No seasonal table, footprints are not available for the whole year'
+            return seasonal_table, caption 
     #here have values either from loaded file or calculated
     year_var=str(year) 
     df_seasonal_table = pd.DataFrame(columns=['Variable', year_var, 'Jan + Feb + Dec', 'Mar-May', 'Jun-Aug','Sep-Nov', 'Unit'], index=['Sensitivity', 'Population','Point source', 'GEE', 'Respiration', 'Anthropogenic'])
