@@ -66,7 +66,7 @@ def prepare_footprints_change(c):
         
         sites_base_network_options.options = all_list
         sites_compare_network_options.options = icos_list
-        """
+
         s_year.disabled = False
         s_month.disabled = False
         s_day.disabled = False
@@ -76,12 +76,12 @@ def prepare_footprints_change(c):
         e_day.disabled = False
 
         time_selection.disabled = False
-        """
+
     else:
        
         sites_base_network_options.options = all_list_2018
         sites_compare_network_options.options = icos_list_2018
-        """
+
         s_year.disabled = True
         s_month.disabled = True
         s_day.disabled = True
@@ -91,7 +91,7 @@ def prepare_footprints_change(c):
         e_day.disabled = True
 
         time_selection.disabled = True
-        """
+
 
     disable_enable_update_button()
         
