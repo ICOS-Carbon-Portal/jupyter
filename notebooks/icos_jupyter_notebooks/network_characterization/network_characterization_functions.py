@@ -1051,7 +1051,7 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
                                  'color':colors}
             column_w_data = 'Sensitivity'
 
-            label_yaxis = 'area in km² * (ppm /(μmol / (m²s))))'
+            label_yaxis = 'area in km² * (ppm /(μmol / (m²s)))'
 
         else:
             values_by_country = list_land_cover_area_fp
@@ -1733,7 +1733,7 @@ def breakdown_landcover_hilda_two_years(list_area_choice, summed_fp_sens, aggreg
 
                 column_w_data = 'Sensitivity'
 
-                label_yaxis = 'area in km² * (ppm /(μmol / (m²s))))'
+                label_yaxis = 'area in km² * (ppm /(μmol / (m²s)))'
 
             #if using the mast - then see what the area of the different land cover types are below. 
             else:
