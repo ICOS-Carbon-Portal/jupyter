@@ -476,12 +476,7 @@ def polar_graph(myStation, rose_type, colorbar='gist_heat_r', zoom=''):
     fp=myStation.fp
     unit=myStation.settings['unit']
     
-    if myStation.settings['startYear']<2015:
-        pop_data_year=2011
-    else:
-        pop_data_year=2018
-    
-    fp_pop= import_population_data(year=pop_data_year)
+    fp_pop= import_population_data(year=2018)
     fp_point= import_point_source_data()
     
     #same function used to all three types of map
@@ -1204,12 +1199,8 @@ def values_multiple_variable_graph(all_stations, selected_station, date_range, t
     df_new_values = pd.DataFrame(columns=['Station','Sensitivity','GEE','Respiration','Anthro','Point source','Population'])
     
     start_date = min(date_range)
-    if start_date.year<2015:
-        pop_data_year=2011
-    else:
-        pop_data_year=2018
-    
-    fp_pop= import_population_data(year=pop_data_year)
+     
+    fp_pop= import_population_data(year=2018)
 
     fp_point= import_point_source_data()
 
