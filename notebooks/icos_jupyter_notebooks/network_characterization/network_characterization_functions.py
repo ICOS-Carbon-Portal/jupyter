@@ -835,190 +835,35 @@ def aggreg_2018_footprints_compare_network(sites_base_network, list_additional_f
    
     return summed_fp_sens_additional, summed_fp_see_not_see_additional, aggreg_fp_see_not_see_additional,fp_max_compare_network, load_lon, load_lat, list_none_footprints_compare
 
-def import_landcover_HILDA(year='2019'):
+def import_landcover_HILDA(year='2018'):
     
     name_data = 'hilda_lulc_'+ year +'.nc' 
     
-    #folder data rather than folder_tool
-    all_hilda_classes= Dataset(os.path.join(folder_data, name_data))
+    all_hilda_classes= Dataset(folder_data + name_data)
 
     #access all the different land cover classes in the .nc files:
     cropland = all_hilda_classes.variables['cropland'][:,:]
     ocean = all_hilda_classes.variables['ocean'][:,:]
-    f_de_br_le = all_hilda_classes.variables['f_de_br_le'][:,:]
-    f_de_ne_le = all_hilda_classes.variables['f_de_ne_le'][:,:]
-    f_eg_br_le = all_hilda_classes.variables['f_eg_br_le'][:,:]
-    f_eg_ne_le = all_hilda_classes.variables['f_eg_ne_le'][:,:]
-    forest_mix = all_hilda_classes.variables['forest_mix'][:,:]
-    forest_unk = all_hilda_classes.variables['forest_unk'][:,:]
-    grass_shru = all_hilda_classes.variables['grass_shru'][:,:]
+    forest_decidious_broad_leaf = all_hilda_classes.variables['f_de_br_le'][:,:]
+    forest_decidious_needle_leaf = all_hilda_classes.variables['f_de_ne_le'][:,:]
+    forest_evergreen_broad_leaf = all_hilda_classes.variables['f_eg_br_le'][:,:]
+    forest_evergreen_needle_leaf = all_hilda_classes.variables['f_eg_ne_le'][:,:]
+    mixed_forest = all_hilda_classes.variables['forest_mix'][:,:]
+    forest_unknown = all_hilda_classes.variables['forest_unk'][:,:]
+    grass_shrub = all_hilda_classes.variables['grass_shru'][:,:]
     other_land = all_hilda_classes.variables['other_land'][:,:]
     pasture = all_hilda_classes.variables['pasture'][:,:]
     urban = all_hilda_classes.variables['urban'][:,:]
     water = all_hilda_classes.variables['water'][:,:]
     unknown = all_hilda_classes.variables['unknown'][:,:]
-    try:
-        total_area = all_hilda_classes.variables['area_total'][:,:]
-    except:
-        total_area = all_hilda_classes.variables['total_area'][:,:] 
-
-    return ocean, cropland, f_de_br_le, f_de_ne_le, f_eg_br_le, f_eg_ne_le, forest_mix, forest_unk, other_land, pasture, urban, grass_shru, water, total_area, unknown
     
-def import_landcover_CORINE_2018():
-
-    # imports land cover data from HILDA and CORINE and returns aggregated land cover classes
-    # to the land cover functions
-    # The CORINE data contains two masks that are used here ('use_hilda' and 'use_corine')
-    # each cell in the STILT domain has either a zero or a one. 
-    # multiplying the two datasets with the masks allow us to finally add the data
-    # together.
-    
-    # Note that the CORINE data cannot be used on its own currently: there would be cells 
-    # with no data assigned in the area that is beyond the CORINE extent. 
-    
-    # CORINE data
-    aggregated_corine_classes = Dataset(folder_data + 'CORINE_land_cover_2018.nc')
-    
-    # one for all cells that should get HILDA land cover values, zero for the rest
-    use_hilda_mask = aggregated_corine_classes.variables['use_hilda'][:,:]
-    
-    # one for all cells that should get CORINE land cover values, zero for the rest
-    use_corine_mask = aggregated_corine_classes.variables['use_corine'][:,:]
-
-    broad_leaf_forest = aggregated_corine_classes.variables['br_le_for'][:,:] * use_corine_mask
-    coniferous_forest = aggregated_corine_classes.variables['con_for'][:,:] * use_corine_mask
-    mixed_forest = aggregated_corine_classes.variables['mix_for'][:,:] * use_corine_mask
-    ocean = aggregated_corine_classes.variables['oceans'][:,:] * use_corine_mask
-    other = aggregated_corine_classes.variables['other'][:,:] * use_corine_mask
-    natural_grassland = aggregated_corine_classes.variables['nat_grass'][:,:] * use_corine_mask
-    cropland = aggregated_corine_classes.variables['cropland'][:,:] * use_corine_mask
-    pasture = aggregated_corine_classes.variables['pastures'][:,:] * use_corine_mask
-    urban = aggregated_corine_classes.variables['urban'][:,:] * use_corine_mask
-    
-    # HILDA data
-    ocean_hilda, cropland_hilda, f_de_br_le_hilda, f_de_ne_le_hilda, f_eg_br_le_hilda, f_eg_ne_le_hilda, forest_mix_hilda, forest_unk_hilda, other_land_hilda, pasture_hilda, urban_hilda, grass_shru_hilda, water_hilda, total_area_hilda, unknown_hilda = import_landcover_HILDA('2018')
-    
-    broad_leaf_forest_hilda = (f_eg_br_le_hilda + f_de_br_le_hilda)  * use_hilda_mask
-    coniferous_forest_hilda = (f_eg_ne_le_hilda + f_de_ne_le_hilda) * use_hilda_mask
-    mixed_forest_hilda = (forest_unk_hilda + forest_mix_hilda) * use_hilda_mask
-    ocean_hilda = ocean_hilda * use_hilda_mask
-    other_hilda = (other_land_hilda + water_hilda) * use_hilda_mask
-    natural_grassland_hilda = grass_shru_hilda * use_hilda_mask
-    cropland_hilda = cropland_hilda * use_hilda_mask
-    pasture_hilda = pasture_hilda * use_hilda_mask
-    urban_hilda = urban_hilda * use_hilda_mask
-    unknown_hilda = unknown_hilda * use_hilda_mask
+    # aggregated classes:
+    broad_leaf_forest = forest_decidious_broad_leaf + forest_evergreen_broad_leaf 
+    coniferous_forest = forest_decidious_needle_leaf+ forest_evergreen_needle_leaf
+    mixed_forest = mixed_forest + forest_unknown
+    other = other_land + water
    
-    broad_leaf_forest = broad_leaf_forest + broad_leaf_forest_hilda
-    coniferous_forest = coniferous_forest + coniferous_forest_hilda
-    mixed_forest = mixed_forest + mixed_forest_hilda
-    ocean = ocean + ocean_hilda
-    other = other + other_hilda
-    natural_grassland = natural_grassland + natural_grassland_hilda
-    cropland = cropland + cropland_hilda
-    pasture = pasture + pasture_hilda
-    urban = urban + urban_hilda
-    unknown = unknown_hilda
-    
-    return broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, natural_grassland, cropland, pasture, urban, unknown
-
-    
-def import_landcover():
-    
-    #prev folder_tool
-    all_corine_classes= Dataset(os.path.join(folder_data, 'CLC_2018_landcover.nc'))
-
-
-    #the "onceans_finalized" dataset is seperate: CORINE class 523 (oceans) did not extend beyond exclusive zone
-    #complemented with Natural Earth data.
-    #CORINE does not cover the whole area, "nodata" area is never ocean, rather landbased data.
-    oceans_finalized= Dataset(os.path.join(folder_data, 'CLC_naturalearth_oceans.nc'))
-
-    #access all the different land cover classes in the .nc files:
-    fp_111 = all_corine_classes.variables['area_111'][:,:]
-    fp_112 = all_corine_classes.variables['area_112'][:,:]
-    fp_121 = all_corine_classes.variables['area_121'][:,:]
-    fp_122 = all_corine_classes.variables['area_122'][:,:]
-    fp_123 = all_corine_classes.variables['area_123'][:,:]
-    fp_124 = all_corine_classes.variables['area_124'][:,:]
-    fp_131 = all_corine_classes.variables['area_131'][:,:]
-    fp_132 = all_corine_classes.variables['area_132'][:,:]
-    fp_133 = all_corine_classes.variables['area_133'][:,:]
-    fp_141 = all_corine_classes.variables['area_141'][:,:]
-    fp_142 = all_corine_classes.variables['area_142'][:,:]
-    fp_211 = all_corine_classes.variables['area_211'][:,:]
-    fp_212 = all_corine_classes.variables['area_212'][:,:]
-    fp_213 = all_corine_classes.variables['area_213'][:,:]
-    fp_221 = all_corine_classes.variables['area_221'][:,:]
-    fp_222 = all_corine_classes.variables['area_222'][:,:]
-    fp_223 = all_corine_classes.variables['area_223'][:,:]
-    fp_231 = all_corine_classes.variables['area_231'][:,:]
-    fp_241 = all_corine_classes.variables['area_241'][:,:]
-    fp_242 = all_corine_classes.variables['area_242'][:,:]
-    fp_243 = all_corine_classes.variables['area_243'][:,:]
-    fp_244 = all_corine_classes.variables['area_244'][:,:]
-    fp_311 = all_corine_classes.variables['area_311'][:,:]
-    fp_312 = all_corine_classes.variables['area_312'][:,:]
-    fp_313 = all_corine_classes.variables['area_313'][:,:]
-    fp_321 = all_corine_classes.variables['area_321'][:,:]
-    fp_322 = all_corine_classes.variables['area_322'][:,:]
-    fp_323 = all_corine_classes.variables['area_323'][:,:]
-    fp_324 = all_corine_classes.variables['area_324'][:,:]
-    fp_331 = all_corine_classes.variables['area_331'][:,:]
-    fp_332 = all_corine_classes.variables['area_332'][:,:]
-    fp_333 = all_corine_classes.variables['area_333'][:,:]
-    fp_334 = all_corine_classes.variables['area_334'][:,:]
-    fp_335 = all_corine_classes.variables['area_335'][:,:]
-    fp_411 = all_corine_classes.variables['area_411'][:,:]
-    fp_412 = all_corine_classes.variables['area_412'][:,:]
-    fp_421 = all_corine_classes.variables['area_421'][:,:]
-    fp_422 = all_corine_classes.variables['area_422'][:,:]
-    fp_423 = all_corine_classes.variables['area_423'][:,:]
-    fp_511 = all_corine_classes.variables['area_511'][:,:]
-    fp_512 = all_corine_classes.variables['area_512'][:,:]
-    fp_521 = all_corine_classes.variables['area_521'][:,:]
-    fp_522 = all_corine_classes.variables['area_522'][:,:]
-
-    #CORINE combined with natural earth data for oceans:
-    fp_523 = oceans_finalized.variables['ocean_ar2'][:,:]
-
-    #have a variable that represents the whole area of the cell,
-    #used to get a percentage breakdown of each corine class.
-    fp_total_area = all_corine_classes.variables['area_stilt'][:,:]
-
-    #19 aggregated classes (these are used in the current bar graphs but can be updated by each user)
-    urban = fp_111+fp_112+fp_141+fp_142
-    industrial = fp_131 + fp_133 + fp_121 
-    road_and_rail = fp_122 
-    ports_and_apirports= fp_123+fp_124
-    dump_sites = fp_132
-    staple_cropland_not_rice = fp_211 + fp_212 + fp_241 + fp_242 + fp_243
-    rice_fields = fp_213
-    cropland_fruit_berry_grapes_olives = fp_221 + fp_222 + fp_223
-    pastures = fp_231
-    broad_leaved_forest = fp_311
-    coniferous_forest = fp_312
-    mixed_forest = fp_313 + fp_244
-    natural_grasslands = fp_321 + fp_322
-    transitional_woodland_shrub= fp_323 + fp_324
-    bare_natural_areas = fp_331 + fp_332 + fp_333 + fp_334
-    glaciers_prepetual_snow = fp_335
-    wet_area= fp_411 + fp_412 + fp_421 + fp_422
-    inland_water_bodies = fp_423 + fp_511 + fp_512 + fp_521 + fp_522
-    oceans = fp_523
-
-    #added: the "missing area" is out of the CORINE domain. Alltogether add upp to "fp_total_area"
-    out_of_domain=fp_total_area-oceans-inland_water_bodies-wet_area-glaciers_prepetual_snow-bare_natural_areas-transitional_woodland_shrub-natural_grasslands-mixed_forest-coniferous_forest-broad_leaved_forest-pastures-cropland_fruit_berry_grapes_olives-rice_fields-staple_cropland_not_rice-dump_sites-ports_and_apirports-road_and_rail-industrial-urban
-
-    #further aggregated classes for the land cover wind polar graph and land cover bar graph
-    urban_aggreg= urban + industrial + road_and_rail + dump_sites + ports_and_apirports
-    cropland_aggreg= staple_cropland_not_rice + rice_fields + cropland_fruit_berry_grapes_olives
-    forests= broad_leaved_forest + coniferous_forest + mixed_forest
-    pastures_grasslands= pastures + natural_grasslands
-    oceans=oceans
-    other=transitional_woodland_shrub+bare_natural_areas+glaciers_prepetual_snow +wet_area + inland_water_bodies
-
-    return out_of_domain, urban_aggreg, cropland_aggreg, forests, pastures_grasslands, oceans, other
+    return broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown
 
 def import_population_data():
 
@@ -1055,9 +900,13 @@ def get_sens_fp_country(land_cover, summed_fp_sens_country):
 def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp_see_not_see, breakdown_type = 'sens'):
     
     #import the necessary data
-    out_of_domain, urban_aggreg, cropland_aggreg, forests, pastures_grasslands, oceans, other= import_landcover()
+    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018') 
     
-    list_land_cover_classes = [urban_aggreg, cropland_aggreg, forests, pastures_grasslands, oceans, other, out_of_domain]
+    list_land_cover_classes = [broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown]
+    
+    land_cover_values = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrubland', 'Other', 'Unknown']
+    
+    colors = ['#4EB265','#CAE0AB','#90C987', '#1964B0', '#882E72', '#F1932D', '#521A13', '#F7F056', '#DC050C', '#777777']
     
     fp_pop = import_population_data()
 
@@ -1069,27 +918,31 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
     
     all_area_masks= Dataset(os.path.join(folder_tool, 'land_and_land_plus_eez_country_masks_icos_members.nc'))
 
-    land_cover_values = ['Urban', 'Cropland', 'Forest','Pastures and grasslands','Oceans', 'Other', 'Out of domain']
 
-    colors=['red', 'darkgoldenrod', 'green', 'yellow','blue','black', 'purple']
-    
     #for aggregate graphs (all selected countries - in case than more than one country selected.
     countries = []
-    urban = []
-    cropland= []
-    forest = []
-    pastures_and_grasslands = []
-    oceans_list = []
-    other_list = []
-    out_of_domain_list = []
+
+    broad_leaf_forest_list = [] 
+    coniferous_forest_list = [] 
+    mixed_forest_list = [] 
+    ocean_list = [] 
+    other_list = [] 
+    grass_shrub_list = [] 
+    cropland_list = [] 
+    pasture_list = [] 
+    urban_list = [] 
+    unknown_list = []
     
-    area_urban = []
-    area_cropland = []
-    area_forest = []
-    area_pastures_and_grasslands = []
-    area_oceans_list = []
-    area_other_list = []
-    area_out_of_domain_list = []
+    area_broad_leaf_forest = [] 
+    area_coniferous_forest = [] 
+    area_mixed_forest = [] 
+    area_ocean = [] 
+    area_other = [] 
+    area_grass_shrub = [] 
+    area_cropland = [] 
+    area_pasture = [] 
+    area_urban = [] 
+    area_unknown = []
     
     population_sensitivity_list = []
     population_total_list = []
@@ -1132,29 +985,38 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
             list_land_cover_sens_fp.append(land_cover_sens_fp)
             
             # for the aggregated graphs at the end (one bar per country
-            if i==0:     
-                urban.append(land_cover_sens_fp)
-                area_urban.append(land_cover_area_fp)
-            if i==1:
-                cropland.append(land_cover_sens_fp)
-                area_cropland.append(land_cover_area_fp)
-            if i==2:     
-                forest.append(land_cover_sens_fp)
-                area_forest.append(land_cover_area_fp)
 
+            if i==0:    
+                broad_leaf_forest_list.append(land_cover_sens_fp)
+                area_broad_leaf_forest.append(land_cover_area_fp)
+            if i==1:
+                coniferous_forest_list.append(land_cover_sens_fp)
+                area_coniferous_forest.append(land_cover_area_fp)
+            if i==2:     
+                mixed_forest_list.append(land_cover_sens_fp)
+                area_mixed_forest.append(land_cover_area_fp)
             if i==3:     
-                pastures_and_grasslands.append(land_cover_sens_fp)
-                area_pastures_and_grasslands.append(land_cover_area_fp)
+                cropland_list.append(land_cover_sens_fp)
+                area_cropland.append(land_cover_area_fp)
             if i==4:
-                oceans_list.append(land_cover_sens_fp)
-                area_oceans_list.append(land_cover_area_fp)
-                
+                pasture_list.append(land_cover_sens_fp)
+                area_pasture.append(land_cover_area_fp)            
             if i==5:     
-                other_list.append(land_cover_sens_fp)
-                area_other_list.append(land_cover_area_fp)
+                urban_list.append(land_cover_sens_fp)
+                area_urban.append(land_cover_area_fp)
             if i==6:
-                out_of_domain_list.append(land_cover_sens_fp)
-                area_out_of_domain_list.append(land_cover_area_fp)  
+                ocean_list.append(land_cover_sens_fp)
+                area_ocean.append(land_cover_area_fp)  
+                
+            if i==7:     
+                grass_shrub_list.append(land_cover_sens_fp)
+                area_grass_shrub.append(land_cover_area_fp)
+            if i==8:
+                other_list.append(land_cover_sens_fp)
+                area_other.append(land_cover_area_fp) 
+            if i==9:
+                unknown_list.append(land_cover_sens_fp)
+                area_unknown.append(land_cover_area_fp) 
             
             i = i + 1
 
@@ -1189,7 +1051,7 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
                                  'color':colors}
             column_w_data = 'Sensitivity'
 
-            label_yaxis = 'area in km² * (ppm /(μmol / (m²s))))'
+            label_yaxis = 'area in km² * (ppm /(μmol / (m²s)))'
 
         else:
             values_by_country = list_land_cover_area_fp
@@ -1250,8 +1112,8 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
     if len(countries)>0:
 
         if breakdown_type == 'sens':
-            #land cover graph
-            dictionary_landcover_by_country = {'Countries': countries,'Urban': urban, 'Cropland': cropland, 'Forest': forest,'Pastures and grasslands' : pastures_and_grasslands,'Oceans': oceans_list,'Other': other_list, 'Out of domain': out_of_domain_list}
+
+            dictionary_landcover_by_country = {'Countries': countries,'Broad leaf forest': broad_leaf_forest_list, 'Coniferous forest': coniferous_forest_list, 'Mixed forest': mixed_forest_list,'Cropland' : cropland_list,'Pasture': pasture_list,'Urban': urban_list, 'Ocean': ocean_list, 'Grass/shrubland': grass_shrub_list, 'Other': other_list, 'Unknown': unknown_list}
 
             title_pop = "Sensitivity to population by country"
 
@@ -1268,7 +1130,7 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
             #land cover graph
             title_pop = "Total population within footprints by country"
 
-            dictionary_landcover_by_country = {'Countries': countries,'Urban': area_urban,'Cropland': area_cropland, 'Forest': area_forest,'Pastures and grasslands' : area_pastures_and_grasslands,'Oceans': area_oceans_list,'Other': area_other_list,'Out of domain': area_out_of_domain_list}
+            dictionary_landcover_by_country = {'Countries': countries,'Broad leaf forest': area_broad_leaf_forest, 'Coniferous forest': area_coniferous_forest, 'Mixed forest': area_mixed_forest,'Cropland' : area_cropland,'Pasture': area_pasture,'Urban': area_urban, 'Ocean': area_ocean, 'Grass/shrubland': area_grass_shrub, 'Other': area_other, 'Unknown': area_unknown}
 
             label_yaxis = 'area (km²)'
 
@@ -1334,9 +1196,16 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
 def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg_fp_see_not_see, summed_fp_sens_uploaded_fp, aggreg_fp_see_not_see_uploaded_fp, breakdown_type='sens', download_output=False):
     
     #import the necessary data
-    out_of_domain, urban_aggreg, cropland_aggreg, forests, pastures_grasslands, oceans, other= import_landcover()
+    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018') 
     
-    list_land_cover_classes = [urban_aggreg, cropland_aggreg, forests, pastures_grasslands, oceans, other, out_of_domain]
+    list_land_cover_classes = [broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown]
+    
+    land_cover_values = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrubland', 'Other', 'Unknown']
+    
+    colors = ['#4EB265','#CAE0AB','#90C987', '#1964B0', '#882E72', '#F1932D', '#521A13', '#F7F056', '#DC050C', '#777777']
+    
+    colors_duplicated = ['#4EB265','#4EB265','#CAE0AB','#CAE0AB','#90C987','#90C987', '#1964B0', '#1964B0', '#882E72', '#882E72', '#F1932D', '#F1932D', '#521A13',  '#521A13', '#F7F056', '#F7F056', '#DC050C', '#DC050C', '#777777', '#777777']
+    land_cover_values_duplicated = ['Broad leaf forest', 'Broad leaf forest+', 'Coniferous forest', 'Coniferous forest+', 'Mixed forest', 'Mixed forest+', 'Cropland', 'Cropland+', 'Pasture', 'Pasture+', 'Urban', 'Urban+', 'Ocean', 'Ocean+', 'Grass/shrubland', 'Grass/shrubland+', 'Other', 'Other+', 'Unknown', 'Unknown+'] 
     
     fp_pop = import_population_data()
     
@@ -1347,31 +1216,30 @@ def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg
     # is land_and_land_plus_eez_country_masks_icos_members.nc in the stc data folder? 
     all_area_masks= Dataset(os.path.join(folder_tool, 'land_and_land_plus_eez_country_masks_icos_members.nc'))
 
-    land_cover_values = ['Urban', 'Cropland', 'Forest','Pastures and grasslands','Oceans', 'Other', 'Out of domain']
-
-    colors=['red', 'darkgoldenrod', 'green', 'yellow','blue','black', 'purple']
-    
-    colors_duplicated = ['red', 'red', 'darkgoldenrod','darkgoldenrod', 'green',  'green' , 'yellow', 'yellow', 'blue','blue', 'black', 'black', 'purple','purple']
-
-    land_cover_values_duplicated = ['Urban','Urban +', 'Cropland', 'Cropland +', 'Forest','Forest +', 'Pastures and grasslands','Pastures and grasslands +','Oceans', 'Oceans +', 'Other', 'Other +', 'Out of domain', 'Out of domain +'] 
-
     countries = []
     # these lists will take the values from both base and compare. 
-    urban = []
-    cropland= []
-    forest = []
-    pastures_and_grasslands = []
-    oceans_list = []
-    other_list = []
-    out_of_domain_list = []
-         
-    urban_area_list = []
-    cropland_area_list = []
-    forest_area_list = []
-    pastures_and_grasslands_area_list = []
-    oceans_list_area_list = []
-    other_list_area_list = []
-    out_of_domain_list_area_list = []
+  
+    broad_leaf_forest_list = [] 
+    coniferous_forest_list = [] 
+    mixed_forest_list = [] 
+    ocean_list = [] 
+    other_list = [] 
+    grass_shrub_list = [] 
+    cropland_list = [] 
+    pasture_list = [] 
+    urban_list = [] 
+    unknown_list = []
+    
+    area_broad_leaf_forest = [] 
+    area_coniferous_forest = [] 
+    area_mixed_forest = [] 
+    area_ocean = [] 
+    area_other = [] 
+    area_grass_shrub = [] 
+    area_cropland = [] 
+    area_pasture = [] 
+    area_urban = [] 
+    area_unknown = []
     
     population_sensitivity_list = []
     population_area_list = []
@@ -1420,41 +1288,59 @@ def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg
             list_land_cover_sens_fp_compare.append(land_cover_sens_fp_compare)  
           
             # for the aggregated graphs at the end (one bar per country
-            if i==0:     
-                urban.append(land_cover_sens_fp_base)
-                urban_area_list.append(land_cover_area_fp_base)
-                urban.append(land_cover_sens_fp_compare)
-                urban_area_list.append(land_cover_area_fp_compare)
+            
+
+            if i==0:    
+                broad_leaf_forest_list.append(land_cover_sens_fp_base)
+                broad_leaf_forest_list.append(land_cover_sens_fp_compare)
+                area_broad_leaf_forest.append(land_cover_area_fp_base)
+                area_broad_leaf_forest.append(land_cover_area_fp_compare)     
             if i==1:
-                cropland.append(land_cover_sens_fp_base)
-                cropland_area_list.append(land_cover_area_fp_base)
-                cropland.append(land_cover_sens_fp_compare)
-                cropland_area_list.append(land_cover_area_fp_compare)
+                coniferous_forest_list.append(land_cover_sens_fp_base)
+                coniferous_forest_list.append(land_cover_sens_fp_compare)
+                area_coniferous_forest.append(land_cover_area_fp_base)
+                area_coniferous_forest.append(land_cover_area_fp_compare)
             if i==2:     
-                forest.append(land_cover_sens_fp_base)
-                forest_area_list.append(land_cover_area_fp_base)
-                forest.append(land_cover_sens_fp_compare)
-                forest_area_list.append(land_cover_area_fp_compare)
+                mixed_forest_list.append(land_cover_sens_fp_base)
+                mixed_forest_list.append(land_cover_sens_fp_compare)
+                area_mixed_forest.append(land_cover_area_fp_base)
+                area_mixed_forest.append(land_cover_area_fp_compare)
             if i==3:     
-                pastures_and_grasslands.append(land_cover_sens_fp_base)
-                pastures_and_grasslands_area_list.append(land_cover_area_fp_base)
-                pastures_and_grasslands.append(land_cover_sens_fp_compare)
-                pastures_and_grasslands_area_list.append(land_cover_area_fp_compare)
+                cropland_list.append(land_cover_sens_fp_base)
+                cropland_list.append(land_cover_sens_fp_compare)
+                area_cropland.append(land_cover_area_fp_base)
+                area_cropland.append(land_cover_area_fp_compare)
             if i==4:
-                oceans_list.append(land_cover_sens_fp_base)
-                oceans_list_area_list.append(land_cover_area_fp_base)
-                oceans_list.append(land_cover_sens_fp_compare)
-                oceans_list_area_list.append(land_cover_area_fp_compare)                
+                pasture_list.append(land_cover_sens_fp_base)
+                pasture_list.append(land_cover_sens_fp_compare)
+                area_pasture.append(land_cover_area_fp_base)   
+                area_pasture.append(land_cover_area_fp_compare) 
             if i==5:     
-                other_list.append(land_cover_sens_fp_base)
-                other_list_area_list.append(land_cover_area_fp_base)
-                other_list.append(land_cover_sens_fp_compare)
-                other_list_area_list.append(land_cover_area_fp_compare)
+                urban_list.append(land_cover_sens_fp_base)
+                urban_list.append(land_cover_sens_fp_compare)
+                area_urban.append(land_cover_area_fp_base)
+                area_urban.append(land_cover_area_fp_compare)
             if i==6:
-                out_of_domain_list.append(land_cover_sens_fp_base)
-                out_of_domain_list_area_list.append(land_cover_area_fp_base)  
-                out_of_domain_list.append(land_cover_sens_fp_compare)
-                out_of_domain_list_area_list.append(land_cover_area_fp_compare)     
+                ocean_list.append(land_cover_sens_fp_base)
+                ocean_list.append(land_cover_sens_fp_compare)
+                area_ocean.append(land_cover_area_fp_base)  
+                area_ocean.append(land_cover_area_fp_compare)                
+            if i==7:     
+                grass_shrub_list.append(land_cover_sens_fp_base)
+                grass_shrub_list.append(land_cover_sens_fp_compare)
+                area_grass_shrub.append(land_cover_area_fp_base)
+                area_grass_shrub.append(land_cover_area_fp_compare)
+            if i==8:
+                other_list.append(land_cover_sens_fp_base)
+                other_list.append(land_cover_sens_fp_compare)
+                area_other.append(land_cover_area_fp_base) 
+                area_other.append(land_cover_area_fp_compare)
+            if i==9:
+                unknown_list.append(land_cover_sens_fp_base)
+                unknown_list.append(land_cover_sens_fp_compare)
+                area_unknown.append(land_cover_area_fp_base) 
+                area_unknown.append(land_cover_area_fp_compare)
+   
 
             i = i + 1
 
@@ -1595,14 +1481,7 @@ def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg
 
         if breakdown_type == 'sens':
 
-            dictionary_sensitivity_by_country = {'Countries': countries,
-                                             'Urban': urban,
-                                             'Cropland': cropland,
-                                             'Forest': forest,
-                                             'Pastures and grasslands' : pastures_and_grasslands,
-                                             'Oceans': oceans_list,
-                                             'Other': other_list,
-                                             'Out of domain': out_of_domain_list}
+            dictionary_sensitivity_by_country = {'Countries': countries,'Broad leaf forest': broad_leaf_forest_list, 'Coniferous forest': coniferous_forest_list, 'Mixed forest': mixed_forest_list,'Cropland' : cropland_list,'Pasture': pasture_list,'Urban': urban_list, 'Ocean': ocean_list, 'Grass/shrubland': grass_shrub_list, 'Other': other_list, 'Unknown': unknown_list}
 
             label_yaxis = 'km² area * (ppm /(μmol / (m²s)))'
 
@@ -1610,14 +1489,7 @@ def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg
 
         else:
 
-            dictionary_sensitivity_by_country = {'Countries': countries,
-                                 'Urban': urban_area_list,
-                                 'Cropland': cropland_area_list,
-                                 'Forest': forest_area_list,
-                                 'Pastures and grasslands' : pastures_and_grasslands_area_list,
-                                 'Oceans': oceans_list_area_list,
-                                 'Other': other_list_area_list,
-                                 'Out of domain': out_of_domain_list_area_list}
+            dictionary_sensitivity_by_country = {'Countries': countries,'Broad leaf forest': area_broad_leaf_forest, 'Coniferous forest': area_coniferous_forest, 'Mixed forest': area_mixed_forest,'Cropland' : area_cropland,'Pasture': area_pasture,'Urban': area_urban, 'Ocean': area_ocean, 'Grass/shrubland': area_grass_shrub, 'Other': area_other, 'Unknown': area_unknown}
 
             label_yaxis = 'km²'
 
@@ -1861,7 +1733,7 @@ def breakdown_landcover_hilda_two_years(list_area_choice, summed_fp_sens, aggreg
 
                 column_w_data = 'Sensitivity'
 
-                label_yaxis = 'area in km² * (ppm /(μmol / (m²s))))'
+                label_yaxis = 'area in km² * (ppm /(μmol / (m²s)))'
 
             #if using the mast - then see what the area of the different land cover types are below. 
             else:

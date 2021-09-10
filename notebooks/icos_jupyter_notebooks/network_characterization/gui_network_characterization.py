@@ -6,7 +6,7 @@ Created on Mon Dec  7 08:38:51 2020
 
 """
 
-from ipywidgets import Dropdown, SelectMultiple, HBox, VBox, Button, Output, IntText, RadioButtons,IntProgress,IntSlider, GridspecLayout,FileUpload, BoundedIntText
+from ipywidgets import Dropdown, SelectMultiple, HBox, VBox, Button, Output, IntText, RadioButtons,IntProgress,IntSlider, GridspecLayout,FileUpload, BoundedIntText, Checkbox
 import stiltStations
 from IPython.core.display import display, HTML 
 from icoscp.station import station as cpstation
@@ -22,11 +22,15 @@ import json
 stiltstations = stiltStations.getStilt()
 
 #for base network it is only possible to choose between ICOS stations:
-icos_list = sorted([((v['country'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items() if '2018' in v['years'] if len(v['2018']['months'])>12 if v['icos']])
+icos_list_2018 = sorted([((v['country'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items() if '2018' in v['years'] if len(v['2018']['months'])>12 if v['icos']])
+
+icos_list = sorted([((v['country'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items()])
 
 #for the compare network any site with STILT runs is possible
 #however, it must have 12 months worth of data to show up in the dropdown
-all_list = sorted([((v['country'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items() if '2018' in v['years'] if len(v['2018']['months'])>12])
+all_list_2018 = sorted([((v['country'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items() if '2018' in v['years'] if len(v['2018']['months'])>12])
+
+all_list = sorted([((v['country'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items()])
 
 
 def set_settings(s):
@@ -39,13 +43,58 @@ def set_settings(s):
     country_options.value = s['countries']
     breakdown_type.value = s['weighing']
     download_output_option.value = s['download']
-    
-def disable_enable_update_button():
+
+
+def disable_enable_update_button():    
 
     if len(selected_base_network_stations.options)>0:
-        update_button.disabled = False          
+        
+        if ((prepared_footprints.value==False) and ((s_year.value != e_year.value) or (s_month.value != e_month.value) or (s_day.value != e_day.value)) or (prepared_footprints.value==True)):
+            update_button.disabled = False
+        else:
+            update_button.disabled = True              
     else:
         update_button.disabled = True
+
+        
+def prepare_footprints_change(c):
+    
+    selected_base_network_stations.options = () 
+    selected_compare_network_stations.options = ()
+    
+    if prepared_footprints.value == False:
+        
+        sites_base_network_options.options = all_list
+        sites_compare_network_options.options = icos_list
+
+        s_year.disabled = False
+        s_month.disabled = False
+        s_day.disabled = False
+
+        e_year.disabled = False
+        e_month.disabled = False
+        e_day.disabled = False
+
+        time_selection.disabled = False
+
+    else:
+       
+        sites_base_network_options.options = all_list_2018
+        sites_compare_network_options.options = icos_list_2018
+
+        s_year.disabled = True
+        s_month.disabled = True
+        s_day.disabled = True
+
+        e_year.disabled = True
+        e_month.disabled = True
+        e_day.disabled = True
+
+        time_selection.disabled = True
+
+
+    disable_enable_update_button()
+        
 
 def change_stations_compare_network(c):
     current_selection = [station_tuple[1] for station_tuple in selected_compare_network_stations.options]
@@ -54,6 +103,8 @@ def change_stations_compare_network(c):
     selected_compare_network_stations.options = sorted(compare_network_selection_tuplelist)
 
 def change_selected_compare_network_stations(c):
+    
+    sites_compare_network_options.value = [station for station in sites_compare_network_options.value if station not in selected_compare_network_stations.value]
     
     selected_compare_network_stations.options = [station_tuple for station_tuple in selected_compare_network_stations.options if station_tuple[1] not in selected_compare_network_stations.value]
 
@@ -73,6 +124,8 @@ def change_stations_base_network(c):
     disable_enable_update_button()
     
 def change_selected_base_network_stations(c):
+    
+    sites_base_network_options.value = [station for station in sites_base_network_options.value if station not in selected_base_network_stations.value]
     
     selected_base_network_stations.options = [station_tuple for station_tuple in selected_base_network_stations.options if station_tuple[1] not in selected_base_network_stations.value]
     
@@ -107,6 +160,86 @@ def file_set_widgets(c):
         settings_dict = json.loads(settings_json)
         set_settings(settings_dict)
         
+        
+def change_yr(c):
+    
+    disable_enable_update_button()
+    
+    years = [x for x in s_year.options if x >= c['new']]
+    
+    e_year.options = years
+        
+def change_mt(c):
+    disable_enable_update_button()
+    #the day widget populated depending on what month it is (different number of days)
+    month_days_30=[4,6,9,11]
+    month_days_31=[1,3,5,7,8,10,12]
+
+    if c['new'] in month_days_31:
+        s_day.options=list(range(1,32))
+
+    elif c['new'] in month_days_30:
+        s_day.options=list(range(1,31))
+    else:
+        s_day.options=list(range(1,29))
+    
+    #when change start_month - change end month also (if same year)
+    if s_year.value==e_year.value :        
+        month = [int(x) for x in s_month.options if x >= c['new']]                
+        e_month.options=month
+
+    #when change start_month - change end day also (if same year and month OR the first time)
+    if s_year.value==e_year.value and s_month.value==e_month.value:
+        day = [x for x in s_day.options if x >= s_day.value]
+        e_day.options=day
+        
+def change_day(c):
+    disable_enable_update_button()
+    
+    #when change the day... if the same month and year (start) - update
+    if s_year.value==e_year.value and s_month.value==e_month.value:
+        if s_day.value > e_day.value:
+            day = [int(x) for x in s_day.options if x >= s_day.value]
+            e_day.options = day
+    
+
+def change_yr_end(c):
+    disable_enable_update_button()
+    
+    years = [x for x in s_year.options if x >= s_year.value]
+    
+    e_year.options = years
+   
+    
+    if s_year.value==e_year.value:
+
+        month = [x for x in s_month.options if x >= s_month.value]        
+        e_month.options = month
+
+def change_month_end(c):
+    disable_enable_update_button()
+    
+    if s_year.value==e_year.value and e_month.value==s_month.value:
+        day = [x for x in s_day.options if x >= s_day.value]
+        e_day.options= day
+    else:
+        month_days_30=[4,6,9,11]
+        month_days_31=[1,3,5,7,8,10,12]
+
+        if c['new'] in month_days_31:
+            e_day.options=list(range(1,32))
+
+        elif c['new'] in month_days_30:
+            e_day.options=list(range(1,31))
+
+        else:
+            e_day.options=list(range(1,29))
+           
+    
+def change_day_end(c):
+    
+    disable_enable_update_button()
+        
 #----------- start processing -----------------
 
 #clear all the output
@@ -138,6 +271,14 @@ def update_func(button_c):
     
     update_button.disabled = True
     clear_all_output()
+    
+    date_range = pd.date_range(start=(str(s_year.value) + '-' + str(s_month.value)  + '-' + str(s_day.value)), end=(str(e_year.value) + '-' + str(e_month.value)  + '-' + str(e_day.value)), freq='3H')
+    
+    timeselect_list = list(time_selection.value)
+    timeselect_string=[str(value) for value in timeselect_list]
+    timeselect_string =':00, '.join(timeselect_string) + ':00'
+    
+    date_range = functions.date_range_hour_filtered(date_range, timeselect_list)
 
     sites_base_network = [station_tuple[1] for station_tuple in selected_base_network_stations.options]
     sites_compare_network=[station_tuple[1] for station_tuple in selected_compare_network_stations.options]
@@ -168,8 +309,8 @@ def update_func(button_c):
 
     breakdown = breakdown_type.value
 
-    #new --> fp_max_base_network
-    fp_combined_base_network, fp_mask_count_base_network, fp_mask_base_network, fp_max_base_network, lon, lat, list_none_footprints = functions.aggreg_2018_footprints_base_network(sites_base_network, threshold_int)
+    fp_combined_base_network, fp_mask_count_base_network, fp_mask_base_network, fp_max_base_network, lon, lat, list_none_footprints = functions.aggreg_2018_footprints_base_network(sites_base_network, threshold_int, date_range)
+    
     
     string_list_none_footprints = ', '.join([str(elem) for elem in list_none_footprints])
  
@@ -178,7 +319,7 @@ def update_func(button_c):
 
         with output_no_footprints:
     
-            display(HTML('<p style="font-size:16px;text-align:center">No footprints available for base network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints.</p>'))
+            display(HTML('<p style="font-size:16px">No footprints available for base network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints.</p>'))
         
         update_button.disabled = False
         
@@ -189,7 +330,7 @@ def update_func(button_c):
     
             if len(list_none_footprints)>0:
                 
-                display(HTML('<p style="font-size:16px;text-align:center">No footprints available for base network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints.</p>'))
+                display(HTML('<p style="font-size:16px">No footprints available for base network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints.</p>'))
            
     if download_output:
         
@@ -199,7 +340,7 @@ def update_func(button_c):
 
     if len(sites_compare_network)>0:      
         
-        fp_combined_compare_network, fp_mask_count_compare_network, fp_mask_compare_network, fp_max_compare_network, lon, lat, list_none_footprints = functions.aggreg_2018_footprints_compare_network(sites_base_network, sites_compare_network, threshold_int)
+        fp_combined_compare_network, fp_mask_count_compare_network, fp_mask_compare_network, fp_max_compare_network, lon, lat, list_none_footprints = functions.aggreg_2018_footprints_compare_network(sites_base_network, sites_compare_network, threshold_int, date_range)
         
         string_list_none_footprints = ', '.join([str(elem) for elem in list_none_footprints])
         
@@ -207,7 +348,7 @@ def update_func(button_c):
 
             with output_no_footprints_compare:
 
-                display(HTML('<p style="font-size:16px">No footprints available for compare network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints. Base network selection is fine. </p>'))
+                display(HTML('<p style="font-size:16px">No footprints available for compare network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints. </p>'))
             update_button.disabled = False
 
             return
@@ -217,7 +358,7 @@ def update_func(button_c):
 
                 if len(list_none_footprints)>0:
 
-                    display(HTML('<p style="font-size:16px">No footprints available for base network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints. Base network selection is fine. </p>'))
+                    display(HTML('<p style="font-size:16px">No footprints available for compare network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints. </p>'))
                     
        
         vmax_see_not_see = np.max(fp_mask_count_compare_network)
@@ -239,7 +380,7 @@ def update_func(button_c):
         else:
             pngfile = ''
             
-        functions.plot_maps(fp_combined_base_network, lon, lat, linlog='', colors=colorbar, pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s)))', vmax=vmax_sens) 
+        functions.plot_maps(fp_combined_base_network, lon, lat, linlog='', colors=colorbar, pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=vmax_sens) 
 
     with output_aggreg_fp_see_not_see:
 
@@ -306,7 +447,7 @@ def update_func(button_c):
     
             display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint (' + threshold_percent + '%)</p>'))
             
-            functions.plot_maps(fp_combined_compare_network, lon, lat, linlog='', colors=colorbar,pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit= 'ppm /(μmol / (m²s)))')        
+            functions.plot_maps(fp_combined_compare_network, lon, lat, linlog='', colors=colorbar,pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit= 'ppm /(μmol / (m²s))')        
 
        
         with output_aggreg_fp_see_not_see_uploaded_fp:
@@ -392,6 +533,18 @@ heading_network_selection = Output()
 
 with heading_network_selection:
     display(HTML('<p style="font-size:20px;font-weight:bold;">Define site network(s)</p>'))
+    
+heading_perpared_footprints = Output()
+    
+with heading_perpared_footprints:
+    
+    display(HTML('<p style="font-size:14px;">Check the below box to use aggregated footprints for year 2018. Aggregated footprints have already been computed for most sites and will make the tool run fast. Checking the box will change what sites are available for selection to only include sites that has footprints for all of 2018.</p>'))
+    
+prepared_footprints = Checkbox(
+    value=False,
+    description='2018 aggregate footprint(s)',
+    style=style_bin
+)
 
 heading_sites_base_network_options = Output()
 
@@ -455,6 +608,51 @@ selected_compare_network_stations = SelectMultiple(options = (),
                                                rows=8)
 
 selected_compare_network_stations.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
+
+
+#Create a Dropdown widget with year values (start year):
+s_year = Dropdown(options = range(2006, 2020),
+                  value = 2018,
+                  description = 'Start Year',
+                  disabled= False,)
+
+#Create a Dropdown widget with month values (start month):
+s_month = Dropdown(options = range(1, 13),
+                   description = 'Start Month',
+                   disabled= False,)
+
+#Create a Dropdown widget with year values (end year):
+e_year = Dropdown(options = range(2018, 2020),
+                  value = 2018,
+                  description = 'End Year',
+                  disabled= False,)
+
+#Create a Dropdown widget with month values (end month):
+e_month = Dropdown(options = range(1, 13),
+                   description = 'End Month',
+                   disabled= False,)
+
+s_day = Dropdown(options = range(1,32),
+                description = 'Start Day',
+                disabled = False,)
+
+e_day = Dropdown(options = range(1,32),
+            description = 'End Day',
+            disabled = False,)
+
+header_timeselect = Output()
+
+with header_timeselect:
+    display(HTML('<p style="font-size:15px;font-weight:bold;"><br>Select date range and hour(s) of the day for footprint aggregation:</p>'))
+
+options_time_selection=[('0:00', 0), ('3:00', 3), ('06:00', 6), ('09:00', 9), ('12:00', 12), ('15:00', 15), ('18:00', 18), ('21:00', 21)]
+
+time_selection= SelectMultiple(
+    options=options_time_selection,
+    value=[0, 3, 6, 9, 12, 15, 18, 21],
+    style=style_bin,
+    description='Time of day',
+    disabled=False)
 
 heading_map_specifications = Output()
 
@@ -563,8 +761,15 @@ box_compare_network = VBox([heading_sites_compare_network_options, sites_compare
 
 base_compare_combined = HBox([box_base_network, box_compare_network])
 
-box_map_settings = HBox([colorbar_choice, threshold_option])
+year_box = VBox([s_year, e_year])
+month_box = VBox([s_month, e_month])
+day_box = VBox([s_day, e_day])
 
+#the two vertical boxes next to each other in a horizontal box
+#Add both time-related VBoxes to a HBox:
+time_box = HBox([year_box, month_box, day_box])
+
+box_map_settings = HBox([colorbar_choice, threshold_option])
 
 box_country_options = VBox([heading_country_options, country_options])
 
@@ -580,7 +785,7 @@ box_additional_selections_combined = HBox([breakdown_choice, area_type_choice])
 
 final_row = HBox([file_name, update_button])
 #Add all widgets to a VBox:
-form = VBox([heading_network_selection, base_compare_combined, heading_map_specifications, box_map_settings, heading_analysis_ancillary_data, country_selection_combined, box_additional_selections_combined, download_output_heading, download_output_option, header_filename, final_row])
+form = VBox([heading_network_selection, heading_perpared_footprints, prepared_footprints, base_compare_combined, header_timeselect, time_box, time_selection, heading_map_specifications, box_map_settings, heading_analysis_ancillary_data, country_selection_combined, box_additional_selections_combined, download_output_heading, download_output_option, header_filename, final_row])
 
 #Initialize form output:
 form_out = Output()
@@ -602,11 +807,21 @@ output_header_landcover_section = Output()
 
 #--------------------------------------------------------------------
 # Observers
+
+prepared_footprints.observe(prepare_footprints_change, 'value')
+
 sites_base_network_options.observe(change_stations_base_network, 'value')
 selected_base_network_stations.observe(change_selected_base_network_stations, 'value')
 
 sites_compare_network_options.observe(change_stations_compare_network, 'value')
 selected_compare_network_stations.observe(change_selected_compare_network_stations, 'value')
+
+s_year.observe(change_yr, 'value')
+s_month.observe(change_mt, 'value')    
+s_day.observe(change_day, 'value')
+e_year.observe(change_yr_end, 'value')
+e_month.observe(change_month_end, 'value')
+e_day.observe(change_day_end, 'value')
 
 country_options.observe(change_countries, 'value')
 selected_countries.observe(change_selected_countries, 'value')
@@ -614,8 +829,6 @@ selected_countries.observe(change_selected_countries, 'value')
 file_name.observe(file_set_widgets, 'value')
 
 update_button.on_click(update_func)
-
-
 
 #--------------------------------------------------------------------
 
@@ -628,7 +841,7 @@ with form_out:
         box_footprints_summed = HBox([output_summed_fp_see_not_see, output_summed_fp_see_not_see_uploaded_fp])
         box_footprints_aggreg = HBox([output_aggreg_fp_see_not_see, output_aggreg_fp_see_not_see_uploaded_fp])
 
-        display(form, output_same_station_base_compare, box_footprints_sens, output_no_footprints, output_no_footprints_compare, box_footprints_summed, box_footprints_aggreg, output_breakdown_countries, output_header_landcover_section, breakdown_landcover_output)
+        display(form, output_same_station_base_compare, output_no_footprints, output_no_footprints_compare, box_footprints_sens, box_footprints_summed, box_footprints_aggreg, output_breakdown_countries, output_header_landcover_section, breakdown_landcover_output)
         
     else:
         
