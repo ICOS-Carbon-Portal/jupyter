@@ -267,6 +267,14 @@ def update_func(button_c):
     
     update_button.disabled = True
     clear_all_output()
+    
+    date_range = pd.date_range(start=(str(s_year.value) + '-' + str(s_month.value)  + '-' + str(s_day.value)), end=(str(e_year.value) + '-' + str(e_month.value)  + '-' + str(e_day.value)), freq='3H')
+    
+    timeselect_list = list(time_selection.value)
+    timeselect_string=[str(value) for value in timeselect_list]
+    timeselect_string =':00, '.join(timeselect_string) + ':00'
+    
+    date_range = functions.date_range_hour_filtered(date_range, timeselect_list)
 
     sites_base_network = [station_tuple[1] for station_tuple in selected_base_network_stations.options]
     sites_compare_network=[station_tuple[1] for station_tuple in selected_compare_network_stations.options]
@@ -297,8 +305,8 @@ def update_func(button_c):
 
     breakdown = breakdown_type.value
 
-    #new --> fp_max_base_network
-    fp_combined_base_network, fp_mask_count_base_network, fp_mask_base_network, fp_max_base_network, lon, lat, list_none_footprints = functions.aggreg_2018_footprints_base_network(sites_base_network, threshold_int)
+    fp_combined_base_network, fp_mask_count_base_network, fp_mask_base_network, fp_max_base_network, lon, lat, list_none_footprints = functions.aggreg_2018_footprints_base_network(sites_base_network, threshold_int, date_range)
+    
     
     string_list_none_footprints = ', '.join([str(elem) for elem in list_none_footprints])
  
@@ -307,7 +315,7 @@ def update_func(button_c):
 
         with output_no_footprints:
     
-            display(HTML('<p style="font-size:16px;text-align:center">No footprints available for base network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints.</p>'))
+            display(HTML('<p style="font-size:16px">No footprints available for base network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints.</p>'))
         
         update_button.disabled = False
         
@@ -318,7 +326,7 @@ def update_func(button_c):
     
             if len(list_none_footprints)>0:
                 
-                display(HTML('<p style="font-size:16px;text-align:center">No footprints available for base network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints.</p>'))
+                display(HTML('<p style="font-size:16px">No footprints available for base network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints.</p>'))
            
     if download_output:
         
@@ -328,7 +336,7 @@ def update_func(button_c):
 
     if len(sites_compare_network)>0:      
         
-        fp_combined_compare_network, fp_mask_count_compare_network, fp_mask_compare_network, fp_max_compare_network, lon, lat, list_none_footprints = functions.aggreg_2018_footprints_compare_network(sites_base_network, sites_compare_network, threshold_int)
+        fp_combined_compare_network, fp_mask_count_compare_network, fp_mask_compare_network, fp_max_compare_network, lon, lat, list_none_footprints = functions.aggreg_2018_footprints_compare_network(sites_base_network, sites_compare_network, threshold_int, date_range)
         
         string_list_none_footprints = ', '.join([str(elem) for elem in list_none_footprints])
         
@@ -336,7 +344,7 @@ def update_func(button_c):
 
             with output_no_footprints_compare:
 
-                display(HTML('<p style="font-size:16px">No footprints available for compare network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints. Base network selection is fine. </p>'))
+                display(HTML('<p style="font-size:16px">No footprints available for compare network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints. </p>'))
             update_button.disabled = False
 
             return
@@ -346,7 +354,7 @@ def update_func(button_c):
 
                 if len(list_none_footprints)>0:
 
-                    display(HTML('<p style="font-size:16px">No footprints available for base network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints. Base network selection is fine. </p>'))
+                    display(HTML('<p style="font-size:16px">No footprints available for compare network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints. </p>'))
                     
        
         vmax_see_not_see = np.max(fp_mask_count_compare_network)
@@ -829,7 +837,7 @@ with form_out:
         box_footprints_summed = HBox([output_summed_fp_see_not_see, output_summed_fp_see_not_see_uploaded_fp])
         box_footprints_aggreg = HBox([output_aggreg_fp_see_not_see, output_aggreg_fp_see_not_see_uploaded_fp])
 
-        display(form, output_same_station_base_compare, box_footprints_sens, output_no_footprints, output_no_footprints_compare, box_footprints_summed, box_footprints_aggreg, output_breakdown_countries, output_header_landcover_section, breakdown_landcover_output)
+        display(form, output_same_station_base_compare, output_no_footprints, output_no_footprints_compare, box_footprints_sens, box_footprints_summed, box_footprints_aggreg, output_breakdown_countries, output_header_landcover_section, breakdown_landcover_output)
         
     else:
         
