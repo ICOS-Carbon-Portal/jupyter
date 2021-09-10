@@ -104,6 +104,8 @@ def change_stations_compare_network(c):
 
 def change_selected_compare_network_stations(c):
     
+    sites_compare_network_options.value = [station for station in sites_compare_network_options.value if station not in selected_compare_network_stations.value]
+    
     selected_compare_network_stations.options = [station_tuple for station_tuple in selected_compare_network_stations.options if station_tuple[1] not in selected_compare_network_stations.value]
 
 def change_stations_base_network(c):
@@ -122,6 +124,8 @@ def change_stations_base_network(c):
     disable_enable_update_button()
     
 def change_selected_base_network_stations(c):
+    
+    sites_base_network_options.value = [station for station in sites_base_network_options.value if station not in selected_base_network_stations.value]
     
     selected_base_network_stations.options = [station_tuple for station_tuple in selected_base_network_stations.options if station_tuple[1] not in selected_base_network_stations.value]
     
