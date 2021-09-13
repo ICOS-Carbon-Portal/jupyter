@@ -833,7 +833,6 @@ def seasonal_table(myStation):
             fall_date_range=pd.date_range(dt.datetime(year,9,1,0), (dt.datetime(year, 12, 1,0)-dt.timedelta(hours=3)), freq='3H')
 
             #the average footprints given the selected date range
-            x, test_fp, y, z, t = read_aggreg_footprints(station, test)
             nfp_winter1, fp_winter1, fp_lon, fp_lat, title_not_used = read_aggreg_footprints(station, winter_date_range1)
             nfp_winter2, fp_winter2, fp_lon, fp_lat, title_not_used = read_aggreg_footprints(station, winter_date_range2)
             nfp_winter = nfp_winter1 + nfp_winter2
