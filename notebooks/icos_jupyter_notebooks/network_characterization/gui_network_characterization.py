@@ -272,13 +272,17 @@ def update_func(button_c):
     update_button.disabled = True
     clear_all_output()
     
-    date_range = pd.date_range(start=(str(s_year.value) + '-' + str(s_month.value)  + '-' + str(s_day.value)), end=(str(e_year.value) + '-' + str(e_month.value)  + '-' + str(e_day.value)), freq='3H')
-    
-    timeselect_list = list(time_selection.value)
-    timeselect_string=[str(value) for value in timeselect_list]
-    timeselect_string =':00, '.join(timeselect_string) + ':00'
-    
-    date_range = functions.date_range_hour_filtered(date_range, timeselect_list)
+    if not prepared_footprints:
+        
+        date_range = pd.date_range(start=(str(s_year.value) + '-' + str(s_month.value)  + '-' + str(s_day.value)), end=(str(e_year.value) + '-' + str(e_month.value)  + '-' + str(e_day.value)), freq='3H')
+        timeselect_list = list(time_selection.value)
+        timeselect_string=[str(value) for value in timeselect_list]
+        timeselect_string =':00, '.join(timeselect_string) + ':00'
+
+        date_range = functions.date_range_hour_filtered(date_range, timeselect_list)
+
+    else:
+        date_range = ''
 
     sites_base_network = [station_tuple[1] for station_tuple in selected_base_network_stations.options]
     sites_compare_network=[station_tuple[1] for station_tuple in selected_compare_network_stations.options]
