@@ -410,11 +410,11 @@ def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='',
         for country_to_add in list_countries_to_add:
 
             country_information = [country for country in reader.records() if country.attributes["NAME_LONG"] == country_to_add][0]
-            country_shape = ShapelyFeature([country_information.geometry], ccrs.PlateCarree(), facecolor="white", hatch="/", edgecolor='black', lw=0.3)                     
+            country_shape = ShapelyFeature([country_information.geometry], ccrs.PlateCarree(), facecolor="white", hatch="/", edgecolor='lightgrey', lw=0.3)                     
             ax.add_feature(country_shape)
         
         # add a legend 
-        proxy_artist = mpatches.Rectangle((0, 0), 1, 0.1, facecolor="white", hatch="/", edgecolor='black', lw=0.5)
+        proxy_artist = mpatches.Rectangle((0, 0), 1, 0.1, facecolor="white", hatch="/", edgecolor='lightgrey', lw=0.5)
         ax.legend([proxy_artist], [legend_title], loc='upper left', fancybox=True)
             
     cmap = plt.get_cmap(colors)
