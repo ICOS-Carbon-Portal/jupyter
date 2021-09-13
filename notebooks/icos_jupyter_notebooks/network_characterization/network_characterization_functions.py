@@ -1115,7 +1115,7 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
 
             dictionary_landcover_by_country = {'Countries': countries,'Broad leaf forest': broad_leaf_forest_list, 'Coniferous forest': coniferous_forest_list, 'Mixed forest': mixed_forest_list,'Cropland' : cropland_list,'Pasture': pasture_list,'Urban': urban_list, 'Ocean': ocean_list, 'Grass/shrubland': grass_shrub_list, 'Other': other_list, 'Unknown': unknown_list}
 
-            title_pop = "Sensitivity to population by country"
+            title_pop = "Sensitivity to land cover by country"
 
             label_yaxis = 'area in km² * (ppm /(μmol / (m²s)))'
 
