@@ -128,9 +128,9 @@ def change_selected_base_network_stations(c):
     sites_base_network_options.value = [station for station in sites_base_network_options.value if station not in selected_base_network_stations.value]
     
     selected_base_network_stations.options = [station_tuple for station_tuple in selected_base_network_stations.options if station_tuple[1] not in selected_base_network_stations.value]
-    
+
     # exclude the selected base network stations from the options in the compare network list:
-    sites_compare_network_options.options = [station for station in all_list if not station[1] in selected_base_network_stations.options]
+    sites_compare_network_options.options = [station for station in all_list if not station in selected_base_network_stations.options]
     
     # exclude the selected base network stations from list of selected compare network stations:
     selected_compare_network_stations.options = [station for station in selected_compare_network_stations.options if not station[1] in selected_base_network_stations.options]
