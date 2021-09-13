@@ -902,7 +902,7 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
     #import the necessary data
     broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018') 
     
-    list_land_cover_classes = [broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown]
+    list_land_cover_classes = [broad_leaf_forest, coniferous_forest, mixed_forest, cropland, pasture, urban, ocean, grass_shrub, other, unknown]
     
     land_cover_values = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrubland', 'Other', 'Unknown']
     
@@ -1052,6 +1052,8 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
             column_w_data = 'Sensitivity'
 
             label_yaxis = 'area in km² * (ppm /(μmol / (m²s)))'
+            
+            figure_title = 'Station/network sensitivity to land cover in ' + country_name
 
         else:
             values_by_country = list_land_cover_area_fp
@@ -1065,9 +1067,11 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
             column_w_data = 'Area covered (km²)'
 
             label_yaxis = 'km²'
+            
+            figure_title = 'Station/network sensitivity area to land cover in ' + country_name
 
 
-        p = figure(x_range=land_cover_values, title=("Breakdown land cover " + country_name), toolbar_location="below")
+        p = figure(x_range=land_cover_values, title=figure_title, toolbar_location="below")
 
         p.vbar(x='Land cover values', top = column_w_data, width=0.5, color='color', source=dictionary_values)
 
@@ -1139,6 +1143,8 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
                      'Population': population_total_list}
 
             label_yaxis_pop = 'Population'
+            
+            figure_title = 'Station/network sensitivity area to land cover in ' + country_name
 
         p = figure(x_range=countries, title=title_pop, toolbar_location="below", tooltips="$name @Countries: @$name{0f}")
 
@@ -1198,7 +1204,9 @@ def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg
     #import the necessary data
     broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018') 
     
-    list_land_cover_classes = [broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown]
+    
+    list_land_cover_classes = [broad_leaf_forest, coniferous_forest, mixed_forest, cropland, pasture, urban, ocean, grass_shrub, other, unknown]
+
     
     land_cover_values = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrubland', 'Other', 'Unknown']
     
@@ -1400,6 +1408,8 @@ def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg
                                  'Compare network additional': compare_minus_base_for_stack}
 
             label_yaxis = 'km² area * (ppm /(μmol / (m²s)))'
+            
+            figure_title = 'Station/network sensitivity to land cover in ' + country_name
 
         else:
             
@@ -1432,10 +1442,12 @@ def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg
                                  'Compare network additional': compare_minus_base_for_stack}
 
             label_yaxis = 'area (km²)'
+            
+            figure_title = 'Station/network sensitivity area to land cover in ' + country_name
 
         country_name = dictionary_area_choice[area_choice]
 
-        p = figure(x_range=land_cover_values, title=("Breakdown land cover " + country_name), toolbar_location="below", tooltips="$name : @$name{0f}")
+        p = figure(x_range=land_cover_values, title=(figure_title), toolbar_location="below", tooltips="$name : @$name{0f}")
 
         p.vbar_stack(['Base network', 'Compare network additional'], x='Land cover values', width=0.5, color=['Black', 'Green'], source=dictionary_values, legend_label=['Base network', 'Compare network additional'])
 
