@@ -205,7 +205,7 @@ def import_landcover_HILDA(year='2018'):
     coniferous_forest = forest_decidious_needle_leaf+ forest_evergreen_needle_leaf
     mixed_forest = mixed_forest + forest_unknown
     other = other_land + water
-   
+       
     return broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown
 
 def import_population_data(year=2018):
@@ -1272,6 +1272,64 @@ def values_multiple_variable_graph(all_stations, selected_station, date_range, t
     
     #these are returned to the function "multiple_variables_graph"
     return df_saved
+
+
+def values_multiple_variable_graph_land_cover(all_stations, selected_station, date_range, timeselect_list, df_saved):
+    
+    df_new_values = pd.DataFrame(columns=['Station', 'Broad leaf forest','Coniferous forest','Mixed forest','Natural grassland','Cropland','Pasture','Urban', 'Ocean', 'Unknown'])
+ 
+    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018')
+    
+    list_stations_without_footprints = []
+    index=0
+    #need to compute for all stations that will be shown together with the "selected stations"
+    for station in all_stations:
+
+        #could use aggregated station footprint.
+        #lon, lat, title not needed
+        nfp, fp_station, lon, lat, title = read_aggreg_footprints(station, date_range)
+        
+        if nfp > 0:
+
+            percent_footprints=(nfp/len(date_range))*100
+            
+            if percent_footprints<75:
+ 
+                display(HTML('<p style="font-size:12px;">' + selected_station + ' (' + str(nfp) + '/' + str(len(date_range)) +' footprints)</p>'))       
+
+            broad_leaf_forest_station = (fp_station * broad_leaf_forest).sum()
+            coniferous_forest_station = (fp_station * coniferous_forest).sum()
+            mixed_forest_station = (fp_station * mixed_forest).sum()
+            ocean_station = (fp_station * ocean).sum()
+            other_station = (fp_station * other).sum()
+            natural_grassland_station = (fp_station * grass_shrub).sum()
+            cropland_station = (fp_station * cropland).sum()
+            pasture_station = (fp_station * pasture).sum()
+            urban_station = (fp_station * urban).sum()
+            unknown_station = (fp_station * unknown).sum()
+
+            df_new_values.loc[index] = [station, broad_leaf_forest_station, coniferous_forest_station, mixed_forest_station, natural_grassland_station, cropland_station, pasture_station, urban_station, ocean_station, unknown_station]
+            
+            index=index+1
+        
+        else:
+            
+            list_stations_without_footprints.append(station)
+            
+            continue 
+
+    #list the reference stations without footprints
+    if len(list_stations_without_footprints)>0:
+        
+        stations_without_footprints_string = ', '.join(list_stations_without_footprints)
+                 
+        display(HTML('<p style="font-size:12px;">Reference stations without footprints and not included for the multiple variables graph: ' + stations_without_footprints_string + '</p>'))
+        
+    df_saved=pd.concat([df_saved, df_new_values], ignore_index=True)
+    
+    #these are returned to the function "multiple_variables_graph"
+    return df_saved
+
       
 def compute_normalized(df_saved_for_normalized, station, column, min_value, range_value):
 
@@ -1478,6 +1536,137 @@ def multiple_variables_graph(myStation):
     caption=('Selected station relative to reference atmospheric stations')
 
     return fig, caption
+
+def multiple_variables_graph_land_cover(myStation):
+    selected_station=myStation.stationId
+    station_name=[myStation.stationName]
+    timeselect_list=myStation.settings['timeOfDay']    
+    date_range=myStation.dateRange
+
+    all_stations=['TRN180', 'SVB150', 'TOH147', 'SMR125', 'LUT', 'KRE250', 'IPR100', 'JFJ', 'KIT200', 'GAT344']
+    
+    if selected_station not in all_stations:
+        all_stations.append(selected_station)
+        
+    start_date=min(date_range)
+    end_date=max(date_range)
+    
+    df_saved_upd=pd.DataFrame(columns=['Station', 'Broad leaf forest','Coniferous forest','Mixed forest','Natural grassland','Cropland','Pasture','Urban', 'Ocean', 'Unknown'])
+
+    #"all_stations" contains all reference stations as well as the selected station (possibly one of the reference stations). Selected station needed seperate also. 
+    df_saved_upd= values_multiple_variable_graph_land_cover(all_stations, selected_station, date_range, timeselect_list, df_saved_upd)
+
+    #DONE GETTING ALL THE DATA: 
+    #sensitivity is the first attribut (list_item[0]) in the each of the lists (one list per station)
+    min_broad_leaf_forest=min(df_saved_upd['Broad leaf forest'])
+    range_broad_leaf_forest=max(df_saved_upd['Broad leaf forest'])-min_broad_leaf_forest
+
+    min_coniferous_forest=min(df_saved_upd['Coniferous forest'])
+    range_coniferous_forest=max(df_saved_upd['Coniferous forest'])-min_coniferous_forest
+        
+    min_mixed_forest=min(df_saved_upd['Mixed forest'])
+    range_mixed_forest=max(df_saved_upd['Mixed forest'])-min_mixed_forest
+    
+    min_natural_grassland=min(df_saved_upd['Natural grassland'])
+    range_natural_grassland=max(df_saved_upd['Natural grassland'])-min_natural_grassland
+    
+    min_cropland=min(df_saved_upd['Cropland'])
+    range_cropland=max(df_saved_upd['Cropland'])-min_cropland
+    
+    min_pasture=min(df_saved_upd['Pasture'])
+    range_pasture=max(df_saved_upd['Pasture'])-min_pasture
+        
+    min_urban=min(df_saved_upd['Urban'])
+    range_urban=max(df_saved_upd['Urban'])-min_urban
+    
+    min_ocean=min(df_saved_upd['Ocean'])
+    range_ocean=max(df_saved_upd['Ocean'])-min_ocean
+    
+    min_unknown=min(df_saved_upd['Unknown'])
+    range_unknown=max(df_saved_upd['Unknown'])-min_unknown
+
+    df_saved_for_normalized=df_saved_upd.copy()
+
+    #for station in all_stations:   
+    for station in df_saved_for_normalized['Station']:
+        
+        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Broad leaf forest', min_broad_leaf_forest, range_broad_leaf_forest)
+        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Coniferous forest', min_coniferous_forest, range_coniferous_forest)
+        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Mixed forest', min_mixed_forest, range_mixed_forest)
+        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Natural grassland', min_natural_grassland, range_natural_grassland)
+        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Cropland', min_cropland, range_cropland)
+        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Pasture', min_pasture, range_pasture)
+        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Urban', min_urban, range_urban)
+        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Ocean', min_ocean, range_ocean)
+        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Unknown', min_unknown, range_unknown)
+
+    #create the figure
+    matplotlib.rcParams.update({'font.size': 14})
+    fig = plt.figure(figsize=(10,9)) 
+    ax = fig.add_subplot(111)
+
+    #added - get on the right side of the plot
+    ax.yaxis.tick_right()
+
+    ax.yaxis.set_label_position("right")
+
+    #remove the ticks (lenght 0 - keep the names)
+    ax.tick_params(axis='both', which='both', length=0)
+    
+    #what will go as labels along the x-axis. Blank space next to station for more room. 
+    list_attributes=['Station', '', 'Broad leaf forest','Coniferous forest','Mixed forest','Natural grassland','Cropland','Pasture','Urban', 'Ocean', 'Unknown']
+
+    #max 15 characters in lable
+    list_attributes=[textwrap.fill(text,15) for text in list_attributes]
+    print('df_saved_for_normalized', df_saved_for_normalized)
+    #incremented for each station.. 0, 10, 20... etc. Where station name and "line" should start along the y-axis. 
+    place_on_axis=0
+    for station in df_saved_for_normalized['Station']:
+        
+        #get all the values for station (row in dataframe)
+        station_values=df_saved_for_normalized.loc[df_saved_for_normalized['Station'] == station]
+
+        #place them in the order we want them in the graph. List that will be used for the line. (one per station)
+        station_values_list =[place_on_axis, place_on_axis, station_values['Broad leaf forest'].values[0], 
+                              station_values['Coniferous forest'].values[0], station_values['Mixed forest'].values[0],
+                              station_values['Natural grassland'].values[0], station_values['Cropland'].values[0], 
+                              station_values['Pasture'].values[0], station_values['Urban'].values[0], station_values['Ocean'].values[0], 
+                              station_values['Unknown'].values[0]]
+        
+        if station==selected_station:
+
+            plt.plot(list_attributes, station_values_list, linestyle='-', marker='o', lw=3, color= 'black', label=station_name)
+            
+            #on 'Station position (along the x-axis). 
+            #station_values_list[0] --> where on y-axis (place_on_axis). +1 for selected_station (bold text, need more room)
+            ax.text('Station', station_values_list[0]+1, station)
+            
+        else:
+            plt.plot(list_attributes, station_values_list, linestyle=':', lw=0.6, color= 'blue', label=station_name)
+                  
+            ax.text('Station', station_values_list[0], station)
+        
+        place_on_axis=place_on_axis+10
+
+    ax.set_ylabel('% of max')
+
+    ax.tick_params(axis='y')
+
+    #vertical labels except "station" which also has different font
+    list_attributes_upd=list_attributes
+    list_attributes_upd[0]=''
+    ax.set_xticklabels(list_attributes_upd, rotation='vertical')
+
+    #label for station (furthest to the left in graph
+    ax.text(0, -10, 'Station', fontsize=15,weight = 'bold')
+
+    ax.yaxis.grid(True)
+        
+    caption=('Selected station relative to reference atmospheric stations')
+
+    return df_saved_for_normalized, fig, caption
+
+
 
 def save(stc, fmt='pdf'):
     """
