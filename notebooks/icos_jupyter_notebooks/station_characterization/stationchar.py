@@ -213,7 +213,7 @@ class StationChar():
                  '3': 'population',
                  '4': 'landcover_bar',
                  '5': 'seasonal',
-                 '6': 'landcover_windrose',                 
+                 '6': 'landcover_polar',                 
                  '7': 'multivar'}
                
         self.figures[str(key)]=[figure, caption, short[str(key)]]
