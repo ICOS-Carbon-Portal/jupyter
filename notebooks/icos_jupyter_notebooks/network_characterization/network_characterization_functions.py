@@ -1053,7 +1053,7 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
 
             label_yaxis = 'area in km² * (ppm /(μmol / (m²s)))'
             
-            figure_title = 'Station/network sensitivity to land cover in ' + country_name
+            title = 'Station/network sensitivity to land cover in ' + country_name
 
         else:
             values_by_country = list_land_cover_area_fp
@@ -1068,10 +1068,10 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
 
             label_yaxis = 'km²'
             
-            figure_title = 'Station/network sensitivity area to land cover in ' + country_name
+            title = 'Station/network sensitivity area to land cover in ' + country_name
 
 
-        p = figure(x_range=land_cover_values, title=figure_title, toolbar_location="below")
+        p = figure(x_range=land_cover_values, title=title, toolbar_location="below")
 
         p.vbar(x='Land cover values', top = column_w_data, width=0.5, color='color', source=dictionary_values)
 
@@ -1117,36 +1117,38 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
 
         if breakdown_type == 'sens':
 
-            dictionary_landcover_by_country = {'Countries': countries,'Broad leaf forest': broad_leaf_forest_list, 'Coniferous forest': coniferous_forest_list, 'Mixed forest': mixed_forest_list,'Cropland' : cropland_list,'Pasture': pasture_list,'Urban': urban_list, 'Ocean': ocean_list, 'Grass/shrubland': grass_shrub_list, 'Other': other_list, 'Unknown': unknown_list}
+            title_pop = "Sensitivity to population by country"
+            
+            title_LC = 'Station/network sensitivity to land cover in ' + country_name
+            
+            label_yaxis_pop = 'population * (ppm /(μmol / (m²s)))'
+            
+            label_yaxis_LC = 'area (km²) * (ppm /(μmol / (m²s)))'
 
-            title_pop = "Sensitivity to land cover by country"
-
-            label_yaxis = 'area in km² * (ppm /(μmol / (m²s)))'
-
-            #population graph
             dictionary_population_by_country = {'Countries': countries,
                                  'Population': population_sensitivity_list}
+            
+            dictionary_landcover_by_country = {'Countries': countries,'Broad leaf forest': broad_leaf_forest_list, 'Coniferous forest': coniferous_forest_list, 'Mixed forest': mixed_forest_list,'Cropland' : cropland_list,'Pasture': pasture_list,'Urban': urban_list, 'Ocean': ocean_list, 'Grass/shrubland': grass_shrub_list, 'Other': other_list, 'Unknown': unknown_list}
 
-            label_yaxis_pop = 'population * (ppm /(μmol / (m²s)))'
 
         else:
 
-            #land cover graph
             title_pop = "Total population within footprints by country"
-
-            dictionary_landcover_by_country = {'Countries': countries,'Broad leaf forest': area_broad_leaf_forest, 'Coniferous forest': area_coniferous_forest, 'Mixed forest': area_mixed_forest,'Cropland' : area_cropland,'Pasture': area_pasture,'Urban': area_urban, 'Ocean': area_ocean, 'Grass/shrubland': area_grass_shrub, 'Other': area_other, 'Unknown': area_unknown}
-
-            label_yaxis = 'area (km²)'
-
-            #population graph
+            
+            title_LC = 'Station/network sensitivity area to land cover in ' + country_name
+            
+            label_yaxis_pop = 'Population count'
+            
+            label_yaxis_LC = 'Area (km²)'
+            
             dictionary_population_by_country = {'Countries': countries,
                      'Population': population_total_list}
 
-            label_yaxis_pop = 'Population'
-            
-            figure_title = 'Station/network sensitivity area to land cover in ' + country_name
+            dictionary_landcover_by_country = {'Countries': countries,'Broad leaf forest': area_broad_leaf_forest, 'Coniferous forest': area_coniferous_forest, 'Mixed forest': area_mixed_forest,'Cropland' : area_cropland,'Pasture': area_pasture,'Urban': area_urban, 'Ocean': area_ocean, 'Grass/shrubland': area_grass_shrub, 'Other': area_other, 'Unknown': area_unknown}
 
-        p = figure(x_range=countries, title=title_pop, toolbar_location="below", tooltips="$name @Countries: @$name{0f}")
+            
+
+        p = figure(x_range=countries, title=title_LC, toolbar_location="below", tooltips="$name @Countries: @$name{0f}")
 
         p.vbar_stack(land_cover_values, x='Countries', width=0.5, color=colors, source=dictionary_landcover_by_country,
                  legend_label=land_cover_values)
@@ -1160,7 +1162,7 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
         p.legend.label_text_font_size = "10px"
         p.legend[0].items.reverse()
         p.xaxis.major_label_orientation = "vertical"
-        p.yaxis.axis_label = label_yaxis
+        p.yaxis.axis_label = label_yaxis_LC
 
         output_landcover_breakdown2 = Output()
 
@@ -1409,7 +1411,7 @@ def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg
 
             label_yaxis = 'km² area * (ppm /(μmol / (m²s)))'
             
-            figure_title = 'Station/network sensitivity to land cover in ' + country_name
+            title = 'Station/network sensitivity to land cover in ' + country_name
 
         else:
             
@@ -1443,11 +1445,11 @@ def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg
 
             label_yaxis = 'area (km²)'
             
-            figure_title = 'Station/network sensitivity area to land cover in ' + country_name
+            title = 'Station/network sensitivity area to land cover in ' + country_name
 
         country_name = dictionary_area_choice[area_choice]
 
-        p = figure(x_range=land_cover_values, title=(figure_title), toolbar_location="below", tooltips="$name : @$name{0f}")
+        p = figure(x_range=land_cover_values, title=(title), toolbar_location="below", tooltips="$name : @$name{0f}")
 
         p.vbar_stack(['Base network', 'Compare network additional'], x='Land cover values', width=0.5, color=['Black', 'Green'], source=dictionary_values, legend_label=['Base network', 'Compare network additional'])
 
@@ -1792,7 +1794,7 @@ def breakdown_landcover_hilda_two_years(list_area_choice, summed_fp_sens, aggreg
 
                 label_yaxis = 'area in km² * (ppm /(μmol / (m²s)))'
                 
-                figure_title = 'Station/network sensitivity to land cover in ' + country_name
+                title = 'Station/network sensitivity to land cover in ' + country_name
 
             #if using the mast - then see what the area of the different land cover types are below. 
             else:
@@ -1805,7 +1807,7 @@ def breakdown_landcover_hilda_two_years(list_area_choice, summed_fp_sens, aggreg
 
                 label_yaxis = 'km²'
                 
-                figure_title = 'Station/network sensitivity area to land cover in ' + country_name
+                title = 'Station/network sensitivity area to land cover in ' + country_name
 
 
             ##### create dataframe - takes country area total of the two years, shows the difference in percent. Also showing the difference in % in terms of sensitivity (using the same footprint / network of footprints)
@@ -1866,7 +1868,7 @@ def breakdown_landcover_hilda_two_years(list_area_choice, summed_fp_sens, aggreg
             styled_df_landcover_change = styled_df_landcover_change.set_properties(**{'text-align': 'center'}).hide_index()
             display(styled_df_landcover_change)
 
-            p = figure(x_range=land_cover_values, title=figure_title, toolbar_location="below", tooltips="@" + column_w_data + "{0f}")
+            p = figure(x_range=land_cover_values, title=title, toolbar_location="below", tooltips="@" + column_w_data + "{0f}")
 
 
             p.vbar(x='Land cover values', top = column_w_data, width=0.5, color='color', source=dictionary_values)
