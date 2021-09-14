@@ -1166,7 +1166,9 @@ def land_cover_polar_graph(myStation):
     ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])    
     ax.legend(labels, bbox_to_anchor=(1.5, 0), ncol=1, loc=4)
     
-    return fig, for_title
+    caption = "Land cover within average footprint aggregated by direction (polar)"
+    
+    return fig, caption
 
     
 #given the directions (and number of them), get the direction of the bars and their width
