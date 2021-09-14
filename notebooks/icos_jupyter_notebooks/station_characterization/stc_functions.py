@@ -356,7 +356,7 @@ def lonlat_2_ixjy(slon,slat,mlon,mlat):
     return ix,jy
 
 def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='', 
-              vmin=0.0001, vmax=None, colors='GnBu', map_type=''): 
+              vmin=0.0001, vmax=None, colors='GnBu'): 
 
     station=myStation.stationId
     lon=myStation.lon
@@ -365,9 +365,13 @@ def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='',
     if unit=='percent':
         unit='%'
     else:
-        unit='absolute'
+        if label=='point source contribution':
+            unit='(ppm)'
+        if label=='population sensitivity':
+            unit='(population * (ppm /(μmol / (m²s))))'
+        if label=='sensitivity':
+            unit='(ppm /(μmol / (m²s)))'
 
-    
     fp_lon=myStation.fpLon
     fp_lat=myStation.fpLat
     
@@ -396,16 +400,16 @@ def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='',
     reader = shpreader.Reader('/data/project/cartopy/shapefiles/natural_earth/cultural/ne_10m_admin_0_countries.shp')
     
     # Color countries that miss data for population and point source respectively
-    if map_type == 'point source contribution':   
+    if label == 'point source contribution':   
         list_countries_to_add = ['Russian Federation', 'Belarus', 'Ukraine', 'Moldova', 'Turkey', 'Tunisia', 'Algeria', 'Morocco','Bosnia and Herzegovina', 'Serbia', 'Montenegro', 'Kosovo', 'Albania', 'Macedonia']
         legend_title= 'Countries with no point source data'
         
-    if map_type == 'population sensitivity':
+    if label == 'population sensitivity':
     
         list_countries_to_add = ['Russian Federation', 'Belarus', 'Ukraine', 'Moldova', 'Turkey', 'Tunisia', 'Algeria', 'Morocco']
         legend_title= 'Countries with no population data'
     
-    if map_type == 'point source contribution' or map_type == 'population sensitivity':
+    if label == 'point source contribution' or label == 'population sensitivity':
         
         for country_to_add in list_countries_to_add:
 
@@ -563,7 +567,7 @@ def polar_graph(myStation, rose_type, colorbar='gist_heat_r', zoom=''):
     caption=(unit.capitalize() + ' ' + rose_type + ' given direction and distance')
           
     polar_map=plot_maps(myStation, rosedata_array, title=caption, label=rose_type, 
-                   linlog='linear', zoom='', vmin=0.0001, vmax=None, colors=colorbar, map_type=rose_type)
+                   linlog='linear', zoom='', vmin=0.0001, vmax=None, colors=colorbar)
         
     return polar_map, caption
     
