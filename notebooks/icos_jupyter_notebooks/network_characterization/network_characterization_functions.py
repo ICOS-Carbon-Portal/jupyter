@@ -902,7 +902,7 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
     #import the necessary data
     broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018') 
     
-    list_land_cover_classes = [broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown]
+    list_land_cover_classes = [broad_leaf_forest, coniferous_forest, mixed_forest, cropland, pasture, urban, ocean, grass_shrub, other, unknown]
     
     land_cover_values = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrubland', 'Other', 'Unknown']
     
@@ -1052,6 +1052,8 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
             column_w_data = 'Sensitivity'
 
             label_yaxis = 'area in km² * (ppm /(μmol / (m²s)))'
+            
+            title = 'Station/network sensitivity to land cover in ' + country_name
 
         else:
             values_by_country = list_land_cover_area_fp
@@ -1065,9 +1067,11 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
             column_w_data = 'Area covered (km²)'
 
             label_yaxis = 'km²'
+            
+            title = 'Station/network sensitivity area to land cover in ' + country_name
 
 
-        p = figure(x_range=land_cover_values, title=("Breakdown land cover " + country_name), toolbar_location="below")
+        p = figure(x_range=land_cover_values, title=title, toolbar_location="below")
 
         p.vbar(x='Land cover values', top = column_w_data, width=0.5, color='color', source=dictionary_values)
 
@@ -1113,34 +1117,38 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
 
         if breakdown_type == 'sens':
 
-            dictionary_landcover_by_country = {'Countries': countries,'Broad leaf forest': broad_leaf_forest_list, 'Coniferous forest': coniferous_forest_list, 'Mixed forest': mixed_forest_list,'Cropland' : cropland_list,'Pasture': pasture_list,'Urban': urban_list, 'Ocean': ocean_list, 'Grass/shrubland': grass_shrub_list, 'Other': other_list, 'Unknown': unknown_list}
+            title_pop = "Sensitivity to population by country"
+            
+            title_LC = 'Station/network sensitivity to land cover in ' + country_name
+            
+            label_yaxis_pop = 'population * (ppm /(μmol / (m²s)))'
+            
+            label_yaxis_LC = 'area (km²) * (ppm /(μmol / (m²s)))'
 
-            title_pop = "Sensitivity to land cover by country"
-
-            label_yaxis = 'area in km² * (ppm /(μmol / (m²s)))'
-
-            #population graph
             dictionary_population_by_country = {'Countries': countries,
                                  'Population': population_sensitivity_list}
+            
+            dictionary_landcover_by_country = {'Countries': countries,'Broad leaf forest': broad_leaf_forest_list, 'Coniferous forest': coniferous_forest_list, 'Mixed forest': mixed_forest_list,'Cropland' : cropland_list,'Pasture': pasture_list,'Urban': urban_list, 'Ocean': ocean_list, 'Grass/shrubland': grass_shrub_list, 'Other': other_list, 'Unknown': unknown_list}
 
-            label_yaxis_pop = 'population * (ppm /(μmol / (m²s)))'
 
         else:
 
-            #land cover graph
             title_pop = "Total population within footprints by country"
-
-            dictionary_landcover_by_country = {'Countries': countries,'Broad leaf forest': area_broad_leaf_forest, 'Coniferous forest': area_coniferous_forest, 'Mixed forest': area_mixed_forest,'Cropland' : area_cropland,'Pasture': area_pasture,'Urban': area_urban, 'Ocean': area_ocean, 'Grass/shrubland': area_grass_shrub, 'Other': area_other, 'Unknown': area_unknown}
-
-            label_yaxis = 'area (km²)'
-
-            #population graph
+            
+            title_LC = 'Station/network sensitivity area to land cover in ' + country_name
+            
+            label_yaxis_pop = 'Population count'
+            
+            label_yaxis_LC = 'Area (km²)'
+            
             dictionary_population_by_country = {'Countries': countries,
                      'Population': population_total_list}
 
-            label_yaxis_pop = 'Population'
+            dictionary_landcover_by_country = {'Countries': countries,'Broad leaf forest': area_broad_leaf_forest, 'Coniferous forest': area_coniferous_forest, 'Mixed forest': area_mixed_forest,'Cropland' : area_cropland,'Pasture': area_pasture,'Urban': area_urban, 'Ocean': area_ocean, 'Grass/shrubland': area_grass_shrub, 'Other': area_other, 'Unknown': area_unknown}
 
-        p = figure(x_range=countries, title=title_pop, toolbar_location="below", tooltips="$name @Countries: @$name{0f}")
+            
+
+        p = figure(x_range=countries, title=title_LC, toolbar_location="below", tooltips="$name @Countries: @$name{0f}")
 
         p.vbar_stack(land_cover_values, x='Countries', width=0.5, color=colors, source=dictionary_landcover_by_country,
                  legend_label=land_cover_values)
@@ -1154,7 +1162,7 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
         p.legend.label_text_font_size = "10px"
         p.legend[0].items.reverse()
         p.xaxis.major_label_orientation = "vertical"
-        p.yaxis.axis_label = label_yaxis
+        p.yaxis.axis_label = label_yaxis_LC
 
         output_landcover_breakdown2 = Output()
 
@@ -1198,7 +1206,9 @@ def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg
     #import the necessary data
     broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018') 
     
-    list_land_cover_classes = [broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown]
+    
+    list_land_cover_classes = [broad_leaf_forest, coniferous_forest, mixed_forest, cropland, pasture, urban, ocean, grass_shrub, other, unknown]
+
     
     land_cover_values = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrubland', 'Other', 'Unknown']
     
@@ -1400,6 +1410,8 @@ def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg
                                  'Compare network additional': compare_minus_base_for_stack}
 
             label_yaxis = 'km² area * (ppm /(μmol / (m²s)))'
+            
+            title = 'Station/network sensitivity to land cover in ' + country_name
 
         else:
             
@@ -1432,10 +1444,12 @@ def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg
                                  'Compare network additional': compare_minus_base_for_stack}
 
             label_yaxis = 'area (km²)'
+            
+            title = 'Station/network sensitivity area to land cover in ' + country_name
 
         country_name = dictionary_area_choice[area_choice]
 
-        p = figure(x_range=land_cover_values, title=("Breakdown land cover " + country_name), toolbar_location="below", tooltips="$name : @$name{0f}")
+        p = figure(x_range=land_cover_values, title=(title), toolbar_location="below", tooltips="$name : @$name{0f}")
 
         p.vbar_stack(['Base network', 'Compare network additional'], x='Land cover values', width=0.5, color=['Black', 'Green'], source=dictionary_values, legend_label=['Base network', 'Compare network additional'])
 
@@ -1638,24 +1652,68 @@ def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg
 
         display(box_population)
 
+def breakdown_landcover_dataframe(list_area_choice, summed_fp_sens, aggreg_fp_see_not_see):
+    
+    all_area_masks= Dataset(os.path.join(folder_tool, 'land_and_land_plus_eez_country_masks_icos_members.nc'))
+    
+    df_w_values = pd.DataFrame(columns=['Country', 'Year', 'Broad leaf forest total (km2)', 'Broad leaf forest total fp (km2)', 'Broad leaf forest total fp (km² area * (ppm /(μmol / (m²s)))', 'Coniferous forest total (km2)', 'Coniferous forest total fp (km2)', 'Coniferous forest total fp (km² area * (ppm /(μmol / (m²s)))', 'Mixed forest total (km2)', 'Mixed forest total fp (km2)', 'Mixed forest total fp (km² area * (ppm /(μmol / (m²s)))', 'Cropland total (km2)', 'Cropland total fp (km2)', 'Cropland total fp (km² area * (ppm /(μmol / (m²s)))', 'Pasture total (km2)', 'Pasture total fp (km2)', 'Pasture total fp (km² area * (ppm /(μmol / (m²s)))', 'Urban total (km2)', 'Urban total fp (km2)', 'Urban total fp (km² area * (ppm /(μmol / (m²s)))', 'Ocean total (km2)', 'Ocean total fp (km2)', 'Ocean total fp (km² area * (ppm /(μmol / (m²s)))', 'Grass/shrubland total (km2)', 'Grass/shrubland total fp (km2)', 'Grass/shrubland total fp (km² area * (ppm /(μmol / (m²s)))', 'Other total (km2)', 'Other total fp (km2)', 'Other total fp (km² area * (ppm /(μmol / (m²s)))', 'Unknown total (km2)', 'Unknown total fp (km2)', 'Unknown total fp (km² area * (ppm /(μmol / (m²s)))'])
+    
+    years = ['1990', '2000', '2010', '2019']
+    i = 0
+    for year in years:
+        
+        broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year=year)
+        
+        list_land_cover_classes = [broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown]
+        
+        #list_land_cover_names = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrubland', 'Other', 'Unknown']
+        
+        for area_choice in list_area_choice:
+  
+            country_mask = all_area_masks.variables[area_choice][:,:]
+        
+            seen_given_see_not_see_mask = country_mask * aggreg_fp_see_not_see
+            
+            summed_fp_sens_country = country_mask * summed_fp_sens
+            
+            list_one_country_one_year = [area_choice, year]
+            
+            for land_cover in list_land_cover_classes:
+                #country total of land cover
+                land_cover_area_total_country = get_area_total_country(land_cover, country_mask)
+                list_one_country_one_year.append(land_cover_area_total_country)
+                
+                #country total of land cover within mask area of footprint
+                land_cover_area_fp = get_area_fp_country(land_cover, seen_given_see_not_see_mask)
+                list_one_country_one_year.append(land_cover_area_fp)
+                
+                #total sensitivity to land cover within country
+                land_cover_sens_total_fp = get_sens_fp_country(land_cover, summed_fp_sens_country)
+                list_one_country_one_year.append(land_cover_sens_total_fp)
+    
+            df_w_values.loc[i] = list_one_country_one_year
+            i = i + 1
+   
+    return df_w_values
+
 def breakdown_landcover_hilda_two_years(list_area_choice, summed_fp_sens, aggreg_fp_see_not_see, breakdown_type = 'sens', year_start='1990', year_end='2019'):
 
+    land_cover_values = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrubland', 'Other', 'Unknown']
 
-    land_cover_values = ['Ocean ' + str(year_start), 'Ocean ' + str(year_end), 'Cropland ' + str(year_start), 'Cropland ' + str(year_end), 'Forest (deciduous, broad leaf) ' + str(year_start), 'Forest (deciduous, broad leaf) ' + str(year_end), 'Forest (deciduous, needle leaf) ' + str(year_start), 'Forest (deciduous, needle leaf) ' + str(year_end), 'Forest (evergreen, broad leaf) ' + str(year_start), 'Forest (evergreen, broad leaf) ' + str(year_end), 'Forest (evergreen, needle leaf) ' + str(year_start), 'Forest (evergreen, needle leaf) ' + str(year_end), 'Forest (mix) ' + str(year_start), 'Forest (mix) ' + str(year_end), 'Forest (unknown/other) ' + str(year_start), 'Forest (unknown/other) ' + str(year_end), 'Other land ' + str(year_start), 'Other land ' + str(year_end), 'Pasture ' + str(year_start), 'Pasture ' + str(year_end), 'Urban ' + str(year_start), 'Urban ' + str(year_end), 'Grass/shrubland ' + str(year_start), 'Grass/shrubland ' + str(year_end), 'Water ' + str(year_start), 'Water ' + str(year_end), 'Unknown ' + str(year_start), 'Unknown ' + str(year_end)]
+    land_cover_values = ['Broad leaf forest ' + str(year_start), 'Broad leaf forest ' + str(year_end), 'Coniferous forest ' + str(year_start), 'Coniferous forest ' + str(year_end), 'Mixed forest ' + str(year_start), 'Mixed forest ' + str(year_end), 'Cropland ' + str(year_start), 'Cropland ' + str(year_end), 'Pasture ' + str(year_start), 'Pasture ' + str(year_end), 'Urban ' + str(year_start), 'Urban ' + str(year_end), 'Ocean ' + str(year_start), 'Ocean ' + str(year_end), 'Grass/shrubland ' + str(year_start), 'Grass/shrubland ' + str(year_end), 'Other ' + str(year_start), 'Other ' + str(year_end), 'Unknown ' + str(year_start), 'Unknown ' + str(year_end)]
     
-    land_cover_values_simple = ['Ocean', 'Cropland', 'Forest (deciduous, broad leaf)','Forest (deciduous, needle leaf)','Forest (evergreen, broad leaf)', 'Forest (evergreen, needle leaf)', 'Forest (mix)', 'Forest (unknown/other)', 'Other land', 'Pasture', 'Urban', 'Grass/shrubland' , 'Water', 'Unknown']
+    land_cover_values_simple = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrubland', 'Other', 'Unknown']
 
-   
-    colors = ['blue', 'blue', 'darkgoldenrod', 'darkgoldenrod', '#1E5631', '#1E5631', '#A4DE02', '#A4DE02', '#76BA1B', '#76BA1B', '#4C9A2A', '#4C9A2A', '#ACDF87', '#ACDF87', '#68BB59', '#68BB59', 'black', 'black', 'yellow', 'yellow', 'red', 'red', 'brown', 'brown', 'lightblue', 'lightblue', 'darkred', 'darkred']
-    
-    #add unknown here - based on diff from STILT area. 
-    ocean_start, cropland_start, f_de_br_le_start, f_de_ne_le_start, f_eg_br_le_start, f_eg_ne_le_start, forest_mix_start, forest_unk_start, other_land_start, pasture_start, urban_start, grass_shru_start, water_start, total_area_start, unknown_start=import_landcover_HILDA(year=year_start)
+    colors = ['#4c9c5e','#4c9c5e','#CAE0AB','#CAE0AB','#90C987','#90C987', '#521A13', '#521A13', '#F7F056','#F7F056', '#DC050C', '#DC050C','#1964B0','#1964B0','#F1932D','#F1932D','#882E72','#882E72', '#777777','#777777']
+  
+
+    broad_leaf_forest_start, coniferous_forest_start, mixed_forest_start, ocean_start, other_start, grass_shrub_start, cropland_start, pasture_start, urban_start, unknown_start = import_landcover_HILDA(year=year_start)
                               
-    ocean_end, cropland_end, f_de_br_le_end, f_de_ne_le_end, f_eg_br_le_end, f_eg_ne_le_end, forest_mix_end, forest_unk_end, other_land_end, pasture_end, urban_end, grass_shru_end, water_end, total_area_end, unknown_end=import_landcover_HILDA(year=year_end)
+    broad_leaf_forest_end, coniferous_forest_end, mixed_forest_end, ocean_end, other_end, grass_shrub_end, cropland_end, pasture_end, urban_end, unknown_end = import_landcover_HILDA(year=year_end)
 
-    list_land_cover_classes_start = [ocean_start, cropland_start, f_de_br_le_start, f_de_ne_le_start, f_eg_br_le_start, f_eg_ne_le_start, forest_mix_start, forest_unk_start, other_land_start, pasture_start, urban_start, grass_shru_start, water_start, unknown_start]
+    list_land_cover_classes_start = [broad_leaf_forest_start, coniferous_forest_start, mixed_forest_start, cropland_start, pasture_start, urban_start, ocean_start, grass_shrub_start, other_start, unknown_start]
     
-    list_land_cover_classes_end = [ocean_end, cropland_end, f_de_br_le_end, f_de_ne_le_end, f_eg_br_le_end, f_eg_ne_le_end, forest_mix_end, forest_unk_end, other_land_end, pasture_end, urban_end, grass_shru_end, water_end, unknown_end]
+    list_land_cover_classes_end = [broad_leaf_forest_end, coniferous_forest_end, mixed_forest_end, cropland_end, pasture_end, urban_end, ocean_end, grass_shrub_end, other_end, unknown_end]
       
     all_area_masks= Dataset(os.path.join(folder_tool, 'land_and_land_plus_eez_country_masks_icos_members.nc'))
 
@@ -1735,6 +1793,8 @@ def breakdown_landcover_hilda_two_years(list_area_choice, summed_fp_sens, aggreg
                 column_w_data = 'Sensitivity'
 
                 label_yaxis = 'area in km² * (ppm /(μmol / (m²s)))'
+                
+                title = 'Station/network sensitivity to land cover in ' + country_name
 
             #if using the mast - then see what the area of the different land cover types are below. 
             else:
@@ -1746,6 +1806,8 @@ def breakdown_landcover_hilda_two_years(list_area_choice, summed_fp_sens, aggreg
                 column_w_data = 'Area'
 
                 label_yaxis = 'km²'
+                
+                title = 'Station/network sensitivity area to land cover in ' + country_name
 
 
             ##### create dataframe - takes country area total of the two years, shows the difference in percent. Also showing the difference in % in terms of sensitivity (using the same footprint / network of footprints)
@@ -1806,7 +1868,7 @@ def breakdown_landcover_hilda_two_years(list_area_choice, summed_fp_sens, aggreg
             styled_df_landcover_change = styled_df_landcover_change.set_properties(**{'text-align': 'center'}).hide_index()
             display(styled_df_landcover_change)
 
-            p = figure(x_range=land_cover_values, title=("Breakdown land cover " + country_name), toolbar_location="below", tooltips="@" + column_w_data + "{0f}")
+            p = figure(x_range=land_cover_values, title=title, toolbar_location="below", tooltips="@" + column_w_data + "{0f}")
 
 
             p.vbar(x='Land cover values', top = column_w_data, width=0.5, color='color', source=dictionary_values)
@@ -1823,6 +1885,53 @@ def breakdown_landcover_hilda_two_years(list_area_choice, summed_fp_sens, aggreg
             p.xaxis.major_label_orientation = "vertical"
 
             show(p)
+    
+#needs to be updated
+def save_map_texts(list_footprint_choice, threshold, list_additional_footprints):
+
+    string_station_info='The following stations 2018 footprint(s) were aggregated to generate the base network: ' 
+    
+    
+    for station in list_footprint_choice:
+        
+        string_station_info+=station + ', '
+        
+    string_station_info = string_station_info[:-2]
+    if len(list_additional_footprints)>0:
+        
+        string_station_info_additional='\nThe following additional stations 2018 footprint(s) compare network maps: ' 
+        
+        for station in list_additional_footprints:
+            
+            string_station_info_additional += station + ', '
+            
+        string_station_info_additional = string_station_info_additional[:-2]
+        
+    else:
+        
+        string_station_info_additional = ''
+ 
+        
+    date_generated = date.today()
+    
+    threshold_percent=threshold*100
+    
+    string_station_info+= string_station_info_additional
+    
+    string_station_info+= '\nThredhold footprint: ' + str(threshold_percent) + '%'
+    
+    string_station_info+= '\nDate generated: ' + str(date_generated)
+    
+    #move up to top (+ remove in other places)
+    output = os.path.join(os.path.expanduser('~'), 'output/network_characterization', date_time)
+                          
+    if not os.path.exists(output):
+        os.makedirs(output)
+        
+    export_file=output + '/description_folder_content.txt'
+    open_file= open(export_file, "w")
+    open_file.write(string_station_info)
+    open_file.close() 
 
 #not used in tool on exploredata          
 def export_fp(summed_fp_sens):
