@@ -31,8 +31,35 @@ def disable_enable_update_button():
         update_button.disabled = True
 
 def set_settings(s):
-  
-    selected_network_sites.options = [station for station in all_list_2018 if station[1] in s['baseNetwork']] 
+    selected_network_sites.options = [station for station in all_list_2018 if station[1] in s['sites_to_compare']] 
+    
+    broad_leaf_forest.value = s["broad_leaf_forest"]
+    broad_leaf_forest_int.value= s["broad_leaf_forest_int"]
+    coniferous_forest.value = s["coniferous_forest"] 
+    coniferous_forest_int.value = s["coniferous_forest_int"]
+    mixed_forest.value = s["mixed_forest"]
+    mixed_forest_int.value = s["mixed_forest_int"] 
+    ocean.value = s["ocean"]
+    ocean_int.value = s["ocean_int"]
+    other.value = s["other"]
+    other_int.value = s["other_int"]
+    grass_shrub.value = s["grass_shrub"]
+    grass_shrub_int.value = s["grass_shrub_int"]
+    cropland.value = s["cropland"]
+    cropland_int.value = s["cropland_int"]
+    pasture.value = s["pasture"]
+    pasture_int.value = s["pasture_int"]
+    urban.value = s["urban"]
+    urban_int.value = s["urban_int"]
+    sens.value = s["sens"]
+    sens_int.value = s["sens_int"] 
+    pop.value = s["pop"]
+    pop_int.value = s["pop_int"]
+    point.value = s["point"]
+    point_int.value = s["point_int"]
+    anthro.value = s["anthro"]
+    anthro_int.value = s["anthro_int"]
+    total_int.value = s["total_int"]
 
 def change_sites_network_options(c):
 
@@ -134,6 +161,28 @@ def update_func(button_c):
     with output_multiple_var_graph:
         
         onf.variables_graph_bokeh(df_saved_for_normalized, variables_compare, variables_weights)
+       
+    if download_settings.value:
+        
+        vbox_1 = VBox([header_broad_leaf_forest, HBox([broad_leaf_forest, broad_leaf_forest_int])])
+        vbox_2 = VBox([header_coniferous_forest, HBox([coniferous_forest, coniferous_forest_int])])
+        vbox_3 = VBox([header_mixed_forest, HBox([mixed_forest, mixed_forest_int])])
+        vbox_4 = VBox([header_ocean, HBox([ocean, ocean_int])])
+        vbox_5 = VBox([header_other, HBox([other, other_int])])
+        vbox_6 = VBox([header_grass_shrub, HBox([grass_shrub, grass_shrub_int])])
+        vbox_7 = VBox([header_cropland, HBox([cropland, cropland_int])])
+        vbox_8 = VBox([header_pasture, HBox([pasture, pasture_int])])
+        vbox_9 = VBox([header_urban, HBox([urban, urban_int])])
+        vbox_10 = VBox([header_sens, HBox([sens, sens_int])])
+        vbox_11 = VBox([header_pop, HBox([pop, pop_int])])
+        vbox_12 = VBox([header_point, HBox([point, point_int])])
+        vbox_13 = VBox([header_anthro, HBox([anthro, anthro_int])])
+        vbox_14 = VBox([header_total_int, total_int])
+        
+        settings = {"sites_to_compare": sites_compare, "variables_to_compare": variables_compare, "broad_leaf_forest":broad_leaf_forest.value, "broad_leaf_forest_int": broad_leaf_forest_int.value, "coniferous_forest":coniferous_forest.value, "coniferous_forest_int":coniferous_forest_int.value, "mixed_forest": mixed_forest.value, "mixed_forest_int":mixed_forest_int.value, "ocean": ocean.value, "ocean_int":ocean_int.value, "other":other.value, "other_int":other_int.value, "grass_shrub":grass_shrub.value, "grass_shrub_int":grass_shrub_int.value, "cropland":cropland.value, "cropland_int":cropland_int.value, "pasture":pasture.value, "pasture_int":pasture_int.value, "urban":urban.value, "urban_int":urban_int.value, "sens":sens.value, "sens_int":sens_int.value, "pop":pop.value, "pop_int":pop_int.value,"point":point.value, "point_int":point_int.value, "anthro":anthro.value, "anthro_int": anthro_int.value, "total_int":total_int.value}
+
+        onf.save_settings(settings, directory='optimize_network')
+        
         
     update_button.disabled = False
         
@@ -270,25 +319,29 @@ total_int = BoundedIntText(value=0, max=1000, min=0, indent=True, layout=Layout(
 
 total_int.layout.margin = '0px 0px 0px 90px' #top, right, bottom, left
 
+header_download = Output()
+with header_download:
+    display(HTML('<p style="font-size:15px;">Download settings</p>'))
+header_download.layout.margin = '50px 0px 0px 40px' #top, right, bottom, left
+
+download_settings = Checkbox(value=True, description='')
+download_settings.layout.margin = '0px 0px 0px 40px' #top, right, bottom, left
 
 header_filename = Output()
-
 with header_filename:
-    display(HTML('<p style="font-size:15px;font-weight:bold;">Load settings from file (optional)</p>'))
+    display(HTML('<p style="font-size:15px;">Load settings from file (optional)</p>'))
 
+header_filename.layout.margin = '50px 0px 0px 0px' #top, right, bottom, left
 
-file_name= FileUpload(
-    accept='.json',  
-    multiple=False  # True to accept multiple files upload else False
-)
-file_name.layout.margin = '50px 0px 0px 0px' #top, right, bottom, left
+file_name= FileUpload(accept='.json',multiple=False)
+
 #Create a Button widget to control execution:
 update_button = Button(description='Run selection',
                        disabled=True,
                        button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
                        tooltip='Click me',)
 
-update_button.layout.margin = '50px 0px 0px 160px' #top, right, bottom, left
+update_button.layout.margin = '0px 0px 0px 600px' #top, right, bottom, left
 royal='#4169E1'
 update_button.style.button_color=royal
 
@@ -315,9 +368,13 @@ hbox_variables1 = HBox([vbox_1,vbox_2,vbox_3,vbox_4, vbox_5])
 hbox_variables2 = HBox([vbox_6,vbox_7,vbox_8,vbox_9])
 hbox_variables3 = HBox([vbox_10,vbox_11,vbox_12, vbox_13, vbox_14])
 
-final_row = HBox([file_name, update_button])
+vbox_settings1 = VBox([header_filename,file_name])
+vbox_settings2 = VBox([header_download,download_settings])
+
+hbox_settings = HBox([vbox_settings1, vbox_settings2])
+
 #Add all widgets to a VBox:
-form = VBox([heading_site_selection, box_site_combined, heading_weighting, hbox_variables1, hbox_variables2, hbox_variables3, final_row])
+form = VBox([heading_site_selection, box_site_combined, heading_weighting, hbox_variables1, hbox_variables2, hbox_variables3,hbox_settings, update_button])
 
 #Initialize form output:
 form_out = Output()

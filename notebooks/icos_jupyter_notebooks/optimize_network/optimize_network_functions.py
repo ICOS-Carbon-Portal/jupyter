@@ -12,7 +12,8 @@ sys.path.append('../station_characterization')
 import stc_functions as stc
 from matplotlib import cm
 import matplotlib
-
+from datetime import datetime
+import json
 
 def variables_graph_bokeh(df, variables, variables_weights):
 
@@ -287,3 +288,19 @@ def normalized_dataframe(all_stations):
         df_saved_for_normalized=stc.compute_normalized(df_saved_for_normalized, station, 'Point source contribution', min_point, range_point)
         df_saved_for_normalized=stc.compute_normalized(df_saved_for_normalized, station, 'Anthropogenic contribution', min_anthro, range_anthro)
     return df_saved_for_normalized
+
+def save_settings(settings, directory):
+    
+    now = datetime.now()
+    date_time = now.strftime("%Y%m%d_%H%M%S")
+
+    output = os.path.join(os.path.expanduser('~'), 'output', directory, date_time)
+
+    if not os.path.exists(output):
+        os.makedirs(output)
+
+    export_file=output + '/settings.json'
+
+    # save settings as json file
+    with open(export_file, 'w') as f:
+        json.dump(settings, f, indent=4)
