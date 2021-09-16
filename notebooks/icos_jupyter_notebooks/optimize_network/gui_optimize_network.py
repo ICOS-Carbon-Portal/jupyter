@@ -56,7 +56,10 @@ def change_total(c):
     total_weight_assigned = 0
     for possible_variable, possible_variable_weight in zip(possible_variables, possible_variables_weights):
         if possible_variable.value:
-            total_weight_assigned = total_weight_assigned + possible_variable_weight.value     
+            total_weight_assigned = total_weight_assigned + possible_variable_weight.value 
+            possible_variable_weight.disabled = False
+        else:
+            possible_variable_weight.disabled = True
     
     total_int.value = total_weight_assigned
         
@@ -263,7 +266,7 @@ anthro_int=BoundedIntText(value=0, max =100,min=0, layout=Layout(width='60px'))
 header_total_int = Output()
 with header_total_int:
     display(HTML('<p style="font-size:15px;margin-left:5em;font-weight:bold;">Total</p>'))
-total_int = BoundedIntText(value=0, max =100,min=0, indent=True, layout=Layout(width='110px'), disabled=True)
+total_int = BoundedIntText(value=0, max=1000, min=0, indent=True, layout=Layout(width='110px'), disabled=True)
 
 total_int.layout.margin = '0px 0px 0px 90px' #top, right, bottom, left
 
@@ -346,19 +349,19 @@ def observe():
     anthro_int.observe(change_total, 'value')
     
     
-    broad_leaf_forest.observe(change_total_checkbox, 'value')
-    coniferous_forest.observe(change_total_checkbox, 'value')
-    mixed_forest.observe(change_total_checkbox, 'value') 
-    ocean.observe(change_total_checkbox, 'value')
-    other.observe(change_total_checkbox, 'value')
-    grass_shrub.observe(change_total_checkbox, 'value')
-    cropland.observe(change_total_checkbox, 'value')
-    pasture.observe(change_total_checkbox, 'value')
-    urban.observe(change_total_checkbox, 'value')
-    sens.observe(change_total_checkbox, 'value')
-    pop.observe(change_total_checkbox, 'value')
-    point.observe(change_total_checkbox, 'value')
-    anthro.observe(change_total_checkbox, 'value')
+    broad_leaf_forest.observe(change_total, 'value')
+    coniferous_forest.observe(change_total, 'value')
+    mixed_forest.observe(change_total, 'value') 
+    ocean.observe(change_total, 'value')
+    other.observe(change_total, 'value')
+    grass_shrub.observe(change_total, 'value')
+    cropland.observe(change_total, 'value')
+    pasture.observe(change_total, 'value')
+    urban.observe(change_total, 'value')
+    sens.observe(change_total, 'value')
+    pop.observe(change_total, 'value')
+    point.observe(change_total, 'value')
+    anthro.observe(change_total, 'value')
 
     file_name.observe(file_set_widgets, 'value')
 

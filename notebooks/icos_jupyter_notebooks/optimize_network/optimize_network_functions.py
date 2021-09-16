@@ -1,6 +1,7 @@
 from bokeh.io import show, output_notebook, reset_output, export_png
 from bokeh.plotting import figure as bokeh_figure
 from bokeh.plotting import figure 
+from bokeh.models import HoverTool,WheelZoomTool, PanTool, ResetTool
 from bokeh.models import ColumnDataSource, HoverTool, Label, Legend
 reset_output()
 output_notebook()    
@@ -20,7 +21,7 @@ def variables_graph_bokeh(df, variables, variables_weights):
                plot_height=700, 
                y_axis_label='% of max',
                title = 'Selected station compared to reference stations',
-               tools='pan,box_zoom,wheel_zoom,undo,redo,reset,save')
+               tools=[PanTool(), WheelZoomTool(), ResetTool(), HoverTool(tooltips=[("Percent of max", "$y"),])])
 
     list_stations = list(df['Station'])
     
@@ -34,18 +35,31 @@ def variables_graph_bokeh(df, variables, variables_weights):
         #except combined score (not in the dataframe with computed values) which is first in the variables list 
         for variable, variable_weight in zip(variables[1:], variables_weights):
             
-            station_score = station_score + (station_values[variable].values[0] * (variable_weight/100))
+            list_reverse_values = ['Population','Point source contribution', 'Anthropogenic contribution']
+            if variable in list_reverse_values:
+                
+                station_score = station_score + ((100-station_values[variable].values[0]) * (variable_weight/100))
+                
+            else:
+                station_score = station_score + (station_values[variable].values[0] * (variable_weight/100))
             
         list_station_scores.append(station_score)
     
     sorted_list_stations = [x for _,x in sorted(zip(list_station_scores,list_stations), reverse=True)]
     sorted_list_station_scores = [x for _,x in sorted(zip(list_station_scores,list_station_scores), reverse=True)]
- 
 
-    cmap = cm.get_cmap('Reds_r',len(sorted_list_stations))
+    #want the total score to range between 0 (worst combined score) and 100 (best combined score)
+    sorted_list_station_scores_normalized = []    
+    for value in sorted_list_station_scores:
+        normalized_value = (value - min(sorted_list_station_scores))/(max(sorted_list_station_scores) - min(sorted_list_station_scores))*100
+        sorted_list_station_scores_normalized.append(normalized_value)
+
+    # cmap - one color for each station that will have a line (best total score will have the darkest red)
+    # +1 to avoid the lightest color which one can barely see. 
+    cmap = cm.get_cmap('Reds_r',(len(sorted_list_stations)+1))
 
     index = 0
-    for station, station_combined_score in zip(sorted_list_stations, sorted_list_station_scores):
+    for station, station_combined_score in zip(sorted_list_stations, sorted_list_station_scores_normalized):
         
         #get all the values for station (row in dataframe)
         station_values=df.loc[df['Station'] == station]
@@ -55,8 +69,17 @@ def variables_graph_bokeh(df, variables, variables_weights):
         #except combined score (not in the dataframe with computed values)
         for variable in variables[1:]:
             
-            station_values_list.append(station_values[variable].values[0])
-            color='grey'
+            # in case of population, point source contirbution and anthropogenic contribution, want 
+            # the value to be as low as possible. This should be reflected in the total score. Hence
+            # the station with the lowest (for instance) anthropogenic contribution should have the highest score.
+            # reverse that here: 
+            list_reverse_values = ['Population','Point source contribution', 'Anthropogenic contribution']
+            if variable in list_reverse_values:
+                orig_value = station_values[variable].values[0]
+                reversed_value = 100 - orig_value
+                station_values_list.append(reversed_value)
+            else:
+                station_values_list.append(station_values[variable].values[0])
             color=matplotlib.colors.rgb2hex(cmap(index))     
             
         p.line(variables, station_values_list, name=station, line_width=1, color=color, legend_label=station)
