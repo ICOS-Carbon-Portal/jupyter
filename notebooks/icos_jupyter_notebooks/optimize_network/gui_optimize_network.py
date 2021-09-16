@@ -7,7 +7,6 @@ Created 2021-08-11
 """
 
 from ipywidgets import Dropdown, SelectMultiple, HBox, VBox, Button, Output, IntText, RadioButtons,IntProgress,IntSlider, GridspecLayout,FileUpload, BoundedIntText, Textarea, Checkbox, Select, IntText, Layout
-
 import stiltStations
 from IPython.core.display import display, HTML 
 from icoscp.station import station as cpstation
@@ -15,13 +14,11 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
 import optimize_network_functions as onf
-
 import json
 
 stiltstations = stiltStations.getStilt()
-#v['country'] + ': ' + 
+
 all_list_2018 = sorted([((v['country'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items() if '2018' in v['years'] if len(v['2018']['months'])>12])
 
 def disable_enable_update_button():    
@@ -74,27 +71,32 @@ def update_func(button_c):
     
     sites_compare=[station_tuple[1] for station_tuple in selected_network_sites.options]
     
-    variables_compare = []
+    #wand to have a combined score first (this combined score will also rank in what order the stations are shown
+    variables_compare = ['Combined score']
+    
+    variables_weights = []
 
     possible_variables = [broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, sens, pop, point, anthro]
     
-    possible_variables_name = ['Broad leaf forest','Coniferous forest','Mixed forest','Natural grassland','Cropland',\
-                          'Pasture','Urban', 'Ocean', 'Unknown','Sensitivity', 'Population', \
+    possible_variables_weights = [broad_leaf_forest_int, coniferous_forest_int, mixed_forest_int, ocean_int, other_int, grass_shrub_int, cropland_int, pasture_int, urban_int, sens_int, pop_int, point_int, anthro_int]
+    
+    possible_variables_name = ['Broad leaf forest','Coniferous forest','Mixed forest', 'Ocean', 'Other', 'Grass/shrubland','Cropland','Pasture','Urban','Sensitivity', 'Population', \
                           'Point source contribution', 'Anthropogenic contribution']
     
-    for possible_variable, possible_variable_name in zip(possible_variables,possible_variables_name) :
+    for possible_variable, possible_variable_name, possible_variable_weight in zip(possible_variables,possible_variables_name, possible_variables_weights) :
         
         # if check box for a variable is checked (True), add it to the list of variables being passed to the function
         if possible_variable.value:
             
             variables_compare.append(possible_variable_name)
+            variables_weights.append(possible_variable_weight.value)
             
     # all values currently computed for normalized_dataframe      
     df_saved_for_normalized = onf.normalized_dataframe(sites_compare)
-    
+
     with output_multiple_var_graph:
         
-        onf.variables_graph_bokeh(df_saved_for_normalized, variables_compare)
+        onf.variables_graph_bokeh(df_saved_for_normalized, variables_compare, variables_weights)
         
     update_button.disabled = False
         
@@ -110,7 +112,7 @@ with heading_site_selection:
 heading_sites_network_options = Output()
 
 with heading_sites_network_options:
-    display(HTML('<p style="font-size:15px;">Options</p>'))
+    display(HTML('<p style="font-size:15px;">Options (footprints available for 2018)</p>'))
     
 sites_network_options= SelectMultiple(
     options=all_list_2018,

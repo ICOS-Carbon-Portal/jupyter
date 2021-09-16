@@ -9,9 +9,11 @@ import sys
 import os
 sys.path.append('../station_characterization')
 import stc_functions as stc
+from matplotlib import cm
+import matplotlib
 
 
-def variables_graph_bokeh(df, variables):
+def variables_graph_bokeh(df, variables, variables_weights):
 
     p = bokeh_figure(plot_width=900,
                x_range=variables,
@@ -20,26 +22,46 @@ def variables_graph_bokeh(df, variables):
                title = 'Selected station compared to reference stations',
                tools='pan,box_zoom,wheel_zoom,undo,redo,reset,save')
 
-    index = 1
+    list_stations = list(df['Station'])
+    
+    list_station_scores = []
+    for station in list_stations:
+        
+        station_values=df.loc[df['Station'] == station]
+        
+        station_score = 0
+        
+        #except combined score (not in the dataframe with computed values) which is first in the variables list 
+        for variable, variable_weight in zip(variables[1:], variables_weights):
+            
+            station_score = station_score + (station_values[variable].values[0] * (variable_weight/100))
+            
+        list_station_scores.append(station_score)
+    
+    sorted_list_stations = [x for _,x in sorted(zip(list_station_scores,list_stations), reverse=True)]
+    sorted_list_station_scores = [x for _,x in sorted(zip(list_station_scores,list_station_scores), reverse=True)]
+ 
 
-    for station in df['Station']:
+    cmap = cm.get_cmap('Reds_r',len(sorted_list_stations))
 
+    index = 0
+    for station, station_combined_score in zip(sorted_list_stations, sorted_list_station_scores):
+        
         #get all the values for station (row in dataframe)
         station_values=df.loc[df['Station'] == station]
         
-        station_values_list = []
-        for variable in variables:
+        station_values_list = [station_combined_score]
+        
+        #except combined score (not in the dataframe with computed values)
+        for variable in variables[1:]:
             
             station_values_list.append(station_values[variable].values[0])
-
-            index = index + 1
-            
             color='grey'
+            color=matplotlib.colors.rgb2hex(cmap(index))     
             
-            line_width = 1
-            
-        p.line(variables, station_values_list, name=station, line_width=line_width, color=color, legend_label=station)
-
+        p.line(variables, station_values_list, name=station, line_width=1, color=color, legend_label=station)
+        index = index + 1
+        
     p.xaxis.major_label_orientation = "vertical"
     #Set title attributes:
     p.title.align = 'center'
@@ -73,7 +95,7 @@ def variables_graph_bokeh(df, variables):
 def normalized_dataframe(all_stations):
 
     df_2018 = pd.DataFrame(columns=['Station', 'Broad leaf forest','Coniferous forest','Mixed forest',\
-                                    'Natural grassland','Cropland','Pasture','Urban', 'Ocean', 'Unknown',
+                                    'Grass/shrubland','Cropland','Pasture','Urban', 'Ocean', 'Other', 'Unknown',
                                    'Sensitivity', 'Population', 'Point source contribution', 'Anthropogenic contribution'])
 
     #change paths later
@@ -171,7 +193,7 @@ def normalized_dataframe(all_stations):
 
         df_2018.loc[index] = [station, broad_leaf_forest_station, coniferous_forest_station, \
                                   mixed_forest_station, grass_shrub_station, cropland_station, \
-                                  pasture_station, urban_station, ocean_station, unknown_station,\
+                                  pasture_station, urban_station, ocean_station, other_station, unknown_station,\
                                   sens_station, pop_station, pointsource_station, anthro_station]
 
         index = index + 1   
@@ -188,8 +210,8 @@ def normalized_dataframe(all_stations):
     min_mixed_forest=min(df_2018['Mixed forest'])
     range_mixed_forest=max(df_2018['Mixed forest'])-min_mixed_forest
 
-    min_natural_grassland=min(df_2018['Natural grassland'])
-    range_natural_grassland=max(df_2018['Natural grassland'])-min_natural_grassland
+    min_grass_shrub=min(df_2018['Grass/shrubland'])
+    range_grass_shrub=max(df_2018['Grass/shrubland'])-min_grass_shrub
 
     min_cropland=min(df_2018['Cropland'])
     range_cropland=max(df_2018['Cropland'])-min_cropland
@@ -202,10 +224,12 @@ def normalized_dataframe(all_stations):
 
     min_ocean=min(df_2018['Ocean'])
     range_ocean=max(df_2018['Ocean'])-min_ocean
+    
+    min_other=min(df_2018['Other'])
+    range_other=max(df_2018['Other'])-min_other
 
     min_unknown=min(df_2018['Unknown'])
     range_unknown=max(df_2018['Unknown'])-min_unknown
-
 
     min_sens=min(df_2018['Sensitivity'])
     range_sens=max(df_2018['Sensitivity'])-min_sens
@@ -228,13 +252,13 @@ def normalized_dataframe(all_stations):
         df_saved_for_normalized=stc.compute_normalized(df_saved_for_normalized, station, 'Broad leaf forest', min_broad_leaf_forest, range_broad_leaf_forest)
         df_saved_for_normalized=stc.compute_normalized(df_saved_for_normalized, station, 'Coniferous forest', min_coniferous_forest, range_coniferous_forest)
         df_saved_for_normalized=stc.compute_normalized(df_saved_for_normalized, station, 'Mixed forest', min_mixed_forest, range_mixed_forest)
-        df_saved_for_normalized=stc.compute_normalized(df_saved_for_normalized, station, 'Natural grassland', min_natural_grassland, range_natural_grassland)
+        df_saved_for_normalized=stc.compute_normalized(df_saved_for_normalized, station, 'Grass/shrubland', min_grass_shrub, range_grass_shrub)
         df_saved_for_normalized=stc.compute_normalized(df_saved_for_normalized, station, 'Cropland', min_cropland, range_cropland)
         df_saved_for_normalized=stc.compute_normalized(df_saved_for_normalized, station, 'Pasture', min_pasture, range_pasture)
         df_saved_for_normalized=stc.compute_normalized(df_saved_for_normalized, station, 'Urban', min_urban, range_urban)
         df_saved_for_normalized=stc.compute_normalized(df_saved_for_normalized, station, 'Ocean', min_ocean, range_ocean)
+        df_saved_for_normalized=stc.compute_normalized(df_saved_for_normalized, station, 'Other', min_other, range_other)
         df_saved_for_normalized=stc.compute_normalized(df_saved_for_normalized, station, 'Unknown', min_unknown, range_unknown)
-
         df_saved_for_normalized=stc.compute_normalized(df_saved_for_normalized, station, 'Sensitivity', min_sens, range_sens)
         df_saved_for_normalized=stc.compute_normalized(df_saved_for_normalized, station, 'Population', min_pop, range_pop)
         df_saved_for_normalized=stc.compute_normalized(df_saved_for_normalized, station, 'Point source contribution', min_point, range_point)
