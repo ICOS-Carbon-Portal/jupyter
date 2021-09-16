@@ -6,7 +6,7 @@ Created 2021-08-11
 
 """
 
-from ipywidgets import Dropdown, SelectMultiple, HBox, VBox, Button, Output, IntText, RadioButtons,IntProgress,IntSlider, GridspecLayout,FileUpload, BoundedIntText, Textarea, Checkbox, Select, IntText, Layout
+from ipywidgets import Dropdown, SelectMultiple, HBox, VBox, Button, Output, IntText, RadioButtons,IntProgress,IntSlider, GridspecLayout,FileUpload, BoundedIntText, Textarea, Checkbox, Select, BoundedIntText, Layout
 import stiltStations
 from IPython.core.display import display, HTML 
 from icoscp.station import station as cpstation
@@ -23,7 +23,7 @@ all_list_2018 = sorted([((v['country'] + ': ' + v['name'] + ' ('+ k + ')'),k) fo
 
 def disable_enable_update_button():    
 
-    if len(selected_network_sites.options)>0:
+    if len(selected_network_sites.options)>0 and total_int.value==100:
 
         update_button.disabled = False
        
@@ -46,6 +46,40 @@ def change_selected_network_sites(c):
     
     selected_network_sites.options = [station_tuple for station_tuple in selected_network_sites.options if station_tuple[1] not in selected_network_sites.value]
     
+#change the weighting
+def change_total(c):
+
+    possible_variables = [broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, sens, pop, point, anthro]
+    
+    possible_variables_weights = [broad_leaf_forest_int, coniferous_forest_int, mixed_forest_int, ocean_int, other_int, grass_shrub_int, cropland_int, pasture_int, urban_int, sens_int, pop_int, point_int, anthro_int]
+
+    total_weight_assigned = 0
+    for possible_variable, possible_variable_weight in zip(possible_variables, possible_variables_weights):
+        if possible_variable.value:
+            total_weight_assigned = total_weight_assigned + possible_variable_weight.value     
+    
+    total_int.value = total_weight_assigned
+        
+    disable_enable_update_button()
+    
+def change_total_checkbox(c):
+
+    possible_variables = [broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, sens, pop, point, anthro]
+    
+    possible_variables_weights = [broad_leaf_forest_int, coniferous_forest_int, mixed_forest_int, ocean_int, other_int, grass_shrub_int, cropland_int, pasture_int, urban_int, sens_int, pop_int, point_int, anthro_int]
+
+    total_weight_assigned = 0
+    for possible_variable, possible_variable_weight in zip(possible_variables, possible_variables_weights):
+        if possible_variable.value:
+            total_weight_assigned = total_weight_assigned + possible_variable_weight.value  
+            possible_variable_weight.disabled = False
+            
+        else:
+            possible_variable_weight.disabled = True
+    
+    total_int.value = total_weight_assigned
+        
+    disable_enable_update_button()
 
 def file_set_widgets(c):
     
@@ -71,7 +105,7 @@ def update_func(button_c):
     
     sites_compare=[station_tuple[1] for station_tuple in selected_network_sites.options]
     
-    #wand to have a combined score first (this combined score will also rank in what order the stations are shown
+    #want to have a combined score first (this combined score will also rank in what order the stations are shown
     variables_compare = ['Combined score']
     
     variables_weights = []
@@ -141,88 +175,98 @@ selected_network_sites.layout.margin = '0px 0px 0px 70px'
 
 heading_weighting = Output()
 
+
+
 with heading_weighting:
-    display(HTML('<p style="font-size:20px;font-weight:bold;">Select variables and weightings</p><p style="font-size:15px;"><br>All checked variables will be included in the graph. Set a value from 0-100 to indicate their importance relative to the other variables. The total for all variables need to add up to 100. The weighting will not affect the look of the graph, only the ranking table.<br></p>'))
+    display(HTML('<p style="font-size:20px;font-weight:bold;">Select variables and weightings</p><p style="font-size:15px;"><br>All checked variables will be included in the graph. Set a value from 0-110 to indicate their importance relative to the other variables. The total for all variables need to add up to 110. The weighting will not affect the look of the graph, only the ranking table.<br></p>'))
     
 heading_weighting.layout.margin = '50px 0px 0px 0px' #top, right, bottom, left
 
 header_broad_leaf_forest = Output()
 with header_broad_leaf_forest:
     display(HTML('<p style="font-size:15px;margin-left:4em;">Broad leaf forest</p>'))
-broad_leaf_forest = Checkbox(value=True, indent=True, layout=Layout(width='100px'))
-broad_leaf_forest_int=IntText(value=0, layout=Layout(width='70px'))
+broad_leaf_forest = Checkbox(value=True, indent=True, layout=Layout(width='110px'))
+broad_leaf_forest_int=BoundedIntText(value=0, max =100,min=0, layout=Layout(width='60px'))
 
 header_coniferous_forest = Output()
 with header_coniferous_forest:
     display(HTML('<p style="font-size:15px;margin-left:4em;">Coniferous forest</p>'))
-coniferous_forest = Checkbox(value=True, indent=True, layout=Layout(width='100px'))
-coniferous_forest_int=IntText(value=0, layout=Layout(width='70px'))
+coniferous_forest = Checkbox(value=True, indent=True, layout=Layout(width='110px'))
+coniferous_forest_int=BoundedIntText(value=0, max =100,min=0, layout=Layout(width='60px'))
 
 header_mixed_forest = Output()
 with header_mixed_forest:
     display(HTML('<p style="font-size:15px;margin-left:4em;">Mixed forest</p>'))
-mixed_forest = Checkbox(value=True, indent=True, layout=Layout(width='100px'))
-mixed_forest_int=IntText(value=0, layout=Layout(width='70px'))
+mixed_forest = Checkbox(value=True, indent=True, layout=Layout(width='110px'))
+mixed_forest_int=BoundedIntText(value=0, max =100,min=0, layout=Layout(width='60px'))
 
 header_ocean = Output()
 with header_ocean:
     display(HTML('<p style="font-size:15px;margin-left:4em;">Ocean</p>'))
-ocean = Checkbox(value=True, indent=True, layout=Layout(width='100px'))
-ocean_int=IntText(value=0, layout=Layout(width='70px'))
+ocean = Checkbox(value=True, indent=True, layout=Layout(width='110px'))
+ocean_int=BoundedIntText(value=0, max =100,min=0, layout=Layout(width='60px'))
 
 header_other = Output()
 with header_other:
-    display(HTML('<p style="font-size:15px;margin-left:4em;">Other</p>'))
-other = Checkbox(value=True, indent=True, layout=Layout(width='100px'))
-other_int=IntText(value=0, layout=Layout(width='70px'))
+    display(HTML('<p style="font-size:15px;margin-left:5em;">Other</p>'))
+other = Checkbox(value=True, indent=True, layout=Layout(width='110px'))
+other_int=BoundedIntText(value=0, max =100,min=0, layout=Layout(width='60px'))
 
 header_grass_shrub = Output()
 with header_grass_shrub:
     display(HTML('<p style="font-size:15px;margin-left:4em;">Grass/shrubland</p>'))
-grass_shrub = Checkbox(value=True, indent=True, layout=Layout(width='100px'))
-grass_shrub_int=IntText(value=0, layout=Layout(width='70px'))
+grass_shrub = Checkbox(value=True, indent=True, layout=Layout(width='110px'))
+grass_shrub_int=BoundedIntText(value=0, max =100,min=0, layout=Layout(width='60px'))
 
 header_cropland = Output()
 with header_cropland:
     display(HTML('<p style="font-size:15px;margin-left:4em;">Cropland</p>'))
-cropland = Checkbox(value=True, indent=True, layout=Layout(width='100px'))
-cropland_int=IntText(value=0, layout=Layout(width='70px'))
+cropland = Checkbox(value=True, indent=True, layout=Layout(width='110px'))
+cropland_int=BoundedIntText(value=0, max =100,min=0, layout=Layout(width='60px'))
 
 header_pasture = Output()
 with header_pasture:
     display(HTML('<p style="font-size:15px;margin-left:4em;">Pasture</p>'))
-pasture = Checkbox(value=True, indent=True, layout=Layout(width='100px'))
-pasture_int=IntText(value=0, layout=Layout(width='70px'))
+pasture = Checkbox(value=True, indent=True, layout=Layout(width='110px'))
+pasture_int=BoundedIntText(value=0, max =100,min=0, layout=Layout(width='60px'))
 
 header_urban = Output()
 with header_urban:
     display(HTML('<p style="font-size:15px;margin-left:4em;">Urban</p>'))
-urban = Checkbox(value=True, indent=True, layout=Layout(width='100px'))
-urban_int=IntText(value=0, layout=Layout(width='70px'))
+urban = Checkbox(value=True, indent=True, layout=Layout(width='110px'))
+urban_int=BoundedIntText(value=0, max =100,min=0, layout=Layout(width='60px'))
  
 header_sens = Output()
 with header_sens:
     display(HTML('<p style="font-size:15px;margin-left:4em;">Sensitivity</p>'))
-sens = Checkbox(value=True, indent=True, layout=Layout(width='100px'))
-sens_int=IntText(value=0, layout=Layout(width='70px'))
+sens = Checkbox(value=True, indent=True, layout=Layout(width='110px'))
+sens_int=BoundedIntText(value=0, max =100,min=0, layout=Layout(width='60px'))
 
 header_pop = Output()
 with header_pop:
     display(HTML('<p style="font-size:15px;margin-left:4em;">Population </p>'))
-pop = Checkbox(value=True, indent=True, layout=Layout(width='100px'))
-pop_int=IntText(value=0, layout=Layout(width='70px'))
+pop = Checkbox(value=True, indent=True, layout=Layout(width='110px'))
+pop_int=BoundedIntText(value=0, max =100,min=0, layout=Layout(width='60px'))
 
 header_point = Output()
 with header_point:
     display(HTML('<p style="font-size:15px;margin-left:4em;">Point source</p>'))
-point = Checkbox(value=True, indent=True, layout=Layout(width='100px'))
-point_int=IntText(value=0, layout=Layout(width='70px'))
+point = Checkbox(value=True, indent=True, layout=Layout(width='110px'))
+point_int=BoundedIntText(value=0, max =100,min=0, layout=Layout(width='60px'))
 
 header_anthro = Output()
 with header_anthro:
     display(HTML('<p style="font-size:15px;margin-left:4em;">Anthropogenic</p>'))
-anthro = Checkbox(value=True, indent=True, layout=Layout(width='100px'))
-anthro_int=IntText(value=0, layout=Layout(width='70px'))
+anthro = Checkbox(value=True, indent=True, layout=Layout(width='110px'))
+anthro_int=BoundedIntText(value=0, max =100,min=0, layout=Layout(width='60px'))
+
+header_total_int = Output()
+with header_total_int:
+    display(HTML('<p style="font-size:15px;margin-left:5em;font-weight:bold;">Total</p>'))
+total_int = BoundedIntText(value=0, max =100,min=0, indent=True, layout=Layout(width='110px'), disabled=True)
+
+total_int.layout.margin = '0px 0px 0px 90px' #top, right, bottom, left
+
 
 header_filename = Output()
 
@@ -231,7 +275,7 @@ with header_filename:
 
 
 file_name= FileUpload(
-    accept='.json',  # Accepted file extension e.g. '.txt', '.pdf', 'image/*', 'image/*,.pdf'
+    accept='.json',  
     multiple=False  # True to accept multiple files upload else False
 )
 file_name.layout.margin = '50px 0px 0px 0px' #top, right, bottom, left
@@ -262,10 +306,11 @@ vbox_10 = VBox([header_sens, HBox([sens, sens_int])])
 vbox_11 = VBox([header_pop, HBox([pop, pop_int])])
 vbox_12 = VBox([header_point, HBox([point, point_int])])
 vbox_13 = VBox([header_anthro, HBox([anthro, anthro_int])])
+vbox_14 = VBox([header_total_int, total_int])
 
 hbox_variables1 = HBox([vbox_1,vbox_2,vbox_3,vbox_4, vbox_5])
 hbox_variables2 = HBox([vbox_6,vbox_7,vbox_8,vbox_9])
-hbox_variables3 = HBox([vbox_10,vbox_11,vbox_12, vbox_13])
+hbox_variables3 = HBox([vbox_10,vbox_11,vbox_12, vbox_13, vbox_14])
 
 final_row = HBox([file_name, update_button])
 #Add all widgets to a VBox:
@@ -284,6 +329,36 @@ def observe():
 
     sites_network_options.observe(change_sites_network_options, 'value')
     selected_network_sites.observe(change_selected_network_sites, 'value')
+    
+    #when change the int value, calculate the new total. If total == 100, enable update button to be clicked
+    broad_leaf_forest_int.observe(change_total, 'value')
+    coniferous_forest_int.observe(change_total, 'value')
+    mixed_forest_int.observe(change_total, 'value') 
+    ocean_int.observe(change_total, 'value')
+    other_int.observe(change_total, 'value')
+    grass_shrub_int.observe(change_total, 'value')
+    cropland_int.observe(change_total, 'value')
+    pasture_int.observe(change_total, 'value')
+    urban_int.observe(change_total, 'value')
+    sens_int.observe(change_total, 'value')
+    pop_int.observe(change_total, 'value')
+    point_int.observe(change_total, 'value')
+    anthro_int.observe(change_total, 'value')
+    
+    
+    broad_leaf_forest.observe(change_total_checkbox, 'value')
+    coniferous_forest.observe(change_total_checkbox, 'value')
+    mixed_forest.observe(change_total_checkbox, 'value') 
+    ocean.observe(change_total_checkbox, 'value')
+    other.observe(change_total_checkbox, 'value')
+    grass_shrub.observe(change_total_checkbox, 'value')
+    cropland.observe(change_total_checkbox, 'value')
+    pasture.observe(change_total_checkbox, 'value')
+    urban.observe(change_total_checkbox, 'value')
+    sens.observe(change_total_checkbox, 'value')
+    pop.observe(change_total_checkbox, 'value')
+    point.observe(change_total_checkbox, 'value')
+    anthro.observe(change_total_checkbox, 'value')
 
     file_name.observe(file_set_widgets, 'value')
 
