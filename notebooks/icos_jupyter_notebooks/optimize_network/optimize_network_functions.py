@@ -16,11 +16,12 @@ from datetime import datetime
 import json
 import folium
 import numpy as np
+import branca
 
 import stiltStations
 stiltstations = stiltStations.getStilt()
 
-def map_with_stations(df):
+def map_with_stations(df, variables, variables_weights):
     
     map_obj = folium.Map(location=[54, 15], zoom_start=4)
     map_obj.control_scale = True
@@ -35,16 +36,42 @@ def map_with_stations(df):
         lon_station = stiltstations[station]['lon']
         station_values=df.loc[df['Station'] == station]
         
-                #Add popup text:
-        #popup=folium.Popup(marker_txt,
-                           #parse_html=True,
-                           #max_width=400)
+        #Create and initialize variable to store station info in html table:            
+        html_table = """<meta content="text/html; charset=UTF-8">
+                    <style>td{padding: 3px;}</style><table>"""
+
+  
+        html_table = html_table+'<tr><td>'+ 'StationID:' + '</td><td><b>'+station+'</b></td></tr>'
+
+        for variable, variable_weight in zip(variables[1:], variables_weights):
+            
+            list_reverse_values = ['Population','Point source contribution', 'Anthropogenic contribution']
+            if variable in list_reverse_values:
+                
+                variable_score = 100-station_values[variable].values[0]
+                
+            else:
+                variable_score = station_values[variable].values[0]
+        
+        
+            html_table = html_table+'<tr><td>' + variable + ': </td><td>' + str("%.1f" % variable_score) +'</td></tr>'            
+
+        #Add html closing tag for table:
+        html_table = html_table +'</table>'
+        
+        height = 30*len(variables)
+        marker_text_station = branca.element.IFrame(html=html_table, width=200, height=height)
+                
+        popup=folium.Popup(marker_text_station,
+                           parse_html=True,
+                           max_width=400)
 
         
         #Create marker and add it to the map:
         folium.Marker(location=[lat_station,
                                 lon_station],
-                      tooltip=(station + ': click for details')).add_to(map_obj)
+                                popup=popup,
+                                tooltip=(station + ': click for details')).add_to(map_obj)
         
     folium.LayerControl().add_to(map_obj)
     display(map_obj)
@@ -149,7 +176,7 @@ def variables_graph_bokeh(df, variables, variables_weights):
 
     show(p)
     
-    map_with_stations(df)
+    map_with_stations(df, variables, variables_weights)
 #also in stc_functions:
 def normalized_dataframe(all_stations):
 
