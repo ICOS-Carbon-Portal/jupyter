@@ -71,20 +71,33 @@ def update_func(button_c):
     
     update_button.disabled = True
     clear_all_output()
-    sites_network=[station_tuple[1] for station_tuple in selected_network_sites.options]
     
-    df_saved_for_normalized = onf.normalized_dataframe(sites_network)
+    sites_compare=[station_tuple[1] for station_tuple in selected_network_sites.options]
+    
+    variables_compare = []
+
+    possible_variables = [broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, sens, pop, point, anthro]
+    
+    possible_variables_name = ['Broad leaf forest','Coniferous forest','Mixed forest','Natural grassland','Cropland',\
+                          'Pasture','Urban', 'Ocean', 'Unknown','Sensitivity', 'Population', \
+                          'Point source contribution', 'Anthropogenic contribution']
+    
+    for possible_variable, possible_variable_name in zip(possible_variables,possible_variables_name) :
+        
+        # if check box for a variable is checked (True), add it to the list of variables being passed to the function
+        if possible_variable.value:
+            
+            variables_compare.append(possible_variable_name)
+            
+    # all values currently computed for normalized_dataframe      
+    df_saved_for_normalized = onf.normalized_dataframe(sites_compare)
     
     with output_multiple_var_graph:
         
-        onf.variables_graph_bokeh(df_saved_for_normalized)
+        onf.variables_graph_bokeh(df_saved_for_normalized, variables_compare)
         
     update_button.disabled = False
         
-    
-        
-    
-
 #-----------widgets definition ----------------
     
 style_bin = {'description_width': 'initial'}
@@ -123,17 +136,13 @@ selected_network_sites = SelectMultiple(
 
 selected_network_sites.layout.margin = '0px 0px 0px 70px'
 
-download_output_heading = Output()
 
-with download_output_heading:
+heading_weighting = Output()
+
+with heading_weighting:
+    display(HTML('<p style="font-size:20px;font-weight:bold;">Select variables and weightings</p><p style="font-size:15px;"><br>All checked variables will be included in the graph. Set a value from 0-100 to indicate their importance relative to the other variables. The total for all variables need to add up to 100. The weighting will not affect the look of the graph, only the ranking table.<br></p>'))
     
-    display(HTML('<p style="font-size:15px;font-weight:bold;">Download output</p>'))
-      
-download_output_option=RadioButtons(
-        options=[('No', False), ('Yes', True)],
-        description=' ',
-        disabled=False)
-
+heading_weighting.layout.margin = '50px 0px 0px 0px' #top, right, bottom, left
 
 header_broad_leaf_forest = Output()
 with header_broad_leaf_forest:
@@ -188,7 +197,30 @@ with header_urban:
     display(HTML('<p style="font-size:15px;margin-left:4em;">Urban</p>'))
 urban = Checkbox(value=True, indent=True, layout=Layout(width='100px'))
 urban_int=IntText(value=0, layout=Layout(width='70px'))
+ 
+header_sens = Output()
+with header_sens:
+    display(HTML('<p style="font-size:15px;margin-left:4em;">Sensitivity</p>'))
+sens = Checkbox(value=True, indent=True, layout=Layout(width='100px'))
+sens_int=IntText(value=0, layout=Layout(width='70px'))
 
+header_pop = Output()
+with header_pop:
+    display(HTML('<p style="font-size:15px;margin-left:4em;">Population </p>'))
+pop = Checkbox(value=True, indent=True, layout=Layout(width='100px'))
+pop_int=IntText(value=0, layout=Layout(width='70px'))
+
+header_point = Output()
+with header_point:
+    display(HTML('<p style="font-size:15px;margin-left:4em;">Point source</p>'))
+point = Checkbox(value=True, indent=True, layout=Layout(width='100px'))
+point_int=IntText(value=0, layout=Layout(width='70px'))
+
+header_anthro = Output()
+with header_anthro:
+    display(HTML('<p style="font-size:15px;margin-left:4em;">Anthropogenic</p>'))
+anthro = Checkbox(value=True, indent=True, layout=Layout(width='100px'))
+anthro_int=IntText(value=0, layout=Layout(width='70px'))
 
 header_filename = Output()
 
@@ -200,14 +232,14 @@ file_name= FileUpload(
     accept='.json',  # Accepted file extension e.g. '.txt', '.pdf', 'image/*', 'image/*,.pdf'
     multiple=False  # True to accept multiple files upload else False
 )
-
+file_name.layout.margin = '50px 0px 0px 0px' #top, right, bottom, left
 #Create a Button widget to control execution:
 update_button = Button(description='Run selection',
                        disabled=True,
                        button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
                        tooltip='Click me',)
 
-update_button.layout.margin = '0px 0px 0px 160px' #top, right, bottom, left
+update_button.layout.margin = '50px 0px 0px 160px' #top, right, bottom, left
 royal='#4169E1'
 update_button.style.button_color=royal
 
@@ -220,16 +252,22 @@ vbox_2 = VBox([header_coniferous_forest, HBox([coniferous_forest, coniferous_for
 vbox_3 = VBox([header_mixed_forest, HBox([mixed_forest, mixed_forest_int])])
 vbox_4 = VBox([header_ocean, HBox([ocean, ocean_int])])
 vbox_5 = VBox([header_other, HBox([other, other_int])])
-vbox_6 = VBox([header_cropland, HBox([cropland, cropland_int])])
-vbox_7 = VBox([header_pasture, HBox([pasture, pasture_int])])
-vbox_8 = VBox([header_urban, HBox([urban, urban_int])])
+vbox_6 = VBox([header_grass_shrub, HBox([grass_shrub, grass_shrub_int])])
+vbox_7 = VBox([header_cropland, HBox([cropland, cropland_int])])
+vbox_8 = VBox([header_pasture, HBox([pasture, pasture_int])])
+vbox_9 = VBox([header_urban, HBox([urban, urban_int])])
+vbox_10 = VBox([header_sens, HBox([sens, sens_int])])
+vbox_11 = VBox([header_pop, HBox([pop, pop_int])])
+vbox_12 = VBox([header_point, HBox([point, point_int])])
+vbox_13 = VBox([header_anthro, HBox([anthro, anthro_int])])
 
-hbox_variables1 = HBox([vbox_1,vbox_2,vbox_3,vbox_4])
-hbox_variables2 = HBox([vbox_5,vbox_6,vbox_7,vbox_8])
+hbox_variables1 = HBox([vbox_1,vbox_2,vbox_3,vbox_4, vbox_5])
+hbox_variables2 = HBox([vbox_6,vbox_7,vbox_8,vbox_9])
+hbox_variables3 = HBox([vbox_10,vbox_11,vbox_12, vbox_13])
 
 final_row = HBox([file_name, update_button])
 #Add all widgets to a VBox:
-form = VBox([heading_site_selection, box_site_combined, hbox_variables1, hbox_variables2, final_row])
+form = VBox([heading_site_selection, box_site_combined, heading_weighting, hbox_variables1, hbox_variables2, hbox_variables3, final_row])
 
 #Initialize form output:
 form_out = Output()

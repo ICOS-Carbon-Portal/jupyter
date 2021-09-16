@@ -11,11 +11,7 @@ sys.path.append('../station_characterization')
 import stc_functions as stc
 
 
-def variables_graph_bokeh(df, variables=[]):
-    #'Broad leaf forest','Coniferous forest','Mixed forest',
-    variables = ['Natural grassland','Cropland',\
-                          'Pasture','Urban', 'Ocean', 'Unknown','Sensitivity', 'Population', \
-                          'Point source contribution', 'Anthropogenic contribution']
+def variables_graph_bokeh(df, variables):
 
     p = bokeh_figure(plot_width=900,
                x_range=variables,
@@ -23,12 +19,9 @@ def variables_graph_bokeh(df, variables=[]):
                y_axis_label='% of max',
                title = 'Selected station compared to reference stations',
                tools='pan,box_zoom,wheel_zoom,undo,redo,reset,save')
-    #list_attributes=['Station', '', 'Broad leaf forest','Coniferous forest','Mixed forest','Natural grassland','Cropland','Pasture','Urban', 'Ocean', 'Unknown']
 
     index = 1
 
-    selected_station = 'HTM150'
-    #p = figure(x_range=variables)
     for station in df['Station']:
 
         #get all the values for station (row in dataframe)
@@ -40,13 +33,11 @@ def variables_graph_bokeh(df, variables=[]):
             station_values_list.append(station_values[variable].values[0])
 
             index = index + 1
-
-        if station == selected_station:
-            color='black'
-            line_width = 3
-        else:
+            
             color='grey'
+            
             line_width = 1
+            
         p.line(variables, station_values_list, name=station, line_width=line_width, color=color, legend_label=station)
 
     p.xaxis.major_label_orientation = "vertical"
@@ -79,7 +70,7 @@ def variables_graph_bokeh(df, variables=[]):
 
     show(p)
 #also in stc_functions:
-def normalized_dataframe(all_stations, variables=[]):
+def normalized_dataframe(all_stations):
 
     df_2018 = pd.DataFrame(columns=['Station', 'Broad leaf forest','Coniferous forest','Mixed forest',\
                                     'Natural grassland','Cropland','Pasture','Urban', 'Ocean', 'Unknown',
