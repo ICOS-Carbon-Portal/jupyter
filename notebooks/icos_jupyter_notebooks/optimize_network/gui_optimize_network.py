@@ -19,6 +19,7 @@ import json
 
 stiltstations = stiltStations.getStilt()
 
+
 all_list_2018 = sorted([((v['country'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items() if '2018' in v['years'] if len(v['2018']['months'])>12])
 
 def disable_enable_update_button():    
@@ -31,6 +32,7 @@ def disable_enable_update_button():
         update_button.disabled = True
 
 def set_settings(s):
+    
     selected_network_sites.options = [station for station in all_list_2018 if station[1] in s['sites_to_compare']] 
     
     broad_leaf_forest.value = s["broad_leaf_forest"]
@@ -179,11 +181,10 @@ def update_func(button_c):
         vbox_13 = VBox([header_anthro, HBox([anthro, anthro_int])])
         vbox_14 = VBox([header_total_int, total_int])
         
-        settings = {"sites_to_compare": sites_compare, "variables_to_compare": variables_compare, "broad_leaf_forest":broad_leaf_forest.value, "broad_leaf_forest_int": broad_leaf_forest_int.value, "coniferous_forest":coniferous_forest.value, "coniferous_forest_int":coniferous_forest_int.value, "mixed_forest": mixed_forest.value, "mixed_forest_int":mixed_forest_int.value, "ocean": ocean.value, "ocean_int":ocean_int.value, "other":other.value, "other_int":other_int.value, "grass_shrub":grass_shrub.value, "grass_shrub_int":grass_shrub_int.value, "cropland":cropland.value, "cropland_int":cropland_int.value, "pasture":pasture.value, "pasture_int":pasture_int.value, "urban":urban.value, "urban_int":urban_int.value, "sens":sens.value, "sens_int":sens_int.value, "pop":pop.value, "pop_int":pop_int.value,"point":point.value, "point_int":point_int.value, "anthro":anthro.value, "anthro_int": anthro_int.value, "total_int":total_int.value}
+        settings = {"sites_to_compare": sites_compare, "broad_leaf_forest":broad_leaf_forest.value, "broad_leaf_forest_int": broad_leaf_forest_int.value, "coniferous_forest":coniferous_forest.value, "coniferous_forest_int":coniferous_forest_int.value, "mixed_forest": mixed_forest.value, "mixed_forest_int":mixed_forest_int.value, "ocean": ocean.value, "ocean_int":ocean_int.value, "other":other.value, "other_int":other_int.value, "grass_shrub":grass_shrub.value, "grass_shrub_int":grass_shrub_int.value, "cropland":cropland.value, "cropland_int":cropland_int.value, "pasture":pasture.value, "pasture_int":pasture_int.value, "urban":urban.value, "urban_int":urban_int.value, "sens":sens.value, "sens_int":sens_int.value, "pop":pop.value, "pop_int":pop_int.value,"point":point.value, "point_int":point_int.value, "anthro":anthro.value, "anthro_int": anthro_int.value, "total_int":total_int.value}
 
         onf.save_settings(settings, directory='optimize_network')
-        
-        
+   
     update_button.disabled = False
         
 #-----------widgets definition ----------------
@@ -230,7 +231,7 @@ heading_weighting = Output()
 
 
 with heading_weighting:
-    display(HTML('<p style="font-size:20px;font-weight:bold;">Select variables and weightings</p><p style="font-size:15px;"><br>All checked variables will be included in the graph. Set a value from 0-110 to indicate their importance relative to the other variables. The total for all variables need to add up to 110. The weighting will not affect the look of the graph, only the ranking table.<br></p>'))
+    display(HTML('<p style="font-size:20px;font-weight:bold;">Select variables and weightings</p><p style="font-size:15px;"><br>All checked variables will be included in the graph. Set a value from 0-100 to indicate their importance relative to the other variables. The total for all variables need to add up to 100. The weighting will not affect the look of the graph, only the ranking table.<br></p>'))
     
 heading_weighting.layout.margin = '50px 0px 0px 0px' #top, right, bottom, left
 

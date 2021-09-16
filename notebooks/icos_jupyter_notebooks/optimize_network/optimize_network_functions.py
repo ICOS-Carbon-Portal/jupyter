@@ -14,7 +14,40 @@ from matplotlib import cm
 import matplotlib
 from datetime import datetime
 import json
+import folium
+import numpy as np
 
+import stiltStations
+stiltstations = stiltStations.getStilt()
+
+def map_with_stations(df):
+    
+    map_obj = folium.Map(location=[54, 15], zoom_start=4)
+    map_obj.control_scale = True
+    folium.TileLayer('cartodbpositron').add_to(map_obj)
+    
+    list_stations = list(df['Station'])
+
+    
+    for station in list_stations:
+        
+        lat_station = stiltstations[station]['lat']
+        lon_station = stiltstations[station]['lon']
+        station_values=df.loc[df['Station'] == station]
+        
+                #Add popup text:
+        #popup=folium.Popup(marker_txt,
+                           #parse_html=True,
+                           #max_width=400)
+
+        
+        #Create marker and add it to the map:
+        folium.Marker(location=[lat_station,
+                                lon_station],
+                      tooltip=(station + ': click for details')).add_to(map_obj)
+        
+    folium.LayerControl().add_to(map_obj)
+    display(map_obj)
 def variables_graph_bokeh(df, variables, variables_weights):
 
     p = bokeh_figure(plot_width=900,
@@ -115,6 +148,8 @@ def variables_graph_bokeh(df, variables, variables_weights):
     p.legend.click_policy="hide"
 
     show(p)
+    
+    map_with_stations(df)
 #also in stc_functions:
 def normalized_dataframe(all_stations):
 
