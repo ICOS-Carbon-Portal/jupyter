@@ -123,6 +123,8 @@ class StationChar():
             c = r.json()
             if not 'error' in c.keys():
                 self.country_code = c['address']['country_code']
+            else:
+                self.country = 'unknown country'
             
         if self.country_code:
             # API to reterive country information using country code. 
@@ -130,7 +132,9 @@ class StationChar():
             resp = requests.get(url=url)
             self.country_information = resp.json()
             self.country=self.country_information['name']
-
+        else:
+            self.country_code = 'unknown'
+ 
     def _setDateRange(self):
         """
         Pandas dataframe with the dates/times for all footprints (every three 
@@ -213,7 +217,7 @@ class StationChar():
                  '3': 'population',
                  '4': 'landcover_bar',
                  '5': 'seasonal',
-                 '6': 'landcover_windrose',                 
+                 '6': 'landcover_polar',                 
                  '7': 'multivar'}
                
         self.figures[str(key)]=[figure, caption, short[str(key)]]

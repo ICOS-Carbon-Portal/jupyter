@@ -237,6 +237,8 @@ def update_func(button_c):
     result_landcover_windrose.clear_output()
     result_multiple_variables_graph.clear_output()
     
+    update_button.disabled = True
+    
     with progress_bar:
         f = IntProgress(min=0, max=10, style=style_bin)
         display(f)
@@ -357,7 +359,7 @@ def update_func(button_c):
 
         updateProgress(f, 'landcover windrose')
         with result_landcover_windrose:
-            fig, caption=stc_functions.landcover_polar_graph(stc)
+            fig, caption=stc_functions.land_cover_polar_graph(stc)
             stc.add_figure(6, fig, caption)
             display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
             display(fig)
@@ -378,7 +380,9 @@ def update_func(button_c):
         # make sure the progress bar is filled..
         updateProgress(f, 'finished')
         f.value = 10
-        
+    
+    update_button.disabled = False
+    
 
 #-----------widgets definition -----------------
     
