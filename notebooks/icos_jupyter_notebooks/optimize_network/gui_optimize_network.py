@@ -157,9 +157,11 @@ def update_func(button_c):
             variables_compare.append(possible_variable_name)
             variables_weights.append(possible_variable_weight.value)
             
-    # all values currently computed for normalized_dataframe      
+    # all values currently computed for normalized_dataframe    
+    global df_saved_for_normalized
     df_saved_for_normalized = onf.normalized_dataframe(sites_compare)
 
+    
     with output_multiple_var_graph:
         
         onf.variables_graph_bokeh(df_saved_for_normalized, variables_compare, variables_weights)
