@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from numpy import loadtxt
 import network_characterization_functions as functions
+from numpy import loadtxt
 
 import json
 from datetime import datetime
@@ -132,8 +133,20 @@ def update_func(button_c):
     map_title2 = station + ': percent of the average footprint sensitivity' + '\n ' + str(s_year.value) + '-' + str(s_month.value)  + '-' + str(s_day.value) + ' to ' + (str(e_year.value) + '-' + str(e_month.value)  + '-' + str(e_day.value) + '\nHours: ' + timeselect_string)
     
     date_range = functions.date_range_hour_filtered(date_range, timeselect_list)
+    
+    start_date=min(date_range)
+    end_date=max(date_range)
+    
+    if start_date==pd.Timestamp(2018, 1, 1, 0) and end_date==pd.Timestamp(2018,12,31,0) and len(timeselect_list)==8:
 
-    nfp, fp, lon, lat, title = functions.read_aggreg_footprints(station, date_range)
+        name_load_footprint_csv='fp_' + station + '.csv'
+        fp=loadtxt(os.path.join(data_folder, name_load_footprint_csv), delimiter=',')
+        
+    else:
+
+        nfp, fp, lon, lat, title = functions.read_aggreg_footprints(station, date_range)
+        
+        fp = fp[0]
 
     if fp is None:
         display(HTML('<p style="font-size:15px;">Not all footprints for ' + station + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to compute footprints for year 2018.</p>'))
@@ -152,7 +165,7 @@ def update_func(button_c):
     
 
     ###added: orig:
-    functions.plot_maps(fp[0], load_lon, load_lat, colors=colorbar, unit='[ppm / ($\mu$mol / (m$^{2}$s))]', title=map_title1, pngfile=pngfile1, date_time_predefined=date_time, linlog='log10')
+    functions.plot_maps(fp, load_lon, load_lat, colors=colorbar, unit='[ppm / ($\mu$mol / (m$^{2}$s))]', title=map_title1, pngfile=pngfile1, date_time_predefined=date_time, linlog='log10')
     
     functions.plot_maps(footprint_0_90, load_lon, load_lat, colors=(colorbar + '_r'), vmin=10, vmax=90, percent = True, unit='%', title=map_title2, pngfile=pngfile2, date_time_predefined=date_time)
  
