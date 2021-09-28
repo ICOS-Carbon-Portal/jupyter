@@ -13,8 +13,7 @@ import network_characterization_functions as functions
 import json
 from datetime import datetime
 
-folder_tool = 'network_characterization' 
-folder_tool_fps = 'footprints_2018_averaged'
+data_folder = '/data/project/stc/footprints_2018_averaged'
 
 stiltstations = stiltStations.getStilt()
 
@@ -139,13 +138,10 @@ def update_func(button_c):
     if fp is None:
         display(HTML('<p style="font-size:15px;">Not all footprints for ' + station + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to compute footprints for year 2018.</p>'))
 
-    #path_input=os.path.join('network_characterization', 'footprints_2018_averaged', 'latitude.csv')
-    load_lat=loadtxt(os.path.join(folder_tool, folder_tool_fps, 'latitude.csv'), delimiter=',')
-    load_lon=loadtxt(os.path.join(folder_tool, folder_tool_fps, 'longitude.csv'), delimiter=',')
+    load_lat=loadtxt(os.path.join(data_folder, 'latitude.csv'), delimiter=',')
+    load_lon=loadtxt(os.path.join(data_folder, 'longitude.csv'), delimiter=',')
 
     footprint_0_90 = functions.footprint_show_percentages(station, fp, load_lat, load_lon, return_fp=True)
-
-    #footprint_0_90_total_potential= functions.percent_of_potential(fp, load_lat, load_lon)
 
     if download:
         pngfile1='log_scale_footprint'
