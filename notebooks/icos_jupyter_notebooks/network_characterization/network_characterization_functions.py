@@ -483,7 +483,7 @@ def footprint_show_percentages(footprint_code, input_footprint, fp_lat, fp_lon, 
     #one column with the original sensitivity values. Has an index that will be used to sort back to 
     #this order (flattened 2D... back to 2D with updated sensitivity values in last step)
     df_sensitivity['sensitivity']=input_footprint.flatten()
-    
+
     #sensitivity values sorterd from largest to smallest
     df_sensitivity_sorted=df_sensitivity.sort_values(by=['sensitivity'], ascending=False)
     
@@ -498,8 +498,7 @@ def footprint_show_percentages(footprint_code, input_footprint, fp_lat, fp_lon, 
     df_sensitivity_sorted['thirty_percent']=df_sensitivity_sorted['cumsum_sens']
     df_sensitivity_sorted['forty_percent']=df_sensitivity_sorted['cumsum_sens']
     df_sensitivity_sorted['fifty_percent']=df_sensitivity_sorted['cumsum_sens']
-    
-    
+       
     ten_percent = sum_sensitivity_values*0.1
     twenty_percent = sum_sensitivity_values*0.2
     thirty_percent = sum_sensitivity_values*0.3
@@ -509,8 +508,7 @@ def footprint_show_percentages(footprint_code, input_footprint, fp_lat, fp_lon, 
     seventy_percent = sum_sensitivity_values*0.7
     eighty_percent = sum_sensitivity_values*0.8
     ninty_percent = sum_sensitivity_values*0.9
-
-    
+  
     df_sensitivity_sorted['ten_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=ten_percent, 0, 1)
     df_sensitivity_sorted['twenty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=twenty_percent, 0, 1)
     df_sensitivity_sorted['thirty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=thirty_percent, 0, 1)
@@ -521,6 +519,73 @@ def footprint_show_percentages(footprint_code, input_footprint, fp_lat, fp_lon, 
     df_sensitivity_sorted['eighty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=eighty_percent, 0, 1)
     df_sensitivity_sorted['ninty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=ninty_percent, 0, 1)
     
+    # df_sensitivity_sorted[df_sensitivity_sorted['ten_percent'] > 0]
+    mean_10_percent = df_sensitivity_sorted[df_sensitivity_sorted['ten_percent'] > 0]['sensitivity'].mean() 
+    mean_20_percent = df_sensitivity_sorted[df_sensitivity_sorted['twenty_percent'] > 0]['sensitivity'].mean()
+    mean_30_percent = df_sensitivity_sorted[df_sensitivity_sorted['thirty_percent'] > 0]['sensitivity'].mean()
+    mean_40_percent = df_sensitivity_sorted[df_sensitivity_sorted['forty_percent'] > 0]['sensitivity'].mean() 
+    mean_50_percent = df_sensitivity_sorted[df_sensitivity_sorted['fifty_percent'] > 0]['sensitivity'].mean()
+    mean_60_percent = df_sensitivity_sorted[df_sensitivity_sorted['sixty_percent'] > 0]['sensitivity'].mean()
+    mean_70_percent = df_sensitivity_sorted[df_sensitivity_sorted['seventy_percent'] > 0]['sensitivity'].mean() 
+    mean_80_percent = df_sensitivity_sorted[df_sensitivity_sorted['eighty_percent'] > 0]['sensitivity'].mean()
+    mean_90_percent = df_sensitivity_sorted[df_sensitivity_sorted['ninty_percent'] > 0]['sensitivity'].mean()
+     
+    # for the table comparing the cells just outside the cuts to the maximum sensitivty cell value and average
+    # of the cells within.
+    
+    df_compare_percent_choices = pd.DataFrame(columns=['Percent', 'Count cells', 'Order of magniture (max)', 'Order of magniture (average)'])
+    
+    index_10_percent = df_sensitivity_sorted['ten_percent'].sum()
+    index_20_percent = df_sensitivity_sorted['twenty_percent'].sum()
+    index_30_percent = df_sensitivity_sorted['thirty_percent'].sum()
+    index_40_percent = df_sensitivity_sorted['forty_percent'].sum()
+    index_50_percent = df_sensitivity_sorted['fifty_percent'].sum()
+    index_60_percent = df_sensitivity_sorted['sixty_percent'].sum()
+    index_70_percent = df_sensitivity_sorted['seventy_percent'].sum()
+    index_80_percent = df_sensitivity_sorted['eighty_percent'].sum()
+    index_90_percent = df_sensitivity_sorted['ninty_percent'].sum()
+    
+    sens_value_10_percent = df_sensitivity_sorted.iloc[index_10_percent]['sensitivity'] 
+    sens_value_20_percent = df_sensitivity_sorted.iloc[index_20_percent]['sensitivity']
+    sens_value_30_percent = df_sensitivity_sorted.iloc[index_30_percent]['sensitivity'] 
+    sens_value_40_percent = df_sensitivity_sorted.iloc[index_40_percent]['sensitivity']
+    sens_value_50_percent = df_sensitivity_sorted.iloc[index_50_percent]['sensitivity'] 
+    sens_value_60_percent = df_sensitivity_sorted.iloc[index_60_percent]['sensitivity']
+    sens_value_70_percent = df_sensitivity_sorted.iloc[index_70_percent]['sensitivity'] 
+    sens_value_80_percent = df_sensitivity_sorted.iloc[index_80_percent]['sensitivity']
+    sens_value_90_percent = df_sensitivity_sorted.iloc[index_90_percent]['sensitivity'] 
+    
+    sens_max = df_sensitivity_sorted.iloc[0]['sensitivity']
+     
+    order_magnitude_10_percent = sens_max/sens_value_10_percent 
+    order_magnitude_20_percent = sens_max/sens_value_20_percent
+    order_magnitude_30_percent = sens_max/sens_value_30_percent 
+    order_magnitude_40_percent = sens_max/sens_value_40_percent
+    order_magnitude_50_percent = sens_max/sens_value_50_percent 
+    order_magnitude_60_percent = sens_max/sens_value_60_percent
+    order_magnitude_70_percent = sens_max/sens_value_70_percent 
+    order_magnitude_80_percent = sens_max/sens_value_80_percent
+    order_magnitude_90_percent = sens_max/sens_value_90_percent 
+
+    order_magnitude_10_percent_average = mean_10_percent/sens_value_10_percent 
+    order_magnitude_20_percent_average = mean_20_percent/sens_value_20_percent  
+    order_magnitude_30_percent_average = mean_30_percent/sens_value_30_percent 
+    order_magnitude_40_percent_average = mean_40_percent/sens_value_40_percent 
+    order_magnitude_50_percent_average = mean_50_percent/sens_value_50_percent 
+    order_magnitude_60_percent_average = mean_60_percent/sens_value_60_percent 
+    order_magnitude_70_percent_average = mean_70_percent/sens_value_70_percent 
+    order_magnitude_80_percent_average = mean_80_percent/sens_value_80_percent 
+    order_magnitude_90_percent_average = mean_90_percent/sens_value_90_percent 
+    
+    df_compare_percent_choices.loc[0] = ['10', index_10_percent, order_magnitude_10_percent, order_magnitude_10_percent_average]
+    df_compare_percent_choices.loc[1] = ['20', index_20_percent, order_magnitude_20_percent, order_magnitude_20_percent_average]
+    df_compare_percent_choices.loc[2] = ['30', index_30_percent, order_magnitude_30_percent, order_magnitude_30_percent_average]
+    df_compare_percent_choices.loc[3] = ['40', index_40_percent, order_magnitude_40_percent, order_magnitude_40_percent_average]
+    df_compare_percent_choices.loc[4] = ['50', index_50_percent, order_magnitude_50_percent, order_magnitude_50_percent_average]
+    df_compare_percent_choices.loc[5] = ['60', index_60_percent, order_magnitude_60_percent, order_magnitude_60_percent_average]
+    df_compare_percent_choices.loc[6] = ['70', index_70_percent, order_magnitude_70_percent, order_magnitude_70_percent_average]
+    df_compare_percent_choices.loc[7] = ['80', index_80_percent, order_magnitude_80_percent, order_magnitude_80_percent_average]
+    df_compare_percent_choices.loc[8] = ['90', index_90_percent, order_magnitude_90_percent, order_magnitude_90_percent_average]
 
     df_sensitivity_sorted['aggreg'] = df_sensitivity_sorted['ten_percent'] + df_sensitivity_sorted['twenty_percent']+df_sensitivity_sorted['thirty_percent']+df_sensitivity_sorted['forty_percent']+df_sensitivity_sorted['fifty_percent'] + df_sensitivity_sorted['sixty_percent'] + df_sensitivity_sorted['seventy_percent'] + df_sensitivity_sorted['eighty_percent'] + df_sensitivity_sorted['ninty_percent']
     
@@ -537,7 +602,7 @@ def footprint_show_percentages(footprint_code, input_footprint, fp_lat, fp_lon, 
     footprint_0_90=np.array(list_aggreg_footprint).reshape((len(fp_lat), len(fp_lon)))
     
     if return_fp:
-        return footprint_0_90
+        return footprint_0_90, df_sensitivity_sorted, df_compare_percent_choices
     
     else:
         plot_maps(footprint_0_90, fp_lon, fp_lat, colors='Blues_r', vmin=10, vmax=90, percent = True, unit='%', title=(footprint_code + ' 2018'))

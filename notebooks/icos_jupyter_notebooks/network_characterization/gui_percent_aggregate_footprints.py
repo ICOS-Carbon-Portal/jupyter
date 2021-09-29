@@ -154,7 +154,9 @@ def update_func(button_c):
     load_lat=loadtxt(os.path.join(data_folder, 'latitude.csv'), delimiter=',')
     load_lon=loadtxt(os.path.join(data_folder, 'longitude.csv'), delimiter=',')
 
-    footprint_0_90 = functions.footprint_show_percentages(station, fp, load_lat, load_lon, return_fp=True)
+    global df_sensitivity_sorted
+    global df_compare_percent_choices
+    footprint_0_90, df_sensitivity_sorted, df_compare_percent_choices = functions.footprint_show_percentages(station, fp, load_lat, load_lon, return_fp=True)
 
     if download:
         pngfile1='log_scale_footprint'
