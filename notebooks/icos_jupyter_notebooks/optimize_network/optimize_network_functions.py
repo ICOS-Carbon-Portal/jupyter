@@ -349,7 +349,7 @@ def normalized_dataframe(all_stations):
         df_saved_for_normalized=stc.compute_normalized(df_saved_for_normalized, station, 'Population', min_pop, range_pop)
         df_saved_for_normalized=stc.compute_normalized(df_saved_for_normalized, station, 'Point source contribution', min_point, range_point)
         df_saved_for_normalized=stc.compute_normalized(df_saved_for_normalized, station, 'Anthropogenic contribution', min_anthro, range_anthro)
-    return df_saved_for_normalized
+    return df_saved_for_normalized, df_2018
 
 def save_settings(settings, directory):
     

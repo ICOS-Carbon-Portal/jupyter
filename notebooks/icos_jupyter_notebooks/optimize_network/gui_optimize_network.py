@@ -159,7 +159,8 @@ def update_func(button_c):
             
     # all values currently computed for normalized_dataframe    
     global df_saved_for_normalized
-    df_saved_for_normalized = onf.normalized_dataframe(sites_compare)
+    global df_2018
+    df_saved_for_normalized, df_2018 = onf.normalized_dataframe(sites_compare)
 
     
     with output_multiple_var_graph:
