@@ -90,8 +90,9 @@ def getStilt():
             stations[ist]['country'] = countries[ist]
             
         else:
-                 
                
+            stations[ist]['country']= 'zzz'
+            """ 
             # revers geocoding
             baseurl = 'https://nominatim.openstreetmap.org/reverse?format=json&'
             url = baseurl + 'lat=' + str(stations[ist]['lat']) + '&lon=' + str(stations[ist]['lon']) + '&zoom=3'
@@ -109,7 +110,7 @@ def getStilt():
                 stations[ist]['country']=country_information['name']
             else:
                 stations[ist]['country']= 'ZZ location in ocean'
-            
+            """
 
     return stations
             
