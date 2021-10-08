@@ -43,7 +43,10 @@ folder_tool_fps = '/data/project/stc/footprints_2018_averaged'
 #added 
 folder_data = '/data/project/stc/'
 
-dictionary_area_choice = {'Belgium':'Belgium','Belgiu_eez':'Belgium (EEZ included)', 'Czech_Rep':'Czech Republic', 'Denmark':'Denmark','Denmar_eez':'Denmark (EEZ included)', 'Estonia':'Estonia', 'Estoni_eez':'Estonia (EEZ included)','Finland':'Finland', 'Finlan_eez':'Finland (EEZ included)', 'France':'France', 'France_eez':'France (EEZ included)','Germany':'Germany','Germa_eez':'Germany (EEZ included)', 'Hungary':'Hungary', 'Italy':'Italy', 'Italy_eez':'Italy', 'Netherland':'Netherlands', 'Nether_eez':'Netherlands (EEZ included)', 'Norway':'Norway', 'Norway_eez':'Norway (EEZ included)', 'Poland':'Poland', 'Poland_eez':'Poland (EEZ included)', 'Spain':'Spain', 'Spain_eez':'Spain (EEZ included)', 'Sweden':'Sweden', 'Swe_eez':'Sweden (EEZ included)', 'Switzerlan':'Switzerland', 'UK':'UK',  'UK_eez':'UK (EEZ included)'}
+dictionary_area_choice = {'ALB':'Albania', 'Andorra':'Andorra', 'AUT':'Austria','BLR':'Belarus','BEL':'Belgium','BIH':'Bosnia and Herzegovina','BGR':'Bulgaria','HRV':'Croatia','CYP':'Cyprus','CZE':'Czechia','DNK':'Denmark','EST':'Estonia','FIN':'Finland','FRA':'France','DEU':'Germany','GRC':'Greece','HUN':'Hungary','IRL':'Ireland','ITA':'Italy','XKX':'Kosovo','LVA':'Latvia','LIE':'Liechtenstein','LTU':'Lithuania','LUX':'Luxembourg','MKD':'Macedonia','MTL':'Malta','MDA':'Moldova','MNE':'Montenegro','NLD':'Netherlands','NOR':'Norway','POL':'Poland','PRT':'Portugal','SRB':'Republic of Serbia','ROU':'Romania','SMR':'San Marino','SVK':'Slovakia','SVN':'Slovenia','ESP':'Spain','SWE':'Sweden','CHE':'Switzerland','GBR':'United Kingdom'}
+
+country_masks = Dataset(os.path.join(folder_data,'europe_STILT_masks.nc'))
+country_masks_eez_included = Dataset(os.path.join(folder_data,'europe_STILT_masks_eez_included.nc'))
 
 #function to read and aggregate footprints for given date range
 def read_aggreg_footprints(station, date_range):
@@ -256,18 +259,12 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
 
 name_correct_dictionary= {'ICOS_memb':'ICOS membership countries','Czech_Rep': 'Czech Republic', 'Switzerlan':'Switzerland', 'Netherland': 'Netherlands'}
 
-def breakdown_countries_base_network(footprint_see_not_see, summed_fp_sens):
-
+def breakdown_countries_base_network(footprint_see_not_see, summed_fp_sens, area_type='Land'):
 
     f_gridarea = cdf.Dataset(os.path.join(folder_data, 'gridareaSTILT.nc'))
 
     #area stored in "cell_area" in m2
     gridarea = f_gridarea.variables['cell_area'][:]
-
-    all_area_masks= cdf.Dataset(os.path.join(folder_tool, 'land_and_land_plus_eez_country_masks_icos_members.nc'))
-
-    list_areas=['Sweden', 'Belgium', 'Czech_Rep', 'Denmark', 'Estonia', 'Finland',  'France',  'Germany', 'Hungary', 'Italy', 'Netherland',  'Norway', 'Poland', 'Spain', 'Switzerlan', 'UK', 'ICOS_memb']
-    list_areas_eez_included=['Swe_eez', 'Belgiu_eez', '', 'Denmar_eez', 'Estoni_eez', 'Finlan_eez', 'France_eez', 'Germa_eez','', 'Italy_eez',  'Nether_eez', 'Norway_eez', 'Poland_eez', 'Spain_eez', '', 'UK_eez', 'ICOS_m_eez']
 
     areas_seen=[]
     percent_seen=[]
@@ -279,9 +276,19 @@ def breakdown_countries_base_network(footprint_see_not_see, summed_fp_sens):
     area_land_mass = []
     area_land_mass_plus_eez = []
     
+    all_available_counties = dictionary_area_choice.keys()
 
-    for area, area_eez in zip(list_areas, list_areas_eez_included):
-        country_mask = all_area_masks.variables[area][:,:]
+    for country_code in all_available_counties:
+        
+        country_mask = country_masks.variables[country_code][:,:]
+
+        try:
+            country_mask_eez = country_masks_eez_included.variables[country_code][:,:]
+
+        # when no eez for country
+        except:    
+            country_mask_eez = country_masks.variables[country_code][:,:]
+
         #area in km2 of the area.
         country_mask_area=(gridarea*country_mask)/1000000
         country_mask_area_total=country_mask_area.sum()
@@ -295,13 +302,6 @@ def breakdown_countries_base_network(footprint_see_not_see, summed_fp_sens):
         sensitivity_total = summed_fp_sens.sum() 
         sensitivity_within_footprint = (summed_fp_sens * country_mask).sum()
         percent_sensitivity = (sensitivity_within_footprint/sensitivity_total)*100
-        
-        
-        if area_eez=='':
-            country_mask_eez=all_area_masks.variables[area][:,:]
-        else:
-            
-            country_mask_eez=all_area_masks.variables[area_eez][:,:]
 
         country_mask_eez_area=(gridarea*country_mask_eez)/1000000
         country_mask_area_eez_total=country_mask_eez_area.sum()
@@ -313,13 +313,12 @@ def breakdown_countries_base_network(footprint_see_not_see, summed_fp_sens):
         sensitivity_within_footprint_eez = (summed_fp_sens * country_mask_eez).sum()
 
         percent_sensitivity_eez = (sensitivity_within_footprint_eez/sensitivity_total)*100
-        
-        
+
         percent_eez_included=(country_mask_within_footprint_area_eez_total/country_mask_area_eez_total)*100
+        
         if percent > 0 or percent_eez_included>0:
             
-            if area in name_correct_dictionary.keys():
-                area = name_correct_dictionary[area]
+            area = dictionary_area_choice[country_code]
 
             areas_seen.append(area)
             percent_seen.append(percent)
@@ -359,14 +358,12 @@ def breakdown_countries_base_network(footprint_see_not_see, summed_fp_sens):
     else:
         display(HTML('<p style="font-size:16px;">The footprint covers none of the countries in the dropdown.</p>'))
 
-def breakdown_countries_compare_network(footprint_see_not_see, aggreg_fp_see_not_see_uploaded_fp):
+def breakdown_countries_compare_network(footprint_see_not_see, aggreg_fp_see_not_see_uploaded_fp, area_type='Land'):
 
     f_gridarea = cdf.Dataset(os.path.join(folder_data, 'gridareaSTILT.nc'))
 
     #area stored in "cell_area" in m2
     gridarea = f_gridarea.variables['cell_area'][:]
-
-    all_area_masks= cdf.Dataset(os.path.join(folder_tool, 'land_and_land_plus_eez_country_masks_icos_members.nc'))
 
     list_areas=['Sweden', 'Belgium', 'Czech_Rep', 'Denmark', 'Estonia', 'Finland',  'France',  'Germany', 'Hungary', 'Italy', 'Netherland',  'Norway', 'Poland', 'Spain', 'Switzerlan', 'UK', 'ICOS_memb']
     
@@ -382,8 +379,19 @@ def breakdown_countries_compare_network(footprint_see_not_see, aggreg_fp_see_not
     area_land_mass = []
     area_land_mass_plus_eez = []
         
-    for area, area_eez in zip(list_areas, list_areas_eez_included):
-        country_mask = all_area_masks.variables[area][:,:]
+    all_available_counties = dictionary_area_choice.keys()
+
+    for country_code in all_available_counties:
+        
+        country_mask = country_masks.variables[country_code][:,:]
+
+        try:
+            country_mask_eez = country_masks_eez_included.variables[country_code][:,:]
+
+        # when no eez for country
+        except:    
+            country_mask_eez = country_masks.variables[country_code][:,:]
+            
         #area in km2 of the area.
         country_mask_area=(gridarea*country_mask)/1000000
         country_mask_area_total=country_mask_area.sum()
@@ -397,15 +405,8 @@ def breakdown_countries_compare_network(footprint_see_not_see, aggreg_fp_see_not
         country_mask_within_footprint_uploaded_fp = aggreg_fp_see_not_see_uploaded_fp * country_mask
         country_mask_within_footprint_area_uploaded_fp = (gridarea * country_mask_within_footprint_uploaded_fp)/1000000
         country_mask_within_footprint_area_total_uploaded_fp= country_mask_within_footprint_area_uploaded_fp.sum()
-        
-        
+                
         percent_uploaded_fp=(country_mask_within_footprint_area_total_uploaded_fp/country_mask_area_total)*100
-        
-        if area_eez=='':
-            country_mask_eez=all_area_masks.variables[area][:,:]
-        else:
-            #when no EEZ (no water)
-            country_mask_eez=all_area_masks.variables[area_eez][:,:]
         
         country_mask_eez_area=(gridarea*country_mask_eez)/1000000
         country_mask_area_eez_total=country_mask_eez_area.sum()
@@ -426,9 +427,7 @@ def breakdown_countries_compare_network(footprint_see_not_see, aggreg_fp_see_not
         
         if percent > 0 or percent_eez_included>0 or percent_uploaded_fp > 0 or percent_eez_included_uploaded_fp>0:
             
-            
-            if area in name_correct_dictionary.keys():
-                area = name_correct_dictionary[area]
+            area = dictionary_area_choice[country_code]
 
             areas_seen.append(area)
             percent_seen.append('%.2f' % percent)
@@ -441,9 +440,7 @@ def breakdown_countries_compare_network(footprint_see_not_see, aggreg_fp_see_not
             area_land_mass_plus_eez.append(country_mask_area_eez_total)
              
     if len(areas_seen)>0:
-        
-        #if breakdown_type = 'sens':
-        
+
         df_percent_seen=pd.DataFrame()
         
         df_percent_seen['Country'] = areas_seen
@@ -897,7 +894,7 @@ def get_sens_fp_country(land_cover, summed_fp_sens_country):
     return land_cover_sens_fp
 
 #summed_fp_sens: now takes the max footprint (update 2021-07-30)
-def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp_see_not_see, breakdown_type = 'sens'):
+def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp_see_not_see, breakdown_type = 'sens', area_type='Land'):
     
     #import the necessary data
     broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018') 
@@ -915,9 +912,6 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
 
     #area stored in "cell_area" in m2
     gridarea = f_gridarea.variables['cell_area'][:]
-    
-    all_area_masks= Dataset(os.path.join(folder_tool, 'land_and_land_plus_eez_country_masks_icos_members.nc'))
-
 
     #for aggregate graphs (all selected countries - in case than more than one country selected.
     countries = []
@@ -959,8 +953,18 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
         
         list_land_cover_sens_fp = []    
         
-        country_mask = all_area_masks.variables[area_choice][:,:]
+        if area_type == 'Land':
+            country_mask = country_masks.variables[area_choice][:,:]
          
+        # in case area_type == 'Land + EEZ'
+        else:
+            try:
+                country_mask = country_masks_eez_included.variables[area_choice][:,:]
+            
+            # when no eez for selected country
+            except:    
+                country_mask = country_masks.variables[area_choice][:,:]
+    
         # m2 to km2
         country_area_grid=(gridarea*country_mask)/1000000
         country_area_total=country_area_grid.sum()
@@ -1119,7 +1123,9 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
 
             title_pop = "Sensitivity to population by country"
             
-            title_LC = 'Station/network sensitivity to land cover in ' + country_name
+            title_LC = 'Sensitivity to land cover by country'
+            
+            #title_LC = 'Station/network sensitivity to land cover in ' + country_name
             
             label_yaxis_pop = 'population * (ppm /(μmol / (m²s)))'
             
@@ -1135,8 +1141,10 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
 
             title_pop = "Total population within footprints by country"
             
-            title_LC = 'Station/network sensitivity area to land cover in ' + country_name
+            #title_LC = 'Station/network sensitivity area to land cover in ' + country_name
             
+            title_LC = 'Total land cover area within footprints by country'
+          
             label_yaxis_pop = 'Population count'
             
             label_yaxis_LC = 'Area (km²)'
@@ -1201,12 +1209,11 @@ def breakdown_landcover_base_network(list_area_choice, summed_fp_sens, aggreg_fp
         display(population_by_country)
     
 #summed_fp_sens and summed_fp_sens_uploaded footprint: now takes the max footprint (update 2021-07-30)
-def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg_fp_see_not_see, summed_fp_sens_uploaded_fp, aggreg_fp_see_not_see_uploaded_fp, breakdown_type='sens', download_output=False):
+def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg_fp_see_not_see, summed_fp_sens_uploaded_fp, aggreg_fp_see_not_see_uploaded_fp, breakdown_type='sens', download_output=False, area_type='Land'):
     
     #import the necessary data
     broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018') 
-    
-    
+
     list_land_cover_classes = [broad_leaf_forest, coniferous_forest, mixed_forest, cropland, pasture, urban, ocean, grass_shrub, other, unknown]
 
     
@@ -1223,9 +1230,6 @@ def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg
     f_gridarea = cdf.Dataset(os.path.join(folder_data, 'gridareaSTILT.nc'))
 
     gridarea = f_gridarea.variables['cell_area'][:]
-    
-    # is land_and_land_plus_eez_country_masks_icos_members.nc in the stc data folder? 
-    all_area_masks= Dataset(os.path.join(folder_tool, 'land_and_land_plus_eez_country_masks_icos_members.nc'))
 
     countries = []
     # these lists will take the values from both base and compare. 
@@ -1269,9 +1273,19 @@ def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg
         
         list_land_cover_sens_fp_base = []    
         list_land_cover_sens_fp_compare = []  
-
-        country_mask = all_area_masks.variables[area_choice][:,:]
         
+        if area_type == 'Land':
+            country_mask = country_masks.variables[area_choice][:,:]
+         
+        # in case area_type == 'Land + EEZ'
+        else:
+            try:
+                country_mask = country_masks_eez_included.variables[area_choice][:,:]
+            
+            # when no eez for selected country
+            except:    
+                country_mask = country_masks.variables[area_choice][:,:]
+
         #area "seen" in the specific country (area_choice)
         seen_given_see_not_see_mask_base = country_mask * aggreg_fp_see_not_see
         summed_fp_sens_country_base = country_mask * summed_fp_sens
@@ -1653,9 +1667,7 @@ def breakdown_landcover_compare_network(list_area_choice, summed_fp_sens, aggreg
         display(box_population)
 
 def breakdown_landcover_dataframe(list_area_choice, summed_fp_sens, aggreg_fp_see_not_see):
-    
-    all_area_masks= Dataset(os.path.join(folder_tool, 'land_and_land_plus_eez_country_masks_icos_members.nc'))
-    
+
     df_w_values = pd.DataFrame(columns=['Country', 'Year', 'Broad leaf forest total (km2)', 'Broad leaf forest total fp (km2)', 'Broad leaf forest total fp (km² area * (ppm /(μmol / (m²s)))', 'Coniferous forest total (km2)', 'Coniferous forest total fp (km2)', 'Coniferous forest total fp (km² area * (ppm /(μmol / (m²s)))', 'Mixed forest total (km2)', 'Mixed forest total fp (km2)', 'Mixed forest total fp (km² area * (ppm /(μmol / (m²s)))', 'Cropland total (km2)', 'Cropland total fp (km2)', 'Cropland total fp (km² area * (ppm /(μmol / (m²s)))', 'Pasture total (km2)', 'Pasture total fp (km2)', 'Pasture total fp (km² area * (ppm /(μmol / (m²s)))', 'Urban total (km2)', 'Urban total fp (km2)', 'Urban total fp (km² area * (ppm /(μmol / (m²s)))', 'Ocean total (km2)', 'Ocean total fp (km2)', 'Ocean total fp (km² area * (ppm /(μmol / (m²s)))', 'Grass/shrubland total (km2)', 'Grass/shrubland total fp (km2)', 'Grass/shrubland total fp (km² area * (ppm /(μmol / (m²s)))', 'Other total (km2)', 'Other total fp (km2)', 'Other total fp (km² area * (ppm /(μmol / (m²s)))', 'Unknown total (km2)', 'Unknown total fp (km2)', 'Unknown total fp (km² area * (ppm /(μmol / (m²s)))'])
     
     years = ['1990', '2000', '2010', '2019']
@@ -1669,9 +1681,19 @@ def breakdown_landcover_dataframe(list_area_choice, summed_fp_sens, aggreg_fp_se
         #list_land_cover_names = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrubland', 'Other', 'Unknown']
         
         for area_choice in list_area_choice:
-  
-            country_mask = all_area_masks.variables[area_choice][:,:]
-        
+            
+            if area_type == 'Land':
+                country_mask = country_masks.variables[area_choice][:,:]
+
+            # in case area_type == 'Land + EEZ'
+            else:
+                try:
+                    country_mask = country_masks_eez_included.variables[area_choice][:,:]
+
+                # when no eez for selected country
+                except:    
+                    country_mask = country_masks.variables[area_choice][:,:]
+
             seen_given_see_not_see_mask = country_mask * aggreg_fp_see_not_see
             
             summed_fp_sens_country = country_mask * summed_fp_sens
@@ -1696,6 +1718,7 @@ def breakdown_landcover_dataframe(list_area_choice, summed_fp_sens, aggreg_fp_se
    
     return df_w_values
 
+#not updated with new country masks (not used on exploredata)
 def breakdown_landcover_hilda_two_years(list_area_choice, summed_fp_sens, aggreg_fp_see_not_see, breakdown_type = 'sens', year_start='1990', year_end='2019'):
 
     land_cover_values = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrubland', 'Other', 'Unknown']

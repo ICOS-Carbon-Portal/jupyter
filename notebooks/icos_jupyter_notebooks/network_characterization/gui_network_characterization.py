@@ -32,8 +32,23 @@ all_list_2018 = sorted([((v['country'] + ': ' + v['name'] + ' ('+ k + ')'),k) fo
 
 all_list = sorted([((v['country'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items()])
 
+countries = [('Albania','ALB'),('Andorra','Andorra'),('Austria','AUT'),('Belarus','BLR'),('Belgium','BEL'),('Bosnia and Herzegovina','BIH'),('Bulgaria','BGR'),('Croatia','HRV'),('Cyprus','CYP'),('Czechia','CZE'),('Denmark','DNK'),('Estonia','EST'),('Finland','FIN'),('France','FRA'),('Germany','DEU'),('Greece','GRC'),('Hungary','HUN'),('Ireland','IRL'),('Italy','ITA'),('Kosovo','XKX'),('Latvia','LVA'),('Liechtenstein','LIE'),('Lithuania','LTU'),('Luxembourg','LUX'),('Macedonia','MKD'),('Malta','MTL'),('Moldova','MDA'),('Montenegro','MNE'),('Netherlands','NLD'),('Norway','NOR'),('Poland','POL'),('Portugal','PRT'),('Republic of Serbia','SRB'),('Romania','ROU'),('San Marino','SMR'),('Slovakia','SVK'),('Slovenia','SVN'),('Spain','ESP'),('Sweden','SWE'),('Switzerland','CHE'),('United Kingdom','GBR')]
+
+dict_countries = {'ALB':'Albania', 'Andorra':'Andorra', 'AUT':'Austria','BLR':'Belarus','BEL':'Belgium','BIH':'Bosnia and Herzegovina','BGR':'Bulgaria','HRV':'Croatia','CYP':'Cyprus','CZE':'Czechia','DNK':'Denmark','EST':'Estonia','FIN':'Finland','FRA':'France','DEU':'Germany','GRC':'Greece','HUN':'Hungary','IRL':'Ireland','ITA':'Italy','XKX':'Kosovo','LVA':'Latvia','LIE':'Liechtenstein','LTU':'Lithuania','LUX':'Luxembourg','MKD':'Macedonia','MTL':'Malta','MDA':'Moldova','MNE':'Montenegro','NLD':'Netherlands','NOR':'Norway','POL':'Poland','PRT':'Portugal','SRB':'Republic of Serbia','ROU':'Romania','SMR':'San Marino','SVK':'Slovakia','SVN':'Slovenia','ESP':'Spain','SWE':'Sweden','CHE':'Switzerland','GBR':'United Kingdom'}
 
 def set_settings(s):
+    
+    prepared_footprints.value= s['perpared_2018_footprints']
+    
+    if prepared_footprints.value == False:
+        
+        s_year.value = s['startYear'] 
+        s_month.value = s['startMonth']
+        s_day.value = s['startDay']
+        e_year.value = s['endYear'] 
+        e_month.value = s['endMonth']
+        e_day.value = s['endDay']
+        time_selection.value = s['timeOfDay']
 
     sites_base_network_options.value = s['baseNetwork']   
     sites_compare_network_options.value = s['compareNetwork'] 
@@ -136,17 +151,31 @@ def change_selected_base_network_stations(c):
     selected_compare_network_stations.options = [station for station in selected_compare_network_stations.options if not station[1] in selected_base_network_stations.options]
     
     disable_enable_update_button()
-    
+
+
 def change_countries(c):
     
     #selected_countries.options = country_options.value
-    a = set(list(country_options.value) + list(selected_countries.options))    
+    list_tuple = []
+    for country_code in list(country_options.value):
+        country_text = dict_countries[country_code]
+        country_tuple = (country_text, country_code)
+        list_tuple.append(country_tuple)
+        
+    #a = set(list(country_options.value) + list(selected_countries.options))    
+    a = set(list_tuple + list(selected_countries.options))    
     selected_countries.options = sorted(a)
 
-    #update here
 def change_selected_countries(c):
     
-    selected_countries.options = [o for o in selected_countries.options if o not in selected_countries.value]
+    list_tuple = []
+    for country_code in list(selected_countries.value):
+        country_text = dict_countries[country_code]
+        country_tuple = (country_text, country_code)
+        list_tuple.append(country_tuple)
+    
+    #selected_countries.options = [o for o in selected_countries.options if o not in selected_countries.value]
+    selected_countries.options = [o for o in selected_countries.options if o not in list_tuple]
 
 
 def file_set_widgets(c):
@@ -272,7 +301,7 @@ def update_func(button_c):
     update_button.disabled = True
     clear_all_output()
     
-    if not prepared_footprints:
+    if not prepared_footprints.value:
         
         date_range = pd.date_range(start=(str(s_year.value) + '-' + str(s_month.value)  + '-' + str(s_day.value)), end=(str(e_year.value) + '-' + str(e_month.value)  + '-' + str(e_day.value)), freq='3H')
         timeselect_list = list(time_selection.value)
@@ -293,25 +322,11 @@ def update_func(button_c):
     download_output=download_output_option.value
     colorbar=colorbar_choice.value
     
-    #countries for combination with ancillary data
-    countries_keys=list(selected_countries.options)
-    countries = []
-    if area_type.value == 'Land':
-
-        dictionary_land={'Belgium': 'Belgium', 'Czech Republic':'Czech_Rep', 'Denmark': 'Denmark', 'Estonia':'Estonia', 'Finland':'Finland', 'France':'France','Germany':'Germany', 'Hungary':'Hungary', 'Italy':'Italy', 'Netherlands':'Netherland','Norway':'Norway', 'Poland':'Poland','Spain':'Spain','Sweden':'Sweden', 'Switzerland':'Switzerlan','UK':'UK'}
-        
-        for country in countries_keys:
-            countries.append(dictionary_land[country])
-            
-    #land + eez:
-    else:
-        
-        dictionary_land_eez={'Belgium': 'Belgiu_eez', 'Czech Republic':'Czech_Rep', 'Denmark': 'Denmar_eez', 'Estonia':'Estoni_eez', 'Finland':'Finlan_eez', 'France':'France_eez','Germany':'Germa_eez', 'Hungary':'Hungary', 'Italy':'Italy_eez', 'Netherlands':'Nether_eez','Norway':'Norway_eez', 'Poland':'Poland_eez','Spain':'Spain_eez','Sweden':'Swe_eez', 'Switzerland':'Switzerlan','UK':'UK_eez'}
-                
-        for country in countries_keys:
-            countries.append(dictionary_land_eez[country])
-
+    type_area = area_type.value
+    
     breakdown = breakdown_type.value
+    
+    countries=[selected_country[1] for selected_country in list(selected_countries.options)]
 
     fp_combined_base_network, fp_mask_count_base_network, fp_mask_base_network, fp_max_base_network, lon, lat, list_none_footprints = functions.aggreg_2018_footprints_base_network(sites_base_network, threshold_int, date_range)
     
@@ -338,7 +353,12 @@ def update_func(button_c):
            
     if download_output:
         
-        settings = {"baseNetwork": sites_base_network, "compareNetwork": sites_compare_network, "colorBar": colorbar_choice.value, "percent": threshold_option.value, "countryDefinition": area_type.value , "countries": countries_keys, "weighing": breakdown_type.value, "download": download_output_option.value}
+        if prepared_footprints.value:
+        
+            settings = {'perpared_2018_footprints': prepared_footprints.value,"baseNetwork": sites_base_network, "compareNetwork": sites_compare_network, "colorBar": colorbar_choice.value, "percent": threshold_option.value, "countryDefinition": area_type.value , "countries": countries, "weighing": breakdown_type.value, "download": download_output_option.value}
+        else:
+            settings = {'perpared_2018_footprints': prepared_footprints.value,'startYear': s_year.value, 'startMonth': s_month.value, 'startDay': s_day.value, 'endYear': e_year.value,'endMonth': e_month.value,'endDay': e_day.value, 'timeOfDay':list(time_selection.value), "baseNetwork": sites_base_network, "compareNetwork": sites_compare_network, "colorBar": colorbar_choice.value, "percent": threshold_option.value, "countryDefinition": area_type.value , "countries": countries, "weighing": breakdown_type.value, "download": download_output_option.value}
+            
 
         functions.save_settings(settings, directory='network_characterization/network_characterization_2018')
 
@@ -363,8 +383,7 @@ def update_func(button_c):
                 if len(list_none_footprints)>0:
 
                     display(HTML('<p style="font-size:16px">No footprints available for compare network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints. </p>'))
-                    
-       
+
         vmax_see_not_see = np.max(fp_mask_count_compare_network)
         vmax_sens = np.max(fp_combined_compare_network)
         
@@ -484,7 +503,7 @@ def update_func(button_c):
 
         with output_breakdown_countries:
 
-            functions.breakdown_countries_compare_network(fp_mask_base_network, fp_mask_compare_network) 
+            functions.breakdown_countries_compare_network(fp_mask_base_network, fp_mask_compare_network, type_area) 
 
         with output_header_landcover_section:
             
@@ -499,14 +518,14 @@ def update_func(button_c):
         with breakdown_landcover_output:
            
             
-            functions.breakdown_landcover_compare_network(countries, fp_max_base_network, fp_mask_base_network, fp_max_compare_network, fp_mask_compare_network, breakdown, download_output)
+            functions.breakdown_landcover_compare_network(countries, fp_max_base_network, fp_mask_base_network, fp_max_compare_network, fp_mask_compare_network, breakdown, download_output, type_area)
             
        
     else:
         with output_breakdown_countries:
             
             
-            functions.breakdown_countries_base_network(fp_mask_base_network, fp_combined_base_network) 
+            functions.breakdown_countries_base_network(fp_mask_base_network, fp_combined_base_network, type_area) 
 
 
         with output_header_landcover_section:
@@ -520,7 +539,7 @@ def update_func(button_c):
 
         with breakdown_landcover_output:
 
-            functions.breakdown_landcover_base_network(countries, fp_max_base_network, fp_mask_base_network, breakdown)
+            functions.breakdown_landcover_base_network(countries, fp_max_base_network, fp_mask_base_network, breakdown, type_area)
 
     update_button.disabled = False
 #-----------widgets definition ----------------
@@ -679,8 +698,6 @@ with heading_analysis_ancillary_data:
 heading_country_options = Output()
 with heading_country_options:
     display(HTML('<p style="font-size:16px;">Countries of interest: </p>'))
-
-countries = ['Belgium', 'Czech Republic','Denmark', 'Estonia','Finland','France', 'Germany','Hungary', 'Italy', 'Netherlands', 'Norway','Poland','Spain','Sweden','Switzerland', 'UK']
 
 country_options= SelectMultiple(
     options=countries,
