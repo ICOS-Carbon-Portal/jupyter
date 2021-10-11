@@ -11,6 +11,7 @@ Functions to run the station characterization notebook on exploredata.
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import math
 import numpy as np
 from netCDF4 import Dataset
@@ -20,40 +21,32 @@ import os
 import six
 import requests
 import tex
-
-
-#for the widgets
 from IPython.core.display import display, HTML 
-
-# import required libraries
-
 import netCDF4 as cdf
 import cartopy
 cartopy.config['data_dir'] = '/data/project/cartopy/'
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
+import cartopy.io.shapereader as shpreader
+from cartopy.feature import ShapelyFeature
 import warnings
 warnings.filterwarnings('ignore')
-
 import json
 
+#path to data such as population data and land cover data
 stcDataPath='/data/project/stc/'
-
-#added - not show the figure that I am saving (different size than the one displayed
-#for land cover bar graph)
-matplotlib.pyplot.ioff()
-
 
 #path to footprints
 pathFP='/data/stiltweb/stations/'
 
+#added to not show the land cover bar graph that is being saved for the PDF which is different size than the one displayed
+matplotlib.pyplot.ioff()
+
 #Earth's radius in km (for calculating distances between the station and cells)
 R = 6373.8
 
-dictionary_color = {'Urban': {'color': 'red'}, 'Cropland':{'color':'darkgoldenrod'}, 'Oceans':{'color':'blue'}, 
-                    'Forests':{'color':'green'}, 'Pastures and grassland':{'color':'yellow'}, 'Other':{'color':'black'}, 'No data':{'color': 'grey'}}
-
-
+#Colors for the land cover plots
+dictionary_color = {'Broad leaf forest': {'color': '#4c9c5e'}, 'Coniferous forest':{'color':'#CAE0AB'}, 'Mixed forest':{'color':'#90C987'}, 'Ocean':{'color':'#1964B0'}, 'Other':{'color':'#882E72'}, 'Grass/shrubland':{'color':'#F1932D'}, 'Cropland':{'color': '#521A13'}, 'Pasture':{'color':'#F7F056'}, 'Urban':{'color':'#DC050C'}, 'Unknown':{'color':'#777777'}}
 
 #function to read and aggregate footprints for given date range
 def read_aggreg_footprints(station, date_range):
@@ -67,8 +60,7 @@ def read_aggreg_footprints(station, date_range):
     nfp=0
     first = True
     for date in date_range:
-        
-  
+
         filename=(pathFP+station+'/'+str(date.year)+'/'+str(date.month).zfill(2)+'/'
              +str(date.year)+'x'+str(date.month).zfill(2)+'x'+str(date.day).zfill(2)+'x'+str(date.hour).zfill(2)+'/foot')
  
@@ -96,15 +88,11 @@ def read_aggreg_footprints(station, date_range):
 
         return 0, None, None, None, None
 
-
-#updated --> take the timeselect list and returns the "correct" dataframe
-#otherwise - not correct hours!
 # function to read STILT concentration time series (new format of STILT results)
 def read_stilt_timeseries(station,date_range,timeselect_list):
     url = 'https://stilt.icos-cp.eu/viewer/stiltresult'
     headers = {'Content-Type': 'application/json', 'Accept-Charset': 'UTF-8'}
-    # check if STILT results exist
-    #pathFP='/data/stiltweb/stations/'
+
     new_range=[]
     
     for date in date_range:
@@ -190,99 +178,35 @@ def date_range_hour_filtered(start_date, end_date, timeselect_list):
     #consider return timeselect
     return date_range
 
-def import_landcover():
-    all_corine_classes= Dataset(stcDataPath + 'CLC_2018_landcover.nc')
-
-    #the "CLC_naturalearth_oceans.nc" is seperate: CORINE class 523 (oceans) did not extend beyond exclusive zone
-    #complemented with Natural Earth data.
-    #CORINE does not cover the whole area, "nodata" area is never ocean, rather landbased data.
-    oceans= Dataset(stcDataPath + 'CLC_naturalearth_oceans.nc')
+def import_landcover_HILDA(year='2018'):
+    
+    name_data = 'hilda_lulc_'+ year +'.nc' 
+    
+    all_hilda_classes= Dataset(stcDataPath + name_data)
 
     #access all the different land cover classes in the .nc files:
-    fp_111 = all_corine_classes.variables['area_111'][:,:]
-    fp_112 = all_corine_classes.variables['area_112'][:,:]
-    fp_121 = all_corine_classes.variables['area_121'][:,:]
-    fp_122 = all_corine_classes.variables['area_122'][:,:]
-    fp_123 = all_corine_classes.variables['area_123'][:,:]
-    fp_124 = all_corine_classes.variables['area_124'][:,:]
-    fp_131 = all_corine_classes.variables['area_131'][:,:]
-    fp_132 = all_corine_classes.variables['area_132'][:,:]
-    fp_133 = all_corine_classes.variables['area_133'][:,:]
-    fp_141 = all_corine_classes.variables['area_141'][:,:]
-    fp_142 = all_corine_classes.variables['area_142'][:,:]
-    fp_211 = all_corine_classes.variables['area_211'][:,:]
-    fp_212 = all_corine_classes.variables['area_212'][:,:]
-    fp_213 = all_corine_classes.variables['area_213'][:,:]
-    fp_221 = all_corine_classes.variables['area_221'][:,:]
-    fp_222 = all_corine_classes.variables['area_222'][:,:]
-    fp_223 = all_corine_classes.variables['area_223'][:,:]
-    fp_231 = all_corine_classes.variables['area_231'][:,:]
-    fp_241 = all_corine_classes.variables['area_241'][:,:]
-    fp_242 = all_corine_classes.variables['area_242'][:,:]
-    fp_243 = all_corine_classes.variables['area_243'][:,:]
-    fp_244 = all_corine_classes.variables['area_244'][:,:]
-    fp_311 = all_corine_classes.variables['area_311'][:,:]
-    fp_312 = all_corine_classes.variables['area_312'][:,:]
-    fp_313 = all_corine_classes.variables['area_313'][:,:]
-    fp_321 = all_corine_classes.variables['area_321'][:,:]
-    fp_322 = all_corine_classes.variables['area_322'][:,:]
-    fp_323 = all_corine_classes.variables['area_323'][:,:]
-    fp_324 = all_corine_classes.variables['area_324'][:,:]
-    fp_331 = all_corine_classes.variables['area_331'][:,:]
-    fp_332 = all_corine_classes.variables['area_332'][:,:]
-    fp_333 = all_corine_classes.variables['area_333'][:,:]
-    fp_334 = all_corine_classes.variables['area_334'][:,:]
-    fp_335 = all_corine_classes.variables['area_335'][:,:]
-    fp_411 = all_corine_classes.variables['area_411'][:,:]
-    fp_412 = all_corine_classes.variables['area_412'][:,:]
-    fp_421 = all_corine_classes.variables['area_421'][:,:]
-    fp_422 = all_corine_classes.variables['area_422'][:,:]
-    fp_423 = all_corine_classes.variables['area_423'][:,:]
-    fp_511 = all_corine_classes.variables['area_511'][:,:]
-    fp_512 = all_corine_classes.variables['area_512'][:,:]
-    fp_521 = all_corine_classes.variables['area_521'][:,:]
-    fp_522 = all_corine_classes.variables['area_522'][:,:]
-
-    #CORINE combined with natural earth data for oceans:
-    fp_523 = oceans.variables['ocean_ar2'][:,:]
-
-    #have a variable that represents the whole area of the cell,
-    #used to get a percentage breakdown of each corine class.
-    fp_total_area = all_corine_classes.variables['area_stilt'][:,:]
-
-    #19 aggregated classes (these are used in the current bar graphs but can be updated by each user)
-    urban = fp_111+fp_112+fp_141+fp_142
-    industrial = fp_131 + fp_133 + fp_121 
-    road_and_rail = fp_122 
-    ports_and_apirports= fp_123+fp_124
-    dump_sites = fp_132
-    staple_cropland_not_rice = fp_211 + fp_212 + fp_241 + fp_242 + fp_243
-    rice_fields = fp_213
-    cropland_fruit_berry_grapes_olives = fp_221 + fp_222 + fp_223
-    pastures = fp_231
-    broad_leaved_forest = fp_311
-    coniferous_forest = fp_312
-    mixed_forest = fp_313 + fp_244
-    natural_grasslands = fp_321 + fp_322
-    transitional_woodland_shrub= fp_323 + fp_324
-    bare_natural_areas = fp_331 + fp_332 + fp_333 + fp_334
-    glaciers_prepetual_snow = fp_335
-    wet_area= fp_411 + fp_412 + fp_421 + fp_422
-    inland_water_bodies = fp_423 + fp_511 + fp_512 + fp_521 + fp_522
-    oceans = fp_523
-
-    #added: the "missing area" is out of the CORINE domain. Alltogether add upp to "fp_total_area"
-    out_of_domain=fp_total_area-oceans-inland_water_bodies-wet_area-glaciers_prepetual_snow-bare_natural_areas-transitional_woodland_shrub-natural_grasslands-mixed_forest-coniferous_forest-broad_leaved_forest-pastures-cropland_fruit_berry_grapes_olives-rice_fields-staple_cropland_not_rice-dump_sites-ports_and_apirports-road_and_rail-industrial-urban
-
-    #further aggregated classes for the land cover wind polar graph and land cover bar graph
-    urban_aggreg= urban + industrial + road_and_rail + dump_sites + ports_and_apirports
-    cropland_aggreg= staple_cropland_not_rice + rice_fields + cropland_fruit_berry_grapes_olives
-    forests= broad_leaved_forest + coniferous_forest + mixed_forest
-    pastures_grasslands= pastures + natural_grasslands
-    oceans=oceans
-    other=transitional_woodland_shrub+bare_natural_areas+glaciers_prepetual_snow +wet_area + inland_water_bodies
-
-    return out_of_domain, urban_aggreg, cropland_aggreg, forests, pastures_grasslands, oceans, other
+    cropland = all_hilda_classes.variables['cropland'][:,:]
+    ocean = all_hilda_classes.variables['ocean'][:,:]
+    forest_decidious_broad_leaf = all_hilda_classes.variables['f_de_br_le'][:,:]
+    forest_decidious_needle_leaf = all_hilda_classes.variables['f_de_ne_le'][:,:]
+    forest_evergreen_broad_leaf = all_hilda_classes.variables['f_eg_br_le'][:,:]
+    forest_evergreen_needle_leaf = all_hilda_classes.variables['f_eg_ne_le'][:,:]
+    mixed_forest = all_hilda_classes.variables['forest_mix'][:,:]
+    forest_unknown = all_hilda_classes.variables['forest_unk'][:,:]
+    grass_shrub = all_hilda_classes.variables['grass_shru'][:,:]
+    other_land = all_hilda_classes.variables['other_land'][:,:]
+    pasture = all_hilda_classes.variables['pasture'][:,:]
+    urban = all_hilda_classes.variables['urban'][:,:]
+    water = all_hilda_classes.variables['water'][:,:]
+    unknown = all_hilda_classes.variables['unknown'][:,:]
+    
+    # aggregated classes:
+    broad_leaf_forest = forest_decidious_broad_leaf + forest_evergreen_broad_leaf 
+    coniferous_forest = forest_decidious_needle_leaf+ forest_evergreen_needle_leaf
+    mixed_forest = mixed_forest + forest_unknown
+    other = other_land + water
+       
+    return broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown
 
 def import_population_data(year=2018):
    
@@ -431,8 +355,6 @@ def lonlat_2_ixjy(slon,slat,mlon,mlat):
     jy = (np.abs(mlat-slat)).argmin()
     return ix,jy
 
-
-
 def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='', 
               vmin=0.0001, vmax=None, colors='GnBu'): 
 
@@ -443,9 +365,13 @@ def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='',
     if unit=='percent':
         unit='%'
     else:
-        unit='absolute'
+        if label=='point source contribution':
+            unit='(ppm)'
+        if label=='population sensitivity':
+            unit='(population * (ppm /(μmol / (m²s))))'
+        if label=='sensitivity':
+            unit='(ppm /(μmol / (m²s)))'
 
-    
     fp_lon=myStation.fpLon
     fp_lat=myStation.fpLat
     
@@ -468,25 +394,47 @@ def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='',
     ax = plt.subplot(1, 2, 1, projection=ccrs.PlateCarree())
     img_extent = (fp_lon.min(), fp_lon.max(), fp_lat.min(), fp_lat.max())
     ax.set_extent([fp_lon.min(), fp_lon.max(), fp_lat.min(), fp_lat.max()],crs=ccrs.PlateCarree())
-    ax.add_feature(countries, edgecolor='black', linewidth=0.3)
-
-    cmap = plt.get_cmap(colors)
     
+    ax.add_feature(countries, edgecolor='lightgrey', linewidth=0.3)
+   
+    reader = shpreader.Reader('/data/project/cartopy/shapefiles/natural_earth/cultural/ne_10m_admin_0_countries.shp')
+    
+    # Color countries that miss data for population and point source respectively
+    if label == 'point source contribution':   
+        list_countries_to_add = ['Russian Federation', 'Belarus', 'Ukraine', 'Moldova', 'Turkey', 'Tunisia', 'Algeria', 'Morocco','Bosnia and Herzegovina', 'Serbia', 'Montenegro', 'Kosovo', 'Albania', 'Macedonia']
+        legend_title= 'Countries with no point source data'
+        
+    if label == 'population sensitivity':
+    
+        list_countries_to_add = ['Russian Federation', 'Belarus', 'Ukraine', 'Moldova', 'Turkey', 'Tunisia', 'Algeria', 'Morocco']
+        legend_title= 'Countries with no population data'
+    
+    if label == 'point source contribution' or label == 'population sensitivity':
+        
+        for country_to_add in list_countries_to_add:
+
+            country_information = [country for country in reader.records() if country.attributes["NAME_LONG"] == country_to_add][0]
+            country_shape = ShapelyFeature([country_information.geometry], ccrs.PlateCarree(), facecolor="white", hatch="/", edgecolor='lightgrey', lw=0.3)                     
+            ax.add_feature(country_shape)
+        
+        # add a legend 
+        proxy_artist = mpatches.Rectangle((0, 0), 1, 0.1, facecolor="white", hatch="/", edgecolor='lightgrey', lw=0.5)
+        ax.legend([proxy_artist], [legend_title], loc='upper left', fancybox=True)
+            
+    cmap = plt.get_cmap(colors)
     cmap.set_under(color='white')  
     
     if linlog == 'linear':
         
         im = ax.imshow(field[:,:],interpolation=None,origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
-        cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='both')
+        cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='neither')
         cbar.set_label(label+'  '+unit)
 
     else:
         
         im = ax.imshow(np.log10(field)[:,:],interpolation='none',origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
-        cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='both')
+        cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='neither')
         cbar.set_label(label+'  log$_{10}$ '+unit)
-    
-    #plt.title(title)
     
     ax.text(0.01, -0.25, 'min: %.2f' % np.min(field[:,:]), horizontalalignment='left',transform=ax.transAxes)
     ax.text(0.99, -0.25, 'max: %.2f' % np.max(field[:,:]), horizontalalignment='right',transform=ax.transAxes)
@@ -495,45 +443,7 @@ def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='',
     if station != '':
 
         ax.plot(lon,lat,'+',color=mcolor,ms=10,markeredgewidth=1,transform=ccrs.PlateCarree())
-        
-    zoom=str(zoom)
-    if zoom != '':
-        
-        #grid cell index of station 
-        ix,jy = lonlat_2_ixjy(lon,lat,fp_lon,fp_lat)
- 
-        # define zoom area 
-        i1 = np.max([ix-35,0])
-        i2 = np.min([ix+35,400])
-        j1 = np.max([jy-42,0])
-        j2 = np.min([jy+42,480])
 
-        lon_z=fp_lon[i1:i2]
-        lat_z=fp_lat[j1:j2]
-
-        field_z=field[j1:j2,i1:i2]
-
-        # set up a map
-        ax = plt.subplot(1, 2, 2, projection=ccrs.PlateCarree())
-        img_extent = (lon_z.min(), lon_z.max(), lat_z.min(), lat_z.max())
-        ax.set_extent([lon_z.min(), lon_z.max(), lat_z.min(), lat_z.max()],crs=ccrs.PlateCarree())
-        ax.add_feature(countries, edgecolor='black', linewidth=0.3)
-    
-        if linlog == 'linear':
-            im = ax.imshow(field_z,interpolation='none',origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
-            cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='both')
-            cbar.set_label(label+'  '+unit)
-        else:
-            im = ax.imshow(np.log10(field_z),interpolation='none',origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
-            cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='both')
-            cbar.set_label(label+'  log$_{10}$ '+unit)
-
-        #show station location if station is provided
-        if station != '':
-            ax.plot(lon,lat,'+',color=mcolor,ms=10,markeredgewidth=1,transform=ccrs.PlateCarree())
-
-        ax.text(0.01, -0.25, 'min: %.2f' % np.min(field[j1:j2,i1:i2]), horizontalalignment='left',transform=ax.transAxes)
-        ax.text(0.99, -0.25, 'max: %.2f' % np.max(field[j1:j2,i1:i2]), horizontalalignment='right',transform=ax.transAxes)
         
     return fig 
     
@@ -570,12 +480,7 @@ def polar_graph(myStation, rose_type, colorbar='gist_heat_r', zoom=''):
     fp=myStation.fp
     unit=myStation.settings['unit']
     
-    if myStation.settings['startYear']<2015:
-        pop_data_year=2011
-    else:
-        pop_data_year=2018
-    
-    fp_pop= import_population_data(year=pop_data_year)
+    fp_pop= import_population_data(year=2018)
     fp_point= import_point_source_data()
     
     #same function used to all three types of map
@@ -665,67 +570,88 @@ def polar_graph(myStation, rose_type, colorbar='gist_heat_r', zoom=''):
                    linlog='linear', zoom='', vmin=0.0001, vmax=None, colors=colorbar)
         
     return polar_map, caption
+    
 
 def land_cover_bar_graph(myStation):    
+    
     fp_lon=myStation.fpLon
     fp_lat=myStation.fpLat
     degrees=myStation.degrees
     fp=myStation.fp
 
     #get all the land cover data from netcdfs 
-    out_of_domain, urban_aggreg, cropland_aggreg, forests, pastures_grasslands, oceans, other= import_landcover()
+    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018')
     
     #land cover classes (imported in the land cover section):
-    cropland=fp*cropland_aggreg
-    urban=fp*urban_aggreg
-    forests=fp*forests
-    pastures_grasslands=fp*pastures_grasslands
-    oceans=fp*oceans
+    broad_leaf_forest=fp*broad_leaf_forest
+    coniferous_forest=fp*coniferous_forest
+    mixed_forest=fp*mixed_forest
+    ocean=fp*ocean
     other=fp*other
-    out_of_domain=fp*out_of_domain
-            
+    grass_shrub=fp*grass_shrub
+    cropland=fp*cropland
+    pasture=fp*pasture
+    urban=fp*urban
+    unknown=fp*unknown
+                
     #lists of these values
+    broad_leaf_forest_values = [item for sublist in broad_leaf_forest[0] for item in sublist]
+    coniferous_forest_values = [item for sublist in coniferous_forest[0] for item in sublist]
+    mixed_forest_values = [item for sublist in mixed_forest[0] for item in sublist]
+    ocean_values = [item for sublist in ocean[0] for item in sublist]
+    other_values = [item for sublist in other[0] for item in sublist]
+    grass_shrub_values = [item for sublist in grass_shrub[0] for item in sublist]
     cropland_values = [item for sublist in cropland[0] for item in sublist]
+    pasture_values = [item for sublist in pasture[0] for item in sublist]
     urban_values = [item for sublist in urban[0] for item in sublist]
-    forests_values = [item for sublist in forests[0] for item in sublist]
-    pastures_grasslands_values = [item for sublist in pastures_grasslands[0] for item in sublist]
-    oceans_values = [item for sublist in oceans[0] for item in sublist]
-    others_values = [item for sublist in other[0] for item in sublist]
-    out_of_domain_values = [item for sublist in out_of_domain[0] for item in sublist]
+    unknown_values = [item for sublist in unknown[0] for item in sublist]
+        
         
     #putting it into a dataframe: initially 192000 values (one per cell) for each of the aggregated land cover classes
     #into same dataframe - have the same coulmn heading. "landcover_type" will be used in "groupby" together with the "slice" (in degrees)
-    df_cropland = pd.DataFrame({'landcover_vals': cropland_values,
+    df_broad_leaf_forest = pd.DataFrame({'landcover_vals': broad_leaf_forest_values,
                                'degrees': degrees,
-                               'landcover_type':'Cropland'})
+                               'landcover_type':'Broad leaf forest'})
     
-    df_urban = pd.DataFrame({'landcover_vals': urban_values,
+    df_coniferous_forest = pd.DataFrame({'landcover_vals': coniferous_forest_values,
                            'degrees': degrees,
-                           'landcover_type':'Urban'})
+                           'landcover_type':'Coniferous forest'})
     
-    df_forests = pd.DataFrame({'landcover_vals': forests_values,
+    df_mixed_forest = pd.DataFrame({'landcover_vals': mixed_forest_values,
                            'degrees': degrees,
-                           'landcover_type':'Forests'})
+                           'landcover_type':'Mixed forest'})
     
-    df_pastures_grassland = pd.DataFrame({'landcover_vals': pastures_grasslands_values,
+    df_ocean = pd.DataFrame({'landcover_vals': ocean_values,
                            'degrees': degrees,
-                           'landcover_type':'Pastures and grassland'})
+                           'landcover_type':'Ocean'})
     
-    df_oceans = pd.DataFrame({'landcover_vals': oceans_values,
-                           'degrees': degrees,
-                           'landcover_type':'Oceans'})
-    
-    df_others = pd.DataFrame({'landcover_vals':  others_values,
+    df_other = pd.DataFrame({'landcover_vals': other_values,
                            'degrees': degrees,
                            'landcover_type':'Other'})
     
-    df_out_of_domain = pd.DataFrame({'landcover_vals':  out_of_domain_values,
+    df_grass_shrub = pd.DataFrame({'landcover_vals':  grass_shrub_values,
                            'degrees': degrees,
-                           'landcover_type':'No data'})
+                           'landcover_type':'Grass/shrubland'})
+    
+    df_cropland = pd.DataFrame({'landcover_vals':  cropland_values,
+                           'degrees': degrees,
+                           'landcover_type':'Cropland'})
+    
+    df_pasture = pd.DataFrame({'landcover_vals': pasture_values,
+                           'degrees': degrees,
+                           'landcover_type':'Pasture'})
+    
+    df_urban = pd.DataFrame({'landcover_vals':  urban_values,
+                           'degrees': degrees,
+                           'landcover_type':'Urban'})
+    
+    df_unknown = pd.DataFrame({'landcover_vals':  unknown_values,
+                           'degrees': degrees,
+                           'landcover_type':'Unknown'})
     
 
     #into one dataframe
-    df_all = df_cropland.append([df_urban, df_forests, df_pastures_grassland, df_oceans, df_others, df_out_of_domain])
+    df_all = df_cropland.append([df_broad_leaf_forest, df_coniferous_forest, df_mixed_forest, df_ocean, df_other, df_grass_shrub, df_pasture, df_urban, df_unknown])
     
 
     #not change with user input
@@ -782,9 +708,19 @@ def land_cover_bar_graph(myStation):
     p7 = ax.bar(ind, list_land_cover_values[6], width, color=dictionary_color[list_land_cover_names_sorted[6]]['color'],
                  bottom=list_land_cover_values[0]+list_land_cover_values[1]+list_land_cover_values[2]+list_land_cover_values[3]+\
                  list_land_cover_values[4]+list_land_cover_values[5])
+    
+    p8 = ax.bar(ind, list_land_cover_values[7], width, color=dictionary_color[list_land_cover_names_sorted[7]]['color'], 
+                bottom=list_land_cover_values[0]+list_land_cover_values[1]+list_land_cover_values[2]+list_land_cover_values[3]+\
+                 list_land_cover_values[4]+list_land_cover_values[5]+list_land_cover_values[6])
+    
+    p9 = ax.bar(ind, list_land_cover_values[8], width, color=dictionary_color[list_land_cover_names_sorted[8]]['color'], bottom=list_land_cover_values[0]+list_land_cover_values[1]+list_land_cover_values[2]+list_land_cover_values[3]+\
+                 list_land_cover_values[4]+list_land_cover_values[5]+list_land_cover_values[6]+list_land_cover_values[7])
+    
+    p10 = ax.bar(ind, list_land_cover_values[9], width, color=dictionary_color[list_land_cover_names_sorted[9]]['color'], bottom=list_land_cover_values[0]+list_land_cover_values[1]+list_land_cover_values[2]+list_land_cover_values[3]+\
+                 list_land_cover_values[4]+list_land_cover_values[5]+list_land_cover_values[6]+ list_land_cover_values[7]+list_land_cover_values[8])
 
     #want to reverese the order (ex if oceans at the "bottom" in the graph - ocean label should be furthest down)
-    handles=(p1[0], p2[0], p3[0], p4[0], p5[0], p6[0], p7[0])
+    handles=(p1[0], p2[0], p3[0], p4[0], p5[0], p6[0], p7[0], p8[0], p9[0], p10[0])
 
     index=0
     list_labels=[]
@@ -796,7 +732,7 @@ def land_cover_bar_graph(myStation):
 
     labels=[textwrap.fill(text,20) for text in list_labels]
 
-    plt.legend(handles[::-1], labels[::-1],bbox_to_anchor=(1, 0.4))
+    plt.legend(handles[::-1], labels[::-1],bbox_to_anchor=(1, 0.52))
  
     plt.ylabel('Percent')
     
@@ -821,7 +757,7 @@ def render_mpl_seasonal_table(myStation, data, station, col_width=2, row_height=
         fig, ax = plt.subplots(figsize=size)
         ax.axis('off')
 
-    mpl_table = ax.table(cellText=data.values, cellLoc='center', bbox=bbox, colLabels=data.columns, colWidths=[3,3.5,1.75,1.75,1.75,1.75,3.5])
+    mpl_table = ax.table(cellText=data.values, cellLoc='center', bbox=bbox, colLabels=data.columns, colWidths=[2.5,1.5,2.5,2,2,2,3.5])
 
     mpl_table.auto_set_font_size(True)
     mpl_table.set_fontsize(font_size)
@@ -836,24 +772,19 @@ def render_mpl_seasonal_table(myStation, data, station, col_width=2, row_height=
 
     return fig
 
-       
-#seasonal variations table
-def seasonal_table(myStation):
- 
-    var_load=pd.read_csv(stcDataPath + 'seasonal_table_values.csv') 
-    
 
+def seasonal_table(myStation):
+    
     station=myStation.stationId
     year=myStation.settings['startYear']
     year_before=year-1
     available_STILT= myStation.settings['stilt']
     months= available_STILT[str(year)]['months']
-    
-    
+    var_load=pd.read_csv(stcDataPath + 'seasonal_table_values.csv') 
     station_year= station +'_' + str(year)
-
+    
     if station_year in set(var_load.station_year):
-
+        
         sens_whole= var_load.loc[var_load['station_year'] == station_year, 'sens_whole'].iloc[0]
         sens_diff_winter = var_load.loc[var_load['station_year'] == station_year, 'sens_diff_winter'].iloc[0]
         sens_diff_spring = var_load.loc[var_load['station_year'] == station_year, 'sens_diff_spring'].iloc[0]
@@ -891,39 +822,25 @@ def seasonal_table(myStation):
         anthro_diff_fall = var_load.loc[var_load['station_year'] == station_year, 'anthro_diff_fall'].iloc[0]
 
     else:
-        
-        if myStation.settings['startYear']<2015:
-            pop_data_year=2011
-        else:
-            pop_data_year=2018
     
-        fp_pop= import_population_data(year=pop_data_year)
+        fp_pop= import_population_data(year=2018)
 
         fp_point = import_point_source_data()
 
-        #check what months available for the year (and December the year before - seasons rather than full year)
-
-        years=[int(year) for year in available_STILT['years']]
-        
-        if year_before in years:
-            try:
-                months_year_before = available_STILT[year_before]['months'] 
-            except: months_year_before=''
-        else:
-            months_year_before=''
-
-        #need there to be 12 months of data avaiable to move on with the code - create a table for whole year
-        #the months + text
-        if len(months)==13 and '12' in months_year_before:
-
+        # if full year avaialbe - go ahead and create the tabel - else a message will be sent to the user
+        if len(months)==13:
             #all hours for the date ranges... could update with date_range_hour_filtered
-            winter_date_range=pd.date_range(dt.datetime(year-1,12,1,0), (dt.datetime(year, 3, 1,0)-dt.timedelta(hours=3)), freq='3H')
+            winter_date_range1=pd.date_range(dt.datetime(year,1,1,0), (dt.datetime(year, 3, 1,0)-dt.timedelta(hours=3)), freq='3H')
+            winter_date_range2=pd.date_range(dt.datetime(year,12,1,0), (dt.datetime(year+1, 1, 1,0)-dt.timedelta(hours=3)), freq='3H')
             spring_date_range=pd.date_range(dt.datetime(year,3,1,0), (dt.datetime(year, 6, 1,0)-dt.timedelta(hours=3)), freq='3H')
             summer_date_range=pd.date_range(dt.datetime(year,6,1,0), (dt.datetime(year, 9, 1,0)-dt.timedelta(hours=3)), freq='3H')
             fall_date_range=pd.date_range(dt.datetime(year,9,1,0), (dt.datetime(year, 12, 1,0)-dt.timedelta(hours=3)), freq='3H')
 
             #the average footprints given the selected date range
-            nfp_winter, fp_winter, fp_lon, fp_lat, title_not_used = read_aggreg_footprints(station, winter_date_range)
+            nfp_winter1, fp_winter1, fp_lon, fp_lat, title_not_used = read_aggreg_footprints(station, winter_date_range1)
+            nfp_winter2, fp_winter2, fp_lon, fp_lat, title_not_used = read_aggreg_footprints(station, winter_date_range2)
+            nfp_winter = nfp_winter1 + nfp_winter2
+            fp_winter = (fp_winter1 * (nfp_winter1/nfp_winter)) + (fp_winter2 * (nfp_winter2/nfp_winter))
             nfp_spring, fp_spring, fp_lon, fp_lat, title_not_used = read_aggreg_footprints(station, spring_date_range)
             nfp_summer, fp_summer, fp_lon, fp_lat, title_not_used = read_aggreg_footprints(station, summer_date_range)
             nfp_fall, fp_fall, fp_lon, fp_lat, title_not_used = read_aggreg_footprints(station, fall_date_range)
@@ -937,7 +854,6 @@ def seasonal_table(myStation):
             part_fall = nfp_fall/nfp_total
 
             fp_whole=(fp_winter*part_winter)+ (fp_spring*part_spring)+(fp_summer*part_summer)+(fp_fall*part_fall)
-
             sens_whole = fp_whole[0].sum()
 
             sens_diff_winter=((fp_winter[0].sum()/sens_whole)*100)-100
@@ -962,7 +878,9 @@ def seasonal_table(myStation):
 
             #get the modelled concentration values
             timeselect_list=[0, 3, 6, 9, 12, 15, 18, 21]
-            df_winter = read_stilt_timeseries(station, winter_date_range, timeselect_list)
+            df_winter1 = read_stilt_timeseries(station, winter_date_range1, timeselect_list)
+            df_winter2 = read_stilt_timeseries(station, winter_date_range2, timeselect_list)
+            df_winter = df_winter1.append(df_winter2)
             df_spring = read_stilt_timeseries(station, spring_date_range, timeselect_list)
             df_summer = read_stilt_timeseries(station, summer_date_range, timeselect_list)
             df_fall = read_stilt_timeseries(station, fall_date_range, timeselect_list)
@@ -997,38 +915,38 @@ def seasonal_table(myStation):
             anthro_diff_spring=(((df_spring_mean['co2.industry']+df_spring_mean['co2.energy']+ df_spring_mean['co2.transport']+ df_spring_mean['co2.others'])/anthro_whole)*100)-100
             anthro_diff_summer=(((df_summer_mean['co2.industry']+df_summer_mean['co2.energy']+ df_summer_mean['co2.transport']+ df_summer_mean['co2.others'])/anthro_whole)*100)-100
             anthro_diff_fall=(((df_fall_mean['co2.industry']+df_fall_mean['co2.energy']+ df_fall_mean['co2.transport']+ df_fall_mean['co2.others'])/anthro_whole)*100)-100
-        
+
         #where there is no information in loaded file, and not all footpritns 
         else:
             seasonal_table = None
             caption = 'No seasonal table, footprints are not available for the whole year'
             return seasonal_table, caption 
     #here have values either from loaded file or calculated
-    year_var='Dec (' + str(year-1) + ') - ' + 'Nov (' + str(year) + ')'
-    df_seasonal_table = pd.DataFrame(columns=['Variable', year_var, 'Dec-Feb', 'Mar-May', 'Jun-Aug','Sep-Nov', 'Unit'], index=['Sensitivity', 'Population','Point source', 'GEE', 'Respiration', 'Anthropogenic'])
+    year_var=str(year) 
+    df_seasonal_table = pd.DataFrame(columns=['Variable', year_var, 'Jan + Feb + Dec', 'Mar-May', 'Jun-Aug','Sep-Nov', 'Unit'], index=['Sensitivity', 'Population','Point source', 'GEE', 'Respiration', 'Anthropogenic'])
 
-    df_seasonal_table.loc['Sensitivity'] = pd.Series({'Variable': 'Sensitivity', year_var:("%.2f" % sens_whole), 'Dec-Feb':("%+.2f" % sens_diff_winter+ '%'), 'Mar-May':("%+.2f" % sens_diff_spring+ '%'), 
+    df_seasonal_table.loc['Sensitivity'] = pd.Series({'Variable': 'Sensitivity', year_var:("%.2f" % sens_whole), 'Jan + Feb + Dec':("%+.2f" % sens_diff_winter+ '%'), 'Mar-May':("%+.2f" % sens_diff_spring+ '%'), 
                                                           'Jun-Aug':("%+.2f" % sens_diff_summer + '%'), 'Sep-Nov':("%+.2f" % sens_diff_fall+ '%'), 'Unit': 'ppm / ($\mu$mol / (m$^{2}$s))'})
 
-    df_seasonal_table.loc['Population'] = pd.Series({'Variable': 'Population', year_var:("%.0f" % pop_whole), 'Dec-Feb':("%+.2f" % pop_diff_winter+ '%'), 'Mar-May':("%+.2f" % pop_diff_spring+ '%'), 
+    df_seasonal_table.loc['Population'] = pd.Series({'Variable': 'Population', year_var:("%.0f" % pop_whole), 'Jan + Feb + Dec':("%+.2f" % pop_diff_winter+ '%'), 'Mar-May':("%+.2f" % pop_diff_spring+ '%'), 
                                                           'Jun-Aug':("%+.2f" % pop_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % pop_diff_fall+ '%'), 'Unit': 'pop*(ppm / ($\mu$mol / (m$^{2}$s)))'})
 
 
-    df_seasonal_table.loc['Point source'] = pd.Series({'Variable': 'Point source', year_var:("%.2f" % point_whole), 'Dec-Feb':("%+.2f" % point_diff_winter+ '%'), 'Mar-May':("%+.2f" % point_diff_spring+ '%'), 
+    df_seasonal_table.loc['Point source'] = pd.Series({'Variable': 'Point source', year_var:("%.2f" % point_whole), 'Jan + Feb + Dec':("%+.2f" % point_diff_winter+ '%'), 'Mar-May':("%+.2f" % point_diff_spring+ '%'), 
                                                           'Jun-Aug':("%+.2f" % point_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % point_diff_fall+ '%'), 'Unit': 'ppm'})
 
 
-    df_seasonal_table.loc['GEE'] = pd.Series({'Variable': 'GEE','Unit': 'ppm (uptake)', year_var:("%.2f" % gee_whole), 'Dec-Feb':("%+.2f" % gee_diff_winter+ '%'), 'Mar-May':("%+.2f" % gee_diff_spring+ '%'), 
+    df_seasonal_table.loc['GEE'] = pd.Series({'Variable': 'GEE','Unit': 'ppm (uptake)', year_var:("%.2f" % gee_whole), 'Jan + Feb + Dec':("%+.2f" % gee_diff_winter+ '%'), 'Mar-May':("%+.2f" % gee_diff_spring+ '%'), 
                                                           'Jun-Aug':("%+.2f" % gee_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % gee_diff_fall+ '%'), 'Unit': 'ppm (uptake)'})
 
-    df_seasonal_table.loc['Respiration'] = pd.Series({'Variable': 'Respiration', year_var:("%.2f" % resp_whole), 'Dec-Feb':("%+.2f" % resp_diff_winter+ '%'), 'Mar-May':("%+.2f" % resp_diff_spring+ '%'), 
+    df_seasonal_table.loc['Respiration'] = pd.Series({'Variable': 'Respiration', year_var:("%.2f" % resp_whole), 'Jan + Feb + Dec':("%+.2f" % resp_diff_winter+ '%'), 'Mar-May':("%+.2f" % resp_diff_spring+ '%'), 
                                                           'Jun-Aug':("%+.2f" % resp_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % resp_diff_fall+ '%'), 'Unit': 'ppm'})
 
 
-    df_seasonal_table.loc['Anthropogenic'] = pd.Series({'Variable': 'Anthropogenic', year_var:("%.2f" % anthro_whole), 'Dec-Feb':("%+.2f" % anthro_diff_winter+ '%'), 'Mar-May':("%+.2f" % anthro_diff_spring+ '%'), 
+    df_seasonal_table.loc['Anthropogenic'] = pd.Series({'Variable': 'Anthropogenic', year_var:("%.2f" % anthro_whole), 'Jan + Feb + Dec':("%+.2f" % anthro_diff_winter+ '%'), 'Mar-May':("%+.2f" % anthro_diff_spring+ '%'), 
                                                           'Jun-Aug':("%+.2f" % anthro_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % anthro_diff_fall+ '%'), 'Unit': 'ppm'})
 
-    caption = 'Seasonal variation December ' + str(year_before) + ' - November ' + str(year)
+    caption = 'Seasonal variation year ' + str(year) 
 
     seasonal_table=render_mpl_seasonal_table(myStation, df_seasonal_table, station, header_columns=0, col_width=2.5)
 
@@ -1036,9 +954,8 @@ def seasonal_table(myStation):
   
 #land cover polar graph:
 
-def landcover_polar_graph(myStation):
+def land_cover_polar_graph(myStation):
     
-   
     station=myStation.stationId
     station_name=myStation.stationName
     date_range=myStation.dateRange
@@ -1051,62 +968,83 @@ def landcover_polar_graph(myStation):
     bin_size=myStation.settings['binSize']
     degrees=myStation.degrees
     polargraph_label= myStation.settings['labelPolar']
-    
-    out_of_domain, urban_aggreg, cropland_aggreg, forests, pastures_grasslands, oceans, other= import_landcover()
+
+    #get all the land cover data from netcdfs 
+    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018')
     
     dir_bins, dir_labels=define_bins_landcover_polar_graph(bin_size=bin_size)
     
     #land cover classes (imported in the land cover section):
-    cropland=fp*cropland_aggreg
-    urban=fp*urban_aggreg
-    forests=fp*forests
-    pastures_grasslands=fp*pastures_grasslands
-    oceans=fp*oceans
+    broad_leaf_forest=fp*broad_leaf_forest
+    coniferous_forest=fp*coniferous_forest
+    mixed_forest=fp*mixed_forest
+    ocean=fp*ocean
     other=fp*other
-    out_of_domain=fp*out_of_domain
-
+    grass_shrub=fp*grass_shrub
+    cropland=fp*cropland
+    pasture=fp*pasture
+    urban=fp*urban
+    unknown=fp*unknown
+    
+            
+    #lists of these values
+    broad_leaf_forest_values = [item for sublist in broad_leaf_forest[0] for item in sublist]
+    coniferous_forest_values = [item for sublist in coniferous_forest[0] for item in sublist]
+    mixed_forest_values = [item for sublist in mixed_forest[0] for item in sublist]
+    ocean_values = [item for sublist in ocean[0] for item in sublist]
+    other_values = [item for sublist in other[0] for item in sublist]
+    grass_shrub_values = [item for sublist in grass_shrub[0] for item in sublist]
     cropland_values = [item for sublist in cropland[0] for item in sublist]
+    pasture_values = [item for sublist in pasture[0] for item in sublist]
     urban_values = [item for sublist in urban[0] for item in sublist]
-    forests_values = [item for sublist in forests[0] for item in sublist]
-    pastures_grasslands_values = [item for sublist in pastures_grasslands[0] for item in sublist]
-    oceans_values = [item for sublist in oceans[0] for item in sublist]
-    others_values = [item for sublist in other[0] for item in sublist]
-    out_of_domain_values = [item for sublist in out_of_domain[0] for item in sublist]
+    unknown_values = [item for sublist in unknown[0] for item in sublist]
         
-
-   #putting it into a dataframe: initially 192000 values (one per cell) for each of the aggregated land cover classes
+        
+    #putting it into a dataframe: initially 192000 values (one per cell) for each of the aggregated land cover classes
     #into same dataframe - have the same coulmn heading. "landcover_type" will be used in "groupby" together with the "slice" (in degrees)
-    df_cropland = pd.DataFrame({'landcover_vals': cropland_values,
+    df_broad_leaf_forest = pd.DataFrame({'landcover_vals': broad_leaf_forest_values,
                                'degrees': degrees,
-                               'landcover_type':'Cropland'})
+                               'landcover_type':'Broad leaf forest'})
     
-    df_urban = pd.DataFrame({'landcover_vals': urban_values,
+    df_coniferous_forest = pd.DataFrame({'landcover_vals': coniferous_forest_values,
                            'degrees': degrees,
-                           'landcover_type':'Urban'})
+                           'landcover_type':'Coniferous forest'})
     
-    df_forests = pd.DataFrame({'landcover_vals': forests_values,
+    df_mixed_forest = pd.DataFrame({'landcover_vals': mixed_forest_values,
                            'degrees': degrees,
-                           'landcover_type':'Forests'})
+                           'landcover_type':'Mixed forest'})
     
-    df_pastures_grassland = pd.DataFrame({'landcover_vals': pastures_grasslands_values,
+    df_ocean = pd.DataFrame({'landcover_vals': ocean_values,
                            'degrees': degrees,
-                           'landcover_type':'Pastures and grassland'})
+                           'landcover_type':'Ocean'})
     
-    df_oceans = pd.DataFrame({'landcover_vals': oceans_values,
-                           'degrees': degrees,
-                           'landcover_type':'Oceans'})
-    
-    df_others = pd.DataFrame({'landcover_vals':  others_values,
+    df_other = pd.DataFrame({'landcover_vals': other_values,
                            'degrees': degrees,
                            'landcover_type':'Other'})
     
-    df_out_of_domain = pd.DataFrame({'landcover_vals':  out_of_domain_values,
+    df_grass_shrub = pd.DataFrame({'landcover_vals':  grass_shrub_values,
                            'degrees': degrees,
-                           'landcover_type':'No data'})
-
+                           'landcover_type':'Grass/shrubland'})
+    
+    df_cropland = pd.DataFrame({'landcover_vals':  cropland_values,
+                           'degrees': degrees,
+                           'landcover_type':'Cropland'})
+    
+    df_pasture = pd.DataFrame({'landcover_vals': pasture_values,
+                           'degrees': degrees,
+                           'landcover_type':'Pasture'})
+    
+    df_urban = pd.DataFrame({'landcover_vals':  urban_values,
+                           'degrees': degrees,
+                           'landcover_type':'Urban'})
+    
+    df_unknown = pd.DataFrame({'landcover_vals':  unknown_values,
+                           'degrees': degrees,
+                           'landcover_type':'Unknown'})
+  
 
     #into one dataframe
-    df_all = df_cropland.append([df_urban, df_forests, df_pastures_grassland, df_oceans, df_others, df_out_of_domain])
+    df_all = df_cropland.append([df_broad_leaf_forest, df_coniferous_forest, df_mixed_forest, df_ocean, df_other, df_grass_shrub, df_pasture, df_urban, df_unknown])
 
     #already have the different land cover classes in one cell (no need to use "pandas.cut" to generate new column with information for groupby)
     #still need a column with the different direction bins - defined in last cell - to use for the groupby (slice)
@@ -1226,9 +1164,11 @@ def landcover_polar_graph(myStation):
        
     
     ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])    
-    ax.legend(labels, bbox_to_anchor=(1.4, 0), ncol=1, loc=4)
+    ax.legend(labels, bbox_to_anchor=(1.5, 0), ncol=1, loc=4)
     
-    return fig, for_title
+    caption = "Land cover within average footprint aggregated by direction (polar)"
+    
+    return fig, caption
 
     
 #given the directions (and number of them), get the direction of the bars and their width
@@ -1239,7 +1179,6 @@ def _convert_dir(directions, N=None):
     barDir = directions * np.pi/180. - np.pi/N
     barWidth = 2 * np.pi / N
     return barDir, barWidth
-
     
 def define_bins_landcover_polar_graph(bin_size):
     
@@ -1258,20 +1197,15 @@ def define_bins_landcover_polar_graph(bin_size):
     dir_labels = (dir_bins[:-1] + dir_bins[1:]) / 2
     
     return dir_bins, dir_labels
-
-    
+   
 #multiple variables graph
 def values_multiple_variable_graph(all_stations, selected_station, date_range, timeselect_list, df_saved):
 
     df_new_values = pd.DataFrame(columns=['Station','Sensitivity','GEE','Respiration','Anthro','Point source','Population'])
     
     start_date = min(date_range)
-    if start_date.year<2015:
-        pop_data_year=2011
-    else:
-        pop_data_year=2018
-    
-    fp_pop= import_population_data(year=pop_data_year)
+     
+    fp_pop= import_population_data(year=2018)
 
     fp_point= import_point_source_data()
 
@@ -1318,6 +1252,63 @@ def values_multiple_variable_graph(all_stations, selected_station, date_range, t
             average_population=fp_pop_multiplied.sum()
             
             df_new_values.loc[index] = [station, average_sensitivity, average_gee, average_respiration, average_anthro, average_pointsource, average_population]
+            
+            index=index+1
+        
+        else:
+            
+            list_stations_without_footprints.append(station)
+            
+            continue 
+
+    #list the reference stations without footprints
+    if len(list_stations_without_footprints)>0:
+        
+        stations_without_footprints_string = ', '.join(list_stations_without_footprints)
+                 
+        display(HTML('<p style="font-size:12px;">Reference stations without footprints and not included for the multiple variables graph: ' + stations_without_footprints_string + '</p>'))
+        
+    df_saved=pd.concat([df_saved, df_new_values], ignore_index=True)
+    
+    #these are returned to the function "multiple_variables_graph"
+    return df_saved
+
+
+def values_multiple_variable_graph_land_cover(all_stations, selected_station, date_range, timeselect_list, df_saved):
+    
+    df_new_values = pd.DataFrame(columns=['Station', 'Broad leaf forest','Coniferous forest','Mixed forest','Natural grassland','Cropland','Pasture','Urban', 'Ocean', 'Unknown'])
+ 
+    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018')
+    
+    list_stations_without_footprints = []
+    index=0
+    #need to compute for all stations that will be shown together with the "selected stations"
+    for station in all_stations:
+
+        #could use aggregated station footprint.
+        #lon, lat, title not needed
+        nfp, fp_station, lon, lat, title = read_aggreg_footprints(station, date_range)
+        
+        if nfp > 0:
+
+            percent_footprints=(nfp/len(date_range))*100
+            
+            if percent_footprints<75:
+ 
+                display(HTML('<p style="font-size:12px;">' + selected_station + ' (' + str(nfp) + '/' + str(len(date_range)) +' footprints)</p>'))       
+
+            broad_leaf_forest_station = (fp_station * broad_leaf_forest).sum()
+            coniferous_forest_station = (fp_station * coniferous_forest).sum()
+            mixed_forest_station = (fp_station * mixed_forest).sum()
+            ocean_station = (fp_station * ocean).sum()
+            other_station = (fp_station * other).sum()
+            natural_grassland_station = (fp_station * grass_shrub).sum()
+            cropland_station = (fp_station * cropland).sum()
+            pasture_station = (fp_station * pasture).sum()
+            urban_station = (fp_station * urban).sum()
+            unknown_station = (fp_station * unknown).sum()
+
+            df_new_values.loc[index] = [station, broad_leaf_forest_station, coniferous_forest_station, mixed_forest_station, natural_grassland_station, cropland_station, pasture_station, urban_station, ocean_station, unknown_station]
             
             index=index+1
         
@@ -1427,8 +1418,6 @@ def multiple_variables_graph(myStation):
     #these lists (list_sensitivity, list_population, list_point_source) will be used to generate texts 
     #for the station characterization PDFs (if choose to create a PDF)
     #--> hence into list here, and not for GEE, respiration and anthropogenic contribution
-    
-
     min_gee=max(df_saved_upd['GEE'])
     range_gee=abs(min_gee-min(df_saved_upd['GEE']))
 
@@ -1547,6 +1536,137 @@ def multiple_variables_graph(myStation):
     caption=('Selected station relative to reference atmospheric stations')
 
     return fig, caption
+
+def multiple_variables_graph_land_cover(myStation):
+    selected_station=myStation.stationId
+    station_name=[myStation.stationName]
+    timeselect_list=myStation.settings['timeOfDay']    
+    date_range=myStation.dateRange
+
+    all_stations=['TRN180', 'SVB150', 'TOH147', 'SMR125', 'LUT', 'KRE250', 'IPR100', 'JFJ', 'KIT200', 'GAT344']
+    
+    if selected_station not in all_stations:
+        all_stations.append(selected_station)
+        
+    start_date=min(date_range)
+    end_date=max(date_range)
+    
+    df_saved_upd=pd.DataFrame(columns=['Station', 'Broad leaf forest','Coniferous forest','Mixed forest','Natural grassland','Cropland','Pasture','Urban', 'Ocean', 'Unknown'])
+
+    #"all_stations" contains all reference stations as well as the selected station (possibly one of the reference stations). Selected station needed seperate also. 
+    df_saved_upd= values_multiple_variable_graph_land_cover(all_stations, selected_station, date_range, timeselect_list, df_saved_upd)
+
+    #DONE GETTING ALL THE DATA: 
+    #sensitivity is the first attribut (list_item[0]) in the each of the lists (one list per station)
+    min_broad_leaf_forest=min(df_saved_upd['Broad leaf forest'])
+    range_broad_leaf_forest=max(df_saved_upd['Broad leaf forest'])-min_broad_leaf_forest
+
+    min_coniferous_forest=min(df_saved_upd['Coniferous forest'])
+    range_coniferous_forest=max(df_saved_upd['Coniferous forest'])-min_coniferous_forest
+        
+    min_mixed_forest=min(df_saved_upd['Mixed forest'])
+    range_mixed_forest=max(df_saved_upd['Mixed forest'])-min_mixed_forest
+    
+    min_natural_grassland=min(df_saved_upd['Natural grassland'])
+    range_natural_grassland=max(df_saved_upd['Natural grassland'])-min_natural_grassland
+    
+    min_cropland=min(df_saved_upd['Cropland'])
+    range_cropland=max(df_saved_upd['Cropland'])-min_cropland
+    
+    min_pasture=min(df_saved_upd['Pasture'])
+    range_pasture=max(df_saved_upd['Pasture'])-min_pasture
+        
+    min_urban=min(df_saved_upd['Urban'])
+    range_urban=max(df_saved_upd['Urban'])-min_urban
+    
+    min_ocean=min(df_saved_upd['Ocean'])
+    range_ocean=max(df_saved_upd['Ocean'])-min_ocean
+    
+    min_unknown=min(df_saved_upd['Unknown'])
+    range_unknown=max(df_saved_upd['Unknown'])-min_unknown
+
+    df_saved_for_normalized=df_saved_upd.copy()
+
+    #for station in all_stations:   
+    for station in df_saved_for_normalized['Station']:
+        
+        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Broad leaf forest', min_broad_leaf_forest, range_broad_leaf_forest)
+        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Coniferous forest', min_coniferous_forest, range_coniferous_forest)
+        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Mixed forest', min_mixed_forest, range_mixed_forest)
+        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Natural grassland', min_natural_grassland, range_natural_grassland)
+        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Cropland', min_cropland, range_cropland)
+        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Pasture', min_pasture, range_pasture)
+        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Urban', min_urban, range_urban)
+        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Ocean', min_ocean, range_ocean)
+        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Unknown', min_unknown, range_unknown)
+
+    #create the figure
+    matplotlib.rcParams.update({'font.size': 14})
+    fig = plt.figure(figsize=(10,9)) 
+    ax = fig.add_subplot(111)
+
+    #added - get on the right side of the plot
+    ax.yaxis.tick_right()
+
+    ax.yaxis.set_label_position("right")
+
+    #remove the ticks (lenght 0 - keep the names)
+    ax.tick_params(axis='both', which='both', length=0)
+    
+    #what will go as labels along the x-axis. Blank space next to station for more room. 
+    list_attributes=['Station', '', 'Broad leaf forest','Coniferous forest','Mixed forest','Natural grassland','Cropland','Pasture','Urban', 'Ocean', 'Unknown']
+
+    #max 15 characters in lable
+    list_attributes=[textwrap.fill(text,15) for text in list_attributes]
+    print('df_saved_for_normalized', df_saved_for_normalized)
+    #incremented for each station.. 0, 10, 20... etc. Where station name and "line" should start along the y-axis. 
+    place_on_axis=0
+    for station in df_saved_for_normalized['Station']:
+        
+        #get all the values for station (row in dataframe)
+        station_values=df_saved_for_normalized.loc[df_saved_for_normalized['Station'] == station]
+
+        #place them in the order we want them in the graph. List that will be used for the line. (one per station)
+        station_values_list =[place_on_axis, place_on_axis, station_values['Broad leaf forest'].values[0], 
+                              station_values['Coniferous forest'].values[0], station_values['Mixed forest'].values[0],
+                              station_values['Natural grassland'].values[0], station_values['Cropland'].values[0], 
+                              station_values['Pasture'].values[0], station_values['Urban'].values[0], station_values['Ocean'].values[0], 
+                              station_values['Unknown'].values[0]]
+        
+        if station==selected_station:
+
+            plt.plot(list_attributes, station_values_list, linestyle='-', marker='o', lw=3, color= 'black', label=station_name)
+            
+            #on 'Station position (along the x-axis). 
+            #station_values_list[0] --> where on y-axis (place_on_axis). +1 for selected_station (bold text, need more room)
+            ax.text('Station', station_values_list[0]+1, station)
+            
+        else:
+            plt.plot(list_attributes, station_values_list, linestyle=':', lw=0.6, color= 'blue', label=station_name)
+                  
+            ax.text('Station', station_values_list[0], station)
+        
+        place_on_axis=place_on_axis+10
+
+    ax.set_ylabel('% of max')
+
+    ax.tick_params(axis='y')
+
+    #vertical labels except "station" which also has different font
+    list_attributes_upd=list_attributes
+    list_attributes_upd[0]=''
+    ax.set_xticklabels(list_attributes_upd, rotation='vertical')
+
+    #label for station (furthest to the left in graph
+    ax.text(0, -10, 'Station', fontsize=15,weight = 'bold')
+
+    ax.yaxis.grid(True)
+        
+    caption=('Selected station relative to reference atmospheric stations')
+
+    return df_saved_for_normalized, fig, caption
+
+
 
 def save(stc, fmt='pdf'):
     """

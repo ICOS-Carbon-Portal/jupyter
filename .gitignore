@@ -13,3 +13,4 @@ site/
 # exclude local testdata from stiltweb
 icos_jupyter_notebooks/station_characterization/data/
 
+.idea/
