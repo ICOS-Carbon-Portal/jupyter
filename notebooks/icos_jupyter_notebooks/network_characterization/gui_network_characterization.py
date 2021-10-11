@@ -152,31 +152,27 @@ def change_selected_base_network_stations(c):
     
     disable_enable_update_button()
 
-
 def change_countries(c):
     
-    #selected_countries.options = country_options.value
     list_tuple = []
     for country_code in list(country_options.value):
         country_text = dict_countries[country_code]
         country_tuple = (country_text, country_code)
         list_tuple.append(country_tuple)
-        
-    #a = set(list(country_options.value) + list(selected_countries.options))    
+         
     a = set(list_tuple + list(selected_countries.options))    
     selected_countries.options = sorted(a)
 
 def change_selected_countries(c):
     
+    country_options.value = [o for o in country_options.value if o not in list(selected_countries.value)]
     list_tuple = []
     for country_code in list(selected_countries.value):
         country_text = dict_countries[country_code]
         country_tuple = (country_text, country_code)
         list_tuple.append(country_tuple)
     
-    #selected_countries.options = [o for o in selected_countries.options if o not in selected_countries.value]
     selected_countries.options = [o for o in selected_countries.options if o not in list_tuple]
-
 
 def file_set_widgets(c):
     
@@ -188,8 +184,7 @@ def file_set_widgets(c):
         settings_json = settings_file.decode('utf8').replace("'", '"')
         settings_dict = json.loads(settings_json)
         set_settings(settings_dict)
-        
-        
+           
 def change_yr(c):
     
     disable_enable_update_button()

@@ -655,8 +655,7 @@ def load_fp(station):
         nfp, fp, lon, lat, title = read_aggreg_footprints(station, date_range)
 
         if fp is None:
-            display(HTML('<p style="font-size:15px;">Not all footprints for ' + station + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to compute footprints for year 2018.</p>'))
-            
+  
             loaded_fp = None
         else:
  
