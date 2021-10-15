@@ -59,7 +59,7 @@ This is a public service and is supposed to give you a first glance what a Jupyt
 If you experience any problems logging-in to exploredata, send us an email to jupyter-info@icos-cp.eu. 
 
 ## Data Licence
-https://data.icos-cp.eu/licence
+[https://data.icos-cp.eu/licence](https://data.icos-cp.eu/licence)
 
 You are free to:
 
