@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>None</loc>
-         <lastmod>2021-09-07</lastmod>
+         <loc>https://icos-carbon-portal.github.io/jupyter/</loc>
+         <lastmod>2021-10-15</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2021-09-07</lastmod>
+         <loc>https://icos-carbon-portal.github.io/jupyter/faq/</loc>
+         <lastmod>2021-10-15</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2021-09-07</lastmod>
+         <loc>https://icos-carbon-portal.github.io/jupyter/how_to/</loc>
+         <lastmod>2021-10-15</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2021-09-07</lastmod>
+         <loc>https://icos-carbon-portal.github.io/jupyter/icos_notebooks/</loc>
+         <lastmod>2021-10-15</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2021-09-07</lastmod>
+         <loc>https://icos-carbon-portal.github.io/jupyter/jupyter_solutions/</loc>
+         <lastmod>2021-10-15</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>

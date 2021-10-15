@@ -6,10 +6,10 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  
-  
+  <meta name="author" content="ICOS Carbon Portal">
+  <link rel="canonical" href="https://icos-carbon-portal.github.io/jupyter/faq/">
   <link rel="shortcut icon" href="../img/favicon.ico">
-  <title>FAQ - ICOS Carbon Portal Jupyter Solutions</title>
+  <title>FAQ - ICOS Carbon Portal<br>Jupyter Solutions</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
 
   <link rel="stylesheet" href="../css/theme.css" />
@@ -20,7 +20,7 @@
     // Current page data
     var mkdocs_page_name = "FAQ";
     var mkdocs_page_input_path = "faq.md";
-    var mkdocs_page_url = null;
+    var mkdocs_page_url = "/jupyter/faq/";
   </script>
   
   <script src="../js/jquery-2.1.1.min.js" defer></script>
@@ -37,7 +37,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
     <div class="wy-side-scroll">
       <div class="wy-side-nav-search">
-        <a href=".." class="icon icon-home"> ICOS Carbon Portal Jupyter Solutions</a>
+        <a href=".." class="icon icon-home"> ICOS Carbon Portal<br>Jupyter Solutions</a>
         <div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
       <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
@@ -65,8 +65,6 @@
                 <ul class="current">
                     <li class="toctree-l1 current"><a class="reference internal current" href="./">FAQ</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#cartopy-maps-i-get-downloadwarning-and-an-error-message">Cartopy maps. I get DownloadWarning and an Error message.</a>
-    </li>
     <li class="toctree-l2"><a class="reference internal" href="#do-i-have-the-latest-version-of">Do I have the latest version of .... ?</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#i-am-a-member-of-project-xyz-but-i-dont-see-the-project-folder">I am a member of 'project XYZ', but I don't see the project folder.</a>
@@ -83,6 +81,8 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#how-to-log-in-to-exploredata">How to log-in to Exploredata</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#data-licence">Data Licence</a>
+    </li>
     </ul>
                     </li>
                 </ul>
@@ -95,7 +95,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="..">ICOS Carbon Portal Jupyter Solutions</a>
+        <a href="..">ICOS Carbon Portal<br>Jupyter Solutions</a>
       </nav>
 
       
@@ -110,6 +110,9 @@
     <li>FAQ</li>
     <li class="wy-breadcrumbs-aside">
       
+        <a href="https://github.com/ICOS-Carbon-Portal/jupyter/edit/master/docs/faq.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
     </li>
   </ul>
   
@@ -120,40 +123,58 @@
             <div class="section">
               
                 <h1 id="faq">FAQ</h1>
-<h2 id="cartopy-maps-i-get-downloadwarning-and-an-error-message">Cartopy maps. I get <code>DownloadWarning</code> and an <code>Error</code> message.</h2>
-<p>All the cartopy maps used in our notebooks are stored locally on our data server. Accessing a 
-cartopy map in any of these notebooks is actually a request to pre-downloaded local resources. 
-This means that there are specific cartopy maps that can be used with a notebook. We are 
-currently working to have a greater range of cartopy maps offline in order to assist as many users 
-as possible.<br><br>
-<strong>Workaround</strong><br>
-If you need to work with a map that currently is not in on our data server, you 
-can <strong>comment out</strong> this line of code in the notebook &#10140;
-<code>cartopy.config['data_dir'] = '/data/project/cartopy/'</code><br />
-The <code>cartopy</code> module will then try to find the requested resource online. Be advised that this 
-request might fail too if the online resources are not available at that moment.</p>
 <h2 id="do-i-have-the-latest-version-of">Do I have the latest version of .... ?</h2>
 <p><a href="../img/launch.png" target=_blank>
 <img style="float: right; padding: 5px" src="../img/launch.png" width="200" align="right"/></a>
-We update regularly our libraries and notebooks. To reflect these changes, you need to restart your server. Top right (after login to the Jupyter Hub), click on control panel and click on 'Stop my Server'. Then click on 'Start My Server' and 'Launch Server' until you see a dropdown list (see image). Select python3 and start.<br>
+We update regularly our libraries and notebooks. To reflect these changes, you need to restart 
+your server. Top right (after login to the Jupyter Hub), click on control panel and click on 
+'Stop my Server'. Then click on 'Start My Server' and 'Launch Server' until you see a dropdown 
+list (see image). Select python3 and start.<br>
 We recommend you do this regularly.</p>
 <h2 id="i-am-a-member-of-project-xyz-but-i-dont-see-the-project-folder">I am a member of 'project XYZ', but I don't see the project folder.</h2>
 <p><a href="../img/launch.png" target=_blank>
 <img style="float: right; padding: 5px" src="../img/launch.png" width="200" align="right"/></a>
-The docker image, and the user permissions (including access to project folders) are regularly updated. To reflect these updates and changes, you need to restart your server. Top right (after login to the Jupyter Hub), click on control panel and click on 'Stop my Server'. Then click on 'Start My Server' and 'Launch Server' until you see a dropdown list (see image). Select python3 and start.</p>
+The docker image, and the user permissions (including access to project folders) are regularly 
+updated. To reflect these updates and changes, you need to restart your server. Top right 
+(after login to the Jupyter Hub), click on control panel and click on 'Stop my Server'. Then 
+click on 'Start My Server' and 'Launch Server' until you see a dropdown list (see image). 
+Select python3 and start.</p>
 <h2 id="can-i-get-my-github-repository-files">Can I get my github repository files?</h2>
 <p><a href="../img/git.png" target=_blank>
 <img style="float: right; padding: 5px" src="../img/git.png" width="200" align="right"/></a>
-Absolutely. After login to the jupyter hub, we recommend you create a new folder, for example 'github'. Then you can open a new terminal (top right, in the dropdown 'new' select terminal). This brings up a terminal window in your home directory. Change directory into github 'cd github' and clone your desired github repository. For example to have a look at the source code for the icoscp python library, you can do: <code>git clone https://github.com/ICOS-Carbon-Portal/pylib.git</code>. Inside the pylib folder you can use the usual git commands (<a href="https://git-scm.com/docs/gittutorial">https://git-scm.com/docs/gittutorial</a>).</p>
+Absolutely. After login to the jupyter hub, we recommend you create a new folder, for example 
+'github'. Then you can open a new terminal (top right, in the dropdown 'new' select terminal). 
+This brings up a terminal window in your home directory. Change directory into github 'cd 
+github' and clone your desired github repository. For example to have a look at the source code 
+for the icoscp python library, you can do: 
+<code>git clone https://github.com/ICOS-Carbon-Portal/pylib.git</code>. Inside the pylib folder you can 
+use the usual git commands 
+(<a href="https://git-scm.com/docs/gittutorial">https://git-scm.com/docs/gittutorial</a>).</p>
 <h2 id="x-axis-with-datetime-from-matplotlib-is-wrong-resolved">x-axis with DateTime from Matplotlib is 'wrong' [RESOLVED]</h2>
-<p>Update 2021-04-02. We have changed the default behaviour of our jupyter hub to run in UTC. The bug mentioned below does exist only if Timezone is different from UTC. But please be aware, the bug of matplotlib is not resolved. If you run your local instance of jupyter hub, you still might get wrong xticks. [<a href="../files/mpl_bug_timezone.ipynb">notebook</a> | <a href="../files/mpl_bug_timezone_CEST.pdf">result CEST</a> | <a href="../files/mpl_bug_timezone_UTC.pdf">result UTC</a> ]</p>
+<p>Update 2021-04-02. We have changed the default behaviour of our jupyter hub to run in UTC. The 
+bug mentioned below does exist only if Timezone is different from UTC. But please be aware, the 
+bug of matplotlib is not resolved. If you run your local instance of jupyter hub, you still 
+might get wrong xticks. 
+[<a href="../files/mpl_bug_timezone.ipynb">notebook</a> |
+<a href="../files/mpl_bug_timezone_CEST.pdf">result CEST</a> |
+<a href="../files/mpl_bug_timezone_UTC.pdf">result UTC</a> ]</p>
 <p><a href="../img/xaxis_man.png" target=_blank>
 <img style="float: right; padding: 5px" src="../img/xaxis_man.png" width="200" align="right"/>
 <a href="../img/xaxis.png" target=_blank>
 <img style="float: centre; padding: 5px" src="../img/xaxis.png" width="150" align="right"/></a>
-If you plot with matplotlib.pyplot or the pandas convenience function of dataframe.plot(x, y) and you have date/time objects on the x-axis, there is a chance that the x-axis labels are shifted..... There is a lot of 'magic' happening inside Matplotlib to display date time objects with as little effort as possible from the user. This behaviour is using a operating system file which considers time zones and the dates displayed etc..... So, very often the results from Matplotlib are satisfying and good enough for a quick glance at time series data, but depending on operating system, and the time zone your computer lives in and 'when' the time series start strange things are possible to happen. See the example picture. Hence, if you want to 'guarantee' the outcome of the plot, you need to skip the magic, and 'hardcode' the labels from the data set. </p>
+If you plot with matplotlib.pyplot or the pandas convenience function of dataframe.plot(x, y) 
+and you have date/time objects on the x-axis, there is a chance that the x-axis labels are 
+shifted..... There is a lot of 'magic' happening inside Matplotlib to display date time objects 
+with as little effort as possible from the user. This behaviour is using a operating system 
+file which considers time zones and the dates displayed etc..... So, very often the results 
+from Matplotlib are satisfying and good enough for a quick glance at time series data, but 
+depending on operating system, and the time zone your computer lives in and 'when' the time 
+series start strange things are possible to happen. See the example picture. Hence, if you want 
+to 'guarantee' the outcome of the plot, you need to skip the magic, and 'hardcode' the labels 
+from the data set. </p>
 <h2 id="is-it-possible-to-use-jupyter-lab">Is it possible to use Jupyter Lab?</h2>
-<p>Yes. After you login to <a href="https://jupyter.icos-cp.eu">https://jupyter.icos-cp.eu</a> you need to modify the address in your internet browser. Change the <strong>?tree</strong> parameter to <strong>lab</strong><br>
+<p>Yes. After you login to <a href="https://jupyter.icos-cp.eu">https://jupyter.icos-cp.eu</a> you need to 
+modify the address in your internet browser. Change the <strong>?tree</strong> parameter to <strong>lab</strong><br>
 jupyter notebook link:<code>https://jupyter.icos-cp.eu/user/myname/tree?</code><br>
 jupyter lab link:<code>https://jupyter.icos-cp.eu/user/myName/lab</code><br></p>
 <h2 id="can-i-install-a-missing-python-package">Can I install a missing python package?</h2>
@@ -161,16 +182,43 @@ jupyter lab link:<code>https://jupyter.icos-cp.eu/user/myName/lab</code><br></p>
 <img style="float: right; padding: 5px" src="../img/installpkg.png" width="200" align="right"/>
 </a></p>
 <p>Yes. You can use pip to install a package into your personal account.
-Open a new Python Notebook and issue the command <code>!pip install myPackage</code>. But please be aware, that if you collaborate with other people, the package is not available to them. If you think it is worthwhile to have this package/module for all users, drop us an email and we will consider the server side installation.</p>
+Open a new Python Notebook and issue the command <code>!pip install myPackage</code>. But please be aware, 
+that if you collaborate with other people, the package is not available to them. If you think 
+it is worthwhile to have this package/module for all users, drop us an email and we will 
+consider the server side installation.</p>
 <h2 id="how-to-log-in-to-icos-cp-jupyter-hub">How to log-in to ICOS CP Jupyter Hub</h2>
-<p>Open your internet browser and go to: <b><a href="https://jupyter.icos-cp.eu">https://jupyter.icos-cp.eu</a> </b> and enter your login-credentials.</p>
-<p>If you wish to access our Jupyter Hub, please apply for a personal account (<a href="https://www.icos-cp.eu/jupyter-personal-account-application" target="_blank">application form</a>), or read more about personal accounts and collaboration on <a href="https://www.icos-cp.eu/data-services/tools/jupyter-notebook">https://www.icos-cp.eu/data-services/tools/jupyter-notebook</a>. Once your request has been accepted, you will receive an email with log-in credentials to your account. In case you experience any problems with you log-in credentials, send us an email to jupyter-info@icos-cp.eu. </p>
+<p>Open your internet browser and go to: 
+<b><a href="https://jupyter.icos-cp.eu">https://jupyter.icos-cp.eu</a></b> and enter your login-credentials.</p>
+<p>If you wish to access our Jupyter Hub, please apply for a personal account 
+(<a href="https://www.icos-cp.eu/jupyter-personal-account-application" target="_blank">
+application form</a>), or read more about personal accounts and collaboration on 
+<a href="https://www.icos-cp.eu/data-services/tools/jupyter-notebook">
+https://www.icos-cp.eu/data-services/tools/jupyter-notebook</a>. Once your request has been 
+accepted, you will receive an email with log-in credentials to your account. In case you 
+experience any problems with you log-in credentials, send us an email to jupyter-info@icos-cp.eu. </p>
 <h2 id="how-to-log-in-to-exploredata">How to log-in to Exploredata</h2>
-<p>Open your internet browser and go to: <b><a href="https://exploredata.icos-cp.eu">https://exploredata.icos-cp.eu</a> </b> and enter your login-credentials.<br>
+<p>Open your internet browser and go to: 
+<b><a href="https://exploredata.icos-cp.eu">https://exploredata.icos-cp.eu</a></b> and enter your 
+login-credentials.<br>
 <b><u>Username:</b></u> myEmailAddress (e.g. kim.nilsson@icos.com)<br>
-<b><u>Password:</b></u> <strong>msa</strong></p>
-<p>This is a public service and is supposed to give you a first glance what a Jupyter Notebook looks like and to explore our example notebooks. Be aware that your work is not saved, but you can download your notebook. </p>
-<p>If you experience any problems logging-in to exploredata, send us an email to jupyter-info@icos-cp.eu. </p>
+<b><u>Password:</b></u> please get in touch to get one</p>
+<p>This is a public service and is supposed to give you a first glance what a Jupyter Notebook 
+looks like and to explore our example notebooks. Be aware that your work is not saved, but you 
+can download your notebook. </p>
+<p>If you experience any problems logging-in to exploredata, send us an email to 
+jupyter-info@icos-cp.eu. </p>
+<h2 id="data-licence">Data Licence</h2>
+<p><a href="https://data.icos-cp.eu/licence">https://data.icos-cp.eu/licence</a></p>
+<p>You are free to:</p>
+<p>Share — copy and redistribute the material in any medium or format<br>
+Adapt — remix, transform, and build upon the material for any purpose, even commercially<br>
+Under the following terms:</p>
+<p>Attribution — You must give appropriate credit, provide a link to the licence, and indicate if 
+changes were made. You may do so in any reasonable manner, but not in any way that suggests the 
+licensor endorses you or your use<br>
+No additional restrictions — You may not apply legal terms or technological measures that 
+legally restrict others from doing anything the licence permits<br>
+The licensor cannot revoke these freedoms as long as you follow the licence terms.</p>
               
             </div>
           </div>
@@ -189,6 +237,8 @@ Open a new Python Notebook and issue the command <code>!pip install myPackage</c
   <div role="contentinfo">
     <!-- Copyright etc -->
     
+      <p>ICOS Carbon Portal</p>
+    
   </div>
 
   Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
@@ -203,6 +253,10 @@ Open a new Python Notebook and issue the command <code>!pip install myPackage</c
 
   <div class="rst-versions" role="note" aria-label="versions">
   <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/ICOS-Carbon-Portal/jupyter/" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
     
     
       <span><a href="../how_to/" style="color: #fcfcfc">&laquo; Previous</a></span>
