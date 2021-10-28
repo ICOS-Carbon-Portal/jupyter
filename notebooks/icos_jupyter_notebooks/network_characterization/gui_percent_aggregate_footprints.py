@@ -16,9 +16,13 @@ from datetime import datetime
 
 data_folder = '/data/project/stc/footprints_2018_averaged'
 
-stiltstations = stiltStations.getStilt()
+from icoscp.stilt import stiltstation
 
-all_list = sorted([((v['country'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items()])
+stiltstations= stiltstation.find()
+
+list_all_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if v['geoinfo']])
+list_all_not_located = [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if not v['geoinfo']]
+list_all = list_all_not_located + list_all_located
 
 
 def change_stn(c): 
@@ -181,7 +185,7 @@ with header_station:
     display(HTML('<p style="font-size:15px;font-weight:bold;">Select site to analyze:</p>'))
 
 
-station_choice = Dropdown(options = all_list,
+station_choice = Dropdown(options = list_all,
                           value=None,
                           description='Sites with STILT runs',
                           style=style_bin,
