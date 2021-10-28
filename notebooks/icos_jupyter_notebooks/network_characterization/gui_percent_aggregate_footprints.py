@@ -1,6 +1,5 @@
 
 from ipywidgets import Dropdown, SelectMultiple, HBox, VBox, Button, Output, IntText, RadioButtons,IntProgress,IntSlider, GridspecLayout,FileUpload, BoundedIntText, Textarea
-import stiltStations
 from IPython.core.display import display, HTML 
 from icoscp.station import station as cpstation
 import os
