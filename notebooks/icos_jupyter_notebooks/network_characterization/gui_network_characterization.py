@@ -7,7 +7,7 @@ Created on Mon Dec  7 08:38:51 2020
 """
 
 from ipywidgets import Dropdown, SelectMultiple, HBox, VBox, Button, Output, IntText, RadioButtons,IntProgress,IntSlider, GridspecLayout,FileUpload, BoundedIntText, Checkbox
-import stiltStations
+
 from IPython.core.display import display, HTML 
 from icoscp.station import station as cpstation
 import os
@@ -19,18 +19,17 @@ import network_characterization_functions as functions
 
 import json
 
-stiltstations = stiltStations.getStilt()
+from icoscp.stilt import stiltstation
 
-#for base network it is only possible to choose between ICOS stations:
-icos_list_2018 = sorted([((v['country'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items() if '2018' in v['years'] if len(v['2018']['months'])>12 if v['icos']])
+stiltstations= stiltstation.find()
 
-icos_list = sorted([((v['country'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items()])
+list_all_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if v['geoinfo']])
+list_all_not_located = [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if not v['geoinfo']]
+list_all = list_all_not_located + list_all_located
 
-#for the compare network any site with STILT runs is possible
-#however, it must have 12 months worth of data to show up in the dropdown
-all_list_2018 = sorted([((v['country'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items() if '2018' in v['years'] if len(v['2018']['months'])>12])
-
-all_list = sorted([((v['country'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items()])
+list_2018_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items() if '2018' in v['years'] if len(v['2018']['months'])>11 if v['geoinfo']])
+list_2018_not_located = [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items() if '2018' in v['years'] if len(v['2018']['months'])>11 if not v['geoinfo']]
+list_2018 = list_2018_not_located + list_2018_located 
 
 countries = [('Albania','ALB'),('Andorra','Andorra'),('Austria','AUT'),('Belarus','BLR'),('Belgium','BEL'),('Bosnia and Herzegovina','BIH'),('Bulgaria','BGR'),('Croatia','HRV'),('Cyprus','CYP'),('Czechia','CZE'),('Denmark','DNK'),('Estonia','EST'),('Finland','FIN'),('France','FRA'),('Germany','DEU'),('Greece','GRC'),('Hungary','HUN'),('Ireland','IRL'),('Italy','ITA'),('Kosovo','XKX'),('Latvia','LVA'),('Liechtenstein','LIE'),('Lithuania','LTU'),('Luxembourg','LUX'),('Macedonia','MKD'),('Malta','MTL'),('Moldova','MDA'),('Montenegro','MNE'),('Netherlands','NLD'),('Norway','NOR'),('Poland','POL'),('Portugal','PRT'),('Republic of Serbia','SRB'),('Romania','ROU'),('San Marino','SMR'),('Slovakia','SVK'),('Slovenia','SVN'),('Spain','ESP'),('Sweden','SWE'),('Switzerland','CHE'),('United Kingdom','GBR')]
 
@@ -79,8 +78,8 @@ def prepare_footprints_change(c):
     
     if prepared_footprints.value == False:
         
-        sites_base_network_options.options = all_list
-        sites_compare_network_options.options = icos_list
+        sites_base_network_options.options = list_all
+        sites_compare_network_options.options = list_all
 
         s_year.disabled = False
         s_month.disabled = False
@@ -94,8 +93,8 @@ def prepare_footprints_change(c):
 
     else:
        
-        sites_base_network_options.options = all_list_2018
-        sites_compare_network_options.options = icos_list_2018
+        sites_base_network_options.options = list_2018
+        sites_compare_network_options.options = list_2018
 
         s_year.disabled = True
         s_month.disabled = True
@@ -114,7 +113,7 @@ def prepare_footprints_change(c):
 def change_stations_compare_network(c):
     current_selection = [station_tuple[1] for station_tuple in selected_compare_network_stations.options]
     compare_network_selection = set(list(sites_compare_network_options.value) + current_selection)     
-    compare_network_selection_tuplelist = [station for station in all_list if station[1] in compare_network_selection]
+    compare_network_selection_tuplelist = [station for station in list_all if station[1] in compare_network_selection]
     selected_compare_network_stations.options = sorted(compare_network_selection_tuplelist)
 
 def change_selected_compare_network_stations(c):
@@ -127,11 +126,11 @@ def change_stations_base_network(c):
     
     current_selection = [station_tuple[1] for station_tuple in selected_base_network_stations.options]
     base_network_selection = set(list(sites_base_network_options.value) + current_selection)     
-    base_network_selection_tuplelist = [station for station in all_list if station[1] in base_network_selection]
+    base_network_selection_tuplelist = [station for station in list_all if station[1] in base_network_selection]
     selected_base_network_stations.options = sorted(base_network_selection_tuplelist)
     
     # exclude the selected base network stations from the options in the compare network list:
-    sites_compare_network_options.options = [station for station in all_list if not station[1] in base_network_selection]
+    sites_compare_network_options.options = [station for station in list_all if not station[1] in base_network_selection]
     
     # exclude the selected base network stations from list of selected compare network stations:
     selected_compare_network_stations.options = [station for station in selected_compare_network_stations.options if not station[1] in base_network_selection]
@@ -145,7 +144,7 @@ def change_selected_base_network_stations(c):
     selected_base_network_stations.options = [station_tuple for station_tuple in selected_base_network_stations.options if station_tuple[1] not in selected_base_network_stations.value]
 
     # exclude the selected base network stations from the options in the compare network list:
-    sites_compare_network_options.options = [station for station in all_list if not station in selected_base_network_stations.options]
+    sites_compare_network_options.options = [station for station in list_all if not station in selected_base_network_stations.options]
     
     # exclude the selected base network stations from list of selected compare network stations:
     selected_compare_network_stations.options = [station for station in selected_compare_network_stations.options if not station[1] in selected_base_network_stations.options]
@@ -570,7 +569,7 @@ with heading_sites_base_network_options:
     display(HTML('<p style="font-size:16px;">Select sites for base network</p>'))
 
 sites_base_network_options= SelectMultiple(
-    options=icos_list,
+    options=list_all,
     style=style_bin,
     rows=14,
     description='',
@@ -610,7 +609,7 @@ with heading_sites_compare_network_options:
     
 heading_sites_compare_network_options.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
     
-sites_compare_network_options = SelectMultiple(options = all_list,
+sites_compare_network_options = SelectMultiple(options = list_all,
                                                rows=14)
 
 sites_compare_network_options.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
