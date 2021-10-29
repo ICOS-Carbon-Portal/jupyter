@@ -56,13 +56,7 @@ class RadiocarbonObjectMeasCp():
             #only going to be set for icos stations, not when only a STILT station
             self.stationClass=self.settings['icos']['icosclass']
             self.siteType=self.settings['icos']['siteType']
-            
-            # API to reterive country name using country code. 
-            url='https://restcountries.eu/rest/v2/alpha/' + self.settings['icos']['country']
-            resp = requests.get(url=url)
-            country_information=resp.json()
-            self.country=country_information['name']
-        
+   
         #only STILT station:
         else:
             self.stationName=self.settings['stilt']['name']  
@@ -71,10 +65,13 @@ class RadiocarbonObjectMeasCp():
             self.lat=self.settings['stilt']['lat'] 
             self.lon=self.settings['stilt']['lon']
             
-            url='https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + str(self.lon) + '&longitude=' + str(self.lat) + '12&localityLanguage=en'
-            resp = requests.get(url=url)
-            country_information=resp.json()
-            self.country=country_information['countryName']
+        if self.settings['stilt']['geoinfo']:
+
+            self.country=self.settings['stilt']['geoinfo']['name']['common']
+        else:
+            self.country='Location in water'
+            
+ 
             
     def _setMeasuredData(self):
         
