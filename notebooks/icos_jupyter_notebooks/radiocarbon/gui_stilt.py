@@ -6,7 +6,6 @@ Created on Mon Dec  7 08:38:51 2020
 """
 
 from ipywidgets import Dropdown, SelectMultiple, HBox, VBox, Button, Output, RadioButtons,IntProgress,IntSlider, GridspecLayout, Text, BoundedFloatText, FileUpload, Checkbox, BoundedIntText
-import stiltStations
 from IPython.core.display import display, HTML 
 from icoscp.station import station as cpstation
 import radiocarbon_functions
@@ -19,19 +18,19 @@ from datetime import datetime
 import json
 
 
-## Global variables
-#---------------------------------------------------------
-# create a dict with all stiltstations
-stiltstations = stiltStations.getStilt()
+from icoscp.stilt import stiltstation
 
-# create a list (tuple) for the dropdown list of stations
-icoslist = sorted([(v['name'],k) for k,v in stiltstations.items() if v['icos']])
-stiltlist = sorted([(v['name'],k) for k,v in stiltstations.items() if not v['icos']])
+stiltstations= stiltstation.find()
 
-# sort by the first element in the tuple (name)
-# sort -> sort the list in place
-icoslist.sort(key=lambda x:x[0])
-stiltlist.sort(key=lambda x:x[0])
+list_all_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if v['geoinfo']])
+list_all_not_located = [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if not v['geoinfo']]
+list_all = list_all_not_located + list_all_located
+
+list_all_icos_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if v['geoinfo'] if v['icos']])
+list_all_icos_not_located = [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if not v['geoinfo'] if v['icos']]
+list_all_icos = list_all_icos_not_located + list_all_icos_located
+
+
 #---------------------------------------------------------
 
 # read or set the parameters
@@ -103,9 +102,9 @@ def change_stn_type(c):
     # make sure the new 'options' are not selected..
     unobserve()    
     if station_type.value=='STILT stations':        
-        station_choice.options=stiltlist
+        station_choice.options=list_all
     else:        
-        station_choice.options= icoslist
+        station_choice.options= list_all_icos
     
     station_choice.value=None 
     # reset the data fields
@@ -369,7 +368,7 @@ station_type=RadioButtons(
         description=' ',
         disabled=False)
 
-station_choice = Dropdown(options = icoslist,
+station_choice = Dropdown(options = list_all_icos,
                    description = 'Station',
                    value=None,
                    disabled= False)
