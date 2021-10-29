@@ -10,42 +10,28 @@ import requests
 import seaborn
 import folium
 import branca
-
 from bokeh.io import show, output_notebook, reset_output, export_png
 from bokeh.plotting import figure as bokeh_figure
 from bokeh.models import ColumnDataSource, HoverTool, Label, Legend
 from datetime import date as current_date
 import datetime as dt
 import math
-
-#added (Dobj):
 from icoscp.sparql import sparqls
 from icoscp.sparql.runsparql import RunSparql
 from icoscp.cpb.dobj import Dobj
 from datetime import timedelta
-
-#remove later when sparql query from Claudio:
 from icoscp.station import station as station_data
-
-#radiocarbon data from CP
-from icoscp.sparql.runsparql import RunSparql
-
 import json
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
+# library (with maps) now at the CP.
 import cartopy
 cartopy.config['data_dir'] = '/data/project/cartopy/'
 import cartopy.feature as cfeature
 import cartopy.crs as ccrs
 
-import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
-
-import stiltStations
-
 folder_w_data = 'radiocarbon'
-stiltstations = stiltStations.getStilt()
-icoslist = sorted([(v['name'],k) for k,v in stiltstations.items() if v['icos']])
-
 pathFP='/data/stiltweb/stations/'
 
 #parameters used to estimate nuclear contamination.
