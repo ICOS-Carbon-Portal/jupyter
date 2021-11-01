@@ -7,20 +7,16 @@ Created on Mon Dec  7 08:38:51 2020
 """
 
 from ipywidgets import Dropdown, SelectMultiple, HBox, VBox, Button, Output, IntText, RadioButtons,IntProgress,IntSlider, GridspecLayout,FileUpload, BoundedIntText, Checkbox
-
 from IPython.core.display import display, HTML 
 from icoscp.station import station as cpstation
 import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
 import network_characterization_functions as functions
-
 import json
-
+import network_object
 from icoscp.stilt import stiltstation
-
 stiltstations= stiltstation.find()
 
 list_all_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if v['geoinfo']])
@@ -34,6 +30,41 @@ list_2018 = list_2018_not_located + list_2018_located
 countries = [('Albania','ALB'),('Andorra','Andorra'),('Austria','AUT'),('Belarus','BLR'),('Belgium','BEL'),('Bosnia and Herzegovina','BIH'),('Bulgaria','BGR'),('Croatia','HRV'),('Cyprus','CYP'),('Czechia','CZE'),('Denmark','DNK'),('Estonia','EST'),('Finland','FIN'),('France','FRA'),('Germany','DEU'),('Greece','GRC'),('Hungary','HUN'),('Ireland','IRL'),('Italy','ITA'),('Kosovo','XKX'),('Latvia','LVA'),('Liechtenstein','LIE'),('Lithuania','LTU'),('Luxembourg','LUX'),('Macedonia','MKD'),('Malta','MTL'),('Moldova','MDA'),('Montenegro','MNE'),('Netherlands','NLD'),('Norway','NOR'),('Poland','POL'),('Portugal','PRT'),('Republic of Serbia','SRB'),('Romania','ROU'),('San Marino','SMR'),('Slovakia','SVK'),('Slovenia','SVN'),('Spain','ESP'),('Sweden','SWE'),('Switzerland','CHE'),('United Kingdom','GBR')]
 
 dict_countries = {'ALB':'Albania', 'Andorra':'Andorra', 'AUT':'Austria','BLR':'Belarus','BEL':'Belgium','BIH':'Bosnia and Herzegovina','BGR':'Bulgaria','HRV':'Croatia','CYP':'Cyprus','CZE':'Czechia','DNK':'Denmark','EST':'Estonia','FIN':'Finland','FRA':'France','DEU':'Germany','GRC':'Greece','HUN':'Hungary','IRL':'Ireland','ITA':'Italy','XKX':'Kosovo','LVA':'Latvia','LIE':'Liechtenstein','LTU':'Lithuania','LUX':'Luxembourg','MKD':'Macedonia','MTL':'Malta','MDA':'Moldova','MNE':'Montenegro','NLD':'Netherlands','NOR':'Norway','POL':'Poland','PRT':'Portugal','SRB':'Republic of Serbia','ROU':'Romania','SMR':'San Marino','SVK':'Slovakia','SVN':'Slovenia','ESP':'Spain','SWE':'Sweden','CHE':'Switzerland','GBR':'United Kingdom'}
+
+def getSettings():
+    
+    s = {}
+    
+    if prepared_footprints.value:
+        
+        s['startYear'] = 2018
+        s['startMonth'] = 1
+        s['startDay'] = 1
+        s['endYear'] = 2018
+        s['endMonth'] = 12
+        s['endDay'] = 31
+        s['timeOfDay'] = [0,3,6,9,12,15,18,21]
+        
+    else: 
+        
+        s['startYear'] = s.year.value 
+        s['startMonth'] = s_month.value
+        s['startDay'] = s_day.value
+        s['endYear'] = e_year.value
+        s['endMonth'] = e_month.value
+        s['endDay'] = e_day.value
+        s['timeOfDay'] = list(time_selection.value)
+        
+    s['perpared_2018_footprints'] = prepared_footprints.value
+    
+    s['baseNetwork'] = [station_tuple[1] for station_tuple in selected_base_network_stations.options]
+    s['compareNetwork'] = [station_tuple[1] for station_tuple in selected_compare_network_stations.options]
+    s['colorBar'] = colorbar_choice.value
+    s['percent'] = str(threshold_option.value)
+    s['countries'] = [selected_country[1] for selected_country in list(selected_countries.options)]
+    s['download'] = download_output_option.value  
+    
+    return s
 
 def set_settings(s):
     
@@ -52,10 +83,8 @@ def set_settings(s):
     sites_base_network_options.value = s['baseNetwork']   
     sites_compare_network_options.value = s['compareNetwork'] 
     colorbar_choice.value = s['colorBar']
-    threshold_option.value = s['percent']
-    area_type.value = s['countryDefinition'] 
+    threshold_option.value = s['percent'] 
     country_options.value = s['countries']
-    breakdown_type.value = s['weighing']
     download_output_option.value = s['download']
 
 
@@ -295,36 +324,26 @@ def update_func(button_c):
     update_button.disabled = True
     clear_all_output()
     
-    if not prepared_footprints.value:
-        
-        date_range = pd.date_range(start=(str(s_year.value) + '-' + str(s_month.value)  + '-' + str(s_day.value)), end=(str(e_year.value) + '-' + str(e_month.value)  + '-' + str(e_day.value)), freq='3H')
-        timeselect_list = list(time_selection.value)
-        timeselect_string=[str(value) for value in timeselect_list]
-        timeselect_string =':00, '.join(timeselect_string) + ':00'
+    settings = getSettings() 
+    
+    global networkObj
+    
+    networkObj = network_object.NetworkObj(settings)
+    
+    #change in case compare network
+    
+    vmax_sens=None
+    
+    threshold_percent = str(int(networkObj.settings['percent'])/100)
+    pngfile = ''
+    with output_summed_sens_fp:
 
-        date_range = functions.date_range_hour_filtered(date_range, timeselect_list)
+        display(HTML('<p style="font-size:16px;text-align:center">Base network footprint (' + threshold_percent  + '%)</p>'))
+        functions.plot_maps(networkObj.baseNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=vmax_sens) 
 
-    else:
-        date_range = ''
-
-    sites_base_network = [station_tuple[1] for station_tuple in selected_base_network_stations.options]
-    sites_compare_network=[station_tuple[1] for station_tuple in selected_compare_network_stations.options]
-
-    threshold_percent = str(threshold_option.value)
-    threshold_int = threshold_option.value/100
+    #fp_combined_base_network, fp_mask_count_base_network, fp_mask_base_network, fp_max_base_network, lon, lat, list_none_footprints = functions.aggreg_2018_footprints_base_network(sites_base_network, threshold_int, date_range)
     
-    download_output=download_output_option.value
-    colorbar=colorbar_choice.value
-    
-    type_area = area_type.value
-    
-    breakdown = breakdown_type.value
-    
-    countries=[selected_country[1] for selected_country in list(selected_countries.options)]
-
-    fp_combined_base_network, fp_mask_count_base_network, fp_mask_base_network, fp_max_base_network, lon, lat, list_none_footprints = functions.aggreg_2018_footprints_base_network(sites_base_network, threshold_int, date_range)
-    
-    
+    """
     string_list_none_footprints = ', '.join([str(elem) for elem in list_none_footprints])
  
     #in case no footprints at all in base network --> nothing after in case true
@@ -344,18 +363,26 @@ def update_func(button_c):
             if len(list_none_footprints)>0:
                 
                 display(HTML('<p style="font-size:16px">No footprints available for base network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints.</p>'))
-           
+                
+    """
+    
+    """
+    #ADD THIS AT END. No need to check for prepared_footprints. 
     if download_output:
         
         if prepared_footprints.value:
         
-            settings = {'perpared_2018_footprints': prepared_footprints.value,"baseNetwork": sites_base_network, "compareNetwork": sites_compare_network, "colorBar": colorbar_choice.value, "percent": threshold_option.value, "countryDefinition": area_type.value , "countries": countries, "weighing": breakdown_type.value, "download": download_output_option.value}
+            settings = {'perpared_2018_footprints': prepared_footprints.value,"baseNetwork": sites_base_network, "compareNetwork": sites_compare_network, "colorBar": colorbar_choice.value, "percent": threshold_option.value, "countries": countries, "download": download_output_option.value}
         else:
-            settings = {'perpared_2018_footprints': prepared_footprints.value,'startYear': s_year.value, 'startMonth': s_month.value, 'startDay': s_day.value, 'endYear': e_year.value,'endMonth': e_month.value,'endDay': e_day.value, 'timeOfDay':list(time_selection.value), "baseNetwork": sites_base_network, "compareNetwork": sites_compare_network, "colorBar": colorbar_choice.value, "percent": threshold_option.value, "countryDefinition": area_type.value , "countries": countries, "weighing": breakdown_type.value, "download": download_output_option.value}
+            settings = {'perpared_2018_footprints': prepared_footprints.value,'startYear': s_year.value, 'startMonth': s_month.value, 'startDay': s_day.value, 'endYear': e_year.value,'endMonth': e_month.value,'endDay': e_day.value, 'timeOfDay':list(time_selection.value), "baseNetwork": sites_base_network, "compareNetwork": sites_compare_network, "colorBar": colorbar_choice.value, "percent": threshold_option.value, "countries": countries, "download": download_output_option.value}
             
 
         functions.save_settings(settings, directory='network_characterization/network_characterization_2018')
-
+    """
+    
+    
+    
+    """
     if len(sites_compare_network)>0:      
         
         fp_combined_compare_network, fp_mask_count_compare_network, fp_mask_compare_network, fp_max_compare_network, lon, lat, list_none_footprints = functions.aggreg_2018_footprints_compare_network(sites_base_network, sites_compare_network, threshold_int, date_range)
@@ -535,6 +562,7 @@ def update_func(button_c):
 
             functions.breakdown_landcover_base_network(countries, fp_max_base_network, fp_mask_base_network, breakdown, type_area)
 
+    """
     update_button.disabled = False
 #-----------widgets definition ----------------
     
@@ -715,29 +743,6 @@ selected_countries = SelectMultiple(
 
 selected_countries.layout.margin = '0px 0px 0px 70px'
 
-heading_area_type = Output()
-with heading_area_type:
-    display(HTML('<p style="font-size:14px;">Choose between getting the land cover<br>breakdown of the land covered, or to include<br>the EEZ (exclusive economic zone): </p>'))
-
-heading_area_type.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
-
-area_type=RadioButtons(
-        options=['Land', 'Land + EEZ'],
-        value='Land',
-        description=' ')
-
-area_type.layout.margin = '0px 0px 0px 50px' #top, right, bottom, left
-
-heading_breakdown_choice = Output()
-with heading_breakdown_choice:
-    display(HTML('<p style="font-size:14px;">Choose between using the footprint masks and<br>sensitivity weighted footprints to compute the<br>ancillary data values:</p>'))
-
-heading_breakdown_choice.layout.margin = '0px 0px 0px 0px' #top, right, bottom, left
-
-breakdown_type=RadioButtons(
-        options=[('Footprint', 'sens'), ('Footprint mask', 'mask')],
-        value='sens',
-        description=' ')
 
 download_output_heading = Output()
 
@@ -792,15 +797,9 @@ box_country_selection = VBox([heading_selected_countries, selected_countries])
 
 country_selection_combined = HBox([box_country_options, box_country_selection])
 
-breakdown_choice = VBox([heading_breakdown_choice, breakdown_type])
-
-area_type_choice = VBox([heading_area_type, area_type])
-
-box_additional_selections_combined = HBox([breakdown_choice, area_type_choice])
-
 final_row = HBox([file_name, update_button])
 #Add all widgets to a VBox:
-form = VBox([heading_network_selection, heading_perpared_footprints, prepared_footprints, base_compare_combined, header_timeselect, time_box, time_selection, heading_map_specifications, box_map_settings, heading_analysis_ancillary_data, country_selection_combined, box_additional_selections_combined, download_output_heading, download_output_option, header_filename, final_row])
+form = VBox([heading_network_selection, heading_perpared_footprints, prepared_footprints, base_compare_combined, header_timeselect, time_box, time_selection, heading_map_specifications, box_map_settings, heading_analysis_ancillary_data, country_selection_combined, download_output_heading, download_output_option, header_filename, final_row])
 
 #Initialize form output:
 form_out = Output()
@@ -860,7 +859,8 @@ with form_out:
         
     else:
         
-        display(form, output_same_station_base_compare, output_no_footprints, output_summed_sens_fp, output_summed_fp_see_not_see, output_aggreg_fp_see_not_see, output_breakdown_countries, output_header_landcover_section, breakdown_landcover_output)
+        #display(form, output_same_station_base_compare, output_no_footprints, output_summed_sens_fp, output_summed_fp_see_not_see, output_aggreg_fp_see_not_see, output_breakdown_countries, output_header_landcover_section, breakdown_landcover_output)
+        display(form, output_summed_sens_fp)
 
 
 
