@@ -31,13 +31,21 @@ class NetworkObj():
         self.loadLon = loadtxt(os.path.join(folder_tool_fps, 'longitude.csv'), delimiter=',')
         self.baseNetwork = None
         self.compareNetwork = None
+        
 
         # fucntions to generate the object attributes
         self._setNetworks()
 
     def _setNetworks(self):
         #, self.compareNetwork
-        self.baseNetwork = functions.return_networks(self)
+        self.baseNetwork, self.compareNetwork = functions.return_networks(self)
+        
+        if self.caompareNetwork is not None:
+            
+            self.vmax_sens = np.max(fp_combined_compare_network)
+        else:
+            self.vmax_sens = None
+
         #fp_mask_count_base_network, fp_mask_base_network, fp_max_base_network, lon, lat, list_none_footprints = functions.aggreg_2018_footprints_base_network(self)
 
 

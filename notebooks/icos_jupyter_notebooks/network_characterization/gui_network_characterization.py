@@ -47,7 +47,7 @@ def getSettings():
         
     else: 
         
-        s['startYear'] = s.year.value 
+        s['startYear'] = s_year.value 
         s['startMonth'] = s_month.value
         s['startDay'] = s_day.value
         s['endYear'] = e_year.value
@@ -296,7 +296,6 @@ def change_day_end(c):
 
 #clear all the output
 def clear_all_output():
-    output_same_station_base_compare.clear_output()
     output_no_footprints.clear_output()
     output_no_footprints_compare.clear_output()
     output_summed_sens_fp.clear_output()
@@ -337,10 +336,17 @@ def update_func(button_c):
     threshold_percent = str(int(networkObj.settings['percent'])/100)
     pngfile = ''
     with output_summed_sens_fp:
-
+  
         display(HTML('<p style="font-size:16px;text-align:center">Base network footprint (' + threshold_percent  + '%)</p>'))
         functions.plot_maps(networkObj.baseNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=vmax_sens) 
 
+    with output_summed_sens_fp_uploaded_fp: 
+        
+        display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint (' + threshold_percent  + '%)</p>'))
+        
+        functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=vmax_sens) 
+        
+        
     #fp_combined_base_network, fp_mask_count_base_network, fp_mask_base_network, fp_max_base_network, lon, lat, list_none_footprints = functions.aggreg_2018_footprints_base_network(sites_base_network, threshold_int, date_range)
     
     """
@@ -451,31 +457,7 @@ def update_func(button_c):
         #vmin - 0.001
         functions.plot_maps(fp_mask_count_base_network, lon, lat, vmax=vmax_see_not_see, vmin=0.001, colors=colorbar, pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit='count')
 
-    #should not be able to add the same stations to the compare network
-    sites_compare_network_upd = []
-    sites_duplicate = []
-    for site in sites_compare_network:
-        if site in sites_base_network:
-            sites_duplicate.append(site)
-            continue
-        else:
-            sites_compare_network_upd.append(site)
-    
-    if len(sites_duplicate)>0:
-        
-        string_same_station_base_compare = ', '.join([str(elem) for elem in sites_duplicate])
-        
-        with output_same_station_base_compare:
-            
-            #plural in output text
-            if len(sites_duplicate)>1:
-                display(HTML('<p style="font-size:16px">Sites selected for the compare network which are already included in the base network: ' + string_same_station_base_compare + '. These are not included in the analyzed compare network. </p>'))
-            
-            #singular in output text
-            else:
-                display(HTML('<p style="font-size:16px">Site selected for the compare network which is already included in the base network: ' + string_same_station_base_compare + '. This site is not included in the analyzed compare network. </p>'))
-   
-   
+
     sites_compare_network = sites_compare_network_upd
     
     #HERE IF there is a compare network in addition to base network
@@ -804,7 +786,6 @@ form = VBox([heading_network_selection, heading_perpared_footprints, prepared_fo
 #Initialize form output:
 form_out = Output()
 
-output_same_station_base_compare = Output()
 output_no_footprints = Output()
 output_no_footprints_compare = Output()
 output_summed_sens_fp = Output()
@@ -852,10 +833,10 @@ with form_out:
     if 'output_summed_sens_fp_uploaded_fp' in locals():
         
         box_footprints_sens = HBox([output_summed_sens_fp, output_summed_sens_fp_uploaded_fp])
-        box_footprints_summed = HBox([output_summed_fp_see_not_see, output_summed_fp_see_not_see_uploaded_fp])
-        box_footprints_aggreg = HBox([output_aggreg_fp_see_not_see, output_aggreg_fp_see_not_see_uploaded_fp])
+        #box_footprints_summed = HBox([output_summed_fp_see_not_see, output_summed_fp_see_not_see_uploaded_fp])
+        #box_footprints_aggreg = HBox([output_aggreg_fp_see_not_see, output_aggreg_fp_see_not_see_uploaded_fp])
 
-        display(form, output_same_station_base_compare, output_no_footprints, output_no_footprints_compare, box_footprints_sens, box_footprints_summed, box_footprints_aggreg, output_breakdown_countries, output_header_landcover_section, breakdown_landcover_output)
+        display(form, box_footprints_sens)
         
     else:
         

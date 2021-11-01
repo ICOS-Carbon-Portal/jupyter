@@ -676,11 +676,10 @@ def return_networks(networkObj):
     load_lat=networkObj.loadLat
     load_lon=networkObj.loadLon
     
-    df_max_base_network = pd.DataFrame()
-    
+    df_footprints_network = pd.DataFrame()
+
     index=1
-    first=True
-    
+
     list_none_footprints = []
     
     for station in sites_base_network:
@@ -705,35 +704,64 @@ def return_networks(networkObj):
    
         upd_fp_sens, upd_fp_see_not_see=update_footprint_based_on_threshold(loaded_fp, load_lat, load_lon, threshold)
         
-        df_max_base_network[('fp_' + str(index))]=upd_fp_sens.flatten()
-
-        if first==True:
-            #sensitivity values
-            summed_fp_sens=upd_fp_sens
-
-            #only for the first footprint.
-            first=False
-        else:
-            summed_fp_sens=summed_fp_sens+upd_fp_sens
- 
+        df_footprints_network[('fp_' + str(index))]=upd_fp_sens.flatten()
+        
         #for new column values
         index=index+1
     
     # make a footprint based on all max values of the combined footprints. 
-    df_max_base_network = df_max_base_network[df_max_base_network.columns].max(axis=1)
-    
+    df_max_base_network = df_footprints_network[df_footprints_network.columns].max(axis=1)
+
     #in case of no available footprints for any of the selections. 
     if len(df_max_base_network.tolist()) == 0:
         
         summed_fp_sens = None   
         fp_max_base_network= None  
+        fp_max_compare_network= None 
 
     else:
         
         fp_max_base_network=np.array(df_max_base_network.tolist()).reshape((len(load_lat), len(load_lon)))
-        
+    
+        #add compare network
+        list_none_footprints_compare = []
+        if len(sites_compare_network)>0:
 
-    return fp_max_base_network
+            for station in sites_compare_network:
+
+                #if use 2018 aggregated footprint
+                if min(date_range)==pd.Timestamp(2018, 1, 1, 0) and max(date_range)==pd.Timestamp(2018,12,31,0) and len(networkObj.settings['timeOfDay'])==8:
+                    loaded_fp=load_fp(station)
+
+                    if loaded_fp is None:
+                        list_none_footprints.append(station)
+                        continue
+
+                #in case of user selected date range/time:
+                else:
+
+                    nfp_not_used, loaded_fp, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range)
+
+                    if loaded_fp is None:
+
+                        list_none_footprints.append(station)
+                        continue
+
+                upd_fp_sens, upd_fp_see_not_see=update_footprint_based_on_threshold(loaded_fp, load_lat, load_lon, threshold)
+
+                df_footprints_network[('fp_' + str(index))]= upd_fp_sens.flatten()
+
+                #for new column values
+                index=index+1
+
+            # make a footprint based on all max values of the combined footprints. 
+
+            df_max_compare_network = df_footprints_network[df_footprints_network.columns].max(axis=1)
+
+            fp_max_compare_network=np.array(df_max_compare_network.tolist()).reshape((len(load_lat), len(load_lon)))
+        
+        
+    return fp_max_base_network, fp_max_compare_network
     
     
 def aggreg_2018_footprints_base_network(sites_base_network, threshold, date_range = ''):
