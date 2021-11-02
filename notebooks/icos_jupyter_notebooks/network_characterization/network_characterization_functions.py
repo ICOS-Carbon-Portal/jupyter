@@ -166,51 +166,16 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
     
     if linlog == 'linear':
         
-        if vmax:
+        im = ax.imshow(field[:,:], interpolation='none',origin='lower', extent=img_extent,cmap=cmap,vmin=0.00001,vmax=vmax)
+        #norm=LogNorm()
+        cs = ax.imshow(field[:,:], origin='lower', extent=img_extent,cmap=cmap,vmin=0.000001,vmax=vmax)
 
-            ticks = [*range(1, (vmax+2), 1)]
+        cbar = plt.colorbar(cs, orientation='horizontal',pad=0.03,fraction=0.055,extend='neither')
+        
+        cbar.ax.minorticks_off()
 
-            ticklabels = ticks[:-1]
-            ticklabels.insert(0, ' ')
-
-        else:
-
-            vmax = np.max(field[:,:])
-            ticks = [*range(1, (np.max(field[:,:])+2),1)]
-
-            ticklabels = ticks[:-1]
-            ticklabels.insert(0, ' ')
-
-        if percent:
-
-            ticks = [10,20,30,40,50,60,70,80,90,100]
-            
-            ticklabels = [' ', 10, 20, 30, 40, 50, 60, 70, 80, 90]
-            
-            vmin =10
- 
-        if not mask:
-
-            #different color if use "neither"
-            if vmin==vmax:
-                vmax=None
-            norm = matplotlib.colors.BoundaryNorm(ticks, cmap.N, extend='both')
-            
-            im = ax.imshow(field[:,:], norm=norm, interpolation='none',origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
-            
-            cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='neither', format='%.0f', ticks=ticks)
-
-            cbar.locator = matplotlib.ticker.FixedLocator(ticks)
-            
-            cbar.update_ticks()
-            
-            cbar.ax.set_xticklabels(ticklabels) 
-            
-            cbar.set_label(label+'  '+unit)
-
-        else:
-    
-            im = ax.imshow(field[:,:], interpolation='none', origin='lower', extent=img_extent,cmap=cmap, vmin=0.0001, vmax=vmax, alpha=.5)
+        cbar.set_label(label+unit)
+        
         
     else:
 

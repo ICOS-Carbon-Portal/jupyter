@@ -159,8 +159,11 @@ def change_stations_base_network(c):
     selected_base_network_stations.options = sorted(base_network_selection_tuplelist)
     
     # exclude the selected base network stations from the options in the compare network list:
-    sites_compare_network_options.options = [station for station in list_all if not station[1] in base_network_selection]
-    
+    if prepared_footprints.value:
+        sites_compare_network_options.options = [station for station in list_2018 if not station[1] in base_network_selection]
+    else:
+        sites_compare_network_options.options = [station for station in list_all if not station[1] in base_network_selection]
+        
     # exclude the selected base network stations from list of selected compare network stations:
     selected_compare_network_stations.options = [station for station in selected_compare_network_stations.options if not station[1] in base_network_selection]
     
@@ -292,23 +295,16 @@ def change_day_end(c):
     
     disable_enable_update_button()
         
-#----------- start processing -----------------
-
 #clear all the output
 def clear_all_output():
     output_no_footprints.clear_output()
     output_no_footprints_compare.clear_output()
-    output_summed_sens_fp.clear_output()
-    output_aggreg_fp_see_not_see.clear_output()
-    output_summed_fp_see_not_see.clear_output()
-    output_summed_sens_fp_uploaded_fp.clear_output()
-    output_aggreg_fp_see_not_see_uploaded_fp.clear_output()
-    output_breakdown_countries.clear_output()
+    output_base_network_fp.clear_output()
+    output_base_network_fp.clear_output()
+    output_base_minus_compare.clear_output()
     output_header_landcover_section.clear_output()
     breakdown_landcover_output.clear_output()
     output_header_landcover_section.clear_output()
-    output_aggreg_fp_see_not_see_uploaded_fp.clear_output()
-    output_summed_fp_see_not_see_uploaded_fp.clear_output()
 
 def clear_selection_base(button_c):
     
@@ -317,7 +313,9 @@ def clear_selection_base(button_c):
 def clear_selection_compare(button_c):
     
     sites_compare_network_options.value = ()
-       
+
+#----------- start processing -----------------
+
 def update_func(button_c):
     
     update_button.disabled = True
@@ -328,23 +326,26 @@ def update_func(button_c):
     global networkObj
     
     networkObj = network_object.NetworkObj(settings)
-    
-    #change in case compare network
-    
-    vmax_sens=None
+   
     
     threshold_percent = str(int(networkObj.settings['percent'])/100)
     pngfile = ''
-    with output_summed_sens_fp:
+    with output_base_network_fp:
   
         display(HTML('<p style="font-size:16px;text-align:center">Base network footprint (' + threshold_percent  + '%)</p>'))
-        functions.plot_maps(networkObj.baseNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=vmax_sens) 
+    
+        functions.plot_maps(networkObj.baseNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
 
-    with output_summed_sens_fp_uploaded_fp: 
+    with output_compare_network_fp: 
         
         display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint (' + threshold_percent  + '%)</p>'))
         
-        functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=vmax_sens) 
+        functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=None) 
+        
+    with output_base_minus_compare:
+        display(HTML('<p style="font-size:16px;text-align:center">Base minus compare</p>'))
+        
+        functions.plot_maps(networkObj.compareMinusBase, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=None)
         
         
     #fp_combined_base_network, fp_mask_count_base_network, fp_mask_base_network, fp_max_base_network, lon, lat, list_none_footprints = functions.aggreg_2018_footprints_base_network(sites_base_network, threshold_int, date_range)
@@ -788,14 +789,10 @@ form_out = Output()
 
 output_no_footprints = Output()
 output_no_footprints_compare = Output()
-output_summed_sens_fp = Output()
-output_summed_sens_fp_uploaded_fp = Output()
+output_base_network_fp = Output()
+output_compare_network_fp = Output()
+output_base_minus_compare = Output()
 
-output_summed_fp_see_not_see = Output()
-output_summed_fp_see_not_see_uploaded_fp = Output()
-
-output_aggreg_fp_see_not_see = Output()
-output_aggreg_fp_see_not_see_uploaded_fp = Output()
 output_breakdown_countries = Output()
 breakdown_landcover_output = Output()
 output_header_landcover_section = Output()
@@ -830,18 +827,17 @@ update_button.on_click(update_func)
 #Open form object:
 with form_out:
 
-    if 'output_summed_sens_fp_uploaded_fp' in locals():
+    if 'output_base_network_fp' in locals():
         
-        box_footprints_sens = HBox([output_summed_sens_fp, output_summed_sens_fp_uploaded_fp])
-        #box_footprints_summed = HBox([output_summed_fp_see_not_see, output_summed_fp_see_not_see_uploaded_fp])
-        #box_footprints_aggreg = HBox([output_aggreg_fp_see_not_see, output_aggreg_fp_see_not_see_uploaded_fp])
+        box_footprints_sens = HBox([output_base_network_fp, output_compare_network_fp])
 
-        display(form, box_footprints_sens)
+
+        display(form, box_footprints_sens, output_base_minus_compare)
         
     else:
         
-        #display(form, output_same_station_base_compare, output_no_footprints, output_summed_sens_fp, output_summed_fp_see_not_see, output_aggreg_fp_see_not_see, output_breakdown_countries, output_header_landcover_section, breakdown_landcover_output)
-        display(form, output_summed_sens_fp)
+   
+        display(form, output_base_network_fp)
 
 
 

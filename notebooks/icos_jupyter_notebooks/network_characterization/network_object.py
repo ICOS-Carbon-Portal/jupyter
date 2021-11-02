@@ -7,6 +7,7 @@ from icoscp.station import station as station_data
 from icoscp.cpb.dobj import Dobj
 from numpy import loadtxt
 import os
+import numpy as np
 
 import network_characterization_functions as functions
 
@@ -31,7 +32,9 @@ class NetworkObj():
         self.loadLon = loadtxt(os.path.join(folder_tool_fps, 'longitude.csv'), delimiter=',')
         self.baseNetwork = None
         self.compareNetwork = None
-        
+        self.vmaxSens = None
+        self.compareMinusBase = None
+
 
         # fucntions to generate the object attributes
         self._setNetworks()
@@ -40,14 +43,13 @@ class NetworkObj():
         #, self.compareNetwork
         self.baseNetwork, self.compareNetwork = functions.return_networks(self)
         
-        if self.caompareNetwork is not None:
+        if self.compareNetwork is not None:
             
-            self.vmax_sens = np.max(fp_combined_compare_network)
-        else:
-            self.vmax_sens = None
-
-        #fp_mask_count_base_network, fp_mask_base_network, fp_max_base_network, lon, lat, list_none_footprints = functions.aggreg_2018_footprints_base_network(self)
-
+            #otherwise remain None
+            self.vmaxSens = np.max(self.compareNetwork)
+            
+            self.compareMinusBase = self.compareNetwork - self.baseNetwork
+        
 
 if __name__ == "__main__":
     """
