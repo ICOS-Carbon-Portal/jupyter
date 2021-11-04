@@ -631,6 +631,9 @@ def load_fp(station):
     return loaded_fp
 
 def return_networks(networkObj):
+    now = datetime.now()
+    global date_time
+    date_time = now.strftime("%Y%m%d_%H%M%S")
     
     sites_base_network = networkObj.settings['baseNetwork']
     sites_compare_network = networkObj.settings['compareNetwork']
@@ -2149,4 +2152,97 @@ def date_range_hour_filtered(date_range, timeselect_list):
           
     #consider return timeselect
     return date_range
-                  
+
+def country_dict_landcover(networkObj):
+    
+    base_network =  networkObj.baseNetwork
+    
+    total_sens_base_network = base_network.sum()
+    
+    compare_network = networkObj.compareNetwork
+    total_sens_compare_network = compare_network.sum()
+    
+    f_gridarea = cdf.Dataset(os.path.join(folder_data, 'gridareaSTILT.nc'))
+    gridarea = f_gridarea.variables['cell_area'][:]
+    
+    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018') 
+    
+    list_land_cover_classes = [broad_leaf_forest, coniferous_forest, mixed_forest, cropland, pasture, urban, ocean, grass_shrub, other, unknown]
+    
+    land_cover_names = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrubland', 'Other', 'Unknown']
+    
+    all_countries = ["ALB","Andorra","AUT", "BLR","BEL","BIH", "BGR","HRV","CYP","CZE","DNK","EST","FIN", "FRA","DEU","GRC","HUN","IRL","ITA","XKX","LVA","LIE","LTU","LUX","MKD","MTL", "MDA","MNE","NLD","NOR", "POL", "PRT","SRB","ROU","SMR","SVK","SVN","ESP","SWE","CHE","GBR"]
+    
+    dict_all_countries= {}
+    
+    for country_code in all_countries:
+        
+        dict_all_countries[country_code]={}
+     
+        dict_all_countries[country_code]['country_breakdown'] = {}
+        
+        dict_all_countries[country_code]['base_network_breakdown'] = {}
+        
+        if compare_network is not None:
+            
+            dict_all_countries[country_code]['compare_network_breakdown'] = {}
+
+        country_mask = country_masks.variables[country_code][:,:]
+        
+        #area of country 
+        country_area_grid = (gridarea*country_mask)/1000000
+        country_area_total=country_area_grid.sum()
+        
+        dict_all_countries[country_code]['country_breakdown']['total area (km2)'] = country_area_total
+        
+        country_base_network_sens_total = (base_network * country_mask).sum()
+        country_compare_network_sens_total = (compare_network * country_mask).sum()
+
+        dict_all_countries[country_code]['base_network_breakdown']['total sens'] = country_base_network_sens_total
+        dict_all_countries[country_code]['compare_network_breakdown']['total sens'] = country_compare_network_sens_total
+        
+        dict_all_countries[country_code]['base_network_breakdown']['total sens/km2'] = country_base_network_sens_total/country_area_total
+        dict_all_countries[country_code]['compare_network_breakdown']['total sens/km2'] = country_compare_network_sens_total/country_area_total
+        
+        for land_cover, land_cover_name in zip(list_land_cover_classes, land_cover_names):
+        
+            # country breakdown
+            area_country_landcover = get_area_total_country(land_cover, country_mask)
+            
+            percent_country_breakdown = (area_country_landcover / country_area_total)*100 
+            
+            dict_all_countries[country_code]['country_breakdown'][land_cover_name]=percent_country_breakdown
+
+            # base network breakdown
+            
+            sens_country_landcover_base = (country_mask * base_network * land_cover).sum()
+            
+            percent_sens_landcover_base =  (sens_country_landcover_base / country_base_network_sens_total)*100 
+            
+            dict_all_countries[country_code]['base_network_breakdown'][land_cover_name + ' total']= sens_country_landcover_base
+            
+            dict_all_countries[country_code]['base_network_breakdown'][land_cover_name + ' percent']= percent_sens_landcover_base
+            
+            sens_country_landcover_compare = (country_mask * compare_network * land_cover).sum()
+            
+            percent_sens_landcover_compare =  (sens_country_landcover_compare / country_base_network_sens_total)*100 
+            
+            dict_all_countries[country_code]['compare_network_breakdown'][land_cover_name+ ' total'] = sens_country_landcover_compare
+            
+            dict_all_countries[country_code]['compare_network_breakdown'][land_cover_name+ ' percent'] = percent_sens_landcover_compare
+
+    f = open("dict.txt","w")
+
+    # write file
+    f.write( str(dict_all_countries) )
+
+    # close file
+    f.close()        
+    
+            
+            
+            
+            
+            
+            
+      

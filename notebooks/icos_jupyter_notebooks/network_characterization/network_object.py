@@ -34,9 +34,7 @@ class NetworkObj():
         self.compareNetwork = None
         self.vmaxSens = None
         self.compareMinusBase = None
-        #influde also in the settings file
         self.noFootprints = None
-        self.noFootprintsString = None
 
         # fucntions to generate the object attributes
         self._setNetworks()
@@ -46,13 +44,6 @@ class NetworkObj():
         
         self.baseNetwork, self.compareNetwork, self.noFootprints = functions.return_networks(self)
 
-        dictionary_all_sites = self.settings['allsites']
-        
-        if len(self.noFootprints)>0:
-        
-            no_footprints_list = [v['name'] + ' ('+ k + ')' for k, v in dictionary_all_sites.items() if k in self.noFootprints]
-            self.noFootprintsString = ", ".join(no_footprints_list)
-        
         if self.compareNetwork is not None:
             
             #otherwise remain None

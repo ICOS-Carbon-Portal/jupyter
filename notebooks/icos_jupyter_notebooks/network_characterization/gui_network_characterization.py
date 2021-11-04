@@ -64,8 +64,6 @@ def getSettings():
     s['countries'] = [selected_country[1] for selected_country in list(selected_countries.options)]
     s['download'] = download_output_option.value  
     
-    s['allsites'] = stiltstations
-    
     return s
 
 def set_settings(s):
@@ -319,6 +317,7 @@ def clear_selection_compare(button_c):
 
 def update_func(button_c):
     
+    
     update_button.disabled = True
     clear_all_output()
     
@@ -326,16 +325,21 @@ def update_func(button_c):
     
     global networkObj
     
-    networkObj = network_object.NetworkObj(settings)  
+    networkObj = network_object.NetworkObj(settings)
+    
+    functions.country_dict_landcover(networkObj)
     
     threshold_percent = str(networkObj.settings['percent'])
     pngfile = ''
     
-    if networkObj.noFootprintsString is not None:
+    if networkObj.noFootprints is not None:
+        settings['noFootprints'] = networkObj.noFootprints
+        no_footprints_list = [v['name'] + ' ('+ k + ')' for k, v in stiltstations.items() if k in networkObj.noFootprints]
+        no_footprints_string = ", ".join(no_footprints_list)
         
         with output_no_footprints:
         
-            display(HTML('<p style="font-size:16px">No footprints available for ' + networkObj.noFootprintsString + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints.</p>'))
+            display(HTML('<p style="font-size:16px">No footprints available for ' + no_footprints_string + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints.</p>'))
         
     if networkObj.baseNetwork is not None:
         
@@ -362,10 +366,9 @@ def update_func(button_c):
 
             functions.plot_maps(networkObj.compareMinusBase, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=None)
             
-    
-        
-        
-    #fp_combined_base_network, fp_mask_count_base_network, fp_mask_base_network, fp_max_base_network, lon, lat, list_none_footprints = functions.aggreg_2018_footprints_base_network(sites_base_network, threshold_int, date_range)
+       
+    functions.save_settings(settings, directory='network_characterization/network_characterization_2018')
+
     
     """
     string_list_none_footprints = ', '.join([str(elem) for elem in list_none_footprints])
