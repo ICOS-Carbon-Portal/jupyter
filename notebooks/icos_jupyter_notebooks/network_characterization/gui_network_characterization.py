@@ -64,6 +64,8 @@ def getSettings():
     s['countries'] = [selected_country[1] for selected_country in list(selected_countries.options)]
     s['download'] = download_output_option.value  
     
+    s['allsites'] = stiltstations
+    
     return s
 
 def set_settings(s):
@@ -298,9 +300,8 @@ def change_day_end(c):
 #clear all the output
 def clear_all_output():
     output_no_footprints.clear_output()
-    output_no_footprints_compare.clear_output()
     output_base_network_fp.clear_output()
-    output_base_network_fp.clear_output()
+    output_compare_network_fp.clear_output()
     output_base_minus_compare.clear_output()
     output_header_landcover_section.clear_output()
     breakdown_landcover_output.clear_output()
@@ -325,27 +326,43 @@ def update_func(button_c):
     
     global networkObj
     
-    networkObj = network_object.NetworkObj(settings)
-   
+    networkObj = network_object.NetworkObj(settings)  
     
-    threshold_percent = str(int(networkObj.settings['percent'])/100)
+    threshold_percent = str(networkObj.settings['percent'])
     pngfile = ''
-    with output_base_network_fp:
-  
-        display(HTML('<p style="font-size:16px;text-align:center">Base network footprint (' + threshold_percent  + '%)</p>'))
     
-        functions.plot_maps(networkObj.baseNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
+    if networkObj.noFootprintsString is not None:
+        
+        with output_no_footprints:
+        
+            display(HTML('<p style="font-size:16px">No footprints available for ' + networkObj.noFootprintsString + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints.</p>'))
+        
+    if networkObj.baseNetwork is not None:
+        
+        with output_base_network_fp:
 
-    with output_compare_network_fp: 
+            display(HTML('<p style="font-size:16px;text-align:center">Base network footprint (' + threshold_percent  + '%)</p>'))
+
+            functions.plot_maps(networkObj.baseNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
+    
+    else:
         
-        display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint (' + threshold_percent  + '%)</p>'))
-        
-        functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=None) 
-        
-    with output_base_minus_compare:
-        display(HTML('<p style="font-size:16px;text-align:center">Base minus compare</p>'))
-        
-        functions.plot_maps(networkObj.compareMinusBase, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=None)
+        update_button.disabled = False
+        return
+
+    if networkObj.compareNetwork is not None:
+        with output_compare_network_fp: 
+
+            display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint (' + threshold_percent  + '%)</p>'))
+
+            functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=None) 
+
+        with output_base_minus_compare:
+            display(HTML('<p style="font-size:16px;text-align:left">Base minus compare</p>'))
+
+            functions.plot_maps(networkObj.compareMinusBase, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=None)
+            
+    
         
         
     #fp_combined_base_network, fp_mask_count_base_network, fp_mask_base_network, fp_max_base_network, lon, lat, list_none_footprints = functions.aggreg_2018_footprints_base_network(sites_base_network, threshold_int, date_range)
@@ -788,7 +805,6 @@ form = VBox([heading_network_selection, heading_perpared_footprints, prepared_fo
 form_out = Output()
 
 output_no_footprints = Output()
-output_no_footprints_compare = Output()
 output_base_network_fp = Output()
 output_compare_network_fp = Output()
 output_base_minus_compare = Output()
@@ -832,7 +848,7 @@ with form_out:
         box_footprints_sens = HBox([output_base_network_fp, output_compare_network_fp])
 
 
-        display(form, box_footprints_sens, output_base_minus_compare)
+        display(form, output_no_footprints, box_footprints_sens, output_base_minus_compare)
         
     else:
         
