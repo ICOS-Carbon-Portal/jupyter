@@ -2231,13 +2231,15 @@ def country_dict_landcover(networkObj):
             
             dict_all_countries[country_code]['compare_network_breakdown'][land_cover_name+ ' percent'] = percent_sens_landcover_compare
 
-    f = open("dict.txt","w")
+    #f = open("dict.txt","w")
 
     # write file
-    f.write( str(dict_all_countries) )
+    #f.write( str(dict_all_countries) )
 
     # close file
-    f.close()        
+    #f.close() 
+    
+    return dict_all_countries
     
             
             

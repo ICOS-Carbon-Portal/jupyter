@@ -34,10 +34,12 @@ class NetworkObj():
         self.compareNetwork = None
         self.vmaxSens = None
         self.compareMinusBase = None
-        self.noFootprints = None
+        self.noFootprints = []
+        self.countryDict= {}
 
         # fucntions to generate the object attributes
         self._setNetworks()
+        self._setCountryDict()
  
 
     def _setNetworks(self):
@@ -50,6 +52,11 @@ class NetworkObj():
             self.vmaxSens = np.max(self.compareNetwork)
             
             self.compareMinusBase = self.compareNetwork - self.baseNetwork
+            
+    def _setCountryDict(self):
+        
+        self.countryDict = functions.country_dict_landcover(self)
+        
 
 
 if __name__ == "__main__":

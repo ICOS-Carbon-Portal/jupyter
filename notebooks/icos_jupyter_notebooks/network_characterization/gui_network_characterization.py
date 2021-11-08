@@ -332,7 +332,7 @@ def update_func(button_c):
     threshold_percent = str(networkObj.settings['percent'])
     pngfile = ''
     
-    if networkObj.noFootprints is not None:
+    if len(networkObj.noFootprints)> 0:
         settings['noFootprints'] = networkObj.noFootprints
         no_footprints_list = [v['name'] + ' ('+ k + ')' for k, v in stiltstations.items() if k in networkObj.noFootprints]
         no_footprints_string = ", ".join(no_footprints_list)
