@@ -32,6 +32,8 @@ from bokeh.models import HoverTool
 from datetime import datetime
 from matplotlib.colors import LogNorm
 import json
+from icoscp.stilt import stiltstation
+
 reset_output()
 output_notebook()
 
@@ -179,7 +181,7 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
         
     else:
 
-        cs = ax.imshow(field[:,:],norm=LogNorm(), origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
+        cs = ax.imshow(field[:,:],norm=LogNorm(), origin='lower', extent=img_extent,cmap=cmap,vmin=0.000001,vmax=vmax)
 
         cbar = plt.colorbar(cs, orientation='horizontal',pad=0.03,fraction=0.055,extend='neither')
         
@@ -630,6 +632,18 @@ def load_fp(station):
 
     return loaded_fp
 
+def get_fp(station, start_date, end_date, hours):
+    
+    station_obj = stiltstation.get(id = station)
+    
+    try:
+        loaded_fps = station_obj.get_fp(start_date, end_date, hours)
+        loaded_fp = loaded_fps.foot.mean('time').to_masked_array()
+    except:
+        loaded_fp = None
+    
+    return loaded_fp
+
 def return_networks(networkObj):
     now = datetime.now()
     global date_time
@@ -637,7 +651,11 @@ def return_networks(networkObj):
     
     sites_base_network = networkObj.settings['baseNetwork']
     sites_compare_network = networkObj.settings['compareNetwork']
-    date_range = pd.date_range(start=(str(networkObj.settings['startYear']) + '-' + str(networkObj.settings['startMonth'])  + '-' + str(networkObj.settings['startDay'])), end=(str(networkObj.settings['endYear']) + '-' + str(networkObj.settings['endMonth'])  + '-' + str(networkObj.settings['endDay'])), freq='3H')
+
+    start_date = str(networkObj.settings['startYear']) + '-' + str(networkObj.settings['startMonth'])  + '-' + str(networkObj.settings['startDay'])
+    end_date = str(networkObj.settings['endYear']) + '-' + str(networkObj.settings['endMonth'])  + '-' + str(networkObj.settings['endDay'])
+    hours = networkObj.settings['timeOfDay']
+
     threshold_value = int(networkObj.settings['percent'])
     threshold = threshold_value/100
     
@@ -653,23 +671,24 @@ def return_networks(networkObj):
     for station in sites_base_network:
         
         #if use 2018 aggregated footprint
-        if min(date_range)==pd.Timestamp(2018, 1, 1, 0) and max(date_range)==pd.Timestamp(2018,12,31,0) and len(networkObj.settings['timeOfDay'])==8:
-            
+        if pd.Timestamp(start_date)==pd.Timestamp(2018, 1, 1, 0) and pd.Timestamp(end_date)==pd.Timestamp(2018,12,31,0) and len(hours)==8:
+
             loaded_fp=load_fp(station)
             
             #might just not be pre-computed 2018 footprint
             if loaded_fp is None:
-                
-                nfp_not_used, loaded_fp, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range)
-                
+
+                loaded_fp = get_fp(station, start_date, end_date, hours)
+
                 #if still None, then add to list of sites with no footprints and continue
                 if loaded_fp is None:
 
                     list_none_footprints.append(station)
                     
         else:
+
+            loaded_fp = get_fp(station, start_date, end_date, hours)
             
-            nfp_not_used, loaded_fp, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range)
 
             if loaded_fp is None:
 
@@ -708,15 +727,15 @@ def return_networks(networkObj):
         for station in sites_compare_network:
 
             #if use 2018 aggregated footprint
-            if min(date_range)==pd.Timestamp(2018, 1, 1, 0) and max(date_range)==pd.Timestamp(2018,12,31,0) and len(networkObj.settings['timeOfDay'])==8:
+            if pd.Timestamp(start_date)==pd.Timestamp(2018, 1, 1, 0) and pd.Timestamp(end_date)==pd.Timestamp(2018,12,31,0) and len(hours)==8:
 
                 loaded_fp=load_fp(station)
 
                 #might just not be pre-computed 2018 footprint
                 if loaded_fp is None:
 
-                    nfp_not_used, loaded_fp, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range)
-
+                    loaded_fp = get_fp(station, start_date, end_date, hours)
+                    
                     #if still None, then add to list of sites with no footprints and continue
                     if loaded_fp is None:
 
@@ -724,8 +743,8 @@ def return_networks(networkObj):
 
             else:
 
-                nfp_not_used, loaded_fp, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range)
-
+                loaded_fp = get_fp(station, start_date, end_date, hours) 
+                
                 if loaded_fp is None:
 
                     list_none_footprints.append(station)
@@ -739,15 +758,15 @@ def return_networks(networkObj):
             #for new column values
             index=index+1
 
-            # make a footprint based on all max values of the combined footprints. 
-            df_max_compare_network = df_footprints_network[df_footprints_network.columns].max(axis=1)
+        # make a footprint based on all max values of the combined footprints. 
+        df_max_compare_network = df_footprints_network[df_footprints_network.columns].max(axis=1)
 
-            fp_max_compare_network=np.array(df_max_compare_network.tolist()).reshape((len(load_lat), len(load_lon)))
+        fp_max_compare_network=np.array(df_max_compare_network.tolist()).reshape((len(load_lat), len(load_lon)))
 
-            if fp_max_compare_network.sum() == fp_max_base_network.sum():
-                fp_max_compare_network = None
+        if fp_max_compare_network.sum() == fp_max_base_network.sum():
+            fp_max_compare_network = None
 
-            return fp_max_base_network, fp_max_compare_network, list_none_footprints
+        return fp_max_base_network, fp_max_compare_network, list_none_footprints
     
     
 def aggreg_2018_footprints_base_network(sites_base_network, threshold, date_range = ''):
@@ -2231,13 +2250,6 @@ def country_dict_landcover(networkObj):
             
             dict_all_countries[country_code]['compare_network_breakdown'][land_cover_name+ ' percent'] = percent_sens_landcover_compare
 
-    #f = open("dict.txt","w")
-
-    # write file
-    #f.write( str(dict_all_countries) )
-
-    # close file
-    #f.close() 
     
     return dict_all_countries
     

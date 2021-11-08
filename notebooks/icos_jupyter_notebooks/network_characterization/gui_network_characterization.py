@@ -32,7 +32,7 @@ countries = [('Albania','ALB'),('Andorra','Andorra'),('Austria','AUT'),('Belarus
 dict_countries = {'ALB':'Albania', 'Andorra':'Andorra', 'AUT':'Austria','BLR':'Belarus','BEL':'Belgium','BIH':'Bosnia and Herzegovina','BGR':'Bulgaria','HRV':'Croatia','CYP':'Cyprus','CZE':'Czechia','DNK':'Denmark','EST':'Estonia','FIN':'Finland','FRA':'France','DEU':'Germany','GRC':'Greece','HUN':'Hungary','IRL':'Ireland','ITA':'Italy','XKX':'Kosovo','LVA':'Latvia','LIE':'Liechtenstein','LTU':'Lithuania','LUX':'Luxembourg','MKD':'Macedonia','MTL':'Malta','MDA':'Moldova','MNE':'Montenegro','NLD':'Netherlands','NOR':'Norway','POL':'Poland','PRT':'Portugal','SRB':'Republic of Serbia','ROU':'Romania','SMR':'San Marino','SVK':'Slovakia','SVN':'Slovenia','ESP':'Spain','SWE':'Sweden','CHE':'Switzerland','GBR':'United Kingdom'}
 
 def getSettings():
-    
+
     s = {}
     
     if prepared_footprints.value:
@@ -327,8 +327,6 @@ def update_func(button_c):
     
     networkObj = network_object.NetworkObj(settings)
     
-    functions.country_dict_landcover(networkObj)
-    
     threshold_percent = str(networkObj.settings['percent'])
     pngfile = ''
     
@@ -359,7 +357,7 @@ def update_func(button_c):
 
             display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint (' + threshold_percent  + '%)</p>'))
 
-            functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=None) 
+            functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
 
         with output_base_minus_compare:
             display(HTML('<p style="font-size:16px;text-align:left">Base minus compare</p>'))
