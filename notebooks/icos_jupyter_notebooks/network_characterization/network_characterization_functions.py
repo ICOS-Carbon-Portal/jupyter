@@ -2063,7 +2063,9 @@ def country_dict_landcover(networkObj):
     
     
 def leader_chart_sensitivity(networkObj):
+    
     compare_network =  networkObj.compareNetwork
+    
     all_countries = ["ALB","Andorra","AUT", "BLR","BEL","BIH", "BGR","HRV","CYP","CZE","DNK","EST","FIN", "FRA","DEU","GRC","HUN","IRL","ITA","XKX","LVA","LIE","LTU","LUX","MKD","MTL", "MDA","MNE","NLD","NOR", "POL", "PRT","SRB","ROU","SMR","SVK","SVN","ESP","SWE","CHE","GBR"]
     
     if compare_network is None:
@@ -2105,7 +2107,6 @@ def leader_chart_sensitivity(networkObj):
         
         df_leader_chart_sens = df_leader_chart_sens.sort_values(by=['Sensitivity/km2 base'], ascending=False)
 
-
         styled_df_leader_chart_sens = (df_leader_chart_sens.style
                                               .format({'Sensitivity/km2 base' : '{:.2E}', 'Sensitivity/km2 compare': '{:.2E}', 'Difference': '{:.2E}'})
                                               .set_table_styles([dict(selector='th', props=[('text-align', 'center')])]))
@@ -2122,37 +2123,72 @@ def leader_chart_sensitivity(networkObj):
                                               .set_table_styles([dict(selector='th', props=[('text-align', 'center')])]))
 
         styled_df_leader_chart_sens = styled_df_leader_chart_sens.set_properties(**{'text-align': 'center'}).hide_index()
+        
+
 
     return styled_df_leader_chart_sens
-        
+       
+def land_cover_bar_graphs_base(networkObj):
     
+    base_network = networkObj.baseNetwork
     
-    """
+    countries = networkObj.settings['countries']
     
     land_cover_values = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrubland', 'Other', 'Unknown']
     
     colors = ['#4c9c5e','#CAE0AB','#90C987', '#521A13', '#F7F056', '#DC050C', '#1964B0', '#F1932D', '#882E72','#777777']
     
-    all_countries = ["ALB","Andorra","AUT", "BLR","BEL","BIH", "BGR","HRV","CYP","CZE","DNK","EST","FIN", "FRA","DEU","GRC","HUN","IRL","ITA","XKX","LVA","LIE","LTU","LUX","MKD","MTL", "MDA","MNE","NLD","NOR", "POL", "PRT","SRB","ROU","SMR","SVK","SVN","ESP","SWE","CHE","GBR"]
+    country_names = []
     
-    dict_all_countries = networkObj.countryDict
+    broad_leaf_forest_list = [] 
+    coniferous_forest_list = [] 
+    mixed_forest_list = [] 
+    ocean_list = [] 
+    other_list = [] 
+    grass_shrub_list = [] 
+    cropland_list = [] 
+    pasture_list = [] 
+    urban_list = [] 
+    unknown_list = []
     
-    countries = []
-    
-    for country in all_countries:
+    for country in countries:
         
-        country_name = dictionary_area_choice[area_choice]
+        #add code to make individual bars
         
-        countries.append(country_name)
-    """
+        if networkObj.countryDict[country]['base_network_breakdown']['total sens']>0:
+            
+            broad_leaf_forest_list.append(networkObj.countryDict[country]['base_network_breakdown']['Broad leaf forest total'])
+            coniferous_forest_list.append(networkObj.countryDict[country]['base_network_breakdown']['Coniferous forest total'])
+            mixed_forest_list.append(networkObj.countryDict[country]['base_network_breakdown']['Mixed forest total'])
+            ocean_list.append(networkObj.countryDict[country]['base_network_breakdown']['Ocean total'])
+            other_list.append(networkObj.countryDict[country]['base_network_breakdown']['Other total'])
+            grass_shrub_list.append(networkObj.countryDict[country]['base_network_breakdown']['Grass/shrubland total'])
+            cropland_list.append(networkObj.countryDict[country]['base_network_breakdown']['Cropland total'])
+            pasture_list.append(networkObj.countryDict[country]['base_network_breakdown']['Pasture total'])
+            urban_list.append(networkObj.countryDict[country]['base_network_breakdown']['Urban total'])
+            unknown_list.append(networkObj.countryDict[country]['base_network_breakdown']['Unknown total'])
         
+ 
+            country_name = dictionary_area_choice[country]
+
+            country_names.append(country_name)
+
+    dictionary_landcover_by_country = {'Countries': country_names,'Broad leaf forest': broad_leaf_forest_list, 'Coniferous forest': coniferous_forest_list, 'Mixed forest': mixed_forest_list,'Cropland' : cropland_list,'Pasture': pasture_list,'Urban': urban_list, 'Ocean': ocean_list, 'Grass/shrubland': grass_shrub_list, 'Other': other_list, 'Unknown': unknown_list}
     
+    p = figure(x_range=country_names, title='Sensitivity to land cover by country', toolbar_location="below", tooltips="$name @Countries: @$name{0f}")
+
+    p.vbar_stack(land_cover_values, x='Countries', width=0.5, color=colors, source=dictionary_landcover_by_country,
+             legend_label=land_cover_values)
+
+    p.y_range.start = 0
+    p.x_range.range_padding = 0.1
+    p.xgrid.grid_line_color = None
+    p.axis.minor_tick_line_color = None
+    p.outline_line_color = None
+    p.legend.label_text_font_size = "10px"
+    p.legend[0].items.reverse()
+    p.xaxis.major_label_orientation = "vertical"
+    p.yaxis.axis_label = 'area (km²) * (ppm /(μmol / (m²s)))'
     
-    
-            
-            
-            
-            
-            
-            
-      
+    return p 
+                  

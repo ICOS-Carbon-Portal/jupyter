@@ -17,6 +17,8 @@ import network_characterization_functions as functions
 import json
 import network_object
 from icoscp.stilt import stiltstation
+
+from bokeh.io import show, output_notebook, reset_output
 stiltstations= stiltstation.find()
 
 list_all_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if v['geoinfo']])
@@ -302,6 +304,7 @@ def clear_all_output():
     output_compare_network_fp.clear_output()
     output_base_minus_compare.clear_output()
     output_leader_chart.clear_output()
+    output_landcover_bargraph_countries.clear_output()
     output_header_landcover_section.clear_output()
     breakdown_landcover_output.clear_output()
     output_header_landcover_section.clear_output()
@@ -361,7 +364,7 @@ def update_func(button_c):
             functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
 
         with output_base_minus_compare:
-            display(HTML('<p style="font-size:16px;text-align:left">Base minus compare</p>'))
+            display(HTML('<p style="font-size:16px;text-align:left">Compare minus base network</p>'))
 
             functions.plot_maps(networkObj.compareMinusBase, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=None)
             
@@ -372,7 +375,14 @@ def update_func(button_c):
         
         display(df_leader_chart_sens)
         
-            
+    p = functions.land_cover_bar_graphs_base(networkObj)
+    
+    with output_landcover_bargraph_countries:
+        
+        show(p)
+        
+    
+    
     #only if choose to donwload:
     functions.save_settings(settings, directory='network_characterization/network_characterization_2018')
     
@@ -821,6 +831,7 @@ output_base_network_fp = Output()
 output_compare_network_fp = Output()
 output_base_minus_compare = Output()
 output_leader_chart = Output()
+output_landcover_bargraph_countries = Output()
 
 output_breakdown_countries = Output()
 breakdown_landcover_output = Output()
@@ -861,7 +872,7 @@ with form_out:
         box_footprints_sens = HBox([output_base_network_fp, output_compare_network_fp])
 
 
-        display(form, output_no_footprints, box_footprints_sens, output_base_minus_compare, output_leader_chart)
+        display(form, output_no_footprints, box_footprints_sens, output_base_minus_compare, output_leader_chart, output_landcover_bargraph_countries)
         
     else:
         
