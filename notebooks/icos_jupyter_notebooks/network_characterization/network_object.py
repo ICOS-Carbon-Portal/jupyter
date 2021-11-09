@@ -42,7 +42,6 @@ class NetworkObj():
         self._setNetworks()
         self._setCountryDict()
  
-
     def _setNetworks(self):
         
         self.baseNetwork, self.compareNetwork, self.noFootprints = functions.return_networks(self)

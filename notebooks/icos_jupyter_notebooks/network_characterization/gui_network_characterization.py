@@ -301,6 +301,7 @@ def clear_all_output():
     output_base_network_fp.clear_output()
     output_compare_network_fp.clear_output()
     output_base_minus_compare.clear_output()
+    output_leader_chart.clear_output()
     output_header_landcover_section.clear_output()
     breakdown_landcover_output.clear_output()
     output_header_landcover_section.clear_output()
@@ -364,8 +365,18 @@ def update_func(button_c):
 
             functions.plot_maps(networkObj.compareMinusBase, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=None)
             
-       
+            
+    df_leader_chart_sens = functions.leader_chart_sensitivity(networkObj)
+
+    with output_leader_chart:
+        
+        display(df_leader_chart_sens)
+        
+            
+    #only if choose to donwload:
     functions.save_settings(settings, directory='network_characterization/network_characterization_2018')
+    
+    
 
     
     """
@@ -809,6 +820,7 @@ output_no_footprints = Output()
 output_base_network_fp = Output()
 output_compare_network_fp = Output()
 output_base_minus_compare = Output()
+output_leader_chart = Output()
 
 output_breakdown_countries = Output()
 breakdown_landcover_output = Output()
@@ -849,7 +861,7 @@ with form_out:
         box_footprints_sens = HBox([output_base_network_fp, output_compare_network_fp])
 
 
-        display(form, output_no_footprints, box_footprints_sens, output_base_minus_compare)
+        display(form, output_no_footprints, box_footprints_sens, output_base_minus_compare, output_leader_chart)
         
     else:
         

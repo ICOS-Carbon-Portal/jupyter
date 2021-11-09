@@ -626,14 +626,12 @@ def return_networks(networkObj):
     
     sites_base_network = networkObj.settings['baseNetwork']
     sites_compare_network = networkObj.settings['compareNetwork']
-
     threshold_value = int(networkObj.settings['percent'])
     threshold = threshold_value/100
-    
+    date_range = networkObj.dateRange
+    hours = networkObj.settings['timeOfDay']
     load_lat=networkObj.loadLat
     load_lon=networkObj.loadLon
-    
-    date_range = networkObj.dateRange
     
     df_footprints_network = pd.DataFrame()
 
@@ -740,175 +738,6 @@ def return_networks(networkObj):
 
         return fp_max_base_network, fp_max_compare_network, list_none_footprints
     
-    
-def aggreg_2018_footprints_base_network(sites_base_network, threshold, date_range = ''):
-   
-    #this will run once per tool run - define it here as opposed to up top so re-defined date_time 
-    #every time the update button is pressed
-    now = datetime.now()
-    global date_time
-    date_time = now.strftime("%Y%m%d_%H%M%S")
-    
-    load_lat=loadtxt(os.path.join(folder_tool, folder_tool_fps, 'latitude.csv'), delimiter=',')
-    load_lon=loadtxt(os.path.join(folder_tool, folder_tool_fps, 'longitude.csv'), delimiter=',')
-    
-    df_max_base_network = pd.DataFrame()
-    
-    index=1
-    first=True
-    
-    list_none_footprints = []
-    for station in sites_base_network:
-        
-        #if use 2018 aggregated footprint
-        if len(date_range)<1:
-
-            loaded_fp=load_fp(station)
-            
-            if loaded_fp is None:
-                list_none_footprints.append(station)
-                continue
-                
-        #in case of user selected date range/time:
-        else:
-            nfp_not_used, loaded_fp, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range)
-            
-            if loaded_fp is None:
-                
-                list_none_footprints.append(station)
-                continue
-   
-        upd_fp_sens, upd_fp_see_not_see=update_footprint_based_on_threshold(loaded_fp, load_lat, load_lon, threshold)
-        
-        df_max_base_network[('fp_' + str(index))]=upd_fp_sens.flatten()
-
-        if first==True:
-            #sensitivity values
-            summed_fp_sens=upd_fp_sens
-            #one or zero, for see or not see.
-            summed_fp_see_not_see=upd_fp_see_not_see
-
-            #only for the first footprint.
-            first=False
-        else:
-            summed_fp_sens=summed_fp_sens+upd_fp_sens
-
-            #values 0 - x depending on how many stations "sees" each cell
-            summed_fp_see_not_see=summed_fp_see_not_see+upd_fp_see_not_see
-            
-        #for new column values
-        index=index+1
-    
-    df_max_base_network = df_max_base_network[df_max_base_network.columns].max(axis=1)
-    
-    #in case of no available footprints for any of the selections. 
-    if len(df_max_base_network.tolist()) == 0:
-        
-        summed_fp_sens = None
-        summed_fp_see_not_see = None    
-        aggreg_fp_see_not_see = None   
-        fp_max_base_network= None  
-
-    else:
-        fp_max_base_network=np.array(df_max_base_network.tolist()).reshape((len(load_lat), len(load_lon)))
-        aggreg_fp_see_not_see = one_or_zero_mask_x(summed_fp_see_not_see)
-
-    return summed_fp_sens, summed_fp_see_not_see, aggreg_fp_see_not_see, fp_max_base_network, load_lon, load_lat, list_none_footprints
-
-def aggreg_2018_footprints_compare_network(sites_base_network, list_additional_footprints, threshold, date_range=''):
-    
-    load_lat=loadtxt(os.path.join(folder_tool, folder_tool_fps, 'latitude.csv'), delimiter=',')
-    load_lon=loadtxt(os.path.join(folder_tool, folder_tool_fps, 'longitude.csv'), delimiter=',')
-    
-    df_max_compare_network = pd.DataFrame()
-    
-    index = 1
-    first=True
-    list_none_footprints_compare = []
-    for station in sites_base_network:
-        
-        if len(date_range)<1:
-
-            loaded_fp=load_fp(station)
-            
-            if loaded_fp is None:
-                
-                continue
-                
-        #in case of user selected date range/time:       
-        else:
-            
-            nfp_not_used, loaded_fp, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range)
-            
-            if loaded_fp is None:
-
-                continue
-            
-        #based on threshold - get 
-        upd_fp_sens, upd_fp_see_not_see=update_footprint_based_on_threshold(loaded_fp, load_lat, load_lon, threshold)
-
-        df_max_compare_network[('fp_' + str(index))]=upd_fp_sens.flatten()
-        
-        if first==True:
-            #sensitivity values
-            summed_fp_sens=upd_fp_sens
-            #one or zero, for see or not see.
-            summed_fp_see_not_see=upd_fp_see_not_see
-
-            #only for the first footprint.
-            first=False
-        else:
-            summed_fp_sens = summed_fp_sens + upd_fp_sens
-
-            #values 0 - x depending on how many stations "sees" each cell
-            summed_fp_see_not_see = summed_fp_see_not_see + upd_fp_see_not_see
-            
-        index = index+1
-        
-    aggreg_fp_see_not_see = one_or_zero_mask_x(summed_fp_see_not_see) 
-    
-    summed_fp_sens_additional = summed_fp_sens
-    summed_fp_see_not_see_additional = summed_fp_see_not_see
-    
-    
-    for station in list_additional_footprints:
-            
-        if len(date_range)<1:
-        
-            loaded_fp = load_fp(station)
-
-            if loaded_fp is None:
-                
-                list_none_footprints_compare.append(station)
-                continue
-                
-        else:
-            
-            nfp_not_used, loaded_fp, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range)
-            
-            if loaded_fp is None:
-                list_none_footprints_compare.append(station)
-
-                continue
-
-        upd_fp_sens, upd_fp_see_not_see=update_footprint_based_on_threshold(loaded_fp, load_lat, load_lon, threshold)
-        
-        df_max_compare_network[('fp_' + str(index))]=upd_fp_sens.flatten()
-        
-        summed_fp_sens_additional = summed_fp_sens_additional + upd_fp_sens
-        
-        summed_fp_see_not_see_additional = summed_fp_see_not_see_additional + upd_fp_see_not_see
-        
-        index = index + 1
-
-    df_max_compare_network = df_max_compare_network[df_max_compare_network.columns].max(axis=1)
-
-    fp_max_compare_network=np.array(df_max_compare_network.tolist()).reshape((len(load_lat), len(load_lon)))
-    
-    aggreg_fp_see_not_see_additional = one_or_zero_mask_x(summed_fp_see_not_see_additional) 
-   
-    return summed_fp_sens_additional, summed_fp_see_not_see_additional, aggreg_fp_see_not_see_additional,fp_max_compare_network, load_lon, load_lat, list_none_footprints_compare
-
 def import_landcover_HILDA(year='2018'):
     
     name_data = 'hilda_lulc_'+ year +'.nc' 
@@ -2151,7 +1980,9 @@ def country_dict_landcover(networkObj):
     total_sens_base_network = base_network.sum()
     
     compare_network = networkObj.compareNetwork
-    total_sens_compare_network = compare_network.sum()
+    
+    if compare_network is not None: 
+        total_sens_compare_network = compare_network.sum()
     
     f_gridarea = cdf.Dataset(os.path.join(folder_data, 'gridareaSTILT.nc'))
     gridarea = f_gridarea.variables['cell_area'][:]
@@ -2174,26 +2005,29 @@ def country_dict_landcover(networkObj):
         
         dict_all_countries[country_code]['base_network_breakdown'] = {}
         
-        if compare_network is not None:
-            
-            dict_all_countries[country_code]['compare_network_breakdown'] = {}
-
         country_mask = country_masks.variables[country_code][:,:]
-        
         #area of country 
         country_area_grid = (gridarea*country_mask)/1000000
         country_area_total=country_area_grid.sum()
-        
         dict_all_countries[country_code]['country_breakdown']['total area (km2)'] = country_area_total
         
+        if compare_network is not None: 
+            
+            dict_all_countries[country_code]['compare_network_breakdown'] = {}
+            
+            country_compare_network_sens_total = (compare_network * country_mask).sum()
+            
+            dict_all_countries[country_code]['compare_network_breakdown']['total sens'] = country_compare_network_sens_total
+            
+            dict_all_countries[country_code]['compare_network_breakdown']['total sens/km2'] = country_compare_network_sens_total/country_area_total
+
         country_base_network_sens_total = (base_network * country_mask).sum()
-        country_compare_network_sens_total = (compare_network * country_mask).sum()
 
         dict_all_countries[country_code]['base_network_breakdown']['total sens'] = country_base_network_sens_total
-        dict_all_countries[country_code]['compare_network_breakdown']['total sens'] = country_compare_network_sens_total
+        
         
         dict_all_countries[country_code]['base_network_breakdown']['total sens/km2'] = country_base_network_sens_total/country_area_total
-        dict_all_countries[country_code]['compare_network_breakdown']['total sens/km2'] = country_compare_network_sens_total/country_area_total
+        
         
         for land_cover, land_cover_name in zip(list_land_cover_classes, land_cover_names):
         
@@ -2203,6 +2037,16 @@ def country_dict_landcover(networkObj):
             percent_country_breakdown = (area_country_landcover / country_area_total)*100 
             
             dict_all_countries[country_code]['country_breakdown'][land_cover_name]=percent_country_breakdown
+                        
+            if compare_network is not None: 
+                sens_country_landcover_compare = (country_mask * compare_network * land_cover).sum()
+                
+                dict_all_countries[country_code]['compare_network_breakdown'][land_cover_name+ ' total'] = sens_country_landcover_compare
+                
+                percent_sens_landcover_compare =  (sens_country_landcover_compare / country_base_network_sens_total)*100 
+                
+                dict_all_countries[country_code]['compare_network_breakdown'][land_cover_name+ ' percent'] = percent_sens_landcover_compare
+            
 
             # base network breakdown
             
@@ -2213,17 +2057,75 @@ def country_dict_landcover(networkObj):
             dict_all_countries[country_code]['base_network_breakdown'][land_cover_name + ' total']= sens_country_landcover_base
             
             dict_all_countries[country_code]['base_network_breakdown'][land_cover_name + ' percent']= percent_sens_landcover_base
-            
-            sens_country_landcover_compare = (country_mask * compare_network * land_cover).sum()
-            
-            percent_sens_landcover_compare =  (sens_country_landcover_compare / country_base_network_sens_total)*100 
-            
-            dict_all_countries[country_code]['compare_network_breakdown'][land_cover_name+ ' total'] = sens_country_landcover_compare
-            
-            dict_all_countries[country_code]['compare_network_breakdown'][land_cover_name+ ' percent'] = percent_sens_landcover_compare
+              
 
-    
     return dict_all_countries
+    
+    
+def leader_chart_sensitivity(networkObj):
+    compare_network =  networkObj.compareNetwork
+    all_countries = ["ALB","Andorra","AUT", "BLR","BEL","BIH", "BGR","HRV","CYP","CZE","DNK","EST","FIN", "FRA","DEU","GRC","HUN","IRL","ITA","XKX","LVA","LIE","LTU","LUX","MKD","MTL", "MDA","MNE","NLD","NOR", "POL", "PRT","SRB","ROU","SMR","SVK","SVN","ESP","SWE","CHE","GBR"]
+    
+    if compare_network is None:
+        df_leader_chart_sens = pd.DataFrame(columns=['Country', 'Sensitivity/km2'])
+    else:
+        df_leader_chart_sens = pd.DataFrame(columns=['Country', 'Sensitivity/km22', 'Sensitivity/km2 compare', 'Difference'])
+    
+    i = 0
+    
+    for country in all_countries:
+        
+        country_name = dictionary_area_choice[country]
+        
+        base_sens_km2 = networkObj.countryDict[country]['base_network_breakdown']['total sens/km2']
+        
+        if compare_network is not None:
+            
+            compare_sens_km2 = networkObj.countryDict[country]['compare_network_breakdown']['total sens/km2']
+
+            diff_base_compare = compare_sens_km2 - base_sens_km2
+            
+            df_leader_chart_sens.loc[i] = [country_name, base_sens_km2, compare_sens_km2, diff_base_compare]
+        
+        else:
+            
+            df_leader_chart_sens.loc[i] = [country_name, base_sens_km2]
+     
+        i = i + 1
+     
+    df_leader_chart_sens = df_leader_chart_sens.sort_values(by=['Sensitivity/km2'], ascending=False)
+
+    styled_df_leader_chart_sens = (df_leader_chart_sens.style
+                                          #.format({'Sensitivity/km2' : '{:.2f}'})
+                                          .set_table_styles([dict(selector='th', props=[('text-align', 'center')])]))
+
+    styled_df_leader_chart_sens = styled_df_leader_chart_sens.set_properties(**{'text-align': 'center'}).hide_index()
+
+    return styled_df_leader_chart_sens
+        
+    
+    
+    """
+    
+    land_cover_values = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrubland', 'Other', 'Unknown']
+    
+    colors = ['#4c9c5e','#CAE0AB','#90C987', '#521A13', '#F7F056', '#DC050C', '#1964B0', '#F1932D', '#882E72','#777777']
+    
+    all_countries = ["ALB","Andorra","AUT", "BLR","BEL","BIH", "BGR","HRV","CYP","CZE","DNK","EST","FIN", "FRA","DEU","GRC","HUN","IRL","ITA","XKX","LVA","LIE","LTU","LUX","MKD","MTL", "MDA","MNE","NLD","NOR", "POL", "PRT","SRB","ROU","SMR","SVK","SVN","ESP","SWE","CHE","GBR"]
+    
+    dict_all_countries = networkObj.countryDict
+    
+    countries = []
+    
+    for country in all_countries:
+        
+        country_name = dictionary_area_choice[area_choice]
+        
+        countries.append(country_name)
+    """
+        
+    
+    
     
             
             
