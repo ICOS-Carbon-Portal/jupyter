@@ -32,7 +32,6 @@ from bokeh.models import HoverTool
 from datetime import datetime
 from matplotlib.colors import LogNorm
 import json
-from icoscp.stilt import stiltstation
 
 reset_output()
 output_notebook()
@@ -616,32 +615,8 @@ def load_fp(station):
         loaded_fp=loadtxt(os.path.join(folder_tool, folder_tool_fps, name_load_footprint_csv), delimiter=',')
     else:
 
-        date_range = pd.date_range(start='2018-01-01', end='2019-01-01', freq='3H')
-
-        #not including midnight between dec 31 and jan 1
-        date_range = date_range[:-1]
-
-        nfp, fp, lon, lat, title = read_aggreg_footprints(station, date_range)
-
-        if fp is None:
-  
-            loaded_fp = None
-        else:
- 
-           loaded_fp=fp[0]
-
-    return loaded_fp
-
-def get_fp(station, start_date, end_date, hours):
-    
-    station_obj = stiltstation.get(id = station)
-    
-    try:
-        loaded_fps = station_obj.get_fp(start_date, end_date, hours)
-        loaded_fp = loaded_fps.foot.mean('time').to_masked_array()
-    except:
         loaded_fp = None
-    
+
     return loaded_fp
 
 def return_networks(networkObj):
@@ -652,15 +627,13 @@ def return_networks(networkObj):
     sites_base_network = networkObj.settings['baseNetwork']
     sites_compare_network = networkObj.settings['compareNetwork']
 
-    start_date = str(networkObj.settings['startYear']) + '-' + str(networkObj.settings['startMonth'])  + '-' + str(networkObj.settings['startDay'])
-    end_date = str(networkObj.settings['endYear']) + '-' + str(networkObj.settings['endMonth'])  + '-' + str(networkObj.settings['endDay'])
-    hours = networkObj.settings['timeOfDay']
-
     threshold_value = int(networkObj.settings['percent'])
     threshold = threshold_value/100
     
     load_lat=networkObj.loadLat
     load_lon=networkObj.loadLon
+    
+    date_range = networkObj.dateRange
     
     df_footprints_network = pd.DataFrame()
 
@@ -671,7 +644,7 @@ def return_networks(networkObj):
     for station in sites_base_network:
         
         #if use 2018 aggregated footprint
-        if pd.Timestamp(start_date)==pd.Timestamp(2018, 1, 1, 0) and pd.Timestamp(end_date)==pd.Timestamp(2018,12,31,0) and len(hours)==8:
+        if pd.Timestamp(min(date_range))==pd.Timestamp(2018, 1, 1, 0) and pd.Timestamp(max(date_range))==pd.Timestamp(2018,12,31,0) and len(hours)==8:
 
             loaded_fp=load_fp(station)
             
@@ -687,8 +660,7 @@ def return_networks(networkObj):
                     
         else:
 
-            loaded_fp = get_fp(station, start_date, end_date, hours)
-            
+            nfp_not_used, loaded_fp, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range)
 
             if loaded_fp is None:
 
@@ -727,7 +699,7 @@ def return_networks(networkObj):
         for station in sites_compare_network:
 
             #if use 2018 aggregated footprint
-            if pd.Timestamp(start_date)==pd.Timestamp(2018, 1, 1, 0) and pd.Timestamp(end_date)==pd.Timestamp(2018,12,31,0) and len(hours)==8:
+            if pd.Timestamp(min(date_range))==pd.Timestamp(2018, 1, 1, 0) and pd.Timestamp(max(date_range))==pd.Timestamp(2018,12,31,0) and len(hours)==8:
 
                 loaded_fp=load_fp(station)
 
@@ -743,7 +715,7 @@ def return_networks(networkObj):
 
             else:
 
-                loaded_fp = get_fp(station, start_date, end_date, hours) 
+                nfp_not_used, loaded_fp, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range)
                 
                 if loaded_fp is None:
 
