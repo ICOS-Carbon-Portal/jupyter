@@ -649,7 +649,7 @@ def return_networks(networkObj):
             #might just not be pre-computed 2018 footprint
             if loaded_fp is None:
 
-                loaded_fp = get_fp(station, start_date, end_date, hours)
+                nfp_not_used, loaded_fp, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range)
 
                 #if still None, then add to list of sites with no footprints and continue
                 if loaded_fp is None:
@@ -704,7 +704,7 @@ def return_networks(networkObj):
                 #might just not be pre-computed 2018 footprint
                 if loaded_fp is None:
 
-                    loaded_fp = get_fp(station, start_date, end_date, hours)
+                    nfp_not_used, loaded_fp, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range)
                     
                     #if still None, then add to list of sites with no footprints and continue
                     if loaded_fp is None:
@@ -2069,7 +2069,7 @@ def leader_chart_sensitivity(networkObj):
     if compare_network is None:
         df_leader_chart_sens = pd.DataFrame(columns=['Country', 'Sensitivity/km2'])
     else:
-        df_leader_chart_sens = pd.DataFrame(columns=['Country', 'Sensitivity/km22', 'Sensitivity/km2 compare', 'Difference'])
+        df_leader_chart_sens = pd.DataFrame(columns=['Country', 'Sensitivity/km2 base', 'Sensitivity/km2 compare', 'Difference'])
     
     i = 0
     
@@ -2079,27 +2079,49 @@ def leader_chart_sensitivity(networkObj):
         
         base_sens_km2 = networkObj.countryDict[country]['base_network_breakdown']['total sens/km2']
         
-        if compare_network is not None:
-            
-            compare_sens_km2 = networkObj.countryDict[country]['compare_network_breakdown']['total sens/km2']
-
-            diff_base_compare = compare_sens_km2 - base_sens_km2
-            
-            df_leader_chart_sens.loc[i] = [country_name, base_sens_km2, compare_sens_km2, diff_base_compare]
-        
-        else:
+        if base_sens_km2>0 and compare_network is None:
             
             df_leader_chart_sens.loc[i] = [country_name, base_sens_km2]
-     
-        i = i + 1
-     
-    df_leader_chart_sens = df_leader_chart_sens.sort_values(by=['Sensitivity/km2'], ascending=False)
+            
+            i = i + 1
+        
+        else: 
+            
+            if compare_network is not None:
 
-    styled_df_leader_chart_sens = (df_leader_chart_sens.style
-                                          #.format({'Sensitivity/km2' : '{:.2f}'})
-                                          .set_table_styles([dict(selector='th', props=[('text-align', 'center')])]))
+                compare_sens_km2 = networkObj.countryDict[country]['compare_network_breakdown']['total sens/km2']
 
-    styled_df_leader_chart_sens = styled_df_leader_chart_sens.set_properties(**{'text-align': 'center'}).hide_index()
+                if compare_sens_km2>0:
+
+
+                    diff_base_compare = compare_sens_km2 - base_sens_km2
+
+                    df_leader_chart_sens.loc[i] = [country_name, base_sens_km2, compare_sens_km2, diff_base_compare]
+
+                    i = i + 1
+
+  
+    if compare_network is not None:
+        
+        df_leader_chart_sens = df_leader_chart_sens.sort_values(by=['Sensitivity/km2 base'], ascending=False)
+
+
+        styled_df_leader_chart_sens = (df_leader_chart_sens.style
+                                              .format({'Sensitivity/km2 base' : '{:.2E}', 'Sensitivity/km2 compare': '{:.2E}', 'Difference': '{:.2E}'})
+                                              .set_table_styles([dict(selector='th', props=[('text-align', 'center')])]))
+        
+        styled_df_leader_chart_sens = styled_df_leader_chart_sens.set_properties(**{'text-align': 'center'}).hide_index()
+
+
+    else:
+
+        df_leader_chart_sens = df_leader_chart_sens.sort_values(by=['Sensitivity/km2'], ascending=False)
+        
+        styled_df_leader_chart_sens = (df_leader_chart_sens.style
+                                              .format({'Sensitivity/km2' : '{:.2E}'})
+                                              .set_table_styles([dict(selector='th', props=[('text-align', 'center')])]))
+
+        styled_df_leader_chart_sens = styled_df_leader_chart_sens.set_properties(**{'text-align': 'center'}).hide_index()
 
     return styled_df_leader_chart_sens
         
