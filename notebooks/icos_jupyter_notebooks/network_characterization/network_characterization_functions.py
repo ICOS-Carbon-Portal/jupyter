@@ -1981,6 +1981,8 @@ def country_dict_landcover(networkObj):
     
     compare_network = networkObj.compareNetwork
     
+    fp_pop = import_population_data()
+    
     if compare_network is not None: 
         total_sens_compare_network = compare_network.sum()
     
@@ -2020,15 +2022,21 @@ def country_dict_landcover(networkObj):
             dict_all_countries[country_code]['compare_network_breakdown']['total sens'] = country_compare_network_sens_total
             
             dict_all_countries[country_code]['compare_network_breakdown']['total sens/km2'] = country_compare_network_sens_total/country_area_total
+            
+            
+            #added here 
+            dict_all_countries[country_code]['compare_network_breakdown']['population sens'] = (country_mask * compare_network * fp_pop).sum()
+            
+            
 
         country_base_network_sens_total = (base_network * country_mask).sum()
 
         dict_all_countries[country_code]['base_network_breakdown']['total sens'] = country_base_network_sens_total
-        
-        
+
         dict_all_countries[country_code]['base_network_breakdown']['total sens/km2'] = country_base_network_sens_total/country_area_total
         
-        
+        dict_all_countries[country_code]['base_network_breakdown']['population sens'] = (country_mask * base_network * fp_pop).sum()
+       
         for land_cover, land_cover_name in zip(list_land_cover_classes, land_cover_names):
         
             # country breakdown
@@ -2057,7 +2065,6 @@ def country_dict_landcover(networkObj):
             dict_all_countries[country_code]['base_network_breakdown'][land_cover_name + ' total']= sens_country_landcover_base
             
             dict_all_countries[country_code]['base_network_breakdown'][land_cover_name + ' percent']= percent_sens_landcover_base
-              
 
     return dict_all_countries
     
@@ -2070,6 +2077,7 @@ def leader_chart_sensitivity(networkObj):
     
     if compare_network is None:
         df_leader_chart_sens = pd.DataFrame(columns=['Country', 'Sensitivity/km2'])
+        
     else:
         df_leader_chart_sens = pd.DataFrame(columns=['Country', 'Sensitivity/km2 base', 'Sensitivity/km2 compare', 'Difference'])
     
