@@ -178,8 +178,13 @@ def change_selected_base_network_stations(c):
     selected_base_network_stations.options = [station_tuple for station_tuple in selected_base_network_stations.options if station_tuple[1] not in selected_base_network_stations.value]
 
     # exclude the selected base network stations from the options in the compare network list:
-    sites_compare_network_options.options = [station for station in list_all if not station in selected_base_network_stations.options]
+    #sites_compare_network_options.options = [station for station in list_all if not station in selected_base_network_stations.options]
     
+    if prepared_footprints.value:
+        sites_compare_network_options.options = [station for station in list_2018 if not station in selected_base_network_stations.options]
+    else:
+        sites_compare_network_options.options = [station for station in list_all if not station in selected_base_network_stations.options]
+       
     # exclude the selected base network stations from list of selected compare network stations:
     selected_compare_network_stations.options = [station for station in selected_compare_network_stations.options if not station[1] in selected_base_network_stations.options]
     
@@ -374,8 +379,11 @@ def update_func(button_c):
     with output_leader_chart:
         
         display(df_leader_chart_sens)
-        
-    p = functions.land_cover_bar_graphs_base(networkObj)
+    
+    if networkObj.compareNetwork is not None:
+        p = functions.land_cover_bar_graphs_compare(networkObj)
+    else:
+        p = functions.land_cover_bar_graphs_base(networkObj)
     
     with output_landcover_bargraph_countries:
         
@@ -882,4 +890,4 @@ with form_out:
 
 
 #Display form:
-display(form_out)    
+display(form_out)
