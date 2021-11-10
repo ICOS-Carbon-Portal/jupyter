@@ -381,15 +381,18 @@ def update_func(button_c):
         display(df_leader_chart_sens)
     
     if networkObj.compareNetwork is not None:
-        p = functions.land_cover_bar_graphs_compare(networkObj)
+        
+        with output_landcover_bargraph_countries:
+            
+            if len(networkObj.settings['countries'])>0:
+                functions.land_cover_bar_graphs_compare(networkObj)
     else:
-        p = functions.land_cover_bar_graphs_base(networkObj)
-    
-    with output_landcover_bargraph_countries:
         
-        show(p)
-        
+        with output_landcover_bargraph_countries:
+            if len(networkObj.settings['countries'])>0:
+                functions.land_cover_bar_graphs_base(networkObj)
     
+
     
     #only if choose to donwload:
     functions.save_settings(settings, directory='network_characterization/network_characterization_2018')
@@ -890,4 +893,4 @@ with form_out:
 
 
 #Display form:
-display(form_out)
+display(form_out)    
