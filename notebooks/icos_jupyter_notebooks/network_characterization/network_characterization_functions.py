@@ -957,20 +957,12 @@ def country_dict_landcover(networkObj):
                 
                 dict_all_countries[country_code]['compare_network_breakdown'][land_cover_name+ ' total'] = sens_country_landcover_compare
                 
-                percent_sens_landcover_compare =  (sens_country_landcover_compare / country_base_network_sens_total)*100 
-                
-                dict_all_countries[country_code]['compare_network_breakdown'][land_cover_name+ ' percent'] = percent_sens_landcover_compare
-            
 
             # base network breakdown
             
             sens_country_landcover_base = (country_mask * base_network * land_cover).sum()
-            
-            percent_sens_landcover_base =  (sens_country_landcover_base / country_base_network_sens_total)*100 
-            
+
             dict_all_countries[country_code]['base_network_breakdown'][land_cover_name + ' total']= sens_country_landcover_base
-            
-            dict_all_countries[country_code]['base_network_breakdown'][land_cover_name + ' percent']= percent_sens_landcover_base
 
     return dict_all_countries
     
@@ -1211,9 +1203,16 @@ def land_cover_bar_graphs_base(networkObj):
     countries = networkObj.settings['countries']
     dictionary = networkObj.countryDict
   
+    # for the graph with all countries 
     land_cover_values = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrubland', 'Other', 'Unknown']
     
     colors = ['#4c9c5e','#CAE0AB','#90C987', '#521A13', '#F7F056', '#DC050C', '#1964B0', '#F1932D', '#882E72','#777777']
+    
+    # one graph for each country showing landcover breakdown of the country as well as the breakdown within the footprint
+    land_cover_values_individual = ['Broad leaf forest country', 'Broad leaf forest network','Coniferous forest country', 'Coniferous forest network','Mixed forest country', 'Mixed forest network','Cropland country', 'Cropland network', 'Pasture country','Pasture network', 'Urban country', 'Urban network',  'Ocean country', 'Ocean network', 'Grass/shrubland country', 'Grass/shrubland network', 'Other country', 'Other network', 'Unknown country', 'Unknown network']
+    
+    colors_individual = ['#4c9c5e','#4c9c5e','#CAE0AB','#CAE0AB','#90C987','#90C987', '#521A13', '#521A13', '#F7F056',  '#F7F056', '#DC050C', '#DC050C', '#1964B0', '#1964B0', '#F1932D','#F1932D', '#882E72', '#882E72','#777777','#777777']
+    
     
     country_names = []
     
@@ -1235,7 +1234,6 @@ def land_cover_bar_graphs_base(networkObj):
         
         output_landcover_individual = Output()
    
-        #add code to make individual bars
         if dictionary[country]['base_network_breakdown']['total sens']>0:
             
             broad_leaf_forest = dictionary[country]['base_network_breakdown']['Broad leaf forest total']   
@@ -1248,7 +1246,8 @@ def land_cover_bar_graphs_base(networkObj):
             grass_shrub = dictionary[country]['base_network_breakdown']['Grass/shrubland total'] 
             other = dictionary[country]['base_network_breakdown']['Other total']   
             unknown = dictionary[country]['base_network_breakdown']['Unknown total']
-       
+            
+            # for the graph with all countries 
             broad_leaf_forest_list.append(broad_leaf_forest)
             coniferous_forest_list.append(coniferous_forest)
             mixed_forest_list.append(mixed_forest)
@@ -1260,21 +1259,46 @@ def land_cover_bar_graphs_base(networkObj):
             other_list.append(other)
             unknown_list.append(unknown)
             
-            list_land_cover_country = [broad_leaf_forest, coniferous_forest, mixed_forest, cropland, pasture, urban, ocean, grass_shrub, other, unknown]
+            # one graph for each country showing landcover breakdown of the country as well as the breakdown within the footprint   
+            total = broad_leaf_forest + coniferous_forest + mixed_forest + cropland + pasture + urban + ocean + grass_shrub + other + unknown 
             
-            dictionary_landcover = {'Land cover values': land_cover_values,
+            broad_leaf_forest_percent = (broad_leaf_forest / total) * 100
+            coniferous_forest_percent = (coniferous_forest / total) * 100
+            mixed_forest_percent = (mixed_forest / total) * 100
+            cropland_percent = (cropland / total) * 100
+            pasture_percent = (pasture / total) * 100
+            urban_percent = (urban / total) * 100
+            ocean_percent = (ocean / total) * 100
+            grass_shrub_percent = (grass_shrub / total) * 100
+            other_percent = (other / total) * 100
+            unknown_percent = (unknown / total) * 100
+            
+            broad_leaf_forest_country_percent = dictionary[country]['country_breakdown']['Broad leaf forest']   
+            coniferous_forest_country_percent = dictionary[country]['country_breakdown']['Coniferous forest'] 
+            mixed_forest_country_percent = dictionary[country]['country_breakdown']['Mixed forest'] 
+            cropland_country_percent = dictionary[country]['country_breakdown']['Cropland'] 
+            pasture_country_percent = dictionary[country]['country_breakdown']['Pasture'] 
+            urban_country_percent = dictionary[country]['country_breakdown']['Urban'] 
+            ocean_country_percent = dictionary[country]['country_breakdown']['Ocean'] 
+            grass_shrub_country_percent = dictionary[country]['country_breakdown']['Grass/shrubland'] 
+            other_country_percent = dictionary[country]['country_breakdown']['Other'] 
+            unknown_country_percent = dictionary[country]['country_breakdown']['Unknown'] 
+            
+            list_land_cover_country = [broad_leaf_forest_percent, broad_leaf_forest_country_percent, coniferous_forest_percent, coniferous_forest_country_percent,mixed_forest_percent,mixed_forest_country_percent, cropland_percent, cropland_country_percent, pasture_percent,  pasture_country_percent, urban_percent,urban_country_percent, ocean_percent,  ocean_country_percent,grass_shrub_percent,grass_shrub_country_percent, other_percent, other_country_percent, unknown_percent, unknown_country_percent]
+            
+            dictionary_landcover = {'Land cover values': land_cover_values_individual,
                                  'Sensitivity':list_land_cover_country,
-                                 'color':colors}
-            
+                                 'color':colors_individual}
+
             country_name = dictionary_area_choice[country]
 
             country_names.append(country_name)
 
-            label_yaxis = 'area in km² * (ppm /(μmol / (m²s)))'
+            label_yaxis = '%'
             
             title = 'Station/network sensitivity to land cover in ' + country_name 
 
-            p_individual = figure(x_range=land_cover_values, title=title, toolbar_location="below")
+            p_individual = figure(x_range=land_cover_values_individual, title=title, toolbar_location="below")
 
             p_individual.vbar(x='Land cover values', top = 'Sensitivity', width=0.5, color='color', source=dictionary_landcover)
 
