@@ -333,6 +333,8 @@ def update_func(button_c):
     
     settings = getSettings() 
     
+    download_output = download_output_option.value
+    
     global networkObj
     
     networkObj = network_object.NetworkObj(settings)
@@ -354,6 +356,12 @@ def update_func(button_c):
         with output_base_network_fp:
 
             display(HTML('<p style="font-size:16px;text-align:center">Base network footprint (' + threshold_percent  + '%)</p>'))
+            
+            if download_output:
+                pngfile = 'base_network_footprint_log'
+
+            else:
+                pngfile = ''
 
             functions.plot_maps(networkObj.baseNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
     
@@ -366,11 +374,24 @@ def update_func(button_c):
         with output_compare_network_fp: 
 
             display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint (' + threshold_percent  + '%)</p>'))
+            
+            if download_output:
+                pngfile = 'compare_network_footprint_log'
+
+            else:
+                pngfile = ''
 
             functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
 
         with output_base_minus_compare:
             display(HTML('<p style="font-size:16px;text-align:left">Compare minus base network</p>'))
+            
+            
+            if download_output:
+                pngfile = 'compare_minus_base_footprint_linear'
+
+            else:
+                pngfile = ''
 
             functions.plot_maps(networkObj.compareMinusBase, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=None)
             
@@ -378,6 +399,8 @@ def update_func(button_c):
     df_leader_chart_sens = functions.leader_chart_sensitivity(networkObj)
 
     with output_leader_chart:
+        
+        display(HTML('<p style="font-size:16px;text-align:left;font-weight:bold">Sensitivity per square kilometer of network falling wihtin country borders</p>'))
         
         display(df_leader_chart_sens)
     
@@ -402,207 +425,11 @@ def update_func(button_c):
                 functions.population_bar_graph_base(networkObj)
     
     #only if choose to donwload:
-    functions.save_settings(settings, directory='network_characterization/network_characterization_2018')
-    
-    
-
-    
-    """
-    string_list_none_footprints = ', '.join([str(elem) for elem in list_none_footprints])
- 
-    #in case no footprints at all in base network --> nothing after in case true
-    if len(list_none_footprints) == len(sites_base_network):
-
-        with output_no_footprints:
-    
-            display(HTML('<p style="font-size:16px">No footprints available for base network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints.</p>'))
-        
-        update_button.disabled = False
-        
-        return
-    else:
-      
-        with output_no_footprints:
-    
-            if len(list_none_footprints)>0:
-                
-                display(HTML('<p style="font-size:16px">No footprints available for base network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints.</p>'))
-                
-    """
-    
-    """
-    #ADD THIS AT END. No need to check for prepared_footprints. 
     if download_output:
-        
-        if prepared_footprints.value:
-        
-            settings = {'perpared_2018_footprints': prepared_footprints.value,"baseNetwork": sites_base_network, "compareNetwork": sites_compare_network, "colorBar": colorbar_choice.value, "percent": threshold_option.value, "countries": countries, "download": download_output_option.value}
-        else:
-            settings = {'perpared_2018_footprints': prepared_footprints.value,'startYear': s_year.value, 'startMonth': s_month.value, 'startDay': s_day.value, 'endYear': e_year.value,'endMonth': e_month.value,'endDay': e_day.value, 'timeOfDay':list(time_selection.value), "baseNetwork": sites_base_network, "compareNetwork": sites_compare_network, "colorBar": colorbar_choice.value, "percent": threshold_option.value, "countries": countries, "download": download_output_option.value}
-            
-
         functions.save_settings(settings, directory='network_characterization/network_characterization_2018')
-    """
     
     
-    
-    """
-    if len(sites_compare_network)>0:      
-        
-        fp_combined_compare_network, fp_mask_count_compare_network, fp_mask_compare_network, fp_max_compare_network, lon, lat, list_none_footprints = functions.aggreg_2018_footprints_compare_network(sites_base_network, sites_compare_network, threshold_int, date_range)
-        
-        string_list_none_footprints = ', '.join([str(elem) for elem in list_none_footprints])
-        
-        if len(list_none_footprints) == len(sites_compare_network):
 
-            with output_no_footprints_compare:
-
-                display(HTML('<p style="font-size:16px">No footprints available for compare network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints. </p>'))
-            update_button.disabled = False
-
-            return
-        else:
-
-            with output_no_footprints_compare:
-
-                if len(list_none_footprints)>0:
-
-                    display(HTML('<p style="font-size:16px">No footprints available for compare network selection: ' + string_list_none_footprints + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints. </p>'))
-
-        vmax_see_not_see = np.max(fp_mask_count_compare_network)
-        vmax_sens = np.max(fp_combined_compare_network)
-        
-    else:
-        vmax_see_not_see= None
-        vmax_sens=None
-
-        sites_compare_network = ''
-   
-    with output_summed_sens_fp:
-
-        display(HTML('<p style="font-size:16px;text-align:center">Base network footprint (' + threshold_percent  + '%)</p>'))
-
-        if download_output:
-            pngfile = 'base_network_footprint'
-        
-        else:
-            pngfile = ''
-            
-        functions.plot_maps(fp_combined_base_network, lon, lat, linlog='', colors=colorbar, pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=vmax_sens) 
-
-    with output_aggreg_fp_see_not_see:
-
-        display(HTML('<p style="font-size:16px;text-align:center">Base network footprint mask (' + threshold_percent + '%)</p>'))
-
-        if download_output:
-            pngfile = 'base_network_footprint_mask'
-
-        else:
-            pngfile = ''
-
-        functions.plot_maps(fp_mask_base_network, lon, lat, vmax=1, vmin=0.001, colors=colorbar, pngfile=pngfile,directory='network_characterization/network_characterization_2018', mask=True)
-        
-    with output_summed_fp_see_not_see:
-
-        display(HTML('<p style="font-size:16px;text-align:center">Base network footprint mask count (' + threshold_percent + '%)</p>'))
-
-        if download_output:
-            pngfile = 'base_network_footprint_mask_count'
-
-
-        else:
-            pngfile = ''
-        #vmin - 0.001
-        functions.plot_maps(fp_mask_count_base_network, lon, lat, vmax=vmax_see_not_see, vmin=0.001, colors=colorbar, pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit='count')
-
-
-    sites_compare_network = sites_compare_network_upd
-    
-    #HERE IF there is a compare network in addition to base network
-    if len(sites_compare_network)>0:
-
-        with output_summed_sens_fp_uploaded_fp:
-            
-            if download_output:
-                pngfile = 'compare_network_footprint'
-
-            else:
-                pngfile = ''
-    
-            display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint (' + threshold_percent + '%)</p>'))
-            
-            functions.plot_maps(fp_combined_compare_network, lon, lat, linlog='', colors=colorbar,pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit= 'ppm /(μmol / (m²s))')        
-
-       
-        with output_aggreg_fp_see_not_see_uploaded_fp:
-            
-            if download_output:
-                pngfile = 'compare_network_footprint_mask'
-
-
-            else:
-                pngfile = ''
-     
-            display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint mask (' + threshold_percent + '%)</p>'))
-
-            functions.plot_maps(fp_mask_compare_network, lon, lat, vmin=0.001, colors=colorbar, pngfile=pngfile,directory='network_characterization/network_characterization_2018', mask=True)
-
-
-        with output_summed_fp_see_not_see_uploaded_fp:
-            
-            
-            if download_output:
-                pngfile = 'compare_network_footprint_mask_count'
-
-
-            else:
-                pngfile = '' 
-            
-            display(HTML('<p style="font-size:16px;text-align:center;">Compare network footprint mask count (' + threshold_percent + '%)</p>'))
-
-            functions.plot_maps(fp_mask_count_compare_network, lon, lat, vmin=1, colors=colorbar, pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit='count')
-
-        with output_breakdown_countries:
-
-            functions.breakdown_countries_compare_network(fp_mask_base_network, fp_mask_compare_network, type_area) 
-
-        with output_header_landcover_section:
-            
-            if len(countries)==0:
-                
-                pass
-            
-            else:
-                display(HTML('<p style="font-size:20px;text-align:left;font-weight:bold;"><br>Land cover breakdown and population</p>'))
-
-
-        with breakdown_landcover_output:
-           
-            
-            functions.breakdown_landcover_compare_network(countries, fp_max_base_network, fp_mask_base_network, fp_max_compare_network, fp_mask_compare_network, breakdown, download_output, type_area)
-            
-       
-    else:
-        with output_breakdown_countries:
-            
-            
-            functions.breakdown_countries_base_network(fp_mask_base_network, fp_combined_base_network, type_area) 
-
-
-        with output_header_landcover_section:
-            
-
-            if len(countries)==0:
-                pass
-            else:
-                display(HTML('<p style="font-size:20px;text-align:left;font-weight:bold;"><br>Land cover breakdown and population</p>'))
-
-
-        with breakdown_landcover_output:
-
-            functions.breakdown_landcover_base_network(countries, fp_max_base_network, fp_mask_base_network, breakdown, type_area)
-
-    """
     update_button.disabled = False
 #-----------widgets definition ----------------
     
