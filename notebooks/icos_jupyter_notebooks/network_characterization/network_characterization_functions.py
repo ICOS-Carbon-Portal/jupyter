@@ -2135,7 +2135,130 @@ def leader_chart_sensitivity(networkObj):
 
 
     return styled_df_leader_chart_sens
-       
+
+def population_bar_graph_base(networkObj):
+    
+    base_network = networkObj.baseNetwork    
+    countries = networkObj.settings['countries']
+    dictionary = networkObj.countryDict
+    
+    population_sensitivity_list = []
+    
+    country_names = []
+    
+    for country in countries: 
+        
+        country_name = dictionary_area_choice[country]
+          
+        if dictionary[country]['base_network_breakdown']['population sens']>0:
+        
+            population = dictionary[country]['base_network_breakdown']['population sens']
+            
+            population_sensitivity_list.append(population)
+            
+            country_names.append(country_name)
+        
+    dictionary_population_by_country = {'Countries': country_names, 'Population': population_sensitivity_list}
+
+    p = figure(x_range= country_names, title='Sensitivity to population by country', toolbar_location="below", tooltips="@Population{0f}")
+
+    p.vbar(x='Countries', top = 'Population', width=0.5, color='Darkblue', source = dictionary_population_by_country)
+
+    p.yaxis.axis_label = 'population * (ppm /(μmol / (m²s)))'
+    
+    p.y_range.start = 0
+    p.x_range.range_padding = 0.1
+    p.xgrid.grid_line_color = None
+    p.axis.minor_tick_line_color = None
+    p.outline_line_color = None
+
+    p.legend.label_text_font_size = "10px"
+    p.xaxis.major_label_orientation = "vertical"
+
+    output_population_by_country = Output()
+
+    with output_population_by_country:
+
+        output_population_by_country.clear_output()
+
+        show(p)
+
+    display(output_population_by_country)
+    
+def population_bar_graph_compare(networkObj):
+    
+    base_network = networkObj.baseNetwork    
+    compare_network = networkObj.compareNetwork
+    countries = networkObj.settings['countries']
+    dictionary = networkObj.countryDict
+    
+    base_network = []
+    
+    compare_minus_base_for_stack = []
+    
+    country_names = []
+    
+    for country in countries: 
+        
+        country_name = dictionary_area_choice[country]
+          
+        if dictionary[country]['base_network_breakdown']['population sens']>0:
+        
+            population_base = dictionary[country]['base_network_breakdown']['population sens']
+            
+            base_network.append(population_base)
+            
+            country_names.append(country_name)
+            
+        else:
+            
+            if networkObj.countryDict[country]['compare_network_breakdown']['population sens']>0:
+                
+                population_base = 0
+                
+                base_network.append(population_base)
+                
+                country_names.append(country_name)
+              
+        if networkObj.countryDict[country]['compare_network_breakdown']['total sens']>0:
+            
+            population_compare = dictionary[country]['compare_network_breakdown']['population sens']
+            
+            compare_minus_base = population_compare - population_base
+            
+            compare_minus_base_for_stack.append(compare_minus_base)
+
+    dictionary_sensitivity_population_by_country = {'Countries': country_names,
+                     'Base network': base_network,
+                     'Compare network additional': compare_minus_base_for_stack}
+    
+    p = figure(x_range=country_names, title='Station/network sensitivity to population by country', toolbar_location="below", tooltips="$name : @$name{0f}")
+
+    p.vbar_stack(['Base network', 'Compare network additional'], x='Countries', width=0.5, color=['Darkblue', 'Green'],\
+                 source=dictionary_sensitivity_population_by_country,\
+                 legend_label=['Base network', 'Compare network additional'])
+
+    p.yaxis.axis_label = 'population * (ppm /(μmol / (m²s)))'
+
+    p.y_range.start = 0
+    p.x_range.range_padding = 0.1
+    p.xgrid.grid_line_color = None
+    p.axis.minor_tick_line_color = None
+    p.outline_line_color = None
+
+    p.legend.label_text_font_size = "10px"
+    p.xaxis.major_label_orientation = "vertical"
+
+    output_population_by_country = Output()
+
+    with output_population_by_country:
+
+        output_population_by_country.clear_output()
+
+        show(p)
+
+    display(output_population_by_country)
+
 def land_cover_bar_graphs_base(networkObj):
     
     base_network = networkObj.baseNetwork    

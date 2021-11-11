@@ -310,6 +310,7 @@ def clear_all_output():
     output_base_minus_compare.clear_output()
     output_leader_chart.clear_output()
     output_landcover_bargraph_countries.clear_output()
+    output_population_bargraph_countries.clear_output()
     output_header_landcover_section.clear_output()
     breakdown_landcover_output.clear_output()
     output_header_landcover_section.clear_output()
@@ -386,13 +387,19 @@ def update_func(button_c):
             
             if len(networkObj.settings['countries'])>0:
                 functions.land_cover_bar_graphs_compare(networkObj)
+                
+        with output_population_bargraph_countries:
+            if len(networkObj.settings['countries'])>0:
+                functions.population_bar_graph_compare(networkObj)
     else:
         
         with output_landcover_bargraph_countries:
             if len(networkObj.settings['countries'])>0:
                 functions.land_cover_bar_graphs_base(networkObj)
-    
-
+                
+        with output_population_bargraph_countries:
+            if len(networkObj.settings['countries'])>0:
+                functions.population_bar_graph_base(networkObj)
     
     #only if choose to donwload:
     functions.save_settings(settings, directory='network_characterization/network_characterization_2018')
@@ -843,6 +850,7 @@ output_compare_network_fp = Output()
 output_base_minus_compare = Output()
 output_leader_chart = Output()
 output_landcover_bargraph_countries = Output()
+output_population_bargraph_countries = Output()
 
 output_breakdown_countries = Output()
 breakdown_landcover_output = Output()
@@ -883,7 +891,7 @@ with form_out:
         box_footprints_sens = HBox([output_base_network_fp, output_compare_network_fp])
 
 
-        display(form, output_no_footprints, box_footprints_sens, output_base_minus_compare, output_leader_chart, output_landcover_bargraph_countries)
+        display(form, output_no_footprints, box_footprints_sens, output_base_minus_compare, output_leader_chart, output_landcover_bargraph_countries, output_population_bargraph_countries)
         
     else:
         
