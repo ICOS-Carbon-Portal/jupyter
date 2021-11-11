@@ -2198,6 +2198,10 @@ def population_bar_graph_compare(networkObj):
     
     country_names = []
     
+    df_diff_base_compare = pd.DataFrame()
+    
+    change_base_compare_percent = []
+    
     for country in countries: 
         
         country_name = dictionary_area_choice[country]
@@ -2227,6 +2231,40 @@ def population_bar_graph_compare(networkObj):
             compare_minus_base = population_compare - population_base
             
             compare_minus_base_for_stack.append(compare_minus_base)
+            
+            if population_base > 0:
+                
+                change_percent = ((population_compare / population_base)*100 - 100)
+            
+            elif population_compare > 0:
+                
+                change_percent = 99999
+                
+            else:
+                change_percent = 0 
+
+            change_base_compare_percent.append(change_percent)
+    
+    # table showing difference between base and compare       
+    df_diff_base_compare['Increase sensitivity (%)'] = change_base_compare_percent
+    
+    output_population_table = Output()
+    
+    with output_population_table:
+
+        output_population_table.clear_output()
+
+        df_diff_base_compare = df_diff_base_compare.astype(float)
+
+        df_diff_base_compare.insert(0, 'Country', country_names)
+
+        styled_df_diff_base_compare = (df_diff_base_compare.style
+                                      .format({'Increase sensitivity (%)': '{:.0f}'})
+                                      .set_table_styles([dict(selector='th', props=[('text-align', 'center')])]))
+
+        styled_df_diff_base_compare = styled_df_diff_base_compare.set_properties(**{'text-align': 'center'}).hide_index()
+
+        display(styled_df_diff_base_compare)  
 
     dictionary_sensitivity_population_by_country = {'Countries': country_names,
                      'Base network': base_network,
@@ -2257,7 +2295,9 @@ def population_bar_graph_compare(networkObj):
 
         show(p)
 
-    display(output_population_by_country)
+    box_population = HBox([output_population_by_country, output_population_table])
+    
+    display(box_population)
 
 def land_cover_bar_graphs_base(networkObj):
     
