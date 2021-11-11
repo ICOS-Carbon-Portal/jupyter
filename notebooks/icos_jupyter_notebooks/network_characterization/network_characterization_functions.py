@@ -2079,7 +2079,7 @@ def leader_chart_sensitivity(networkObj):
         df_leader_chart_sens = pd.DataFrame(columns=['Country', 'Sensitivity/km2'])
         
     else:
-        df_leader_chart_sens = pd.DataFrame(columns=['Country', 'Sensitivity/km2 base', 'Sensitivity/km2 compare', 'Difference'])
+        df_leader_chart_sens = pd.DataFrame(columns=['Country', 'Sensitivity/km2 base', 'Sensitivity/km2 compare', 'Increase (%)'])
     
     i = 0
     
@@ -2103,10 +2103,10 @@ def leader_chart_sensitivity(networkObj):
 
                 if compare_sens_km2>0:
 
+                    #diff_base_compare = compare_sens_km2 - base_sens_km2
+                    diff_base_compare_percent = (((compare_sens_km2/base_sens_km2)*100)-100) 
 
-                    diff_base_compare = compare_sens_km2 - base_sens_km2
-
-                    df_leader_chart_sens.loc[i] = [country_name, base_sens_km2, compare_sens_km2, diff_base_compare]
+                    df_leader_chart_sens.loc[i] = [country_name, base_sens_km2, compare_sens_km2, diff_base_compare_percent]
 
                     i = i + 1
 
@@ -2116,7 +2116,7 @@ def leader_chart_sensitivity(networkObj):
         df_leader_chart_sens = df_leader_chart_sens.sort_values(by=['Sensitivity/km2 base'], ascending=False)
 
         styled_df_leader_chart_sens = (df_leader_chart_sens.style
-                                              .format({'Sensitivity/km2 base' : '{:.2E}', 'Sensitivity/km2 compare': '{:.2E}', 'Difference': '{:.2E}'})
+                                              .format({'Sensitivity/km2 base' : '{:.2E}', 'Sensitivity/km2 compare': '{:.2E}', 'Increase (%)': '{:.0f}'})
                                               .set_table_styles([dict(selector='th', props=[('text-align', 'center')])]))
         
         styled_df_leader_chart_sens = styled_df_leader_chart_sens.set_properties(**{'text-align': 'center'}).hide_index()
