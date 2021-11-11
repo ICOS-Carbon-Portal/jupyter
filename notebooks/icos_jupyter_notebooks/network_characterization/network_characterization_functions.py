@@ -175,7 +175,18 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
 
         cbar.set_label(label+unit)
         
-        
+        if percent:
+
+            ticks = [10,20,30,40,50,60,70,80,90,100]
+            
+            ticklabels = [' ', 10, 20, 30, 40, 50, 60, 70, 80, 90]
+            
+            vmin =10
+            
+            norm = matplotlib.colors.BoundaryNorm(ticks, cmap.N, extend='both')
+            
+            im = ax.imshow(field[:,:], norm=norm, interpolation='none',origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
+       
     else:
 
         cs = ax.imshow(field[:,:],norm=LogNorm(), origin='lower', extent=img_extent,cmap=cmap,vmin=0.000001,vmax=vmax)
@@ -220,8 +231,6 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
     if percent:
         
         return plt
-
-name_correct_dictionary= {'ICOS_memb':'ICOS membership countries','Czech_Rep': 'Czech Republic', 'Switzerlan':'Switzerland', 'Netherland': 'Netherlands'}
 
 # for visualization_average_footprints.ipynb --> consider move
 def footprint_show_percentages(footprint_code, input_footprint, fp_lat, fp_lon, return_fp=False):
