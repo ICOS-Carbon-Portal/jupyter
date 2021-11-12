@@ -20,6 +20,8 @@ from icoscp.stilt import stiltstation
 
 from bokeh.io import show, output_notebook, reset_output
 stiltstations= stiltstation.find()
+# error in geocoder - located ZSF in Austria rather than Germany 
+stiltstations['ZSF']['geoinfo']['name']['common'] = 'Germany'
 
 list_all_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if v['geoinfo']])
 list_all_not_located = [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if not v['geoinfo']]
@@ -28,6 +30,10 @@ list_all = list_all_not_located + list_all_located
 list_2018_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items() if '2018' in v['years'] if len(v['2018']['months'])>11 if v['geoinfo']])
 list_2018_not_located = [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items() if '2018' in v['years'] if len(v['2018']['months'])>11 if not v['geoinfo']]
 list_2018 = list_2018_not_located + list_2018_located 
+
+
+
+#workaround ZSF (not in the netherlands - rather Germany. Geocoder gets it wrong)
 
 countries = [('Albania','ALB'),('Andorra','Andorra'),('Austria','AUT'),('Belarus','BLR'),('Belgium','BEL'),('Bosnia and Herzegovina','BIH'),('Bulgaria','BGR'),('Croatia','HRV'),('Cyprus','CYP'),('Czechia','CZE'),('Denmark','DNK'),('Estonia','EST'),('Finland','FIN'),('France','FRA'),('Germany','DEU'),('Greece','GRC'),('Hungary','HUN'),('Ireland','IRL'),('Italy','ITA'),('Kosovo','XKX'),('Latvia','LVA'),('Liechtenstein','LIE'),('Lithuania','LTU'),('Luxembourg','LUX'),('Macedonia','MKD'),('Malta','MTL'),('Moldova','MDA'),('Montenegro','MNE'),('Netherlands','NLD'),('Norway','NOR'),('Poland','POL'),('Portugal','PRT'),('Republic of Serbia','SRB'),('Romania','ROU'),('San Marino','SMR'),('Slovakia','SVK'),('Slovenia','SVN'),('Spain','ESP'),('Sweden','SWE'),('Switzerland','CHE'),('United Kingdom','GBR')]
 
@@ -109,9 +115,6 @@ def use_icos_network_change(c):
     
     list_icos_stations = [k for k, v in stiltstations.items() if v['icos']]
     
-    #SMR125 as opposed to SMR127
-    #list_icos_stations = ['BIR', 'CMN', 'GAT344', 'HEL', 'HPB131', 'HTM150', 'IPR100', 'JFJ', 'KIT200', 'KRE250', 'LIN099', 'LMP', 'LUT', 'NOR100', 'OPE120', 'OXK163', 'PAL', 'PRS', 'PUI', 'PUY', 'SAC100', 'SMR125', 'STE252', 'SVB150', 'TOH147', 'TRN180', 'UTO', 'ZSF']
-
     list_icos_stations_reduced = []
     stations_reduced = []
     for station in list_icos_stations:
@@ -516,7 +519,7 @@ prepared_footprints = Checkbox(
 
 use_icos_network = Checkbox(
     value=False,
-    description='Use current ICOS network',
+    description='Select current ICOS network',
     style=style_bin
 )
 
@@ -724,13 +727,11 @@ box_country_options = VBox([heading_country_options, country_options])
 
 box_country_selection = VBox([heading_selected_countries, selected_countries])
 
-box_selection_restriction = HBox([use_icos_network, prepared_footprints])
-
 country_selection_combined = HBox([box_country_options, box_country_selection])
 
 final_row = HBox([file_name, update_button])
 #Add all widgets to a VBox:
-form = VBox([heading_network_selection, heading_perpared_footprints, box_selection_restriction, base_compare_combined, header_timeselect, time_box, time_selection, heading_map_specifications, box_map_settings, heading_analysis_ancillary_data, country_selection_combined, download_output_heading, download_output_option, header_filename, final_row])
+form = VBox([heading_network_selection, heading_perpared_footprints, use_icos_network, prepared_footprints, base_compare_combined, header_timeselect, time_box, time_selection, heading_map_specifications, box_map_settings, heading_analysis_ancillary_data, country_selection_combined, download_output_heading, download_output_option, header_filename, final_row])
 
 #Initialize form output:
 form_out = Output()
