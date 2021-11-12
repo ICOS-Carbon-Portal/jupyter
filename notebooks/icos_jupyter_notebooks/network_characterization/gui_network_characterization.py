@@ -101,13 +101,50 @@ def disable_enable_update_button():
     else:
         update_button.disabled = True
 
-        
-def prepare_footprints_change(c):
+def use_icos_network_change(c):
     
+    if use_icos_network.value == True:
+        prepared_footprints.value= True
+    
+    
+    list_icos_stations = [k for k, v in stiltstations.items() if v['icos']]
+    
+    #SMR125 as opposed to SMR127
+    list_icos_stations = ['BIR', 'CMN', 'GAT344', 'HEL', 'HPB131', 'HTM150', 'IPR100', 'JFJ', 'KIT200', 'KRE250', 'LIN099', 'LMP', 'LUT', 'NOR100', 'OPE120', 'OXK163', 'PAL', 'PRS', 'PUI', 'PUY', 'SAC100', 'SMR125', 'STE252', 'SVB150', 'TOH147', 'TRN180', 'UTO', 'ZSF']
+    
+    sites_base_network_options.value = list_icos_stations
+    
+    """
+    stations = []
+    stations_reduced = []
+    for station in test:
+
+        if station[0:3] not in stations_reduced:
+
+            stations.append(station)
+            stations_reduced.append(station[0:3])
+
+        # if there already is a station with that name
+        else:
+
+            #remove from list and replace with higher val
+            matched_station = [s for s in stations if s[0:3] == station[0:3]][0]
+
+            if len(station)>3 and len(matched_station)>3:
+                if int(station[3:6])>int(matched_station[3:6]):
+                    stations.remove(matched_station)
+                    stations.append(station)
+                    stations_reduced.append(station[0:3])
+    """
+
+def prepare_footprints_change(c):
+
     selected_base_network_stations.options = () 
     selected_compare_network_stations.options = ()
     
     if prepared_footprints.value == False:
+        
+        use_icos_network.value = False
         
         sites_base_network_options.options = list_all
         sites_compare_network_options.options = list_all
@@ -305,7 +342,9 @@ def change_day_end(c):
 #clear all the output
 def clear_all_output():
     output_no_footprints.clear_output()
+    output_base_network_fp_linear.clear_output()
     output_base_network_fp.clear_output()
+    output_compare_network_fp_linear.clear_output()
     output_compare_network_fp.clear_output()
     output_base_minus_compare.clear_output()
     output_leader_chart.clear_output()
@@ -351,11 +390,19 @@ def update_func(button_c):
         
             display(HTML('<p style="font-size:16px">No footprints available for ' + no_footprints_string + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints.</p>'))
         
+        all_stations = networkObj.settings['baseNetwork'] + networkObj.settings['compareNetwork']
+        
     if networkObj.baseNetwork is not None:
         
+        with output_base_network_fp_linear:
+            
+            display(HTML('<p style="font-size:16px;text-align:center">Base network footprint linear scale (' + threshold_percent  + '%)</p>'))
+            
+            functions.plot_maps(networkObj.baseNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
+
         with output_base_network_fp:
 
-            display(HTML('<p style="font-size:16px;text-align:center">Base network footprint (' + threshold_percent  + '%)</p>'))
+            display(HTML('<p style="font-size:16px;text-align:center">Base network footprint logarithmic scale (' + threshold_percent  + '%)</p>'))
             
             if download_output:
                 pngfile = 'base_network_footprint_log'
@@ -371,9 +418,16 @@ def update_func(button_c):
         return
 
     if networkObj.compareNetwork is not None:
+        
+        with output_compare_network_fp_linear: 
+
+            display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint linear scale (' + threshold_percent  + '%)</p>'))
+
+            functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
+        
         with output_compare_network_fp: 
 
-            display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint (' + threshold_percent  + '%)</p>'))
+            display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint logarithmic scale (' + threshold_percent  + '%)</p>'))
             
             if download_output:
                 pngfile = 'compare_network_footprint_log'
@@ -384,7 +438,7 @@ def update_func(button_c):
             functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
 
         with output_base_minus_compare:
-            display(HTML('<p style="font-size:16px;text-align:left">Compare minus base network</p>'))
+            display(HTML('<p style="font-size:16px;text-align:center">Difference compare - base linear scale</p>'))
             
             
             if download_output:
@@ -400,7 +454,7 @@ def update_func(button_c):
 
     with output_leader_chart:
         
-        display(HTML('<p style="font-size:16px;text-align:left;font-weight:bold">Sensitivity per square kilometer of network falling wihtin country borders</p>'))
+        display(HTML('<p style="font-size:16px;text-align:left">Sensitivity/km2 of network by country</p>'))
         
         display(df_leader_chart_sens)
     
@@ -455,6 +509,12 @@ with heading_perpared_footprints:
 prepared_footprints = Checkbox(
     value=False,
     description='2018 aggregate footprint(s)',
+    style=style_bin
+)
+
+use_icos_network = Checkbox(
+    value=False,
+    description='Use current ICOS network',
     style=style_bin
 )
 
@@ -662,17 +722,21 @@ box_country_options = VBox([heading_country_options, country_options])
 
 box_country_selection = VBox([heading_selected_countries, selected_countries])
 
+box_selection_restriction = HBox([use_icos_network, prepared_footprints])
+
 country_selection_combined = HBox([box_country_options, box_country_selection])
 
 final_row = HBox([file_name, update_button])
 #Add all widgets to a VBox:
-form = VBox([heading_network_selection, heading_perpared_footprints, prepared_footprints, base_compare_combined, header_timeselect, time_box, time_selection, heading_map_specifications, box_map_settings, heading_analysis_ancillary_data, country_selection_combined, download_output_heading, download_output_option, header_filename, final_row])
+form = VBox([heading_network_selection, heading_perpared_footprints, box_selection_restriction, base_compare_combined, header_timeselect, time_box, time_selection, heading_map_specifications, box_map_settings, heading_analysis_ancillary_data, country_selection_combined, download_output_heading, download_output_option, header_filename, final_row])
 
 #Initialize form output:
 form_out = Output()
 
 output_no_footprints = Output()
+output_base_network_fp_linear = Output()
 output_base_network_fp = Output()
+output_compare_network_fp_linear = Output()
 output_compare_network_fp = Output()
 output_base_minus_compare = Output()
 output_leader_chart = Output()
@@ -687,6 +751,7 @@ output_header_landcover_section = Output()
 # Observers
 
 prepared_footprints.observe(prepare_footprints_change, 'value')
+use_icos_network.observe(use_icos_network_change, 'value')
 
 sites_base_network_options.observe(change_stations_base_network, 'value')
 selected_base_network_stations.observe(change_selected_base_network_stations, 'value')
@@ -713,19 +778,11 @@ update_button.on_click(update_func)
 #Open form object:
 with form_out:
 
-    if 'output_base_network_fp' in locals():
-        
-        box_footprints_sens = HBox([output_base_network_fp, output_compare_network_fp])
+    box_footprints_sens_linear = HBox([output_base_network_fp_linear, output_compare_network_fp_linear])
+    box_footprints_sens = HBox([output_base_network_fp, output_compare_network_fp])
+    box_difference_and_leader = HBox([output_base_minus_compare, output_leader_chart])
 
-
-        display(form, output_no_footprints, box_footprints_sens, output_base_minus_compare, output_leader_chart, output_landcover_bargraph_countries, output_population_bargraph_countries)
-        
-    else:
-        
-   
-        display(form, output_base_network_fp)
-
-
+    display(form, output_no_footprints, box_footprints_sens_linear, box_footprints_sens, box_difference_and_leader, output_landcover_bargraph_countries, output_population_bargraph_countries)
 
 #Display form:
 display(form_out)    

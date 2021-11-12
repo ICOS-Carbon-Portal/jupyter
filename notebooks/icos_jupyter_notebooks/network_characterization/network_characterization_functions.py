@@ -42,7 +42,7 @@ folder_tool_fps = '/data/project/stc/footprints_2018_averaged'
 #added 
 folder_data = '/data/project/stc/'
 
-dictionary_area_choice = {'ALB':'Albania', 'Andorra':'Andorra', 'AUT':'Austria','BLR':'Belarus','BEL':'Belgium','BIH':'Bosnia and Herzegovina','BGR':'Bulgaria','HRV':'Croatia','CYP':'Cyprus','CZE':'Czechia','DNK':'Denmark','EST':'Estonia','FIN':'Finland','FRA':'France','DEU':'Germany','GRC':'Greece','HUN':'Hungary','IRL':'Ireland','ITA':'Italy','XKX':'Kosovo','LVA':'Latvia','LIE':'Liechtenstein','LTU':'Lithuania','LUX':'Luxembourg','MKD':'Macedonia','MTL':'Malta','MDA':'Moldova','MNE':'Montenegro','NLD':'Netherlands','NOR':'Norway','POL':'Poland','PRT':'Portugal','SRB':'Republic of Serbia','ROU':'Romania','SMR':'San Marino','SVK':'Slovakia','SVN':'Slovenia','ESP':'Spain','SWE':'Sweden','CHE':'Switzerland','GBR':'United Kingdom'}
+dictionary_area_choice = {'ALB':'Albania', 'Andorra':'Andorra', 'AUT':'Austria','BLR':'Belarus','BEL':'Belgium', 'BIH':'Bosnia and Herzegovina', 'BGR':'Bulgaria', 'HRV':'Croatia','CYP':'Cyprus','CZE':'Czechia','DNK':'Denmark','EST':'Estonia','FIN':'Finland','FRA':'France','DEU':'Germany','GRC':'Greece','HUN':'Hungary','IRL':'Ireland','ITA':'Italy','XKX':'Kosovo','LVA':'Latvia','LIE':'Liechtenstein','LTU':'Lithuania','LUX':'Luxembourg','MKD':'Macedonia','MTL':'Malta','MDA':'Moldova','MNE':'Montenegro','NLD':'Netherlands','NOR':'Norway','POL':'Poland','PRT':'Portugal','SRB':'Republic of Serbia','ROU':'Romania','SMR':'San Marino','SVK':'Slovakia','SVN':'Slovenia','ESP':'Spain','SWE':'Sweden','CHE':'Switzerland','GBR':'United Kingdom'}
 
 country_masks = Dataset(os.path.join(folder_data,'europe_STILT_masks.nc'))
 country_masks_eez_included = Dataset(os.path.join(folder_data,'europe_STILT_masks_eez_included.nc'))
@@ -91,9 +91,8 @@ def read_aggreg_footprints(station, date_range):
         return 0, None, None, None, None
     
 #given the input - create an updated pandas date range with only hours in timeselect_list
-def date_range_hour_filtered(start_date, end_date, timeselect_list):
-    
-    date_range = pd.date_range(start_date, end_date, freq='3H')
+def date_range_hour_filtered(date_range, timeselect_list):
+   
 
     #depending on how many input (max 8 for 0 3 6 9 12 15 18 21), filter to include hours.
     for time_value in timeselect_list:
@@ -135,6 +134,64 @@ def date_range_hour_filtered(start_date, end_date, timeselect_list):
     #consider return timeselect
     return date_range
 
+def save_settings(settings, directory):
+
+    output = os.path.join(os.path.expanduser('~'), 'output', directory, date_time)
+
+    if not os.path.exists(output):
+        os.makedirs(output)
+
+    export_file=output + '/settings.json'
+
+    # save settings as json file
+    with open(export_file, 'w') as f:
+        json.dump(settings, f, indent=4)
+
+def import_landcover_HILDA(year='2018'):
+    
+    name_data = 'hilda_lulc_'+ year +'.nc' 
+    
+    all_hilda_classes= Dataset(folder_data + name_data)
+
+    #access all the different land cover classes in the .nc files:
+    cropland = all_hilda_classes.variables['cropland'][:,:]
+    ocean = all_hilda_classes.variables['ocean'][:,:]
+    forest_decidious_broad_leaf = all_hilda_classes.variables['f_de_br_le'][:,:]
+    forest_decidious_needle_leaf = all_hilda_classes.variables['f_de_ne_le'][:,:]
+    forest_evergreen_broad_leaf = all_hilda_classes.variables['f_eg_br_le'][:,:]
+    forest_evergreen_needle_leaf = all_hilda_classes.variables['f_eg_ne_le'][:,:]
+    mixed_forest = all_hilda_classes.variables['forest_mix'][:,:]
+    forest_unknown = all_hilda_classes.variables['forest_unk'][:,:]
+    grass_shrub = all_hilda_classes.variables['grass_shru'][:,:]
+    other_land = all_hilda_classes.variables['other_land'][:,:]
+    pasture = all_hilda_classes.variables['pasture'][:,:]
+    urban = all_hilda_classes.variables['urban'][:,:]
+    water = all_hilda_classes.variables['water'][:,:]
+    unknown = all_hilda_classes.variables['unknown'][:,:]
+    
+    # aggregated classes:
+    broad_leaf_forest = forest_decidious_broad_leaf + forest_evergreen_broad_leaf 
+    coniferous_forest = forest_decidious_needle_leaf+ forest_evergreen_needle_leaf
+    mixed_forest = mixed_forest + forest_unknown
+    other = other_land + water
+   
+    return broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown
+
+def import_population_data():
+
+    pop_data= Dataset(os.path.join(folder_data, 'GEOSTAT_population_2011_2018.nc'))
+    
+    fp_pop=pop_data.variables['2018'][:,:]
+    return fp_pop
+
+# function to convert station longitude and latitude (slat, slon) to indices of STILT model grid (ix,jy)
+def lonlat_2_ixjy(slon,slat,mlon,mlat):
+    #slon, slat: longitude and latitude of station
+    #mlon, mlat: 1-dim. longitude and latitude of model grid
+    ix = (np.abs(mlon-slon)).argmin()
+    jy = (np.abs(mlat-slat)).argmin()
+    return ix,jy
+
 # footprint_show_percentages() is used to with argument percent=True to generate an aggregated % sensitivity map. 
 def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', station='', zoom='', 
               vmin=None, vmax=None, colors='GnBu',pngfile='', directory='figures', mask=False, percent=False, date_time_predefined=''): 
@@ -155,8 +212,10 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
 
     # set up a map
     ax = plt.subplot(1, 2, 1, projection=ccrs.PlateCarree())
+    
     img_extent = (lon.min(), lon.max(), lat.min(), lat.max())
     ax.set_extent([lon.min(), lon.max(), lat.min(), lat.max()],crs=ccrs.PlateCarree())
+   
     ax.add_feature(countries, edgecolor='black', linewidth=0.3)
 
     cmap = plt.get_cmap(colors)
@@ -166,7 +225,6 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
     if linlog == 'linear':
         
         im = ax.imshow(field[:,:], interpolation='none',origin='lower', extent=img_extent,cmap=cmap,vmin=0.00001,vmax=vmax)
-        #norm=LogNorm()
         cs = ax.imshow(field[:,:], origin='lower', extent=img_extent,cmap=cmap,vmin=0.000001,vmax=vmax)
         
         if percent:
@@ -218,7 +276,7 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
         station_lat.append(stations[station]['lat'])
         ax.plot(station_lon,station_lat,'+',color=mcolor,ms=10,markeredgewidth=1,transform=ccrs.PlateCarree())
         
-    zoom=str(zoom)
+    #zoom=str(zoom)
   
     plt.show()
    
@@ -243,118 +301,6 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
         
         return plt
 
-# for visualization_average_footprints.ipynb --> consider move
-def footprint_show_percentages(footprint_code, input_footprint, fp_lat, fp_lon, return_fp=False):
-    
-    
-    sum_sensitivity_values=sum(input_footprint.flatten())
-
-    
-    #create a dataframe that will have the updated sensitivity values + the steps on the way
-    df_sensitivity = pd.DataFrame()
-
-    #one column with the original sensitivity values. Has an index that will be used to sort back to 
-    #this order (flattened 2D... back to 2D with updated sensitivity values in last step)
-    df_sensitivity['sensitivity']=input_footprint.flatten()
-    
-    #sensitivity values sorterd from largest to smallest
-    df_sensitivity_sorted=df_sensitivity.sort_values(by=['sensitivity'], ascending=False)
-    
-    #another column that has the cumilated sum of the values in the sensitivity column.
-    #used to determine when the footprint threshold is met. 
-    df_sensitivity_sorted['cumsum_sens']=df_sensitivity_sorted.cumsum()
-    
-    #mask threshold: when the cumulative sum is over the threshold - these values are assigned 0.
-    #to be multiplied with the original sensitivity values (disregard the ones with value 0)
-    #df_sensitivity_sorted['ten_percent']=df_sensitivity_sorted['cumsum_sens']
-    df_sensitivity_sorted['twenty_percent']=df_sensitivity_sorted['cumsum_sens']
-    df_sensitivity_sorted['thirty_percent']=df_sensitivity_sorted['cumsum_sens']
-    df_sensitivity_sorted['forty_percent']=df_sensitivity_sorted['cumsum_sens']
-    df_sensitivity_sorted['fifty_percent']=df_sensitivity_sorted['cumsum_sens']
-    
-    
-    ten_percent = sum_sensitivity_values*0.1
-    twenty_percent = sum_sensitivity_values*0.2
-    thirty_percent = sum_sensitivity_values*0.3
-    forty_percent = sum_sensitivity_values*0.4
-    fifty_percent = sum_sensitivity_values*0.5
-    sixty_percent = sum_sensitivity_values*0.6
-    seventy_percent = sum_sensitivity_values*0.7
-    eighty_percent = sum_sensitivity_values*0.8
-    ninty_percent = sum_sensitivity_values*0.9
-
-    
-    df_sensitivity_sorted['ten_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=ten_percent, 0, 1)
-    df_sensitivity_sorted['twenty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=twenty_percent, 0, 1)
-    df_sensitivity_sorted['thirty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=thirty_percent, 0, 1)
-    df_sensitivity_sorted['forty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=forty_percent, 0, 1)
-    df_sensitivity_sorted['fifty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=fifty_percent, 0, 1)  
-    df_sensitivity_sorted['sixty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=sixty_percent, 0, 1)
-    df_sensitivity_sorted['seventy_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=seventy_percent, 0, 1)
-    df_sensitivity_sorted['eighty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=eighty_percent, 0, 1)
-    df_sensitivity_sorted['ninty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=ninty_percent, 0, 1)
-    
-
-    df_sensitivity_sorted['aggreg'] = df_sensitivity_sorted['ten_percent'] + df_sensitivity_sorted['twenty_percent']+df_sensitivity_sorted['thirty_percent']+df_sensitivity_sorted['forty_percent']+df_sensitivity_sorted['fifty_percent'] + df_sensitivity_sorted['sixty_percent'] + df_sensitivity_sorted['seventy_percent'] + df_sensitivity_sorted['eighty_percent'] + df_sensitivity_sorted['ninty_percent']
-    
-    df_sensitivity_sorted['aggreg']=df_sensitivity_sorted['aggreg']*10
-    
-    df_sensitivity_sorted['reversed_percent'] = 100 - df_sensitivity_sorted['aggreg']
-    
-    df_sensitivity_sorted['reversed_percent']= np.where(df_sensitivity_sorted['reversed_percent']>90, 0, df_sensitivity_sorted['reversed_percent'])
-    
-    df_sensitivity_upd=df_sensitivity_sorted.sort_index()
-    
-    list_aggreg_footprint=df_sensitivity_upd['reversed_percent'].tolist()
-
-    footprint_0_90=np.array(list_aggreg_footprint).reshape((len(fp_lat), len(fp_lon)))
-    
-    if return_fp:
-        return footprint_0_90
-    
-    else:
-        plot_maps(footprint_0_90, fp_lon, fp_lat, colors='Blues_r', vmin=10, vmax=90, percent = True, unit='%', title=(footprint_code + ' 2018'))
-    
-def percent_of_potential(input_footprint, fp_lat, fp_lon):
-    
-    max_fp_value = input_footprint.max()
-    
-    update_values = pd.DataFrame()
-    
-    update_values['flattened_fp'] = input_footprint.flatten()
-    
-    ten_percent = max_fp_value*0.1
-    twenty_percent = max_fp_value*0.2
-    thirty_percent = max_fp_value*0.3
-    forty_percent = max_fp_value*0.4
-    fifty_percent = max_fp_value*0.5
-    sixty_percent = max_fp_value*0.6
-    seventy_percent = max_fp_value*0.7
-    eighty_percent = max_fp_value*0.8
-    ninty_percent = max_fp_value*0.9
-    
-    #one is true here, in the other function (consum) 0 was true
-    update_values['ten_percent']= np.where(update_values['flattened_fp']>=ten_percent, 1, 0)
-    update_values['twenty_percent']= np.where(update_values['flattened_fp']>=twenty_percent, 1, 0)
-    update_values['thirty_percent']= np.where(update_values['flattened_fp']>=thirty_percent, 1, 0)
-    update_values['forty_percent']= np.where(update_values['flattened_fp']>=forty_percent, 1, 0)
-    update_values['fifty_percent']= np.where(update_values['flattened_fp']>=fifty_percent, 1, 0)  
-    update_values['sixty_percent']= np.where(update_values['flattened_fp']>=sixty_percent, 1, 0)
-    update_values['seventy_percent']= np.where(update_values['flattened_fp']>=seventy_percent, 1, 0)
-    update_values['eighty_percent']= np.where(update_values['flattened_fp']>=eighty_percent, 1, 0)
-    update_values['ninty_percent']= np.where(update_values['flattened_fp']>=ninty_percent, 1, 0)
-    
-    update_values['aggreg'] = update_values['ten_percent'] + update_values['twenty_percent']+update_values['thirty_percent']+update_values['forty_percent']+update_values['fifty_percent'] + update_values['sixty_percent'] + update_values['seventy_percent'] + update_values['eighty_percent'] + update_values['ninty_percent']
-    
-    update_values['aggreg']=update_values['aggreg']*10
-     
-    list_updated_values=update_values['aggreg'].tolist()
-
-    footprint_0_90=np.array(list_updated_values).reshape((len(fp_lat), len(fp_lon)))
-    
-    return footprint_0_90
-
-    
 def update_footprint_based_on_threshold(input_footprint, fp_lat, fp_lon, threshold):
 
     #total sensitivity - use this value to calculate what the sensitivity of the ex 50% footprint it (threshold)
@@ -386,10 +332,6 @@ def update_footprint_based_on_threshold(input_footprint, fp_lat, fp_lon, thresho
     else:
         df_sensitivity_sorted['mask_threshold']= np.where(df_sensitivity_sorted['cumsum_sens']>=threshold_sensitivity, 0, 1)
     
-    #did not work when threhsold sensitivity was less than 1. 
-    #df_sensitivity_sorted['mask_threshold'].loc[df_sensitivity_sorted['mask_threshold'] >= threshold_sensitivity]=0.0
-    #df_sensitivity_sorted['mask_threshold'].loc[df_sensitivity_sorted['mask_threshold'] < threshold_sensitivity]=1.0
-
     #mask*sensitivity = for "new" footprint that only has sensitivity values in the cells that have the value 1.
     df_sensitivity_sorted['mask_sensitivity']=df_sensitivity_sorted['mask_threshold']*df_sensitivity_sorted['sensitivity']
 
@@ -538,346 +480,6 @@ def return_networks(networkObj):
 
         return fp_max_base_network, fp_max_compare_network, list_none_footprints
     
-def import_landcover_HILDA(year='2018'):
-    
-    name_data = 'hilda_lulc_'+ year +'.nc' 
-    
-    all_hilda_classes= Dataset(folder_data + name_data)
-
-    #access all the different land cover classes in the .nc files:
-    cropland = all_hilda_classes.variables['cropland'][:,:]
-    ocean = all_hilda_classes.variables['ocean'][:,:]
-    forest_decidious_broad_leaf = all_hilda_classes.variables['f_de_br_le'][:,:]
-    forest_decidious_needle_leaf = all_hilda_classes.variables['f_de_ne_le'][:,:]
-    forest_evergreen_broad_leaf = all_hilda_classes.variables['f_eg_br_le'][:,:]
-    forest_evergreen_needle_leaf = all_hilda_classes.variables['f_eg_ne_le'][:,:]
-    mixed_forest = all_hilda_classes.variables['forest_mix'][:,:]
-    forest_unknown = all_hilda_classes.variables['forest_unk'][:,:]
-    grass_shrub = all_hilda_classes.variables['grass_shru'][:,:]
-    other_land = all_hilda_classes.variables['other_land'][:,:]
-    pasture = all_hilda_classes.variables['pasture'][:,:]
-    urban = all_hilda_classes.variables['urban'][:,:]
-    water = all_hilda_classes.variables['water'][:,:]
-    unknown = all_hilda_classes.variables['unknown'][:,:]
-    
-    # aggregated classes:
-    broad_leaf_forest = forest_decidious_broad_leaf + forest_evergreen_broad_leaf 
-    coniferous_forest = forest_decidious_needle_leaf+ forest_evergreen_needle_leaf
-    mixed_forest = mixed_forest + forest_unknown
-    other = other_land + water
-   
-    return broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown
-
-def import_population_data():
-
-    pop_data= Dataset(os.path.join(folder_data, 'GEOSTAT_population_2011_2018.nc'))
-    
-    fp_pop=pop_data.variables['2018'][:,:]
-    return fp_pop
-
-#for network_characterization_lulc_change.ipynb
-def breakdown_landcover_dataframe(list_area_choice, summed_fp_sens, aggreg_fp_see_not_see):
-
-    df_w_values = pd.DataFrame(columns=['Country', 'Year', 'Broad leaf forest total (km2)', 'Broad leaf forest total fp (km2)', 'Broad leaf forest total fp (km² area * (ppm /(μmol / (m²s)))', 'Coniferous forest total (km2)', 'Coniferous forest total fp (km2)', 'Coniferous forest total fp (km² area * (ppm /(μmol / (m²s)))', 'Mixed forest total (km2)', 'Mixed forest total fp (km2)', 'Mixed forest total fp (km² area * (ppm /(μmol / (m²s)))', 'Cropland total (km2)', 'Cropland total fp (km2)', 'Cropland total fp (km² area * (ppm /(μmol / (m²s)))', 'Pasture total (km2)', 'Pasture total fp (km2)', 'Pasture total fp (km² area * (ppm /(μmol / (m²s)))', 'Urban total (km2)', 'Urban total fp (km2)', 'Urban total fp (km² area * (ppm /(μmol / (m²s)))', 'Ocean total (km2)', 'Ocean total fp (km2)', 'Ocean total fp (km² area * (ppm /(μmol / (m²s)))', 'Grass/shrubland total (km2)', 'Grass/shrubland total fp (km2)', 'Grass/shrubland total fp (km² area * (ppm /(μmol / (m²s)))', 'Other total (km2)', 'Other total fp (km2)', 'Other total fp (km² area * (ppm /(μmol / (m²s)))', 'Unknown total (km2)', 'Unknown total fp (km2)', 'Unknown total fp (km² area * (ppm /(μmol / (m²s)))'])
-    
-    years = ['1990', '2000', '2010', '2019']
-    i = 0
-    for year in years:
-        
-        broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year=year)
-        
-        list_land_cover_classes = [broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown]
-        
-        #list_land_cover_names = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrubland', 'Other', 'Unknown']
-        
-        for area_choice in list_area_choice:
-            
-            if area_type == 'Land':
-                country_mask = country_masks.variables[area_choice][:,:]
-
-            # in case area_type == 'Land + EEZ'
-            else:
-                try:
-                    country_mask = country_masks_eez_included.variables[area_choice][:,:]
-
-                # when no eez for selected country
-                except:    
-                    country_mask = country_masks.variables[area_choice][:,:]
-
-            seen_given_see_not_see_mask = country_mask * aggreg_fp_see_not_see
-            
-            summed_fp_sens_country = country_mask * summed_fp_sens
-            
-            list_one_country_one_year = [area_choice, year]
-            
-            for land_cover in list_land_cover_classes:
-                #country total of land cover
-                land_cover_area_total_country = (land_cover*country_mask).sum()
-                list_one_country_one_year.append(land_cover_area_total_country)
-                
-                #country total of land cover within mask area of footprint
-                land_cover_area_fp = get_area_fp_country(land_cover, seen_given_see_not_see_mask)
-                list_one_country_one_year.append(land_cover_area_fp)
-                
-                #total sensitivity to land cover within country
-                land_cover_sens_total_fp = get_sens_fp_country(land_cover, summed_fp_sens_country)
-                list_one_country_one_year.append(land_cover_sens_total_fp)
-    
-            df_w_values.loc[i] = list_one_country_one_year
-            i = i + 1
-   
-    return df_w_values
-
-#not updated with new country masks (not used on exploredata)
-def breakdown_landcover_hilda_two_years(list_area_choice, summed_fp_sens, aggreg_fp_see_not_see, breakdown_type = 'sens', year_start='1990', year_end='2019'):
-
-    land_cover_values = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrubland', 'Other', 'Unknown']
-
-    land_cover_values = ['Broad leaf forest ' + str(year_start), 'Broad leaf forest ' + str(year_end), 'Coniferous forest ' + str(year_start), 'Coniferous forest ' + str(year_end), 'Mixed forest ' + str(year_start), 'Mixed forest ' + str(year_end), 'Cropland ' + str(year_start), 'Cropland ' + str(year_end), 'Pasture ' + str(year_start), 'Pasture ' + str(year_end), 'Urban ' + str(year_start), 'Urban ' + str(year_end), 'Ocean ' + str(year_start), 'Ocean ' + str(year_end), 'Grass/shrubland ' + str(year_start), 'Grass/shrubland ' + str(year_end), 'Other ' + str(year_start), 'Other ' + str(year_end), 'Unknown ' + str(year_start), 'Unknown ' + str(year_end)]
-    
-    land_cover_values_simple = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrubland', 'Other', 'Unknown']
-
-    colors = ['#4c9c5e','#4c9c5e','#CAE0AB','#CAE0AB','#90C987','#90C987', '#521A13', '#521A13', '#F7F056','#F7F056', '#DC050C', '#DC050C','#1964B0','#1964B0','#F1932D','#F1932D','#882E72','#882E72', '#777777','#777777']
-  
-
-    broad_leaf_forest_start, coniferous_forest_start, mixed_forest_start, ocean_start, other_start, grass_shrub_start, cropland_start, pasture_start, urban_start, unknown_start = import_landcover_HILDA(year=year_start)
-                              
-    broad_leaf_forest_end, coniferous_forest_end, mixed_forest_end, ocean_end, other_end, grass_shrub_end, cropland_end, pasture_end, urban_end, unknown_end = import_landcover_HILDA(year=year_end)
-
-    list_land_cover_classes_start = [broad_leaf_forest_start, coniferous_forest_start, mixed_forest_start, cropland_start, pasture_start, urban_start, ocean_start, grass_shrub_start, other_start, unknown_start]
-    
-    list_land_cover_classes_end = [broad_leaf_forest_end, coniferous_forest_end, mixed_forest_end, cropland_end, pasture_end, urban_end, ocean_end, grass_shrub_end, other_end, unknown_end]
-      
-    all_area_masks= Dataset(os.path.join('network_characterization', 'land_and_land_plus_eez_country_masks_icos_members.nc'))
-
-    for area_choice in list_area_choice:
-  
-        country_mask = all_area_masks.variables[area_choice][:,:]
-        
-        seen_given_see_not_see_mask = country_mask * aggreg_fp_see_not_see
-        
-        summed_fp_sens_country = country_mask * summed_fp_sens
-
-        
-        list_land_cover_area_total_country_start = []
-        list_land_cover_area_total_country_end = []
-
-        list_land_cover_area_fp_start = []        
-        list_land_cover_area_fp_end = []
-        
-        list_land_cover_sens_fp_start = []        
-        list_land_cover_sens_fp_end = []
-
-        
-        for land_cover_start, land_cover_end in zip(list_land_cover_classes_start, list_land_cover_classes_end):
-            
-            land_cover_area_total_country_start = (land_cover_start*country_mask).sum()
-            list_land_cover_area_total_country_start.append(land_cover_area_total_country_start)
- 
-            land_cover_area_total_country_end = (land_cover_end*country_mask).sum()
-            list_land_cover_area_total_country_end.append(land_cover_area_total_country_end)
-     
-            land_cover_area_fp_start = get_area_fp_country(land_cover_start, seen_given_see_not_see_mask)
-            list_land_cover_area_fp_start.append(land_cover_area_fp_start)
-            
-            land_cover_area_fp_end = get_area_fp_country(land_cover_end, seen_given_see_not_see_mask)
-            list_land_cover_area_fp_end.append(land_cover_area_fp_end)
-            
-            
-            land_cover_sens_total_fp_start = get_sens_fp_country(land_cover_start, summed_fp_sens_country)
-            list_land_cover_sens_fp_start.append(land_cover_sens_total_fp_start)
-            
-            land_cover_sens_fp_start = get_sens_fp_country(land_cover_end, summed_fp_sens_country)
-            list_land_cover_sens_fp_end.append(land_cover_sens_fp_start)
-            
-        list_land_cover_area_total_country_start = [0 if math.isnan(x) or x<0 else x for x in list_land_cover_area_total_country_start]
-        
-        list_land_cover_area_total_country_end = [0 if math.isnan(x) or x<0 else x for x in list_land_cover_area_total_country_end]
-
-        values_diff_country = []
-
-        for i in range(len(list_land_cover_area_total_country_start)):
-
-            if list_land_cover_area_total_country_start[i]>0.00001:
-                diff_base_compare = (((list_land_cover_area_total_country_end[i]/list_land_cover_area_total_country_start[i])*100)-100) 
-
-            #if no sensitivty at start
-            else:
-
-                if list_land_cover_area_total_country_end[i]>0.00001:
-                    diff_base_compare = 9999
-                else:
-                    diff_base_compare = 0
-
-            values_diff_country.append(diff_base_compare)
-
-        
-        # analysis based on the footprints.
-        if seen_given_see_not_see_mask.sum() > 0:
-            
-            country_name = dictionary_area_choice[area_choice]
-
-            if breakdown_type=='sens':
-
-                compare_values_start = list_land_cover_sens_fp_start
-
-                compare_values_end = list_land_cover_sens_fp_end
-
-                column_w_data = 'Sensitivity'
-
-                label_yaxis = 'area in km² * (ppm /(μmol / (m²s)))'
-                
-                title = 'Station/network sensitivity to land cover in ' + country_name
-
-            #if using the mast - then see what the area of the different land cover types are below. 
-            else:
-
-                compare_values_start = list_land_cover_area_fp_start
-
-                compare_values_end = list_land_cover_area_fp_start
-
-                column_w_data = 'Area'
-
-                label_yaxis = 'km²'
-                
-                title = 'Station/network sensitivity area to land cover in ' + country_name
-
-
-            ##### create dataframe - takes country area total of the two years, shows the difference in percent. Also showing the difference in % in terms of sensitivity (using the same footprint / network of footprints)
-
-            start_end_combined = [sub[item] for item in range(len(compare_values_end)) for sub in [compare_values_start, compare_values_end]]
-
-            #for the plot with both years in stacks next to each other. 
-            dictionary_values = {'Land cover values':land_cover_values,
-                                     column_w_data: start_end_combined,
-                                     'color':colors}
-
-            compare_values_start = [0 if math.isnan(x) or x<0 else x for x in compare_values_start]
-
-            compare_values_end = [0 if math.isnan(x) or x<0 else x for x in compare_values_end]
-
-            compare_values_diff = []
-
-            for i in range(len(compare_values_start)):
-
-                if compare_values_start[i]>0.00001:
-
-                    diff = (((compare_values_end[i]/compare_values_start[i])*100)-100) 
-
-                #if no sensitivty at start
-                else:
-
-                    if compare_values_end[i]>0.00001:
-                        diff = 9999
-                    else:
-                        diff = 0
-
-                compare_values_diff.append(diff)
-
-            #move this to where have sensitivity info also
-            df_landcover_change = pd.DataFrame()
-
-            df_landcover_change['Category'] = land_cover_values_simple
-
-            df_landcover_change['Area (km2) year ' + str(year_start)] = list_land_cover_area_total_country_start
-
-            df_landcover_change['Area (km2) year ' + str(year_end)] = list_land_cover_area_total_country_end
-
-            df_landcover_change['Difference (%)'] = values_diff_country
-
-            if breakdown_type=='sens':
-                name_diff_col = 'Difference sensitvity (%)'
-
-            else:
-                name_diff_col = 'Difference area (%)'
-
-            df_landcover_change[name_diff_col] = compare_values_diff
-
-            styled_df_landcover_change = (df_landcover_change.style
-                                          .format({('Area (km2) year ' + str(year_start)): '{:.0f}', ('Area (km2) year ' + str(year_end)): '{:.0f}', 'Difference (%)': '{:.2f}',  name_diff_col: '{:.2f}'})
-
-                                          .set_table_styles([dict(selector='th', props=[('text-align', 'center')])]))
-
-            styled_df_landcover_change = styled_df_landcover_change.set_properties(**{'text-align': 'center'}).hide_index()
-            display(styled_df_landcover_change)
-
-            p = figure(x_range=land_cover_values, title=title, toolbar_location="below", tooltips="@" + column_w_data + "{0f}")
-
-
-            p.vbar(x='Land cover values', top = column_w_data, width=0.5, color='color', source=dictionary_values)
-
-            p.yaxis.axis_label = label_yaxis
-
-            p.y_range.start = 0
-            p.x_range.range_padding = 0.1
-            p.xgrid.grid_line_color = None
-            p.axis.minor_tick_line_color = None
-            p.outline_line_color = None
-
-            p.legend.label_text_font_size = "10px"
-            p.xaxis.major_label_orientation = "vertical"
-
-            show(p)
-
-
-    
-def save_settings(settings, directory):
-
-    output = os.path.join(os.path.expanduser('~'), 'output', directory, date_time)
-
-    if not os.path.exists(output):
-        os.makedirs(output)
-
-    export_file=output + '/settings.json'
-
-    # save settings as json file
-    with open(export_file, 'w') as f:
-        json.dump(settings, f, indent=4)
-        
-        
-#given the input - create an updated pandas date range with only hours in timeselect_list
-def date_range_hour_filtered(date_range, timeselect_list):
-   
-
-    #depending on how many input (max 8 for 0 3 6 9 12 15 18 21), filter to include hours.
-    for time_value in timeselect_list:
-        if len(timeselect_list)==1:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)]
-            #df_nine = df.loc[(timeselect_list[count_timeselect] == df.index.hour)]
-        if len(timeselect_list)==2:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]
-        if len(timeselect_list)==3:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)]
-
-        if len(timeselect_list)==4:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]
-
-        if len(timeselect_list)==5:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
-            | date_range[(timeselect_list[4] == date_range.hour)]
-
-        if len(timeselect_list)==6:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
-            | date_range[(timeselect_list[4] == date_range.hour)] | date_range[(timeselect_list[5] == date_range.hour)]
-
-        if len(timeselect_list)==7:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
-            | date_range[(timeselect_list[4] == date_range.hour)] | date_range[(timeselect_list[5] == date_range.hour)]\
-            | date_range[(timeselect_list[6] == date_range.hour)]
-        
-        if len(timeselect_list)==8:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
-            | date_range[(timeselect_list[4] == date_range.hour)] | date_range[(timeselect_list[5] == date_range.hour)]\
-            | date_range[(timeselect_list[6] == date_range.hour)] | date_range[(timeselect_list[7] == date_range.hour)]
-          
-    #consider return timeselect
-    return date_range
 
 def country_dict_landcover(networkObj):
     
@@ -977,7 +579,7 @@ def leader_chart_sensitivity(networkObj):
         df_leader_chart_sens = pd.DataFrame(columns=['Country', 'Sensitivity/km2'])
         
     else:
-        df_leader_chart_sens = pd.DataFrame(columns=['Country', 'Sensitivity/km2 base', 'Sensitivity/km2 compare', 'Increase (%)'])
+        df_leader_chart_sens = pd.DataFrame(columns=['Country', 'Sens./km2 base', 'Sens./km2 compare', 'Increase (%)'])
     
     i = 0
     
@@ -1011,10 +613,10 @@ def leader_chart_sensitivity(networkObj):
   
     if compare_network is not None:
         
-        df_leader_chart_sens = df_leader_chart_sens.sort_values(by=['Sensitivity/km2 base'], ascending=False)
+        df_leader_chart_sens = df_leader_chart_sens.sort_values(by=['Sens./km2 base'], ascending=False)
 
         styled_df_leader_chart_sens = (df_leader_chart_sens.style
-                                              .format({'Sensitivity/km2 base' : '{:.2E}', 'Sensitivity/km2 compare': '{:.2E}', 'Increase (%)': '{:.0f}'})
+                                              .format({'Sens./km2 base' : '{:.2E}', 'Sens./km2 compare': '{:.2E}', 'Increase (%)': '{:.0f}'})
                                               .set_table_styles([dict(selector='th', props=[('text-align', 'center')])]))
         
         styled_df_leader_chart_sens = styled_df_leader_chart_sens.set_properties(**{'text-align': 'center'}).hide_index()
@@ -1029,8 +631,6 @@ def leader_chart_sensitivity(networkObj):
                                               .set_table_styles([dict(selector='th', props=[('text-align', 'center')])]))
 
         styled_df_leader_chart_sens = styled_df_leader_chart_sens.set_properties(**{'text-align': 'center'}).hide_index()
-        
-
 
     return styled_df_leader_chart_sens
 
@@ -1553,3 +1153,114 @@ def land_cover_bar_graphs_compare(networkObj):
         show(p_aggreg)
         
     display(output_landcover_all)
+    
+# 10-90% footprint visualization notebook
+def footprint_show_percentages(footprint_code, input_footprint, fp_lat, fp_lon, return_fp=False):
+    
+    
+    sum_sensitivity_values=sum(input_footprint.flatten())
+
+    
+    #create a dataframe that will have the updated sensitivity values + the steps on the way
+    df_sensitivity = pd.DataFrame()
+
+    #one column with the original sensitivity values. Has an index that will be used to sort back to 
+    #this order (flattened 2D... back to 2D with updated sensitivity values in last step)
+    df_sensitivity['sensitivity']=input_footprint.flatten()
+    
+    #sensitivity values sorterd from largest to smallest
+    df_sensitivity_sorted=df_sensitivity.sort_values(by=['sensitivity'], ascending=False)
+    
+    #another column that has the cumilated sum of the values in the sensitivity column.
+    #used to determine when the footprint threshold is met. 
+    df_sensitivity_sorted['cumsum_sens']=df_sensitivity_sorted.cumsum()
+    
+    #mask threshold: when the cumulative sum is over the threshold - these values are assigned 0.
+    #to be multiplied with the original sensitivity values (disregard the ones with value 0)
+    #df_sensitivity_sorted['ten_percent']=df_sensitivity_sorted['cumsum_sens']
+    df_sensitivity_sorted['twenty_percent']=df_sensitivity_sorted['cumsum_sens']
+    df_sensitivity_sorted['thirty_percent']=df_sensitivity_sorted['cumsum_sens']
+    df_sensitivity_sorted['forty_percent']=df_sensitivity_sorted['cumsum_sens']
+    df_sensitivity_sorted['fifty_percent']=df_sensitivity_sorted['cumsum_sens']
+    
+    
+    ten_percent = sum_sensitivity_values*0.1
+    twenty_percent = sum_sensitivity_values*0.2
+    thirty_percent = sum_sensitivity_values*0.3
+    forty_percent = sum_sensitivity_values*0.4
+    fifty_percent = sum_sensitivity_values*0.5
+    sixty_percent = sum_sensitivity_values*0.6
+    seventy_percent = sum_sensitivity_values*0.7
+    eighty_percent = sum_sensitivity_values*0.8
+    ninty_percent = sum_sensitivity_values*0.9
+
+    
+    df_sensitivity_sorted['ten_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=ten_percent, 0, 1)
+    df_sensitivity_sorted['twenty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=twenty_percent, 0, 1)
+    df_sensitivity_sorted['thirty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=thirty_percent, 0, 1)
+    df_sensitivity_sorted['forty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=forty_percent, 0, 1)
+    df_sensitivity_sorted['fifty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=fifty_percent, 0, 1)  
+    df_sensitivity_sorted['sixty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=sixty_percent, 0, 1)
+    df_sensitivity_sorted['seventy_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=seventy_percent, 0, 1)
+    df_sensitivity_sorted['eighty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=eighty_percent, 0, 1)
+    df_sensitivity_sorted['ninty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=ninty_percent, 0, 1)
+    
+
+    df_sensitivity_sorted['aggreg'] = df_sensitivity_sorted['ten_percent'] + df_sensitivity_sorted['twenty_percent']+df_sensitivity_sorted['thirty_percent']+df_sensitivity_sorted['forty_percent']+df_sensitivity_sorted['fifty_percent'] + df_sensitivity_sorted['sixty_percent'] + df_sensitivity_sorted['seventy_percent'] + df_sensitivity_sorted['eighty_percent'] + df_sensitivity_sorted['ninty_percent']
+    
+    df_sensitivity_sorted['aggreg']=df_sensitivity_sorted['aggreg']*10
+    
+    df_sensitivity_sorted['reversed_percent'] = 100 - df_sensitivity_sorted['aggreg']
+    
+    df_sensitivity_sorted['reversed_percent']= np.where(df_sensitivity_sorted['reversed_percent']>90, 0, df_sensitivity_sorted['reversed_percent'])
+    
+    df_sensitivity_upd=df_sensitivity_sorted.sort_index()
+    
+    list_aggreg_footprint=df_sensitivity_upd['reversed_percent'].tolist()
+
+    footprint_0_90=np.array(list_aggreg_footprint).reshape((len(fp_lat), len(fp_lon)))
+    
+    if return_fp:
+        return footprint_0_90
+    
+    else:
+        plot_maps(footprint_0_90, fp_lon, fp_lat, colors='Blues_r', vmin=10, vmax=90, percent = True, unit='%', title=(footprint_code + ' 2018'))
+    
+def percent_of_potential(input_footprint, fp_lat, fp_lon):
+    
+    max_fp_value = input_footprint.max()
+    
+    update_values = pd.DataFrame()
+    
+    update_values['flattened_fp'] = input_footprint.flatten()
+    
+    ten_percent = max_fp_value*0.1
+    twenty_percent = max_fp_value*0.2
+    thirty_percent = max_fp_value*0.3
+    forty_percent = max_fp_value*0.4
+    fifty_percent = max_fp_value*0.5
+    sixty_percent = max_fp_value*0.6
+    seventy_percent = max_fp_value*0.7
+    eighty_percent = max_fp_value*0.8
+    ninty_percent = max_fp_value*0.9
+    
+    #one is true here, in the other function (consum) 0 was true
+    update_values['ten_percent']= np.where(update_values['flattened_fp']>=ten_percent, 1, 0)
+    update_values['twenty_percent']= np.where(update_values['flattened_fp']>=twenty_percent, 1, 0)
+    update_values['thirty_percent']= np.where(update_values['flattened_fp']>=thirty_percent, 1, 0)
+    update_values['forty_percent']= np.where(update_values['flattened_fp']>=forty_percent, 1, 0)
+    update_values['fifty_percent']= np.where(update_values['flattened_fp']>=fifty_percent, 1, 0)  
+    update_values['sixty_percent']= np.where(update_values['flattened_fp']>=sixty_percent, 1, 0)
+    update_values['seventy_percent']= np.where(update_values['flattened_fp']>=seventy_percent, 1, 0)
+    update_values['eighty_percent']= np.where(update_values['flattened_fp']>=eighty_percent, 1, 0)
+    update_values['ninty_percent']= np.where(update_values['flattened_fp']>=ninty_percent, 1, 0)
+    
+    update_values['aggreg'] = update_values['ten_percent'] + update_values['twenty_percent']+update_values['thirty_percent']+update_values['forty_percent']+update_values['fifty_percent'] + update_values['sixty_percent'] + update_values['seventy_percent'] + update_values['eighty_percent'] + update_values['ninty_percent']
+    
+    update_values['aggreg']=update_values['aggreg']*10
+     
+    list_updated_values=update_values['aggreg'].tolist()
+
+    footprint_0_90=np.array(list_updated_values).reshape((len(fp_lat), len(fp_lon)))
+    
+    return footprint_0_90

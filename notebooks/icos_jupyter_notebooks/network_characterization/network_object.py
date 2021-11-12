@@ -55,13 +55,16 @@ class NetworkObj():
             
     def _setCountryDict(self):
         
-        self.countryDict = functions.country_dict_landcover(self)
+        if self.baseNetwork is not None:
+        
+            self.countryDict = functions.country_dict_landcover(self)
         
     def _setDateRange(self):
         
         date_range = pd.date_range(start=(str(self.settings['startYear']) + '-' + str(self.settings['startMonth']) + '-' + str(self.settings['startDay'])), end=(str(self.settings['endYear']) + '-' + str(self.settings['endMonth']) + '-' + str(self.settings['endDay'])), freq='3H')
         
         self.dateRange = functions.date_range_hour_filtered(date_range, self.settings['timeOfDay'])
+
 
 if __name__ == "__main__":
     """
