@@ -110,32 +110,34 @@ def use_icos_network_change(c):
     list_icos_stations = [k for k, v in stiltstations.items() if v['icos']]
     
     #SMR125 as opposed to SMR127
-    list_icos_stations = ['BIR', 'CMN', 'GAT344', 'HEL', 'HPB131', 'HTM150', 'IPR100', 'JFJ', 'KIT200', 'KRE250', 'LIN099', 'LMP', 'LUT', 'NOR100', 'OPE120', 'OXK163', 'PAL', 'PRS', 'PUI', 'PUY', 'SAC100', 'SMR125', 'STE252', 'SVB150', 'TOH147', 'TRN180', 'UTO', 'ZSF']
-    
-    sites_base_network_options.value = list_icos_stations
-    
-    """
-    stations = []
+    #list_icos_stations = ['BIR', 'CMN', 'GAT344', 'HEL', 'HPB131', 'HTM150', 'IPR100', 'JFJ', 'KIT200', 'KRE250', 'LIN099', 'LMP', 'LUT', 'NOR100', 'OPE120', 'OXK163', 'PAL', 'PRS', 'PUI', 'PUY', 'SAC100', 'SMR125', 'STE252', 'SVB150', 'TOH147', 'TRN180', 'UTO', 'ZSF']
+
+    list_icos_stations_reduced = []
     stations_reduced = []
-    for station in test:
+    for station in list_icos_stations:
+        
+        if station =='SMR127':
+            continue
 
         if station[0:3] not in stations_reduced:
 
-            stations.append(station)
+            list_icos_stations_reduced.append(station)
             stations_reduced.append(station[0:3])
 
         # if there already is a station with that name
         else:
 
             #remove from list and replace with higher val
-            matched_station = [s for s in stations if s[0:3] == station[0:3]][0]
+            matched_station = [s for s in list_icos_stations_reduced if s[0:3] == station[0:3]][0]
 
             if len(station)>3 and len(matched_station)>3:
                 if int(station[3:6])>int(matched_station[3:6]):
-                    stations.remove(matched_station)
-                    stations.append(station)
+                    list_icos_stations_reduced.remove(matched_station)
+                    list_icos_stations_reduced.append(station)
                     stations_reduced.append(station[0:3])
-    """
+                    
+    sites_base_network_options.value = list_icos_stations_reduced
+
 
 def prepare_footprints_change(c):
 
