@@ -6,6 +6,7 @@ import pandas as pd
 from icoscp.station import station as station_data
 from icoscp.cpb.dobj import Dobj
 from numpy import loadtxt
+import numpy as np
 import os
 import numpy as np
 
@@ -47,11 +48,15 @@ class NetworkObj():
         self.baseNetwork, self.compareNetwork, self.noFootprints = functions.return_networks(self)
 
         if self.compareNetwork is not None:
-            
+
             #otherwise remain None
-            self.vmaxSens = np.max(self.compareNetwork)
+            self.vmaxSens = np.percentile(self.compareNetwork,99.9)
             
-            self.compareMinusBase = self.compareNetwork - self.baseNetwork
+            self.compareMinusBase = self.compareNetwork - self.baseNetwork 
+            
+        else:
+            
+            self.vmaxSens = np.percentile(self.baseNetwork,99.9)
             
     def _setCountryDict(self):
         

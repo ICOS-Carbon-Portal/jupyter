@@ -17,8 +17,8 @@ import network_characterization_functions as functions
 import json
 import network_object
 from icoscp.stilt import stiltstation
-
 from bokeh.io import show, output_notebook, reset_output
+import matplotlib.pyplot as plt
 stiltstations= stiltstation.find()
 # error in geocoder - located ZSF in Austria rather than Germany 
 stiltstations['ZSF']['geoinfo']['name']['common'] = 'Germany'
@@ -339,6 +339,7 @@ def change_day_end(c):
 #clear all the output
 def clear_all_output():
     output_no_footprints.clear_output()
+    output_histogram.clear_output()
     output_base_network_fp_linear.clear_output()
     output_base_network_fp.clear_output()
     output_compare_network_fp_linear.clear_output()
@@ -396,19 +397,26 @@ def update_func(button_c):
         list_used_stations = networkObj.settings['baseNetwork'] + networkObj.settings['compareNetwork']
         
     # lats' and lons' of stations:
-    min_lat = min([v['lat'] for k, v in stiltstations.items() if k in list_used_stations]) - 2 
-    max_lat = max([v['lat'] for k, v in stiltstations.items() if k in list_used_stations]) + 2
-    min_lon = min([v['lon'] for k, v in stiltstations.items() if k in list_used_stations]) - 2
-    max_lon = max([v['lon'] for k, v in stiltstations.items() if k in list_used_stations]) + 2
+    min_lat = min([v['lat'] for k, v in stiltstations.items() if k in list_used_stations]) 
+    max_lat = max([v['lat'] for k, v in stiltstations.items() if k in list_used_stations]) 
+    min_lon = min([v['lon'] for k, v in stiltstations.items() if k in list_used_stations]) 
+    max_lon = max([v['lon'] for k, v in stiltstations.items() if k in list_used_stations]) 
     
     settings['domain'] = (min_lon, max_lon, min_lat, max_lat)
 
     #end adding for zoom
-        
+    
     if networkObj.baseNetwork is not None:
         
+        df_for_hist = functions.histogram_fp_distribution(networkObj.baseNetwork)
+        test_hist = df_for_hist.plot(kind='hist', bins=70, figsize=(8,6))
+
+        with output_histogram:
+
+            plt.show(test_hist)
+        
         with output_base_network_fp_linear:
-            
+
             display(HTML('<p style="font-size:16px;text-align:center">Base network footprint linear scale (' + threshold_percent  + '%)</p>'))
             
             functions.plot_maps(networkObj.baseNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
@@ -745,6 +753,7 @@ form = VBox([heading_network_selection, heading_perpared_footprints, use_icos_ne
 form_out = Output()
 
 output_no_footprints = Output()
+output_histogram = Output()
 output_base_network_fp_linear = Output()
 output_base_network_fp = Output()
 output_compare_network_fp_linear = Output()
@@ -793,7 +802,7 @@ with form_out:
     box_footprints_sens = HBox([output_base_network_fp, output_compare_network_fp])
     box_difference_and_leader = HBox([output_base_minus_compare, output_leader_chart])
 
-    display(form, output_no_footprints, box_footprints_sens_linear, box_footprints_sens, box_difference_and_leader, output_landcover_bargraph_countries, output_population_bargraph_countries)
+    display(form, output_no_footprints, output_histogram, box_footprints_sens_linear, box_footprints_sens, box_difference_and_leader, output_landcover_bargraph_countries, output_population_bargraph_countries)
 
 #Display form:
 display(form_out)    

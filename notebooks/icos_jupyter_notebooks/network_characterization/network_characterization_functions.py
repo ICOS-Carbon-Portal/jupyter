@@ -339,7 +339,7 @@ def update_footprint_based_on_threshold(input_footprint, fp_lat, fp_lon, thresho
     df_sensitivity_upd=df_sensitivity_sorted.sort_index()
 
     list_updated_sensitivity=df_sensitivity_upd['mask_sensitivity'].tolist()
-
+    
     upd_footprint_sens=np.array(list_updated_sensitivity).reshape((len(fp_lat), len(fp_lon)))
 
     #want a footprint with 0/1 for see or not see also 
@@ -382,7 +382,7 @@ def return_networks(networkObj):
     list_none_footprints = []
     
     for station in sites_base_network:
-        
+
         #if use 2018 aggregated footprint
         if pd.Timestamp(min(date_range))==pd.Timestamp(2018, 1, 1, 0) and pd.Timestamp(max(date_range))==pd.Timestamp(2018,12,31,0) and len(hours)==8:
 
@@ -392,7 +392,6 @@ def return_networks(networkObj):
             if loaded_fp is None:
 
                 nfp_not_used, loaded_fp, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range)
-
                 #if still None, then add to list of sites with no footprints and continue
                 if loaded_fp is None:
 
@@ -1154,13 +1153,24 @@ def land_cover_bar_graphs_compare(networkObj):
         
     display(output_landcover_all)
     
+def histogram_fp_distribution(input_footprint):
+    
+    df_values_fp = pd.DataFrame()
+
+    #one column with the original sensitivity values. Has an index that will be used to sort back to 
+    #this order (flattened 2D... back to 2D with updated sensitivity values in last step)
+    df_values_fp['sensitivity']=input_footprint.flatten()
+    
+    vmax = np.percentile(input_footprint,99.9)
+
+    df_for_hist = df_values_fp[(df_values_fp['sensitivity'] > 0) & (df_values_fp['sensitivity'] <vmax)]
+
+    return df_for_hist
+    
 # 10-90% footprint visualization notebook
 def footprint_show_percentages(footprint_code, input_footprint, fp_lat, fp_lon, return_fp=False):
-    
-    
-    sum_sensitivity_values=sum(input_footprint.flatten())
 
-    
+    sum_sensitivity_values=sum(input_footprint.flatten()) 
     #create a dataframe that will have the updated sensitivity values + the steps on the way
     df_sensitivity = pd.DataFrame()
 
