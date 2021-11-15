@@ -31,10 +31,6 @@ list_2018_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] 
 list_2018_not_located = [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items() if '2018' in v['years'] if len(v['2018']['months'])>11 if not v['geoinfo']]
 list_2018 = list_2018_not_located + list_2018_located 
 
-
-
-#workaround ZSF (not in the netherlands - rather Germany. Geocoder gets it wrong)
-
 countries = [('Albania','ALB'),('Andorra','Andorra'),('Austria','AUT'),('Belarus','BLR'),('Belgium','BEL'),('Bosnia and Herzegovina','BIH'),('Bulgaria','BGR'),('Croatia','HRV'),('Cyprus','CYP'),('Czechia','CZE'),('Denmark','DNK'),('Estonia','EST'),('Finland','FIN'),('France','FRA'),('Germany','DEU'),('Greece','GRC'),('Hungary','HUN'),('Ireland','IRL'),('Italy','ITA'),('Kosovo','XKX'),('Latvia','LVA'),('Liechtenstein','LIE'),('Lithuania','LTU'),('Luxembourg','LUX'),('Macedonia','MKD'),('Malta','MTL'),('Moldova','MDA'),('Montenegro','MNE'),('Netherlands','NLD'),('Norway','NOR'),('Poland','POL'),('Portugal','PRT'),('Republic of Serbia','SRB'),('Romania','ROU'),('San Marino','SMR'),('Slovakia','SVK'),('Slovenia','SVN'),('Spain','ESP'),('Sweden','SWE'),('Switzerland','CHE'),('United Kingdom','GBR')]
 
 dict_countries = {'ALB':'Albania', 'Andorra':'Andorra', 'AUT':'Austria','BLR':'Belarus','BEL':'Belgium','BIH':'Bosnia and Herzegovina','BGR':'Bulgaria','HRV':'Croatia','CYP':'Cyprus','CZE':'Czechia','DNK':'Denmark','EST':'Estonia','FIN':'Finland','FRA':'France','DEU':'Germany','GRC':'Greece','HUN':'Hungary','IRL':'Ireland','ITA':'Italy','XKX':'Kosovo','LVA':'Latvia','LIE':'Liechtenstein','LTU':'Lithuania','LUX':'Luxembourg','MKD':'Macedonia','MTL':'Malta','MDA':'Moldova','MNE':'Montenegro','NLD':'Netherlands','NOR':'Norway','POL':'Poland','PRT':'Portugal','SRB':'Republic of Serbia','ROU':'Romania','SMR':'San Marino','SVK':'Slovakia','SVN':'Slovenia','ESP':'Spain','SWE':'Sweden','CHE':'Switzerland','GBR':'United Kingdom'}
@@ -112,34 +108,30 @@ def use_icos_network_change(c):
     if use_icos_network.value == True:
         prepared_footprints.value= True
     
-    
-    list_icos_stations = [k for k, v in stiltstations.items() if v['icos']]
-    
-    list_icos_stations_reduced = []
-    stations_reduced = []
-    for station in list_icos_stations:
-        
-        if station =='SMR127':
-            continue
+        list_icos_stations = [k for k, v in stiltstations.items() if v['icos']]
 
-        if station[0:3] not in stations_reduced:
+        list_icos_stations_reduced = []
+        stations_reduced = []
+        for station in list_icos_stations:
 
-            list_icos_stations_reduced.append(station)
-            stations_reduced.append(station[0:3])
+            if station[0:3] not in stations_reduced:
 
-        # if there already is a station with that name
-        else:
+                list_icos_stations_reduced.append(station)
+                stations_reduced.append(station[0:3])
 
-            #remove from list and replace with higher val
-            matched_station = [s for s in list_icos_stations_reduced if s[0:3] == station[0:3]][0]
+            # if there already is a station with that name
+            else:
 
-            if len(station)>3 and len(matched_station)>3:
-                if int(station[3:6])>int(matched_station[3:6]):
-                    list_icos_stations_reduced.remove(matched_station)
-                    list_icos_stations_reduced.append(station)
-                    stations_reduced.append(station[0:3])
-                    
-    sites_base_network_options.value = list_icos_stations_reduced
+                #remove from list and replace with higher val
+                matched_station = [s for s in list_icos_stations_reduced if s[0:3] == station[0:3]][0]
+
+                if len(station)>3 and len(matched_station)>3:
+                    if int(station[3:6])>int(matched_station[3:6]):
+                        list_icos_stations_reduced.remove(matched_station)
+                        list_icos_stations_reduced.append(station)
+                        stations_reduced.append(station[0:3])
+
+        sites_base_network_options.value = list_icos_stations_reduced
 
 
 def prepare_footprints_change(c):
@@ -396,6 +388,22 @@ def update_func(button_c):
             display(HTML('<p style="font-size:16px">No footprints available for ' + no_footprints_string + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints.</p>'))
         
         all_stations = networkObj.settings['baseNetwork'] + networkObj.settings['compareNetwork']
+        
+        #added for zoom
+        list_used_stations = [station for station in all_stations if station not in networkObj.noFootprints]
+    
+    else:
+        list_used_stations = networkObj.settings['baseNetwork'] + networkObj.settings['compareNetwork']
+        
+    # lats' and lons' of stations:
+    min_lat = min([v['lat'] for k, v in stiltstations.items() if k in list_used_stations]) - 2 
+    max_lat = max([v['lat'] for k, v in stiltstations.items() if k in list_used_stations]) + 2
+    min_lon = min([v['lon'] for k, v in stiltstations.items() if k in list_used_stations]) - 2
+    max_lon = max([v['lon'] for k, v in stiltstations.items() if k in list_used_stations]) + 2
+    
+    settings['domain'] = (min_lon, max_lon, min_lat, max_lat)
+
+    #end adding for zoom
         
     if networkObj.baseNetwork is not None:
         
