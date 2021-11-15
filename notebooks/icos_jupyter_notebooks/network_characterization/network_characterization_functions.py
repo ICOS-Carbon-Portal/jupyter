@@ -884,7 +884,7 @@ def land_cover_bar_graphs_base(networkObj):
             other_country_percent = dictionary[country]['country_breakdown']['Other'] 
             unknown_country_percent = dictionary[country]['country_breakdown']['Unknown'] 
             
-            list_land_cover_country = [broad_leaf_forest_percent, broad_leaf_forest_country_percent, coniferous_forest_percent, coniferous_forest_country_percent,mixed_forest_percent,mixed_forest_country_percent, cropland_percent, cropland_country_percent, pasture_percent,  pasture_country_percent, urban_percent,urban_country_percent, ocean_percent,  ocean_country_percent,grass_shrub_percent,grass_shrub_country_percent, other_percent, other_country_percent, unknown_percent, unknown_country_percent]
+            list_land_cover_country = [broad_leaf_forest_country_percent, broad_leaf_forest_percent, coniferous_forest_country_percent, coniferous_forest_percent,mixed_forest_country_percent,mixed_forest_percent, cropland_country_percent, cropland_percent, pasture_country_percent, pasture_percent, urban_country_percent,urban_percent, ocean_country_percent, ocean_percent,grass_shrub_country_percent,grass_shrub_percent, other_country_percent, other_percent, unknown_country_percent, unknown_percent]
             
             dictionary_landcover = {'Land cover values': land_cover_values_individual,
                                  'Sensitivity':list_land_cover_country,
