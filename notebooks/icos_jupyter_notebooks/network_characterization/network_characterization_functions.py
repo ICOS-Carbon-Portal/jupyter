@@ -250,7 +250,7 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
             cbar.set_label(label+'  '+unit)
             
         else:
-            cbar = plt.colorbar(cs, orientation='horizontal',pad=0.03,fraction=0.055,extend='neither')
+            cbar = plt.colorbar(cs, orientation='horizontal',pad=0.03,fraction=0.055,extend='both')
         
             cbar.ax.minorticks_off()
 
@@ -260,7 +260,7 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
 
         cs = ax.imshow(field[:,:],norm=LogNorm(), origin='lower', extent=img_extent,cmap=cmap,vmin=0.000001,vmax=vmax)
 
-        cbar = plt.colorbar(cs, orientation='horizontal',pad=0.03,fraction=0.055,extend='neither')
+        cbar = plt.colorbar(cs, orientation='horizontal',pad=0.03,fraction=0.055,extend='both')
         
         cbar.ax.minorticks_off()
 
@@ -1157,8 +1157,6 @@ def histogram_fp_distribution(input_footprint):
     
     df_values_fp = pd.DataFrame()
 
-    #one column with the original sensitivity values. Has an index that will be used to sort back to 
-    #this order (flattened 2D... back to 2D with updated sensitivity values in last step)
     df_values_fp['sensitivity']=input_footprint.flatten()
     
     vmax = np.percentile(input_footprint,99.9)
