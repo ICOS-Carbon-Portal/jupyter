@@ -339,9 +339,10 @@ def change_day_end(c):
 #clear all the output
 def clear_all_output():
     output_no_footprints.clear_output()
-    output_histogram.clear_output()
+    output_histogram_base.clear_output()
     output_base_network_fp_linear.clear_output()
     output_base_network_fp.clear_output()
+    output_histogram_compare.clear_output()
     output_compare_network_fp_linear.clear_output()
     output_compare_network_fp.clear_output()
     output_base_minus_compare.clear_output()
@@ -408,12 +409,13 @@ def update_func(button_c):
     
     if networkObj.baseNetwork is not None:
         
-        df_for_hist = functions.histogram_fp_distribution(networkObj.baseNetwork)
-        test_hist = df_for_hist.plot(kind='hist', bins=70, figsize=(8,6))
+        histogram_base = functions.histogram_fp_distribution(networkObj.baseNetwork)
 
-        with output_histogram:
+        with output_histogram_base:
+            
+            display(HTML('<p style="font-size:16px;text-align:center">Base network footprint cell values (' + threshold_percent  + '%)</p>'))
 
-            plt.show(test_hist)
+            plt.show(histogram_base)
         
         with output_base_network_fp_linear:
 
@@ -439,6 +441,14 @@ def update_func(button_c):
         return
 
     if networkObj.compareNetwork is not None:
+        
+        histogram_compare = functions.histogram_fp_distribution(networkObj.compareNetwork)
+        
+        with output_histogram_compare:
+            
+            display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint cell values (' + threshold_percent  + '%)</p>'))
+
+            plt.show(histogram_compare)
         
         with output_compare_network_fp_linear: 
 
@@ -475,7 +485,7 @@ def update_func(button_c):
 
     with output_leader_chart:
         
-        display(HTML('<p style="font-size:16px;text-align:left">Sensitivity/km2 of network by country</p>'))
+        display(HTML('<p style="font-size:16px;text-align:center">Sensitivity/km2 of network by country</p>'))
         
         display(df_leader_chart_sens)
     
@@ -753,9 +763,10 @@ form = VBox([heading_network_selection, heading_perpared_footprints, use_icos_ne
 form_out = Output()
 
 output_no_footprints = Output()
-output_histogram = Output()
+output_histogram_base = Output()
 output_base_network_fp_linear = Output()
 output_base_network_fp = Output()
+output_histogram_compare = Output()
 output_compare_network_fp_linear = Output()
 output_compare_network_fp = Output()
 output_base_minus_compare = Output()
@@ -797,12 +808,12 @@ update_button.on_click(update_func)
 
 #Open form object:
 with form_out:
-
+    box_histogram = HBox([output_histogram_base, output_histogram_compare])
     box_footprints_sens_linear = HBox([output_base_network_fp_linear, output_compare_network_fp_linear])
     box_footprints_sens = HBox([output_base_network_fp, output_compare_network_fp])
     box_difference_and_leader = HBox([output_base_minus_compare, output_leader_chart])
 
-    display(form, output_no_footprints, output_histogram, box_footprints_sens_linear, box_footprints_sens, box_difference_and_leader, output_landcover_bargraph_countries, output_population_bargraph_countries)
+    display(form, output_no_footprints, box_histogram, box_footprints_sens_linear, box_footprints_sens, box_difference_and_leader, output_landcover_bargraph_countries, output_population_bargraph_countries)
 
 #Display form:
 display(form_out)    

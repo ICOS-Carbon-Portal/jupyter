@@ -1162,8 +1162,10 @@ def histogram_fp_distribution(input_footprint):
     vmax = np.percentile(input_footprint,99.9)
 
     df_for_hist = df_values_fp[(df_values_fp['sensitivity'] > 0) & (df_values_fp['sensitivity'] <vmax)]
+    
+    histogram = df_for_hist.plot(kind='hist', bins=70, figsize=(7,6))
 
-    return df_for_hist
+    return histogram
     
 # 10-90% footprint visualization notebook
 def footprint_show_percentages(footprint_code, input_footprint, fp_lat, fp_lon, return_fp=False):
