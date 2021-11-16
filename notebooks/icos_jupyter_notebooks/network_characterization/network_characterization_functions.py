@@ -23,11 +23,12 @@ import math
 from ipywidgets import Output, HBox
 from IPython.core.display import HTML 
 from datetime import date
+from bokeh.transform import factor_cmap
 
 #for bokeh
 from bokeh.io import show, output_notebook, reset_output
 from bokeh.plotting import figure
-from bokeh.models import HoverTool
+from bokeh.models import HoverTool, ColumnDataSource, FactorRange
 
 from datetime import datetime
 from matplotlib.colors import LogNorm
@@ -803,14 +804,15 @@ def land_cover_bar_graphs_base(networkObj):
     dictionary = networkObj.countryDict
   
     # for the graph with all countries 
-    land_cover_values = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrubland', 'Other', 'Unknown']
+    land_cover_values = ['Broad leaf', 'Coniferous', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrub', 'Other', 'Unknown']
     
     colors = ['#4c9c5e','#CAE0AB','#90C987', '#521A13', '#F7F056', '#DC050C', '#1964B0', '#F1932D', '#882E72','#777777']
     
-    # one graph for each country showing landcover breakdown of the country as well as the breakdown within the footprint
-    land_cover_values_individual = ['Broad leaf forest country', 'Broad leaf forest network','Coniferous forest country', 'Coniferous forest network','Mixed forest country', 'Mixed forest network','Cropland country', 'Cropland network', 'Pasture country','Pasture network', 'Urban country', 'Urban network',  'Ocean country', 'Ocean network', 'Grass/shrubland country', 'Grass/shrubland network', 'Other country', 'Other network', 'Unknown country', 'Unknown network']
+    colors_individual = ['#82ba8f','#4c9c5f','#dae9c4','#CAE0AB','#b1d9ab','#90C987', '#865f5a', '#521A13', '#f8f167',  '#ded74d', '#ee8286', '#DC050C', '#5e93c8', '#1964B0', '#f7be81','#F1932D', '#c497b8', '#882E72','#a0a0a0','#777777']
     
-    colors_individual = ['#4c9c5e','#4c9c5e','#CAE0AB','#CAE0AB','#90C987','#90C987', '#521A13', '#521A13', '#F7F056',  '#F7F056', '#DC050C', '#DC050C', '#1964B0', '#1964B0', '#F1932D','#F1932D', '#882E72', '#882E72','#777777','#777777']
+    # added 
+    
+    categories = ['Country', 'Network']
     
     
     country_names = []
@@ -834,6 +836,10 @@ def land_cover_bar_graphs_base(networkObj):
         output_landcover_individual = Output()
    
         if dictionary[country]['base_network_breakdown']['total sens']>0:
+        
+            country_name = dictionary_area_choice[country]
+
+            country_names.append(country_name)
             
             broad_leaf_forest = dictionary[country]['base_network_breakdown']['Broad leaf forest total']   
             coniferous_forest = dictionary[country]['base_network_breakdown']['Coniferous forest total']
@@ -882,24 +888,26 @@ def land_cover_bar_graphs_base(networkObj):
             grass_shrub_country_percent = dictionary[country]['country_breakdown']['Grass/shrubland'] 
             other_country_percent = dictionary[country]['country_breakdown']['Other'] 
             unknown_country_percent = dictionary[country]['country_breakdown']['Unknown'] 
+                
+            dictionary_landcover = {'Sensitivity country': [broad_leaf_forest_country_percent, coniferous_forest_country_percent,mixed_forest_country_percent,cropland_country_percent,  pasture_country_percent, urban_country_percent,ocean_country_percent,grass_shrub_country_percent,other_country_percent, unknown_country_percent],
+                                    
+                                    'Sensitivity network': [broad_leaf_forest_percent,  coniferous_forest_percent,mixed_forest_percent, cropland_percent, pasture_percent,urban_percent, ocean_percent,grass_shrub_percent, other_percent, unknown_percent]}
             
-            list_land_cover_country = [broad_leaf_forest_country_percent, broad_leaf_forest_percent, coniferous_forest_country_percent, coniferous_forest_percent,mixed_forest_country_percent,mixed_forest_percent, cropland_country_percent, cropland_percent, pasture_country_percent, pasture_percent, urban_country_percent,urban_percent, ocean_country_percent, ocean_percent,grass_shrub_country_percent,grass_shrub_percent, other_country_percent, other_percent, unknown_country_percent, unknown_percent]
+            x = [ (land_cover, category) for land_cover in land_cover_values for category in categories ]
             
-            dictionary_landcover = {'Land cover values': land_cover_values_individual,
-                                 'Sensitivity':list_land_cover_country,
-                                 'color':colors_individual}
-
-            country_name = dictionary_area_choice[country]
-
-            country_names.append(country_name)
+            counts = sum(zip(dictionary_landcover['Sensitivity country'], dictionary_landcover['Sensitivity network']), ()) 
+            
+            source = ColumnDataSource(data=dict(x=x, counts=counts, colors=colors_individual))
 
             label_yaxis = '%'
             
-            title = 'Station/network sensitivity to land cover in ' + country_name 
+            title = 'Landcover within country vs. landcover within network ' + country_name 
 
-            p_individual = figure(x_range=land_cover_values_individual, title=title, toolbar_location="below")
+            #p_individual = figure(x_range=land_cover_values_individual, title=title, toolbar_location="below")
+            p_individual = figure(x_range=FactorRange(*x), title=title, width = 800, height = 350, toolbar_location="right", tooltips="@x : @counts{0f}")
 
-            p_individual.vbar(x='Land cover values', top = 'Sensitivity', width=0.5, color='color', source=dictionary_landcover)
+            #p_individual.vbar(x='Land cover values', top = 'Sensitivity', width=0.5, color='color', source=dictionary_landcover)
+            p_individual.vbar(x='x', top = 'counts', width=0.5, color = 'colors', source=source)
 
             p_individual.yaxis.axis_label = label_yaxis
 
@@ -911,6 +919,7 @@ def land_cover_bar_graphs_base(networkObj):
 
             p_individual.legend.label_text_font_size = "10px"
             p_individual.xaxis.major_label_orientation = "vertical"
+
             
             with output_landcover_individual:
                 output_landcover_individual.clear_output()
@@ -920,7 +929,7 @@ def land_cover_bar_graphs_base(networkObj):
 
     dictionary_landcover_by_country = {'Countries': country_names,'Broad leaf forest': broad_leaf_forest_list, 'Coniferous forest': coniferous_forest_list, 'Mixed forest': mixed_forest_list,'Cropland' : cropland_list,'Pasture': pasture_list,'Urban': urban_list, 'Ocean': ocean_list, 'Grass/shrubland': grass_shrub_list, 'Other': other_list, 'Unknown': unknown_list}
     
-    p_aggreg = figure(x_range=country_names, title='Sensitivity to land cover by country', toolbar_location="below", tooltips="$name @Countries: @$name{0f}")
+    p_aggreg = figure(x_range=country_names, title='Landcover within network by country', toolbar_location="below", tooltips="$name @Countries: @$name{0f}")
 
     p_aggreg.vbar_stack(land_cover_values, x='Countries', width=0.5, color=colors, source=dictionary_landcover_by_country,
              legend_label=land_cover_values)
@@ -939,8 +948,10 @@ def land_cover_bar_graphs_base(networkObj):
     
     with output_landcover_all:
         output_landcover_all.clear_output()
+        
+        if len(country_names)>1:
     
-        show(p_aggreg)
+            show(p_aggreg)
         
     display(output_landcover_all)
 
