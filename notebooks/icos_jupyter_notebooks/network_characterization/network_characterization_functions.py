@@ -530,13 +530,10 @@ def country_dict_landcover(networkObj):
             dict_all_countries[country_code]['compare_network_breakdown']['total sens'] = country_compare_network_sens_total
             
             dict_all_countries[country_code]['compare_network_breakdown']['total sens/km2'] = country_compare_network_sens_total/country_area_total
-            
-            
-            #added here 
+     
             dict_all_countries[country_code]['compare_network_breakdown']['population sens'] = (country_mask * compare_network * fp_pop).sum()
             
-            
-
+      
         country_base_network_sens_total = (base_network * country_mask).sum()
 
         dict_all_countries[country_code]['base_network_breakdown']['total sens'] = country_base_network_sens_total
@@ -553,7 +550,7 @@ def country_dict_landcover(networkObj):
             percent_country_breakdown = (area_country_landcover / country_area_total)*100 
             
             dict_all_countries[country_code]['country_breakdown'][land_cover_name]=percent_country_breakdown
-                        
+
             if compare_network is not None: 
                 sens_country_landcover_compare = (country_mask * compare_network * land_cover).sum()
                 
@@ -669,7 +666,7 @@ def population_bar_graph_base(networkObj):
     p.xgrid.grid_line_color = None
     p.axis.minor_tick_line_color = None
     p.outline_line_color = None
-    p.legend[0].items.reverse()
+    p.legend.items.reverse()
     p.legend.label_text_font_size = "10px"
     p.xaxis.major_label_orientation = "vertical"
 
@@ -770,7 +767,7 @@ def population_bar_graph_compare(networkObj):
                      'Base network': base_network,
                      'Compare network additional': compare_minus_base_for_stack}
     
-    p = figure(x_range=country_names, title='Sensitivity of network to country populations', toolbar_location="below", tooltips="$name : @$name{0f}")
+    p = figure(x_range=country_names, title='Sensitivities of networks to country populations', toolbar_location="below", tooltips="$name : @$name{0f}")
 
     p.vbar_stack(['Base network', 'Compare network additional'], x='Countries', width=0.5, color=['Darkblue', 'Green'],\
                  source=dictionary_sensitivity_population_by_country,\
@@ -783,7 +780,7 @@ def population_bar_graph_compare(networkObj):
     p.xgrid.grid_line_color = None
     p.axis.minor_tick_line_color = None
     p.outline_line_color = None
-
+    p.legend[0].items.reverse()
     p.legend.label_text_font_size = "10px"
     p.xaxis.major_label_orientation = "vertical"
 
@@ -856,7 +853,7 @@ def land_cover_bar_graphs_base(networkObj):
             
     dictionary_landcover_by_country = {'Countries': country_names,'Broad leaf forest': broad_leaf_forest_list, 'Coniferous forest': coniferous_forest_list, 'Mixed forest': mixed_forest_list,'Cropland' : cropland_list,'Pasture': pasture_list,'Urban': urban_list, 'Ocean': ocean_list, 'Grass/shrubland': grass_shrub_list, 'Other': other_list, 'Unknown': unknown_list}
     
-    p_aggreg = figure(x_range=country_names, title='Sensitivity of network to country split by land cover', toolbar_location="right", tooltips="$name @Countries: @$name{0f}", height=550, width=800)
+    p_aggreg = figure(x_range=country_names, title='Sensitivity of network to countries split by land cover', toolbar_location="right", tooltips="$name @Countries: @$name{0f}", height=550, width=800)
 
     graph_items = p_aggreg.vbar_stack(land_cover_values, x='Countries', width=0.5, color=colors, source=dictionary_landcover_by_country)
     
@@ -998,13 +995,16 @@ def land_cover_bar_graphs_compare(networkObj):
     urban_list = [] 
     unknown_list = []
     
+    factors = []
+    colors_individual = ['#82ba8f','#4c9c5f','#dae9c4','#CAE0AB','#b1d9ab','#90C987', '#865f5a', '#521A13', '#f8f167',  '#ded74d', '#ee8286', '#DC050C', '#5e93c8', '#1964B0', '#f7be81','#F1932D', '#c497b8', '#882E72','#a0a0a0','#777777']
+    
     for country in countries:
-        
+            
         country_name = dictionary_area_choice[country]
         
         if networkObj.countryDict[country]['base_network_breakdown']['total sens']>0:
             
-            country_names.append(country_name + ' base')
+            factors.append((country_name, 'Base'))
             
             broad_leaf_forest = dictionary[country]['base_network_breakdown']['Broad leaf forest total']   
             coniferous_forest = dictionary[country]['base_network_breakdown']['Coniferous forest total']
@@ -1014,8 +1014,10 @@ def land_cover_bar_graphs_compare(networkObj):
             urban = dictionary[country]['base_network_breakdown']['Urban total']
             ocean = dictionary[country]['base_network_breakdown']['Ocean total']
             grass_shrub = dictionary[country]['base_network_breakdown']['Grass/shrubland total'] 
-            other = dictionary[country]['base_network_breakdown']['Other total']   
+            other = dictionary[country]['base_network_breakdown']['Other total']  
             unknown = dictionary[country]['base_network_breakdown']['Unknown total']
+            if unknown <0:
+                unknown = 0
        
             broad_leaf_forest_list.append(broad_leaf_forest)
             coniferous_forest_list.append(coniferous_forest)
@@ -1034,7 +1036,7 @@ def land_cover_bar_graphs_compare(networkObj):
             # only need to add anything in case value in compare network
             if networkObj.countryDict[country]['compare_network_breakdown']['total sens']>0:
                 
-                country_names.append(country_name + ' base')
+                factors.append((country_name, 'Base'))
                 
                 broad_leaf_forest_list.append(0)
                 coniferous_forest_list.append(0)
@@ -1050,7 +1052,7 @@ def land_cover_bar_graphs_compare(networkObj):
         # the compare network contains at least the base network + additional sites
         if networkObj.countryDict[country]['compare_network_breakdown']['total sens']>0:
             
-            country_names.append(country_name + ' compare')
+            factors.append((country_name, 'Compare'))
             
             broad_leaf_forest = dictionary[country]['compare_network_breakdown']['Broad leaf forest total']   
             coniferous_forest = dictionary[country]['compare_network_breakdown']['Coniferous forest total']
@@ -1062,6 +1064,8 @@ def land_cover_bar_graphs_compare(networkObj):
             grass_shrub = dictionary[country]['compare_network_breakdown']['Grass/shrubland total'] 
             other = dictionary[country]['compare_network_breakdown']['Other total']   
             unknown = dictionary[country]['compare_network_breakdown']['Unknown total']
+            if unknown <0:
+                unknown = 0
        
             broad_leaf_forest_list.append(broad_leaf_forest)
             coniferous_forest_list.append(coniferous_forest)
@@ -1073,23 +1077,33 @@ def land_cover_bar_graphs_compare(networkObj):
             grass_shrub_list.append(grass_shrub)
             other_list.append(other)
             unknown_list.append(unknown)
-                
-    dictionary_landcover_by_country = {'Countries': country_names,'Broad leaf forest': broad_leaf_forest_list, 'Coniferous forest': coniferous_forest_list, 'Mixed forest': mixed_forest_list,'Cropland' : cropland_list,'Pasture': pasture_list,'Urban': urban_list, 'Ocean': ocean_list, 'Grass/shrubland': grass_shrub_list, 'Other': other_list, 'Unknown': unknown_list}
-    
-    p_aggreg = figure(x_range=country_names, title='Sensitivities of networks to country split by land cover', toolbar_location="below", tooltips="$name @Countries: @$name{0f}")
+   
+    dictionary_landcover_by_country  = {'x': factors,
+                                        'Broad leaf forest':broad_leaf_forest_list, 
+                                        'Coniferous forest': coniferous_forest_list,
+                                        'Mixed forest':mixed_forest_list,
+                                        'Cropland':cropland_list,
+                                        'Pasture':pasture_list,
+                                        'Urban':urban_list,
+                                        'Ocean': ocean_list,
+                                        'Grass/shrubland': grass_shrub_list,
+                                        'Other':other_list,
+                                        'Unknown': unknown_list}
+                                        
+    source = ColumnDataSource(data=dictionary_landcover_by_country)
+            
+    p = figure(x_range=FactorRange(*factors), title='Sensitivities of networks to countries split by land cover', height=550, width=800,toolbar_location="right", tooltips="$name : @$name{0f}")
 
-    p_aggreg.vbar_stack(land_cover_values, x='Countries', width=0.5, color=colors, source=dictionary_landcover_by_country,
-             legend_label=land_cover_values)
-
-    p_aggreg.y_range.start = 0
-    p_aggreg.x_range.range_padding = 0.1
-    p_aggreg.xgrid.grid_line_color = None
-    p_aggreg.axis.minor_tick_line_color = None
-    p_aggreg.outline_line_color = None
-    p_aggreg.legend.label_text_font_size = "10px"
-    p_aggreg.legend[0].items.reverse()
-    p_aggreg.xaxis.major_label_orientation = "vertical"
-    p_aggreg.yaxis.axis_label = 'area (km²) * (ppm /(μmol / (m²s)))'
+    p.vbar_stack(land_cover_values, x='x', width=0.5, color=colors, source=source,
+                 legend_label=land_cover_values)
+ 
+    p.y_range.start = 0
+    p.legend[0].items.reverse()
+    p.legend.label_text_font_size = "10px"
+    p.xaxis.major_label_orientation = "vertical"
+    p.yaxis.axis_label = 'area (km²) * (ppm /(μmol / (m²s)))'
+    p.xgrid.grid_line_color = None
+    p.axis.minor_tick_line_color = None
     
     output_landcover_all = Output()
     
@@ -1097,10 +1111,9 @@ def land_cover_bar_graphs_compare(networkObj):
         
         output_landcover_all.clear_output()
     
-        show(p_aggreg)
+        show(p)
         
     display(output_landcover_all)
-        
 
     for country in countries:
         
