@@ -1073,7 +1073,7 @@ def land_cover_bar_graphs_compare(networkObj):
 
             p_individual = figure(x_range=land_cover_values, title=(title), toolbar_location="below", tooltips="$name : @$name{0f}")
 
-            p_individual.vbar_stack(['Base network', 'Compare network additional'], x='Land cover values', width=0.5, color=['Black', 'Green'], source=dictionary_landcover, legend_label=['Base network', 'Compare network additional'])
+            p_individual.vbar_stack(['Base network', 'Compare network additional'], x='Land cover values', width=0.5, color=['Grey', 'Green'], source=dictionary_landcover, legend_label=['Base network', 'Compare network additional'])
 
             p_individual.yaxis.axis_label = label_yaxis
 
@@ -1153,13 +1153,11 @@ def land_cover_bar_graphs_compare(networkObj):
         
     display(output_landcover_all)
     
-def histogram_fp_distribution(input_footprint):
+def histogram_fp_distribution(input_footprint, vmax):
     
     df_values_fp = pd.DataFrame()
 
     df_values_fp['sensitivity']=input_footprint.flatten()
-    
-    vmax = np.percentile(input_footprint,99.9)
 
     df_for_hist = df_values_fp[(df_values_fp['sensitivity'] > 0) & (df_values_fp['sensitivity'] <vmax)]
     

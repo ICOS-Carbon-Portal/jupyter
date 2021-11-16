@@ -63,7 +63,6 @@ def getSettings():
     
     s['baseNetwork'] = [station_tuple[1] for station_tuple in selected_base_network_stations.options]
     s['compareNetwork'] = [station_tuple[1] for station_tuple in selected_compare_network_stations.options]
-    s['colorBar'] = colorbar_choice.value
     s['percent'] = str(threshold_option.value)
     s['countries'] = [selected_country[1] for selected_country in list(selected_countries.options)]
     s['download'] = download_output_option.value  
@@ -86,7 +85,6 @@ def set_settings(s):
 
     sites_base_network_options.value = s['baseNetwork']   
     sites_compare_network_options.value = s['compareNetwork'] 
-    colorbar_choice.value = s['colorBar']
     threshold_option.value = s['percent'] 
     country_options.value = s['countries']
     download_output_option.value = s['download']
@@ -379,6 +377,8 @@ def update_func(button_c):
     
     threshold_percent = str(networkObj.settings['percent'])
     pngfile = ''
+    lin_color = 'GnBu'
+    log_color = 'PuBuGn'
     
     if len(networkObj.noFootprints)> 0:
         settings['noFootprints'] = networkObj.noFootprints
@@ -409,7 +409,7 @@ def update_func(button_c):
     
     if networkObj.baseNetwork is not None:
         
-        histogram_base = functions.histogram_fp_distribution(networkObj.baseNetwork)
+        histogram_base = functions.histogram_fp_distribution(networkObj.baseNetwork, vmax = networkObj.vmaxSens)
 
         with output_histogram_base:
             
@@ -421,7 +421,7 @@ def update_func(button_c):
 
             display(HTML('<p style="font-size:16px;text-align:center">Base network footprint linear scale (' + threshold_percent  + '%)</p>'))
             
-            functions.plot_maps(networkObj.baseNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
+            functions.plot_maps(networkObj.baseNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
 
         with output_base_network_fp:
 
@@ -433,7 +433,7 @@ def update_func(button_c):
             else:
                 pngfile = ''
 
-            functions.plot_maps(networkObj.baseNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
+            functions.plot_maps(networkObj.baseNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=log_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
     
     else:
         
@@ -442,7 +442,7 @@ def update_func(button_c):
 
     if networkObj.compareNetwork is not None:
         
-        histogram_compare = functions.histogram_fp_distribution(networkObj.compareNetwork)
+        histogram_compare = functions.histogram_fp_distribution(networkObj.compareNetwork, vmax = networkObj.vmaxSens)
         
         with output_histogram_compare:
             
@@ -454,7 +454,7 @@ def update_func(button_c):
 
             display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint linear scale (' + threshold_percent  + '%)</p>'))
 
-            functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
+            functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
         
         with output_compare_network_fp: 
 
@@ -466,7 +466,7 @@ def update_func(button_c):
             else:
                 pngfile = ''
 
-            functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
+            functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=log_color, pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
 
         with output_base_minus_compare:
             display(HTML('<p style="font-size:16px;text-align:center">Difference compare - base linear scale</p>'))
@@ -478,7 +478,7 @@ def update_func(button_c):
             else:
                 pngfile = ''
 
-            functions.plot_maps(networkObj.compareMinusBase, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=networkObj.settings['colorBar'], pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=None)
+            functions.plot_maps(networkObj.compareMinusBase, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=None)
             
             
     df_leader_chart_sens = functions.leader_chart_sensitivity(networkObj)
@@ -519,12 +519,6 @@ def update_func(button_c):
 #-----------widgets definition ----------------
     
 style_bin = {'description_width': 'initial'}
-
-
-colorbar_choice_list= ['GnBu', 'Greys', 'Purples', 'Blues', 'Greens', 'Oranges', 'Reds',\
-                         'YlOrBr', 'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu','PuBu', 'YlGnBu', \
-                         'PuBuGn', 'BuGn', 'YlGn']
-
 
 heading_network_selection = Output()
 
@@ -657,19 +651,6 @@ time_selection= SelectMultiple(
     description='Time of day',
     disabled=False)
 
-heading_map_specifications = Output()
-
-with heading_map_specifications:
-    
-    display(HTML('<p style="font-size:16px;font-weight:bold;"><br>Map settings</p>'))
-    
-colorbar_choice = Dropdown(
-    description='Colorbar:', 
-    style=style_bin,
-    options=colorbar_choice_list,
-    disabled=False,
-)
-
 heading_analysis_ancillary_data = Output()
 
 with heading_analysis_ancillary_data:
@@ -747,7 +728,7 @@ day_box = VBox([s_day, e_day])
 #Add both time-related VBoxes to a HBox:
 time_box = HBox([year_box, month_box, day_box])
 
-box_map_settings = HBox([colorbar_choice, threshold_option])
+box_selections = HBox([prepared_footprints,threshold_option])
 
 box_country_options = VBox([heading_country_options, country_options])
 
@@ -757,7 +738,7 @@ country_selection_combined = HBox([box_country_options, box_country_selection])
 
 final_row = HBox([file_name, update_button])
 #Add all widgets to a VBox:
-form = VBox([heading_network_selection, heading_perpared_footprints, use_icos_network, prepared_footprints, base_compare_combined, header_timeselect, time_box, time_selection, heading_map_specifications, box_map_settings, heading_analysis_ancillary_data, country_selection_combined, download_output_heading, download_output_option, header_filename, final_row])
+form = VBox([heading_network_selection, heading_perpared_footprints, use_icos_network, box_selections, base_compare_combined, header_timeselect, time_box, time_selection, heading_analysis_ancillary_data, country_selection_combined, download_output_heading, download_output_option, header_filename, final_row])
 
 #Initialize form output:
 form_out = Output()
