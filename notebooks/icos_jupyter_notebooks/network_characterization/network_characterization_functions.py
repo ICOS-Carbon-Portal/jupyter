@@ -666,7 +666,6 @@ def population_bar_graph_base(networkObj):
     p.xgrid.grid_line_color = None
     p.axis.minor_tick_line_color = None
     p.outline_line_color = None
-    p.legend.items.reverse()
     p.legend.label_text_font_size = "10px"
     p.xaxis.major_label_orientation = "vertical"
 
@@ -764,14 +763,14 @@ def population_bar_graph_compare(networkObj):
         display(styled_df_diff_base_compare)  
 
     dictionary_sensitivity_population_by_country = {'Countries': country_names,
-                     'Base network': base_network,
-                     'Compare network additional': compare_minus_base_for_stack}
+                     'Base': base_network,
+                     'Compare (added)': compare_minus_base_for_stack}
     
     p = figure(x_range=country_names, title='Sensitivities of networks to country populations', toolbar_location="below", tooltips="$name : @$name{0f}")
 
-    p.vbar_stack(['Base network', 'Compare network additional'], x='Countries', width=0.5, color=['Darkblue', 'Green'],\
+    p.vbar_stack(['Base', 'Compare (added)'], x='Countries', width=0.5, color=['Darkblue', 'Green'],\
                  source=dictionary_sensitivity_population_by_country,\
-                 legend_label=['Base network', 'Compare network additional'])
+                 legend_label=['Base', 'Compare (added)'])
 
     p.yaxis.axis_label = 'population * (ppm /(μmol / (m²s)))'
 
@@ -1094,13 +1093,19 @@ def land_cover_bar_graphs_compare(networkObj):
             
     p = figure(x_range=FactorRange(*factors), title='Sensitivities of networks to countries split by land cover', height=550, width=800,toolbar_location="right", tooltips="$name : @$name{0f}")
 
-    p.vbar_stack(land_cover_values, x='x', width=0.5, color=colors, source=source,
-                 legend_label=land_cover_values)
+    graph_items= p.vbar_stack(land_cover_values, x='x', width=0.5, color=colors, source=source)
+
+        # to make the legend appear to the right of the graph 
+    legend_items = [(land_cover, [graph]) for  land_cover, graph in zip(land_cover_values, graph_items)]
+    legend = Legend(items=legend_items)
+    p.add_layout(legend, 'right')
+
  
     p.y_range.start = 0
     p.legend[0].items.reverse()
     p.legend.label_text_font_size = "10px"
     p.xaxis.major_label_orientation = "vertical"
+    p.xaxis.group_label_orientation = 'vertical'
     p.yaxis.axis_label = 'area (km²) * (ppm /(μmol / (m²s)))'
     p.xgrid.grid_line_color = None
     p.axis.minor_tick_line_color = None
@@ -1205,8 +1210,8 @@ def land_cover_bar_graphs_compare(networkObj):
 
             #for land cover bar graph:
             dictionary_landcover = {'Land cover values': land_cover_values,
-                         'Base network': list_land_cover_country_base,
-                         'Compare network additional': compare_minus_base_for_stack}
+                         'Base': list_land_cover_country_base,
+                         'Compare (added)': compare_minus_base_for_stack}
 
             label_yaxis = 'km² area * (ppm /(μmol / (m²s)))'
 
@@ -1214,7 +1219,7 @@ def land_cover_bar_graphs_compare(networkObj):
 
             p_individual = figure(x_range=land_cover_values, title=(title), toolbar_location="below", tooltips="$name : @$name{0f}")
 
-            p_individual.vbar_stack(['Base network', 'Compare network additional'], x='Land cover values', width=0.5, color=['Grey', 'Green'], source=dictionary_landcover, legend_label=['Base network', 'Compare network additional'])
+            p_individual.vbar_stack(['Base', 'Compare (added)'], x='Land cover values', width=0.5, color=['Grey', 'Green'], source=dictionary_landcover, legend_label=['Base', 'Compare (added)'])
 
             p_individual.yaxis.axis_label = label_yaxis
 
@@ -1276,7 +1281,9 @@ def histogram_fp_distribution(input_footprint, vmax):
 
     df_for_hist = df_values_fp[(df_values_fp['sensitivity'] > 0) & (df_values_fp['sensitivity'] <vmax)]
     
-    histogram = df_for_hist.plot(kind='hist', bins=70, figsize=(7,6))
+    histogram = df_for_hist.plot(kind='hist', bins=70, figsize=(7,6), legend=False)
+    
+    histogram.set_xlabel('Sensitivity ((ppm /(μmol / (m²s)))')
 
     return histogram
     
