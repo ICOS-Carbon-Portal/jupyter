@@ -47,16 +47,26 @@ class NetworkObj():
         
         self.baseNetwork, self.compareNetwork, self.noFootprints = functions.return_networks(self)
 
+        df_values_fp = pd.DataFrame()
+        
         if self.compareNetwork is not None:
-
-            #otherwise remain None
-            self.vmaxSens = np.percentile(self.compareNetwork,99.9)
             
+            df_values_fp['sensitivity']=self.compareNetwork.flatten()
+            
+            df_values_fp_over_zero = df_values_fp[df_values_fp['sensitivity'] > 0] 
+
+            self.vmaxSens = np.percentile(df_values_fp_over_zero['sensitivity'],99.9)
+         
             self.compareMinusBase = self.compareNetwork - self.baseNetwork 
             
         else:
             
-            self.vmaxSens = np.percentile(self.baseNetwork,99.9)
+            df_values_fp['sensitivity']=self.baseNetwork.flatten()
+            
+            df_values_fp_over_zero = df_values_fp[df_values_fp['sensitivity'] > 0] 
+
+            self.vmaxSens = np.percentile(df_values_fp_over_zero['sensitivity'],99.9)
+         
             
     def _setCountryDict(self):
         

@@ -655,7 +655,7 @@ def population_bar_graph_base(networkObj):
         
     dictionary_population_by_country = {'Countries': country_names, 'Population': population_sensitivity_list}
 
-    p = figure(x_range= country_names, title='Sensitivities of networks to country populations', toolbar_location="below", tooltips="@Population{0f}", width=800, height=350)
+    p = figure(x_range= country_names, title='Sensitivities of network to country populations', toolbar_location="below", tooltips="@Population{0f}", width=800, height=350)
 
     p.vbar(x='Countries', top = 'Population', width=0.5, color='Darkblue', source = dictionary_population_by_country)
 
@@ -943,7 +943,7 @@ def land_cover_bar_graphs_base(networkObj):
 
             label_yaxis = '%'
             
-            title = 'Land cover within ' + country_name + ' vs. sensitivity of network split by land cover within: ' + country_name
+            title = 'Land cover within ' + country_name + ' vs. sensitivity of network split by land cover within ' + country_name
 
             #p_individual = figure(x_range=land_cover_values_individual, title=title, toolbar_location="below")
             p_individual = figure(x_range=FactorRange(*x), title=title, width = 800, height = 350, toolbar_location="right", tooltips="@x : @counts{0f} %")
@@ -1277,14 +1277,22 @@ def histogram_fp_distribution(input_footprint, vmax):
     
     df_values_fp = pd.DataFrame()
 
-    df_values_fp['sensitivity']=input_footprint.flatten()
+    df_values_fp['sensitivity'] = input_footprint.flatten()
 
+    max_original = df_values_fp['sensitivity'].max()
+
+    number_cells_above = df_values_fp[df_values_fp.sensitivity > vmax].shape[0]
+    
     df_for_hist = df_values_fp[(df_values_fp['sensitivity'] > 0) & (df_values_fp['sensitivity'] <vmax)]
     
-    histogram = df_for_hist.plot(kind='hist', bins=70, figsize=(7,6), legend=False)
+    number_cells = len(df_for_hist)
     
-    histogram.set_xlabel('Sensitivity ((ppm /(μmol / (m²s)))')
+    percentile_excluded = 100-((number_cells_above/number_cells)*100)
+    
+    histogram = df_for_hist.plot(kind='hist', bins=70, density=True, figsize=(7,6), legend=False)
 
+    histogram.set_xlabel('Sensitivity ((ppm /(μmol / (m²s))) \nUsing the ' + str("%0.1f" % percentile_excluded) + 'th percentile as maximum which excludes ' + str(number_cells_above) + ' cells\n Original maximum is ' + str("%0.3f" % max_original))
+    
     return histogram
     
 # 10-90% footprint visualization notebook

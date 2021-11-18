@@ -339,10 +339,8 @@ def clear_all_output():
     output_no_footprints.clear_output()
     output_histogram_base.clear_output()
     output_base_network_fp_linear.clear_output()
-    output_base_network_fp.clear_output()
     output_histogram_compare.clear_output()
     output_compare_network_fp_linear.clear_output()
-    output_compare_network_fp.clear_output()
     output_base_minus_compare.clear_output()
     output_leader_chart.clear_output()
     output_landcover_bargraph_countries.clear_output()
@@ -419,21 +417,10 @@ def update_func(button_c):
         
         with output_base_network_fp_linear:
 
-            display(HTML('<p style="font-size:16px;text-align:center">Base network footprint linear scale (' + threshold_percent  + '%)</p>'))
+            display(HTML('<p style="font-size:16px;text-align:center">Base network footprint (' + threshold_percent  + '% and 99.9th percentile of cells)</p>'))
             
             functions.plot_maps(networkObj.baseNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
 
-        with output_base_network_fp:
-
-            display(HTML('<p style="font-size:16px;text-align:center">Base network footprint logarithmic scale (' + threshold_percent  + '%)</p>'))
-            
-            if download_output:
-                pngfile = 'base_network_footprint_log'
-
-            else:
-                pngfile = ''
-
-            functions.plot_maps(networkObj.baseNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=log_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
     
     else:
         
@@ -452,24 +439,13 @@ def update_func(button_c):
         
         with output_compare_network_fp_linear: 
 
-            display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint linear scale (' + threshold_percent  + '%)</p>'))
+            display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint (' + threshold_percent  + '% and 99.9th percentile of cells)</p></p>'))
 
             functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
         
-        with output_compare_network_fp: 
-
-            display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint logarithmic scale (' + threshold_percent  + '%)</p>'))
-            
-            if download_output:
-                pngfile = 'compare_network_footprint_log'
-
-            else:
-                pngfile = ''
-
-            functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='', colors=log_color, pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
-
+    
         with output_base_minus_compare:
-            display(HTML('<p style="font-size:16px;text-align:center">Difference compare - base linear scale</p>'))
+            display(HTML('<p style="font-size:16px;text-align:center">Compare network - base network</p>'))
             
             
             if download_output:
@@ -523,13 +499,13 @@ style_bin = {'description_width': 'initial'}
 heading_network_selection = Output()
 
 with heading_network_selection:
-    display(HTML('<p style="font-size:20px;font-weight:bold;">Define site network(s)</p>'))
+    display(HTML('<p style="font-size:20px;font-weight:bold;">Define station network(s)</p>'))
     
 heading_perpared_footprints = Output()
     
 with heading_perpared_footprints:
     
-    display(HTML('<p style="font-size:14px;">Check the below box to use aggregated footprints for year 2018. Aggregated footprints have already been computed for most sites and will make the tool run fast. Checking the box will change what sites are available for selection to only include sites that has footprints for all of 2018.</p>'))
+    display(HTML('<p style="font-size:14px;">Check the below box to use aggregated footprints for year 2018. Aggregated footprints have already been computed for most stations and will make the tool run fast. Checking the box will change what stations are available for selection to only include stations that has footprints for all of 2018.</p>'))
     
 prepared_footprints = Checkbox(
     value=False,
@@ -546,7 +522,7 @@ use_icos_network = Checkbox(
 heading_sites_base_network_options = Output()
 
 with heading_sites_base_network_options:
-    display(HTML('<p style="font-size:16px;">Select sites for base network</p>'))
+    display(HTML('<p style="font-size:16px;">Select stations for base network</p>'))
 
 sites_base_network_options= SelectMultiple(
     options=list_all,
@@ -585,7 +561,7 @@ threshold_option.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
 heading_sites_compare_network_options = Output()
 with heading_sites_compare_network_options:
     
-    display(HTML('<p style="font-size:16px;">Select sites/points of interests for compare network (optional)</p>'))
+    display(HTML('<p style="font-size:16px;">Select stations/points of interests for compare network (optional)</p>'))
     
 heading_sites_compare_network_options.layout.margin = '0px 0px 0px 70px' #top, right, bottom, left
     
@@ -746,10 +722,8 @@ form_out = Output()
 output_no_footprints = Output()
 output_histogram_base = Output()
 output_base_network_fp_linear = Output()
-output_base_network_fp = Output()
 output_histogram_compare = Output()
 output_compare_network_fp_linear = Output()
-output_compare_network_fp = Output()
 output_base_minus_compare = Output()
 output_leader_chart = Output()
 output_landcover_bargraph_countries = Output()
@@ -791,10 +765,9 @@ update_button.on_click(update_func)
 with form_out:
     box_histogram = HBox([output_histogram_base, output_histogram_compare])
     box_footprints_sens_linear = HBox([output_base_network_fp_linear, output_compare_network_fp_linear])
-    box_footprints_sens = HBox([output_base_network_fp, output_compare_network_fp])
     box_difference_and_leader = HBox([output_base_minus_compare, output_leader_chart])
 
-    display(form, output_no_footprints, box_histogram, box_footprints_sens_linear, box_footprints_sens, box_difference_and_leader, output_landcover_bargraph_countries, output_population_bargraph_countries)
+    display(form, output_no_footprints, box_histogram, box_footprints_sens_linear, box_difference_and_leader, output_landcover_bargraph_countries, output_population_bargraph_countries)
 
 #Display form:
 display(form_out)    
