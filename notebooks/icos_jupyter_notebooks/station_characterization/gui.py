@@ -318,35 +318,35 @@ def update_func(button_c):
           
             fig, caption = stc_functions.polar_graph(stc, 'sensitivity')
             stc.add_figure(1, fig, caption)
-            display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
+            display(HTML('<p style="font-size:16px;text-align:center">'  + caption + ' </p>'))
             display(fig)
 
         updateProgress(f, 'process pointsource')
         with result_population:
             fig, caption=stc_functions.polar_graph(stc, 'point source contribution', colorbar='Purples')
             stc.add_figure(2, fig, caption)
-            display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
+            display(HTML('<p style="font-size:16px;text-align:center">'  + caption + ' </p>'))
             display(fig)
 
         updateProgress(f, 'process population')
         with result_pointsource:
             fig, caption =stc_functions.polar_graph(stc, 'population sensitivity', colorbar='Greens')
             stc.add_figure(3, fig, caption)
-            display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
+            display(HTML('<p style="font-size:16px;text-align:center">'  + caption + ' </p>'))
             display(fig)
 
         updateProgress(f, 'get landcover')
         with result_land_cover_bar_graph:
             fig, caption=stc_functions.land_cover_bar_graph(stc)
             stc.add_figure(4, fig, caption)
-            display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
+            display(HTML('<p style="font-size:16px;text-align:center">'  + caption + ' </p>'))
             display(fig)
 
         updateProgress(f, 'seasonal table')
         with result_seasonal_table:
             fig, caption=stc_functions.seasonal_table(stc)
             stc.add_figure(5, fig, caption)
-            display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
+            display(HTML('<p style="font-size:16px;text-align:center">'  + caption + ' </p>'))
 
             try:
                 display(fig)
@@ -362,7 +362,7 @@ def update_func(button_c):
         with result_landcover_windrose:
             fig, caption=stc_functions.land_cover_polar_graph(stc)
             stc.add_figure(6, fig, caption)
-            display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
+            display(HTML('<p style="font-size:16px;text-align:center">'  + caption + ' </p>'))
             display(fig)
 
 
@@ -370,7 +370,7 @@ def update_func(button_c):
         with result_multiple_variables_graph:
             fig, caption= stc_functions.multiple_variables_graph(stc)
             stc.add_figure(7, fig, caption)
-            display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
+            display(HTML('<p style="font-size:16px;text-align:center">'  + caption + ' </p>'))
             display(fig)
 
         if stc.settings['saveFigs'] == 'yes':
