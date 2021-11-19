@@ -1091,7 +1091,7 @@ def land_cover_bar_graphs_compare(networkObj):
                                         
     source = ColumnDataSource(data=dictionary_landcover_by_country)
             
-    p = figure(x_range=FactorRange(*factors), title='Sensitivities of networks to countries split by land cover', height=550, width=800,toolbar_location="right", tooltips="$name : @$name{0f}")
+    p = figure(x_range=FactorRange(*factors), title='Sensitivities of networks to countries split by land cover', height=550, width=900,toolbar_location="right", tooltips="$name : @$name{0f}")
 
     graph_items= p.vbar_stack(land_cover_values, x='x', width=0.5, color=colors, source=source)
 
