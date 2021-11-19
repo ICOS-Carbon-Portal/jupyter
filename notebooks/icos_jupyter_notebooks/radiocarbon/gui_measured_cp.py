@@ -112,6 +112,8 @@ progress_bar = Output()
 result_radiocarbon = Output()
 
 def update_func(button_c):
+    
+    update_button.disabled = True
 
     progress_bar.clear_output()
 
@@ -154,6 +156,8 @@ def update_func(button_c):
             radiocarbon_functions.save_data_cp(radiocarbonObject)
         
     updateProgress(f, 'finished')
+
+    update_button.disabled = False
     
     f.value = 3
 

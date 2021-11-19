@@ -282,6 +282,8 @@ def updateProgress(f, desc=''):
     
 def update_func(button_c):
     
+    update_button.disabled = True
+    
     progress_bar.clear_output()
     header_no_footprints.clear_output()
     output_per_station.clear_output()
@@ -349,6 +351,9 @@ def update_func(button_c):
                 radiocarbon_functions.save_data(radiocarbonObject)
 
     updateProgress(f, 'finished')
+    
+    update_button.disabled = False
+    
     f.value = 6           
         
 #-----------widgets definition -----------------
