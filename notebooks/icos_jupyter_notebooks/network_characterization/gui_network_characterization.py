@@ -337,8 +337,11 @@ def change_day_end(c):
 #clear all the output
 def clear_all_output():
     output_no_footprints.clear_output()
+    output_base_footprint_information.clear_output()
     output_histogram_base.clear_output()
     output_base_network_fp_linear.clear_output()
+    
+    output_compare_footprint_information.clear_output()
     output_histogram_compare.clear_output()
     output_compare_network_fp_linear.clear_output()
     output_base_minus_compare.clear_output()
@@ -407,17 +410,18 @@ def update_func(button_c):
     
     if networkObj.baseNetwork is not None:
         
-        histogram_base = functions.histogram_fp_distribution(networkObj.baseNetwork, vmax = networkObj.vmaxSens)
+        histogram_base, percentile_excluded, max_original, number_cells_above = functions.histogram_fp_distribution(networkObj, fp_type= 'base')
+        
+        with output_base_footprint_information:
+            
+            display(HTML('<p style="font-size:16px;text-align:center">Base network footprint (' + threshold_percent  + '%)<br>' + str("%0.1f" % percentile_excluded) + 'th percentile of non-zero fp cells as maximum <br> Network maximum: ' + str("%0.3f" % max_original) + ' (' + str(number_cells_above) + ' cells excluded)' + '</p>'))
+            
 
         with output_histogram_base:
             
-            display(HTML('<p style="font-size:16px;text-align:center">Base network footprint cell values (' + threshold_percent  + '%)</p>'))
-
             plt.show(histogram_base)
         
         with output_base_network_fp_linear:
-
-            display(HTML('<p style="font-size:16px;text-align:center">Base network footprint (' + threshold_percent  + '% and 99.9th percentile of cells)</p>'))
             
             functions.plot_maps(networkObj.baseNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
 
@@ -429,17 +433,18 @@ def update_func(button_c):
 
     if networkObj.compareNetwork is not None:
         
-        histogram_compare = functions.histogram_fp_distribution(networkObj.compareNetwork, vmax = networkObj.vmaxSens)
+        histogram_compare, percentile_excluded, max_original, number_cells_above = functions.histogram_fp_distribution(networkObj, fp_type='compare')
+        
+        with output_compare_footprint_information:
+            
+            display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint (' + threshold_percent  + '%)<br>' + str("%0.1f" % percentile_excluded) + 'th percentile of non-zero fp cells as maximum <br> Network maximum: ' + str("%0.3f" % max_original) + ' (' + str(number_cells_above) + ' cells excluded)' + '</p>'))
         
         with output_histogram_compare:
             
-            display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint cell values (' + threshold_percent  + '%)</p>'))
-
             plt.show(histogram_compare)
         
         with output_compare_network_fp_linear: 
 
-            display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint (' + threshold_percent  + '% and 99.9th percentile of cells)</p></p>'))
 
             functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
         
@@ -720,8 +725,11 @@ form = VBox([heading_network_selection, heading_perpared_footprints, use_icos_ne
 form_out = Output()
 
 output_no_footprints = Output()
+output_base_footprint_information = Output()
 output_histogram_base = Output()
 output_base_network_fp_linear = Output()
+
+output_compare_footprint_information = Output()
 output_histogram_compare = Output()
 output_compare_network_fp_linear = Output()
 output_base_minus_compare = Output()
@@ -763,11 +771,17 @@ update_button.on_click(update_func)
 
 #Open form object:
 with form_out:
-    box_histogram = HBox([output_histogram_base, output_histogram_compare])
-    box_footprints_sens_linear = HBox([output_base_network_fp_linear, output_compare_network_fp_linear])
+    
+    vbox_base = VBox([output_base_footprint_information, output_histogram_base, output_base_network_fp_linear])
+    
+    vbox_compare = VBox([output_compare_footprint_information, output_histogram_compare, output_compare_network_fp_linear])
+    
+    box_base_compare = HBox([vbox_base, vbox_compare])
+    
+    #box_footprints_sens_linear = HBox([output_base_network_fp_linear, output_compare_network_fp_linear])
     box_difference_and_leader = HBox([output_base_minus_compare, output_leader_chart])
 
-    display(form, output_no_footprints, box_histogram, box_footprints_sens_linear, box_difference_and_leader, output_landcover_bargraph_countries, output_population_bargraph_countries)
+    display(form, output_no_footprints,box_base_compare, box_difference_and_leader, output_landcover_bargraph_countries, output_population_bargraph_countries)
 
 #Display form:
 display(form_out)    

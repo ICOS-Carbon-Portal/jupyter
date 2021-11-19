@@ -33,6 +33,7 @@ class NetworkObj():
         self.loadLon = loadtxt(os.path.join(folder_tool_fps, 'longitude.csv'), delimiter=',')
         self.baseNetwork = None
         self.compareNetwork = None
+        self.vmaxPercentile = 99.5
         self.vmaxSens = None
         self.compareMinusBase = None
         self.noFootprints = []
@@ -41,13 +42,22 @@ class NetworkObj():
         # fucntions to generate the object attributes
         self._setDateRange()
         self._setNetworks()
+        self._setVmax()
         self._setCountryDict()
  
     def _setNetworks(self):
         
         self.baseNetwork, self.compareNetwork, self.noFootprints = functions.return_networks(self)
-
+        
+        if self.compareNetwork is not None:
+         
+            self.compareMinusBase = self.compareNetwork - self.baseNetwork 
+            
+            
+    def _setVmax(self):
+        
         df_values_fp = pd.DataFrame()
+        
         
         if self.compareNetwork is not None:
             
@@ -55,18 +65,16 @@ class NetworkObj():
             
             df_values_fp_over_zero = df_values_fp[df_values_fp['sensitivity'] > 0] 
 
-            self.vmaxSens = np.percentile(df_values_fp_over_zero['sensitivity'],99.9)
-         
-            self.compareMinusBase = self.compareNetwork - self.baseNetwork 
-            
+            self.vmaxSens = np.percentile(df_values_fp_over_zero['sensitivity'],self.vmaxPercentile)
+        
         else:
             
             df_values_fp['sensitivity']=self.baseNetwork.flatten()
-            
+ 
             df_values_fp_over_zero = df_values_fp[df_values_fp['sensitivity'] > 0] 
 
-            self.vmaxSens = np.percentile(df_values_fp_over_zero['sensitivity'],99.9)
-         
+            self.vmaxSens = np.percentile(df_values_fp_over_zero['sensitivity'],self.vmaxPercentile)
+ 
             
     def _setCountryDict(self):
         
