@@ -1273,22 +1273,15 @@ def land_cover_bar_graphs_compare(networkObj):
 
             display(box_landcover_individual)
     
-def histogram_fp_distribution(networkObj, fp_type):
-    
-    if fp_type == 'base':
-        network=networkObj.baseNetwork
-    else:
-        network = networkObj.compareNetwork
-        
-    vmax = networkObj.vmaxSens
+def histogram_fp_distribution(input_footprint, vmax):
     
     df_values_fp = pd.DataFrame()
 
-    df_values_fp['sensitivity'] = network.flatten()
+    df_values_fp['sensitivity'] = input_footprint.flatten()
 
     max_original = df_values_fp['sensitivity'].max()
 
-    number_cells_above = df_values_fp[df_values_fp.sensitivity >= vmax].shape[0]
+    number_cells_above = df_values_fp[df_values_fp.sensitivity > vmax].shape[0]
     
     df_for_hist = df_values_fp[(df_values_fp['sensitivity'] > 0) & (df_values_fp['sensitivity'] <vmax)]
     
@@ -1296,12 +1289,11 @@ def histogram_fp_distribution(networkObj, fp_type):
     
     percentile_excluded = 100-((number_cells_above/number_cells)*100)
     
-    histogram = df_for_hist.plot(kind='hist', bins=10, figsize=(7,6), legend=False, range=[0, vmax])
-    histogram.grid(True)
+    histogram = df_for_hist.plot(kind='hist', bins=70, density=True, figsize=(7,6), legend=False)
+
+    histogram.set_xlabel('Sensitivity ((ppm /(μmol / (m²s))) \nUsing the ' + str("%0.1f" % percentile_excluded) + 'th percentile as maximum which excludes ' + str(number_cells_above) + ' cells\n Original maximum is ' + str("%0.3f" % max_original))
     
-    histogram.set_xlabel('ppm /(μmol / (m²s)')
-    
-    return histogram, percentile_excluded, max_original, number_cells_above
+    return histogram
     
 # 10-90% footprint visualization notebook
 def footprint_show_percentages(footprint_code, input_footprint, fp_lat, fp_lon, return_fp=False):
@@ -1310,7 +1302,7 @@ def footprint_show_percentages(footprint_code, input_footprint, fp_lat, fp_lon, 
     #create a dataframe that will have the updated sensitivity values + the steps on the way
     df_sensitivity = pd.DataFrame()
 
-    #one column with the original senstivity values. Has an index that will be used to sort back to 
+    #one column with the original sensitivity values. Has an index that will be used to sort back to 
     #this order (flattened 2D... back to 2D with updated sensitivity values in last step)
     df_sensitivity['sensitivity']=input_footprint.flatten()
     
