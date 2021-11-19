@@ -395,7 +395,7 @@ def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='',
     img_extent = (fp_lon.min(), fp_lon.max(), fp_lat.min(), fp_lat.max())
     ax.set_extent([fp_lon.min(), fp_lon.max(), fp_lat.min(), fp_lat.max()],crs=ccrs.PlateCarree())
     
-    ax.add_feature(countries, edgecolor='lightgrey', linewidth=0.3)
+    ax.add_feature(countries, edgecolor='grey', linewidth=0.5)
    
     reader = shpreader.Reader('/data/project/cartopy/shapefiles/natural_earth/cultural/ne_10m_admin_0_countries.shp')
     
