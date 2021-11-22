@@ -175,11 +175,11 @@ def update_func(button_c):
     
     colorbar=colorbar_choice.value
     
-    if prepared_footprints:
+    if prepared_footprints.value:
+  
+        map_title1 = station + ':  average footprint logarithmic scale' + '\n 2018-1-1 to 2018-12-31\nHours: ' + timeselect_string
 
-        map_title1 = station + ':  average footprint logarithmic scale' + '\n 2018-1-1 to 2018-1-12\nHours: ' + timeselect_string
-
-        map_title2 = station + ': percent of the average footprint sensitivity' + '\n ' + str(s_year.value) + '-' + str(s_month.value)  + '-' + str(s_day.value) + ' to ' + (str(e_year.value) + '-' + str(e_month.value)  + '-' + str(e_day.value) + '\nHours: ' + timeselect_string)
+        map_title2 = station + ': percent of the average footprint sensitivity' + '\n 2018-1-1 to 2018-12-31\nHours: ' + timeselect_string
         
     else:
         map_title1 = station + ':  average footprint logarithmic scale' + '\n ' + str(s_year.value) + '-' + str(s_month.value)  + '-' + str(s_day.value) + ' to ' + (str(e_year.value) + '-' + str(e_month.value)  + '-' + str(e_day.value) + '\nHours: ' + timeselect_string)
@@ -189,6 +189,7 @@ def update_func(button_c):
     start_date=min(date_range)
     end_date=max(date_range)
     
+
     if start_date==pd.Timestamp(2018, 1, 1, 0) and end_date==pd.Timestamp(2018,12,31,0) and len(timeselect_list)==8:
 
         name_load_footprint_csv='fp_' + station + '.csv'
