@@ -69,13 +69,15 @@ class NetworkObj():
         
         else:
             
-            df_values_fp['sensitivity']=self.baseNetwork.flatten()
- 
-            df_values_fp_over_zero = df_values_fp[df_values_fp['sensitivity'] > 0] 
-
-            self.vmaxSens = np.percentile(df_values_fp_over_zero['sensitivity'],self.vmaxPercentile)
- 
+            if self.baseNetwork is not None:
             
+                df_values_fp['sensitivity']=self.baseNetwork.flatten()
+
+                df_values_fp_over_zero = df_values_fp[df_values_fp['sensitivity'] > 0] 
+
+                self.vmaxSens = np.percentile(df_values_fp_over_zero['sensitivity'],self.vmaxPercentile)
+
+
     def _setCountryDict(self):
         
         if self.baseNetwork is not None:
