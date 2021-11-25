@@ -6,32 +6,33 @@ Created on Mon Dec  7 08:38:51 2020
 """
 
 from ipywidgets import Dropdown, SelectMultiple, FileUpload, HBox, Text, VBox, Button, Output, IntText, RadioButtons,IntProgress, GridspecLayout
-import stiltStations
 from IPython.core.display import display, HTML 
 import settings
 from icoscp.station import station as cpstation
-
-
 import stationchar
 import stc_functions
-
 import os
 from datetime import datetime
 import json
 
-## Global variables
-#---------------------------------------------------------
-# create a dict with all stiltstations
-stiltstations = stiltStations.getStilt()
+from icoscp.stilt import stiltstation
+
+stiltstations= stiltstation.find()
+
+list_all_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if v['geoinfo']])
+list_all_not_located = [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if not v['geoinfo']]
+list_all = list_all_not_located + list_all_located
+
+list_all_icos_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if v['geoinfo'] if v['icos']])
+list_all_icos_not_located = [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if not v['geoinfo'] if v['icos']]
+list_all_icos = list_all_icos_not_located + list_all_icos_located
+
+
 
 # create a list (tuple) for the dropdown list of stations
-icoslist = sorted([(v['name'],k) for k,v in stiltstations.items() if v['icos']])
-stiltlist = sorted([(v['name'],k) for k,v in stiltstations.items() if not v['icos']])
+#icoslist = sorted([(v['name'],k) for k,v in stiltstations.items() if v['icos']])
+#stiltlist = sorted([(v['name'],k) for k,v in stiltstations.items() if not v['icos']])
 
-# sort by the first element in the tuple (name)
-# sort -> sort the list in place
-icoslist.sort(key=lambda x:x[0])
-stiltlist.sort(key=lambda x:x[0])
 #---------------------------------------------------------
 
 # read or set the parameters
@@ -92,9 +93,9 @@ def change_stn_type(c):
     # make sure the new 'options' are not selected..
     unobserve()    
     if station_type.value=='STILT stations':        
-        station_choice.options=stiltlist
+        station_choice.options=list_all_located
     else:        
-        station_choice.options= icoslist
+        station_choice.options= list_all_icos
     
     station_choice.value=None 
     # reset the data fields
@@ -129,7 +130,7 @@ def change_yr(c):
         
     #extract month (remove last item, not a month)
     stn = station_choice.value   
-    month = sorted(stiltstations[stn][str(s_year.value)]['months'][:-1])
+    month = sorted(stiltstations[stn][str(s_year.value)]['months'])
     month = [int(x) for x in month]
     s_month.options= month
     
@@ -166,7 +167,7 @@ def change_yr_end(c):
         e_month.options = month
     else:
         # if different from start year, all months are up for choice!
-        month = sorted(stiltstations[station_choice.value][str(s_year.value)]['months'][:-1])
+        month = sorted(stiltstations[station_choice.value][str(s_year.value)]['months'])
         month = [int(x) for x in month]
         e_month.options = month
 
@@ -317,35 +318,35 @@ def update_func(button_c):
           
             fig, caption = stc_functions.polar_graph(stc, 'sensitivity')
             stc.add_figure(1, fig, caption)
-            display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
+            display(HTML('<p style="font-size:16px;text-align:center">'  + caption + ' </p>'))
             display(fig)
 
         updateProgress(f, 'process pointsource')
         with result_population:
             fig, caption=stc_functions.polar_graph(stc, 'point source contribution', colorbar='Purples')
             stc.add_figure(2, fig, caption)
-            display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
+            display(HTML('<p style="font-size:16px;text-align:center">'  + caption + ' </p>'))
             display(fig)
 
         updateProgress(f, 'process population')
         with result_pointsource:
             fig, caption =stc_functions.polar_graph(stc, 'population sensitivity', colorbar='Greens')
             stc.add_figure(3, fig, caption)
-            display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
+            display(HTML('<p style="font-size:16px;text-align:center">'  + caption + ' </p>'))
             display(fig)
 
         updateProgress(f, 'get landcover')
         with result_land_cover_bar_graph:
             fig, caption=stc_functions.land_cover_bar_graph(stc)
             stc.add_figure(4, fig, caption)
-            display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
+            display(HTML('<p style="font-size:16px;text-align:center">'  + caption + ' </p>'))
             display(fig)
 
         updateProgress(f, 'seasonal table')
         with result_seasonal_table:
             fig, caption=stc_functions.seasonal_table(stc)
             stc.add_figure(5, fig, caption)
-            display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
+            display(HTML('<p style="font-size:16px;text-align:center">'  + caption + ' </p>'))
 
             try:
                 display(fig)
@@ -361,7 +362,7 @@ def update_func(button_c):
         with result_landcover_windrose:
             fig, caption=stc_functions.land_cover_polar_graph(stc)
             stc.add_figure(6, fig, caption)
-            display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
+            display(HTML('<p style="font-size:16px;text-align:center">'  + caption + ' </p>'))
             display(fig)
 
 
@@ -369,7 +370,7 @@ def update_func(button_c):
         with result_multiple_variables_graph:
             fig, caption= stc_functions.multiple_variables_graph(stc)
             stc.add_figure(7, fig, caption)
-            display(HTML('<p style="font-size:16px">'  + caption + ' </p>'))
+            display(HTML('<p style="font-size:16px;text-align:center">'  + caption + ' </p>'))
             display(fig)
 
         if stc.settings['saveFigs'] == 'yes':
@@ -406,7 +407,7 @@ station_type=RadioButtons(
         disabled=False)
 
 
-station_choice = Dropdown(options = icoslist,
+station_choice = Dropdown(options = list_all_icos,
                    description = 'Station',
                    value=None,
                    disabled= False)

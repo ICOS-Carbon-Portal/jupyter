@@ -6,38 +6,21 @@ Created on Mon Dec  7 08:38:51 2020
 """
 
 from ipywidgets import Dropdown, SelectMultiple, HBox, VBox, Button, Output, RadioButtons,IntProgress,IntSlider, GridspecLayout, Text, BoundedFloatText, FileUpload, Checkbox, BoundedIntText
-
-import stiltStations
 from IPython.core.display import display, HTML 
 from icoscp.station import station as cpstation
-
 import radiocarbon_functions
 import radiocarbon_object_cp
-
-
 import os
 import matplotlib.pyplot as plt
-
 from datetime import datetime
 import json
 
+from icoscp.stilt import stiltstation
 
-## Global variables
-#---------------------------------------------------------
-# create a dict with all stiltstations
-stiltstations = stiltStations.getStilt()
-
-# create a list (tuple) for the dropdown list of stations
-icoslist = sorted([(v['name'],k) for k,v in stiltstations.items() if v['icos']])
-
-icoslist.sort(key=lambda x:x[0])
-
-#---------------------------------------------------------
-
-# read or set the parameters
+stiltstations= stiltstation.find()
 
 def getSettings():
-    #s = settings.getDict()    
+ 
     s = {}
     
     try:
@@ -70,9 +53,6 @@ def getSettings():
     return s
 
 #----------- start processing -----------------
-
-
-    
 def updateProgress(f, desc=''):
     # custom progressbar updates
     f.value += 1
@@ -132,6 +112,8 @@ progress_bar = Output()
 result_radiocarbon = Output()
 
 def update_func(button_c):
+    
+    update_button.disabled = True
 
     progress_bar.clear_output()
 
@@ -174,6 +156,8 @@ def update_func(button_c):
             radiocarbon_functions.save_data_cp(radiocarbonObject)
         
     updateProgress(f, 'finished')
+
+    update_button.disabled = False
     
     f.value = 3
 

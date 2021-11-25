@@ -1,4 +1,12 @@
-site_name: ICOS Carbon Portal Jupyter Solutions
+site_name: ICOS Carbon Portal<br>Jupyter Solutions
+site_url: https://icos-carbon-portal.github.io/jupyter/
+repo_url: https://github.com/ICOS-Carbon-Portal/jupyter
+
+site_description: Public Jupyter Hub Service from ICOS 
+site_author: ICOS Carbon Portal
+copyright: ICOS Carbon Portal
+
+
 nav:
     - About: index.md
     - Jupyter Solutions: jupyter_solutions.md
