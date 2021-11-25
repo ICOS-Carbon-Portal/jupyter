@@ -777,7 +777,6 @@ def seasonal_table(myStation):
     
     station=myStation.stationId
     year=myStation.settings['startYear']
-    year_before=year-1
     available_STILT= myStation.settings['stilt']
     months= available_STILT[str(year)]['months']
     var_load=pd.read_csv(stcDataPath + 'seasonal_table_values.csv') 
@@ -828,7 +827,7 @@ def seasonal_table(myStation):
         fp_point = import_point_source_data()
 
         # if full year avaialbe - go ahead and create the tabel - else a message will be sent to the user
-        if len(months)==13:
+        if len(months)==12:
             #all hours for the date ranges... could update with date_range_hour_filtered
             winter_date_range1=pd.date_range(dt.datetime(year,1,1,0), (dt.datetime(year, 3, 1,0)-dt.timedelta(hours=3)), freq='3H')
             winter_date_range2=pd.date_range(dt.datetime(year,12,1,0), (dt.datetime(year+1, 1, 1,0)-dt.timedelta(hours=3)), freq='3H')
