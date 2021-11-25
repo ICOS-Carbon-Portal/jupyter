@@ -16,11 +16,21 @@ import numpy as np
 import pandas as pd
 import optimize_network_functions as onf
 import json
+from icoscp.stilt import stiltstation
 
+stiltstations= stiltstation.find()
+# error in geocoder - located ZSF in Austria rather than Germany 
+stiltstations['ZSF']['geoinfo']['name']['common'] = 'Germany'
+
+list_2018_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items() if '2018' in v['years'] if len(v['2018']['months'])>11 if v['geoinfo']])
+list_2018_not_located = [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items() if '2018' in v['years'] if len(v['2018']['months'])>11 if not v['geoinfo']]
+list_2018 = list_2018_not_located + list_2018_located 
+"""
 stiltstations = stiltStations.getStilt()
 
 
 all_list_2018 = sorted([((v['country'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k,v in stiltstations.items() if '2018' in v['years'] if len(v['2018']['months'])>12])
+"""
 
 def disable_enable_update_button():    
 
@@ -33,7 +43,7 @@ def disable_enable_update_button():
 
 def set_settings(s):
     
-    selected_network_sites.options = [station for station in all_list_2018 if station[1] in s['sites_to_compare']] 
+    selected_network_sites.options = [station for station in list_2018 if station[1] in s['sites_to_compare']] 
     
     broad_leaf_forest.value = s["broad_leaf_forest"]
     broad_leaf_forest_int.value= s["broad_leaf_forest_int"]
@@ -67,7 +77,7 @@ def change_sites_network_options(c):
 
     current_selection = [station_tuple[1] for station_tuple in selected_network_sites.options]
     selection = set(list(sites_network_options.value) + current_selection)     
-    selection_tuplelist = [station for station in all_list_2018 if station[1] in selection]
+    selection_tuplelist = [station for station in list_2018 if station[1] in selection]
     selected_network_sites.options = sorted(selection_tuplelist)
     disable_enable_update_button()
 
@@ -205,7 +215,7 @@ with heading_sites_network_options:
     display(HTML('<p style="font-size:15px;">Options (footprints available for 2018)</p>'))
     
 sites_network_options= SelectMultiple(
-    options=all_list_2018,
+    options=list_2018,
     rows=14,
     style=style_bin,
     description='',
