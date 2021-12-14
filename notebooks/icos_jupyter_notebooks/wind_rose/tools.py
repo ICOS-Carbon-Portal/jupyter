@@ -11,13 +11,13 @@ from IPython.display import display
 import matplotlib.pyplot as plt
 
 
-data = {
+meta_data = {
     'station_ids': [],
     'station_names': [],
     'heights_per_id': {},
-    'exclude': {'GAT': ['2.5'], 'HEL': ['2.5'], 'HPB': ['50.0'], 'JFJ': ['1.0', '2.0'],
-                'HTM': ['3.5']}
-}
+    'exclude': {'GAT': ['2.5'], 'HEL': ['2.5'], 'HPB': ['50.0'], 'HTM': ['3.5'], 'IPR': ['60.0'],
+                'JFJ': ['1.0', '2.0'], 'KIT': ['2.5'], 'LIN': ['2.5', '10.0'], 'LMP': ['2.0'],
+                'LUT': ['7.0'], 'NOR': ['1.5']}}
 
 
 def query_stations():
@@ -50,12 +50,12 @@ def query_stations():
 
 def find_relevant_stations(process_data):
     # Get all distinct station ids from the sparql query.
-    data['station_ids'] = sorted(list(set(process_data['fileName'].str[22:25])))
-    for station_id in data['station_ids']:
-        data['heights_per_id'][station_id] = []
+    meta_data['station_ids'] = sorted(list(set(process_data['fileName'].str[22:25])))
+    for station_id in meta_data['station_ids']:
+        meta_data['heights_per_id'][station_id] = []
         # These names will appear in the gui. They are a combination of
         # station name and station id.
-        data['station_names'].append(station_id + ' ' + station.get(station_id).name)
+        meta_data['station_names'].append(station_id + ' ' + station.get(station_id).name)
         # Find all dataframe rows relevant to the station id.
         df_station_files = \
             process_data[process_data['fileName'].str.contains(station_id)]['fileName'].to_list()
@@ -65,79 +65,74 @@ def find_relevant_stations(process_data):
             sampling_height = re.findall(r'[+-]?\d*\.\d*', str_file)[1]
             # Exclude sampling heights not meant for wind speed
             # measurements.
-            if (station_id in data['exclude'].keys() and
-                    sampling_height in data['exclude'][station_id]):
+            if (station_id in meta_data['exclude'].keys() and
+                    sampling_height in meta_data['exclude'][station_id]):
                 continue
-            data['heights_per_id'][station_id].append(sampling_height)
+            meta_data['heights_per_id'][station_id].append(sampling_height)
         # Sort sampling heights so they appear correctly in the gui.
-        data['heights_per_id'][station_id] = sorted(data['heights_per_id'][station_id], key=float)
+        meta_data['heights_per_id'][station_id] = \
+            sorted(meta_data['heights_per_id'][station_id], key=float)
     return
 
 
-def initialise():
-    m_data = query_stations()
-    find_relevant_stations(process_data=m_data)
-
+def gui_widgets():
+    output = widgets.Output()
     station_drop_down = widgets.Dropdown(description='Please choose station',
                                          style={'description_width': 'initial'},
-                                         options=data['station_names'],
+                                         options=meta_data['station_names'],
                                          value=None)
-
-    def station_drop_down_handler(change):
-        sampling_height_drop_down.options = data['heights_per_id'][change.new[0:3]]
-
     sampling_height_drop_down = widgets.Dropdown(description='and height',
                                                  style={'description_width': 'initial'},
                                                  options=[],
                                                  value=None,
                                                  layout=Layout(width='auto', margin='0 0 0 15px'))
-
-    # def height_drop_down_handler(change):
-    #     sampling_height_drop_down.options = data['heights_per_id'][change.new[0:3]]
-
-    station_drop_down.observe(station_drop_down_handler, names='value')
-    # sampling_height_drop_down.observe(height_drop_down_handler, names='value')
-
-    my_button = widgets.Button(
-        description='Update Plots',
-        disabled=False,
-        button_style='',  # 'success', 'info', 'warning', 'danger' or ''
-        tooltip='Click me',
-        icon='check' # (FontAwesome names without the `fa-` prefix)
-    )
-    output = widgets.Output()
-    box = HBox([station_drop_down, sampling_height_drop_down])
-    display(box, my_button)
+    widget_box = HBox([station_drop_down, sampling_height_drop_down])
+    update_plot_button = widgets.Button(description='Update Plots')
 
     @output.capture()
+    # todo: add comments for this function. It's where the magic happens.
     def on_button_clicked(b):
         current_station_selection = station_drop_down.value[0:3]
         current_sampling_height_selection = sampling_height_drop_down.value
         print(current_station_selection, ' ', current_sampling_height_selection)
         output.clear_output()
         with output:
-            get_data(station_id=current_station_selection,
-                     sampling_height=current_sampling_height_selection)
+            m_data = \
+                retrieve_meteorological_data(station_id=current_station_selection,
+                                             sampling_height=current_sampling_height_selection)
+            plot_meteorological_data(data=m_data)
+            nan_values = len(m_data[m_data['WD'].isna()])
+            if nan_values != 0:
+                print(f'Warning {nan_values} NaN values have been spotted in the plot-dataframe.')
 
-    my_button.on_click(on_button_clicked)
-    display(output)
+    update_plot_button.on_click(on_button_clicked)
+
+    # todo: "fix" comment for handler function of station_drop_down
+    #  widget.
+    def h_station_drop_down(change):
+        sampling_height_drop_down.options = meta_data['heights_per_id'][change.new[0:3]]
+        return
+
+    station_drop_down.observe(h_station_drop_down, names='value')
+    display(widget_box, update_plot_button, output)
+    return
 
 
-def get_data(station_id, sampling_height):
+def retrieve_meteorological_data(station_id, sampling_height):
     station_object = station.get(station_id)
     station_data = station_object.data()
     m_meta_data = station_data[(station_data['specLabel'] == 'ICOS ATC Meteo Release') &
                                (station_data['samplingheight'] == sampling_height)]
-    # m_meta_data = station_data[station_data['specLabel'].str.contains('ICOS ATC Meteo Release')
-    #                            and station_data['samplingheight'] == sampling_height]
-    co2_meta_data = station_data[station_data['specLabel'].str.contains('ICOS ATC CO2 Release')]
-    ch4_meta_data = station_data[station_data['specLabel'].str.contains('ICOS ATC CH4 Release')]
-    m_data = pd.DataFrame
+    # co2_meta_data = station_data[station_data['specLabel'].str.contains('ICOS ATC CO2 Release')]
+    # ch4_meta_data = station_data[station_data['specLabel'].str.contains('ICOS ATC CH4 Release')]
+    m_data = pd.DataFrame()
     for m_index, m_row in m_meta_data.iterrows():
-    #     m_time_start = m_row['timeStart']
-    #     m_time_end = m_row['timeEnd']
-    #     m_sampling_height = m_row['samplingheight']
+        # m_time_start = m_row['timeStart']
+        # m_time_end = m_row['timeEnd']
+        # m_sampling_height = m_row['samplingheight']
         m_data = Dobj(m_row['dobj']).data
+        # Find and "drop" rows with NaN wind speed in the 'WD' column.
+        m_data = m_data[pd.notnull(m_data['WD'])]
         m_data = m_data[['WD', 'WS', 'TIMESTAMP']]
     #     co2_height_queried = co2_meta_data[
     #         co2_meta_data['samplingheight'] == m_sampling_height]
@@ -168,17 +163,19 @@ def get_data(station_id, sampling_height):
     #             print('No Co2 data for sampling height of', m_sampling_height)
     #             continue
     #             # 2016-05-10 00:00:00
-    pi = np.pi
-    data = m_data
-    data['wind_direction_in_radians'] = data['WD'].apply(lambda wind_direction: math.radians(
-        wind_direction))
+    return m_data
+
+
+def plot_meteorological_data(data):
+    data['wind_direction_in_radians'] = data['WD'].\
+        apply(lambda wind_direction: math.radians(wind_direction))
     fig, ax = plt.subplots(subplot_kw=dict(projection='polar'), figsize=(10, 10))
-    ax.set_xticks(np.arange(0, 2 * pi, pi / 4))
+    ax.set_xticks(np.arange(0, 2 * np.pi, np.pi / 4))
     ax.set_xticklabels(['E', 'NE', 'N', 'NW', 'W', 'SW', 'S', 'SE'])
     ax.set_title("Wind Rose", fontsize=25)
 
-    step_angle = pi / 12
-    x_edges = np.arange(0, 2 * pi + step_angle, step_angle)
+    step_angle = np.pi / 12
+    x_edges = np.arange(0, 2 * np.pi + step_angle, step_angle)
     y_edges = np.arange(0, math.ceil(data['WS'].max()), 1)
 
     x = data['wind_direction_in_radians']
@@ -202,3 +199,10 @@ def get_data(station_id, sampling_height):
 
     ax.grid(True)
     plt.show()
+
+
+def initialise():
+    m_data = query_stations()
+    find_relevant_stations(process_data=m_data)
+    gui_widgets()
+
