@@ -918,7 +918,7 @@ def seasonal_table(myStation):
         #where there is no information in loaded file, and not all footpritns 
         else:
             seasonal_table = None
-            caption = 'No seasonal table, footprints are not available for the whole year'
+            caption = 'No seasonal table, footprints are not available for the whole (start-)year'
             return seasonal_table, caption 
     #here have values either from loaded file or calculated
     year_var=str(year) 

@@ -167,7 +167,7 @@ def change_yr_end(c):
         e_month.options = month
     else:
         # if different from start year, all months are up for choice!
-        month = sorted(stiltstations[station_choice.value][str(s_year.value)]['months'])
+        month = sorted(stiltstations[station_choice.value][str(e_year.value)]['months'])
         month = [int(x) for x in month]
         e_month.options = month
 
