@@ -168,8 +168,8 @@ def update_func(button_c):
         date_range = pd.date_range(start=(str(s_year.value) + '-' + str(s_month.value)  + '-' + str(s_day.value)), end=(str(e_year.value) + '-' + str(e_month.value)  + '-' + str(e_day.value)), freq='3H')
 
         timeselect_list = list(time_selection.value)
-        timeselect_string=[str(value) for value in timeselect_list]
-        timeselect_string =':00, '.join(timeselect_string) + ':00'
+        timeselect_string_simple=[str(value) for value in timeselect_list]
+        timeselect_string =':00, '.join(timeselect_string_simple) + ':00'
         
     date_range = functions.date_range_hour_filtered(date_range, timeselect_list)
     
@@ -206,12 +206,34 @@ def update_func(button_c):
 
     load_lat=loadtxt(os.path.join(data_folder, 'latitude.csv'), delimiter=',')
     load_lon=loadtxt(os.path.join(data_folder, 'longitude.csv'), delimiter=',')
-
+    
     footprint_0_90 = functions.footprint_show_percentages(station, fp, load_lat, load_lon, return_fp=True)
 
+    np.savetxt('fp_export_0_90.csv',footprint_0_90,delimiter=',',fmt='%.15f')
+    
     if download:
         pngfile1='log_scale_footprint'
         pngfile2='percent_footprint_sensitivity'
+        
+        # save the footprints in csv-files. The latitude and longitude values are saved seperatley
+        output_download = os.path.join(os.path.expanduser('~'), 'output/vis_average_footprints', date_time)
+        
+        if not os.path.exists(output_download):
+            os.makedirs(output_download)
+  
+        # create the name of the files
+        timeselect_string_output ='_'.join(timeselect_string_simple)
+        
+        string_0_90 = station + '_0_90_' + str(start_date.year) + '_' + str(start_date.month)+ '_' + str(start_date.day)+ '_' + str(end_date.year) + '_' + str(end_date.month)+ '_' + str(end_date.day) + '_' + timeselect_string_output + '.csv'
+        
+        string_average_fp = station + '_' + str(start_date.year) + '_' + str(start_date.month)+ '_' + str(start_date.day)+ '_' + str(end_date.year) + '_' + str(end_date.month)+ '_' + str(end_date.day) + '_' + timeselect_string_output + '.csv'
+
+        # download the files 
+        np.savetxt(output_download + '/' + string_0_90,footprint_0_90,delimiter=',',fmt='%.15f')
+        np.savetxt(output_download + '/' + string_average_fp, fp, delimiter=',',fmt='%.15f')
+        np.savetxt(output_download + '/' + 'longitude.csv', load_lon, delimiter=',',fmt='%.15f')
+        np.savetxt(output_download + '/' + 'latitude.csv', load_lat, delimiter=',',fmt='%.15f')
+        
     else:
         pngfile1=''
         pngfile2=''
