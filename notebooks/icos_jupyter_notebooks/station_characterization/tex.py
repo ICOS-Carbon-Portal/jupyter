@@ -116,8 +116,10 @@ def _template():
         \\usepackage{blindtext}
         %nicer date at bottom:
         \\usepackage[yyyymmdd]{datetime}
-        
-        
+        \\usepackage{tabularx}
+        \\newcolumntype{b}{X}
+        \\newcolumntype{s}{>{\\hsize=.5\\hsize}X}
+
         \\begin{document}
 
         %date 
@@ -137,34 +139,35 @@ def _template():
         
         The station characterisation is based on STILT model footprints, an anthropogenic emission inventory, a biogenic flux model and ancillary data layers. More detailed information on the data source and processing is provided at the end of this document. **name** is **class_type_text** located in **country** (latitude: **lat**°N \\unskip, longitude: **lon**°E \\unskip).
         
-        \n
+        \\
 
         \\begin{figure}[!h]
-        \\includegraphics[width=0.53\\textwidth]{**sensitivity**}
-        \\raisebox{4.7cm}[0pt][0pt]{%
-        \\hspace{-0.35cm}%
+        \\includegraphics[width=0.47\\textwidth]{**sensitivity**}
+        \\raisebox{3.8cm}[0pt][0pt]{%
+        \\hspace{-0.5cm}%
         \\captionsetup{labelformat=empty}
         
-        \\parbox{7.9cm}{\\caption{\\begin{small}\\\\\\\\\\textbf{Model height:} **model_height**\\\\
+        \\parbox{9.7cm}{\\caption{\\begin{small}\\\\\\\\\\textbf{Model height:} **model_height**\\\\
         \\textbf{Date range:} **date_range**\\\\
         \\textbf{Hour(s):} **hours**\\\\
         The map bins are **degrees** degrees at **increment** km increments.\\\\\\\\
         The \\textbf{sensitivity area map} shows the average footprint/sensitivity area. The darker the colour, the more important the area is as a potential source influencing the measured concentrations. The total sensitivity to the surface varies between stations and **name** is in the **quartile_sensitivity** compared to selected reference ICOS atmospheric stations (see multiple variables graph).
         \\end{small}}}}
         \\end{figure}
-
+        
+        \\
         \\begin{figure}[!h]
         \\begin{subfigure}[t]{0.5\\textwidth}
-        \\includegraphics[width=0.85\\linewidth]{**population**}
-        \\centering
-        \\captionsetup{width=.8\\linewidth}
-        \\caption{\\begin{small}The \\textbf{population sensitivity map} is the result of the average sensitivity map multiplied by the number of people living within each footprint cell. Relative to the reference atmospheric stations, **name** is in the **quartile_population** regarding sensitivity to population.\\end{small}}
-        \\end{subfigure}%
-        \\begin{subfigure}[t]{0.5\\textwidth}
-        \\includegraphics[width=0.85\\linewidth]{**pointsource**}
-        \\centering
-        \\captionsetup{width=.8\\linewidth}
+        \\includegraphics[width=0.95\\linewidth,left]{**pointsource**}
+        \\raggedright
+        \\captionsetup{width=.95\\linewidth}
         \\caption{\\begin{small}The \\textbf{point source contribution map} is the result of the average sensitivity map multiplied by the {\\ensuremath{\\mathrm{CO_2}}} emissions from industrial facilities within each footprint cell, translated into expected influence on the {\\ensuremath{\\mathrm{CO_2}}} concentration at the station. Relative to the reference atmospheric stations, **name** is in the **quartile_pointsource** regarding contribution from point sources.\\end{small}}
+        \\end{subfigure}
+        \\begin{subfigure}[t]{0.5\\textwidth}
+        \\includegraphics[width=0.95\\linewidth,right]{**population**}
+        \\centering
+        \\captionsetup{width=.95\\linewidth}
+        \\caption{\\begin{small}The \\textbf{population sensitivity map} is the result of the average sensitivity map multiplied by the number of people living within each footprint cell. Relative to the reference atmospheric stations, **name** is in the **quartile_population** regarding sensitivity to population.\\end{small}}
         \\end{subfigure}
         \\end{figure}\n
         
@@ -200,9 +203,7 @@ def _template():
         \\textbf{Advanced figures}\\\\
         \\end{large}
         \\end{flushleft}
-        
-        The following figures present more advanced syntheses. Please read the specification section at the end of this document for further information and explanations.
-       
+
         \\begin{figure}[!h]
         \\includegraphics[width=0.75\\textwidth]{**landcover_windrose**}
         \\raisebox{6.8cm}[0pt][0pt]{%
@@ -213,11 +214,39 @@ def _template():
         
         \\begin{figure}[!h]
         \\includegraphics[width=0.57\\textwidth]{**multivar**}
-        \\raisebox{4.8cm}[0pt][0pt]{%
+        \\raisebox{6.4cm}[0pt][0pt]{%
         \\hspace{-0.3cm}%
         \\captionsetup{labelformat=empty}
-        \\parbox{7.9cm}{\\caption{\\begin{small}Selected reference atmospheric stations are compared in this \\textbf{multiple variables graph}. **name**'s values are shown with the black line and the points' placements on the y-axis are determined relative to the minimum (0\\%) and maximum (100\\%) of the reference stations. The same variables are the same as the ones in the seasonal variations table are shown above. \\end{small}}}}
+        \\parbox{7.9cm}{\\caption{\\begin{small}Selected reference atmospheric stations (see below table) are compared in this \\textbf{multiple variables graph}. **name**'s values are shown with the black line and the points' placements on the y-axis are determined relative to the minimum (0\\%) and maximum (100\\%) of the reference stations. The same variables are the same as the ones in the seasonal variations table are shown above. \\end{small}}}}
         \\end{figure}
+        
+        \\begin{small}
+        \\begin{tabularx}{0.55\\textwidth}{sbb}
+        \\hline
+        \\textbf{Code} & \\textbf{Name} & \\textbf{Country} \\\\
+        \\hline
+        TRN180 & Trainou  & France  \\\\
+        \\hline
+        TOH147  & Torfhaus  & Germany  \\\\
+        \\hline
+        SVB150  & Svartberget  & Sweden  \\\\
+        \\hline
+        SMR125  & SMEAR/Hyytiälä  & Finland  \\\\
+        \\hline
+        LUT  & Lutjewad  & Netherlands  \\\\
+        \\hline
+        KRE250  & Kresin  & Czech Republic  \\\\
+        \\hline
+        KIT200  & Karlsruhe  & Germany  \\\\
+        \\hline
+        JFJ  & Jungfraujoch  & Switzerland  \\\\
+        \\hline
+        IPR100  & Ispra  & Italy  \\\\
+        \\hline
+        GAT344  & Gartow  & Germany  \\\\
+
+        \\end{tabularx}
+        \end{small}
         
         %text in margin
         \\begin{textblock}{70}(115,280)
@@ -297,8 +326,10 @@ def generate_pdf_tex(stc):
     if stc.settings['stilt']['icos']:
         if stc.settings['icos']['siteType']=='mountain' or stc.settings['icos']['siteType']=='Mountain':
             tex=tex.replace('**mountain_message**', '(might be different from station intake height since mountain station, see \\href{https://www.icos-cp.eu/about-stilt-calculator}{link})')
+
         else:
             tex=tex.replace('**mountain_message**', '')
+
     else:
         tex=tex.replace('**mountain_message**', '')   
                     
@@ -314,7 +345,7 @@ def generate_pdf_tex(stc):
         tex=tex.replace('**lat**', str(round(stc.settings['icos']['lat'], 2)))
         tex=tex.replace('**lon**', str(round(stc.settings['icos']['lon'], 2)))
         tex=tex.replace('**class_type_text**', ('a class ' + str(stc.settings['icos']['icosclass']) +\
-                       ' ICOS atmospheric station of the type ' + str(stc.settings['icos']['siteType'])))
+                       ' ICOS atmospheric station of the type \MakeLowercase{' + str(stc.settings['icos']['siteType']) + '}'))
     
     else:
         if '_' in stc.settings['stilt']['name']:
