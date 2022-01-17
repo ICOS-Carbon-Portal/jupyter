@@ -39,7 +39,7 @@ def _template_specifications(standalone=False):
 
         More specifics about the processing of the ancillary data layers can be found in \\href{https://lup.lub.lu.se/student-papers/search/publication/9007298}{Storm (2020)} (section 3.3).
 
-        An interactive Jupyter Notebook is available at \\href{https://exploredata.icos-cp.eu}{ICOS explore data} and can be used to output the figures and maps presented in this document, e.g. for a different time-period and/or specific hour(s) of the day. It is also possible to change the bin-sizes and intervals used in the maps and the land cover wind rose. Furthermore, it is possible to generate a characterisation for a hypothetical station. The only requirement is that footprints have been generated using the \\href{https://stilt.icos-cp.eu/worker/}{STILT on demand calculator}. 
+        An interactive Jupyter Notebook is available at \\href{https://exploredata.icos-cp.eu/hub/user-redirect/notebooks/icos_jupyter_notebooks/station_characterization.ipynb}{ICOS explore data} and can be used to output the figures and maps presented in this document, e.g. for a different time-period and/or specific hour(s) of the day. It is also possible to change the bin-sizes and intervals used in the maps and the land cover wind rose. Furthermore, it is possible to generate a characterisation for a hypothetical station. The only requirement is that footprints have been generated using the \\href{https://stilt.icos-cp.eu/worker/}{STILT on demand calculator}. 
        
      """
     
@@ -66,6 +66,9 @@ def _template_specifications(standalone=False):
                 "saveFigs": "**saveFigs**"
                 }
              \\end{verbatim}
+             
+             The STILT model results for this report are availabe online \\href{https://stilt.icos-cp.eu/viewer/?stationId=**stationCode**&fromDate=**startYear**-**startMonth**-**startDay**&toDate=**endYear**-**endMonth**-**endDay**}{here}.
+
              """
         
         tex=tex+tex_settings
@@ -257,7 +260,6 @@ def _template():
         """
     return tex
 
-
 def generate_pdf_tex(stc):
     """       
     Provide an stc object, which contains all the necessary information to create the texfile
@@ -273,7 +275,17 @@ def generate_pdf_tex(stc):
     """
     
     output = stc.settings['output_folder']
-        
+    
+    # need two digits in date string (to access stilt model results):
+    if len(str(stc.settings['startMonth'])) == 1:   
+        stc.settings['startMonth'] = '0' + str(stc.settings['startMonth'])
+    if len(str(stc.settings['endMonth'])) == 1:   
+        stc.settings['endMonth'] = '0' + str(stc.settings['endMonth'])
+    if len(str(stc.settings['startDay'])) == 1:   
+        stc.settings['startDay'] = '0' + str(stc.settings['startDay'])
+    if len(str(stc.settings['endDay'])) == 1:   
+        stc.settings['endDay'] = '0' + str(stc.settings['endDay'])
+ 
     tex = _template()
 
     tex=tex.replace('**logo**', os.path.join('station_characterization', 'Icos_cp_Logo_RGB.pdf'))
@@ -345,8 +357,8 @@ def generate_pdf_tex(stc):
         tex=tex.replace('**lat**', str(round(stc.settings['icos']['lat'], 2)))
         tex=tex.replace('**lon**', str(round(stc.settings['icos']['lon'], 2)))
         tex=tex.replace('**class_type_text**', ('a class ' + str(stc.settings['icos']['icosclass']) +\
-                       ' ICOS atmospheric station of the type \MakeLowercase{' + str(stc.settings['icos']['siteType']) + '}'))
-    
+                       ' ICOS atmospheric station of the type ``\MakeLowercase{' + str(stc.settings['icos']['siteType']) + '}\'\''))
+
     else:
         if '_' in stc.settings['stilt']['name']:
             name_for_update = stc.settings['stilt']['name']
