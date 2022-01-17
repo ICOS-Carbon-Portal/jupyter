@@ -64,7 +64,16 @@ def get_settings():
     return s
 
 def set_settings(s):
-    station_choice.value = s['stationCode']   
+    
+    if s['stationCode'] in list_all_icos: 
+        station_type.value='ICOS stations'
+        station_choice.options=list_all_icos
+        station_choice.value = s['stationCode']
+    else:
+        station_type.value='STILT stations'
+        station_choice.options=list_all
+        station_choice.value = s['stationCode']
+        
     s_year.value = s['startYear'] 
     s_month.value = s['startMonth']
     s_day.value = s['startDay']
