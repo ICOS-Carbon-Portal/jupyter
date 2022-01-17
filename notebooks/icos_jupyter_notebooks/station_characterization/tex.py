@@ -37,9 +37,10 @@ def _template_specifications(standalone=False):
         \\end{large}
         \\end{flushleft}
 
-        More specifics about the processing of the ancillary data layers can be found in \\href{https://lup.lub.lu.se/student-papers/search/publication/9007298}{Storm (2020)} (section 3.3).
+        More specifics about the processing of the ancillary data layers can be found in \\href{https://lup.lub.lu.se/student-papers/search/publication/9007298}{Storm (2020)} (section 3.3). **landingPage**
 
         An interactive Jupyter Notebook is available at \\href{https://exploredata.icos-cp.eu/hub/user-redirect/notebooks/icos_jupyter_notebooks/station_characterization.ipynb}{ICOS explore data} and can be used to output the figures and maps presented in this document, e.g. for a different time-period and/or specific hour(s) of the day. It is also possible to change the bin-sizes and intervals used in the maps and the land cover wind rose. Furthermore, it is possible to generate a characterisation for a hypothetical station. The only requirement is that footprints have been generated using the \\href{https://stilt.icos-cp.eu/worker/}{STILT on demand calculator}. 
+        
        
      """
     
@@ -67,7 +68,7 @@ def _template_specifications(standalone=False):
                 }
              \\end{verbatim}
              
-             The STILT model results for this report are availabe online \\href{https://stilt.icos-cp.eu/viewer/?stationId=**stationCode**&fromDate=**startYear**-**startMonth**-**startDay**&toDate=**endYear**-**endMonth**-**endDay**}{here}.
+             The STILT model results for this report are availabe online \\href{https://stilt.icos-cp.eu/viewer/?stationId=**stationCode**&fromDate=**startDate**&toDate=**endDate**}{here} and other stations can be selected at \\href{https://stilt.icos-cp.eu/viewer/}{the STILT viewer}.
 
              """
         
@@ -200,13 +201,13 @@ def _template():
         Contributions of different land cover types within **name**´s average footprint is shown in the  \\textbf{land cover bar graph}. The total contributions are listed in the legend and their relative occurrences in the different directions of the stations (North-East, East, South-East etc.) are indicated by the graph. 
           
         \\pagebreak
-
-        \\begin{flushleft}
-        \\begin{large}
-        \\textbf{Advanced figures}\\\\
-        \\end{large}
-        \\end{flushleft}
-
+        
+        The following figures present more advanced syntheses. Please read the specification section at
+the end of this document for further information and explanations.
+        
+        \\
+        \\
+        
         \\begin{figure}[!h]
         \\includegraphics[width=0.75\\textwidth]{**landcover_windrose**}
         \\raisebox{6.8cm}[0pt][0pt]{%
@@ -215,16 +216,14 @@ def _template():
         \\parbox{7.9cm}{\\caption{\\begin{small}The \\textbf{land cover polar graph} summarizes the distribution of land cover types in the average footprint around the station (located in the centre of the graph). Note that the area of a land cover type with the highest contribution is located closest to the centre. \\end{small}}}}
         \\end{figure}
         
+        \\
         \\begin{figure}[!h]
-        \\includegraphics[width=0.57\\textwidth]{**multivar**}
-        \\raisebox{6.4cm}[0pt][0pt]{%
-        \\hspace{-0.3cm}%
+        \\includegraphics[width=0.6\\textwidth]{**multivar**}
+        \\raisebox{4.6cm}[0pt][0pt]{%
+        \\hspace{-0.6cm}%
         \\captionsetup{labelformat=empty}
-        \\parbox{7.9cm}{\\caption{\\begin{small}Selected reference atmospheric stations (see below table) are compared in this \\textbf{multiple variables graph}. **name**'s values are shown with the black line and the points' placements on the y-axis are determined relative to the minimum (0\\%) and maximum (100\\%) of the reference stations. The same variables are the same as the ones in the seasonal variations table are shown above. \\end{small}}}}
-        \\end{figure}
-        
-        \\begin{small}
-        \\begin{tabularx}{0.55\\textwidth}{sbb}
+        \\parbox{7.9cm}{\\caption{\\begin{small}Selected reference atmospheric stations (see below table) are compared in this \\textbf{multiple variables graph}. **name**'s values are shown with the black line and the points' placements on the y-axis are determined relative to the minimum (0\\%) and maximum (100\\%) of the reference stations. The same variables are the same as the ones in the seasonal variations table are shown above. \\end{small}}\\begin{scriptsize}
+        \\begin{tabularx}{0.45\\textwidth}{sbb}
         \\hline
         \\textbf{Code} & \\textbf{Name} & \\textbf{Country} \\\\
         \\hline
@@ -249,8 +248,9 @@ def _template():
         GAT344  & Gartow  & Germany  \\\\
 
         \\end{tabularx}
-        \end{small}
-        
+        \end{scriptsize}}}
+        \\end{figure}
+     
         %text in margin
         \\begin{textblock}{70}(115,280)
         \\noindent Date and time generated: \\today \\hspace{0.1cm} \\currenttime
@@ -276,16 +276,14 @@ def generate_pdf_tex(stc):
     
     output = stc.settings['output_folder']
     
-    # need two digits in date string (to access stilt model results):
-    if len(str(stc.settings['startMonth'])) == 1:   
-        stc.settings['startMonth'] = '0' + str(stc.settings['startMonth'])
-    if len(str(stc.settings['endMonth'])) == 1:   
-        stc.settings['endMonth'] = '0' + str(stc.settings['endMonth'])
-    if len(str(stc.settings['startDay'])) == 1:   
-        stc.settings['startDay'] = '0' + str(stc.settings['startDay'])
-    if len(str(stc.settings['endDay'])) == 1:   
-        stc.settings['endDay'] = '0' + str(stc.settings['endDay'])
- 
+    start_date = str(stc.settings['startYear']).zfill(2) + '-' + str(stc.settings['startMonth']).zfill(2) + '-' + str(stc.settings['startDay']).zfill(2)
+
+    end_date = str(stc.settings['endYear']).zfill(2) + '-' + str(stc.settings['endMonth']).zfill(2) + '-' + str(stc.settings['endDay']).zfill(2)
+
+    timeselect_list = stc.settings['timeOfDay']
+    timeselect_string=[str(value) for value in timeselect_list]
+    hours_string =':00, '.join(timeselect_string) + ':00'
+    
     tex = _template()
 
     tex=tex.replace('**logo**', os.path.join('station_characterization', 'Icos_cp_Logo_RGB.pdf'))
@@ -324,13 +322,8 @@ def generate_pdf_tex(stc):
     tex=tex.replace('**degrees**', str(stc.settings['binSize']))
     tex=tex.replace('**increment**', str(stc.settings['binInterval']))
     
-    date_string=str(stc.settings['startYear']) + '-' + str(stc.settings['startMonth']) + '-' + str(stc.settings['startDay']) + ' to ' + str(stc.settings['endYear']) + '-' + str(stc.settings['endMonth']) + '-' + str(stc.settings['endDay'])
+    tex=tex.replace('**date_range**', start_date + ' to ' + end_date)
     
-    timeselect_list = stc.settings['timeOfDay']
-    timeselect_string=[str(value) for value in timeselect_list]
-    hours_string =':00, '.join(timeselect_string) + ':00'
-    
-    tex=tex.replace('**date_range**', date_string)
     tex=tex.replace('**hours**', hours_string)
     
     tex=tex.replace('**model_height**', (str(stc.settings['stilt']['alt']) + 'm above ground **mountain_message**'))
@@ -382,6 +375,9 @@ def generate_specifications(stc, standalone=False):
         list_timeOfDay= list(stc.settings['timeOfDay'])
         timeOfDayStr = ', '.join([str(elem) for elem in list_timeOfDay])
         timeOfDayStr='[' + timeOfDayStr + ']'
+        start_date = str(stc.settings['startYear']).zfill(2) + '-' + str(stc.settings['startMonth']).zfill(2) + '-' + str(stc.settings['startDay']).zfill(2)
+
+        end_date = str(stc.settings['endYear']).zfill(2) + '-' + str(stc.settings['endMonth']).zfill(2) + '-' + str(stc.settings['endDay']).zfill(2)
 
         tex_specifications = tex_specifications.replace('**stationCode**', stc.settings['stationCode'])
         tex_specifications = tex_specifications.replace('**startYear**', str(stc.settings['startYear']))
@@ -396,12 +392,23 @@ def generate_specifications(stc, standalone=False):
         tex_specifications = tex_specifications.replace('**unit**', stc.settings['unit'])
         tex_specifications = tex_specifications.replace('**labelPolar**', stc.settings['labelPolar'])
         tex_specifications = tex_specifications.replace('**saveFigs**', stc.settings['saveFigs'])
+        tex_specifications = tex_specifications.replace('**startDate**', start_date)
+        tex_specifications = tex_specifications.replace('**endDate**', end_date) 
+        
+        if stc.settings['stilt']['icos']:
+
+            tex_specifications=tex_specifications.replace('**landingPage**', 'Further information about the station is available \\href{https://meta.icos-cp.eu/resources/stations/AS_' + stc.settings['stationCode'][0:3] + '}{the station landing page}.')
+        else:
+
+            tex_specifications=tex_specifications.replace('**landingPage**', '')
         
         return tex_specifications
     
     else:
         
         tex_specifications = _template_specifications(standalone=True)
+        
+        tex_specifications=tex_specifications.replace('**landingPage**', '')
         
         begin="""
         
@@ -438,7 +445,7 @@ def generate_full(stc):
       
     tex= generate_pdf_tex(stc)
     tex_specifications=generate_specifications(stc)
-    
+
     full_tex=tex + tex_specifications  + '\\end{document}'
     
     return full_tex
