@@ -210,8 +210,10 @@ def import_landcover_HILDA(year='2018'):
 
 def import_population_data(year=2018):
    
-    pop_data= Dataset(stcDataPath + 'GEOSTAT_population_2011_2018.nc')
-    fp_pop=pop_data.variables[str(year)][:,:]
+    #pop_data= Dataset(stcDataPath + 'GEOSTAT_population_2011_2018.nc')
+    #fp_pop=pop_data.variables[str(year)][:,:]
+    pop_data = Dataset('pop_2020_gpw.nc')
+    fp_pop=pop_data.variables['pop_2020'][:,:]
     return fp_pop
 
 def import_point_source_data():
@@ -403,14 +405,7 @@ def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='',
     if label == 'point source contribution':   
         list_countries_to_add = ['Russian Federation', 'Belarus', 'Ukraine', 'Moldova', 'Turkey', 'Tunisia', 'Algeria', 'Morocco','Bosnia and Herzegovina', 'Serbia', 'Montenegro', 'Kosovo', 'Albania', 'Macedonia']
         legend_title= 'Countries with no point source data'
-        
-    if label == 'population sensitivity':
-    
-        list_countries_to_add = ['Russian Federation', 'Belarus', 'Ukraine', 'Moldova', 'Turkey', 'Tunisia', 'Algeria', 'Morocco']
-        legend_title= 'Countries with no population data'
-    
-    if label == 'point source contribution' or label == 'population sensitivity':
-        
+
         for country_to_add in list_countries_to_add:
 
             country_information = [country for country in reader.records() if country.attributes["NAME_LONG"] == country_to_add][0]
@@ -782,6 +777,7 @@ def seasonal_table(myStation):
     var_load=pd.read_csv(stcDataPath + 'seasonal_table_values.csv') 
     station_year= station +'_' + str(year)
     
+    #need to update this with new population data! 
     if station_year in set(var_load.station_year):
         
         sens_whole= var_load.loc[var_load['station_year'] == station_year, 'sens_whole'].iloc[0]
