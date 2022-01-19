@@ -208,12 +208,11 @@ def import_landcover_HILDA(year='2018'):
        
     return broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown
 
-def import_population_data(year=2018):
+def import_population_data():
    
-    #pop_data= Dataset(stcDataPath + 'GEOSTAT_population_2011_2018.nc')
-    #fp_pop=pop_data.variables[str(year)][:,:]
-    pop_data = Dataset('pop_2020_gpw.nc')
+    pop_data= Dataset(stcDataPath + 'GPW_population_2020.nc')
     fp_pop=pop_data.variables['pop_2020'][:,:]
+
     return fp_pop
 
 def import_point_source_data():
@@ -475,7 +474,7 @@ def polar_graph(myStation, rose_type, colorbar='gist_heat_r', zoom=''):
     fp=myStation.fp
     unit=myStation.settings['unit']
     
-    fp_pop= import_population_data(year=2018)
+    fp_pop= import_population_data()
     fp_point= import_point_source_data()
     
     #same function used to all three types of map
@@ -776,8 +775,7 @@ def seasonal_table(myStation):
     months= available_STILT[str(year)]['months']
     var_load=pd.read_csv(stcDataPath + 'seasonal_table_values.csv') 
     station_year= station +'_' + str(year)
-    
-    #need to update this with new population data! 
+
     if station_year in set(var_load.station_year):
         
         sens_whole= var_load.loc[var_load['station_year'] == station_year, 'sens_whole'].iloc[0]
@@ -818,7 +816,7 @@ def seasonal_table(myStation):
 
     else:
     
-        fp_pop= import_population_data(year=2018)
+        fp_pop= import_population_data()
 
         fp_point = import_point_source_data()
 
@@ -1200,7 +1198,7 @@ def values_multiple_variable_graph(all_stations, selected_station, date_range, t
     
     start_date = min(date_range)
      
-    fp_pop= import_population_data(year=2018)
+    fp_pop= import_population_data()
 
     fp_point= import_point_source_data()
 
