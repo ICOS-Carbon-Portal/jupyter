@@ -75,11 +75,12 @@ class StationChar():
         self.distances = None           # distances from station to all cells in the STILT grid 
         self.degrees = None             # degree angle between station and all cells in the STILT grid 
         
-        #own class? --> script. provide lat and lon + gridsize. general.get distances and angels. general. "version 2".
+        self.areaFifty = None           # the most important 50% sensitivity area (km2)
         self.intervalBins = None        # numpy array with the bin intervals for the maps
         self.intervalLabels = None      # list with the bin labels for the maps 
         self.dirBins = None             # numpy array with the direction bins for the maps
         self.dirLabels = None           # list with the direction labels for the maps
+
         
         self.figures = {}               # dictionary to store figures and captions
                                         # use figures['1'] = [fig, caption] to get figure 1....
@@ -133,7 +134,12 @@ class StationChar():
         fpLat and fpLon corresponding to the average footprint are also set here. 
         """
         nfp, self.fp, self.fpLon, self.fpLat, title= stc_functions.read_aggreg_footprints(self.stationId, self.dateRange)
-
+        
+        self.areaFifty = stc_functions.area_footprint_based_on_threshold(self.fp, self.fpLat, self.fpLon, 0.5)
+        
+        #need this information in the PDF: 
+        self.settings['areaFifty'] = self.areaFifty
+        
     #station_lat, station_lon, grid_lat, grid_lon
     def _setDistancesAndDegrees(self):
         """

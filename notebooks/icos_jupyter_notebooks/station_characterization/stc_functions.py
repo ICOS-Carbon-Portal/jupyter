@@ -175,8 +175,54 @@ def date_range_hour_filtered(start_date, end_date, timeselect_list):
             | date_range[(timeselect_list[4] == date_range.hour)] | date_range[(timeselect_list[5] == date_range.hour)]\
             | date_range[(timeselect_list[6] == date_range.hour)] | date_range[(timeselect_list[7] == date_range.hour)]
           
-    #consider return timeselect
     return date_range
+
+def area_footprint_based_on_threshold(input_footprint, fp_lat, fp_lon, threshold):
+
+    #total sensitivity - use this value to calculate what the sensitivity of the ex 50% footprint it (threshold)
+    sum_sensitivity_values=sum(input_footprint.flatten())
+
+    threshold_sensitivity=sum_sensitivity_values*threshold
+
+    #create a dataframe that will have the updated sensitivity values + the steps on the way
+    df_sensitivity = pd.DataFrame()
+
+    #one column with the original sensitivity values. Has an index that will be used to sort back to 
+    #this order (flattened 2D... back to 2D with updated sensitivity values in last step)
+    df_sensitivity['sensitivity']=input_footprint.flatten()
+    
+    #sensitivity values sorterd from largest to smallest
+    df_sensitivity_sorted=df_sensitivity.sort_values(by=['sensitivity'], ascending=False)
+    
+    #another column that has the cumilated sum of the values in the sensitivity column.
+    #used to determine when the footprint threshold is met. 
+    df_sensitivity_sorted['cumsum_sens']=df_sensitivity_sorted.cumsum()
+    
+    #mask threshold: when the cumulative sum is over the threshold - these values are assigned 0.
+    #to be multiplied with the original sensitivity values (disregard the ones with value 0)
+    df_sensitivity_sorted['mask_threshold']=df_sensitivity_sorted['cumsum_sens']
+
+    if threshold==1:
+
+        df_sensitivity_sorted['mask_threshold']= np.where(df_sensitivity_sorted['sensitivity']==0, 0, 1)
+    else:
+        df_sensitivity_sorted['mask_threshold']= np.where(df_sensitivity_sorted['cumsum_sens']>=threshold_sensitivity, 0, 1)
+        
+    #sort it back (so in correct lat/lon order for "packing back up" to 2D)
+    df_sensitivity_upd=df_sensitivity_sorted.sort_index()
+    #want a footprint with 0/1 for see or not see also 
+    list_mask_threshold=df_sensitivity_upd['mask_threshold'].tolist()
+    
+    upd_footprint_see_not_see=np.array(list_mask_threshold).reshape((len(fp_lat), len(fp_lon)))
+    
+    #a NetCDF file with the grid size calues in m2
+    f_gridarea = cdf.Dataset(stcDataPath + 'gridareaSTILT.nc')
+    #area stored in "cell_area". Convert to km2
+    gridarea = f_gridarea.variables['cell_area'][:]/1000000
+    
+    area_within_threshold = sum((upd_footprint_see_not_see * gridarea).flatten())
+
+    return area_within_threshold
 
 def import_landcover_HILDA(year='2018'):
     
