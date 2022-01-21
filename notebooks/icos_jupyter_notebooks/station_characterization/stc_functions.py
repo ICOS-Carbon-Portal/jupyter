@@ -819,7 +819,8 @@ def seasonal_table(myStation):
     year=myStation.settings['startYear']
     available_STILT= myStation.settings['stilt']
     months= available_STILT[str(year)]['months']
-    var_load=pd.read_csv(stcDataPath + 'seasonal_table_values.csv') 
+    
+    var_load=pd.read_csv(stcDataPath + 'seasonal_table_values_GPW_pop.csv') 
     station_year= station +'_' + str(year)
 
     if station_year in set(var_load.station_year):
