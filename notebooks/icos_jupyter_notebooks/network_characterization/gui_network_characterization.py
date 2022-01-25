@@ -120,17 +120,14 @@ def use_icos_network_change(c):
             # if there already is a station with that name
             else:
 
-                #remove from list and replace with higher val 
+                #remove from list and replace with higher val
                 matched_station = [s for s in list_icos_stations_reduced if s[0:3] == station[0:3]][0]
 
                 if len(station)>3 and len(matched_station)>3:
-                    
-                    #can only check if value in stilt station name (always the case, except CMN_test)
-                    if station[3:6].isdecimal() and matched_station[3:6].isdecimal():
-                        if int(station[3:6])>int(matched_station[3:6]):
-                            list_icos_stations_reduced.remove(matched_station)
-                            list_icos_stations_reduced.append(station)
-                            stations_reduced.append(station[0:3])
+                    if int(station[3:6])>int(matched_station[3:6]):
+                        list_icos_stations_reduced.remove(matched_station)
+                        list_icos_stations_reduced.append(station)
+                        stations_reduced.append(station[0:3])
 
         sites_base_network_options.value = list_icos_stations_reduced
 
