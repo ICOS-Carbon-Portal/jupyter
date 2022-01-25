@@ -20,8 +20,6 @@ from icoscp.stilt import stiltstation
 from bokeh.io import show, output_notebook, reset_output
 import matplotlib.pyplot as plt
 stiltstations= stiltstation.find()
-# error in geocoder - located ZSF in Austria rather than Germany 
-stiltstations['ZSF']['geoinfo']['name']['common'] = 'Germany'
 
 list_all_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if v['geoinfo']])
 list_all_not_located = [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if not v['geoinfo']]
