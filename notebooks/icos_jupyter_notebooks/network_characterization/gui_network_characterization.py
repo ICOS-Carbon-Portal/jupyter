@@ -423,12 +423,6 @@ def update_func(button_c):
         
         with output_base_network_fp_linear:
             
-            if download_output:
-                pngfile = 'base_footpint_linear'
-
-            else:
-                pngfile = ''
-            
             functions.plot_maps(networkObj.baseNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
 
     
@@ -450,27 +444,22 @@ def update_func(button_c):
             plt.show(histogram_compare)
         
         with output_compare_network_fp_linear: 
-            
-            if download_output:
-                pngfile = 'compare_footprint_linear'
-
-            else:
-                pngfile = ''
 
 
-            functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
+            functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
         
     
         with output_base_minus_compare:
             display(HTML('<p style="font-size:16px;text-align:center">Compare network - base network</p>'))
-       
+            
+            
             if download_output:
                 pngfile = 'compare_minus_base_footprint_linear'
 
             else:
                 pngfile = ''
 
-            functions.plot_maps(networkObj.compareMinusBase, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=None)
+            functions.plot_maps(networkObj.compareMinusBase, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=None)
             
             
     df_leader_chart_sens = functions.leader_chart_sensitivity(networkObj)
@@ -503,7 +492,7 @@ def update_func(button_c):
     
     #only if choose to donwload:
     if download_output:
-        functions.save_settings(settings, directory='network_characterization/network_characterization')
+        functions.save_settings(settings, directory='network_characterization/network_characterization_2018')
     
     
 
