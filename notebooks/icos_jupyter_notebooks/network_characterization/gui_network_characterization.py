@@ -20,8 +20,6 @@ from icoscp.stilt import stiltstation
 from bokeh.io import show, output_notebook, reset_output
 import matplotlib.pyplot as plt
 stiltstations= stiltstation.find()
-# error in geocoder - located ZSF in Austria rather than Germany 
-stiltstations['ZSF']['geoinfo']['name']['common'] = 'Germany'
 
 list_all_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if v['geoinfo']])
 list_all_not_located = [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if not v['geoinfo']]
@@ -120,14 +118,17 @@ def use_icos_network_change(c):
             # if there already is a station with that name
             else:
 
-                #remove from list and replace with higher val
+                #remove from list and replace with higher val 
                 matched_station = [s for s in list_icos_stations_reduced if s[0:3] == station[0:3]][0]
 
                 if len(station)>3 and len(matched_station)>3:
-                    if int(station[3:6])>int(matched_station[3:6]):
-                        list_icos_stations_reduced.remove(matched_station)
-                        list_icos_stations_reduced.append(station)
-                        stations_reduced.append(station[0:3])
+                    
+                    #can only check if value in stilt station name (always the case, except CMN_test)
+                    if station[3:6].isdecimal() and matched_station[3:6].isdecimal():
+                        if int(station[3:6])>int(matched_station[3:6]):
+                            list_icos_stations_reduced.remove(matched_station)
+                            list_icos_stations_reduced.append(station)
+                            stations_reduced.append(station[0:3])
 
         sites_base_network_options.value = list_icos_stations_reduced
 
@@ -423,6 +424,12 @@ def update_func(button_c):
         
         with output_base_network_fp_linear:
             
+            if download_output:
+                pngfile = 'base_footpint_linear'
+
+            else:
+                pngfile = ''
+            
             functions.plot_maps(networkObj.baseNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
 
     
@@ -444,22 +451,27 @@ def update_func(button_c):
             plt.show(histogram_compare)
         
         with output_compare_network_fp_linear: 
+            
+            if download_output:
+                pngfile = 'compare_footprint_linear'
+
+            else:
+                pngfile = ''
 
 
-            functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
+            functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
         
     
         with output_base_minus_compare:
             display(HTML('<p style="font-size:16px;text-align:center">Compare network - base network</p>'))
-            
-            
+       
             if download_output:
                 pngfile = 'compare_minus_base_footprint_linear'
 
             else:
                 pngfile = ''
 
-            functions.plot_maps(networkObj.compareMinusBase, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization_2018', unit = 'ppm /(μmol / (m²s))', vmax=None)
+            functions.plot_maps(networkObj.compareMinusBase, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=None)
             
             
     df_leader_chart_sens = functions.leader_chart_sensitivity(networkObj)
@@ -492,7 +504,7 @@ def update_func(button_c):
     
     #only if choose to donwload:
     if download_output:
-        functions.save_settings(settings, directory='network_characterization/network_characterization_2018')
+        functions.save_settings(settings, directory='network_characterization/network_characterization')
     
     
 
