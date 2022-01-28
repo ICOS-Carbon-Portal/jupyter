@@ -134,10 +134,8 @@ def read_stilt_timeseries(station,date_range,timeselect_list):
     return df
 
 #given the input - create an updated pandas date range with only hours in timeselect_list
-def date_range_hour_filtered(start_date, end_date, timeselect_list):
+def date_range_hour_filtered(date_range, timeselect_list):
     
-    date_range = pd.date_range(start_date, end_date, freq='3H')
-
     #depending on how many input (max 8 for 0 3 6 9 12 15 18 21), filter to include hours.
     for time_value in timeselect_list:
         if len(timeselect_list)==1:
