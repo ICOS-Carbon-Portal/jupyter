@@ -187,7 +187,10 @@ def create_STILT_dictionary():
                 if (len(ist[3:])==0):
                     ih = int(float(heights[0]))
                 else:
-                    ih = [int(float(el)) for el in heights if (abs(int(float(el))-int(ist[3:]))<6)]
+                    if (ist[3:].isdigit()):
+                       	ih = [int(float(el)) for el in heights if (abs(int(float(el))-int(ist[3:]))<6)]
+                    else:
+                        ih = []
             if isinstance(ih, list):
                 if (len(ih) == 0):
                     stations[ist]['icosHeight'] = np.nan
