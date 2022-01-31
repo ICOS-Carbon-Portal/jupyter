@@ -1236,163 +1236,7 @@ def define_bins_landcover_polar_graph(bin_size):
     
     return dir_bins, dir_labels
    
-#multiple variables graph
-def values_multiple_variable_graph(all_stations, selected_station, date_range, timeselect_list, df_saved):
-
-    df_new_values = pd.DataFrame(columns=['Station','Sensitivity','GEE','Respiration','Anthro','Point source','Population'])
-    
-    start_date = min(date_range)
-     
-    fp_pop= import_population_data()
-
-    fp_point= import_point_source_data()
-
-    list_stations_without_footprints=[]
-    index=0
-    #need to compute for all stations that will be shown together with the "selected stations"
-    for station in all_stations:
-        
-        #could use aggregated station footprint.
-        #lon, lat, title not needed
-        nfp, fp_station, lon, lat, title = read_aggreg_footprints(station, date_range)
-        
-        if nfp > 0:
-
-            percent_footprints=(nfp/len(date_range))*100
-            
-            if percent_footprints<75:
- 
-                display(HTML('<p style="font-size:12px;">' + selected_station + ' (' + str(nfp) + '/' + str(len(date_range)) +' footprints)</p>'))       
-
-            #total average sensitivity for specific station:
-            average_sensitivity=fp_station[0].sum()
-
-            #read the modelled concentration data - for anthro and bio values
-            #using the updated version of read_stilt_timeseries allows for filtering out different hours of the days
-            df_modelled_concentrations = read_stilt_timeseries(station, date_range, timeselect_list)
-
-            #averages of the values --> default skip nan
-            df_mean=df_modelled_concentrations.mean()
-
-            average_gee=df_mean['co2.bio.gee']
-
-            average_respiration=df_mean['co2.bio.resp']
-
-            #anthro:
-            average_anthro=(df_mean['co2.industry']+df_mean['co2.energy']+ df_mean['co2.transport']+ df_mean['co2.others'])
-
-            #point source for specific station 
-            fp_pointsource_multiplied=fp_station*fp_point
-            average_pointsource=fp_pointsource_multiplied.sum()
-
-            #population for specific station
-            fp_pop_multiplied=fp_station*fp_pop
-            average_population=fp_pop_multiplied.sum()
-            
-            df_new_values.loc[index] = [station, average_sensitivity, average_gee, average_respiration, average_anthro, average_pointsource, average_population]
-            
-            index=index+1
-        
-        else:
-            
-            list_stations_without_footprints.append(station)
-            
-            continue 
-
-    #list the reference stations without footprints
-    if len(list_stations_without_footprints)>0:
-        
-        stations_without_footprints_string = ', '.join(list_stations_without_footprints)
-                 
-        display(HTML('<p style="font-size:12px;">Reference stations without footprints and not included for the multiple variables graph: ' + stations_without_footprints_string + '</p>'))
-        
-    df_saved=pd.concat([df_saved, df_new_values], ignore_index=True)
-    
-    #these are returned to the function "multiple_variables_graph"
-    return df_saved
-
-
-def values_multiple_variable_graph_land_cover(all_stations, selected_station, date_range, timeselect_list, df_saved):
-    
-    df_new_values = pd.DataFrame(columns=['Station', 'Broad leaf forest','Coniferous forest','Mixed forest','Natural grassland','Cropland','Pasture','Urban', 'Ocean', 'Unknown'])
- 
-    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018')
-    
-    list_stations_without_footprints = []
-    index=0
-    #need to compute for all stations that will be shown together with the "selected stations"
-    for station in all_stations:
-
-        #could use aggregated station footprint.
-        #lon, lat, title not needed
-        nfp, fp_station, lon, lat, title = read_aggreg_footprints(station, date_range)
-        
-        if nfp > 0:
-
-            percent_footprints=(nfp/len(date_range))*100
-            
-            if percent_footprints<75:
- 
-                display(HTML('<p style="font-size:12px;">' + selected_station + ' (' + str(nfp) + '/' + str(len(date_range)) +' footprints)</p>'))       
-
-            broad_leaf_forest_station = (fp_station * broad_leaf_forest).sum()
-            coniferous_forest_station = (fp_station * coniferous_forest).sum()
-            mixed_forest_station = (fp_station * mixed_forest).sum()
-            ocean_station = (fp_station * ocean).sum()
-            other_station = (fp_station * other).sum()
-            natural_grassland_station = (fp_station * grass_shrub).sum()
-            cropland_station = (fp_station * cropland).sum()
-            pasture_station = (fp_station * pasture).sum()
-            urban_station = (fp_station * urban).sum()
-            unknown_station = (fp_station * unknown).sum()
-
-            df_new_values.loc[index] = [station, broad_leaf_forest_station, coniferous_forest_station, mixed_forest_station, natural_grassland_station, cropland_station, pasture_station, urban_station, ocean_station, unknown_station]
-            
-            index=index+1
-        
-        else:
-            
-            list_stations_without_footprints.append(station)
-            
-            continue 
-
-    #list the reference stations without footprints
-    if len(list_stations_without_footprints)>0:
-        
-        stations_without_footprints_string = ', '.join(list_stations_without_footprints)
-                 
-        display(HTML('<p style="font-size:12px;">Reference stations without footprints and not included for the multiple variables graph: ' + stations_without_footprints_string + '</p>'))
-        
-    df_saved=pd.concat([df_saved, df_new_values], ignore_index=True)
-    
-    #these are returned to the function "multiple_variables_graph"
-    return df_saved
-
-      
-def compute_normalized(df_saved_for_normalized, station, column, min_value, range_value):
-
-    value=df_saved_for_normalized.loc[df_saved_for_normalized['Station'] == station, column]
-
-    value=value.values[0]
-
-    if value==min_value:
-        value_normalized=0
-        df_saved_for_normalized.loc[df_saved_for_normalized['Station'] == station, column]=0
-    else:
-        #min and range in dictionary to column? 
-        #min GEE is the value with the highest contirubtion to co2. 
-        if column=='GEE':
-            
-            value_normalized = ((abs(value)-abs(min_value))/range_value)*100
-           
-        else:
-            
-            value_normalized=((value-min_value)/range_value)*100
-        df_saved_for_normalized.loc[df_saved_for_normalized['Station'] == station, column]=value_normalized
-
-        
-    return df_saved_for_normalized
-            
+#multiple variables graph    
 def multiple_variables_graph(myStation):
     
     selected_station=myStation.stationId
@@ -1400,84 +1244,78 @@ def multiple_variables_graph(myStation):
     timeselect_list=myStation.settings['timeOfDay']    
     date_range=myStation.dateRange
     
+    df_save = pd.DataFrame(columns=['Station','Sensitivity','Area 50% sensitivity', 'GEE','Respiration','Anthro','Point source','Population'])
 
     all_stations=['TRN180', 'SVB150', 'TOH147', 'SMR125', 'LUT', 'KRE250', 'IPR100', 'JFJ', 'KIT200', 'GAT344']
     
     if selected_station not in all_stations:
         all_stations.append(selected_station)
         
-    start_date=min(date_range)
-    end_date=max(date_range)
-
-    #if the user selection is to use all footprints of 2017 or 2018, use saved values for all the 
-    #reference stations (and a few more- all the stations used in Storm(2020))
-    if start_date==pd.Timestamp(2018, 1, 1, 0) and end_date==pd.Timestamp(2018,12,31,0) and len(timeselect_list)==8:
-        df_saved=pd.read_csv(stcDataPath + 'multiple_variables_graph_values_2018.csv')
-        predefined=True
-        
-    elif start_date==pd.Timestamp(2017, 1, 1, 0) and end_date==pd.Timestamp(2017,12,31,0) and len(timeselect_list)==8:
-        df_saved=pd.read_csv(stcDataPath + 'multiple_variables_graph_values_2017.csv')
-        predefined=True
-
-    #if different date-range, need to compute variable values for all.
-    else:
-        
-        #what would have gotten from saved file. Here create empty datafram which
-        #will be appended to in compute_values_multiple_varaible_graph_upd
-        df_saved=pd.DataFrame(columns=['Station','Sensitivity','GEE','Respiration','Anthro','Point source','Population'])
-        
-        #"all_stations" contains all reference stations as well as the selected station (possibly one of the reference stations). Selected station needed seperate also. 
-        df_saved= values_multiple_variable_graph(all_stations, selected_station, date_range, timeselect_list, df_saved)
-        
-        predefined=False
-           
-    #if all of 2017 or all of 2018 (predefined) - create the list_of_lists_all mainly from the saved dataframes 
-    if predefined:
-
-        list_stations_from_saved=df_saved['Station'].tolist() 
-  
-        #check so all stations we want. defined in all_stations (+selected station if not in there)
-        for station in all_stations:
-            
-            #if a station is not in the list with pre-computed data, need to compute it
-            if station not in list_stations_from_saved:
-                
-                #also update df_saved... used for 1st, 2nd, 3rd quartile
-                df_saved= values_multiple_variable_graph([station],selected_station,date_range, timeselect_list, df_saved)
-          
-    #only the selected station (and later append selected station if not already among the saved. 
-    df_saved_upd = df_saved[df_saved['Station'].isin(all_stations)]
+    start_date_year=min(date_range).year
+    end_date_year=max(date_range).year
     
-    #DONE GETTING ALL THE DATA: 
+    if start_date_year == end_date_year and len(timeselect_list)==8:
+        full_year = True
+   
+    else:
+        full_year = False
+
+    var_load=pd.read_csv(stcDataPath + 'seasonal_table_values_GPW_pop.csv') 
+
+    index = 0 
+    for station in all_stations:
+        
+        station_year = station + '_' + str(start_date_year)
+
+        if full_year and station_year in set(var_load.station_year):
+            
+            sens_whole= var_load.loc[var_load['station_year'] == station_year, 'sens_whole'].iloc[0]
+            sens_area_50= var_load.loc[var_load['station_year'] == station_year, 'sens_area_50_percent'].iloc[0] 
+            gee_whole= var_load.loc[var_load['station_year'] == station_year, 'gee_whole'].iloc[0]
+            resp_whole= var_load.loc[var_load['station_year'] == station_year, 'resp_whole'].iloc[0]
+            anthro_whole= var_load.loc[var_load['station_year'] == station_year, 'anthro_whole'].iloc[0]
+            point_whole= var_load.loc[var_load['station_year'] == station_year, 'point_whole'].iloc[0]
+            pop_whole= var_load.loc[var_load['station_year'] == station_year, 'pop_whole'].iloc[0]
+            
+        else:
+            sens_whole,sens_area_50, gee_whole,resp_whole, anthro_whole,point_whole,pop_whole = values_multiple_variable_graph(myStation, station)
+            
+        if sens_whole is not None:
+
+            df_save.loc[len(df_save.index)] = [station, sens_whole,sens_area_50,gee_whole,resp_whole, anthro_whole,point_whole,pop_whole]
+            index=index+1
+
     #sensitivity is the first attribut (list_item[0]) in the each of the lists (one list per station)
-    min_sens=min(df_saved_upd['Sensitivity'])
-    range_sens=max(df_saved_upd['Sensitivity'])-min_sens
+    min_sens=min(df_save['Sensitivity'])
+    range_sens=max(df_save['Sensitivity'])-min_sens
+    
+    min_sens_50=min(df_save['Area 50% sensitivity'])
+    range_sens_50=max(df_save['Area 50% sensitivity'])-min_sens_50
 
     #these lists (list_sensitivity, list_population, list_point_source) will be used to generate texts 
     #for the station characterization PDFs (if choose to create a PDF)
     #--> hence into list here, and not for GEE, respiration and anthropogenic contribution
-    min_gee=max(df_saved_upd['GEE'])
-    range_gee=abs(min_gee-min(df_saved_upd['GEE']))
+    min_gee=max(df_save['GEE'])
+    range_gee=abs(min_gee-min(df_save['GEE']))
 
-    min_resp=min(df_saved_upd['Respiration'])
-    range_resp=max(df_saved_upd['Respiration'])-min_resp
+    min_resp=min(df_save['Respiration'])
+    range_resp=max(df_save['Respiration'])-min_resp
         
-    min_anthro=min(df_saved_upd['Anthro'])
-    range_anthro=max(df_saved_upd['Anthro'])-min_anthro
+    min_anthro=min(df_save['Anthro'])
+    range_anthro=max(df_save['Anthro'])-min_anthro
     
-    min_pointsource=min(df_saved_upd['Point source'])
-    range_pointsource=max(df_saved_upd['Point source'])-min_pointsource
+    min_pointsource=min(df_save['Point source'])
+    range_pointsource=max(df_save['Point source'])-min_pointsource
     
-    min_population=min(df_saved_upd['Population'])
-    range_population=max(df_saved_upd['Population'])-min_population
+    min_population=min(df_save['Population'])
+    range_population=max(df_save['Population'])-min_population
 
-    df_saved_for_normalized=df_saved_upd.copy()
+    df_saved_for_normalized=df_save.copy()
 
-    #for station in all_stations:
-        
     for station in df_saved_for_normalized['Station']:
         
         df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Sensitivity', min_sens, range_sens)
+        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Area 50% sensitivity', min_sens_50, range_sens_50)
         df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'GEE', min_gee, range_gee)
         df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Respiration', min_resp, range_resp)
 
@@ -1499,7 +1337,7 @@ def multiple_variables_graph(myStation):
     ax.tick_params(axis='both', which='both', length=0)
     
     #what will go as labels along the x-axis. Blank space next to station for more room. 
-    list_attributes=['Station', '', 'Sensitivity', 'Population', 'Point source contribution', 'GEE (uptake)', 'Respiration', 'Anthropogenic contribution']
+    list_attributes=['Station', '', 'Sensitivity', 'Area 50% sensitivity', 'Population', 'Point source contribution', 'GEE (uptake)', 'Respiration', 'Anthropogenic contribution']
 
     #max 15 characters in lable
     list_attributes=[textwrap.fill(text,15) for text in list_attributes]
@@ -1512,164 +1350,10 @@ def multiple_variables_graph(myStation):
         station_values=df_saved_for_normalized.loc[df_saved_for_normalized['Station'] == station]
 
         #place them in the order we want them in the graph. List that will be used for the line. (one per station)
-        station_values_list =[place_on_axis, place_on_axis, station_values['Sensitivity'].values[0], 
+        station_values_list =[place_on_axis, place_on_axis, station_values['Sensitivity'].values[0], station_values['Area 50% sensitivity'], 
                               station_values['Population'].values[0], station_values['Point source'].values[0],
                               station_values['GEE'].values[0], station_values['Respiration'].values[0], 
                               station_values['Anthro'].values[0]]
-        
-        if station==selected_station:
-
-            plt.plot(list_attributes, station_values_list, linestyle='-', marker='o', lw=3, color= 'black', label=station_name)
-            
-            #on 'Stationä position (along the x-axis). 
-            #station_values_list[0] --> where on y-axis (place_on_axis). +1 for selected_station (bold text, need more room)
-            ax.text('Station', station_values_list[0]+1, station)
-            
-        else:
-            plt.plot(list_attributes, station_values_list, linestyle=':', lw=0.6, color= 'blue', label=station_name)
-                  
-            ax.text('Station', station_values_list[0], station)
-        
-        place_on_axis=place_on_axis+10
-
-    ax.set_ylabel('% of max')
-
-    ax.tick_params(axis='y')
-
-    #vertical labels except "station" which also has different font
-    list_attributes_upd=list_attributes
-    list_attributes_upd[0]=''
-    ax.set_xticklabels(list_attributes_upd, rotation='vertical')
-
-    #label for station (furthest to the left in graph
-    ax.text(0, -10, 'Station', fontsize=15,weight = 'bold')
-
-    ax.yaxis.grid(True)
-        
-    columns_need_quartiles=['Sensitivity','Population','Point source']
-    
-    for column in columns_need_quartiles:
-        
-        #df saved - the original values. 
-        quartile_df=df_saved[column].quantile([0.25,0.5,0.75])
-
-        q1=quartile_df[0.25]
-        q2=quartile_df[0.5]
-        q3=quartile_df[0.75]
-        
-        value_selected_station = df_saved.loc[df_saved['Station'] == selected_station, column]
-        value_selected_station= value_selected_station.values[0]
-        
-        if value_selected_station<q1:
-            pdf_text='first quartile'
-        elif value_selected_station>=q1 and value_selected_station<q2:
-            pdf_text='second quartile'
-        elif value_selected_station>=q2 and value_selected_station<q3:
-            pdf_text='third quartile'
-        else:
-            pdf_text='fourth quartile'
-
-        myStation.settings[column] = pdf_text
-        
-    caption=('Selected station relative to reference atmospheric stations')
-
-    return fig, caption
-
-def multiple_variables_graph_land_cover(myStation):
-    selected_station=myStation.stationId
-    station_name=[myStation.stationName]
-    timeselect_list=myStation.settings['timeOfDay']    
-    date_range=myStation.dateRange
-
-    all_stations=['TRN180', 'SVB150', 'TOH147', 'SMR125', 'LUT', 'KRE250', 'IPR100', 'JFJ', 'KIT200', 'GAT344']
-    
-    if selected_station not in all_stations:
-        all_stations.append(selected_station)
-        
-    start_date=min(date_range)
-    end_date=max(date_range)
-    
-    df_saved_upd=pd.DataFrame(columns=['Station', 'Broad leaf forest','Coniferous forest','Mixed forest','Natural grassland','Cropland','Pasture','Urban', 'Ocean', 'Unknown'])
-
-    #"all_stations" contains all reference stations as well as the selected station (possibly one of the reference stations). Selected station needed seperate also. 
-    df_saved_upd= values_multiple_variable_graph_land_cover(all_stations, selected_station, date_range, timeselect_list, df_saved_upd)
-
-    #DONE GETTING ALL THE DATA: 
-    #sensitivity is the first attribut (list_item[0]) in the each of the lists (one list per station)
-    min_broad_leaf_forest=min(df_saved_upd['Broad leaf forest'])
-    range_broad_leaf_forest=max(df_saved_upd['Broad leaf forest'])-min_broad_leaf_forest
-
-    min_coniferous_forest=min(df_saved_upd['Coniferous forest'])
-    range_coniferous_forest=max(df_saved_upd['Coniferous forest'])-min_coniferous_forest
-        
-    min_mixed_forest=min(df_saved_upd['Mixed forest'])
-    range_mixed_forest=max(df_saved_upd['Mixed forest'])-min_mixed_forest
-    
-    min_natural_grassland=min(df_saved_upd['Natural grassland'])
-    range_natural_grassland=max(df_saved_upd['Natural grassland'])-min_natural_grassland
-    
-    min_cropland=min(df_saved_upd['Cropland'])
-    range_cropland=max(df_saved_upd['Cropland'])-min_cropland
-    
-    min_pasture=min(df_saved_upd['Pasture'])
-    range_pasture=max(df_saved_upd['Pasture'])-min_pasture
-        
-    min_urban=min(df_saved_upd['Urban'])
-    range_urban=max(df_saved_upd['Urban'])-min_urban
-    
-    min_ocean=min(df_saved_upd['Ocean'])
-    range_ocean=max(df_saved_upd['Ocean'])-min_ocean
-    
-    min_unknown=min(df_saved_upd['Unknown'])
-    range_unknown=max(df_saved_upd['Unknown'])-min_unknown
-
-    df_saved_for_normalized=df_saved_upd.copy()
-
-    #for station in all_stations:   
-    for station in df_saved_for_normalized['Station']:
-        
-        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Broad leaf forest', min_broad_leaf_forest, range_broad_leaf_forest)
-        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Coniferous forest', min_coniferous_forest, range_coniferous_forest)
-        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Mixed forest', min_mixed_forest, range_mixed_forest)
-        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Natural grassland', min_natural_grassland, range_natural_grassland)
-        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Cropland', min_cropland, range_cropland)
-        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Pasture', min_pasture, range_pasture)
-        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Urban', min_urban, range_urban)
-        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Ocean', min_ocean, range_ocean)
-        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Unknown', min_unknown, range_unknown)
-
-    #create the figure
-    matplotlib.rcParams.update({'font.size': 14})
-    fig = plt.figure(figsize=(10,9)) 
-    ax = fig.add_subplot(111)
-
-    #added - get on the right side of the plot
-    ax.yaxis.tick_right()
-
-    ax.yaxis.set_label_position("right")
-
-    #remove the ticks (lenght 0 - keep the names)
-    ax.tick_params(axis='both', which='both', length=0)
-    
-    #what will go as labels along the x-axis. Blank space next to station for more room. 
-    list_attributes=['Station', '', 'Broad leaf forest','Coniferous forest','Mixed forest','Natural grassland','Cropland','Pasture','Urban', 'Ocean', 'Unknown']
-
-    #max 15 characters in lable
-    list_attributes=[textwrap.fill(text,15) for text in list_attributes]
-    print('df_saved_for_normalized', df_saved_for_normalized)
-    #incremented for each station.. 0, 10, 20... etc. Where station name and "line" should start along the y-axis. 
-    place_on_axis=0
-    for station in df_saved_for_normalized['Station']:
-        
-        #get all the values for station (row in dataframe)
-        station_values=df_saved_for_normalized.loc[df_saved_for_normalized['Station'] == station]
-
-        #place them in the order we want them in the graph. List that will be used for the line. (one per station)
-        station_values_list =[place_on_axis, place_on_axis, station_values['Broad leaf forest'].values[0], 
-                              station_values['Coniferous forest'].values[0], station_values['Mixed forest'].values[0],
-                              station_values['Natural grassland'].values[0], station_values['Cropland'].values[0], 
-                              station_values['Pasture'].values[0], station_values['Urban'].values[0], station_values['Ocean'].values[0], 
-                              station_values['Unknown'].values[0]]
         
         if station==selected_station:
 
@@ -1700,10 +1384,108 @@ def multiple_variables_graph_land_cover(myStation):
 
     ax.yaxis.grid(True)
         
+    columns_need_quartiles=['Sensitivity','Population','Point source']
+    
+    for column in columns_need_quartiles:
+        
+        #df saved - the original values. 
+        quartile_df=df_save[column].quantile([0.25,0.5,0.75])
+
+        q1=quartile_df[0.25]
+        q2=quartile_df[0.5]
+        q3=quartile_df[0.75]
+        
+        value_selected_station = df_save.loc[df_save['Station'] == selected_station, column]
+        value_selected_station= value_selected_station.values[0]
+        
+        if value_selected_station<q1:
+            pdf_text='first quartile'
+        elif value_selected_station>=q1 and value_selected_station<q2:
+            pdf_text='second quartile'
+        elif value_selected_station>=q2 and value_selected_station<q3:
+            pdf_text='third quartile'
+        else:
+            pdf_text='fourth quartile'
+
+        myStation.settings[column] = pdf_text
+        
     caption=('Selected station relative to reference atmospheric stations')
 
-    return df_saved_for_normalized, fig, caption
+    return fig, caption
 
+def values_multiple_variable_graph(myStation, station):
+
+    date_range = myStation.dateRange
+    timeselect_list = myStation.settings['timeOfDay']  
+    fp_pop= import_population_data()
+    fp_point= import_point_source_data()
+    nfp, fp_station, lon, lat, title = read_aggreg_footprints(station, date_range)
+   
+    if nfp > 0:
+
+        percent_footprints=(nfp/len(date_range))*100
+
+        if percent_footprints<75:
+
+            display(HTML('<p style="font-size:12px;">' + station + ' (' + str(nfp) + '/' + str(len(date_range)) +' footprints)</p>'))       
+            
+        sens_area_50 = area_footprint_based_on_threshold(fp_station, lat, lon, 0.5)
+
+        #total average sensitivity for specific station:
+        sens_whole=fp_station[0].sum()
+
+        #read the modelled concentration data - for anthro and bio values
+        #using the updated version of read_stilt_timeseries allows for filtering out different hours of the days
+        df_modelled_concentrations = read_stilt_timeseries(station, date_range, timeselect_list)
+
+        #averages of the values --> default skip nan
+        df_mean=df_modelled_concentrations.mean()
+
+        gee_whole=df_mean['co2.bio.gee']
+
+        resp_whole=df_mean['co2.bio.resp']
+
+        #anthro:
+        anthro_whole=(df_mean['co2.industry']+df_mean['co2.energy']+ df_mean['co2.transport']+ df_mean['co2.others'])
+
+        #point source for specific station 
+        fp_pointsource_multiplied=fp_station*fp_point
+        point_whole=fp_pointsource_multiplied.sum()
+
+        #population for specific station
+        fp_pop_multiplied=fp_station*fp_pop
+        pop_whole=fp_pop_multiplied.sum()
+
+        return sens_whole, sens_area_50, gee_whole, resp_whole, anthro_whole, point_whole, pop_whole
+    
+    else:
+        display(HTML('<p style="font-size:12px;">' + station + ' has no footprints for specified date range. </p>'))   
+        return None, None, None, None, None, None, None
+
+      
+def compute_normalized(df_saved_for_normalized, station, column, min_value, range_value):
+
+    value=df_saved_for_normalized.loc[df_saved_for_normalized['Station'] == station, column]
+
+    value=value.values[0]
+
+    if value==min_value:
+        value_normalized=0
+        df_saved_for_normalized.loc[df_saved_for_normalized['Station'] == station, column]=0
+    else:
+        #min and range in dictionary to column? 
+        #min GEE is the value with the highest contirubtion to co2. 
+        if column=='GEE':
+            
+            value_normalized = ((abs(value)-abs(min_value))/range_value)*100
+           
+        else:
+            
+            value_normalized=((value-min_value)/range_value)*100
+        df_saved_for_normalized.loc[df_saved_for_normalized['Station'] == station, column]=value_normalized
+
+        
+    return df_saved_for_normalized
 
 
 def save(stc, fmt='pdf'):

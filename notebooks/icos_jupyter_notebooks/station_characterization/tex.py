@@ -125,8 +125,7 @@ def _template():
         %nicer date at bottom:
         \\usepackage[yyyymmdd]{datetime}
         \\usepackage{tabularx}
-        \\newcolumntype{b}{X}
-        \\newcolumntype{s}{>{\\hsize=.5\\hsize}X}
+        \\newcolumntype{b}{>{\\sffamily}X}
 
         \\begin{document}
 
@@ -213,7 +212,7 @@ the end of this document for further information and explanations.
         \\
         
         \\begin{figure}[!h]
-        \\includegraphics[trim={0 0 8cm 0},clip,width=0.6\\textwidth]{**landcover_windrose**}
+        \\includegraphics[trim={0 0 8.1cm 0},clip,width=0.6\\textwidth]{**landcover_windrose**}
         \\raisebox{4.5cm}[0pt][0pt]{%
         \\hspace{-0.6cm}%
         \\captionsetup{labelformat=empty}
@@ -223,11 +222,12 @@ the end of this document for further information and explanations.
         \\
         \\begin{figure}[!h]
         \\includegraphics[width=0.6\\textwidth]{**multivar**}
-        \\raisebox{4.6cm}[0pt][0pt]{%
+        \\raisebox{5.1cm}[0pt][0pt]{%
         \\hspace{-0.6cm}%
         \\captionsetup{labelformat=empty}
-        \\parbox{7.9cm}{\\caption{\\begin{small}Selected reference atmospheric stations (see below table) are compared in this \\textbf{multiple variables graph}. **name**'s values are shown with the black line and the points' placements on the y-axis are determined relative to the minimum (0\\%) and maximum (100\\%) of the reference stations. The same variables as in the seasonal variations table are shown above. \\end{small}}\\begin{scriptsize}
-        \\begin{tabularx}{0.45\\textwidth}{sbb}
+        \\parbox{7.9cm}{\\caption{\\begin{small}Selected reference atmospheric stations (see below table) are compared in this \\textbf{multiple variables graph}. **name**'s values are shown with the black line and the points' placements on the y-axis are determined relative to the minimum (0\\%) and maximum (100\\%) of the reference stations. The same variables as in the seasonal variations table are shown above. \\end{small}}\\begin{tiny}
+        \\hspace{0.87cm}%
+        \\begin{tabularx}{0.38\\textwidth}{bbb}
         \\hline
         \\textbf{Code} & \\textbf{Name} & \\textbf{Country} \\\\
         \\hline
@@ -252,7 +252,7 @@ the end of this document for further information and explanations.
         GAT344  & Gartow  & Germany  \\\\
 
         \\end{tabularx}
-        \end{scriptsize}}}
+        \end{tiny}}}
         \\end{figure}
      
         %text in margin
