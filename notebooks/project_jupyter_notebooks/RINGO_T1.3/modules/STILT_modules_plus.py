@@ -109,7 +109,8 @@ def create_STILT_dictionary():
     # extract location from filename of link
 
     path_stations = path_stiltweb+'/stations/'
-    all_stations = os.listdir(path_stations)
+	all_stations = [s for s in os.listdir(path_stations) if os.path.exists(path_stations + s)]    
+    #all_stations = os.listdir(path_stations)
 
     # empty dictionary
     stations = {}
