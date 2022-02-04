@@ -27,14 +27,6 @@ list_all_icos_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['nam
 list_all_icos_not_located = [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if not v['geoinfo'] if v['icos']]
 list_all_icos = list_all_icos_not_located + list_all_icos_located
 
-
-
-# create a list (tuple) for the dropdown list of stations
-#icoslist = sorted([(v['name'],k) for k,v in stiltstations.items() if v['icos']])
-#stiltlist = sorted([(v['name'],k) for k,v in stiltstations.items() if not v['icos']])
-
-#---------------------------------------------------------
-
 # read or set the parameters
 
 def get_settings():
@@ -64,7 +56,16 @@ def get_settings():
     return s
 
 def set_settings(s):
-    station_choice.value = s['stationCode']   
+    
+    if s['stationCode'] in list_all_icos: 
+        station_type.value='ICOS stations'
+        station_choice.options=list_all_icos
+        station_choice.value = s['stationCode']
+    else:
+        station_type.value='STILT stations'
+        station_choice.options=list_all
+        station_choice.value = s['stationCode']
+        
     s_year.value = s['startYear'] 
     s_month.value = s['startMonth']
     s_day.value = s['startDay']
