@@ -86,42 +86,29 @@ class RadiocarbonObject():
     #possibly add to stilt and cpstation - full country name. Only code from cplibrary,
     #only lat and lon from stilt
     def _setStationData(self):
-                
-        self.stationId = self.settings['stationCode']  
+        
+        #self.stationId = self.settings['stationCode']  
         self.threshold = self.settings['threshold']
         
-        #if True that it is an ICOS station.
-        #if self.settings['icos']:
+        self.stationId = self.settings['stationCode']
+        self.country = self.settings['stilt']['geoinfo']['name']['common']
+        
         if 'icos' in self.settings.keys():
-            
+            # ICOS station 
             self.stationName=self.settings['icos']['name']
             self.lat=self.settings['icos']['lat']
             self.lon=self.settings['icos']['lon']
             
             #only going to be set for icos stations, not when only a STILT station
             self.stationClass=self.settings['icos']['icosclass']
-            self.siteType=self.settings['icos']['siteType']
-            
-            if self.settings['stilt']['geoinfo']:
-                
-                self.country=self.settings['stilt']['geoinfo']['name']['common']
-            else:
-                self.country='Location in water'
-        
-        #only STILT station:
+            self.siteType=self.settings['icos']['siteType']            
+       
         else:
-            self.stationName=self.settings['stilt']['name']  
-            
-            # API to reterive country name using reverse geocoding of station lat/lon
+            # STILT station:
+            self.stationName=self.settings['stilt']['name']            
             self.lat=self.settings['stilt']['lat'] 
             self.lon=self.settings['stilt']['lon']
-            
-            if self.settings['geoinfo']:
-                
-                self.country=self.settings['stilt']['geoinfo']['name']['common']
-            else:
-                self.country='Location in water'
-
+  
     def _setDateRange(self):
         """
         Pandas dataframe with the dates/times for all footprints (every three 
