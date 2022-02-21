@@ -103,6 +103,8 @@ def use_icos_network_change(c):
     
     if use_icos_network.value == True:
         prepared_footprints.value= True
+        
+        """
     
         list_icos_stations = [k for k, v in stiltstations.items() if v['icos']]
 
@@ -129,6 +131,10 @@ def use_icos_network_change(c):
                             list_icos_stations_reduced.remove(matched_station)
                             list_icos_stations_reduced.append(station)
                             stations_reduced.append(station[0:3])
+                            
+        """
+        
+        list_icos_stations_reduced = ['BIR075','GAT344', 'HEL110', 'HPB131','HTM150', 'UTO','IPR100', 'JFJ','JUE120','KIT200','KRE250','LMP','LIN099','LUT','CMN760','NOR100','OPE120','OXK163','PAL','PRS','PUI','PUY','SMR127','SAC100','STE252','SVB150','TOH147','TRN180','WES','WAO','ZSF']
 
         sites_base_network_options.value = list_icos_stations_reduced
 
@@ -425,7 +431,7 @@ def update_func(button_c):
         with output_base_network_fp_linear:
             
             if download_output:
-                pngfile = 'base_footpint_linear'
+                pngfile = 'base_footprint_linear'
 
             else:
                 pngfile = ''
@@ -474,14 +480,25 @@ def update_func(button_c):
             functions.plot_maps(networkObj.compareMinusBase, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=None)
             
             
-    df_leader_chart_sens = functions.leader_chart_sensitivity(networkObj)
+    df_leader_chart_sens, original_df_leader_chart_sens = functions.leader_chart_sensitivity(networkObj)
+    
 
     with output_leader_chart:
         
         display(HTML('<p style="font-size:16px;text-align:center">Sensitivity/km2 of network by country</p>'))
         
         display(df_leader_chart_sens)
-    
+        
+        if download_output:
+            
+     
+            
+            path_output= os.path.join(os.path.expanduser('~'), 'output/network_characterization/network_characterization/' + str(networkObj.dateTime))
+            
+     
+
+            original_df_leader_chart_sens.to_csv(path_output + '/leader_chart.csv')
+  
     if networkObj.compareNetwork is not None:
         
         with output_landcover_bargraph_countries:
@@ -601,7 +618,7 @@ selected_compare_network_stations.layout.margin = '0px 0px 0px 70px' #top, right
 
 
 #Create a Dropdown widget with year values (start year):
-s_year = Dropdown(options = range(2006, 2020),
+s_year = Dropdown(options = range(2006, 2021),
                   value = 2018,
                   description = 'Start Year',
                   disabled= False,)
@@ -612,7 +629,7 @@ s_month = Dropdown(options = range(1, 13),
                    disabled= False,)
 
 #Create a Dropdown widget with year values (end year):
-e_year = Dropdown(options = range(2018, 2020),
+e_year = Dropdown(options = range(2018, 2021),
                   value = 2018,
                   description = 'End Year',
                   disabled= False,)

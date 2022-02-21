@@ -47,7 +47,7 @@ class NetworkObj():
  
     def _setNetworks(self):
         
-        self.baseNetwork, self.compareNetwork, self.noFootprints = functions.return_networks(self)
+        self.baseNetwork, self.compareNetwork, self.noFootprints, self.dateTime = functions.return_networks(self)
         
         if self.compareNetwork is not None:
          

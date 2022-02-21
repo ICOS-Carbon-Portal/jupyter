@@ -297,6 +297,7 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
         if not os.path.exists(output):
             os.makedirs(output)
   
+        print(output)
         fig.savefig(output+'/'+pngfile+'.png',dpi=100,bbox_inches='tight')
     if percent:
         
@@ -434,7 +435,7 @@ def return_networks(networkObj):
         # if no base network to add to, there will be no compare network either 
         if len(sites_compare_network) == 0:
 
-            return fp_max_base_network, None, list_none_footprints
+            return fp_max_base_network, None, list_none_footprints, date_time
 
         for station in sites_compare_network:
 
@@ -478,7 +479,7 @@ def return_networks(networkObj):
         if fp_max_compare_network.sum() == fp_max_base_network.sum():
             fp_max_compare_network = None
 
-        return fp_max_base_network, fp_max_compare_network, list_none_footprints
+        return fp_max_base_network, fp_max_compare_network, list_none_footprints, date_time
     
 
 def country_dict_landcover(networkObj):
@@ -629,7 +630,7 @@ def leader_chart_sensitivity(networkObj):
 
         styled_df_leader_chart_sens = styled_df_leader_chart_sens.set_properties(**{'text-align': 'center'}).hide_index()
 
-    return styled_df_leader_chart_sens
+    return styled_df_leader_chart_sens, df_leader_chart_sens
 
 def population_bar_graph_base(networkObj):
     
