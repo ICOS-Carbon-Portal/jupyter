@@ -297,7 +297,6 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
         if not os.path.exists(output):
             os.makedirs(output)
   
-        print(output)
         fig.savefig(output+'/'+pngfile+'.png',dpi=100,bbox_inches='tight')
     if percent:
         
