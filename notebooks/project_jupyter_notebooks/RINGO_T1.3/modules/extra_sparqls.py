@@ -37,54 +37,46 @@ def get_station_class():
 #--------------------------------------------------------------------------------
 
 def get_icos_stations_atc_samplingheight():
-    
+
     """
     Description:      Download ICOS station names for all L1 gases from ICOS CP with a SPARQL-query.
     Input parameters: No input parameter/s
     Output:           Pandas Dataframe
                       columns: 
-                            1. URL to ICOS RI Data Object Landing Page (var_name: 'dobj', var_type: String)
-                            2. Filename for Data Object (var_name: 'filename', var_type: String)
-                            3. Name of gas (var_name: 'variable', var_type: String)
+                            1. Station ID (var_name: 'stationId', var_type: String)
+                            2. URL to ICOS RI Data Object Landing Page (var_name: 'dobj', var_type: String)
+                            3. Filename for Data Object (var_name: 'filename', var_type: String)
                             4. Station name (var_name: 'stationName', var_type: String)
                             5. Sampling height a.g.l. (var_name: 'height', var_type: String)
                             6. Sampling Start Time (var_name: 'timeStart', var_type: String)
                             7. Sampling End Time (var_naem: 'timeEnd', var_type: String)
-                            8. Station ID (var_name: 'stationId', var_type: String)
     """
     
     query = """
-        prefix cpres: <http://meta.icos-cp.eu/resources/cpmeta/>
         prefix cpmeta: <http://meta.icos-cp.eu/ontologies/cpmeta/>
         prefix prov: <http://www.w3.org/ns/prov#>
-        select ?dobj ?fileName ?variable ?stationName ?height ?timeStart ?timeEnd ?stationId
-        where{
-           values ?vtype { cpres:co2MixingRatio cpres:coMixingRatioPpb cpres:ch4MixingRatioPpb}
-           #values ?spec {cpres:atcCo2NrtGrowingDataObject cpres:atcCoNrtGrowingDataObject cpres:atcCh4NrtGrowingDataObject}
-           ?vtype rdfs:label ?variable .
-           ?col cpmeta:hasValueType ?vtype .
-           ?dset cpmeta:hasColumn ?col .
-           ?spec cpmeta:containsDataset ?dset .
-           ?spec cpmeta:hasAssociatedProject <http://meta.icos-cp.eu/resources/projects/icos> .
-           ?dobj cpmeta:hasObjectSpec ?spec .
-           ?dobj cpmeta:hasName ?fileName .
-           ?dobj cpmeta:hasSizeInBytes ?fileSize .
-           filter not exists {[] cpmeta:isNextVersionOf ?dobj}
-           ?dobj cpmeta:wasAcquiredBy [
-              prov:wasAssociatedWith/cpmeta:hasStationId ?stationId ;
-              prov:startedAtTime ?timeStart ;
-              prov:endedAtTime ?timeEnd ;
-              prov:wasAssociatedWith/cpmeta:hasName ?stationName 
-            ] .
-            ?dobj cpmeta:wasAcquiredBy/cpmeta:hasSamplingHeight ?height .
+        prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+        select ?stationId ?dobj ?fileName ?stationName ?height ?timeStart ?timeEnd 
+        where {
+            VALUES ?spec {<http://meta.icos-cp.eu/resources/cpmeta/atcCo2L2DataObject> <http://meta.icos-cp.eu/resources/cpmeta/atcCo2NrtGrowingDataObject>}
+            ?station cpmeta:hasStationId ?stationId;cpmeta:hasName ?stationName .
+            ?dobj cpmeta:hasObjectSpec ?spec .
+            ?dobj cpmeta:hasName ?fileName .
+            ?dobj cpmeta:wasAcquiredBy [
+                prov:startedAtTime ?timeStart ;
+                prov:endedAtTime ?timeEnd ;
+                prov:wasAssociatedWith ?station ;
+                cpmeta:hasSamplingHeight ?height
+                ]
+            FILTER NOT EXISTS {[] cpmeta:isNextVersionOf ?dobj}
         }
-        order by ?variable ?stationName ?height
+        order by ?stationId
     """
-    
     return query
 
-#-------------------------------------------------------------------------------------
-#wichtig
+#--------------------------------------------------------------------------------
+
 def atc_station_tracer_query(station_code, samp_height, tracer, level=2):
 
     """
