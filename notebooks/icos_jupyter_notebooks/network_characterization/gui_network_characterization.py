@@ -134,7 +134,7 @@ def use_icos_network_change(c):
                             
         """
         
-        list_icos_stations_reduced = ['BIR075','GAT344', 'HEL110', 'HPB131','HTM150', 'UTO','IPR100', 'JFJ','JUE120','KIT200','KRE250','LMP','LIN099','LUT','CMN760','NOR100','OPE120','OXK163','PAL','PRS','PUI','PUY','SMR127','SAC100','STE252','SVB150','TOH147','TRN180','WES','WAO','ZSF']
+        list_icos_stations_reduced = ['BIR075','GAT344', 'HEL110', 'HPB131','HTM150', 'UTO','IPR100', 'JFJ','JUE120','KIT200','KRE250','LMP','LIN099','LUT','CMN760','NOR100','OPE120','OXK163','PAL','PRS','PUI084','PUY','SMR125','SAC100','STE252','SVB150','TOH147','TRN180','WES','WAO','ZSF']
 
         sites_base_network_options.value = list_icos_stations_reduced
 
