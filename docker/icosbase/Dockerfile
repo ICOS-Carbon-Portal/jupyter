@@ -1,7 +1,7 @@
 # We use a specific hash since :latest has broken spuriously in the past.
 # https://hub.docker.com/r/jupyter/datascience-notebook
-# This hash is jupyter/datascience-notebook:latest on 28-02-2022.
-FROM jupyter/datascience-notebook@sha256:5d7df327e3ce9e01b066b19951b66485cde45775b3c0bd9b1d44b698fda16db1
+# This hash is jupyter/datascience-notebook:latest on 18-03-2022.
+FROM jupyter/datascience-notebook@sha256:9e64f73a33a52533a5663c389052716775089aa0f0cfe6085f6833046cb83f9c
 # -------------------------
 # Remove the default xetex LaTeX installation of jupyter-lab and
 # install the full latest LaTeX version. It takes about 45 minutes to
@@ -16,7 +16,7 @@ RUN rm -rf /usr/share/texlive
 RUN wget -O /tmp/install-tl-unx.tar.gz http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
 RUN tar -xf /tmp/install-tl-unx.tar.gz --strip-components=1 -C /tmp/
 # Add profile and start intallation.
-COPY Texlive2022/texlive.profile /tmp/.
+COPY Texlive2021/texlive.profile /tmp/.
 RUN /tmp/install-tl --profile=/tmp/texlive.profile
 # Export path to texlive2022
 ENV PATH="/usr/local/texlive/2022/bin/x86_64-linux:${PATH}"
@@ -26,16 +26,14 @@ USER jovyan
 
 # Experimental, use mamba.
 # https://medium.com/@QuantStack/open-software-packaging-for-science-61cecee7fc23
-RUN conda install -y mamba -c conda-forge && conda clean -qafy
+RUN conda install --yes mamba --channel conda-forge \
+    && conda clean --quiet --all --force-pkgs-dirs --yes
 # Install required packages
-RUN mamba install -qy \
+RUN mamba install --quiet --yes \
     basemap basemap-data-hires cartopy geoviews holoviews panel datashader hvplot param cdo \
     python-cdo netcdf4 geopandas mpld3 pscript ipyleaflet netcdf-fortran sparqlwrapper xarray \
-    shapely folium qgrid zarr plotly nco qgrid \
-    && mamba clean -qafy
-
-# this is for the visual debugger in JupyterLab
-RUN mamba install -qy xeus-python && mamba clean -qafy
+    shapely folium qgrid zarr plotly nco qgrid xeus-python \
+    && mamba clean --quiet --all --force-pkgs-dirs --yes
 
 # install the standard notebook extensions
 # and activate the configurator
