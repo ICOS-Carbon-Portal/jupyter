@@ -1,35 +1,27 @@
 # We use a specific hash since :latest has broken spuriously in the past.
 # https://hub.docker.com/r/jupyter/datascience-notebook
-# This hash is jupyter/datascience-notebook:latest on 2021-01-28.
-FROM jupyter/datascience-notebook@sha256:e6d5c7d595d25f6ec7a894d8fcc7cb4b542c28f65fb71cdf0cb9b77f0ce0ddd0
-
+# This hash is jupyter/datascience-notebook:latest on 28-02-2022.
+FROM jupyter/datascience-notebook@sha256:5d7df327e3ce9e01b066b19951b66485cde45775b3c0bd9b1d44b698fda16db1
 # -------------------------
-# this block is added to the top of the Dockerfile
-# because it takes about 45 minutes to install TL2020, so be patient.
-# Install a full version of Texlive2020 (https://tug.org/texlive/)
-# switch to root for texlive installation
+# Remove the default xetex LaTeX installation of jupyter-lab and
+# install the full latest LaTeX version. It takes about 45 minutes to
+# install it, so be patient.
+
+# Switch to root for texlive installation.
 USER root
-
-# Remove old texlive installation
+# Remove old texlive installation.
 RUN rm -rf /usr/share/texlive
-
-# Add texlive2020 installer and unpack
+# Add texlive2022 installer and unpack.
 # http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
-
 RUN wget -O /tmp/install-tl-unx.tar.gz http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
 RUN tar -xf /tmp/install-tl-unx.tar.gz --strip-components=1 -C /tmp/
-
-# add profile and start intallation
-
-COPY Texlive2020/texlive.profile /tmp/.
+# Add profile and start intallation.
+COPY Texlive2022/texlive.profile /tmp/.
 RUN /tmp/install-tl --profile=/tmp/texlive.profile
-
-# export path to texlive2020
-ENV PATH="/usr/local/texlive/2020/bin/x86_64-linux:${PATH}"
-
+# Export path to texlive2022
+ENV PATH="/usr/local/texlive/2022/bin/x86_64-linux:${PATH}"
 # switch back to normal user
 USER jovyan
-
 # -------------------------
 
 # Experimental, use mamba.
