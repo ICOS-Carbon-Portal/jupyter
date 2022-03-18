@@ -27,12 +27,12 @@ USER jovyan
 # Experimental, use mamba.
 # https://medium.com/@QuantStack/open-software-packaging-for-science-61cecee7fc23
 RUN conda install -y mamba -c conda-forge && conda clean -qafy
-
-RUN mamba install -qy                                                          \
-        basemap basemap-data-hires cartopy geoviews holoviews panel datashader \
-        hvplot param cdo python-cdo netcdf4 geopandas mpld3 pscript ipyleaflet \
-        netcdf-fortran sparqlwrapper xarray shapely folium qgrid               \
-        && mamba clean -qafy
+# Install required packages
+RUN mamba install -qy \
+    basemap basemap-data-hires cartopy geoviews holoviews panel datashader hvplot param cdo \
+    python-cdo netcdf4 geopandas mpld3 pscript ipyleaflet netcdf-fortran sparqlwrapper xarray \
+    shapely folium qgrid zarr plotly nco qgrid \
+    && mamba clean -qafy
 
 # this is for the visual debugger in JupyterLab
 RUN mamba install -qy xeus-python && mamba clean -qafy
