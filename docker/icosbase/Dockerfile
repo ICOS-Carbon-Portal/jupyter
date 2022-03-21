@@ -11,15 +11,15 @@ FROM jupyter/datascience-notebook@sha256:9e64f73a33a52533a5663c389052716775089aa
 USER root
 # Remove old texlive installation.
 RUN rm -rf /usr/share/texlive
-# Add texlive2022 installer and unpack.
+# Add texlive2021 installer and unpack.
 # http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
 RUN wget -O /tmp/install-tl-unx.tar.gz http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
 RUN tar -xf /tmp/install-tl-unx.tar.gz --strip-components=1 -C /tmp/
 # Add profile and start intallation.
 COPY Texlive2021/texlive.profile /tmp/.
 RUN /tmp/install-tl --profile=/tmp/texlive.profile
-# Export path to texlive2022
-ENV PATH="/usr/local/texlive/2022/bin/x86_64-linux:${PATH}"
+# Export path to texlive2021
+ENV PATH="/usr/local/texlive/2021/bin/x86_64-linux:${PATH}"
 # switch back to normal user
 USER jovyan
 # -------------------------
@@ -56,14 +56,16 @@ RUN jupyter labextension install @lckr/jupyterlab_variableinspector --no-build
 #RUN jupyter labextension install qgrid2 --no-build
 RUN jupyter lab build
 
-RUN pip install pangaeapy
-RUN pip install jupyter_module_loader
 
-# convert kml files to geojson
-RUN pip install kml2geojson
-
-# simplify polygons 
-RUN pip install simplification
+# Additional python modules, not available using mamba.
+# - openpyxl: Pandas require openpyxl module to read excel files.
+# - kml2geojson: Convert kml files to geojson.
+# - simplification: simplify polygons.
+RUN pip install --quiet pangaeapy jupyter-module-loader kml2geojson simplification openpyxl
+# Keep this in a separate line. It's the only library that changes
+# frequently and the new docker image will build faster.
+# Update version number according to latest release.
+RUN pip install --quiet icoscp==0.1.14
 
 WORKDIR /home/jovyan
 
@@ -74,18 +76,3 @@ RUN rmdir work
 # This package, and the following notebook directories, are the stuff that
 # changes most often, so we add them last.
 RUN pip install icoscp==0.1.14
-
-
-# -----start temp fix---2021-03-26 CD-------------------
-
-# temporary fixes to the icos base image
-# current version of jupyter/datascience-notebook
-# has updated version of pandas which needs openpyxl to read excel files
-RUN mamba install -qy openpyxl
-
-# gdal 3.2.1 can't be loaded.. downgrade to last version we 
-# know is working
-
-RUN mamba install -qy gdal=3.1.4
-
-# -----eof temp fix------------------------------------
