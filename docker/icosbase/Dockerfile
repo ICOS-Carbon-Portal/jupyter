@@ -2,11 +2,10 @@
 # https://hub.docker.com/r/jupyter/datascience-notebook
 # This hash is jupyter/datascience-notebook:latest on 18-03-2022.
 FROM jupyter/datascience-notebook@sha256:9e64f73a33a52533a5663c389052716775089aa0f0cfe6085f6833046cb83f9c
-# -------------------------
+
 # Remove the default xetex LaTeX installation of jupyter-lab and
 # install the full latest LaTeX version. It takes about 45 minutes to
 # install it, so be patient.
-
 # Switch to root for texlive installation.
 USER root
 # Remove old texlive installation.
@@ -22,7 +21,11 @@ RUN /tmp/install-tl --profile=/tmp/texlive.profile
 ENV PATH="/usr/local/texlive/2021/bin/x86_64-linux:${PATH}"
 # switch back to normal user
 USER jovyan
-# -------------------------
+
+# This directory is added by jupyter/base-notebook, for backwards
+# compatibility, but we don't need it.
+WORKDIR /home/jovyan
+RUN rmdir work
 
 # Experimental, use mamba.
 # https://medium.com/@QuantStack/open-software-packaging-for-science-61cecee7fc23
@@ -35,26 +38,24 @@ RUN mamba install --quiet --yes \
     shapely folium qgrid zarr plotly nco qgrid xeus-python \
     && mamba clean --quiet --all --force-pkgs-dirs --yes
 
-# install the standard notebook extensions
-# and activate the configurator
-RUN mamba install -qy -c conda-forge jupyter_contrib_nbextensions
+# Install the standard notebook extensions and activate the
+# configurator.
+RUN mamba install --quiet --yes --channel conda-forge jupyter_contrib_nbextensions
 RUN jupyter nbextensions_configurator enable
 
-# patch the default configuration for toc,
-# such that headers are NOT numbered by default
-# and activate the extension
-
+# Patch the default configuration for toc, such that headers are NOT
+# numbered by default and activate the extension.
 COPY nbextensionDefault/*.diff /tmp/
 RUN patch /opt/conda/share/jupyter/nbextensions/toc2/toc2.yaml /tmp/toc2.yaml.diff
 RUN patch /opt/conda/share/jupyter/nbextensions/toc2/toc2.js /tmp/toc2.js.diff
 RUN jupyter nbextension enable toc2/main
 
-# update jupyter lab and rebuild
-#RUN jupyter labextension install @jupyterlab/debugger --no-build
-#RUN jupyter labextension install @lckr/jupyterlab_variableinspector --no-build
-# jupter lab build fails with this base-notebook
-#RUN jupyter labextension install qgrid2 --no-build
-#RUN jupyter lab build
+# Install qgrid extension (qgrid package also needs to have been
+# installed before installing the extension).
+RUN jupyter labextension install @j123npm/qgrid2@1.1.4 --no-build
+# Rebuild jupyter lab.
+RUN jupyter lab build
+
 # Additional python modules, not available using mamba.
 # - openpyxl: Pandas require openpyxl module to read excel files.
 # - kml2geojson: Convert kml files to geojson.
@@ -64,10 +65,3 @@ RUN pip install --quiet pangaeapy jupyter-module-loader kml2geojson simplificati
 # frequently and the new docker image will build faster.
 # Update version number according to latest release.
 RUN pip install --quiet icoscp==0.1.14
-WORKDIR /home/jovyan
-# This directory is added by jupyter/base-notebook, "for backwards
-# compatibility", but we don't need it.
-RUN rmdir work
-RUN jupyter labextension install @j123npm/qgrid2@1.1.4 --no-build
-# RUN jupyter labextension install @j123npm/qgrid2@1.1.4
-RUN jupyter lab build
