@@ -50,11 +50,11 @@ RUN patch /opt/conda/share/jupyter/nbextensions/toc2/toc2.js /tmp/toc2.js.diff
 RUN jupyter nbextension enable toc2/main
 
 # update jupyter lab and rebuild
-RUN jupyter labextension install @jupyterlab/debugger --no-build
-RUN jupyter labextension install @lckr/jupyterlab_variableinspector --no-build
+#RUN jupyter labextension install @jupyterlab/debugger --no-build
+#RUN jupyter labextension install @lckr/jupyterlab_variableinspector --no-build
 # jupter lab build fails with this base-notebook
 #RUN jupyter labextension install qgrid2 --no-build
-RUN jupyter lab build
+#RUN jupyter lab build
 # Additional python modules, not available using mamba.
 # - openpyxl: Pandas require openpyxl module to read excel files.
 # - kml2geojson: Convert kml files to geojson.
