@@ -40,7 +40,7 @@ RUN mamba install --quiet --yes \
 RUN mamba install -qy -c conda-forge jupyter_contrib_nbextensions
 RUN jupyter nbextensions_configurator enable
 
-# patch the default configuration for toc, 
+# patch the default configuration for toc,
 # such that headers are NOT numbered by default
 # and activate the extension
 
@@ -55,8 +55,6 @@ RUN jupyter labextension install @lckr/jupyterlab_variableinspector --no-build
 # jupter lab build fails with this base-notebook
 #RUN jupyter labextension install qgrid2 --no-build
 RUN jupyter lab build
-
-
 # Additional python modules, not available using mamba.
 # - openpyxl: Pandas require openpyxl module to read excel files.
 # - kml2geojson: Convert kml files to geojson.
@@ -66,13 +64,10 @@ RUN pip install --quiet pangaeapy jupyter-module-loader kml2geojson simplificati
 # frequently and the new docker image will build faster.
 # Update version number according to latest release.
 RUN pip install --quiet icoscp==0.1.14
-
 WORKDIR /home/jovyan
-
 # This directory is added by jupyter/base-notebook, "for backwards
 # compatibility", but we don't need it.
 RUN rmdir work
-
-# This package, and the following notebook directories, are the stuff that
-# changes most often, so we add them last.
-RUN pip install icoscp==0.1.14
+RUN jupyter labextension install @j123npm/qgrid2@1.1.4 --no-build
+# RUN jupyter labextension install @j123npm/qgrid2@1.1.4
+RUN jupyter lab build
