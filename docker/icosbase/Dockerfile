@@ -35,7 +35,7 @@ RUN conda install --yes mamba --channel conda-forge \
 RUN mamba install --quiet --yes \
     basemap basemap-data-hires cartopy geoviews holoviews panel datashader hvplot param cdo \
     python-cdo netcdf4 geopandas mpld3 pscript ipyleaflet netcdf-fortran sparqlwrapper xarray \
-    shapely folium qgrid zarr plotly nco qgrid xeus-python \
+    shapely folium qgrid zarr plotly nco qgrid \
     && mamba clean --quiet --all --force-pkgs-dirs --yes
 
 # Install the standard notebook extensions and activate the
