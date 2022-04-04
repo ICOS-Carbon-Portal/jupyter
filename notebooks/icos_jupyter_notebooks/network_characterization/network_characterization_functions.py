@@ -385,7 +385,7 @@ def return_networks(networkObj):
     for station in sites_base_network:
 
         #if use 2018 aggregated footprint
-        if pd.Timestamp(min(date_range))==pd.Timestamp(2018, 1, 1, 0) and pd.Timestamp(max(date_range))==pd.Timestamp(2018,12,31,0) and len(hours)==8:
+        if pd.Timestamp(min(date_range))==pd.Timestamp(2018, 1, 1, 0) and pd.Timestamp(max(date_range))==pd.Timestamp(2018,12,31,21) and len(hours)==8:
 
             loaded_fp=load_fp(station)
             
