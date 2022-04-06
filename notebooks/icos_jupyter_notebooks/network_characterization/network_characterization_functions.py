@@ -385,7 +385,7 @@ def return_networks(networkObj):
     for station in sites_base_network:
 
         #if use 2018 aggregated footprint
-        if pd.Timestamp(min(date_range))==pd.Timestamp(2018, 1, 1, 0) and pd.Timestamp(max(date_range))==pd.Timestamp(2018,12,31,0) and len(hours)==8:
+        if pd.Timestamp(min(date_range))==pd.Timestamp(2018, 1, 1, 0) and pd.Timestamp(max(date_range))==pd.Timestamp(2018,12,31,21) and len(hours)==8:
 
             loaded_fp=load_fp(station)
             
@@ -802,7 +802,7 @@ def land_cover_bar_graphs_base(networkObj):
     dictionary = networkObj.countryDict
   
     # for the graph with all countries 
-    land_cover_values = ['Broad leaf', 'Coniferous', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrub', 'Other', 'Unknown']
+    land_cover_values = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrub', 'Other', 'Unknown']
     
     colors = ['#4c9c5e','#CAE0AB','#90C987', '#521A13', '#F7F056', '#DC050C', '#1964B0', '#F1932D', '#882E72','#777777']
     
