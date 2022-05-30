@@ -802,7 +802,7 @@ def land_cover_bar_graphs_base(networkObj):
     dictionary = networkObj.countryDict
   
     # for the graph with all countries 
-    land_cover_values = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrub', 'Other', 'Unknown']
+    land_cover_values = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrubland', 'Other', 'Unknown']
     
     colors = ['#4c9c5e','#CAE0AB','#90C987', '#521A13', '#F7F056', '#DC050C', '#1964B0', '#F1932D', '#882E72','#777777']
     
