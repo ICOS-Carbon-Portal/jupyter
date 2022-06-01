@@ -60,7 +60,7 @@ RUN patch /opt/conda/share/jupyter/nbextensions/toc2/toc2.js /tmp/toc2.js.diff
 RUN jupyter nbextension enable toc2/main
 
 # Activate initialisation cell extension
-RUN jupyter nbextension enable init_cell/main
+#RUN jupyter nbextension enable init_cell/main
 
 # update jupyter lab and rebuild
 RUN jupyter labextension install @jupyterlab/debugger --no-build
