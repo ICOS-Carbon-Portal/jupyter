@@ -11,3 +11,7 @@ ADD --chown=1000:100 pylib_examples ./pylib_examples
 # add files from the notebooks root level
 ADD --chown=1000:100 *.md ./
 ADD --chown=1000:100 *.ipynb ./
+
+# the index notebook has an initialisatin cell
+# to automatically run, we need to trus the notebook
+RUN jupyter trust index_notebook.ipynb
