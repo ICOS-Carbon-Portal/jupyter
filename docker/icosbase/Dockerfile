@@ -59,9 +59,6 @@ RUN patch /opt/conda/share/jupyter/nbextensions/toc2/toc2.yaml /tmp/toc2.yaml.di
 RUN patch /opt/conda/share/jupyter/nbextensions/toc2/toc2.js /tmp/toc2.js.diff
 RUN jupyter nbextension enable toc2/main
 
-# Activate initialisation cell extension
-#RUN jupyter nbextension enable init_cell/main
-
 # update jupyter lab and rebuild
 RUN jupyter labextension install @jupyterlab/debugger --no-build
 RUN jupyter labextension install @lckr/jupyterlab_variableinspector --no-build
@@ -102,3 +99,6 @@ RUN mamba install -qy openpyxl
 RUN mamba install -qy gdal=3.1.4
 
 # -----eof temp fix------------------------------------
+
+# Activate initialisation cell extension
+RUN jupyter nbextension enable init_cell/main
