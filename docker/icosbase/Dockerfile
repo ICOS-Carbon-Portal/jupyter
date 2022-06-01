@@ -59,15 +59,17 @@ RUN patch /opt/conda/share/jupyter/nbextensions/toc2/toc2.yaml /tmp/toc2.yaml.di
 RUN patch /opt/conda/share/jupyter/nbextensions/toc2/toc2.js /tmp/toc2.js.diff
 RUN jupyter nbextension enable toc2/main
 
-# Activate initialisation cell extension
-RUN jupyter nbextension enable init_cell/main
-
 # update jupyter lab and rebuild
 RUN jupyter labextension install @jupyterlab/debugger --no-build
 RUN jupyter labextension install @lckr/jupyterlab_variableinspector --no-build
 # jupter lab build fails with this base-notebook
 #RUN jupyter labextension install qgrid2 --no-build
 RUN jupyter lab build
+
+
+# Activate initialisation cell extension
+# needs to run AFTER build
+RUN jupyter nbextension enable init_cell/main
 
 RUN pip install pangaeapy
 RUN pip install jupyter_module_loader
