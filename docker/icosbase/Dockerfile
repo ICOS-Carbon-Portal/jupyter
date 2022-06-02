@@ -66,6 +66,10 @@ RUN jupyter labextension install @lckr/jupyterlab_variableinspector --no-build
 #RUN jupyter labextension install qgrid2 --no-build
 RUN jupyter lab build
 
+
+# Activate initialisation cell extension AFTER lab build.
+RUN jupyter nbextension enable init_cell/main
+
 RUN pip install pangaeapy
 RUN pip install jupyter_module_loader
 
@@ -99,3 +103,4 @@ RUN mamba install -qy openpyxl
 RUN mamba install -qy gdal=3.1.4
 
 # -----eof temp fix------------------------------------
+
