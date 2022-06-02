@@ -8,10 +8,10 @@ ADD --chown=1000:100 project_jupyter_notebooks ./project_jupyter_notebooks
 ADD --chown=1000:100 introduction ./introduction
 ADD --chown=1000:100 pylib_examples ./pylib_examples
 
-# add files from the notebooks root level
+# Add files from the notebooks' root level.
 ADD --chown=1000:100 *.md ./
 ADD --chown=1000:100 *.ipynb ./
 
-# the index notebook has an initialisatin cell
-# to automatically run, we need to trus the notebook
+# The index notebook has an initialisation cell. To automatically run
+# the notebook we need to trust it first.
 RUN jupyter trust index_notebook.ipynb

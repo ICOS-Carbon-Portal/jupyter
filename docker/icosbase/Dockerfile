@@ -67,8 +67,7 @@ RUN jupyter labextension install @lckr/jupyterlab_variableinspector --no-build
 RUN jupyter lab build
 
 
-# Activate initialisation cell extension
-# needs to run AFTER build
+# Activate initialisation cell extension AFTER lab build.
 RUN jupyter nbextension enable init_cell/main
 
 RUN pip install pangaeapy
