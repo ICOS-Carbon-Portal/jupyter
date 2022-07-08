@@ -40,17 +40,63 @@ def add_bokeh_label(fig, x_coor, y_coor, unit, txt_str, txt_font_size, alignment
 
 #add interactive plot (optional)
 def plot_icos_single_station_binary(dobj, var, glyph, color='#0F0C08'):
-    
-    
     #Import modules:
     import numpy as np
     import pandas as pd
     from bokeh.plotting import figure
     from bokeh.models import ColumnDataSource, HoverTool, Label, Legend
+
+
+    
+    # Parsing metadata from dobj. 
+    ## Retruns unit if a variable has a unit
+    def unit():
+        cols = dobj.meta['specificInfo']['columns'] 
+        try:
+            #next raises error in case the column label is missing
+            col = next( col for col in cols if col['label'] == var)
+            return '' if not ('valueType' in col.keys() and 'unit' in col['valueType'].keys()) else str(col['valueType']['unit'])
+        except Exception:
+            return ''
+        
+    ## Retruns sampling height if any.
+    def sampling_height():
+        try:
+            if dobj.meta['specificInfo']['acquisition']['samplingHeight']>0:
+                return '(' + str(dobj.meta['specificInfo']['acquisition']['samplingHeight']) + ' m.a.g.l.)' 
+            else:
+                return ''
+        except Exception: 
+            return ''
+
+    ## Retruns label of column
+    def column_label():
+        cols = dobj.meta['specificInfo']['columns'] 
+        try:
+            #next raises error in case the column label is missing
+            col = next( col for col in cols if col['label'] == var)
+            if not ('valueType' in col.keys() and 
+                    'self' in col['valueType'].keys() and 
+                    'label' in col['valueType']['self']):
+                return ''
+            else: 
+                return str(col['valueType']['self']['label'])
+
+                print(2)
+        except Exception:
+            return ''
+        
+    def station_name():
+        try:
+            return str(dobj.station['org']['name'])
+        except Exception:
+            return ''
+
+
     
     #Dictionary for subscript transformations of numbers:
     SUB = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
-    
+        
     #Check if dobj has data:
     if ((isinstance(dobj.get(), pd.DataFrame))&(var in dobj.get().columns.values)):
         
@@ -77,29 +123,20 @@ def plot_icos_single_station_binary(dobj, var, glyph, color='#0F0C08'):
             #Create a ColumnDataSource object:
             source = ColumnDataSource( data = df )
 
-
-            #Check if variable has unit-info:
-            if(dobj.info[1].unit.loc[dobj.info[1].colName==var].isnull().values[0]):
-                unit = ''
-            else:
-                unit = '('+dobj.info[1].unit.loc[dobj.info[1].colName==var].values[0]+')'
-
-            #Check if sampling height is empty:
-            if(dobj.info[2].samplingHeight.values[0]):
-                sampl_height = ' ('+ dobj.info[2].samplingHeight.values[0] +' m.a.g.l.)'
-            else:
-                sampl_height = ''
-
-
-
+            #Set unit-info if any:
+            var_unit = unit()
+            
+            #Set sampling height if any:
+            sampl_height = sampling_height()
+            
+            
             #Create a figure object:
             p = figure(plot_width=900,
                        plot_height=400,
                        x_axis_label='Time (UTC)', 
-                       y_axis_label=var.upper().translate(SUB)+' '+unit,
+                       y_axis_label=var.upper().translate(SUB)+' '+ var_unit,
                        x_axis_type='datetime',
-                       title = dobj.info[1].valueType.loc[dobj.info[1].colName==var].values[0]+'  -  '+
-                       dobj.station + sampl_height,
+                       title = column_label() +'  -  '+ station_name() + sampl_height,
                        tools='pan,box_zoom,wheel_zoom,undo,redo,reset,save')
 
 
