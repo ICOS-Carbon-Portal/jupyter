@@ -1263,6 +1263,7 @@ def multiple_variables_graph(myStation):
     var_load=pd.read_csv(stcDataPath + 'seasonal_table_values_GPW_pop.csv') 
 
     index = 0 
+    stations_missing_footprints=[]
     for station in all_stations:
         
         station_year = station + '_' + str(start_date_year)
@@ -1284,6 +1285,18 @@ def multiple_variables_graph(myStation):
 
             df_save.loc[len(df_save.index)] = [station, sens_whole,sens_area_50,gee_whole,resp_whole, anthro_whole,point_whole,pop_whole]
             index=index+1
+        
+        
+        else:
+            stations_missing_footprints.append(station)
+            
+    if len(stations_missing_footprints)>0:
+        
+        string_stations_missing_footprints = ", ".join(stations_missing_footprints)
+        
+        string_stations_missing_footprints = string_stations_missing_footprints[:-1]
+        display(HTML('<p style="font-size:12px;">Reference station(s) missing footprints for specified date range: ' + string_stations_missing_footprints + '</p>'))  
+        
 
     #sensitivity is the first attribut (list_item[0]) in the each of the lists (one list per station)
     min_sens=min(df_save['Sensitivity'])
@@ -1459,7 +1472,7 @@ def values_multiple_variable_graph(myStation, station):
         return sens_whole, sens_area_50, gee_whole, resp_whole, anthro_whole, point_whole, pop_whole
     
     else:
-        display(HTML('<p style="font-size:12px;">' + station + ' has no footprints for specified date range. </p>'))   
+        
         return None, None, None, None, None, None, None
 
       
