@@ -1110,6 +1110,7 @@ def land_cover_polar_graph(myStation):
     rosedata= rosedata.applymap(lambda x: x / total_all * 100)
        
     directions = np.arange(0, 360, bin_size)
+    directions = np.arange(dir_bins[1], 360, bin_size)
     
     if title=='yes':
         
