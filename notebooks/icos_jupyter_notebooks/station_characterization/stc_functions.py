@@ -1108,8 +1108,8 @@ def land_cover_polar_graph(myStation):
     total_all=sum(rosedata_sum_per_class_sorted)
     #for all values: want the % of the total sensitivity (one value for each distance for each direction)
     rosedata= rosedata.applymap(lambda x: x / total_all * 100)
-       
-    directions = np.arange(0, 360, bin_size)
+
+    directions = np.arange(dir_bins[1], 360, bin_size)
     
     if title=='yes':
         
@@ -1540,9 +1540,11 @@ def save(stc, fmt='pdf'):
     with open(file, 'w') as f:
         
         settings_copy = stc.settings.copy()
-        
-        del settings_copy['icos']
+
         del settings_copy['stilt']
+        
+        if 'icos' in settings_copy.keys():
+            del settings_copy['icos']
         
         json.dump(settings_copy, f, indent=4)
         
