@@ -1538,7 +1538,13 @@ def save(stc, fmt='pdf'):
     # save settings as json file
     file = os.path.join(stc.settings['output_folder'],'settings.json')
     with open(file, 'w') as f:
-        json.dump(stc.settings, f, indent=4)
+        
+        settings_copy = stc.settings.copy()
+        
+        del settings_copy['icos']
+        del settings_copy['stilt']
+        
+        json.dump(settings_copy, f, indent=4)
         
     # save PDF
     tex_string=tex.generate_full(stc)
