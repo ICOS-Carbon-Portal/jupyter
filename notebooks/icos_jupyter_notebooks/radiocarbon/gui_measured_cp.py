@@ -136,30 +136,36 @@ def update_func(button_c):
         radiocarbon_functions.display_info_html_table(radiocarbonObject, meas_data=True, cp_private=True)
     
         updateProgress(f, 'create the Bokeh plot')
-    
-        radiocarbon_functions.plot_radiocarbon_bokhe(radiocarbonObject, include_meas=True)
-        
-        if radiocarbonObject.settings['downloadOption'] == 'yes':
-      
-            now = datetime.now()
-        
-            radiocarbonObject.settings['date/time generated'] =  now.strftime("%Y%m%d_%H%M%S_")
-            
-            output = os.path.join(os.path.expanduser('~'), 'output/radiocarbon_cp_result', radiocarbonObject.settings['date/time generated']+radiocarbonObject.stationId) 
-            if not os.path.exists(output):
-                os.makedirs(output)
-                
-            radiocarbonObject.settings['output_folder'] = output
+
+        if not radiocarbonObject.df_for_export.empty:
+
+            radiocarbon_functions.plot_radiocarbon_bokhe(radiocarbonObject, include_meas=True)
+
+            if radiocarbonObject.settings['downloadOption'] == 'yes':
+
+                now = datetime.now()
+
+                radiocarbonObject.settings['date/time generated'] =  now.strftime("%Y%m%d_%H%M%S_")
+
+                output = os.path.join(os.path.expanduser('~'), 'output/radiocarbon_cp_result', radiocarbonObject.settings['date/time generated']+radiocarbonObject.stationId) 
+                if not os.path.exists(output):
+                    os.makedirs(output)
+
+                radiocarbonObject.settings['output_folder'] = output
 
 
-            #possibly add format also (input to function save_model)
-            radiocarbon_functions.save_data_cp(radiocarbonObject)
+                #possibly add format also (input to function save_model)
+                radiocarbon_functions.save_data_cp(radiocarbonObject)
+
         
+        else:
+            display(HTML('<p style="font-size:15px;"><b><mark>No analysis generated</mark></b><br>Start by checking if footprints are available for date range specified above <a href="https://stilt.icos-cp.eu/viewer/" target="blank">here</a> and use the on <a href="https://stilt.icos-cp.eu/worker/" target="blank">demand calculator</a> if confirmed. Note that footprints are only available years 2006-2020 (2022-07-26).</p>'))
+
     updateProgress(f, 'finished')
-
     update_button.disabled = False
-    
     f.value = 3
+        
+        
 
 update_button.on_click(update_func)
 
