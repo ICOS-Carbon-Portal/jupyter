@@ -14,6 +14,7 @@ import os
 import matplotlib.pyplot as plt
 from datetime import datetime
 import json
+import pandas as pd
 
 from icoscp.stilt import stiltstation
 
@@ -28,10 +29,12 @@ def getSettings():
         dictionary_meas_to_stilt={'HPB': 'HPB131', 'HTM':'HTM150', 'JFJ':'JFJ', 'LIN': 'LIN099', 'NOR':'NOR100', 'OPE':'OPE120', 'PAL': 'PAL', 'SAC': 'SAC100', 'SVB':'SVB150', 'KRE':'KRE250', 'KIT':'KIT200', 'STE':'STE252'}
         
         if not station_choice_meas.value['station_code'] in dictionary_meas_to_stilt:
-
-            guess_stilt_code = station_choice_meas.value['station_code'] + str(station_choice_meas.value['sampling_height'])
-
-            s['stationCode'] = guess_stilt_code
+   
+            df = pd.read_csv('https://stilt.icos-cp.eu/viewer/stationinfo')
+            df_icos = df.loc[(df['ICOS height'] >0)]    
+            df_icos_tallest = df_icos.drop_duplicates(subset=['ICOS id'],  keep='last')            
+            specific_code = df_icos_tallest[df_icos_tallest['ICOS id'].str.contains(station_choice_meas.value['station_code'])]['STILT id']
+            s['stationCode'] = specific_code.to_list()[0]
             
         else:
         
@@ -136,30 +139,36 @@ def update_func(button_c):
         radiocarbon_functions.display_info_html_table(radiocarbonObject, meas_data=True, cp_private=True)
     
         updateProgress(f, 'create the Bokeh plot')
-    
-        radiocarbon_functions.plot_radiocarbon_bokhe(radiocarbonObject, include_meas=True)
-        
-        if radiocarbonObject.settings['downloadOption'] == 'yes':
-      
-            now = datetime.now()
-        
-            radiocarbonObject.settings['date/time generated'] =  now.strftime("%Y%m%d_%H%M%S_")
-            
-            output = os.path.join(os.path.expanduser('~'), 'output/radiocarbon_cp_result', radiocarbonObject.settings['date/time generated']+radiocarbonObject.stationId) 
-            if not os.path.exists(output):
-                os.makedirs(output)
-                
-            radiocarbonObject.settings['output_folder'] = output
+
+        if not radiocarbonObject.df_for_export.empty:
+
+            radiocarbon_functions.plot_radiocarbon_bokhe(radiocarbonObject, include_meas=True)
+
+            if radiocarbonObject.settings['downloadOption'] == 'yes':
+
+                now = datetime.now()
+
+                radiocarbonObject.settings['date/time generated'] =  now.strftime("%Y%m%d_%H%M%S_")
+
+                output = os.path.join(os.path.expanduser('~'), 'output/radiocarbon_cp_result', radiocarbonObject.settings['date/time generated']+radiocarbonObject.stationId) 
+                if not os.path.exists(output):
+                    os.makedirs(output)
+
+                radiocarbonObject.settings['output_folder'] = output
 
 
-            #possibly add format also (input to function save_model)
-            radiocarbon_functions.save_data_cp(radiocarbonObject)
+                #possibly add format also (input to function save_model)
+                radiocarbon_functions.save_data_cp(radiocarbonObject)
+
         
+        else:
+            display(HTML('<p style="font-size:15px;"><b><mark>No analysis generated</mark></b><br>Start by checking if footprints are available for date range specified above <a href="https://stilt.icos-cp.eu/viewer/" target="blank">here</a> and use the on <a href="https://stilt.icos-cp.eu/worker/" target="blank">demand calculator</a> if confirmed. Note that footprints are only available years 2006-2020 (2022-07-26).</p>'))
+
     updateProgress(f, 'finished')
-
     update_button.disabled = False
-    
     f.value = 3
+        
+        
 
 update_button.on_click(update_func)
 
