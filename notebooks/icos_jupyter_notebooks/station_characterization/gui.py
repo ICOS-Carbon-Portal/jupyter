@@ -451,7 +451,7 @@ time_selection= SelectMultiple(
     disabled=False)
 
 
-bin_size = Dropdown(options = [15, 30, 60, 90, 180, 360],
+bin_size = Dropdown(options = [15, 30, 45, 60, 90, 180, 360],
             description = 'Bin size (degrees)', style=style_bin,
             disabled = False,)
 
