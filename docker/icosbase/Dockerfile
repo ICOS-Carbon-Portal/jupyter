@@ -1,11 +1,15 @@
 # We use a specific hash since :latest has broken spuriously in the past.
 # https://hub.docker.com/r/jupyter/datascience-notebook
-# This hash is jupyter/datascience-notebook:latest on 18-03-2022.
-FROM jupyter/datascience-notebook@sha256:9e64f73a33a52533a5663c389052716775089aa0f0cfe6085f6833046cb83f9c
+# This hash is jupyter/datascience-notebook:latest on 26-08-2022.
+FROM jupyter/datascience-notebook@sha256:08677b8b71501eceb37cbd12f1fe0d5a80b3fe3e1b8caa2cbdd8bcd37429caaa
 
 # Remove the default xetex LaTeX installation of jupyter-lab and
 # install the full latest LaTeX version. It takes about 45 minutes to
 # install it, so be patient.
+# Check here -> https://github.com/jupyter/docker-stacks/blob/main/minimal-notebook/Dockerfile,
+# which engine is used by default in jupyter notebooks to process TeX documents.
+# Remember! minimal-notebook is included in datascience-notebook according to this
+# https://jupyter-docker-stacks.readthedocs.io/en/latest/using/selecting.html#jupyter-datascience-notebook
 # Switch to root for texlive installation.
 USER root
 # Remove old texlive installation.
@@ -64,4 +68,4 @@ RUN pip install --quiet pangaeapy jupyter-module-loader kml2geojson simplificati
 # Keep this in a separate line. It's the only library that changes
 # frequently and the new docker image will build faster.
 # Update version number according to latest release.
-RUN pip install --quiet icoscp==0.1.14
+RUN pip install --quiet icoscp==0.1.15
