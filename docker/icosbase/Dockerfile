@@ -1,4 +1,5 @@
-# We use a specific hash since :latest has broken spuriously in the past.
+# We use a specific hash since :latest has broken spuriously in the
+# past.
 # https://hub.docker.com/r/jupyter/datascience-notebook
 # This hash is jupyter/datascience-notebook:latest on 26-08-2022.
 FROM jupyter/datascience-notebook@sha256:08677b8b71501eceb37cbd12f1fe0d5a80b3fe3e1b8caa2cbdd8bcd37429caaa
@@ -6,9 +7,10 @@ FROM jupyter/datascience-notebook@sha256:08677b8b71501eceb37cbd12f1fe0d5a80b3fe3
 # Remove the default xetex LaTeX installation of jupyter-lab and
 # install the full latest LaTeX version. It takes about 45 minutes to
 # install it, so be patient.
-# Check here -> https://github.com/jupyter/docker-stacks/blob/main/minimal-notebook/Dockerfile,
-# which engine is used by default in jupyter notebooks to process TeX documents.
-# Remember! minimal-notebook is included in datascience-notebook according to this
+# Check links below to find which engine is used by default in jupyter
+# notebooks to process TeX documents. Remember, minimal-notebook is
+# included in datascience-notebook.
+# https://github.com/jupyter/docker-stacks/blob/main/minimal-notebook/Dockerfile
 # https://jupyter-docker-stacks.readthedocs.io/en/latest/using/selecting.html#jupyter-datascience-notebook
 # Switch to root for texlive installation.
 USER root
@@ -35,11 +37,12 @@ RUN rmdir work
 # https://medium.com/@QuantStack/open-software-packaging-for-science-61cecee7fc23
 RUN conda install --yes mamba --channel conda-forge \
     && conda clean --quiet --all --force-pkgs-dirs --yes
+
 # Install required packages
 RUN mamba install --quiet --yes \
     basemap basemap-data-hires cartopy geoviews holoviews panel datashader hvplot param cdo \
-    python-cdo netcdf4 geopandas mpld3 pscript ipyleaflet netcdf-fortran sparqlwrapper xarray \
-    shapely folium qgrid zarr plotly nco qgrid \
+    python-cdo netcdf4 geopandas mpld3 pscript ipyleaflet netcdf-fortran xarray \
+    shapely folium zarr plotly nco \
     && mamba clean --quiet --all --force-pkgs-dirs --yes
 
 # Install the standard notebook extensions and activate the
