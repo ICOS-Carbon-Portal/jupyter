@@ -57,8 +57,14 @@ RUN patch /opt/conda/share/jupyter/nbextensions/toc2/toc2.yaml /tmp/toc2.yaml.di
 RUN patch /opt/conda/share/jupyter/nbextensions/toc2/toc2.js /tmp/toc2.js.diff
 RUN jupyter nbextension enable toc2/main
 
-# Install qgrid extension (qgrid package also needs to have been
-# installed before installing the extension).
+# Install this extension because it is needed for the qgrid extension
+# installation.
+RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build
+# Before installing the qgrid extension make sure you have installed
+# the qgrid library. In this current jupyter/datascience-notebook image
+# the qgrid library is already included, thus there is no need to
+# reinstall it.
+# Install qgrid extension.
 RUN jupyter labextension install @j123npm/qgrid2@1.1.4 --no-build
 # Rebuild jupyter lab.
 RUN jupyter lab build
