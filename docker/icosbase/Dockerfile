@@ -38,16 +38,29 @@ RUN rmdir work
 RUN conda install --yes mamba --channel conda-forge \
     && conda clean --quiet --all --force-pkgs-dirs --yes
 
-# Install required packages
+# Install required packages.
 RUN mamba install --quiet --yes \
-    basemap basemap-data-hires cartopy geoviews holoviews panel datashader hvplot param cdo \
-    python-cdo netcdf4 geopandas mpld3 pscript ipyleaflet netcdf-fortran xarray \
-    shapely folium zarr plotly nco \
+    basemap  basemap-data-hires \
+    cartopy cdo \
+    datashader \
+    folium \
+    geopandas geoviews gmt \
+    holoviews hvplot \
+    ipyleaflet \
+    kml2geojson \
+    mpld3 \
+    nco netcdf4 netcdf-fortran \
+    openpyxl \
+    panel param plotly pscript pygmt python-cdo \
+    shapely \
+    xarray \
+    zarr \
     && mamba clean --quiet --all --force-pkgs-dirs --yes
 
 # Install the standard notebook extensions and activate the
 # configurator.
-RUN mamba install --quiet --yes --channel conda-forge jupyter_contrib_nbextensions
+RUN mamba install --quiet --yes --channel conda-forge  \
+    jupyter_contrib_nbextensions
 RUN jupyter nbextensions_configurator enable
 
 # Patch the default configuration for toc, such that headers are NOT
@@ -69,11 +82,13 @@ RUN jupyter labextension install @j123npm/qgrid2@1.1.4 --no-build
 # Rebuild jupyter lab.
 RUN jupyter lab build
 
+# Activate initialisation cell extension AFTER lab build.
+# todo: maybe also enable here toc2/main.
+RUN jupyter nbextension enable init_cell/main
+
 # Additional python modules, not available using mamba.
-# - openpyxl: Pandas require openpyxl module to read excel files.
-# - kml2geojson: Convert kml files to geojson.
-# - simplification: simplify polygons.
-RUN pip install --quiet pangaeapy jupyter-module-loader kml2geojson simplification openpyxl
+RUN pip install --quiet \
+    jupyter-module-loader pangaeapy simplification
 # Keep this in a separate line. It's the only library that changes
 # frequently and the new docker image will build faster.
 # Update version number according to latest release.
