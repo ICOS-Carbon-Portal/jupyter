@@ -39,7 +39,7 @@ RUN conda install -y mamba -c conda-forge && conda clean -qafy
 RUN mamba install -qy                                                          \
         basemap basemap-data-hires cartopy geoviews holoviews panel datashader \
         hvplot param cdo python-cdo netcdf4 geopandas mpld3 pscript ipyleaflet \
-        netcdf-fortran sparqlwrapper xarray shapely folium qgrid               \
+        netcdf-fortran sparqlwrapper xarray=2022.3.0 shapely folium qgrid               \
         && mamba clean -qafy
 
 # this is for the visual debugger in JupyterLab
