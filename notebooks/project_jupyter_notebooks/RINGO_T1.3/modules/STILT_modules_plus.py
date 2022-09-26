@@ -24,7 +24,7 @@ from icoscp.sparql import sparqls
 
 
 my_home = os.getenv('HOME')
-sys.path.insert(0,my_home+'/new_jupyter/modules')
+#sys.path.insert(0,my_home+'/common/project_jupyter_notebooks/RINGO_T1.3/modules')
 from extra_sparqls import get_station_class, get_icos_stations_atc_samplingheight #, atc_station_tracer_query
 
 # paths --- changed for new JupyterHub instance

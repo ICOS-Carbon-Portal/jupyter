@@ -8,6 +8,13 @@ ADD --chown=1000:100 project_jupyter_notebooks ./project_jupyter_notebooks
 ADD --chown=1000:100 introduction ./introduction
 ADD --chown=1000:100 pylib_examples ./pylib_examples
 
-# add files from the notebooks root level
+# Add files from the notebooks' root level.
 ADD --chown=1000:100 *.md ./
 ADD --chown=1000:100 *.ipynb ./
+
+# The index and other notebooks have an initialization cell. To automatically
+# run these notebooks we need to trust them first. This also prevents the
+# trust notebook popup window from showing up.
+RUN jupyter trust index_notebook.ipynb
+RUN jupyter trust project_jupyter_notebooks/RINGO_T1.3/ICOS_flasksampling_fossilfuel.ipynb
+RUN jupyter trust project_jupyter_notebooks/RINGO_T1.3/RINGO_T1.3_flasksampling_v5.ipynb

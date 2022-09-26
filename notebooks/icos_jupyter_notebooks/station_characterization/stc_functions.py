@@ -89,6 +89,7 @@ def read_aggreg_footprints(station, date_range):
         return 0, None, None, None, None
 
 # function to read STILT concentration time series (new format of STILT results)
+# function to read STILT concentration time series (new format of STILT results)
 def read_stilt_timeseries(station,date_range,timeselect_list):
     url = 'https://stilt.icos-cp.eu/viewer/stiltresult'
     headers = {'Content-Type': 'application/json', 'Accept-Charset': 'UTF-8'}
@@ -105,8 +106,8 @@ def read_stilt_timeseries(station,date_range,timeselect_list):
         fromDate = date_range[0].strftime('%Y-%m-%d')
         toDate = date_range[-1].strftime('%Y-%m-%d')
         columns = ('["isodate","co2.stilt","co2.fuel","co2.bio","co2.bio.gee","co2.bio.resp","co2.fuel.coal","co2.fuel.oil",'+
-                   '"co2.fuel.gas","co2.fuel.bio","co2.energy","co2.transport", "co2.industry",'+
-                   '"co2.others", "co2.cement", "co2.background",'+
+                   '"co2.fuel.gas","co2.fuel.bio","co2.fuel.waste", "co2.energy","co2.transport", "co2.industry",'+
+                   '"co2.other_categories", "co2.residential", "co2.cement", "co2.background",'+
                    '"co.stilt","co.fuel","co.bio","co.fuel.coal","co.fuel.oil",'+
                    '"co.fuel.gas","co.fuel.bio","co.energy","co.transport", "co.industry",'+
                    '"co.others", "co.cement", "co.background",'+
@@ -946,13 +947,13 @@ def seasonal_table(myStation):
             resp_diff_summer=((df_summer_mean['co2.bio.resp']/resp_whole)*100)-100
             resp_diff_fall=((df_fall_mean['co2.bio.resp']/resp_whole)*100)-100
 
-            #anthropogenic
-            anthro_whole=df_whole_mean['co2.industry']+df_whole_mean['co2.energy']+ df_whole_mean['co2.transport']+ df_whole_mean['co2.others']
+            #anthropogenic  
+            anthro_whole=df_whole_mean['co2.industry']+df_whole_mean['co2.energy']+ df_whole_mean['co2.transport']+ df_winter_mean['co2.residential'] + df_winter_mean['co2.other_categories']
 
-            anthro_diff_winter=(((df_winter_mean['co2.industry']+df_winter_mean['co2.energy']+ df_winter_mean['co2.transport']+ df_winter_mean['co2.others'])/anthro_whole)*100)-100
-            anthro_diff_spring=(((df_spring_mean['co2.industry']+df_spring_mean['co2.energy']+ df_spring_mean['co2.transport']+ df_spring_mean['co2.others'])/anthro_whole)*100)-100
-            anthro_diff_summer=(((df_summer_mean['co2.industry']+df_summer_mean['co2.energy']+ df_summer_mean['co2.transport']+ df_summer_mean['co2.others'])/anthro_whole)*100)-100
-            anthro_diff_fall=(((df_fall_mean['co2.industry']+df_fall_mean['co2.energy']+ df_fall_mean['co2.transport']+ df_fall_mean['co2.others'])/anthro_whole)*100)-100
+            anthro_diff_winter=(((df_winter_mean['co2.industry']+df_winter_mean['co2.energy']+ df_winter_mean['co2.transport']+ df_winter_mean['co2.residential'] + df_winter_mean['co2.other_categories'])/anthro_whole)*100)-100
+            anthro_diff_spring=(((df_spring_mean['co2.industry']+df_spring_mean['co2.energy']+ df_spring_mean['co2.transport']+ df_winter_mean['co2.residential'] + df_winter_mean['co2.other_categories'])/anthro_whole)*100)-100
+            anthro_diff_summer=(((df_summer_mean['co2.industry']+df_summer_mean['co2.energy']+ df_summer_mean['co2.transport']+ df_winter_mean['co2.residential'] + df_winter_mean['co2.other_categories'])/anthro_whole)*100)-100
+            anthro_diff_fall=(((df_fall_mean['co2.industry']+df_fall_mean['co2.energy']+ df_fall_mean['co2.transport']+ df_winter_mean['co2.residential'] + df_winter_mean['co2.other_categories'])/anthro_whole)*100)-100
 
         #where there is no information in loaded file, and not all footpritns 
         else:
@@ -1108,8 +1109,8 @@ def land_cover_polar_graph(myStation):
     total_all=sum(rosedata_sum_per_class_sorted)
     #for all values: want the % of the total sensitivity (one value for each distance for each direction)
     rosedata= rosedata.applymap(lambda x: x / total_all * 100)
-       
-    directions = np.arange(0, 360, bin_size)
+
+    directions = np.arange(dir_bins[1], 360, bin_size)
     
     if title=='yes':
         
@@ -1263,6 +1264,7 @@ def multiple_variables_graph(myStation):
     var_load=pd.read_csv(stcDataPath + 'seasonal_table_values_GPW_pop.csv') 
 
     index = 0 
+    stations_missing_footprints=[]
     for station in all_stations:
         
         station_year = station + '_' + str(start_date_year)
@@ -1284,6 +1286,18 @@ def multiple_variables_graph(myStation):
 
             df_save.loc[len(df_save.index)] = [station, sens_whole,sens_area_50,gee_whole,resp_whole, anthro_whole,point_whole,pop_whole]
             index=index+1
+        
+        
+        else:
+            stations_missing_footprints.append(station)
+            
+    if len(stations_missing_footprints)>0:
+        
+        string_stations_missing_footprints = ", ".join(stations_missing_footprints)
+        
+        string_stations_missing_footprints = string_stations_missing_footprints[:-1]
+        display(HTML('<p style="font-size:12px;">Reference station(s) missing footprints for specified date range: ' + string_stations_missing_footprints + '</p>'))  
+        
 
     #sensitivity is the first attribut (list_item[0]) in the each of the lists (one list per station)
     min_sens=min(df_save['Sensitivity'])
@@ -1446,7 +1460,7 @@ def values_multiple_variable_graph(myStation, station):
         resp_whole=df_mean['co2.bio.resp']
 
         #anthro:
-        anthro_whole=(df_mean['co2.industry']+df_mean['co2.energy']+ df_mean['co2.transport']+ df_mean['co2.others'])
+        anthro_whole=(df_mean['co2.industry']+df_mean['co2.energy']+ df_mean['co2.transport']+ df_mean['co2.residential'] + df_mean['co2.other_categories'])
 
         #point source for specific station 
         fp_pointsource_multiplied=fp_station*fp_point
@@ -1459,7 +1473,7 @@ def values_multiple_variable_graph(myStation, station):
         return sens_whole, sens_area_50, gee_whole, resp_whole, anthro_whole, point_whole, pop_whole
     
     else:
-        display(HTML('<p style="font-size:12px;">' + station + ' has no footprints for specified date range. </p>'))   
+        
         return None, None, None, None, None, None, None
 
       
@@ -1538,7 +1552,15 @@ def save(stc, fmt='pdf'):
     # save settings as json file
     file = os.path.join(stc.settings['output_folder'],'settings.json')
     with open(file, 'w') as f:
-        json.dump(stc.settings, f, indent=4)
+        
+        settings_copy = stc.settings.copy()
+
+        del settings_copy['stilt']
+        
+        if 'icos' in settings_copy.keys():
+            del settings_copy['icos']
+        
+        json.dump(settings_copy, f, indent=4)
         
     # save PDF
     tex_string=tex.generate_full(stc)

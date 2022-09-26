@@ -1483,8 +1483,10 @@ def list_station_tuples_w_radiocarbon_data():
         
         values_dictionary = {'station_code': station_id, 'sampling_height':sampling_height}
         
-        list_of_tuples_for_dropdown.append((display, values_dictionary)) 
+        if not (station_id == 'JFJ' and sampling_height == 10):
         
+            list_of_tuples_for_dropdown.append((display, values_dictionary)) 
+
     return list_of_tuples_for_dropdown
     
 

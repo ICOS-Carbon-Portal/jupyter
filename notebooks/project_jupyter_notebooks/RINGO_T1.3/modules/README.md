@@ -7,9 +7,11 @@
 
 <br>
 
-The folder contains python modules for the RINGO_T1.3_flasksampling notebook:
+The folder contains python modules for the RINGO T1.3 flasksampling notebooks:
 
 * flasksampling_modules.ipynb notebook contains routines for the analysis of STILT results together with ICOS measurement timeseries to evaluate different parameters for the flask sampling strategy
+
+* flasksampling_modules_ff.ipynb notebook contains routines for the analysis ICOS measurement timeseries to evaluate thresholds for the flask sampling strategy
 
 * STILT_modules_plus.py contains STILT-specific python routines plus a routine to read ICOS atmospheric measurement data
 
