@@ -51,7 +51,7 @@ RUN mamba install --quiet --yes \
     mpld3 \
     nco netcdf4 netcdf-fortran \
     openpyxl \
-    panel param plotly proj4 pscript pygmt python-cdo \
+    panel param plotly proj pscript pygmt python-cdo \
     shapely \
     xarray \
     zarr \
