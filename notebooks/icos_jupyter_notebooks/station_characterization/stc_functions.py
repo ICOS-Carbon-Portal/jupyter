@@ -23,6 +23,7 @@ import requests
 import tex
 from IPython.core.display import display, HTML 
 import netCDF4 as cdf
+os.environ['PROJ_LIB'] = '/opt/conda/share/proj'
 import cartopy
 cartopy.config['data_dir'] = '/data/project/cartopy/'
 import cartopy.crs as ccrs
