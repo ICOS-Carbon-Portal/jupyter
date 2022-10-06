@@ -357,8 +357,13 @@ def generate_pdf_tex(stc):
             
         tex=tex.replace('**lat**', str(round(stc.settings['icos']['lat'], 2)))
         tex=tex.replace('**lon**', str(round(stc.settings['icos']['lon'], 2)))
-        tex=tex.replace('**class_type_text**', ('a class ' + str(stc.settings['icos']['icosclass']) +\
-                       ' ICOS atmospheric station of the type ``\MakeLowercase{' + str(stc.settings['icos']['siteType']) + '}\'\''))
+        
+        if stc.settings['icos']['siteType'] is not None:
+            tex=tex.replace('**class_type_text**', ('a class ' + str(stc.settings['icos']['icosclass']) +\
+                           ' ICOS atmospheric station of the type ``\MakeLowercase{' + str(stc.settings['icos']['siteType']) + '}\'\''))
+        else:
+            tex=tex.replace('**class_type_text**', ('a class ' + str(stc.settings['icos']['icosclass']) +\
+                               ' ICOS atmospheric station (undefined station type)'))
 
     else:
         if '_' in stc.settings['stilt']['name']:

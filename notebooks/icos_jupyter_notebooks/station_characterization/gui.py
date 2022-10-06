@@ -293,13 +293,20 @@ def update_func(button_c):
                 else:
                     mountain_string = '.'
 
-
-                display(HTML('<p style="font-size:35px;font-weight:bold;"><br>' + station_name +  \
-                         ' station characterisation</p><p style="font-size:18px;"><br>'+ station_name + ' (' + station_code +\
-                             ') is a class ' + str(station_class) + ' ICOS atmospheric station of the type ' + station_site_type.lower() + \
-                             ' located in ' + station_country + ' (latitude: ' + str("%.2f" % station_lat) +\
-                             degree_sign + 'N, ' + 'longitude: ' + str("%.2f" % station_lon) +\
-                             degree_sign + 'E). The model height is ' + str(model_height)+ ' meters above ground' + mountain_string + '<br></p>'))
+                if station_site_type is not None:
+                    display(HTML('<p style="font-size:35px;font-weight:bold;"><br>' + station_name +  \
+                             ' station characterisation</p><p style="font-size:18px;"><br>'+ station_name + ' (' + station_code +\
+                                 ') is a class ' + str(station_class) + ' ICOS atmospheric station of the type ' + station_site_type.lower() + \
+                                 ' located in ' + station_country + ' (latitude: ' + str("%.2f" % station_lat) +\
+                                 degree_sign + 'N, ' + 'longitude: ' + str("%.2f" % station_lon) +\
+                                 degree_sign + 'E). The model height is ' + str(model_height)+ ' meters above ground' + mountain_string + '<br></p>'))
+                else:
+                    display(HTML('<p style="font-size:35px;font-weight:bold;"><br>' + station_name +  \
+                             ' station characterisation</p><p style="font-size:18px;"><br>'+ station_name + ' (' + station_code +\
+                                 ') is a class ' + str(station_class) + ' ICOS atmospheric station (undefined station type) ' + \
+                                 ' located in ' + station_country + ' (latitude: ' + str("%.2f" % station_lat) +\
+                                 degree_sign + 'N, ' + 'longitude: ' + str("%.2f" % station_lon) +\
+                                 degree_sign + 'E). The model height is ' + str(model_height)+ ' meters above ground' + mountain_string + '<br></p>'))
 
             else:
 
