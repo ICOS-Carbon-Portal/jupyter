@@ -73,7 +73,7 @@ RUN jupyter lab build
 
 # Additional python modules, not available using mamba.
 RUN pip install --quiet \
-    jupyter-module-loader pangaeapy simplification
+    jupyter-module-loader pangaeapy simplification qgrid
 # Keep this in a separate line. It's the only library that changes
 # frequently and the new docker image will build faster.
 # Update version number according to latest release.
