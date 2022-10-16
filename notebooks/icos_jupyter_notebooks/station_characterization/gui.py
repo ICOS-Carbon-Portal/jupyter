@@ -56,7 +56,6 @@ def get_settings():
     return s
 
 def set_settings(s):
-    
     if s['stationCode'] in list_all_icos: 
         station_type.value='ICOS stations'
         station_choice.options=list_all_icos
@@ -206,10 +205,19 @@ def file_set_widgets(c):
     
     #check if there is content in the dictionary (uploaded file)
     if bool(uploaded_file):
-        settings_file=uploaded_file[list(uploaded_file.keys())[0]]['content']
-        settings_json = settings_file.decode('utf8').replace("'", '"')
-        settings_dict = json.loads(settings_json)
-        set_settings(settings_dict)
+        
+        if type(uploaded_file) is tuple:
+            # unless tobytes() is used, settings_concent will be of type "memoryview"
+            settings_content = uploaded_file[0]['content'].tobytes()
+            settings_dict = json.loads(settings_content)
+            set_settings(settings_dict)
+        
+        #this works on exploredata (uploaded_file = dictionary)
+        else:
+            settings_file=uploaded_file[list(uploaded_file.keys())[0]]['content']
+            settings_json = settings_file.decode('utf8').replace("'", '"')
+            settings_dict = json.loads(settings_file.tobytes())
+            set_settings(settings_dict)
     
 #----------- start processing -----------------
      
