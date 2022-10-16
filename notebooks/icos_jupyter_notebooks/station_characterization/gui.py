@@ -111,18 +111,17 @@ def change_stn_type(c):
 def change_stn(c): 
  
     update_button.disabled = False
-
         
     stn = c['new']
     years = sorted(stiltstations[stn]['years'])    
     years = [int(x) for x in years] 
 
-    s_year.options=years            
+    s_year.options=years 
+    s_year.value = min(years)
     e_year.options=years
-    
+    e_year.value = min(years)
     #triggers "change_yr" --> months populated
     
-
 def change_yr(c):
     
     years = [x for x in s_year.options if x >= c['new']]
@@ -133,8 +132,9 @@ def change_yr(c):
     month = sorted(stiltstations[stn][str(s_year.value)]['months'])
     month = [int(x) for x in month]
     s_month.options= month
-    
-    e_month.options = month    
+    s_month.value = min(month)
+    e_month.options = month
+    e_month.value = min(month)
 
 def change_mt(c):
     
@@ -148,43 +148,36 @@ def change_mt(c):
     elif c['new'] in month_days_30:
         s_day.options=list(range(1,31))
     else:
-        s_day.options=list(range(1,29))
+        s_day.options=list(range(1,29))   
+    s_day.value = 1
     
-    #when change start_month - change end month also (if same year)
-    if s_year.value==e_year.value :        
+    #when change start_month - change end day also (if same year and month OR the first time)
+    if s_year.value==e_year.value and s_month.value>e_month.value:
         month = [int(x) for x in s_month.options if x >= c['new']]                
         e_month.options=month
-
-    #when change start_month - change end day also (if same year and month OR the first time)
-    if s_year.value==e_year.value and s_month.value==e_month.value:
+        e_month.value = min(month)
+        
         day = [x for x in s_day.options if x >= s_day.value]
         e_day.options=day
+        e_day.value = min(day)
 
 def change_yr_end(c):
     
     if s_year.value==e_year.value:
         month = [x for x in s_month.options if x >= s_month.value]        
         e_month.options = month
+        e_month.value = min(month)
     else:
         # if different from start year, all months are up for choice!
         month = sorted(stiltstations[station_choice.value][str(e_year.value)]['months'])
         month = [int(x) for x in month]
         e_month.options = month
-
-def change_day(c):
-    
-    #when change the day... if the same month and year (start) - update
-    if s_year.value==e_year.value and s_month.value==e_month.value:
-        #print(s_day.options)
-        day = [int(x) for x in s_day.options if x >= s_day.value]
-        e_day.options = day
-    
-
-def change_month_end(c):
-    
+        e_month.value = min(month)
+        
     if s_year.value==e_year.value and e_month.value==s_month.value:
         day = [x for x in s_day.options if x >= s_day.value]
         e_day.options= day
+        e_day.value = min(day)
     else:
         month_days_30=[4,6,9,11]
         month_days_31=[1,3,5,7,8,10,12]
@@ -197,7 +190,36 @@ def change_month_end(c):
 
         else:
             e_day.options=list(range(1,29))
- 
+            
+        e_day.value = 1
+
+def change_day(c):
+    
+    #when change the day... if the same month and year (start) - update
+    if s_year.value==e_year.value and s_month.value==e_month.value:
+        day = [int(x) for x in s_day.options if x >= s_day.value]
+        e_day.options = day
+        e_day.value = min(day)
+    
+def change_month_end(c):
+    
+    if s_year.value==e_year.value and e_month.value==s_month.value:
+        day = [x for x in s_day.options if x >= s_day.value]
+        e_day.options= day
+        e_day.value = min(day)
+    else:
+        month_days_30=[4,6,9,11]
+        month_days_31=[1,3,5,7,8,10,12]
+
+        if c['new'] in month_days_31:
+            e_day.options=list(range(1,32))
+
+        elif c['new'] in month_days_30:
+            e_day.options=list(range(1,31))
+
+        else:
+            e_day.options=list(range(1,29))          
+        e_day.value = 1
         
 def file_set_widgets(c):
     
