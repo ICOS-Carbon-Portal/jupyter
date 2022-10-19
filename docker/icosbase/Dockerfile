@@ -74,7 +74,7 @@ RUN jupyter lab build
 # Additional python modules, not available using mamba.
 RUN pip install --quiet \
     jupyter-module-loader pangaeapy simplification qgrid \
-    git+https://github.com/NERSC/nersc-refresh-announcements.git \
+    git+https://github.com/NERSC/nersc-refresh-announcements.git
 # Override configuration for jupyter lab settings.
 COPY overrides.json /opt/conda/share/jupyter/lab/settings/.
 # Keep this in a separate line. It's the only library that changes
