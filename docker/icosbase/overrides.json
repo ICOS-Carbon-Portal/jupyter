@@ -1,0 +1,6 @@
+{
+    "nersc-refresh-announcements:plugin": {
+        "url": "https://api.npoint.io/caa8ce9ae7cd6a7d9641",
+        "refresh-interval": 300000
+    }
+}
