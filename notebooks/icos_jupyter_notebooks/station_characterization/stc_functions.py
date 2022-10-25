@@ -1559,7 +1559,7 @@ def save(stc, fmt='pdf'):
 
     for item in delete: 
         if item in settings_copy.keys():
-           del settings_copy[item]
+            del settings_copy[item]
 
     with open(file, 'w') as f:
         
@@ -1576,8 +1576,7 @@ def save(stc, fmt='pdf'):
     output_folder = stc.settings['output_folder']
 
     a = os.system(('pdflatex -output-directory=' + output_folder + ' ' + tex_file))
-    
-    
+
     if a!=0:
         print('problem generating the output PDF')
 
@@ -1586,9 +1585,3 @@ def save(stc, fmt='pdf'):
         for file_ext in files_to_remove:
             remove = stc.settings['date/time generated']+stc.stationId+ file_ext
             os.remove(output_folder + '/' + remove)
-
-                
-        
-
-                
-        
