@@ -1552,14 +1552,16 @@ def save(stc, fmt='pdf'):
     
     # save settings as json file
     file = os.path.join(stc.settings['output_folder'],'settings.json')
-    with open(file, 'w') as f:
-        
-        settings_copy = stc.settings.copy()
+    
+    settings_copy = stc.settings.copy()
 
-        del settings_copy['stilt']
-        
-        if 'icos' in settings_copy.keys():
-            del settings_copy['icos']
+    delete = ['stilt', 'icos', 'areaFifty', 'date/time generated', 'output_folder', 'Sensitivity', 'Population', 'Point source']
+
+    for item in delete: 
+        if item in settings_copy.keys():
+           del settings_copy[item]
+
+    with open(file, 'w') as f:
         
         json.dump(settings_copy, f, indent=4)
         
