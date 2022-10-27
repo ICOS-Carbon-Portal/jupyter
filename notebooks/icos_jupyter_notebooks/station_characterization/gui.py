@@ -114,7 +114,7 @@ def change_stn_type(c):
     unobserve()    
     if station_type.value=='STILT stations':        
         station_choice.options=list_all_located
-    else:        
+    else:       
         station_choice.options= list_all_icos
     
     station_choice.value=None 
@@ -382,12 +382,11 @@ def update_func(button_c):
             display(HTML('<p style="font-size:18px;">The map bins are ' + str(maps_bin_size) + ' degrees at ' +\
                          str(maps_bin_interval) + ' km increments</p>'))
 
-
         updateProgress(f, 'calculate sensitivity')
         with result_sensitivity:   
             fig, caption = stc_functions.polar_graph(stc, 'sensitivity')
             stc.add_figure(1, fig, caption)
-            display(HTML('<p style="font-size:16px;text-align:center">'  + caption + ' </p>'))
+            display(HTML('<p style="font-size:16px;text-align:left;text-indent: 20px">'  + caption + ' </p>'))
             display(fig)
             plt.close(fig)
             
@@ -395,7 +394,7 @@ def update_func(button_c):
         with result_pointsource:
             fig, caption=stc_functions.polar_graph(stc, 'point source contribution', colorbar='Purples')
             stc.add_figure(2, fig, caption)
-            display(HTML('<p style="font-size:16px;text-align:center">'  + caption + ' </p>'))
+            display(HTML('<p style="font-size:16px;text-align:left;text-indent: 20px">'  + caption + ' </p>'))
             display(fig)
             plt.close(fig)
 
@@ -403,7 +402,7 @@ def update_func(button_c):
         with result_population:
             fig, caption =stc_functions.polar_graph(stc, 'population sensitivity', colorbar='Greens')
             stc.add_figure(3, fig, caption)
-            display(HTML('<p style="font-size:16px;text-align:center">'  + caption + ' </p>'))
+            display(HTML('<p style="font-size:16px;text-align:left;text-indent: 20px">'  + caption + ' </p>'))
             display(fig)
             plt.close(fig)
 
@@ -411,7 +410,7 @@ def update_func(button_c):
         with result_land_cover_bar_graph:
             fig, caption=stc_functions.land_cover_bar_graph(stc)
             stc.add_figure(4, fig, caption)
-            display(HTML('<p style="font-size:16px;text-align:center">'  + caption + ' </p>'))
+            display(HTML('<p style="font-size:16px;text-align:left;text-indent: 20px">'  + caption + ' </p>'))
             display(fig)
             plt.close(fig)
 
@@ -419,7 +418,7 @@ def update_func(button_c):
         with result_seasonal_table:
             fig, caption=stc_functions.seasonal_table(stc)
             stc.add_figure(5, fig, caption)
-            display(HTML('<p style="font-size:16px;text-align:center">'  + caption + ' </p>'))
+            display(HTML('<p style="font-size:16px;text-align:left;text-indent: 20px">'  + caption + ' </p>'))
             
             # a seasonal table is not always created (requires the full year of footprints)
             try:
@@ -429,15 +428,15 @@ def update_func(button_c):
                 pass
 
         with header_advanced:
-            display(HTML('<h2>Advanced figures</h2><br>\
+            display(HTML('<h2>Advanced figures</h2><br><p style="font-size:16px">\
                 Please read the <a href="./station_characterization/specifications.pdf" target="_blank">\
-                    specifications document</a> before attempting to interpret the following figures.'))
+                    specifications document</a> before attempting to interpret the following figures.</p>'))
 
         updateProgress(f, 'landcover windrose')
         with result_landcover_windrose:
             fig, caption=stc_functions.land_cover_polar_graph(stc)
             stc.add_figure(6, fig, caption)
-            display(HTML('<p style="font-size:16px;text-align:center">'  + caption + ' </p>'))
+            display(HTML('<p style="font-size:16px;text-align:left;text-indent: 20px">'  + caption + ' </p>'))
             display(fig)
             plt.close(fig)
 
@@ -445,7 +444,7 @@ def update_func(button_c):
         with result_multiple_variables_graph:
             fig, caption= stc_functions.multiple_variables_graph(stc)
             stc.add_figure(7, fig, caption)
-            display(HTML('<p style="font-size:16px;text-align:center">'  + caption + ' </p>'))
+            display(HTML('<p style="font-size:16px;text-align:left;text-indent: 20px">'  + caption + ' </p>'))
             display(fig)
             plt.close(fig)
 
