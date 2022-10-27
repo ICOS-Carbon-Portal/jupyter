@@ -17,8 +17,26 @@ import network_characterization_functions as functions
 import json
 import network_object
 from icoscp.stilt import stiltstation
+import ipywidgets as widgets
 from bokeh.io import show, output_notebook, reset_output
 import matplotlib.pyplot as plt
+
+# style to supress scrolling in the output 
+style_scroll = """
+    <style>
+       .jupyter-widgets-output-area .output_scroll {
+            height: unset !important;
+            border-radius: unset !important;
+            -webkit-box-shadow: unset !important;
+            box-shadow: unset !important;
+        }
+        .jupyter-widgets-output-area  {
+            height: auto !important;
+        }
+    </style>
+    """
+
+# access all stations with stiltruns (see in viewer here: https://stilt.icos-cp.eu/viewer/) 
 stiltstations= stiltstation.find()
 
 list_all_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if v['geoinfo']])
@@ -528,7 +546,8 @@ def update_func(button_c):
     update_button.disabled = False
 #-----------widgets definition ----------------
     
-style_bin = {'description_width': 'initial'}
+style = {'description_width': 'initial'}
+layout = {'width': 'initial', 'height':'initial'}
 
 heading_network_selection = Output()
 
@@ -544,13 +563,15 @@ with heading_perpared_footprints:
 prepared_footprints = Checkbox(
     value=False,
     description='2018 aggregate footprint(s)',
-    style=style_bin
+    style=style,
+    layout=layout
 )
 
 use_icos_network = Checkbox(
     value=False,
     description='Select current ICOS network',
-    style=style_bin
+    style=style,
+    layout=layout
 )
 
 heading_sites_base_network_options = Output()
@@ -560,7 +581,8 @@ with heading_sites_base_network_options:
 
 sites_base_network_options= SelectMultiple(
     options=list_all,
-    style=style_bin,
+    style=style,
+    layout=layout,
     rows=14,
     description='',
     disabled=False) 
@@ -573,7 +595,8 @@ with heading_selected_base_network_stations:
 
 selected_base_network_stations = SelectMultiple(
     options=(),
-    style=style_bin,
+    style=style,
+    layout=layout,
     rows=8,
     description='',
     disabled=False) 
@@ -585,7 +608,8 @@ threshold_option = BoundedIntText(
     min=1,
     max=99,
     step=1,
-    style=style_bin,
+    style=style,
+    layout=layout,
     description='Percent footprint(s):',
     disabled=False
 )
@@ -621,31 +645,43 @@ selected_compare_network_stations.layout.margin = '0px 0px 0px 70px' #top, right
 s_year = Dropdown(options = range(2006, 2021),
                   value = 2018,
                   description = 'Start Year',
-                  disabled= False,)
+                  disabled= False,
+                  style=style,
+                  layout=layout)
 
 #Create a Dropdown widget with month values (start month):
 s_month = Dropdown(options = range(1, 13),
                    description = 'Start Month',
-                   disabled= False,)
+                   disabled= False,
+                  style=style,
+                  layout=layout)
 
 #Create a Dropdown widget with year values (end year):
 e_year = Dropdown(options = range(2018, 2021),
                   value = 2018,
                   description = 'End Year',
-                  disabled= False,)
+                  disabled= False,
+                  style=style,
+                  layout=layout)
 
 #Create a Dropdown widget with month values (end month):
 e_month = Dropdown(options = range(1, 13),
                    description = 'End Month',
-                   disabled= False,)
+                   disabled= False,
+                  style=style,
+                  layout=layout)
 
 s_day = Dropdown(options = range(1,32),
                 description = 'Start Day',
-                disabled = False,)
+                disabled = False,
+                  style=style,
+                  layout=layout)
 
 e_day = Dropdown(options = range(1,32),
             description = 'End Day',
-            disabled = False,)
+            disabled = False,
+                  style=style,
+                  layout=layout)
 
 header_timeselect = Output()
 
@@ -657,7 +693,7 @@ options_time_selection=[('0:00', 0), ('3:00', 3), ('06:00', 6), ('09:00', 9), ('
 time_selection= SelectMultiple(
     options=options_time_selection,
     value=[0, 3, 6, 9, 12, 15, 18, 21],
-    style=style_bin,
+    style=style,
     description='Time of day',
     disabled=False)
 
@@ -672,7 +708,8 @@ with heading_country_options:
 
 country_options= SelectMultiple(
     options=countries,
-    style=style_bin,
+    style=style,
+    layout=layout,
     rows=10,
     description='')
 
@@ -686,7 +723,8 @@ heading_selected_countries.layout.margin = '0px 0px 0px 70px' #top, right, botto
 
 selected_countries = SelectMultiple(
     options='',
-    style=style_bin,
+    style=style,
+    layout=layout,
     rows=10,
     description='')
 
@@ -701,7 +739,8 @@ with download_output_heading:
       
 download_output_option=RadioButtons(
         options=[('No', False), ('Yes', True)],
-        description=' ')
+        description=' ',
+        layout=layout)
 
 header_filename = Output()
 
@@ -711,8 +750,8 @@ with header_filename:
 
 file_name= FileUpload(
     accept='.json',  # Accepted file extension e.g. '.txt', '.pdf', 'image/*', 'image/*,.pdf'
-    multiple=False  # True to accept multiple files upload else False
-)
+    multiple=False,  # True to accept multiple files upload else False
+    layout=layout)
 
 
 #Create a Button widget to control execution:
@@ -813,4 +852,4 @@ with form_out:
     display(form, output_no_footprints,box_base_compare, box_difference_and_leader, output_landcover_bargraph_countries, output_population_bargraph_countries)
 
 #Display form:
-display(form_out)    
+display(widgets.HTML(style_scroll),form_out)   
