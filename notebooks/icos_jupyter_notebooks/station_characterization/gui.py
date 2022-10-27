@@ -40,11 +40,11 @@ stiltstations= stiltstation.find()
 
 # access the station information for the widgets, one list with all stations (list_all) and one limited to the ICOS labeled stations (list_all_icos)
 list_all_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if v['geoinfo']])
-list_all_not_located = [(('Not located' + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if not v['geoinfo']]
+list_all_not_located = [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if not v['geoinfo']]
 list_all = list_all_not_located + list_all_located
 
 list_all_icos_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if v['geoinfo'] if v['icos']])
-list_all_icos_not_located = [(('Not located' + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if not v['geoinfo'] if v['icos']]
+list_all_icos_not_located = [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if not v['geoinfo'] if v['icos']]
 list_all_icos = list_all_icos_not_located + list_all_icos_located
 
 # read or set the parameters from the widgets 
@@ -113,7 +113,7 @@ def change_stn_type(c):
     # make sure the new 'options' are not selected..
     unobserve()    
     if station_type.value=='STILT stations':        
-        station_choice.options=list_all_located
+        station_choice.options=list_all
     else:       
         station_choice.options= list_all_icos
     
