@@ -80,5 +80,5 @@ COPY overrides.json /opt/conda/share/jupyter/lab/settings/.
 # Keep this in a separate line. It's the only library that changes
 # frequently and the new docker image will build faster.
 # Update version number according to latest release.
-# RUN pip install --quiet icoscp==0.1.16
-RUN pip install git+https://github.com/icos-carbon-portal/pylib.git@107_update_stationdata_sparql
+RUN pip install --quiet icoscp==0.1.16
+# RUN pip install git+https://github.com/icos-carbon-portal/pylib.git@107_update_stationdata_sparql
