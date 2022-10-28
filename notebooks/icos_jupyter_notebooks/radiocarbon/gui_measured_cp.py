@@ -15,9 +15,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import json
 import pandas as pd
-
 from icoscp.stilt import stiltstation
-
 stiltstations= stiltstation.find()
 
 def getSettings():
@@ -65,6 +63,7 @@ def updateProgress(f, desc=''):
         f.description = str(desc)
 
 style_bin = {'description_width': 'initial'}
+layout = {'width': 'initial', 'height':'initial'}
 
 header_station = Output()
 with header_station:
@@ -75,38 +74,35 @@ stations_with_data = radiocarbon_functions.list_station_tuples_w_radiocarbon_dat
 
 station_choice_meas = Dropdown(options = stations_with_data,
                    description = '',
+                   layout = layout, 
                    value=None,
                    disabled= False,)
 
 header_download = Output()
 with header_download:
     display(HTML('<p style="font-size:15px;font-weight:bold;">Download output:</p>'))
-    
-header_download.layout.margin = '0px 0px 0px 200px' #top, right, bottom, left
 
 download_choice = RadioButtons(
     options=['yes', 'no'],
     description=' ',
+    layout = layout, 
     value='yes',
     disabled=False)
 
-download_choice.layout.width = '603px'
-download_choice.layout.margin = '-10px 0px 0px -40px' #top, right, bottom, left
-
 update_button = Button(description='Run selection',
                        disabled=False,
+                       layout = layout, 
                        button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
                        tooltip='Click me',)
-#update_button.layout.margin = '0px 0px 0px 260px' #top, right, bottom, left
 
 royal='#4169E1'
 update_button.style.button_color=royal
 
-h_box_1=HBox([header_station, header_download])
-
-h_box_2=HBox([station_choice_meas,download_choice])
-
-form = VBox([h_box_1, h_box_2, update_button])
+output_grid=GridspecLayout(2, 2)
+output_grid[0:1, 0:1] = header_station
+output_grid[0:1, 1:2] = header_download
+output_grid[1:2, 0:1] = station_choice_meas
+output_grid[1:2, 1:2] = download_choice
 
 #Initialize form output:
 form_out = Output()
@@ -156,7 +152,6 @@ def update_func(button_c):
 
                 radiocarbonObject.settings['output_folder'] = output
 
-
                 #possibly add format also (input to function save_model)
                 radiocarbon_functions.save_data_cp(radiocarbonObject)
 
@@ -168,15 +163,12 @@ def update_func(button_c):
     update_button.disabled = False
     f.value = 3
         
-        
-
 update_button.on_click(update_func)
-
 
 #Open form object:
 with form_out:
 
-    display(form, progress_bar, output_per_station)
+    display(output_grid, update_button, output_per_station)
 
 #Display form:
 display(form_out)

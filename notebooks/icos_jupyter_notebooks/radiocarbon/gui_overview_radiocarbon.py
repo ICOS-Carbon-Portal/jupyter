@@ -3,6 +3,8 @@ from ipywidgets import Dropdown, Button, Output, VBox, RadioButtons
 from IPython.display import clear_output
 from icoscp.station import station as station_data
 from IPython.core.display import display, HTML 
+import warnings
+warnings.filterwarnings('ignore')
 
 #want to have a dropdown with the names of the nuclear facilities ranked by their emissions year 2018
 list_facility_names=[]   
