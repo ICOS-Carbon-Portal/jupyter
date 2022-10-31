@@ -18,6 +18,22 @@ button_color_able='#4169E1'
 button_color_disable='#900D09'
 import warnings
 warnings.filterwarnings('ignore')
+
+import ipywidgets as widgets
+style_scroll = """
+    <style>
+       .jupyter-widgets-output-area .output_scroll {
+            height: unset !important;
+            border-radius: unset !important;
+            -webkit-box-shadow: unset !important;
+            box-shadow: unset !important;
+        }
+        .jupyter-widgets-output-area  {
+            height: auto !important;
+        }
+    </style>
+    """
+
 from icoscp.stilt import stiltstation
 
 stiltstations= stiltstation.find()
@@ -591,4 +607,4 @@ with form_out:
     display(form, progress_bar, header_no_footprints, h_box_footprints)
 
 #Display form:
-display(form_out)    
+display(widgets.HTML(style_scroll),form_out) 

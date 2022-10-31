@@ -15,6 +15,21 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import json
 import pandas as pd
+import ipywidgets as widgets
+style_scroll = """
+    <style>
+       .jupyter-widgets-output-area .output_scroll {
+            height: unset !important;
+            border-radius: unset !important;
+            -webkit-box-shadow: unset !important;
+            box-shadow: unset !important;
+        }
+        .jupyter-widgets-output-area  {
+            height: auto !important;
+        }
+    </style>
+    """
+
 from icoscp.stilt import stiltstation
 stiltstations= stiltstation.find()
 
@@ -171,4 +186,4 @@ with form_out:
     display(output_grid, update_button, output_per_station)
 
 #Display form:
-display(form_out)
+display(widgets.HTML(style_scroll),form_out) 
