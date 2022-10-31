@@ -9,14 +9,26 @@ import pandas as pd
 from numpy import loadtxt
 import network_characterization_functions as functions
 from numpy import loadtxt
-
 import json
 from datetime import datetime
-
 data_folder = '/data/project/stc/footprints_2018_averaged'
+# style to supress scrolling in the output 
+import ipywidgets as widgets
+style_scroll = """
+    <style>
+       .jupyter-widgets-output-area .output_scroll {
+            height: unset !important;
+            border-radius: unset !important;
+            -webkit-box-shadow: unset !important;
+            box-shadow: unset !important;
+        }
+        .jupyter-widgets-output-area  {
+            height: auto !important;
+        }
+    </style>
+    """
 
 from icoscp.stilt import stiltstation
-
 stiltstations= stiltstation.find()
 
 list_all_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if v['geoinfo']])
@@ -404,5 +416,5 @@ form_out = Output()
 with form_out:
     #here add the output also 
     display(form, output)
-    
-display(form_out) 
+
+display(widgets.HTML(style_scroll),form_out) 
