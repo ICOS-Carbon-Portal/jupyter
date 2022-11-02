@@ -54,7 +54,7 @@ RUN mamba install --quiet --yes \
     nco=5.1.0 netcdf4=1.5.8 netcdf-fortran=4.6.0 \
     openpyxl=3.0.10  \
     panel=0.14.0 papermill=2.3.4 param=1.12.2 plotly=5.10.0 pscript=0.7.7 pygmt=0.7.0 pypdf2=2.10.8 python-cdo=1.5.6 \
-    s3fs=2022.10.0 shapely=1.8.4= \
+    s3fs=2022.10.0 shapely=1.8.4 \
     xarray=2022.9.0 \
     zarr=2.13.3 \
     && mamba clean --quiet --all --force-pkgs-dirs --yes
