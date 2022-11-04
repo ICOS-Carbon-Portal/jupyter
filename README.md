@@ -4,8 +4,9 @@
 <br> 
 
 # ICOS Carbon Portal - Jupyter Notebooks
-This folder contains code and ancillary data for all jupyter notebooks that are currently available through the ICOS CP "Anonymous" service: https://exploredata.icos-cp.eu
-
+This folder contains code and ancillary data for all jupyter notebooks that are currently available through the 
+ICOS CP "Anonymous" service: https://exploredata.icos-cp.eu.   
+Documentation about the ICOS Carbon Portal Jupyter-Hub is available at https://icos-carbon-portal.github.io/jupyter/
 <br>
 
 ## Structure

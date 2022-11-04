@@ -199,3 +199,21 @@ For more information on how to work with Jupyter read the official [Jupyter docu
 
 <br>
 <br>
+
+## Restart your jupyter instance
+
+#### Jupyter-Lab interface
+- Use the main menu bar and go to **File** -> **Hub Control Panel**.
+- When the control panel window has finished loading, click **Stop My Server**.
+- Wait one minute until the system performs some additional steps.
+- Finally, click **Start My Server**.
+
+#### Jupyter-Classic interface
+- From Jupyter's dashboard (where you can list all your directories and files) click the **Control Panel** 
+button in the upper right corner of Jupyter.
+- When the control panel window has finished loading, click **Stop My Server**.
+- Wait one minute until the system performs some additional steps.
+- Finally, click **Start My Server**.
+ 
+<br>
+<br>
