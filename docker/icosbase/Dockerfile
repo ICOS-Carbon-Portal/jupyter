@@ -42,6 +42,7 @@ RUN conda install --yes mamba --channel conda-forge \
 COPY mamba_requirements.txt  mamba_requirements.txt
 RUN mamba install --quiet --yes --file mamba_requirements.txt  \
     && mamba clean --quiet --all --force-pkgs-dirs --yes
+RUN rm mamba_requirements.txt
 
 # Install this extension because it is needed for the qgrid extension
 # installation.
@@ -58,6 +59,7 @@ RUN jupyter lab build
 # Additional python modules, not available using mamba.
 COPY pip_requirements.txt  pip_requirements.txt
 RUN pip install --quiet --requirement pip_requirements.txt
+RUN rm pip_requirements.txt
 # Version of nersc-refresh-announcements is 0.1.0.
 RUN pip install --quiet git+https://github.com/NERSC/nersc-refresh-announcements.git
 
