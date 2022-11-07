@@ -8,6 +8,7 @@ import pandas as pd
 import os
 import netCDF4 as cdf
 import numpy as np
+os.environ['PROJ_LIB'] = '/opt/conda/share/proj'
 import cartopy
 cartopy.config['data_dir'] = '/data/project/cartopy/'
 import cartopy.crs as ccrs
@@ -223,6 +224,8 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
     
     cmap.set_under(color='white')  
     
+    norm = matplotlib.colors.BoundaryNorm
+    
     if linlog == 'linear':
         
         im = ax.imshow(field[:,:], interpolation='none',origin='lower', extent=img_extent,cmap=cmap,vmin=0.00001,vmax=vmax)
@@ -238,7 +241,7 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
             
             norm = matplotlib.colors.BoundaryNorm(ticks, cmap.N, extend='both')
             
-            im = ax.imshow(field[:,:], norm=norm, interpolation='none',origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
+            im = ax.imshow(field[:,:], norm=norm, interpolation='none',origin='lower', extent=img_extent,cmap=cmap)
             
             cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='neither', format='%.0f', ticks=ticks)
 
@@ -258,8 +261,8 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
             cbar.set_label(label+unit)
        
     else:
-
-        cs = ax.imshow(field[:,:],norm=LogNorm(), origin='lower', extent=img_extent,cmap=cmap,vmin=0.000001,vmax=vmax)
+        
+        cs = ax.imshow(field[:,:],norm=LogNorm(), origin='lower', extent=img_extent,cmap=cmap)
 
         cbar = plt.colorbar(cs, orientation='horizontal',pad=0.03,fraction=0.055,extend='both')
         

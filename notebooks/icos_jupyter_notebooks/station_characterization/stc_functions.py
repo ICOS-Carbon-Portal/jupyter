@@ -23,6 +23,7 @@ import requests
 import tex
 from IPython.core.display import display, HTML 
 import netCDF4 as cdf
+os.environ['PROJ_LIB'] = '/opt/conda/share/proj'
 import cartopy
 cartopy.config['data_dir'] = '/data/project/cartopy/'
 import cartopy.crs as ccrs
@@ -1551,14 +1552,16 @@ def save(stc, fmt='pdf'):
     
     # save settings as json file
     file = os.path.join(stc.settings['output_folder'],'settings.json')
-    with open(file, 'w') as f:
-        
-        settings_copy = stc.settings.copy()
+    
+    settings_copy = stc.settings.copy()
 
-        del settings_copy['stilt']
-        
-        if 'icos' in settings_copy.keys():
-            del settings_copy['icos']
+    delete = ['stilt', 'icos', 'areaFifty', 'date/time generated', 'output_folder', 'Sensitivity', 'Population', 'Point source']
+
+    for item in delete: 
+        if item in settings_copy.keys():
+            del settings_copy[item]
+
+    with open(file, 'w') as f:
         
         json.dump(settings_copy, f, indent=4)
         
@@ -1573,8 +1576,7 @@ def save(stc, fmt='pdf'):
     output_folder = stc.settings['output_folder']
 
     a = os.system(('pdflatex -output-directory=' + output_folder + ' ' + tex_file))
-    
-    
+
     if a!=0:
         print('problem generating the output PDF')
 
@@ -1583,9 +1585,3 @@ def save(stc, fmt='pdf'):
         for file_ext in files_to_remove:
             remove = stc.settings['date/time generated']+stc.stationId+ file_ext
             os.remove(output_folder + '/' + remove)
-
-                
-        
-
-                
-        

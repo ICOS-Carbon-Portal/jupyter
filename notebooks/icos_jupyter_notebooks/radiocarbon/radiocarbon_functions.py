@@ -395,10 +395,9 @@ def plotmap(stations, selected_facility, basemap, d_icon='cloud', icon_col='blue
         #Get station info in html-format and add it to an iframe:
         #station_name and uri
         iframe = branca.element.IFrame(html=html_table_station(station=st[1][1],station_name=st[1][2],uri=st[1][0]), width=300, height=100)
-        
-    
+
         #Add marker for current station to map:
-        add_marker(m, iframe, icon_col, lat_station=float(st[1][4]), lon_station=float(st[1][5]), name_station=st[1][2])
+        add_marker(m, iframe, icon_col, lat_station=float(st[1][5]), lon_station=float(st[1][6]), name_station=st[1][2])
             
     for dictionary_item in dictionary_radiocarbon_emissions:
         
@@ -472,7 +471,7 @@ def plotmap_static(atm_stations, year):
     #points for all the ICOS atmospheric stations:
     for atm_station in atm_stations.iterrows():
 
-        p9=ax.plot(float(atm_station[1][5]),float(atm_station[1][4]),'o',color='b',ms=4,transform=ccrs.PlateCarree())  
+        p9=ax.plot(float(atm_station[1][6]),float(atm_station[1][5]),'o',color='b',ms=4,transform=ccrs.PlateCarree())  
 
     matplotlib.rcParams.update({'font.size': 17})
 

@@ -91,7 +91,11 @@ class RadiocarbonObject():
         self.threshold = self.settings['threshold']
         
         self.stationId = self.settings['stationCode']
-        self.country = self.settings['stilt']['geoinfo']['name']['common']
+        
+        if self.settings['stilt']['geoinfo']:
+            self.country = self.settings['stilt']['geoinfo']['name']['common']
+        else: 
+            self.country = 'not located'
         
         if 'icos' in self.settings.keys():
             # ICOS station 

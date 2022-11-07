@@ -3,6 +3,22 @@ from ipywidgets import Dropdown, Button, Output, VBox, RadioButtons
 from IPython.display import clear_output
 from icoscp.station import station as station_data
 from IPython.core.display import display, HTML 
+import warnings
+warnings.filterwarnings('ignore')
+import ipywidgets as widgets
+style_scroll = """
+    <style>
+       .jupyter-widgets-output-area .output_scroll {
+            height: unset !important;
+            border-radius: unset !important;
+            -webkit-box-shadow: unset !important;
+            box-shadow: unset !important;
+        }
+        .jupyter-widgets-output-area  {
+            height: auto !important;
+        }
+    </style>
+    """
 
 #want to have a dropdown with the names of the nuclear facilities ranked by their emissions year 2018
 list_facility_names=[]   
@@ -140,5 +156,4 @@ with form_out:
     display(VBox([header_interactive_map, header_select_facility, select_facility, header_select_basemap, select_basemap, header_static_map, header_year_data, year_data, button_exe, plot_out]))
 
 #Display form:
-
-display(form_out)
+display(widgets.HTML(style_scroll),form_out)  

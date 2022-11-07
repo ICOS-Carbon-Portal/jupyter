@@ -1,106 +1,72 @@
-# We use a specific hash since :latest has broken spuriously in the past.
+# We use a specific hash since :latest has broken spuriously in the
+# past.
 # https://hub.docker.com/r/jupyter/datascience-notebook
-# This hash is jupyter/datascience-notebook:latest on 2021-01-28.
-FROM jupyter/datascience-notebook@sha256:e6d5c7d595d25f6ec7a894d8fcc7cb4b542c28f65fb71cdf0cb9b77f0ce0ddd0
+# This hash is jupyter/datascience-notebook:latest on 2022-10-04.
+FROM jupyter/datascience-notebook@sha256:731da3b2844e168d677e622d6ce127e790117e291c57933deefd93bc5f79217d
 
-# -------------------------
-# this block is added to the top of the Dockerfile
-# because it takes about 45 minutes to install TL2020, so be patient.
-# Install a full version of Texlive2020 (https://tug.org/texlive/)
-# switch to root for texlive installation
+# Remove the default xetex LaTeX installation of jupyter-lab and
+# install the full latest LaTeX version. It takes about 45 minutes to
+# install it, so be patient.
+# Check links below to find which engine is used by default in jupyter
+# notebooks to process TeX documents. Remember, minimal-notebook is
+# included in datascience-notebook.
+# https://github.com/jupyter/docker-stacks/blob/main/minimal-notebook/Dockerfile
+# https://jupyter-docker-stacks.readthedocs.io/en/latest/using/selecting.html#jupyter-datascience-notebook
+# Switch to root for texlive installation.
 USER root
-
-# Remove old texlive installation
+# Remove old texlive installation.
 RUN rm -rf /usr/share/texlive
-
-# Add texlive2020 installer and unpack
+# Add texlive2021 installer and unpack.
 # http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
-
 RUN wget -O /tmp/install-tl-unx.tar.gz http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
 RUN tar -xf /tmp/install-tl-unx.tar.gz --strip-components=1 -C /tmp/
-
-# add profile and start intallation
-
-COPY Texlive2020/texlive.profile /tmp/.
+# Add profile and start intallation.
+COPY Texlive2021/texlive.profile /tmp/.
 RUN /tmp/install-tl --profile=/tmp/texlive.profile
-
-# export path to texlive2020
-ENV PATH="/usr/local/texlive/2020/bin/x86_64-linux:${PATH}"
-
+# Export path to texlive2021
+ENV PATH="/usr/local/texlive/2021/bin/x86_64-linux:${PATH}"
 # switch back to normal user
 USER jovyan
 
-# -------------------------
+# This directory is added by jupyter/base-notebook, for backwards
+# compatibility, but we don't need it.
+WORKDIR /home/jovyan
+RUN rmdir work
 
 # Experimental, use mamba.
 # https://medium.com/@QuantStack/open-software-packaging-for-science-61cecee7fc23
-RUN conda install -y mamba -c conda-forge && conda clean -qafy
+RUN conda install --yes mamba --channel conda-forge \
+    && conda clean --quiet --all --force-pkgs-dirs --yes
 
-RUN mamba install -qy                                                          \
-        basemap basemap-data-hires cartopy geoviews holoviews panel datashader \
-        hvplot param cdo python-cdo netcdf4 geopandas mpld3 pscript ipyleaflet \
-        netcdf-fortran sparqlwrapper xarray=2022.3.0 shapely folium qgrid               \
-        && mamba clean -qafy
+# Install required packages.
+COPY mamba_requirements.txt  mamba_requirements.txt
+RUN mamba install --quiet --yes --file mamba_requirements.txt  \
+    && mamba clean --quiet --all --force-pkgs-dirs --yes
+RUN rm mamba_requirements.txt
 
-# this is for the visual debugger in JupyterLab
-RUN mamba install -qy xeus-python && mamba clean -qafy
-
-# install the standard notebook extensions
-# and activate the configurator
-RUN mamba install -qy -c conda-forge jupyter_contrib_nbextensions
-RUN jupyter nbextensions_configurator enable
-
-# patch the default configuration for toc, 
-# such that headers are NOT numbered by default
-# and activate the extension
-
-COPY nbextensionDefault/*.diff /tmp/
-RUN patch /opt/conda/share/jupyter/nbextensions/toc2/toc2.yaml /tmp/toc2.yaml.diff
-RUN patch /opt/conda/share/jupyter/nbextensions/toc2/toc2.js /tmp/toc2.js.diff
-RUN jupyter nbextension enable toc2/main
-
-# update jupyter lab and rebuild
-#RUN jupyter labextension install @jupyterlab/debugger --no-build
-#RUN jupyter labextension install @lckr/jupyterlab_variableinspector --no-build
-# jupter lab build fails with this base-notebook
-#RUN jupyter labextension install qgrid2 --no-build
+# Install this extension because it is needed for the qgrid extension
+# installation.
+RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build
+# Before installing the qgrid extension make sure you have installed
+# the qgrid library. In this current jupyter/datascience-notebook image
+# the qgrid library is already included, thus there is no need to
+# reinstall it.
+# Install qgrid extension.
+RUN jupyter labextension install @j123npm/qgrid2@1.1.4 --no-build
+# Rebuild jupyter lab.
 RUN jupyter lab build
 
+# Additional python modules, not available using mamba.
+COPY pip_requirements.txt  pip_requirements.txt
+RUN pip install --quiet --requirement pip_requirements.txt
+RUN rm pip_requirements.txt
+# Version of nersc-refresh-announcements is 0.1.0.
+RUN pip install --quiet git+https://github.com/NERSC/nersc-refresh-announcements.git
 
-# Activate initialisation cell extension AFTER lab build.
-RUN jupyter nbextension enable init_cell/main
-
-RUN pip install pangaeapy
-RUN pip install jupyter_module_loader
-
-# convert kml files to geojson
-RUN pip install kml2geojson
-
-# simplify polygons 
-RUN pip install simplification
-
-WORKDIR /home/jovyan
-
-# This directory is added by jupyter/base-notebook, "for backwards
-# compatibility", but we don't need it.
-RUN rmdir work
-
-# This package, and the following notebook directories, are the stuff that
-# changes most often, so we add them last.
-RUN pip install icoscp==0.1.16
-
-
-# -----start temp fix---2021-03-26 CD-------------------
-
-# temporary fixes to the icos base image
-# current version of jupyter/datascience-notebook
-# has updated version of pandas which needs openpyxl to read excel files
-RUN mamba install -qy openpyxl
-
-# gdal 3.2.1 can't be loaded.. downgrade to last version we 
-# know is working
-
-RUN mamba install -qy gdal=3.1.4
-
-# -----eof temp fix------------------------------------
-
+# Override configuration for jupyter lab settings.
+COPY overrides.json /opt/conda/share/jupyter/lab/settings/.
+# Keep this in a separate line. It's the only library that changes
+# frequently and the new docker image will build faster.
+# Update version number according to latest release.
+# RUN pip install --quiet icoscp==0.1.16
+RUN pip install git+https://github.com/icos-carbon-portal/pylib.git@107_update_stationdata_sparql

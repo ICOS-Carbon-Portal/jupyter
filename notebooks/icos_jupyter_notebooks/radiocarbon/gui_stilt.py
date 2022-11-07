@@ -10,13 +10,29 @@ from IPython.core.display import display, HTML
 from icoscp.station import station as cpstation
 import radiocarbon_functions
 import radiocarbon_object
-
 import os
 import matplotlib.pyplot as plt
-
 from datetime import datetime
 import json
+button_color_able='#4169E1'
+button_color_disable='#900D09'
+import warnings
+warnings.filterwarnings('ignore')
 
+import ipywidgets as widgets
+style_scroll = """
+    <style>
+       .jupyter-widgets-output-area .output_scroll {
+            height: unset !important;
+            border-radius: unset !important;
+            -webkit-box-shadow: unset !important;
+            box-shadow: unset !important;
+        }
+        .jupyter-widgets-output-area  {
+            height: auto !important;
+        }
+    </style>
+    """
 
 from icoscp.stilt import stiltstation
 
@@ -95,18 +111,22 @@ def set_settings(s):
 
 #---------------------------------------------------------
     
-def change_stn_type(c):  
+def change_stn_type(c): 
     
+    # disable update button until date and time defined (see how these are reset below)
     update_button.disabled = True
-    
+    update_button.tooltip = 'Unable to run'
+    update_button.style.button_color=button_color_disable
+
     # make sure the new 'options' are not selected..
     unobserve()    
     if station_type.value=='STILT stations':        
         station_choice.options=list_all
-    else:        
+    else:       
         station_choice.options= list_all_icos
     
     station_choice.value=None 
+    
     # reset the data fields
     s_year.options = []
     e_year.options = []
@@ -114,127 +134,130 @@ def change_stn_type(c):
     e_month.options = []
     s_day.options = []
     e_day.options = []
+    
     # make sure future changes are observed again
     observe()
     
-def change_stn(c):   
-
-    stn = c['new']
-    years = sorted(stiltstations[stn]['years'])    
+def change_stn(c): 
+ 
+    update_button.disabled = False
+    update_button.tooltip = 'Click to start the run'
+    update_button.style.button_color=button_color_able
+        
+    years = sorted(stiltstations[station_choice.value]['years'])    
     years = [int(x) for x in years] 
 
-    s_year.options=years            
+    s_year.options=years 
+    s_year.value = min(years)
     e_year.options=years
+    e_year.value = min(years)
     
-    if s_year.value!=e_year.value or s_month.value != e_month.value or e_day.value != s_day.value:
-
-        update_button.disabled = False
-
-def change_yr(c): 
+    #triggers "change_yr" --> pupulates the month widgets based on STILT footprint availability
     
-    years = [x for x in s_year.options if x >= c['new']]
+
+def change_yr(c):
+    
+    years = [x for x in s_year.options if x >= s_year.value]
     e_year.options = years
         
-    #extract month (remove last item, not a month)
-    stn = station_choice.value   
-    month = sorted(stiltstations[stn][str(s_year.value)]['months'])
+    #extract available months 
+    month = sorted(stiltstations[station_choice.value][str(s_year.value)]['months'])
     month = [int(x) for x in month]
     s_month.options= month
-    
-    #added
+    s_month.value = min(month)
     e_month.options = month
-    
-    if s_year.value==e_year.value and s_month.value == e_month.value and e_day.value == s_day.value:
-        update_button.disabled = True
-    else:
-        update_button.disabled = False
-        
-def change_yr_end(c):
+    e_month.value = min(month)
 
-    
-    if s_year.value==e_year.value:
-        month = [x for x in s_month.options if x >= s_month.value]        
-        e_month.options = month
-    else:
-        # if different from start year, all months are up for choice!
-        month = sorted(stiltstations[station_choice.value][str(s_year.value)]['months'])
-        month = [int(x) for x in month]
-        e_month.options = month
-
-    if s_year.value==e_year.value and s_month.value == e_month.value and e_day.value == s_day.value:
-        update_button.disabled = True
-    else:
-        update_button.disabled = False
-        
 def change_mt(c):
     
     #the day widget populated depending on what month it is (different number of days)
     month_days_30=[4,6,9,11]
     month_days_31=[1,3,5,7,8,10,12]
 
-    if c['new'] in month_days_31:
+    if s_month.value in month_days_31:
         s_day.options=list(range(1,32))
 
-    elif c['new'] in month_days_30:
+    elif s_month.value in month_days_30:
         s_day.options=list(range(1,31))
     else:
-        s_day.options=list(range(1,29))
+        s_day.options=list(range(1,29))   
     
-    #when change start_month - change end month also (if same year)
-    if s_year.value==e_year.value :        
-        month = [int(x) for x in s_month.options if x >= c['new']]                
-        e_month.options=month
-
+    s_day.value = 1
+    
     #when change start_month - change end day also (if same year and month OR the first time)
-    if s_year.value==e_year.value and s_month.value==e_month.value:
+    if s_year.value==e_year.value and s_month.value>e_month.value:
+        month = [int(x) for x in s_month.options if x >= s_month.value]                
+        e_month.options=month
+        e_month.value = min(month)
+        
         day = [x for x in s_day.options if x >= s_day.value]
         e_day.options=day
-        
-    if s_year.value==e_year.value and s_month.value == e_month.value and e_day.value == s_day.value:
-  
-        update_button.disabled = True
-    else:
+        e_day.value = min(day)
 
-        update_button.disabled = False
-        
-
-def change_month_end(c):
+def change_yr_end(c):
     
-
+    if s_year.value==e_year.value:
+        month = [x for x in s_month.options if x >= s_month.value]        
+        e_month.options = month
+        e_month.value = min(month)
+    else:
+        # if different from start year, all months are up for choice!
+        month = sorted(stiltstations[station_choice.value][str(e_year.value)]['months'])
+        month = [int(x) for x in month]
+        e_month.options = month
+        e_month.value = min(month)
+        
     if s_year.value==e_year.value and e_month.value==s_month.value:
         day = [x for x in s_day.options if x >= s_day.value]
         e_day.options= day
+        e_day.value = min(day)
     else:
         month_days_30=[4,6,9,11]
         month_days_31=[1,3,5,7,8,10,12]
 
-        if c['new'] in month_days_31:
+        if e_month.value in month_days_31:
             e_day.options=list(range(1,32))
 
-        elif c['new'] in month_days_30:
+        elif e_month.value in month_days_30:
             e_day.options=list(range(1,31))
 
         else:
             e_day.options=list(range(1,29))
             
-    if s_year.value==e_year.value and s_month.value == e_month.value and e_day.value == s_day.value:
-        update_button.disabled = True
-    else:
-        update_button.disabled = False
-    
+        e_day.value = 1
 
 def change_day(c):
-  
+    
     #when change the day... if the same month and year (start) - update
     if s_year.value==e_year.value and s_month.value==e_month.value:
-
-        day = [int(x) for x in s_day.options if x >= s_day.value]
-        e_day.options = day
+        original_value = e_day.value 
+        allowed_days = [int(x) for x in s_day.options if x >= s_day.value]
+        e_day.options = allowed_days  
         
-    if s_year.value==e_year.value and s_month.value == e_month.value and e_day.value == s_day.value:
-        update_button.disabled = True
+        if original_value in allowed_days:
+            e_day.value = original_value
+        else:
+            e_day.value = min(allowed_days)
+    
+def change_month_end(c):
+    
+    if s_year.value==e_year.value and e_month.value==s_month.value:
+        day = [x for x in s_day.options if x >= s_day.value]
+        e_day.options= day
+        e_day.value = min(day)
     else:
-        update_button.disabled = False
+        month_days_30=[4,6,9,11]
+        month_days_31=[1,3,5,7,8,10,12]
+
+        if e_month.value in month_days_31:
+            e_day.options=list(range(1,32))
+
+        elif e_month.value in month_days_30:
+            e_day.options=list(range(1,31))
+
+        else:
+            e_day.options=list(range(1,29))          
+        e_day.value = 1
     
 def change_day_end(c):
     
@@ -363,6 +386,7 @@ colorbar_choice_list= ['GnBu', 'Greys', 'Purples', 'Blues', 'Greens', 'Oranges',
                          'PuBuGn', 'BuGn', 'YlGn']
  
 style_bin = {'description_width': 'initial'}
+layout = {'width': 'initial', 'height':'initial'}
 
 #Create a Dropdown widget with station names:
 #maybe let it be coded (ex GAT344), but shown options 
@@ -371,39 +395,47 @@ station_type=RadioButtons(
         options=['ICOS stations', 'STILT stations'],
         value='ICOS stations',
         description=' ',
+        layout = layout,
         disabled=False)
 
 station_choice = Dropdown(options = list_all_icos,
                    description = 'Station',
+                   layout = layout,
                    value=None,
                    disabled= False)
 
 #Create a Dropdown widget with year values (start year):
 s_year = Dropdown(options = [],
-                  description = 'Start Year',
+                  description = 'Start Year',     
+                  layout = layout,
                   disabled= False,)
 
 #Create a Dropdown widget with month values (start month):
 s_month = Dropdown(options = [],
                    description = 'Start Month',
+                   layout = layout,
                    disabled= False,)
 
 #Create a Dropdown widget with year values (end year):
 e_year = Dropdown(options = [],
                   description = 'End Year',
+                  layout = layout,
                   disabled= False,)
 
 #Create a Dropdown widget with month values (end month):
 e_month = Dropdown(options = [],
                    description = 'End Month',
+                   layout = layout,
                    disabled= False,)
 
 s_day = Dropdown(options = [],
                 description = 'Start Day',
+                 layout = layout,
                 disabled = False,)
 
 e_day = Dropdown(options = [],
             description = 'End Day',
+             layout = layout,
             disabled = False,)
 
 station_type=RadioButtons(
@@ -442,6 +474,7 @@ threshold_facility_inclusions = BoundedFloatText(
     value=0.2,
     min=0,
     style=style_bin,
+    layout = layout,
     disabled=False)
 
 header_resample = Output()
@@ -453,6 +486,7 @@ resample = BoundedIntText(
     min=0,
     step=1,
     description='Days:',
+    layout = layout,
     disabled=False
 )
 
@@ -460,6 +494,7 @@ resample_monthly = Checkbox(
     value=False,
     description='Monthly',
     disabled=False,
+    layout = layout,
     indent=False
 )
 
@@ -572,4 +607,4 @@ with form_out:
     display(form, progress_bar, header_no_footprints, h_box_footprints)
 
 #Display form:
-display(form_out)    
+display(widgets.HTML(style_scroll),form_out) 

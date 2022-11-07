@@ -13,6 +13,7 @@ nav:
     - ICOS Notebooks: icos_notebooks.md
     - How to: how_to.md
     - FAQ: faq.md
+    - Changelog: changelog.md
 
 #markdown extensions:
     #- attr_list
