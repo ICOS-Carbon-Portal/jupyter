@@ -671,19 +671,11 @@ def population_bar_graph_base(networkObj):
     p.outline_line_color = None
     p.legend.label_text_font_size = "10px"
     p.xaxis.major_label_orientation = "vertical"
+  
+    if len(country_names)>1:
 
-    output_population_by_country = Output()
+        show(p)
 
-    with output_population_by_country:
-
-        output_population_by_country.clear_output()
-        
-        if len(country_names)>1:
-
-            show(p)
-
-    display(output_population_by_country)
-    
 def population_bar_graph_compare(networkObj):
     
     base_network = networkObj.baseNetwork    
@@ -873,18 +865,11 @@ def land_cover_bar_graphs_base(networkObj):
     p_aggreg.legend[0].items.reverse()
     p_aggreg.xaxis.major_label_orientation = "vertical"
     p_aggreg.yaxis.axis_label = 'area (km²) * (ppm /(μmol / (m²s)))'
+     
+    if len(country_names)>1:
     
-    output_landcover_all = Output()
-    
-    with output_landcover_all:
-        output_landcover_all.clear_output()
+        show(p_aggreg)
         
-        if len(country_names)>1:
-    
-            show(p_aggreg)
-        
-    display(output_landcover_all)
-   
     colors_individual = ['#82ba8f','#4c9c5f','#dae9c4','#CAE0AB','#b1d9ab','#90C987', '#865f5a', '#521A13', '#f8f167',  '#ded74d', '#ee8286', '#DC050C', '#5e93c8', '#1964B0', '#f7be81','#F1932D', '#c497b8', '#882E72','#a0a0a0','#777777']
     
     categories = ['Country', 'Network']
@@ -965,13 +950,7 @@ def land_cover_bar_graphs_base(networkObj):
             p_individual.legend.label_text_font_size = "10px"
             p_individual.xaxis.major_label_orientation = "vertical"
 
-            
-            with output_landcover_individual:
-                output_landcover_individual.clear_output()
-                show(p_individual)
-                
-            display(output_landcover_individual)
-
+            show(p_individual)
 
 def land_cover_bar_graphs_compare(networkObj):
     
@@ -1102,8 +1081,6 @@ def land_cover_bar_graphs_compare(networkObj):
     legend_items = [(land_cover, [graph]) for  land_cover, graph in zip(land_cover_values, graph_items)]
     legend = Legend(items=legend_items)
     p.add_layout(legend, 'right')
-
- 
     p.y_range.start = 0
     p.legend[0].items.reverse()
     p.legend.label_text_font_size = "10px"
@@ -1113,16 +1090,8 @@ def land_cover_bar_graphs_compare(networkObj):
     p.xgrid.grid_line_color = None
     p.axis.minor_tick_line_color = None
     
-    output_landcover_all = Output()
-    
-    with output_landcover_all:
+    show(p)
         
-        output_landcover_all.clear_output()
-    
-        show(p)
-        
-    display(output_landcover_all)
-
     for country in countries:
         
         # to display land cover graph for each country 
