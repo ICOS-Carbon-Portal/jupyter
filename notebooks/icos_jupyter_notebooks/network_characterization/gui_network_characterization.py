@@ -21,6 +21,7 @@ import ipywidgets as widgets
 from bokeh.io import show, output_notebook, reset_output
 import matplotlib.pyplot as plt
 
+
 # style to supress scrolling in the output 
 style_scroll = """
     <style>
@@ -373,6 +374,8 @@ def clear_all_output():
     output_leader_chart.clear_output()
     output_landcover_bargraph_countries.clear_output()
     output_population_bargraph_countries.clear_output()
+    output_population_bokhe.clear_output()
+    output_population_table.clear_output()
     output_header_landcover_section.clear_output()
     breakdown_landcover_output.clear_output()
     output_header_landcover_section.clear_output()
@@ -416,8 +419,7 @@ def update_func(button_c):
             display(HTML('<p style="font-size:16px">No footprints available for ' + no_footprints_string + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints.</p>'))
         
         all_stations = networkObj.settings['baseNetwork'] + networkObj.settings['compareNetwork']
-        
-        #added for zoom
+
         list_used_stations = [station for station in all_stations if station not in networkObj.noFootprints]
     
     else:
@@ -431,8 +433,6 @@ def update_func(button_c):
     
     settings['domain'] = (min_lon, max_lon, min_lat, max_lat)
 
-    #end adding for zoom
-    
     if networkObj.baseNetwork is not None:
         
         histogram_base, percentile_excluded, max_original, number_cells_above = functions.histogram_fp_distribution(networkObj, fp_type= 'base')
@@ -440,7 +440,6 @@ def update_func(button_c):
         with output_base_footprint_information:
             
             display(HTML('<p style="font-size:16px;text-align:center">Base network footprint (' + threshold_percent  + '%)<br>' + str("%0.1f" % percentile_excluded) + 'th percentile of non-zero fp cells as maximum <br> Network maximum: ' + str("%0.3f" % max_original) + ' (' + str(number_cells_above) + ' cells excluded)' + '</p>'))
-            
 
         with output_histogram_base:
             
@@ -456,7 +455,6 @@ def update_func(button_c):
             
             functions.plot_maps(networkObj.baseNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
 
-    
     else:
         
         update_button.disabled = False
@@ -482,9 +480,7 @@ def update_func(button_c):
             else:
                 pngfile = ''
 
-
             functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
-        
     
         with output_base_minus_compare:
             display(HTML('<p style="font-size:16px;text-align:center">Compare network - base network</p>'))
@@ -496,10 +492,8 @@ def update_func(button_c):
                 pngfile = ''
 
             functions.plot_maps(networkObj.compareMinusBase, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=None)
-            
-            
+           
     df_leader_chart_sens, original_df_leader_chart_sens = functions.leader_chart_sensitivity(networkObj)
-    
 
     with output_leader_chart:
         
@@ -509,24 +503,16 @@ def update_func(button_c):
         
         if download_output:
             
-     
-            
             path_output= os.path.join(os.path.expanduser('~'), 'output/network_characterization/network_characterization/' + str(networkObj.dateTime))
-            
-     
-
+ 
             original_df_leader_chart_sens.to_csv(path_output + '/leader_chart.csv')
   
     if networkObj.compareNetwork is not None:
-        
+
         with output_landcover_bargraph_countries:
-            
             if len(networkObj.settings['countries'])>0:
                 functions.land_cover_bar_graphs_compare(networkObj)
-                
-        with output_population_bargraph_countries:
-            if len(networkObj.settings['countries'])>0:
-                functions.population_bar_graph_compare(networkObj)
+
     else:
         
         with output_landcover_bargraph_countries:
@@ -540,8 +526,6 @@ def update_func(button_c):
     #only if choose to donwload:
     if download_output:
         functions.save_settings(settings, directory='network_characterization/network_characterization')
-    
-    
 
     update_button.disabled = False
 #-----------widgets definition ----------------
@@ -804,6 +788,8 @@ output_base_minus_compare = Output()
 output_leader_chart = Output()
 output_landcover_bargraph_countries = Output()
 output_population_bargraph_countries = Output()
+output_population_bokhe = Output()
+output_population_table = Output()
 
 output_breakdown_countries = Output()
 breakdown_landcover_output = Output()
@@ -846,10 +832,11 @@ with form_out:
     
     box_base_compare = HBox([vbox_base, vbox_compare])
     
-    #box_footprints_sens_linear = HBox([output_base_network_fp_linear, output_compare_network_fp_linear])
     box_difference_and_leader = HBox([output_base_minus_compare, output_leader_chart])
 
-    display(form, output_no_footprints,box_base_compare, box_difference_and_leader, output_landcover_bargraph_countries, output_population_bargraph_countries)
+    h_box_population = HBox([output_population_bokhe, output_population_table])
+    
+    display(form, output_no_footprints,box_base_compare, box_difference_and_leader, output_landcover_bargraph_countries, output_population_bargraph_countries, h_box_population)
 
 #Display form:
 display(widgets.HTML(style_scroll),form_out)   
