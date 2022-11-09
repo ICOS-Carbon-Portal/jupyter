@@ -671,19 +671,11 @@ def population_bar_graph_base(networkObj):
     p.outline_line_color = None
     p.legend.label_text_font_size = "10px"
     p.xaxis.major_label_orientation = "vertical"
+  
+    if len(country_names)>0:
 
-    output_population_by_country = Output()
+        show(p)
 
-    with output_population_by_country:
-
-        output_population_by_country.clear_output()
-        
-        if len(country_names)>1:
-
-            show(p)
-
-    display(output_population_by_country)
-    
 def population_bar_graph_compare(networkObj):
     
     base_network = networkObj.baseNetwork    
@@ -747,23 +739,15 @@ def population_bar_graph_compare(networkObj):
     # table showing difference between base and compare       
     df_diff_base_compare['Increase sensitivity (%)'] = change_base_compare_percent
     
-    output_population_table = Output()
-    
-    with output_population_table:
+    df_diff_base_compare = df_diff_base_compare.astype(float)
 
-        output_population_table.clear_output()
+    df_diff_base_compare.insert(0, 'Country', country_names)
 
-        df_diff_base_compare = df_diff_base_compare.astype(float)
+    styled_df_diff_base_compare = (df_diff_base_compare.style
+                                  .format({'Increase sensitivity (%)': '{:.0f}'})
+                                  .set_table_styles([dict(selector='th', props=[('text-align', 'center')])]))
 
-        df_diff_base_compare.insert(0, 'Country', country_names)
-
-        styled_df_diff_base_compare = (df_diff_base_compare.style
-                                      .format({'Increase sensitivity (%)': '{:.0f}'})
-                                      .set_table_styles([dict(selector='th', props=[('text-align', 'center')])]))
-
-        styled_df_diff_base_compare = styled_df_diff_base_compare.set_properties(**{'text-align': 'center'}).hide_index()
-
-        display(styled_df_diff_base_compare)  
+    styled_df_diff_base_compare = styled_df_diff_base_compare.set_properties(**{'text-align': 'center'}).hide_index()
 
     dictionary_sensitivity_population_by_country = {'Countries': country_names,
                      'Base': base_network,
@@ -785,18 +769,9 @@ def population_bar_graph_compare(networkObj):
     p.legend[0].items.reverse()
     p.legend.label_text_font_size = "10px"
     p.xaxis.major_label_orientation = "vertical"
-
-    output_population_by_country = Output()
-
-    with output_population_by_country:
-
-        output_population_by_country.clear_output()
-
-        show(p)
-
-    box_population = HBox([output_population_by_country, output_population_table])
     
-    display(box_population)
+    # p = population_bokeh and styled_df_diff_base_compare = population_table in GUI
+    return p, styled_df_diff_base_compare
 
 def land_cover_bar_graphs_base(networkObj):
     
@@ -873,18 +848,11 @@ def land_cover_bar_graphs_base(networkObj):
     p_aggreg.legend[0].items.reverse()
     p_aggreg.xaxis.major_label_orientation = "vertical"
     p_aggreg.yaxis.axis_label = 'area (km²) * (ppm /(μmol / (m²s)))'
+     
+    if len(country_names)>1:
     
-    output_landcover_all = Output()
-    
-    with output_landcover_all:
-        output_landcover_all.clear_output()
+        show(p_aggreg)
         
-        if len(country_names)>1:
-    
-            show(p_aggreg)
-        
-    display(output_landcover_all)
-   
     colors_individual = ['#82ba8f','#4c9c5f','#dae9c4','#CAE0AB','#b1d9ab','#90C987', '#865f5a', '#521A13', '#f8f167',  '#ded74d', '#ee8286', '#DC050C', '#5e93c8', '#1964B0', '#f7be81','#F1932D', '#c497b8', '#882E72','#a0a0a0','#777777']
     
     categories = ['Country', 'Network']
@@ -965,13 +933,7 @@ def land_cover_bar_graphs_base(networkObj):
             p_individual.legend.label_text_font_size = "10px"
             p_individual.xaxis.major_label_orientation = "vertical"
 
-            
-            with output_landcover_individual:
-                output_landcover_individual.clear_output()
-                show(p_individual)
-                
-            display(output_landcover_individual)
-
+            show(p_individual)
 
 def land_cover_bar_graphs_compare(networkObj):
     
@@ -1102,8 +1064,6 @@ def land_cover_bar_graphs_compare(networkObj):
     legend_items = [(land_cover, [graph]) for  land_cover, graph in zip(land_cover_values, graph_items)]
     legend = Legend(items=legend_items)
     p.add_layout(legend, 'right')
-
- 
     p.y_range.start = 0
     p.legend[0].items.reverse()
     p.legend.label_text_font_size = "10px"
@@ -1113,16 +1073,10 @@ def land_cover_bar_graphs_compare(networkObj):
     p.xgrid.grid_line_color = None
     p.axis.minor_tick_line_color = None
     
-    output_landcover_all = Output()
+    show(p)
     
-    with output_landcover_all:
-        
-        output_landcover_all.clear_output()
-    
-        show(p)
-        
-    display(output_landcover_all)
-
+    list_country_landcover_bokhe = []
+    list_country_landcover_table = []
     for country in countries:
         
         # to display land cover graph for each country 
@@ -1236,6 +1190,7 @@ def land_cover_bar_graphs_compare(networkObj):
             p_individual.legend.label_text_font_size = "10px"
             p_individual.xaxis.major_label_orientation = "vertical"
             
+            show(p_individual)
             # for diff table
             change_base_compare_percent=[]
             for i in range(len(list_land_cover_country_base)):
@@ -1252,30 +1207,21 @@ def land_cover_bar_graphs_compare(networkObj):
 
             df_diff_base_compare['Increase sensitivity (%)'] = change_base_compare_percent
 
-            with output_landcover_individual:
-                output_landcover_individual.clear_output()
-                show(p_individual)
-                
-            with output_landcover_individual_table:
-                
-                output_landcover_individual_table.clear_output()
+            df_diff_base_compare = df_diff_base_compare.astype(float)
 
-                df_diff_base_compare = df_diff_base_compare.astype(float)
+            df_diff_base_compare.insert(0, 'Category', land_cover_values)
 
-                df_diff_base_compare.insert(0, 'Category', land_cover_values)
+            styled_df_diff_base_compare = (df_diff_base_compare.style
+                                          .format({'Increase sensitivity (%)': '{:.0f}'})
+                                          .set_table_styles([dict(selector='th', props=[('text-align', 'center')])]))
 
-                styled_df_diff_base_compare = (df_diff_base_compare.style
-                                              .format({'Increase sensitivity (%)': '{:.0f}'})
-                                              .set_table_styles([dict(selector='th', props=[('text-align', 'center')])]))
+            styled_df_diff_base_compare = styled_df_diff_base_compare.set_properties(**{'text-align': 'center'}).hide_index()
+            
+            list_country_landcover_bokhe.append(p_individual)
+            list_country_landcover_table.append(styled_df_diff_base_compare)
+            
+            display(styled_df_diff_base_compare)
 
-                styled_df_diff_base_compare = styled_df_diff_base_compare.set_properties(**{'text-align': 'center'}).hide_index()
-                
-                display(styled_df_diff_base_compare)  
-                
-            box_landcover_individual = HBox([output_landcover_individual, output_landcover_individual_table])
-
-            display(box_landcover_individual)
-    
 def histogram_fp_distribution(networkObj, fp_type):
     
     if fp_type == 'base':
