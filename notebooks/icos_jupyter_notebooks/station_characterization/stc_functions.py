@@ -1297,7 +1297,7 @@ def multiple_variables_graph(myStation):
         string_stations_missing_footprints = ", ".join(stations_missing_footprints)
         
         string_stations_missing_footprints = string_stations_missing_footprints[:-1]
-        display(HTML('<p style="font-size:12px;">Reference station(s) missing footprints for specified date range: ' + string_stations_missing_footprints + '</p>'))  
+        display(HTML('<p style="font-size:16px;">Reference station(s) missing footprints for specified date range: ' + string_stations_missing_footprints + '</p>'))  
         
 
     #sensitivity is the first attribut (list_item[0]) in the each of the lists (one list per station)
@@ -1442,7 +1442,7 @@ def values_multiple_variable_graph(myStation, station):
 
         if percent_footprints<75:
 
-            display(HTML('<p style="font-size:12px;">' + station + ' (' + str(nfp) + '/' + str(len(date_range)) +' footprints)</p>'))       
+            display(HTML('<p style="font-size:16px;">' + station + ' (' + str(nfp) + '/' + str(len(date_range)) +' footprints)</p>'))       
             
         sens_area_50 = area_footprint_based_on_threshold(fp_station, lat, lon, 0.5)
 

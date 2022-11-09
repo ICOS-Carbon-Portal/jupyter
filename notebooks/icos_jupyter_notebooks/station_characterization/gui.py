@@ -454,46 +454,37 @@ def update_func(button_c):
             fmt=fig_format.value
             stc_functions.save(stc, fmt)
             
+            # create a html string for the download. Only links to files and documents that exist (for instance, if there is not footprints for the full year, the seasonal table will not be created. 
             file_folder=stc.settings['output_folder'].split('/')[-1]
             
             pdf_file_name = stc.settings['date/time generated']+stc.stationId+'.pdf'
-            pdf_file = os.path.join('../output/station_characterisation', file_folder, pdf_file_name)
+            pdf_file_path = os.path.join('../output/station_characterisation', file_folder, pdf_file_name)
             
-            sensitivity_map_name = 'sensitivity.' + stc.settings['figFormat']
-            sensitivity_map_file = os.path.join('../output/station_characterisation', file_folder, sensitivity_map_name)
+            if os.path.exists(pdf_file_path):
+                
+                html_string_pdf = '<h2>Download</h2><br>Full station characterization document:<br><a href='  + pdf_file_path + ' target="_blank">' + pdf_file_name + '</a><br><br>Individual figures:<br>'
+     
+            else:
+                
+                html_string_pdf = '<h2>Download</h2><br><br>Individual figures:<br>'
+
+            list_individual_figures = ['sensitivity', 'pointsource', 'population', 'landcover_bar', 'seasonal', 'landcover_polar', 'multivar']
             
-            
-            pointsource_map_name = 'pointsource.' + stc.settings['figFormat']
-            pointsource_map_file = os.path.join('../output/station_characterisation', file_folder, pointsource_map_name)
-            
-            population_map_name = 'population.' + stc.settings['figFormat']
-            population_map_file = os.path.join('../output/station_characterisation', file_folder, population_map_name)
-            
-            landcover_bar_name = 'landcover_bar.' + stc.settings['figFormat']
-            landcover_bar_file = os.path.join('../output/station_characterisation', file_folder, landcover_bar_name)
-            
-            seasonal_name = 'seasonal.' + stc.settings['figFormat']
-            seasonal_file = os.path.join('../output/station_characterisation', file_folder, seasonal_name)
-            
-            landcover_polar_name = 'landcover_polar.' + stc.settings['figFormat']
-            landcover_polar_file = os.path.join('../output/station_characterisation', file_folder, landcover_polar_name)
-            
-            multivar_name = 'multivar.' + stc.settings['figFormat']
-            multivar_file = os.path.join('../output/station_characterisation', file_folder, multivar_name)
-            
-            settings_file = os.path.join('../output/station_characterisation', file_folder, 'settings.json')
+            html_string_individual_figures = ''
+            for figure in list_individual_figures:
+                
+                path = os.path.join('../output/station_characterisation', file_folder, figure + '.' + stc.settings['figFormat'])
+                
+                if os.path.exists(path):
                     
+                    html_string_individual_figures = html_string_individual_figures + '<a href='  + path + ' target="_blank">' + figure + '.' + stc.settings['figFormat'] + '</a><br>'
+            
+            settings_file_path = os.path.join('../output/station_characterisation', file_folder, 'settings.json')  
+            
+            html_string_settings = '<br><br>Settings:</br><a href='  + settings_file_path + ' target="_blank">settings.json</a><br>'
+            
             with header_download:
-                display(HTML('<h2>Download</h2><br>Full station characterization document:<br>\
-                    <a href='  + pdf_file + ' target="_blank">' + pdf_file_name + '</a><br><br>Individual figures:<br>\
-                    <a href='  + sensitivity_map_file + ' target="_blank">' + sensitivity_map_name + '</a><br>\
-                    <a href='  + population_map_file + ' target="_blank">' + population_map_name + '</a><br>\
-                    <a href='  + landcover_bar_file + ' target="_blank">' + landcover_bar_name + '</a><br>\
-                    <a href='  + seasonal_file + ' target="_blank">' + seasonal_name + '</a><br>\
-                    <a href='  + landcover_polar_file + ' target="_blank">' + landcover_polar_name + '</a><br>\
-                    <a href='  + multivar_file + ' target="_blank">' + multivar_name + '</a><br>\
-                    <a href='  + sensitivity_map_file + ' target="_blank">' + sensitivity_map_name + '</a><br><br>Settings:</br>\
-                    <a href='  + settings_file + ' target="_blank">settings.json</a><br>'))           
+                display(HTML(html_string_pdf + html_string_individual_figures + html_string_settings))
 
         # make sure the progress bar is filled..
         updateProgress(f, 'finished')
