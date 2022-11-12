@@ -398,7 +398,7 @@ def read_aggreg_network_footprints(nwc, extended = False):
         date_string = str(date.year) + '_' + str(date.month) + '_' + str(date.day) + '_' +  str(date.hour)
         
         filename = os.path.join(path, folder, date_string + '.csv')
-        print(filename)
+
         if os.path.isfile(filename):
             
             network_fp = pd.read_csv(filename)
@@ -460,7 +460,7 @@ def lonlat_2_ixjy(slon,slat,mlon,mlat):
     return ix,jy
 
 # footprint_show_percentages() is used to with argument percent=True to generate an aggregated % sensitivity map. 
-def plot_maps(field, lon, lat, nwc, footprint_stations='', title='', label='', unit='', linlog='linear', extend = 'both', station='', vmin=None, vmax=None, colors='GnBu',pngfile='', directory='figures', output='', reference = '',  monitoring_potential = False): 
+def plot_maps(field, lon, lat, nwc, footprint_stations='', title='', label='', unit='', linlog='linear', extend = 'both', station='', vmin=None, vmax=None, colors='GnBu',pngfile='', output='', reference = '',  monitoring_potential = False): 
 
     # Set scale for features from Natural Earth
     NEscale = '50m'
@@ -512,8 +512,6 @@ def plot_maps(field, lon, lat, nwc, footprint_stations='', title='', label='', u
     
     if len(pngfile)>0:
         
-        output = output
-
         if not os.path.exists(output):
             os.makedirs(output)
   
@@ -812,10 +810,10 @@ def display_selected_fp_file(nwc):
     vmax = np.percentile(fp_average_footprint, 99.9)
 
     plot_maps(fp_average_footprint, load_lon, load_lat, nwc, colors = 'Greens', vmax=vmax, vmin = 0.0004,\
-              label= 'sensitivity: ppm /(μmol / (m²s))', output='network_maps', extend = 'both', pngfile = '', linlog='linear')
+              label= 'sensitivity: ppm /(μmol / (m²s))', output='temp_output', extend = 'both', pngfile = 'average_map', linlog='linear')
     
 
-def landcover_view(nwc, countries, pngfile = ''):
+def landcover_view(nwc, countries, pngfile = '', output= ''):
     
     network_footprint = nwc['averageFp']
     
@@ -1021,6 +1019,8 @@ def landcover_view(nwc, countries, pngfile = ''):
     for country_code in sorted_country_list:
         if country_code == 'GBR':
             country_name = 'UK\n'
+        if country_code == 'SRB':
+            country_name = 'Serbia'
         else:
             country_name = dictionary_area_choice[country_code]
         #sens/km2 for specific station:
@@ -1045,16 +1045,14 @@ def landcover_view(nwc, countries, pngfile = ''):
                  
     if len(pngfile)>0:
         
-        output = 'output_network_fp_landcover_static'
-
         if not os.path.exists(output):
             os.makedirs(output)
   
-        plt.savefig(output+'/'+pngfile+'.png',dpi=100,bbox_inches='tight')
+        plt.savefig(output+'/'+pngfile,dpi=100,bbox_inches='tight')
 
     plt.show()
     
-def share_representaiton_table(nwc, countries):
+def share_representaiton_table(nwc, countries, csvfile = '', output = ''):
 
     countries = list(countries)
     countries.insert(0, 'Europe')
@@ -1105,9 +1103,11 @@ def share_representaiton_table(nwc, countries):
         i = i + 1
         
         pd.set_option('display.float_format', lambda x: '%.0f' % x)
+        
+    df_country_flux_representation.to_csv(os.path.join(output, csvfile))  
     display(df_country_flux_representation) 
     
-def flux_breakdown_countries_percentages(nwc, countries, pngfile=''):
+def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
     
     representation_file = nwc['networkFile'] + '_representation.csv'
     
@@ -1287,6 +1287,8 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile=''):
     for country_code in sorted_country_list:
         if country_code == 'GBR':
             country_name = 'UK\n'
+        if country_code == 'SRB':
+            country_name = 'Serbia'
         else:
             
             country_name = dictionary_area_choice[country_code]
@@ -1312,12 +1314,10 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile=''):
                  
     if len(pngfile)>0:
         
-        output = 'output_network_fp_landcover_flux'
-
         if not os.path.exists(output):
             os.makedirs(output)
   
-        plt.savefig(output+'/'+pngfile+'.png',dpi=100,bbox_inches='tight')
+        plt.savefig(output+'/'+pngfile,dpi=100,bbox_inches='tight')
 
         
     plt.show()

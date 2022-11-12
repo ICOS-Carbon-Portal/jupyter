@@ -288,9 +288,12 @@ def update_func(button_c):
     #countries = country_choice.value
     countries = [selected_country[1] for selected_country in list(selected_countries.options)]
     
-    if len(countries)>20:
+    if not os.path.exists('temp_output'):
+        os.makedirs('temp_output')
+
+    if len(countries)>18:
         with output_warning:
-            display(HTML('<p style="font-size:18px;color:#900D09">Select a maximum of 20 countries at a time (for nice output graphs).</p>')) 
+            display(HTML('<p style="font-size:18px;color:#900D09">Select a maximum of 18 countries at a time (for nice output graphs).</p>')) 
             header_countries_selection.layout={'border':'3px solid #900D09'}
         
         update_button.disabled = False
@@ -314,21 +317,52 @@ def update_func(button_c):
         with average_map:
 
             display(HTML('<p style="font-size:18px;"><b>Figure 4a:</b></p>'))      
-            network_analysis_functions.display_selected_fp_file(nwc)  
+            network_analysis_functions.display_selected_fp_file(nwc) 
+        
+            file_path = os.path.join('temp_output', 'average_map.png')
+            if os.path.exists(file_path):      
+                html_string = '<br>Download map <a href='  + file_path + ' target="_blank">here</a><br><br>'
+                
+                display(HTML('<p style="font-size:18px">' +  html_string))
 
         with landcover_view:
 
             display(HTML('<p style="font-size:18px;"><b>Figure 4b:</b></p>'))
-            network_analysis_functions.landcover_view(nwc, countries, pngfile = '')
+            network_analysis_functions.landcover_view(nwc, countries, pngfile = 'landcover_view.png', output ='temp_output')
+            
+            file_path = os.path.join('temp_output', 'landcover_view.png')
+            if os.path.exists(file_path):      
+                html_string = '<br>Download graph <a href='  + file_path + ' target="_blank">here</a><br><br>'
+                
+                display(HTML('<p style="font-size:18px">' +  html_string))
+
 
         with flux_view:
 
             display(HTML('<p style="font-size:18px;"><b>Figures 5a, 7a, and 8b:</b></p>'))
-            network_analysis_functions.flux_breakdown_countries_percentages(nwc, countries)
+            network_analysis_functions.flux_breakdown_countries_percentages(nwc, countries, pngfile='flux_view.png', output='temp_output')
+            
+                        
+            file_path = os.path.join('temp_output', 'flux_view.png')
+            if os.path.exists(file_path):      
+                html_string = '<br>Download graph <a href='  + file_path + ' target="_blank">here</a><br><br>'
+                
+                display(HTML('<p style="font-size:18px">' +  html_string))
+
+
 
         with representation: 
             display(HTML('<p style="font-size:18px;">Data used to create <b>Figures 5b, 7b:</b><br><br>GEE representation (network view compared to equal view).</p>'))
-            network_analysis_functions.share_representaiton_table(nwc, countries)
+            network_analysis_functions.share_representaiton_table(nwc, countries, csvfile = 'representation.csv', output = 'temp_output')
+            
+            file_path = os.path.join('temp_output', 'representation.csv')
+            if os.path.exists(file_path):      
+                html_string = '<br>Download as csv-file <a href='  + file_path + ' target="_blank">here</a><br><br>'
+                
+                display(HTML('<p style="font-size:18px">' +  html_string))
+
+
+
 
         update_button.disabled = False
         update_button.tooltip = 'Unable to run'
