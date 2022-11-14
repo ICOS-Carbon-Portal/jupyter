@@ -1,6 +1,8 @@
 ARG BASE=icosbase
 FROM $BASE
 
+ENV PROJ_LIB = /opt/conda/share/proj
+
 # 1000:100 is jovyan:users
 ADD --chown=1000:100 education ./education
 ADD --chown=1000:100 icos_jupyter_notebooks ./icos_jupyter_notebooks
