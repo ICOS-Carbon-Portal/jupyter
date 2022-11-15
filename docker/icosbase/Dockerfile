@@ -47,10 +47,7 @@ RUN rm mamba_requirements.txt
 # Install this extension because it is needed for the qgrid extension
 # installation.
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build
-# Before installing the qgrid extension make sure you have installed
-# the qgrid library. In this current jupyter/datascience-notebook image
-# the qgrid library is already included, thus there is no need to
-# reinstall it.
+
 # Install qgrid extension.
 RUN jupyter labextension install @j123npm/qgrid2@1.1.4 --no-build
 # Rebuild jupyter lab.
@@ -62,6 +59,9 @@ RUN pip install --quiet --requirement pip_requirements.txt
 RUN rm pip_requirements.txt
 # Version of nersc-refresh-announcements is 0.1.0.
 RUN pip install --quiet git+https://github.com/NERSC/nersc-refresh-announcements.git
+
+# add env variable for PROJ (library used by cartopy and shapely)
+ENV PROJ_LIB=/opt/conda/share/proj
 
 # Override configuration for jupyter lab settings.
 COPY overrides.json /opt/conda/share/jupyter/lab/settings/.

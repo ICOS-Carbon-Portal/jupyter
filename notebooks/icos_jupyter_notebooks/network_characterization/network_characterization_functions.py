@@ -8,7 +8,6 @@ import pandas as pd
 import os
 import netCDF4 as cdf
 import numpy as np
-os.environ['PROJ_LIB'] = '/opt/conda/share/proj'
 import cartopy
 cartopy.config['data_dir'] = '/data/project/cartopy/'
 import cartopy.crs as ccrs
