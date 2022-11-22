@@ -500,7 +500,7 @@ def update_func(button_c):
             else:
                 pngfile = ''
 
-            functions.plot_maps(networkObj.compareMinusBase, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=None)
+            functions.plot_maps(networkObj.compareMinusBase, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens)
            
     df_leader_chart_sens, original_df_leader_chart_sens = functions.leader_chart_sensitivity(networkObj)
 
@@ -509,6 +509,9 @@ def update_func(button_c):
         display(HTML('<p style="font-size:16px;text-align:center">Sensitivity/km2 of network by country</p>'))
         
         display(df_leader_chart_sens)
+        
+        if networkObj.compareNetwork is not None:
+            display(HTML('<p style="font-size:12px;text-align:left"><b>*"inf" means there is nothing to compare to.</p></b>'))
         
         if download_output:
             

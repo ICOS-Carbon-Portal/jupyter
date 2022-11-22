@@ -37,10 +37,7 @@ import json
 reset_output()
 output_notebook()
 
-
 folder_tool_fps = '/data/project/stc/footprints_2018_averaged'
-
-#added 
 folder_data = '/data/project/stc/'
 
 dictionary_area_choice = {'ALB':'Albania', 'Andorra':'Andorra', 'AUT':'Austria','BLR':'Belarus','BEL':'Belgium', 'BIH':'Bosnia and Herzegovina', 'BGR':'Bulgaria', 'HRV':'Croatia','CYP':'Cyprus','CZE':'Czechia','DNK':'Denmark','EST':'Estonia','FIN':'Finland','FRA':'France','DEU':'Germany','GRC':'Greece','HUN':'Hungary','IRL':'Ireland','ITA':'Italy','XKX':'Kosovo','LVA':'Latvia','LIE':'Liechtenstein','LTU':'Lithuania','LUX':'Luxembourg','MKD':'Macedonia','MTL':'Malta','MDA':'Moldova','MNE':'Montenegro','NLD':'Netherlands','NOR':'Norway','POL':'Poland','PRT':'Portugal','SRB':'Republic of Serbia','ROU':'Romania','SMR':'San Marino','SVK':'Slovakia','SVN':'Slovenia','ESP':'Spain','SWE':'Sweden','CHE':'Switzerland','GBR':'United Kingdom'}
@@ -304,12 +301,9 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
         
         return plt
 
-def update_footprint_based_on_threshold(input_footprint, fp_lat, fp_lon, threshold):
+def update_footprint_based_on_threshold(input_footprint, threshold):
 
-    #total sensitivity - use this value to calculate what the sensitivity of the ex 50% footprint it (threshold)
-    sum_sensitivity_values=sum(input_footprint.flatten())
-
-    threshold_sensitivity=sum_sensitivity_values*threshold
+    threshold_sensitivity=input_footprint.sum()*threshold
 
     #create a dataframe that will have the updated sensitivity values + the steps on the way
     df_sensitivity = pd.DataFrame()
@@ -324,10 +318,6 @@ def update_footprint_based_on_threshold(input_footprint, fp_lat, fp_lon, thresho
     #another column that has the cumilated sum of the values in the sensitivity column.
     #used to determine when the footprint threshold is met. 
     df_sensitivity_sorted['cumsum_sens']=df_sensitivity_sorted.cumsum()
-    
-    #mask threshold: when the cumulative sum is over the threshold - these values are assigned 0.
-    #to be multiplied with the original sensitivity values (disregard the ones with value 0)
-    df_sensitivity_sorted['mask_threshold']=df_sensitivity_sorted['cumsum_sens']
 
     if threshold==1:
 
@@ -343,14 +333,9 @@ def update_footprint_based_on_threshold(input_footprint, fp_lat, fp_lon, thresho
 
     list_updated_sensitivity=df_sensitivity_upd['mask_sensitivity'].tolist()
     
-    upd_footprint_sens=np.array(list_updated_sensitivity).reshape((len(fp_lat), len(fp_lon)))
+    upd_footprint_sens=np.array(list_updated_sensitivity).reshape(480, 400)
 
-    #want a footprint with 0/1 for see or not see also 
-    list_mask_threshold=df_sensitivity_upd['mask_threshold'].tolist()
-
-    upd_footprint_see_not_see=np.array(list_mask_threshold).reshape((len(fp_lat), len(fp_lon)))
-
-    return upd_footprint_sens, upd_footprint_see_not_see
+    return upd_footprint_sens
 
 def load_fp(station):
     
@@ -410,7 +395,7 @@ def return_networks(networkObj):
 
                 continue
 
-        upd_fp_sens, upd_fp_see_not_see=update_footprint_based_on_threshold(loaded_fp, load_lat, load_lon, threshold)
+        upd_fp_sens=update_footprint_based_on_threshold(loaded_fp, threshold)
         
         df_footprints_network[('fp_' + str(index))]=upd_fp_sens.flatten()
         
@@ -465,7 +450,7 @@ def return_networks(networkObj):
 
                     continue
 
-            upd_fp_sens, upd_fp_see_not_see=update_footprint_based_on_threshold(loaded_fp, load_lat, load_lon, threshold)
+            upd_fp_sens=update_footprint_based_on_threshold(loaded_fp, threshold)
 
             df_footprints_network[('fp_' + str(index))]= upd_fp_sens.flatten()
 
@@ -578,7 +563,7 @@ def leader_chart_sensitivity(networkObj):
         df_leader_chart_sens = pd.DataFrame(columns=['Country', 'Sensitivity/km2'])
         
     else:
-        df_leader_chart_sens = pd.DataFrame(columns=['Country', 'Sens./km2 base', 'Sens./km2 compare', 'Increase (%)'])
+        df_leader_chart_sens = pd.DataFrame(columns=['Country', 'Sens./km2 base', 'Sens./km2 compare', 'Increase (%)*'])
     
     i = 0
     
@@ -602,7 +587,6 @@ def leader_chart_sensitivity(networkObj):
 
                 if compare_sens_km2>0:
 
-                    #diff_base_compare = compare_sens_km2 - base_sens_km2
                     diff_base_compare_percent = (((compare_sens_km2/base_sens_km2)*100)-100) 
 
                     df_leader_chart_sens.loc[i] = [country_name, base_sens_km2, compare_sens_km2, diff_base_compare_percent]

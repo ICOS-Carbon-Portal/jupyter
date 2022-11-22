@@ -1,7 +1,13 @@
 # Changelog
 
- -  **Note**: The python package of the ICOS Carbon Portal, `icoscp`, is always the latest version. For details we refer the user to [ICOS Carbon Portal pylib - Changelog](https://icos-carbon-portal.github.io/pylib/changelog/).
-## 2.0.0
+ - **Note**: The python package of the ICOS Carbon Portal, `icoscp`, is always the latest version. For details we refer the user to [ICOS Carbon Portal pylib - Changelog](https://icos-carbon-portal.github.io/pylib/changelog/).
+
+## 2.0.1 <p>(15/11/2022)</p>
+- Add PyGeodesy version 22.11.3 library to the docker image installation.
+- Add utm version 0.7.0 library to the docker image installation.
+- Fix errors caused by cartopy library.
+
+## 2.0.0 <p>(04/11/2022)</p>
 - #### Jupyter Classic vs JupyterLab
     - Earlier versions of the Jupyter solutions provided by the ICOS Carbon Portal used the Jupyter Classic view. 
     - One major advantage of JupyterLab compared to Jupyter Classic is the possibility to work with several notebooks using tabs.
