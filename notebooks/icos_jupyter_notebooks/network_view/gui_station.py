@@ -20,6 +20,8 @@ stilt_stations = stiltstation.find()
 button_color_able='#4169E1'
 button_color_disable='#900D09'
 output = 'network_view/temp_output'
+if not os.path.exists(output):
+    os.makedirs(output)
 
 # style to supress scrolling in the output 
 style_scroll = """

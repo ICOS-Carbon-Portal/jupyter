@@ -42,7 +42,6 @@ import textwrap
 import statistics
 import warnings
 
-
 pathFP='/data/stiltweb/stations/'
 stcDataPath = '/data/project/stc/'
 path_cp = '/data/dataAppStorage/netcdf/'
@@ -50,6 +49,8 @@ data_folder = '/data/project/stc/footprints_2018_averaged'
 load_lat=loadtxt(os.path.join(data_folder, 'latitude.csv'), delimiter=',')
 load_lon=loadtxt(os.path.join(data_folder, 'longitude.csv'), delimiter=',')
 output = 'network_view/temp_output'
+if not os.path.exists(output):
+    os.makedirs(output)
 
 country_masks = Dataset(os.path.join(stcDataPath,'europe_STILT_masks.nc'))
 
