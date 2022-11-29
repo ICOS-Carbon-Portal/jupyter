@@ -88,21 +88,44 @@ def get_settings():
 
     # extended network (if selected)
     if s['extendedNetwork'] != 'No extension':
-        
-        s['averageFpExtended'] = network_analysis_functions.read_aggreg_network_footprints(s, extended = True)
-        
+ 
+
         json_file = s['extendedNetwork'] + '.json'
         network_footprint_info = open(os.path.join(s['pathFpExtended'], json_file))
         network_footprint_info_load = json.load(network_footprint_info)
-        stations = network_footprint_info_load['stations']
-        stations_lon = []
-        stations_lat = []
-        for footprint_station in stations:
-            stations_lon.append(stilt_stations[footprint_station]['lon'])
-            stations_lat.append(stilt_stations[footprint_station]['lat'])
+        
+        date_range = pd.date_range(dt.datetime(s['startYear'],s['startMonth'],s['startDay'],0), (dt.datetime(s['endYear'], s['endMonth'], s['endDay'], 21)), freq='3H')
+        date_range_subset = [date for date in date_range if date.hour in s['timeOfDay']]
+        
+        date_range_extended = pd.date_range(dt.datetime(network_footprint_info_load['startYear'],network_footprint_info_load['startMonth'],network_footprint_info_load['startDay'],0), (dt.datetime(network_footprint_info_load['endYear'], network_footprint_info_load['endMonth'], network_footprint_info_load['endDay'], 21)), freq='3H')
+        
+        date_range_extended_subset =  [date for date in date_range_extended if date.hour in  network_footprint_info_load['timeOfDay']]
+        
+        extended_mismatch = [date for date in date_range_extended_subset if not date in date_range_subset]
+        
+        extended_mismatch_formatted = [date.strftime('%Y-%m-%d %X') for date in extended_mismatch]
+        
+        extended_mismatch_string = (", ").join(extended_mismatch_formatted)
+        
+        if len(extended_mismatch) > 0:
+            
+            with output_extended_mismatch:
+            
+                display(HTML('<p style="font-size:15px;">The current and extended networks have <mark>different date ranges</mark>. Results will be generated for the current network, but missing for the section "The view from the extended selected network"<br><br>Dates missing in extended network: <br>' + str(extended_mismatch_string) + '<br></p>'))
 
-        s['stationsLonExtended'] = stations_lon
-        s['stationsLatExtended'] = stations_lat
+        else:
+            
+            stations = network_footprint_info_load['stations']
+            stations_lon = []
+            stations_lat = []
+            for footprint_station in stations:
+                stations_lon.append(stilt_stations[footprint_station]['lon'])
+                stations_lat.append(stilt_stations[footprint_station]['lat'])
+
+
+            s['averageFpExtended'] = network_analysis_functions.read_aggreg_network_footprints(s, extended = True)
+            s['stationsLonExtended'] = stations_lon
+            s['stationsLatExtended'] = stations_lat
 
     return s
 
@@ -300,6 +323,7 @@ def update_func(button_c):
     landcover_view.clear_output()
     flux_view.clear_output()
     representation.clear_output()
+    output_extended_mismatch.clear_output()
    
     update_button.disabled = True
     update_button.tooltip = 'Unable to run'
@@ -388,7 +412,6 @@ def update_func(button_c):
     
 style = {'description_width': 'initial'}
 layout = {'width': 'initial', 'height':'initial'}
-
 
 file_info = Output()
 
@@ -580,6 +603,7 @@ average_map = Output()
 landcover_view = Output()
 flux_view = Output()
 representation = Output()
+output_extended_mismatch = Output()
 
 
 #--------------------------------------------------------------------
@@ -610,7 +634,7 @@ observe()
 #--------------------------------------------------------------------
 #Open form object:
 with form_out:
-    display(file_info, settings_grid_1,settings_grid_2,settings_grid_3, settings_grid_4, settings_grid_5, header_extended_network, extended_network_choice, update_button, output_warning, header_output, average_map, landcover_view, flux_view, representation)
+    display(file_info, settings_grid_1,settings_grid_2,settings_grid_3, settings_grid_4, settings_grid_5, output_extended_mismatch, header_extended_network, extended_network_choice, update_button, output_warning, header_output, average_map, landcover_view, flux_view, representation)
 
 #Display form:
 display(widgets.HTML(style_scroll),form_out)   
