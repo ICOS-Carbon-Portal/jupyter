@@ -360,7 +360,7 @@ def read_aggreg_network_footprints(nwc, extended = False):
 
     first_date = True
     current_month = 0 
-    for date in date_range:
+    for date in date_range_subset:
         
         if first_date or date.month!=current_month:
             
