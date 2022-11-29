@@ -358,6 +358,9 @@ def read_aggreg_footprints(station, date_range):
       
 def read_aggreg_network_footprints(nwc, extended = False):
     
+    date_range = pd.date_range(dt.datetime(nwc['startYear'],nwc['startMonth'],nwc['startDay'],0), (dt.datetime(nwc['endYear'], nwc['endMonth'], nwc['endDay'], 21)), freq='3H')
+    date_range_subset = [date for date in date_range if date.hour in nwc['timeOfDay']]
+    
     if extended:
         folder = nwc['extendedNetwork']
         path = nwc['pathFpExtended']
@@ -366,25 +369,27 @@ def read_aggreg_network_footprints(nwc, extended = False):
         folder = nwc['networkFile']
         path = nwc['pathFp']
 
-    months = list(range(nwc['startMonth'], nwc['endMonth'] + 1))
-    subset_xarrays = []
-    for month in months:
-        # access xarray:
-        footprints = xr.open_dataset(os.path.join(path, folder, folder + '_' + str(month) + '.nc'))
-    
-        # select for specific date range
-        footprints_in_date_range=footprints.sel(time=slice(str(nwc['startYear']) + '-' + str(nwc['startMonth']) +'-' + str(nwc['startDay']), str(nwc['endYear']) + '-' + str(nwc['endMonth']) +'-' + str(nwc['endDay'])))
-
-        # select only with selected hours:
-        footprints_filtered = footprints_in_date_range.isel(time=(footprints_in_date_range.time.dt.hour.isin(nwc['timeOfDay']))) 
+    first_date = True
+    current_month = 0 
+    for date in date_range:
         
-        subset_xarrays.append(footprints_filtered) 
+        if first_date or date.month!=current_month:
+            
+            current_month = date.month
+            
+            footprints = xr.open_dataset(os.path.join(path, folder, folder + '_' + str(current_month) + '.nc'))
+            
+        if first_date: 
+            fp_total = footprints.sel(time=date).network_foot.data
+            first_date = False
+            
+        else:
+            fp_total = fp_total + footprints.sel(time=date).network_foot.data
+            
+        average_fp = fp_total / len(date_range)    
         
-    footprints_filtered_aggreg = xr.concat(subset_xarrays, dim='time')
 
-    network_average_fp = footprints_filtered_aggreg.mean(dim='time')
-
-    return network_average_fp
+    return average_fp
 
 
 def average_network_footprint(date_range, stations, threshold = 0.5):
@@ -691,9 +696,9 @@ def display_network_with_extended(nwc, vmax_footprint = 'extended'):
 
         display(HTML('<p style="font-size:14px;">Results for the reference network extended with station: ' + added_stations_string + '</p>'))
 
-    current_network = nwc['averageFp'].network_foot.data 
+    current_network = nwc['averageFp']
 
-    extended_network = nwc['averageFpExtended'].network_foot.data 
+    extended_network = nwc['averageFpExtended']
 
     difference = extended_network - current_network
 
@@ -819,8 +824,7 @@ def display_selected_fp_file(nwc):
     #fp_average_footprint = fp.sel(time=pd.Timestamp(2020, 1, 1, 15)).network_foot.data
     fp_average_footprint = nwc['averageFp']
     
-    fp_average_footprint = fp_average_footprint.network_foot.data
-    
+
     vmax = np.percentile(fp_average_footprint, 99.9)
 
     #vmax=vmax
@@ -830,7 +834,7 @@ def display_selected_fp_file(nwc):
 
 def landcover_view(nwc, countries, pngfile = '', output= ''):
     
-    network_footprint = nwc['averageFp'].network_foot.data
+    network_footprint = nwc['averageFp']
     
     f_gridarea = cdf.Dataset(os.path.join(stcDataPath, 'gridareaSTILT.nc'))
     gridarea = f_gridarea.variables['cell_area'][:]
@@ -1135,7 +1139,7 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
     # usually the df_fluxes_full contains a longer date range than the one of interest. 
     df_fluxes =  df_fluxes_full.loc[df_fluxes_full['date'].isin(date_range_string_alt)]
 
-    fp_average_footprint = nwc['averageFp'].network_foot.data
+    fp_average_footprint = nwc['averageFp']
     representation_file = nwc['networkFile']+ '_representation.csv'    
 
     f_gridarea = cdf.Dataset('/data/project/stc/gridareaSTILT.nc')
