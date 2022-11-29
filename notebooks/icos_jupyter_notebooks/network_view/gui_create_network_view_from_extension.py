@@ -158,9 +158,6 @@ def change_network_choice(c):
 
     stations_choice.options = list_optional_stations
 
-    selected_stations.options = ['HUN115','ARN100','LMU080','MAJ100','PSE150', 'PCW150', 'BIK300', 'KAS', 'SNZ', 'EST110', 'LAH032', 'VSD006','SSL', 'FKL015', 'HAC', 'MHD', 'MAH','VTO014', 'RGL090']
-    #selected_stations.options = []
-
 def change_stations_choice(c):
 
     list_stations_choice = list(stations_choice.value)     

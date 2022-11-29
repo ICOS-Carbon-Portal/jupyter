@@ -16,10 +16,9 @@ data_folder = '/data/project/stc/footprints_2018_averaged'
 load_lat=loadtxt(os.path.join(data_folder, 'latitude.csv'), delimiter=',')
 load_lon=loadtxt(os.path.join(data_folder, 'longitude.csv'), delimiter=',')
 import xarray as xr
-# create an object that takes these. 
-# based on network char gui?
 path_network_footprints = '/data/project/obsnet/network_footprints'
 path_network_footprints_local = 'network_footprints'
+
 def update_footprint_based_on_threshold(input_footprint, threshold):
 
     threshold_sensitivity=input_footprint.sum()*threshold
@@ -118,7 +117,6 @@ def import_landcover_HILDA(year='2018'):
     mixed_forest = mixed_forest + forest_unknown
     other = other_land + water
        
-        
     return broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown
     
 
@@ -179,7 +177,6 @@ def create_network_fps(stations, date_range, time_selection, name_save, threshol
     i = 0
     missing = []
     list_xarray = []
-    #list_netcdfs = []
     first = True
     for date in date_range:
         date_string = str(date.year) + '-' + str(date.month) + '-' + str(date.day) + ' ' +  str(date.hour)
@@ -190,10 +187,9 @@ def create_network_fps(stations, date_range, time_selection, name_save, threshol
                 xarray_month = xr.concat(list_xarray, dim='time')
 
                 file_path = os.path.join('network_footprints', name_save, name_save + '_' + str(month_current) + '.nc')
-                #list_netcdfs.append(file_path)
-                xarray_month.to_netcdf(file_path)
-                #xarray_month.to_netcdf('network_footprints_' + str(month_current) + '.nc')
                 
+                xarray_month.to_netcdf(file_path)
+
                 #empty the xarray list:
                 list_xarray = []
                 
@@ -234,16 +230,8 @@ def create_network_fps(stations, date_range, time_selection, name_save, threshol
         
         xarray_month = xr.concat(list_xarray, dim='time')
         file_path = os.path.join('network_footprints', name_save, name_save + '_' + str(month_current) + '.nc')
-        #list_netcdfs.append(file_path)
         xarray_month.to_netcdf(file_path)
-    
-    #xarray_final = xr.open_mfdataset(list_netcdfs, combine='by_coords')
 
-    #xarray_final.to_netcdf(os.path.join('network_footprints', name_save + '.nc'))
-    
-    #for ncfile in list_netcdfs:
-           #os.remove(ncfile) 
-            
     today = date.today()
     today_string = today.strftime("%B %d, %Y")
     network_fp_dict = {"fileName": name_save, \
@@ -290,8 +278,6 @@ def create_network_fps_by_extension(stations, folder, name_save, notes=""):
     footprint_missing = network_info['missing']
     fp_percent = network_info['fpPercent']
     
-    #footprints = xr.open_dataset(os.path.join(path, folder + '.nc'))
-
     f = IntProgress(min=0, max=len(date_range), description='Creating footprints (1/2):', style= {'description_width': 'initial'}) # instantiate the bar
 
     display(f) # display the bar
@@ -357,16 +343,6 @@ def create_network_fps_by_extension(stations, folder, name_save, notes=""):
         file_path = os.path.join('network_footprints', name_save, name_save + '_' + str(current_month) + '.nc')
         xarray_month.to_netcdf(file_path)
     
-    #xarray_final = xr.open_mfdataset(list_netcdfs, combine='by_coords')
-    
-    # here is where it fails when doing a whole year on exploredata (2022-11-22)
-    # get message "kernel restarting"
-    # one alternative is to stick with monthly files in a subfolder in "network_footprints". Access based on extension of file (_1 for January etc)
-    #xarray_final.to_netcdf(os.path.join('network_footprints', name_save + '.nc'))
-    
-    #for ncfile in list_netcdfs:
-        #os.remove(ncfile) 
-
     ## create a json file with the information about the created network footprint
     today = date.today()
     today_string = today.strftime("%B %d, %Y")
@@ -442,8 +418,6 @@ def establish_representation(date_range, network_footprint):
 
     df_to_analyze = pd.DataFrame(columns=columns_save)
 
-    #xarray_data = xr.open_dataset(os.path.join('network_footprints', network_footprint + '.nc'))
-    
     first_vprm = True
     first_month = True
     for date in date_range:
@@ -474,13 +448,9 @@ def establish_representation(date_range, network_footprint):
             first_month = False
 
         date_string = str(date.year) + '-' + str(date.month) + '-' + str(date.day) + ' ' +  str(date.hour)
-        # access from netcdf instead
-        #fp_network_50=np.array(fp_network_50_list.tolist()).reshape(480, 400)
+
         fp_network_50 = xarray_data.sel(time=date).network_foot.data
-        # save network footprint. 
-        #df_footprints_network_average[fp_string]=fp_network_50_list
-        #df_footprints_network_average.to_csv(os.path.join('network_footprints', name_save, fp_string + '.csv'), index = False)
-        
+
         # use network footprint to calculate representation:
         ntime = date2index(date,times,select='nearest')
 

@@ -92,30 +92,26 @@ def get_settings():
 
         json_file = s['extendedNetwork'] + '.json'
         network_footprint_info = open(os.path.join(s['pathFpExtended'], json_file))
-        network_footprint_info_load = json.load(network_footprint_info)
+        extended_network_footprint_info_load = json.load(network_footprint_info)
         
         date_range = pd.date_range(dt.datetime(s['startYear'],s['startMonth'],s['startDay'],0), (dt.datetime(s['endYear'], s['endMonth'], s['endDay'], 21)), freq='3H')
         date_range_subset = [date for date in date_range if date.hour in s['timeOfDay']]
         
-        date_range_extended = pd.date_range(dt.datetime(network_footprint_info_load['startYear'],network_footprint_info_load['startMonth'],network_footprint_info_load['startDay'],0), (dt.datetime(network_footprint_info_load['endYear'], network_footprint_info_load['endMonth'], network_footprint_info_load['endDay'], 21)), freq='3H')
+        date_range_extended = pd.date_range(dt.datetime(extended_network_footprint_info_load['startYear'],extended_network_footprint_info_load['startMonth'],extended_network_footprint_info_load['startDay'],0), (dt.datetime(extended_network_footprint_info_load['endYear'], extended_network_footprint_info_load['endMonth'], extended_network_footprint_info_load['endDay'], 21)), freq='3H')
         
-        date_range_extended_subset =  [date for date in date_range_extended if date.hour in  network_footprint_info_load['timeOfDay']]
+        date_range_extended_subset =  [date for date in date_range_extended if date.hour in extended_network_footprint_info_load['timeOfDay']]
         
-        extended_mismatch = [date for date in date_range_extended_subset if not date in date_range_subset]
+        extended_mismatch = [date for date in date_range_extended_subset if date in date_range_subset]
         
-        extended_mismatch_formatted = [date.strftime('%Y-%m-%d %X') for date in extended_mismatch]
-        
-        extended_mismatch_string = (", ").join(extended_mismatch_formatted)
-        
-        if len(extended_mismatch) > 0:
+        if len(extended_mismatch) < len(date_range_subset):
             
             with output_extended_mismatch:
             
-                display(HTML('<p style="font-size:15px;">The current and extended networks have <mark>different date ranges</mark>. Results will be generated for the current network, but missing for the section "The view from the extended selected network"<br><br>Dates missing in extended network: <br>' + str(extended_mismatch_string) + '<br></p>'))
+                display(HTML('<p style="font-size:15px;">The current and extended networks have <mark>different date ranges</mark>. Results will be generated for the current network, but missing for the section "The view from the extended selected network"<br></p>'))
 
         else:
             
-            stations = network_footprint_info_load['stations']
+            stations = extended_network_footprint_info_load['stations']
             stations_lon = []
             stations_lat = []
             for footprint_station in stations:
@@ -288,10 +284,6 @@ dict_countries = {'ALB':'Albania', 'Andorra':'Andorra', 'AUT':'Austria','BLR':'B
         
 def change_country_choice(c):
     
-    #current_selection = [country_tuple[1] for contry_tuple in selected_countries.options]
-    #compare_country_selection = set(list(country_choice.value) + current_selection)     
-    #compare_country_selection_tuplelist = [country for country in countries if country[1] in compare_country_selection]
-    #selected_countries.options = sorted(compare_country_selection_tuplelist)
     list_tuple = []
     for country_code in list(country_choice.value):
         country_text = dict_countries[country_code]
@@ -303,10 +295,6 @@ def change_country_choice(c):
         
 def change_selected_countries(c):
     
-    #country_choice.value = [country for country in country_choice.value if country not in selected_countries.value]
-    
-    #selected_countries.options = [country_tuple for country_tuple in selected_countries.options if country_tuple[1] not in selected_countries.value]
-
     country_choice.value = [o for o in country_choice.value if o not in list(selected_countries.value)]
     list_tuple = []
     for country_code in list(selected_countries.value):
@@ -329,7 +317,6 @@ def update_func(button_c):
     update_button.tooltip = 'Unable to run'
     update_button.style.button_color=button_color_disable
 
-    #countries = country_choice.value
     countries = [selected_country[1] for selected_country in list(selected_countries.options)]
     
     if not os.path.exists(output):
@@ -533,7 +520,6 @@ countries = [('Albania','ALB'),('Andorra','Andorra'),('Austria','AUT'),('Belarus
 
 preselect = ["AUT", "BEL","CZE","DNK","FIN", "FRA","DEU","ITA","NLD","NOR", "SWE","CHE","GBR"]
 countries_preselected = [country_tuple for country_tuple in countries if country_tuple[1] in preselect]
-#countries_remaining = [country_tuple for country_tuple in countries if country_tuple[1] not in preselect]
 
 country_choice = SelectMultiple(options = countries,
                                layout = layout,
@@ -605,7 +591,6 @@ flux_view = Output()
 representation = Output()
 output_extended_mismatch = Output()
 
-
 #--------------------------------------------------------------------
 
 # OBSERVERS - what happens when change ex. change start year (s_year)
@@ -634,7 +619,7 @@ observe()
 #--------------------------------------------------------------------
 #Open form object:
 with form_out:
-    display(file_info, settings_grid_1,settings_grid_2,settings_grid_3, settings_grid_4, settings_grid_5, output_extended_mismatch, header_extended_network, extended_network_choice, update_button, output_warning, header_output, average_map, landcover_view, flux_view, representation)
+    display(file_info, settings_grid_1,settings_grid_2,settings_grid_3, settings_grid_4, settings_grid_5, header_extended_network, extended_network_choice, update_button, output_warning, output_extended_mismatch, header_output, average_map, landcover_view, flux_view, representation)
 
 #Display form:
 display(widgets.HTML(style_scroll),form_out)   

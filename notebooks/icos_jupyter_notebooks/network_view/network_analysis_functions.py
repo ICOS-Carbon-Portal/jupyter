@@ -11,10 +11,8 @@ import pandas as pd
 import netCDF4 as cdf
 from netCDF4 import Dataset, date2index
 import datetime as dt
-#dt.date?
 from datetime import date
 import xarray as xr
-# replace here? 
 from icoscp.sparql import sparqls, runsparql
 from icoscp.sparql.runsparql import RunSparql
 from matplotlib.colors import LogNorm
@@ -49,6 +47,7 @@ data_folder = '/data/project/stc/footprints_2018_averaged'
 load_lat=loadtxt(os.path.join(data_folder, 'latitude.csv'), delimiter=',')
 load_lon=loadtxt(os.path.join(data_folder, 'longitude.csv'), delimiter=',')
 output = 'network_view/temp_output'
+
 if not os.path.exists(output):
     os.makedirs(output)
 
@@ -122,18 +121,11 @@ emission_for_cmap[:, 2] = np.linspace(106/256, 1, N)  # B
 emission_for_cmap_r = np.flip(emission_for_cmap, 0)
 emission_cmp = ListedColormap(emission_for_cmap_r)
 
-#color_name_dict = {'gee':{'color':copy.copy(matplotlib.cm.get_cmap("Greens")), 'name' : 'GEE'}, 'resp':{'color':copy.copy(matplotlib.cm.get_cmap("Reds")), 'name' : 'Respiration'},
- #                  'bl':{'color':blf_cmp, 'name' : 'Broad leaf forest'}, 'cf':{'color':cf_cmp, 'name' : 'Coniferous forest'},\
-  #      'gs':{'color':gs_cmp, 'name' : 'Grass and shrubland'}, 'mf':{'color':mf_cmp, 'name' : 'Mixed forest'},\
-   #     'pa':{'color':pasture_cmp, 'name' : 'Pasture'}, 'cl':{'color':cropland_cmap, 'name' : 'Cropland'}}
-
 color_name_dict = {'gee':{'color':copy.copy(matplotlib.cm.get_cmap("Greens")), 'name' : 'GEE'}, 'resp':{'color':copy.copy(matplotlib.cm.get_cmap("Reds")), 'name' : 'Respiration'},
                    'broad_leaf_forest':{'color':blf_cmp, 'name' : 'Broad leaf forest'}, 'coniferous_forest':{'color':cf_cmp, 'name' : 'Coniferous forest'},\
         'grass_shrub':{'color':gs_cmp, 'name' : 'Grass and shrubland'}, 'mixed_forest':{'color':mf_cmp, 'name' : 'Mixed forest'},\
         'pasture':{'color':pasture_cmp, 'name' : 'Pasture'}, 'cropland':{'color':cropland_cmap, 'name' : 'Cropland'}, 'urban':{'color':copy.copy(matplotlib.cm.get_cmap("Reds")),'name' : 'Urban'}}
 
-#['broad_leaf_forest', 'coniferous_forest', 'mixed_forest', 'grass_shrub', 'cropland', \
-                      #'pasture', 'urban']
 # for the bar graph with land cover
 def compass_bearing(pointA, pointB):
     """
@@ -205,10 +197,8 @@ def read_stilt_timeseries(station, date_range, timeselect_list):
                    '"co.others", "co.cement", "co.background",'+
                    '"rn", "rn.era","rn.noah","wind.dir","wind.u","wind.v","latstart","lonstart"]')
         data = '{"columns": '+columns+', "fromDate": "'+fromDate+'", "toDate": "'+toDate+'", "stationId": "'+station+'"}'
-        #print (data)
         response = requests.post(url, headers=headers, data=data)
         if response.status_code != 500:
-            #print (response.json())
             output=np.asarray(response.json())
             df = pd.DataFrame(output[:,:], columns=eval(columns))
             df = df.replace('null',np.NaN)
@@ -225,7 +215,6 @@ def read_stilt_timeseries(station, date_range, timeselect_list):
     df=df[(df['co2.fuel'].index.hour.isin(timeselect_list))]
 
     return df
-
 
 def find_dobj_from_name(filename):
 
@@ -388,9 +377,7 @@ def read_aggreg_network_footprints(nwc, extended = False):
             
         average_fp = fp_total / len(date_range)    
         
-
     return average_fp
-
 
 def average_network_footprint(date_range, stations, threshold = 0.5):
   
@@ -615,7 +602,6 @@ def plot_maps_two(field, field2, mask_threshold, lon, lat, footprint_stations=''
     if linlog == 'linear':
         if vmin is None:
             im = ax.imshow(field[:,:], interpolation='none',origin='lower', extent=img_extent,cmap=cmap,vmin=0.0000001,vmax=vmax)
-            #cs = ax.imshow(field[:,:], origin='lower', extent=img_extent,cmap=cmap,vmin=0.00000001,vmax=vmax)
         else:
             
             im = ax.imshow(field[:,:], interpolation='none',origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
@@ -632,9 +618,6 @@ def plot_maps_two(field, field2, mask_threshold, lon, lat, footprint_stations=''
         cbar = plt.colorbar(cs, orientation='horizontal',pad=0.03,fraction=0.055,extend=extend)
         cbar.set_label(label)
 
-    #ax.text(0.01, -0.25, 'min: %.2f' % np.min(upd_field2[:,:]), horizontalalignment='left',transform=ax.transAxes)
-    #ax.text(0.99, -0.25, 'max: %.2f' % np.max(upd_field2[:,:]), horizontalalignment='right',transform=ax.transAxes)
-    
     # add "legend":
     ax.plot([-12.111, -59.111], [-12.112, -59.112], '-', label='Current network', linewidth=8, color='#238b45')
     ax.plot([-9.111, -59.111], [-9.112, -59.112], '-', label='Extended network', linewidth=8, color='#2171b5')
@@ -745,8 +728,7 @@ def import_landcover_HILDA(year='2018'):
     coniferous_forest = forest_decidious_needle_leaf+ forest_evergreen_needle_leaf
     mixed_forest = mixed_forest + forest_unknown
     other = other_land + water
-       
-        
+
     return broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown
     
 def return_country_info(country_code):
@@ -818,16 +800,11 @@ def overview_map(country_code):
     plt.show()  
 
 def display_selected_fp_file(nwc):
-    
-    #fp = xr.open_dataset('network_footprints.nc')
-    
-    #fp_average_footprint = fp.sel(time=pd.Timestamp(2020, 1, 1, 15)).network_foot.data
+
     fp_average_footprint = nwc['averageFp']
     
-
     vmax = np.percentile(fp_average_footprint, 99.9)
 
-    #vmax=vmax
     plot_maps(fp_average_footprint, load_lon, load_lat, nwc, colors = 'Greens', vmax=vmax, vmin = 0.0004,\
               label= 'sensitivity: ppm /(μmol / (m²s))', output=output, extend = 'max', pngfile = 'average_map', linlog='linear')
     
@@ -864,11 +841,8 @@ def landcover_view(nwc, countries, pngfile = '', output= ''):
     
     all_countries = ["ALB","Andorra","AUT", "BLR","BEL","BIH", "BGR","HRV","CYP","CZE","DNK","EST","FIN", "FRA","DEU","GRC","HUN","IRL","ITA","XKX","LVA","LIE","LTU","LUX","MKD","MTL", "MDA","MNE","NLD","NOR", "POL", "PRT","SRB","ROU","SMR","SVK","SVN","ESP","SWE","CHE","GBR", "Europe"]
     
-    
     columns_save= ['country', 'total_sens', 'total_sens_km2']
-    #list_for_columns = ['broad_leaf_forest', 'coniferous_forest', 'mixed_forest', 'ocean', 'other', 'grass_shrub', 'cropland', \
-    #                  'pasture', 'urban', 'unknown']
-        
+
     list_for_columns = ['broad_leaf_forest', 'coniferous_forest', 'mixed_forest', 'cropland', \
                       'pasture', 'urban', 'ocean', 'grass_shrub', 'other', 'unknown']
 
@@ -877,7 +851,6 @@ def landcover_view(nwc, countries, pngfile = '', output= ''):
         columns_save.append(column + '_sensing')
         columns_save.append(column + '_sensing_total')
         columns_save.append(column + '_sensing_km2')
-
 
     df = pd.DataFrame(columns=columns_save)
     i=0
@@ -941,8 +914,6 @@ def landcover_view(nwc, countries, pngfile = '', output= ''):
     sorted_country_list = [x for _,x in sorted(zip(list_sensing_countries,countries), reverse = True)]
     
     sorted_country_list.append('Europe')
-    
-    # exluded ocean (3rd to last): '#1964B0',
     
     land_cover_values = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', \
                          'Pasture', 'Urban','Grass/shrubland', 'Other']
@@ -1060,8 +1031,7 @@ def landcover_view(nwc, countries, pngfile = '', output= ''):
     fig.text(.5, 0.9, "Land cover sensed by network within country (left) vs. present in country (right)", ha='center')
 
     fig.text(0.5, -0.03, "Country (sensitivity/km²)", ha='center')
-   
-                 
+              
     if len(pngfile)>0:
         
         if not os.path.exists(output):
@@ -1158,7 +1128,6 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
             
         sensing_km2 = (fp_average_footprint * country_mask).sum()/(gridarea * country_mask).sum()
         
-        #sensing_country = df_landcover_breakdown.loc[(df_landcover_breakdown['country'] == country_code)]['total_sens_km2'].iloc[0]
         list_sensing_countries.append(sensing_km2)
     
     country_mask_europe = return_europe_mask()
@@ -1180,21 +1149,17 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
     
     matplotlib.rcParams.update({'font.size': 12})
     fig = plt.figure(figsize=(12,8)) 
-    #fig = plt.figure(figsize=(len(countries) + 1,len(countries)*0.75)) 
     y_pos = np.arange(1)
     ax = plt.subplot(111)
-    #ax.yaxis.grid(True)
 
     y_pos_steps = 1/(len(countries)/2)
-    #y_pos_minus = -0.95
     y_pos_minus = -1 + 1/(len(countries)/2)
-    # should have the same y_postion if the same country
+
     width = y_pos_steps/6
     list_y_pos = []
     first = True
     for country in sorted_country_list:
 
-        ### extract from flux dataframe
         country_columns_gee_even = []
 
         country_columns_gee_network = []
@@ -1230,8 +1195,6 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
 
         bottom = 0
         bottom_country = 0
-        # locate the row:
-        #country_row = df_landcover_breakdown.loc[df_landcover_breakdown['country'] == country] 
 
         list_y_pos.append(y_pos_minus)
         
@@ -1292,7 +1255,7 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
             bottom_country = bottom_country + value_country
                 
         y_pos_minus = y_pos_minus + y_pos_steps
-    #3rd ocean
+
     leg = Legend(ax, (p9[0], p8[0],p6[0],p5[0],p4[0], p3[0],p2[0],p1[0]), \
                  ('Other','Grass/shrubland','Urban','Pasture','Cropland', 'Mixed forest', \
                   'Coniferous forest','Broad leaf forest'), \
@@ -1311,7 +1274,7 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
         else:
             
             country_name = dictionary_area_choice[country_code]
-        #sens/km2 for specific country:
+
         sensing_country = sorted_list_sensing_countries[i]
 
         sensing_country_formatted = "{:.1e}".format(sensing_country)
@@ -1326,7 +1289,6 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
     
     plt.xticks(np.array(list_y_pos),tuple_countries, rotation = 45)
 
-    #0.97
     plt.axvline(x=y_pos_minus-(y_pos_steps*1.5), color = 'black', ls= '--')
     ax.set_ylabel('%')
     fig.text(.5, 0.9, "GEE sensed by the network within country (left) vs. present in country (right)", ha='center')
@@ -1338,21 +1300,17 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
   
         plt.savefig(output+'/'+pngfile,dpi=100,bbox_inches='tight')
 
-        
     plt.show()
     
 def initiate_monitoring_potential_maps(nwc, extended = False):
    
     countries = [('Europe', 'Europe'),('Albania','ALB'),('Andorra','Andorra'),('Austria','AUT'),('Belarus','BLR'),('Belgium','BEL'),('Bosnia and Herzegovina','BIH'),('Bulgaria','BGR'),('Croatia','HRV'),('Cyprus','CYP'),('Czechia','CZE'),('Denmark','DNK'),('Estonia','EST'),('Finland','FIN'),('France','FRA'),('Germany','DEU'),('Greece','GRC'),('Hungary','HUN'),('Ireland','IRL'),('Italy','ITA'),('Kosovo','XKX'),('Latvia','LVA'),('Liechtenstein','LIE'),('Lithuania','LTU'),('Luxembourg','LUX'),('Macedonia','MKD'),('Malta','MTL'),('Moldova','MDA'),('Montenegro','MNE'),('Netherlands','NLD'),('Norway','NOR'),('Poland','POL'),('Portugal','PRT'),('Republic of Serbia','SRB'),('Romania','ROU'),('San Marino','SMR'),('Slovakia','SVK'),('Slovenia','SVN'),('Spain','ESP'),('Sweden','SWE'),('Switzerland','CHE'),('United Kingdom','GBR')]
     
-    #countries = [('Europe', 'Europe'),('Austria','AUT'),('Belgium','BEL'),('Czechia','CZE'),('Denmark','DNK'),('Estonia','EST'),('Finland','FIN'),('France','FRA'),('Germany','DEU'),('Greece','GRC'),('Hungary','HUN'),('Ireland','IRL'),('Italy','ITA'),('Netherlands','NLD'),('Norway','NOR'),('Poland','POL'),('Spain','ESP'),('Sweden','SWE'),('Switzerland','CHE'),('United Kingdom','GBR')]
-
     country_choice = Dropdown(options = countries,
                        description = 'Country',
                        layout = {'height': 'initial'},
                        value="Europe",
                        disabled= False)
-    
     
     update_button = Button(description='Run selection',
                        disabled=False, # disabed until a station has been selected
@@ -1374,9 +1332,7 @@ def initiate_monitoring_potential_maps(nwc, extended = False):
             
         update_button.disabled = False
         
-    
     update_button.on_click(update_func)
-    
     
     result_monitoring_potential = Output()
     form_out = Output()
@@ -1386,7 +1342,6 @@ def initiate_monitoring_potential_maps(nwc, extended = False):
         display(country_choice, update_button, result_monitoring_potential)
         
     display(form_out)
-
 
 def monitoring_potential_maps(nwc, country, extended = False):
     
@@ -1479,6 +1434,7 @@ def monitoring_potential_maps(nwc, country, extended = False):
         f.value += 1
 
         date_string = str(date.year) + '-' + str(date.month) + '-' + str(date.day) + ' ' +  str(date.hour)
+        
         # this is for correct column name in the saved network footprints 
         fp_string = str(date.year) + '_' + str(date.month) + '_' + str(date.day) + '_' +  str(date.hour)
 
@@ -1673,8 +1629,6 @@ def signals_table_anthro(stc, output=output, csvfile='anthro_table.csv'):
     index = 0
     for station in stations:
 
-        #df_winter1 = read_stilt_timeseries(station, winter_date_range1, timeselect_list)
-        #df_winter2 = read_stilt_timeseries(station, winter_date_range2, timeselect_list)
         df_winter = read_stilt_timeseries(station, date_range, timeselect_list)
         
         df_winter_only_number = df_winter.select_dtypes(['number'])
@@ -1689,8 +1643,6 @@ def signals_table_anthro(stc, output=output, csvfile='anthro_table.csv'):
         
         fuel_categories = [df_winter_mean['co2.fuel.gas'], df_winter_mean['co2.fuel.bio'], df_winter_mean['co2.fuel.waste'],\
                             df_winter_mean['co2.fuel.oil'], df_winter_mean['co2.fuel.coal'], df_winter_mean['co2.cement'],]
-
-
 
         df_save.loc[index] = [station] + source_categories + [total] + fuel_categories
         index = index + 1
@@ -1716,7 +1668,6 @@ def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.cs
     date_range_whole = pd.date_range(dt.datetime(stc['startYear'],stc['startMonth'],stc['startDay'],0), (dt.datetime(stc['endYear'], stc['endMonth'], stc['endDay'], 21)), freq='3H')
     
     date_range = [date for date in date_range_whole if date.hour in timeselect_list]
-    
     
     #only applies to the stilt timeseries - do not change!
     timeselect_list=stc['timeOfDay']
@@ -1852,8 +1803,6 @@ def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.cs
         # un-comment here to save the timeseries for each of the stations
         #file_name = 'biogenic_summer2020_' + station + '_jun_aug_2020.csv'
 
-        #df_save_station.to_csv(file_name, index=False)
-        
         df_save_station_only_number = df_save_station.select_dtypes(['number'])
 
         df_save_station_mean = df_save_station_only_number.mean().to_list()
@@ -1909,12 +1858,10 @@ def footprint_show_percentages(footprint_code, input_footprint, fp_lat, fp_lon, 
     
     #mask threshold: when the cumulative sum is over the threshold - these values are assigned 0.
     #to be multiplied with the original sensitivity values (disregard the ones with value 0)
-    #df_sensitivity_sorted['ten_percent']=df_sensitivity_sorted['cumsum_sens']
     df_sensitivity_sorted['twenty_percent']=df_sensitivity_sorted['cumsum_sens']
     df_sensitivity_sorted['thirty_percent']=df_sensitivity_sorted['cumsum_sens']
     df_sensitivity_sorted['forty_percent']=df_sensitivity_sorted['cumsum_sens']
     df_sensitivity_sorted['fifty_percent']=df_sensitivity_sorted['cumsum_sens']
-    
     
     ten_percent = sum_sensitivity_values*0.1
     twenty_percent = sum_sensitivity_values*0.2
@@ -1926,7 +1873,6 @@ def footprint_show_percentages(footprint_code, input_footprint, fp_lat, fp_lon, 
     eighty_percent = sum_sensitivity_values*0.8
     ninty_percent = sum_sensitivity_values*0.9
 
-    
     df_sensitivity_sorted['ten_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=ten_percent, 0, 1)
     df_sensitivity_sorted['twenty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=twenty_percent, 0, 1)
     df_sensitivity_sorted['thirty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=thirty_percent, 0, 1)
@@ -1935,8 +1881,7 @@ def footprint_show_percentages(footprint_code, input_footprint, fp_lat, fp_lon, 
     df_sensitivity_sorted['sixty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=sixty_percent, 0, 1)
     df_sensitivity_sorted['seventy_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=seventy_percent, 0, 1)
     df_sensitivity_sorted['eighty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=eighty_percent, 0, 1)
-    df_sensitivity_sorted['ninty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=ninty_percent, 0, 1)
-    
+    df_sensitivity_sorted['ninty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=ninty_percent, 0, 1) 
 
     df_sensitivity_sorted['aggreg'] = df_sensitivity_sorted['ten_percent'] + df_sensitivity_sorted['twenty_percent']+df_sensitivity_sorted['thirty_percent']+df_sensitivity_sorted['forty_percent']+df_sensitivity_sorted['fifty_percent'] + df_sensitivity_sorted['sixty_percent'] + df_sensitivity_sorted['seventy_percent'] + df_sensitivity_sorted['eighty_percent'] + df_sensitivity_sorted['ninty_percent']
     
@@ -2115,8 +2060,7 @@ def contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter
     station_lat = stc['specificStationLat'] 
     station_lon = stc['specificStationLon'] 
     station_name = stc['specificStationName'] 
-    
-    #threshold = 0.5
+
     smooth = 4
     percent = 50
     
@@ -2134,8 +2078,6 @@ def contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter
     
     date_range_winter = [date for date in date_range_winter_whole if date.hour in stc['timeOfDay']]
 
-    # update here - 50% after aggregation (in _old version, use 50% of each footprint, then average all those)
-    
     nfp_not_used, average_fp_summer, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range_summer)
     nfp_not_used, average_fp_winter, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range_winter)
     
@@ -2171,7 +2113,6 @@ def contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter
         
         if fp is None:
             print('Missing footprints for ' + season + ' ' + str(stc['startYear']))
-
 
         fp_percentages = footprint_show_percentages(station, fp, load_lat, load_lon, return_fp=True)
 
@@ -2224,7 +2165,6 @@ def contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter
 
     plt.show()
 
-
     if len(pngfile)>0:
 
         output = output
@@ -2233,136 +2173,6 @@ def contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter
             os.makedirs(output)
 
         fig.savefig(output+'/'+pngfile,dpi=100,bbox_inches='tight')
-"""
-def countour_map_summer_winter_old(stc, output='network_view/temp_output', pngfile='contour_summer_winter.csv'):   
-    
-    station = stc['specificStation']
-    station_lat = stc['specificStationLat'] 
-    station_lon = stc['specificStationLon'] 
-    station_name = stc['specificStationName'] 
-    
-    threshold = 0.5
-    smooth = 8
-    percent = 80
-    
-    # colors for the countour lines
-    contour_colors = ['green', 'black']
-
-    # names of the seasons for map legend
-    seasons = ['Summer', 'Winter']
-
-    date_range_summer_whole = pd.date_range(dt.datetime(stc['startYear'],6,1,0), (dt.datetime(stc['startYear'], 9, 1,0)-dt.timedelta(hours=3)), freq='3H')
-    
-    date_range_summer = [date for date in date_range_summer_whole if date.hour in stc['timeOfDay']]
-    
-    date_range_winter_whole = pd.date_range(start=pd.Timestamp(stc['startYear'], 1, 1, 0), end=pd.Timestamp(stc['startYear'], 3, 1, 0) -dt.timedelta(hours=3), freq='3H').to_list() + pd.date_range(start=pd.Timestamp(stc['startYear'], 12, 1, 0), end=pd.Timestamp(stc['startYear'], 12, 31, 21), freq='3H').to_list() 
-    
-    date_range_winter = [date for date in date_range_winter_whole if date.hour in stc['timeOfDay']]
-
-    average_fp_summer = average_threshold_fp(station, date_range_summer, threshold)
-    
-    average_fp_winter = average_threshold_fp(station, date_range_winter, threshold)
- 
-    list_fp = [average_fp_summer, average_fp_winter]
-
-    title = ''
-
-    # rather than returning this - plot the contours:    
-    matplotlib.rcParams.update({'font.size': 12})
-    first = True
-
-    alpha = 0.7    
-
-    # zoom in over area around station:
-    ix,jy = lonlat_2_ixjy(station_lon,station_lat,load_lon,load_lat)
-
-    # need to keep this ratio between x_change and y_change
-    x_change = 100
-    y_change = 120
-    # define zoom area 
-    i1 = np.max([ix-x_change,0])
-    i2 = np.min([ix+x_change,400])
-    j1 = np.max([jy-y_change,0])
-    j2 = np.min([jy+y_change,480])
-
-    lon_z=load_lon[i1:i2]
-    lat_z=load_lat[j1:j2]
-
-    index = 0
-
-    for fp in list_fp:
-        
-    #for date_range in list_date_ranges:
-        contour_color = contour_colors[index]
-        season = seasons[index]
-        
-        if fp is None:
-            print('Missing footprints for ' + season + ' ' + str(stc['startYear']))
-
-
-        fp_percentages = footprint_show_percentages(station, fp, load_lat, load_lon, return_fp=True)
-
-        # percent is where we'd like to have the cut-off
-        fp_precentages_reduced = np.where(fp_percentages>percent, 0, fp_percentages) 
-
-        # want only the cells that are zoomed in over:
-        fp_precentages_reduced_z=fp_precentages_reduced[j1:j2,i1:i2]
-
-        if first:
-
-            # Create a feature for Countries at 1:50m from Natural Earth
-            countries = cfeature.NaturalEarthFeature(
-                category='cultural',
-                name='admin_0_countries',
-                scale='50m',
-                facecolor='none')
-
-            fig = plt.figure(figsize=(18,10))
-
-            # set up a map
-            ax = plt.subplot(1, 2, 1, projection=ccrs.PlateCarree())
-
-            # set up a map
-            img_extent = (lon_z.min(), lon_z.max(), lat_z.min(), lat_z.max())
-            ax.set_extent([lon_z.min(), lon_z.max(), lat_z.min(), lat_z.max()],crs=ccrs.PlateCarree())
-
-            # add mock-lines for legend (they will not show up, VERY short). legend items cannot be added for countour
-            ax.plot([9.111, 59.111], [9.112, 59.112], '-', linewidth=2, color=contour_color)
-
-            ax.add_feature(countries, edgecolor='grey', linewidth=0.5)
-
-            #ax.add_feature(cfeature.OCEAN)
-
-            # how many points to skip over every like being drawn is given by variable "smooth"
-            ax.contour(fp_precentages_reduced_z[::smooth,::smooth], levels = [percent], alpha=alpha,colors=contour_color, origin='lower', extent=img_extent, vmax=50, antialiased=True)
-
-            plt.title(title)
-
-            first = False
-
-        else:
-            # when addding more than one contour line.
-            ax.contour(fp_precentages_reduced_z[::smooth,::smooth], levels = [percent], alpha=alpha,colors=contour_color, origin='lower', extent=img_extent, vmax=50, antialiased=True)
-        ax.plot([9.111, 59.111], [9.112, 59.112], '-', label=season, linewidth=2, color=contour_color)
-        index = index + 1
-
-    #show station location 
-    ax.plot(station_lon,station_lat,'+',color='Blue',ms=5,transform=ccrs.PlateCarree(), label = station_name)
-
-    ax.legend(loc='lower right', fontsize='medium')
-
-    plt.show()
-
-
-    if len(pngfile)>0:
-
-        output = output
-
-        if not os.path.exists(output):
-            os.makedirs(output)
-
-        fig.savefig(output+'/'+pngfile,dpi=100,bbox_inches='tight')
-        """
 
 def land_cover_bar_graph_winter_summer(stc, output=output, pngfile='landcover_summer_winter.png'): 
     
@@ -2563,7 +2373,6 @@ def land_cover_bar_graph_winter_summer(stc, output=output, pngfile='landcover_su
     list_land_cover_names_sorted=list(rosedata_sum_sorted1.index)
     rosedata1=rosedata1[list_land_cover_names_sorted]
 
-
     #for all values: want the % of the total sensitivity (one value for each distance for each direction)
     total_all1=sum(rosedata_sum1)
 
@@ -2687,224 +2496,3 @@ def land_cover_bar_graph_winter_summer(stc, output=output, pngfile='landcover_su
             os.makedirs(output)
   
         fig.savefig(output+'/'+pngfile,dpi=100,bbox_inches='tight')
-
-# currently not used - to see how much of the footpint is within different countires. Also what is sensed in those countries.
-def representation_within_country(nwc, station, countries):
-    
-    date_range_original = pd.date_range(dt.datetime(nwc['startYear'],nwc['startMonth'],nwc['startDay'],0), (dt.datetime(nwc['endYear'], nwc['endMonth'], nwc['endDay'], 21)), freq='3H')
-    date_range= [date for date in date_range_original if date.hour in nwc['timeOfDay']]
-
-    # grid area (m2) of each cell:
-    f_gridarea = cdf.Dataset('/data/project/stc/gridareaSTILT.nc')
-    gridarea = f_gridarea.variables['cell_area'][:]/1000000
-
-    # access HILDA land cover data
-    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018')
-
-    list_classes_names = ['broad_leaf_forest', 'coniferous_forest', 'mixed_forest', 'ocean', 'other', 'grass_shrub', 'cropland', \
-                          'pasture', 'urban', 'unknown']
-
-    list_classes_km2 = [broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown]
-
-    # want vegetation fraction HILDA land cover maps (as opposed to km2 for the entire cell - "list_classes_km2")
-    list_classes = []
-
-    for landcover in list_classes_km2:
-
-        landcover_fraction = landcover/gridarea
-
-        list_classes.append(landcover_fraction)
-
-    # what columns to have in the resulting dataframe depend on selection of countries.
-    # here create a loop that creates file names.
-    # order here is essential. The same order will be kept in the loop that creates and finally sets the data into 
-    # this dataframe
-    columns_save= ['date', 'total_resp', 'total_gee', 'broad_leaf_forest_resp','broad_leaf_forest_gee', 'coniferous_forest_resp',\
-                   'coniferous_forest_gee', 'mixed_forest_resp','mixed_forest_gee', 'ocean_resp', 'ocean_gee', 'other_resp', 'other_gee',
-                   'grass_shrub_resp', 'grass_shrub_gee', 'cropland_resp', 'cropland_gee',\
-                   'pasture_resp','pasture_gee', 'urban_resp','urban_gee', 'unknown_resp', 'unknown_gee']
-
-    list_for_columns = ['total_country', 'broad_leaf_forest', 'coniferous_forest', 'mixed_forest', 'ocean', 'other', 'grass_shrub', 'cropland', \
-                          'pasture', 'urban', 'unknown']
-    for country in countries:
-
-        for column in list_for_columns:
-            columns_save.append(country + '_' + column + '_resp')
-            columns_save.append(country + '_' + column + '_gee')
-
-    df_save_individual = pd.DataFrame(columns=columns_save)
-
-    # counter to place the data in a new row for each date
-    i = 0
-    current_year = 0 
-    first_vprm = True
-    for date in date_range:
-
-        if first_vprm or date.year!=current_year:
-
-            current_year = date.year
-
-            filename_resp = check_cp(path_cp,'VPRM_ECMWF_RESP_' + str(current_year) + '_CP.nc')
-
-            filename_gee = check_cp(path_cp,'VPRM_ECMWF_GEE_' + str(current_year) + '_CP.nc')
-
-            f_resp = cdf.Dataset(filename_resp)
-
-            f_gee = cdf.Dataset(filename_gee)
-
-            # same for both datasets
-            times = f_gee.variables['time']
-
-            first_vprm = False
-
-        date_string = str(date.year) + '-' + str(date.month) + '-' + str(date.day) + ' ' +  str(date.hour)
-
-        ntime = date2index(date,times,select='nearest')
-
-        resp = f_resp.variables['RESP'][ntime][:][:]
-        gee = f_gee.variables['GEE'][ntime][:][:]
-
-        # footprint for specific date
-        filename=(pathFP+station+'/'+str(date.year)+'/'+str(date.month).zfill(2)+'/'+str(date.year)+'x'+str(date.month).zfill(2)+'x'+str(date.day).zfill(2)+'x'+str(date.hour).zfill(2)+'/foot')
-
-        if os.path.isfile(filename):
-
-            f_fp = cdf.Dataset(filename)
-
-            fp=f_fp.variables['foot'][:,:,:]
-
-            fp_resp = fp * resp
-            fp_gee = fp * gee
-
-            # added for individual station - interested in how much is sensed within border
-            fp_resp_total = fp_resp.sum()
-            fp_gee_total = fp_gee.sum()
-
-            # the list "data_specific_date" will be filled with data for all the columns for this specific date
-            # added to the dataframe when the country loop is done (load data for all selected countries), and the 
-            # loop over land cover classes which is started once for each country (sensing of broad leaf forest
-            # for specific country for specific day)
-            data_specific_date = [date_string, fp_resp_total, fp_gee_total]
-
-            for landcover_hilda, landcover_name in zip(list_classes, list_classes_names):
-
-                    total_resp_landcover = (fp_resp * landcover_hilda).sum()
-                    total_gee_landcover = (fp_gee * landcover_hilda).sum()
-
-                    #total_resp_landcover_country, total_gee_landcover_country,\
-                                    # total_resp_country_landcover_even,total_gee_country_landcover_even
-                    data_specific_date.extend([total_resp_landcover, total_gee_landcover])  
-
-
-            for country_code in countries:
-
-
-                if country_code == "Europe":
-                    country_mask = return_europe_mask()
-
-                else:
-                    country_mask = country_masks.variables[country_code][:,:]
-
-                # this is what is interesting. compare to total flux sensed at station
-                total_resp_country = (fp_resp * country_mask).sum()
-                total_gee_country = (fp_gee * country_mask).sum()
-
-                percent_resp_country = (total_resp_country/fp_resp_total) * 100 
-                percent_gee_country = (total_gee_country/fp_gee_total) * 100
-
-                data_specific_date.extend([total_resp_country, total_gee_country])
-
-                for landcover_hilda, landcover_name in zip(list_classes, list_classes_names):
-
-                    total_resp_landcover_country = (fp_resp * country_mask * landcover_hilda).sum()
-                    total_gee_landcover_country = (fp_gee * country_mask * landcover_hilda).sum()
-
-                    data_specific_date.extend([total_resp_landcover_country, total_gee_landcover_country])  
-
-            df_save_individual.loc[i] = data_specific_date
-            i = i + 1
-    
-    pd.set_option('display.float_format', lambda x: '%.1f' % x)
-
-    output_df = pd.DataFrame()
-
-    output_df['landcover'] = ['Total GEE', 'Broad leaf forest GEE', \
-                              'Coniferous forest GEE', 'Mixed forest GEE',\
-                              'Other GEE', 'Grass and Shrub GEE',\
-                             'Cropland GEE', 'Pasture GEE',\
-                              'Urban GEE']
-
-    country_columns_gee = []
-    country_columns_resp = []
-    for column in df_save_individual:
-  
-        column_list = column.split("_")   
-
-        if 'gee' in column and 'ocean' not in column and 'unknown' not in column:
-            country_columns_gee.append(column)
-
-            if column_list[0]=='total':
-
-                total_column = column
-
-
-        if 'resp' in column:
-            country_columns_resp.append(column) 
-
-            if column_list[0]=='total':
-
-                total_column = column
-
-
-    #display as table!
-    df_subset_gee = abs(df_save_individual[country_columns_gee])
-    df_subset_resp = df_save_individual[country_columns_resp]
-
-    df_subset_gee_mean = df_subset_gee.mean()
-    df_subset_resp_mean = df_subset_resp.mean()
-
-    df_subset_gee_columns = df_subset_gee_mean.index.to_list()
-
-    values_total = df_subset_gee_mean[0:9]
-
-    value_total = values_total[0]
-
-    percent_total = [((value_landcover/value_total)*100) for value_landcover in values_total[1:]]
-
-    output_df['Total'] = [np.nan] + percent_total
-
-
-    for country in countries:
-
-        index = 0
-
-        first = True
-
-        for column in df_subset_gee_columns: 
-
-
-            column_list = column.split("_")
-            if first: 
-                if column_list[0] == country:
-
-                    values_specific_country = df_subset_gee_mean[index:index+9]
-
-                    value_total_specific_country = values_specific_country[0]
-
-                    percent_specific_country = [((value_landcover/value_total_specific_country)*100) for value_landcover in values_specific_country[1:]]
-
-                    total_country = (value_total_specific_country/value_total)*100
-                    output_df[country + (' (%)')] = [total_country] + percent_specific_country
-
-                    index = index + 11
-
-                    first = False
-
-            index = index + 1
-
-
-    display(output_df)
-
-    
-    return df_save_individual
-
