@@ -1403,7 +1403,7 @@ def monitoring_potential_maps(nwc, country, extended = False):
     if extended: 
         # what happens when run the tool without an extended network presented
         if nwc['extendedNetwork']== 'No extension':
-            display(HTML('<p style="font-size:14px;">Specify an "extended network" in the section "The view from the current ICOS network".</p>'))
+            display(HTML('<p style="font-size:14px;">Specify an "extended network" in the section "The view from a selected network".</p>'))
             return
 
         # station list extended network:
