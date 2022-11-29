@@ -21,7 +21,7 @@ stilt_stations = stiltstation.find()
 button_color_able='#4169E1'
 button_color_disable='#900D09'
 import create_network_analysis
-
+path_network_footprints_local = 'network_footprints'
 
 # style to supress scrolling in the output 
 style_scroll = """
@@ -176,6 +176,7 @@ def update_func(button_c):
     
     create_network_footprints.clear_output()
     create_network_footprints_representation.clear_output()
+    output_name_same.clear_output()
    
     update_button.disabled = True
     update_button.tooltip = 'Unable to run'
@@ -193,6 +194,24 @@ def update_func(button_c):
     
     notes_choice = notes.value
     
+    # check so that the input name is unique (else there would be an error)
+    for root, dirs, files in os.walk(r'' + path_network_footprints_local):
+        for file in files:
+            if file.endswith('-checkpoint.json'):
+                break
+
+            if file == name_save_choice + '.json':
+                
+                with output_name_same:
+                    
+                    display(HTML('<p style="font-size:15px;"><mark>"' + name_save_choice +'" is the name of an existing network</mark>. Try a different name and run the tool again.</p>')) 
+                    
+                update_button.disabled = False
+                update_button.tooltip = 'Unable to run'
+                update_button.style.button_color=button_color_able
+                return
+                
+
     with create_network_footprints:
         
         display(HTML('<p style="font-size:18px;"><b>Creating network footprints</b></p>')) 
@@ -347,6 +366,7 @@ form_out = Output()
 #Initialize results output widgets:
 create_network_footprints = Output()
 create_network_footprints_representation = Output()
+output_name_same = Output()
 
 #--------------------------------------------------------------------
 # OBSERVERS - what happens when change ex. change start year (s_year)
@@ -376,7 +396,7 @@ observe()
 #--------------------------------------------------------------------
 #Open form object:
 with form_out:
-    display(header_stations, settings_grid_0, settings_grid_1,settings_grid_2,settings_grid_3, settings_grid_4, notes, update_button, create_network_footprints, create_network_footprints_representation)
+    display(header_stations, settings_grid_0, settings_grid_1,settings_grid_2,settings_grid_3, settings_grid_4, notes, update_button, output_name_same, create_network_footprints, create_network_footprints_representation)
 
 #Display form:
 display(widgets.HTML(style_scroll),form_out)   

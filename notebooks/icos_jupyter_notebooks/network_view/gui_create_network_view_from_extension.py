@@ -175,14 +175,34 @@ def change_selected_stations(c):
 
 def update_func(button_c):
 
+    output_name_same.clear_output()
     output_create_network.clear_output()
     update_button.disabled = True
 
     stations = list(selected_stations.options)
     
+    name_save_choice = name_save.value
+    
+    # check so that the input name is unique (else there would be an error)
+    for root, dirs, files in os.walk(r'' + path_network_footprints_local):
+        for file in files:
+            if file.endswith('-checkpoint.json'):
+                break
+
+            if file == name_save_choice + '.json':
+                
+                with output_name_same:
+                    
+                    display(HTML('<p style="font-size:15px;"><mark>"' + name_save_choice +'" is the name of an existing network</mark>. Try a different name and run the tool again.</p>')) 
+                    
+                update_button.disabled = False
+                update_button.tooltip = 'Unable to run'
+                update_button.style.button_color=button_color_able
+                return
+    
     with output_create_network:
 
-        create_network_analysis.create_network_fps_by_extension(stations, network_choice.value, name_save.value, notes.value)
+        create_network_analysis.create_network_fps_by_extension(stations, network_choice.value, name_save_choice, notes.value)
 
     update_button.disabled = False
 
@@ -202,9 +222,10 @@ settings_grid_1[0:1, 1:2] = selected_stations
 
 form_out = Output()
 output_create_network = Output()
+output_name_same = Output()
 
 with form_out:
 
-    display(file_info, settings_grid, settings_grid_1, notes, update_button, output_create_network)
+    display(file_info, settings_grid, settings_grid_1, notes, update_button, output_name_same, output_create_network)
 
 display(form_out)
