@@ -187,7 +187,7 @@ def update_func(button_c):
 
     with signals_anthro:
         
-        display(HTML('<p style="font-size:18px;"><b>Table 1 (anthropogenic signal):</b></p>')) 
+        display(HTML('<p style="font-size:18px;"><b>Table 1 (anthropogenic signal in ppm):</b></p>')) 
         
         network_analysis_functions.signals_table_anthro(stc, output=output, csvfile='anthro_table.csv')
         
@@ -199,7 +199,7 @@ def update_func(button_c):
 
     with signals_bio:
         
-        display(HTML('<p style="font-size:18px;"><b>Table 1 (biogenic GEE signal):</b><br><br>Note that this takes a while to run, especially if many stations are selected and a long date range is chosen.</p>')) 
+        display(HTML('<p style="font-size:18px;"><b>Table 1 (biogenic GEE signal in ppm):</b><br><br>Note that this takes a while to run, especially if many stations are selected and a long date range is chosen.</p>')) 
         
         network_analysis_functions.signals_table_bio(stc, component = 'gee', output=output, csvfile='bio_table.csv')
         

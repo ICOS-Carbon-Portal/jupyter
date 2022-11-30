@@ -485,11 +485,11 @@ def plot_maps_country_zoom(field, lon, lat, nwc, country_code, output='monitorin
    
     # zoom in country (given lat and lon)
     ix,jy = lonlat_2_ixjy(country_info['mid_lon'],country_info['mid_lat'],load_lon,load_lat)     
-    
-    i1 = np.max([int(math.ceil(ix-0.55*country_info['size_lon'])),0])
-    i2 = np.min([int(math.ceil(ix+0.55*country_info['size_lon'])),400])
-    j1 = np.max([int(math.ceil(jy-0.55*country_info['size_lat'])),0])
-    j2 = np.min([int(math.ceil(jy+0.55*country_info['size_lat'])),480])
+
+    i1 = np.max([math.ceil(ix-0.55*(country_info['size_lon']+1)),0])
+    i2 = np.min([math.ceil(ix+0.55*(country_info['size_lon']+1)),400])
+    j1 = np.max([math.ceil(jy-0.55*(country_info['size_lat']+1)),0])
+    j2 = np.min([math.ceil(jy+0.55*(country_info['size_lat']+1)),480])
 
     lon_z=load_lon[i1:i2]
     lat_z=load_lat[j1:j2]
@@ -499,7 +499,7 @@ def plot_maps_country_zoom(field, lon, lat, nwc, country_code, output='monitorin
     mcolor='m'
 
     # Set scale for features from Natural Earth
-    NEscale = '50m'
+    NEscale = '10m'
 
     # Create a feature for Countries at 1:50m from Natural Earth
     countries = cfeature.NaturalEarthFeature(
@@ -1551,16 +1551,22 @@ def monitoring_potential_maps(nwc, country, extended = False):
     percentile = 99.9
     # for each land cover - show the representation
     for landcover_fractions, landcover_name in zip(list_landcover_fractions, list_landcover_names):
-        
+
         colors = color_name_dict[landcover_name]['color']
         name = color_name_dict[landcover_name]['name']
-        
-        # skip gee for now:
+
         footprint = fp_network_gee_average * landcover_fractions
         footprint_even = fp_network_even_gee_average * landcover_fractions
 
         if footprint.sum() == 0:
-            return
+            country_name = dictionary_area_choice[country]
+            display(HTML('<p style="font-size:15px">Sensing of ' +  name +' in ' + country_name + ' is zero which means no monitoring potential maps can be created.</p>'))
+            
+            # if GEE is zero, it means the monitoring potential will be zero for all classes and we break out of the function. Otherwise, just break out of the loop.
+            if name == 'GEE':
+                return
+            else:
+                continue
         
         # will not work for extended network - need to havethe even extended file also (for the representation value, only compare with the equal view of reference network to see the change
         if extended:
@@ -1591,8 +1597,8 @@ def monitoring_potential_maps(nwc, country, extended = False):
                 display(HTML('<p style="font-size:18px">' +  html_string))
 
             else:
-                print('Sensing of ' +  name +' in ' + country_name + ' is very low and it is not feaible to show monitoring potential of')
-
+                display(HTML('<p style="font-size:15px">Sensing of ' +  name +' in ' + country_name + ' is very low and it is not feasible to show monitoring potential of.</p>'))
+                
         else:
             country_info = return_country_info(country)
 
@@ -1601,7 +1607,7 @@ def monitoring_potential_maps(nwc, country, extended = False):
             name_underscore = name.replace(' ', '_')
 
             pngfile = name_underscore + '_monitoring_potential' + country.replace(' ', '_')
-
+            
             if (abs(footprint_even)-abs(footprint)).max() > 0.0000001:
                 plot_maps_country_zoom(abs(footprint_even)-abs(footprint), load_lon, load_lat, nwc, country, title = (name + ' monitoring potential ' + country_name + ' ' + add_for_title), colors = colors,label = 'relatively low potential                                                                           relatively high potential', monitoring_potential = True, output=output, pngfile = pngfile, extend='max', extended = extended)
 
@@ -1611,7 +1617,7 @@ def monitoring_potential_maps(nwc, country, extended = False):
 
                     display(HTML('<p style="font-size:18px">' +  html_string))
             else:
-                print('Sensing of ' +  name +' in ' + country_name + ' is very low and it is not feaible to show monitoring potential of')
+                display(HTML('<p style="font-size:15px">Sensing of ' +  name +' in ' + country_name + ' is very low and it is not feasible to show monitoring potential of.</p>'))
 
 # Station characterization
 def signals_table_anthro(stc, output=output, csvfile='anthro_table.csv'):
@@ -1623,8 +1629,8 @@ def signals_table_anthro(stc, output=output, csvfile='anthro_table.csv'):
     date_range = [date for date in date_range_whole if date.hour in timeselect_list]
 
     df_save = pd.DataFrame(columns= ['Station',
-                                     'Transport (ppm)','Energy (ppm)','Industry (ppm)','Residential (ppm)', 'Other categories (ppm)', 'Total (ppm)',\
-                                     'Gas (ppm)', 'Bio (ppm)', 'Waste (ppm)', 'Oil (ppm)', 'Coal (ppm)', 'Cement (ppm)'])
+                                     'Transport','Energy','Industry','Residential', 'Other categories', 'Total',\
+                                     'Gas', 'Bio', 'Waste', 'Oil', 'Coal', 'Cement'])
 
     index = 0
     for station in stations:
@@ -1648,7 +1654,7 @@ def signals_table_anthro(stc, output=output, csvfile='anthro_table.csv'):
         index = index + 1
         
     df_save_sort = df_save.sort_values(by=['Station'])
-    subset_style = subset = ['Transport (ppm)','Energy (ppm)','Industry (ppm)','Residential (ppm)', 'Other categories (ppm)', 'Gas (ppm)', 'Bio (ppm)', 'Waste (ppm)','Oil (ppm)', 'Coal (ppm)', 'Cement (ppm)']
+    subset_style = subset = ['Transport','Energy','Industry','Residential', 'Other categories', 'Gas', 'Bio', 'Waste','Oil', 'Coal', 'Cement']
     subset_format = {key: "{:.2f}" for key in subset_style}
     subset_format['Total (ppm)'] = '{:.2f}'
     df_save_sort_styled = df_save_sort.style.background_gradient(cmap='Reds', axis=None, subset = subset_style)\
@@ -2055,7 +2061,12 @@ def initiate_summer_winter_comparison():
 
 def contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter.csv'):   
     warnings.filterwarnings("ignore")
+    
+    f = IntProgress(min=0, max=5) # instantiate the bar
 
+    display(f) 
+    f.value += 1
+    
     station = stc['specificStation']
     station_lat = stc['specificStationLat'] 
     station_lon = stc['specificStationLon'] 
@@ -2079,7 +2090,9 @@ def contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter
     date_range_winter = [date for date in date_range_winter_whole if date.hour in stc['timeOfDay']]
 
     nfp_not_used, average_fp_summer, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range_summer)
+    f.value += 1
     nfp_not_used, average_fp_winter, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range_winter)
+    f.value += 1
     
     list_fp = [average_fp_summer, average_fp_winter]
     
@@ -2121,6 +2134,9 @@ def contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter
 
         # want only the cells that are zoomed in over:
         fp_precentages_reduced_z=fp_precentages_reduced[j1:j2,i1:i2]
+        
+        f.value += 1
+        
 
         if first:
 
@@ -2146,7 +2162,6 @@ def contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter
             ax.add_feature(countries, edgecolor='grey', linewidth=0.5)
 
             ax.add_feature(cfeature.OCEAN)
-
             # how many points to skip over every like being drawn is given by variable "smooth"
             ax.contour(fp_precentages_reduced_z[::smooth,::smooth], levels = [0, percent], alpha=alpha,colors=contour_color, origin='lower', extent=img_extent, vmax=50, antialiased=True)
 

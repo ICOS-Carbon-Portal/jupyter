@@ -381,7 +381,7 @@ def update_func(button_c):
                 display(HTML('<p style="font-size:18px">' +  html_string))
 
         with representation: 
-            display(HTML('<p style="font-size:18px;">Data used to create <b>Figures 5b, 7b:</b><br><br>GEE representation (network view compared to equal view).</p>'))
+            display(HTML('<p style="font-size:18px;">Data used to create <b>Figures 5b and 7b:</b><br><br>GEE representation ("network view" compared to an "equal view").</p>'))
             network_analysis_functions.share_representaiton_table(nwc, countries, csvfile = 'representation.csv', output = output)
             
             file_path = os.path.join(output, 'representation.csv')
@@ -433,7 +433,7 @@ with file_info:
                 date_created = network_footprint_info_load['dateCreated']
                 display(HTML('<p style="font-size:15px;"><b>Name: </b> ' + str(network_footprint_info_load['fileName']) + '<br><b>Date created: </b> ' + date_created + '<br><b>Stations: </b> ' + stations_string + '<br><b>Year: </b> ' +  str(network_footprint_info_load['startYear']) + '<br><b>Month(s): </b> ' +  str(months)+ '<br><b>Threshold:</b> ' +  str(network_footprint_info_load['fpPercent']*100)+ '%</p>'))
 
-    display(HTML('<p style="font-size:15px;">To analyse a <mark>different network</mark>, use the <a href="network_view/create_network_analysis.ipynb" target="_blank">"create_network_analysis"</a> notebook. The new network will automatically appear in the above list and below dropdowns.<br><br></p>'))
+    display(HTML('<p style="font-size:15px;">To analyse a <mark>different network</mark>, use the "<a href="network_view/create_network_analysis.ipynb" target="_blank">create_network_analysis</a>" notebook. The new network will automatically appear in the above list and below dropdowns.<br><br></p>'))
                 
 header_network = Output()
 with header_network:
