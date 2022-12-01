@@ -307,8 +307,6 @@ def return_europe_mask():
 
 #function to read and aggregate footprints for given date range
 def read_aggreg_footprints(station, date_range):
-    
-    # loop over all dates and read netcdf files
 
     # path to footprint files in new stiltweb directory structure
     pathFP='/data/stiltweb/stations/'
@@ -333,17 +331,15 @@ def read_aggreg_footprints(station, date_range):
                 fp=fp+f_fp.variables['foot'][:,:,:]
             f_fp.close()
             nfp+=1
-        #else:
-            #print ('file does not exist: ',filename)
+
     if nfp > 0:
         fp=fp/nfp
-        title = 'not used'
         
-        return nfp, fp, lon, lat, title
+        return fp
 
     else:
 
-        return 0, None, None, None, None
+        return None
       
 def read_aggreg_network_footprints(nwc, extended = False):
     
@@ -389,7 +385,7 @@ def average_network_footprint(date_range, stations, threshold = 0.5):
     
     for station in stations:
 
-        nfp_not_used, loaded_fp, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range)
+        loaded_fp = read_aggreg_footprints(station, date_range)
 
         if loaded_fp is None:
 
@@ -478,7 +474,6 @@ def plot_maps(field, lon, lat, nwc, footprint_stations='', title='', label='', u
         
         return plt
     
-# footprint_show_percentages() is used to with argument percent=True to generate an aggregated % sensitivity map. 
 def plot_maps_country_zoom(field, lon, lat, nwc, country_code, output='monitorint_potential_maps', title='', label='', unit='', linlog='linear', extend = 'right', station='', zoom='',vmin=None, vmax=None, colors='GnBu', pngfile='', reference = '', monitoring_potential = False, extended = False): 
 
     country_info = return_country_info(country_code)
@@ -499,7 +494,7 @@ def plot_maps_country_zoom(field, lon, lat, nwc, country_code, output='monitorin
     mcolor='m'
 
     # Set scale for features from Natural Earth
-    NEscale = '10m'
+    NEscale = '50m'
 
     # Create a feature for Countries at 1:50m from Natural Earth
     countries = cfeature.NaturalEarthFeature(
@@ -519,7 +514,7 @@ def plot_maps_country_zoom(field, lon, lat, nwc, country_code, output='monitorin
     ax.add_feature(countries, facecolor='None', edgecolor='lightgrey', linewidth=0.3)
     
     # add think border around selected country:
-    reader = shpreader.Reader('/data/project/cartopy/shapefiles/natural_earth/cultural/ne_10m_admin_0_countries.shp')
+    reader = shpreader.Reader('/data/project/cartopy/shapefiles/natural_earth/cultural/ne_50m_admin_0_countries.shp')
     
     # Color countries that miss data for population and point source respectively
     if country_code != 'Andorra':
@@ -545,6 +540,13 @@ def plot_maps_country_zoom(field, lon, lat, nwc, country_code, output='monitorin
     
     if monitoring_potential:
         cbar = plt.colorbar(cs, orientation='horizontal',pad=0.03,fraction=0.055,extend='max', ticks=[])
+        
+        fname = '/data/project/cartopy/shapefiles/natural_earth/physical/ne_50m_ocean.shp'
+
+        #ax = plt.axes(projection=ccrs.Robinson())
+        ocean = ShapelyFeature(Reader(fname).geometries(),
+                                        ccrs.PlateCarree(), edgecolor='black', linewidth=0.3, facecolor=np.array([ 0.59375 , 0.71484375, 0.8828125 ]))
+        ax.add_feature(ocean)
     else:
         cbar = plt.colorbar(cs, orientation='horizontal',pad=0.03,fraction=0.055,extend='both')
 
@@ -1656,7 +1658,7 @@ def signals_table_anthro(stc, output=output, csvfile='anthro_table.csv'):
     df_save_sort = df_save.sort_values(by=['Station'])
     subset_style = subset = ['Transport','Energy','Industry','Residential', 'Other categories', 'Gas', 'Bio', 'Waste','Oil', 'Coal', 'Cement']
     subset_format = {key: "{:.2f}" for key in subset_style}
-    subset_format['Total (ppm)'] = '{:.2f}'
+    subset_format['Total'] = '{:.2f}'
     df_save_sort_styled = df_save_sort.style.background_gradient(cmap='Reds', axis=None, subset = subset_style)\
                                             .format(subset_format)
     display(df_save_sort_styled)
@@ -1845,70 +1847,6 @@ def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.cs
     display(df_save_sort_styled)
     df_save.to_csv(os.path.join(output, csvfile), index = False)  
     
-def footprint_show_percentages(footprint_code, input_footprint, fp_lat, fp_lon, return_fp=False):
-
-    sum_sensitivity_values=sum(input_footprint.flatten()) 
-    #create a dataframe that will have the updated sensitivity values + the steps on the way
-    df_sensitivity = pd.DataFrame()
-
-    #one column with the original senstivity values. Has an index that will be used to sort back to 
-    #this order (flattened 2D... back to 2D with updated sensitivity values in last step)
-    df_sensitivity['sensitivity']=input_footprint.flatten()
-    
-    #sensitivity values sorterd from largest to smallest
-    df_sensitivity_sorted=df_sensitivity.sort_values(by=['sensitivity'], ascending=False)
-    
-    #another column that has the cumilated sum of the values in the sensitivity column.
-    #used to determine when the footprint threshold is met. 
-    df_sensitivity_sorted['cumsum_sens']=df_sensitivity_sorted.cumsum()
-    
-    #mask threshold: when the cumulative sum is over the threshold - these values are assigned 0.
-    #to be multiplied with the original sensitivity values (disregard the ones with value 0)
-    df_sensitivity_sorted['twenty_percent']=df_sensitivity_sorted['cumsum_sens']
-    df_sensitivity_sorted['thirty_percent']=df_sensitivity_sorted['cumsum_sens']
-    df_sensitivity_sorted['forty_percent']=df_sensitivity_sorted['cumsum_sens']
-    df_sensitivity_sorted['fifty_percent']=df_sensitivity_sorted['cumsum_sens']
-    
-    ten_percent = sum_sensitivity_values*0.1
-    twenty_percent = sum_sensitivity_values*0.2
-    thirty_percent = sum_sensitivity_values*0.3
-    forty_percent = sum_sensitivity_values*0.4
-    fifty_percent = sum_sensitivity_values*0.5
-    sixty_percent = sum_sensitivity_values*0.6
-    seventy_percent = sum_sensitivity_values*0.7
-    eighty_percent = sum_sensitivity_values*0.8
-    ninty_percent = sum_sensitivity_values*0.9
-
-    df_sensitivity_sorted['ten_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=ten_percent, 0, 1)
-    df_sensitivity_sorted['twenty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=twenty_percent, 0, 1)
-    df_sensitivity_sorted['thirty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=thirty_percent, 0, 1)
-    df_sensitivity_sorted['forty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=forty_percent, 0, 1)
-    df_sensitivity_sorted['fifty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=fifty_percent, 0, 1)  
-    df_sensitivity_sorted['sixty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=sixty_percent, 0, 1)
-    df_sensitivity_sorted['seventy_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=seventy_percent, 0, 1)
-    df_sensitivity_sorted['eighty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=eighty_percent, 0, 1)
-    df_sensitivity_sorted['ninty_percent']= np.where(df_sensitivity_sorted['cumsum_sens']>=ninty_percent, 0, 1) 
-
-    df_sensitivity_sorted['aggreg'] = df_sensitivity_sorted['ten_percent'] + df_sensitivity_sorted['twenty_percent']+df_sensitivity_sorted['thirty_percent']+df_sensitivity_sorted['forty_percent']+df_sensitivity_sorted['fifty_percent'] + df_sensitivity_sorted['sixty_percent'] + df_sensitivity_sorted['seventy_percent'] + df_sensitivity_sorted['eighty_percent'] + df_sensitivity_sorted['ninty_percent']
-    
-    df_sensitivity_sorted['aggreg']=df_sensitivity_sorted['aggreg']*10
-    
-    df_sensitivity_sorted['reversed_percent'] = 100 - df_sensitivity_sorted['aggreg']
-    
-    df_sensitivity_sorted['reversed_percent']= np.where(df_sensitivity_sorted['reversed_percent']>90, 0, df_sensitivity_sorted['reversed_percent'])
-    
-    df_sensitivity_upd=df_sensitivity_sorted.sort_index()
-    
-    list_aggreg_footprint=df_sensitivity_upd['reversed_percent'].tolist()
-
-    footprint_0_90=np.array(list_aggreg_footprint).reshape((len(fp_lat), len(fp_lon)))
-    
-    if return_fp:
-        return footprint_0_90
-    
-    else:
-        plot_maps(footprint_0_90, fp_lon, fp_lat, colors='Blues_r', vmin=10, vmax=90, percent = True, unit='%', title=(footprint_code + ' 2018'))
-    
 def average_threshold_fp(station, date_range, threshold):
     
     pathFP='/data/stiltweb/stations/'
@@ -1985,7 +1923,7 @@ def initiate_summer_winter_comparison():
 
         with contour_map:
 
-            display(HTML('<p style="font-size:18px;"><b>Figure 2a:</b><br>Improvements to the contour lines is extected in a coming release.</p>'))
+            display(HTML('<p style="font-size:18px;"><b>Figure 2a:</b><br>Improvements to the contour lines is expected in a coming release.</p>'))
 
             contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter.png')
 
@@ -2059,11 +1997,45 @@ def initiate_summer_winter_comparison():
     
     display(header_specific_station, settings_grid_1,settings_grid_2, update_button, contour_map, landcover_bar)
 
+def return_extent_info(input_map):
+     
+    extent_info = {}
+    
+    df = pd.DataFrame()
+    list_lat = []
+    list_lon = []
+    for lat in load_lat:
+        for lon in load_lon:
+            list_lat.append(lat)
+            list_lon.append(lon)
+    df['lat'] = list_lat
+    df['lon'] = list_lon
+    df['mask'] = input_map.flatten()
+    
+    mask_over_threshold = df.loc[df['mask'] > 0]
+
+    extent_info['min_lat'] = mask_over_threshold['lat'].min()
+    extent_info['max_lat'] = mask_over_threshold['lat'].max()
+    
+    extent_info['min_lon'] = mask_over_threshold['lon'].min()
+    extent_info['max_lon'] = mask_over_threshold['lon'].max()
+    
+    unique_lon = mask_over_threshold['lon'].unique()
+    unique_lat = mask_over_threshold['lat'].unique()
+    
+    extent_info['size_lon'] = len(unique_lon)
+    extent_info['size_lat'] = len(unique_lat)
+    
+    extent_info['mid_lon']= statistics.median(unique_lon)
+    extent_info['mid_lat'] = statistics.median(unique_lat)
+    
+    return extent_info
+
 def contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter.csv'):   
     warnings.filterwarnings("ignore")
+    matplotlib.rcParams.update({'font.size': 12})
     
-    f = IntProgress(min=0, max=5) # instantiate the bar
-
+    f = IntProgress(min=0, max=5) 
     display(f) 
     f.value += 1
     
@@ -2072,8 +2044,11 @@ def contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter
     station_lon = stc['specificStationLon'] 
     station_name = stc['specificStationName'] 
 
+    # parameters for the contour - only use every 4th point for the contour line
     smooth = 4
-    percent = 50
+    
+    # want the contours for the 50% footprint = 0.5 in threshold
+    threshold = 0.5
     
     # colors for the countour lines
     contour_colors = ['green', 'black']
@@ -2082,44 +2057,49 @@ def contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter
     seasons = ['Summer', 'Winter']
 
     date_range_summer_whole = pd.date_range(dt.datetime(stc['startYear'],6,1,0), (dt.datetime(stc['startYear'], 9, 1,0)-dt.timedelta(hours=3)), freq='3H')
-    
     date_range_summer = [date for date in date_range_summer_whole if date.hour in stc['timeOfDay']]
     
     date_range_winter_whole = pd.date_range(start=pd.Timestamp(stc['startYear'], 1, 1, 0), end=pd.Timestamp(stc['startYear'], 3, 1, 0) -dt.timedelta(hours=3), freq='3H').to_list() + pd.date_range(start=pd.Timestamp(stc['startYear'], 12, 1, 0), end=pd.Timestamp(stc['startYear'], 12, 31, 21), freq='3H').to_list() 
-    
     date_range_winter = [date for date in date_range_winter_whole if date.hour in stc['timeOfDay']]
 
-    nfp_not_used, average_fp_summer, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range_summer)
-    f.value += 1
-    nfp_not_used, average_fp_winter, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range_winter)
+    # create average footprints
+    average_fp_summer = read_aggreg_footprints(station, date_range_summer)
     f.value += 1
     
-    list_fp = [average_fp_summer, average_fp_winter]
+    average_fp_winter = read_aggreg_footprints(station, date_range_winter)
+    f.value += 1
     
-    # rather than returning this - plot the contours:    
-    matplotlib.rcParams.update({'font.size': 12})
-    first = True
+    average_fp_summer = update_footprint_based_on_threshold(average_fp_summer, 0.5)
+    average_fp_winter = update_footprint_based_on_threshold(average_fp_winter, 0.5)
+    
+    list_fps = [average_fp_summer, average_fp_winter]
+    
+    # get information on the extent - to know how to zoom in 
+    # want the extent to cover the maximum of both the summer and winter footprints:
+    fp_both = pd.DataFrame()
+    fp_both['summer'] = average_fp_summer.flatten() 
+    fp_both['winter'] = average_fp_winter.flatten()
+    fp_both_list = fp_both[fp_both.columns].max(axis=1)
+    
+    fp_both = np.array(fp_both_list).reshape(480, 400)
+    
+    extent_info = return_extent_info(fp_both)
+    
+    # zoom in country 
+    ix,jy = lonlat_2_ixjy(extent_info['mid_lon'],extent_info['mid_lat'],load_lon,load_lat)     
 
-    alpha = 0.7    
-
-    # zoom in over area around station:
-    ix,jy = lonlat_2_ixjy(station_lon,station_lat,load_lon,load_lat)
-
-    # need to keep this ratio between x_change and y_change
-    x_change = 100
-    y_change = 120
-    # define zoom area 
-    i1 = np.max([ix-x_change,0])
-    i2 = np.min([ix+x_change,400])
-    j1 = np.max([jy-y_change,0])
-    j2 = np.min([jy+y_change,480])
+    i1 = np.max([math.ceil(ix-0.55*(extent_info['size_lon']+1)),0])
+    i2 = np.min([math.ceil(ix+0.55*(extent_info['size_lon']+1)),400])
+    j1 = np.max([math.ceil(jy-0.55*(extent_info['size_lat']+1)),0])
+    j2 = np.min([math.ceil(jy+0.55*(extent_info['size_lat']+1)),480])
 
     lon_z=load_lon[i1:i2]
     lat_z=load_lat[j1:j2]
 
     index = 0
 
-    for fp in list_fp:
+    first = True
+    for fp in list_fps:
 
         contour_color = contour_colors[index]
         season = seasons[index]
@@ -2127,16 +2107,8 @@ def contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter
         if fp is None:
             print('Missing footprints for ' + season + ' ' + str(stc['startYear']))
 
-        fp_percentages = footprint_show_percentages(station, fp, load_lat, load_lon, return_fp=True)
-
-        # percent is where we'd like to have the cut-off
-        fp_precentages_reduced = np.where(fp_percentages>percent, 0, fp_percentages) 
-
-        # want only the cells that are zoomed in over:
-        fp_precentages_reduced_z=fp_precentages_reduced[j1:j2,i1:i2]
-        
+        fp_z = fp[j1:j2,i1:i2]
         f.value += 1
-        
 
         if first:
 
@@ -2144,7 +2116,7 @@ def contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter
             countries = cfeature.NaturalEarthFeature(
                 category='cultural',
                 name='admin_0_countries',
-                scale='50m',
+                scale='10m',
                 facecolor='none')
 
             fig = plt.figure(figsize=(18,10))
@@ -2160,16 +2132,24 @@ def contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter
             ax.plot([9.111, 59.111], [9.112, 59.112], '-', linewidth=2, color=contour_color)
 
             ax.add_feature(countries, edgecolor='grey', linewidth=0.5)
+            
+            #ne_10m_coastline.shp
+            fname = '/data/project/cartopy/shapefiles/natural_earth/physical/ne_50m_ocean.shp'
 
-            ax.add_feature(cfeature.OCEAN)
+            #ax = plt.axes(projection=ccrs.Robinson())
+            ocean = ShapelyFeature(Reader(fname).geometries(),
+                                            ccrs.PlateCarree(), edgecolor='black', linewidth=0.3, facecolor=np.array([ 0.59375 , 0.71484375, 0.8828125 ]))
+
+            ax.add_feature(ocean)
+            
             # how many points to skip over every like being drawn is given by variable "smooth"
-            ax.contour(fp_precentages_reduced_z[::smooth,::smooth], levels = [0, percent], alpha=alpha,colors=contour_color, origin='lower', extent=img_extent, vmax=50, antialiased=True)
+            ax.contour(fp_z[::smooth,::smooth], levels = [0, fp.max()],colors=contour_color, origin='lower', extent=img_extent, vmax=50, antialiased=True)
 
             first = False
 
         else:
             # when addding more than one contour line.
-            ax.contour(fp_precentages_reduced_z[::smooth,::smooth], levels = [0, percent], alpha=alpha,colors=contour_color, origin='lower', extent=img_extent, vmax=50, antialiased=True)
+            ax.contour(fp_z[::smooth,::smooth], levels = [0, fp.max()], colors=contour_color, origin='lower', extent=img_extent, vmax=50, antialiased=True)
         ax.plot([9.111, 59.111], [9.112, 59.112], '-', label=season, linewidth=2, color=contour_color)
         index = index + 1
 
@@ -2217,9 +2197,9 @@ def land_cover_bar_graph_winter_summer(stc, output=output, pngfile='landcover_su
 
 
     # take two date ranges for final graph
-    nfp1, fp1, lon, lat, title_not_used = read_aggreg_footprints(station, date_range1)
+    fp1 = read_aggreg_footprints(station, date_range1)
 
-    nfp2, fp2, lon, lat, title_not_used = read_aggreg_footprints(station, date_range2)
+    fp2 = read_aggreg_footprints(station, date_range2)
 
     #get all the land cover data from netcdfs 
     broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018')
