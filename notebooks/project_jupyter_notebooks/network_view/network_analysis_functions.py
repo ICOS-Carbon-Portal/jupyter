@@ -53,14 +53,14 @@ if not os.path.exists(output):
 
 country_masks = Dataset(os.path.join(stcDataPath,'europe_STILT_masks.nc'))
 
-dictionary_area_choice = {'ALB':'Albania', 'Andorra':'Andorra', 'AUT':'Austria','BLR':'Belarus',\
+dictionary_area_choice = {'ALB':'Albania', 'AUT':'Austria','BLR':'Belarus',\
                           'BEL':'Belgium', 'BIH':'Bosnia and Herzegovina', 'BGR':'Bulgaria', 'HRV':'Croatia',\
                           'CYP':'Cyprus','CZE':'Czechia','DNK':'Denmark','EST':'Estonia','FIN':'Finland',\
                           'FRA':'France','DEU':'Germany','GRC':'Greece','HUN':'Hungary','IRL':'Ireland',\
-                          'ITA':'Italy','XKX':'Kosovo','LVA':'Latvia','LIE':'Liechtenstein','LTU':'Lithuania',\
-                          'LUX':'Luxembourg','MKD':'Macedonia','MTL':'Malta','MDA':'Moldova','MNE':'Montenegro',\
+                          'ITA':'Italy','XKX':'Kosovo','LVA':'Latvia','LTU':'Lithuania',\
+                          'LUX':'Luxembourg','MKD':'Macedonia','MDA':'Moldova','MNE':'Montenegro',\
                           'NLD':'Netherlands','NOR':'Norway','POL':'Poland','PRT':'Portugal','SRB':'Republic of Serbia',\
-                          'ROU':'Romania','SMR':'San Marino','SVK':'Slovakia','SVN':'Slovenia','ESP':'Spain',\
+                          'ROU':'Romania','SVK':'Slovakia','SVN':'Slovenia','ESP':'Spain',\
                           'SWE':'Sweden','CHE':'Switzerland','GBR':'United Kingdom', 'Europe':'Europe'}
 
 dictionary_color = {'Broad leaf forest': {'color': '#4c9c5e'}, 'Coniferous forest':{'color':'#CAE0AB'}, 'Mixed forest':{'color':'#90C987'}, 'Ocean':{'color':'#1964B0'}, 'Other':{'color':'#882E72'}, 'Grass/shrubland':{'color':'#F1932D'}, 'Cropland':{'color': '#521A13'}, 'Pasture':{'color':'#F7F056'}, 'Urban':{'color':'#DC050C'}, 'Unknown':{'color':'#777777'}}
@@ -289,6 +289,7 @@ def update_footprint_based_on_threshold(input_footprint, threshold):
 def return_europe_mask():
     
     all_countries= ["ALB","Andorra", "AUT", "BLR","BEL", "BIH", "BGR", "HRV", "CYP", "CZE", "DNK","EST","FIN","FRA","DEU","GRC","HUN","IRL","ITA","XKX","LVA","LIE","LTU","LUX","MKD", "MTL","MDA","MNE","NLD","NOR","POL","PRT","SRB","ROU","SMR","SVK","SVN","ESP","SWE","CHE","GBR"]
+    
     first_country = True
     for country_code in all_countries:
         
@@ -476,32 +477,26 @@ def plot_maps(field, lon, lat, nwc, footprint_stations='', title='', label='', u
     
 def plot_maps_country_zoom(field, lon, lat, nwc, country_code, output='monitorint_potential_maps', title='', label='', unit='', linlog='linear', extend = 'right', station='', zoom='',vmin=None, vmax=None, colors='GnBu', pngfile='', reference = '', monitoring_potential = False, extended = False): 
 
-    country_info = return_country_info(country_code)
-   
-    # zoom in country (given lat and lon)
-    ix,jy = lonlat_2_ixjy(country_info['mid_lon'],country_info['mid_lat'],load_lon,load_lat)     
+    if country_code == "Europe":
 
-    i1 = np.max([math.ceil(ix-0.55*(country_info['size_lon']+1)),0])
-    i2 = np.min([math.ceil(ix+0.55*(country_info['size_lon']+1)),400])
-    j1 = np.max([math.ceil(jy-0.55*(country_info['size_lat']+1)),0])
-    j2 = np.min([math.ceil(jy+0.55*(country_info['size_lat']+1)),480])
+        country_mask = return_europe_mask()
+    else: 
+        country_mask = country_masks.variables[country_code][:,:]
+        
+    extent_info = return_extent_info(country_mask)
+
+    # zoom in country (given lat and lon)
+    ix,jy = lonlat_2_ixjy(extent_info['mid_lon'],extent_info['mid_lat'],load_lon,load_lat)     
+
+    i1 = np.max([math.ceil(ix-0.55*(extent_info['size_lon']+1)),0])
+    i2 = np.min([math.ceil(ix+0.55*(extent_info['size_lon']+1)),400])
+    j1 = np.max([math.ceil(jy-0.55*(extent_info['size_lat']+1)),0])
+    j2 = np.min([math.ceil(jy+0.55*(extent_info['size_lat']+1)),480])
 
     lon_z=load_lon[i1:i2]
     lat_z=load_lat[j1:j2]
 
     field_z=field[j1:j2,i1:i2]
-    
-    mcolor='m'
-
-    # Set scale for features from Natural Earth
-    NEscale = '50m'
-
-    # Create a feature for Countries at 1:50m from Natural Earth
-    countries = cfeature.NaturalEarthFeature(
-        category='cultural',
-        name='admin_0_countries',
-        scale=NEscale,
-        facecolor='none')
 
     fig = plt.figure(figsize=(18,10))
 
@@ -510,18 +505,28 @@ def plot_maps_country_zoom(field, lon, lat, nwc, country_code, output='monitorin
 
     img_extent = (lon_z.min(), lon_z.max(), lat_z.min(), lat_z.max())
     ax.set_extent([lon_z.min(), lon_z.max(), lat_z.min(), lat_z.max()],crs=ccrs.PlateCarree())
-
+    
+    # Create a feature for Countries at 1:50m from Natural Earth
+    countries = cfeature.NaturalEarthFeature(
+        category='cultural',
+        name='admin_0_countries',
+        scale='50m',
+        facecolor='none')
+    
     ax.add_feature(countries, facecolor='None', edgecolor='lightgrey', linewidth=0.3)
     
     # add think border around selected country:
     reader = shpreader.Reader('/data/project/cartopy/shapefiles/natural_earth/cultural/ne_50m_admin_0_countries.shp')
     
     # Color countries that miss data for population and point source respectively
-    if country_code != 'Andorra':
-        country_information_selected = [country for country in reader.records() if country.attributes["ADM0_A3"] == country_code][0]
+    if country_code == 'XKX':
+        country_information_selected = [country for country in reader.records() if country.attributes["ADM0_A3"] == 'KOS'][0]
+        
     else:
-        country_information_selected = [country for country in reader.records() if country.attributes["ADM0_A3"] == 'AND'][0]
-    country_shape = ShapelyFeature([country_information_selected.geometry], ccrs.PlateCarree(),facecolor="None", edgecolor='black', lw=0.3)                     
+        country_information_selected = [country for country in reader.records() if country.attributes["ADM0_A3"] == country_code][0]
+    
+    country_shape = ShapelyFeature([country_information_selected.geometry], ccrs.PlateCarree(),facecolor="None", edgecolor='black', lw=0.4)                     
+    
     ax.add_feature(country_shape)
 
     cmap = copy.copy(matplotlib.cm.get_cmap(colors))
@@ -561,31 +566,19 @@ def plot_maps_country_zoom(field, lon, lat, nwc, country_code, output='monitorin
     ax.plot(nwc['stationsLon'],nwc['stationsLat'],'o',color='blue',ms=2,transform=ccrs.PlateCarree())
 
     plt.tight_layout()
-    plt.show()
+    #plt.show()
     
     if len(pngfile)>0:
-        
-        output = output
 
         if not os.path.exists(output):
             os.makedirs(output)
   
         fig.savefig(output+'/'+pngfile+'.png',dpi=100,bbox_inches='tight')
+    
+    plt.close()
         
 # compare the current and extended networks in a map with two different colors. 
 def plot_maps_two(field, field2, mask_threshold, lon, lat, footprint_stations='', title='', label='', unit='', linlog='linear', extend = 'both', station='', zoom='', vmin=None, vmax=None, colors='GnBu',pngfile='', directory='figures', mask=False, percent=False, date_time_predefined='', output=''): 
-
-    mcolor='m'
-
-    # Set scale for features from Natural Earth
-    NEscale = '50m'
-
-    # Create a feature for Countries at 1:50m from Natural Earth
-    countries = cfeature.NaturalEarthFeature(
-        category='cultural',
-        name='admin_0_countries',
-        scale=NEscale,
-        facecolor='none')
 
     fig = plt.figure(figsize=(18,10))
 
@@ -594,6 +587,13 @@ def plot_maps_two(field, field2, mask_threshold, lon, lat, footprint_stations=''
     
     img_extent = (lon.min(), lon.max(), lat.min(), lat.max())
     ax.set_extent([lon.min(), lon.max(), lat.min(), lat.max()],crs=ccrs.PlateCarree())
+    
+    # Create a feature for Countries at 1:50m from Natural Earth
+    countries = cfeature.NaturalEarthFeature(
+        category='cultural',
+        name='admin_0_countries',
+        scale='50m',
+        facecolor='none')
    
     ax.add_feature(countries, edgecolor='black', linewidth=0.3)
 
@@ -629,18 +629,19 @@ def plot_maps_two(field, field2, mask_threshold, lon, lat, footprint_stations=''
     plt.title(title)
  
     plt.tight_layout()
+    
     plt.show()
     
     if len(pngfile)>0:
         
-        output = output
-
         if not os.path.exists(output):
             os.makedirs(output)
   
         fig.savefig(output+'/'+pngfile+'.png',dpi=100,bbox_inches='tight')
         
         return plt
+    
+    plt.close()
     
 def display_network_with_extended(nwc, vmax_footprint = 'extended'):
     
@@ -732,47 +733,16 @@ def import_landcover_HILDA(year='2018'):
     other = other_land + water
 
     return broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown
-    
-def return_country_info(country_code):
-    
-    country_info = {}
-    
-    # access mask
-    country_mask = country_masks.variables[country_code][:,:]
-    
-    df = pd.DataFrame()
-    list_lat = []
-    list_lon = []
-    for lat in load_lat:
-        for lon in load_lon:
-            list_lat.append(lat)
-            list_lon.append(lon)
-    df['lat'] = list_lat
-    df['lon'] = list_lon
-    df['mask'] = country_mask.data.flatten()
-    
-    mask_over_0 = df.loc[df['mask'] > 0]
-
-    country_info['min_lat'] = mask_over_0['lat'].min()
-    country_info['max_lat'] = mask_over_0['lat'].max()
-    
-    country_info['min_lon'] = mask_over_0['lon'].min()
-    country_info['max_lon'] = mask_over_0['lon'].max()
-    
-    unique_lon = mask_over_0['lon'].unique()
-    unique_lat = mask_over_0['lat'].unique()
-    
-    country_info['size_lon'] = len(unique_lon)
-    country_info['size_lat'] = len(unique_lat)
-    
-    country_info['mid_lon']= statistics.median(unique_lon)
-    country_info['mid_lat'] = statistics.median(unique_lat)
-    
-    return country_info
 
 def overview_map(country_code):
     
-    country_info = return_country_info(country_code)
+    if country_code == "Europe":
+
+        country_mask = return_europe_mask()
+    else: 
+        country_mask = country_masks.variables[country_code][:,:]
+    
+    extent_info = return_extent_info(country_mask)
 
     fig = plt.figure(figsize=(18,10))
 
@@ -792,7 +762,7 @@ def overview_map(country_code):
 
     ax.add_feature(cfeature.OCEAN)
 
-    bbox = shapely.geometry.box(country_info['min_lon'], country_info['min_lat'], country_info['max_lon'], country_info['max_lat'], ccw=True)
+    bbox = shapely.geometry.box(extent_info['min_lon'], extent_info['min_lat'], extent_info['max_lon'], extent_info['max_lat'], ccw=True)
 
     x_bbox,y_bbox = bbox.exterior.xy
     
@@ -841,7 +811,7 @@ def landcover_view(nwc, countries, pngfile = '', output= ''):
     land_cover_names = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', \
                         'Urban', 'Ocean', 'Grass/shrubland', 'Other', 'Unknown']
     
-    all_countries = ["ALB","Andorra","AUT", "BLR","BEL","BIH", "BGR","HRV","CYP","CZE","DNK","EST","FIN", "FRA","DEU","GRC","HUN","IRL","ITA","XKX","LVA","LIE","LTU","LUX","MKD","MTL", "MDA","MNE","NLD","NOR", "POL", "PRT","SRB","ROU","SMR","SVK","SVN","ESP","SWE","CHE","GBR", "Europe"]
+    all_countries = ["ALB","AUT", "BLR","BEL","BIH", "BGR","HRV","CYP","CZE","DNK","EST","FIN", "FRA","DEU","GRC","HUN","IRL","ITA","XKX","LVA","LTU","LUX","MKD", "MDA","MNE","NLD","NOR", "POL", "PRT","SRB","ROU","SVK","SVN","ESP","SWE","CHE","GBR", "Europe"]
     
     columns_save= ['country', 'total_sens', 'total_sens_km2']
 
@@ -1306,7 +1276,7 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
     
 def initiate_monitoring_potential_maps(nwc, extended = False):
    
-    countries = [('Europe', 'Europe'),('Albania','ALB'),('Andorra','Andorra'),('Austria','AUT'),('Belarus','BLR'),('Belgium','BEL'),('Bosnia and Herzegovina','BIH'),('Bulgaria','BGR'),('Croatia','HRV'),('Cyprus','CYP'),('Czechia','CZE'),('Denmark','DNK'),('Estonia','EST'),('Finland','FIN'),('France','FRA'),('Germany','DEU'),('Greece','GRC'),('Hungary','HUN'),('Ireland','IRL'),('Italy','ITA'),('Kosovo','XKX'),('Latvia','LVA'),('Liechtenstein','LIE'),('Lithuania','LTU'),('Luxembourg','LUX'),('Macedonia','MKD'),('Malta','MTL'),('Moldova','MDA'),('Montenegro','MNE'),('Netherlands','NLD'),('Norway','NOR'),('Poland','POL'),('Portugal','PRT'),('Republic of Serbia','SRB'),('Romania','ROU'),('San Marino','SMR'),('Slovakia','SVK'),('Slovenia','SVN'),('Spain','ESP'),('Sweden','SWE'),('Switzerland','CHE'),('United Kingdom','GBR')]
+    countries = [('Europe', 'Europe'),('Albania','ALB'),('Austria','AUT'),('Belarus','BLR'),('Belgium','BEL'),('Bosnia and Herzegovina','BIH'),('Bulgaria','BGR'),('Croatia','HRV'),('Cyprus','CYP'),('Czechia','CZE'),('Denmark','DNK'),('Estonia','EST'),('Finland','FIN'),('France','FRA'),('Germany','DEU'),('Greece','GRC'),('Hungary','HUN'),('Ireland','IRL'),('Italy','ITA'),('Kosovo','XKX'),('Latvia','LVA'),('Lithuania','LTU'),('Luxembourg','LUX'),('Macedonia','MKD'),('Moldova','MDA'),('Montenegro','MNE'),('Netherlands','NLD'),('Norway','NOR'),('Poland','POL'),('Portugal','PRT'),('Republic of Serbia','SRB'),('Romania','ROU'),('Slovakia','SVK'),('Slovenia','SVN'),('Spain','ESP'),('Sweden','SWE'),('Switzerland','CHE'),('United Kingdom','GBR')]
     
     country_choice = Dropdown(options = countries,
                        description = 'Country',
@@ -1346,7 +1316,7 @@ def initiate_monitoring_potential_maps(nwc, extended = False):
     display(form_out)
 
 def monitoring_potential_maps(nwc, country, extended = False):
-    
+
     folder = nwc['networkFile']
     path = nwc['pathFp']
 
@@ -1546,10 +1516,11 @@ def monitoring_potential_maps(nwc, country, extended = False):
         
         fp_network_even_gee_average_extended = fp_network_even_gee_average_extended_for_average / i
 
-    if country != 'Europe' and country != 'France' and country != 'Norway' and country!='Spain':
+    #if country != 'Europe':
         
-        overview_map(country)
-        
+        #overview_map(country)
+    
+    # update here
     percentile = 99.9
     # for each land cover - show the representation
     for landcover_fractions, landcover_name in zip(list_landcover_fractions, list_landcover_names):
@@ -1602,8 +1573,7 @@ def monitoring_potential_maps(nwc, country, extended = False):
                 display(HTML('<p style="font-size:15px">Sensing of ' +  name +' in ' + country_name + ' is very low and it is not feasible to show monitoring potential of.</p>'))
                 
         else:
-            country_info = return_country_info(country)
-
+            
             country_name = dictionary_area_choice[country]
 
             name_underscore = name.replace(' ', '_')
