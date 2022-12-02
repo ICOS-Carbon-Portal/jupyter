@@ -45,6 +45,9 @@ style_scroll = """
 def get_settings():
     s = {}
     
+    # not from the user - but could make it
+    s['vmaxPercentile'] = 99.9
+    
     if network_choice.value[-5:] == 'local': 
         s['networkFile'] = network_choice.value[:-6]
         s['pathFp'] = path_network_footprints_local

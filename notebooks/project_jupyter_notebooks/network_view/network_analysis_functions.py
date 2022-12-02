@@ -690,9 +690,20 @@ def display_network_with_extended(nwc, vmax_footprint = 'extended'):
     difference = extended_network - current_network
 
     if vmax_footprint == 'current':
-        vmax = np.percentile(current_network, 99.9)
+        
+        df_values_fp = pd.DataFrame()
+        df_values_fp['sensitivity']=current_network.flatten()
+
+        current_network_over_zero = df_values_fp[df_values_fp['sensitivity'] > 0] 
+        vmax = np.percentile(current_network_over_zero['sensitivity'],nwc['vmaxPercentile'])
+
     else:
-        vmax = np.percentile(extended_network, 99.9)
+        
+        df_values_fp = pd.DataFrame()
+        df_values_fp['sensitivity']=extended_network.flatten()
+        
+        extended_network_over_zero = df_values_fp[df_values_fp['sensitivity'] > 0] 
+        vmax = np.percentile(extended_network_over_zero['sensitivity'],nwc['vmaxPercentile'])
 
     mask_threshold = 0.0004
     pngfile='current_extended_map'
@@ -777,8 +788,12 @@ def display_selected_fp_file(nwc):
 
     fp_average_footprint = nwc['averageFp']
     
-    vmax = np.percentile(fp_average_footprint, 99.9)
+    df_values_fp = pd.DataFrame()
+    df_values_fp['sensitivity']=fp_average_footprint.flatten()
 
+    fp_average_footprint_over_zero = df_values_fp[df_values_fp['sensitivity'] > 0] 
+    vmax = np.percentile(fp_average_footprint_over_zero['sensitivity'],nwc['vmaxPercentile'])
+    
     plot_maps(fp_average_footprint, load_lon, load_lat, nwc, colors = 'Greens', vmax=vmax, vmin = 0.0004,\
               label= 'sensitivity: ppm /(μmol / (m²s))', output=output, extend = 'max', pngfile = 'average_map', linlog='linear')
     
