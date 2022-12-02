@@ -566,7 +566,8 @@ def plot_maps_country_zoom(field, lon, lat, nwc, country_code, output='monitorin
     ax.plot(nwc['stationsLon'],nwc['stationsLat'],'o',color='blue',ms=2,transform=ccrs.PlateCarree())
 
     plt.tight_layout()
-    #plt.show()
+
+    plt.show()
     
     if len(pngfile)>0:
 
@@ -698,6 +699,7 @@ def display_network_with_extended(nwc, vmax_footprint = 'extended'):
     plot_maps_two(current_network, difference , mask_threshold, load_lon, load_lat, linlog='linear', extend = 'max', 
               vmin=0.0004, vmax=vmax, colors='Greens', label= 'sensitivity: ppm /(μmol / (m²s))', pngfile=pngfile, output=output)
 
+    display(HTML('<p style="font-size:15px"><b>Figure 8: Average network and extended network footprints for the selected time-period. Only the colorbar for the extended network (blue) is displayed but has the same colorbar maximum as the average network (green).</b></p>'))
     file_path = os.path.join(output, pngfile + '.png')
     if os.path.exists(file_path):      
         html_string = '<br>Download map <a href='  + file_path + ' target="_blank">here</a><br><br>'
@@ -973,8 +975,9 @@ def landcover_view(nwc, countries, pngfile = '', output= ''):
     leg = Legend(ax, (p9[0], p8[0],p6[0],p5[0],p4[0], p3[0],p2[0],p1[0]), \
                  ('Other','Grass/shrubland','Urban','Pasture','Cropland', 'Mixed forest', \
                   'Coniferous forest','Broad leaf forest'), \
-                 loc='upper right', title = '',  bbox_to_anchor=(1.24, 0.33))
-    ax.add_artist(leg)
+                 loc='upper right', title = '', bbox_to_anchor=(1.20, 0.3))
+    
+    fig.add_artist(leg)
 
     list_country_names = []
     list_sensing_countries = []
@@ -1000,17 +1003,19 @@ def landcover_view(nwc, countries, pngfile = '', output= ''):
     plt.axvline(x=y_pos_minus-(y_pos_steps*1.5), color = 'black', ls= '--')
     ax.set_ylabel('%')
     
-    fig.text(.5, 0.9, "Land cover sensed by network within country (left) vs. present in country (right)", ha='center')
+    fig.text(.5, 1, "Land cover sensed by network within country (left) vs. present in country (right)", ha='center')
 
-    fig.text(0.5, -0.03, "Country (sensitivity/km²)", ha='center')
+    fig.text(0.5, 0, "Country (sensitivity/km²)", ha='center')
               
+    plt.tight_layout()
+    
     if len(pngfile)>0:
         
         if not os.path.exists(output):
             os.makedirs(output)
   
         plt.savefig(output+'/'+pngfile,dpi=100,bbox_inches='tight')
-
+    
     plt.show()
     
 def share_representaiton_table(nwc, countries, csvfile = '', output = ''):
@@ -1158,6 +1163,16 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
         df_network = abs(df_fluxes[country_columns_gee_network])
 
         df_even_mean = df_even.mean()
+        
+        # see if all are the same (zero):
+        df_even_mean_test_unique = df_even_mean.to_numpy() 
+        
+        # if all zero: return without table
+        if (df_even_mean_test_unique[0] == df_even_mean_test_unique).all():
+            
+            plt.close()
+            display(HTML('<p style="font-size:15px;"><mark>No GEE during the selected time-period</mark> (probably night-time selected). No GEE-based output created.</p>'))
+            return False
 
         df_even_mean_percent = (df_even_mean/df_even_mean.sum())*100
 
@@ -1231,10 +1246,10 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
     leg = Legend(ax, (p9[0], p8[0],p6[0],p5[0],p4[0], p3[0],p2[0],p1[0]), \
                  ('Other','Grass/shrubland','Urban','Pasture','Cropland', 'Mixed forest', \
                   'Coniferous forest','Broad leaf forest'), \
-                 loc='upper right', title = '', bbox_to_anchor=(1.24, 0.33))
+                 loc='upper right', title = '', bbox_to_anchor=(1.20, 0.3))
 
-    ax.add_artist(leg)
-    
+    fig.add_artist(leg)
+
     list_country_names = []
     list_sensing_countries = []
     i = 0
@@ -1263,8 +1278,11 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
 
     plt.axvline(x=y_pos_minus-(y_pos_steps*1.5), color = 'black', ls= '--')
     ax.set_ylabel('%')
-    fig.text(.5, 0.9, "GEE sensed by the network within country (left) vs. present in country (right)", ha='center')
-                 
+              
+    fig.text(.5, 1, "GEE sensed by the network within country (left) vs. present in country (right)", ha='center')
+    fig.text(0.5, 0, "Country (sensitivity/km²)", ha='center')
+    
+    plt.tight_layout()
     if len(pngfile)>0:
         
         if not os.path.exists(output):
@@ -1273,6 +1291,10 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
         plt.savefig(output+'/'+pngfile,dpi=100,bbox_inches='tight')
 
     plt.show()
+
+    display(HTML('<p style="font-size:15px;"><b>Figures 5a, 7a, and 8b: Land cover share of flux (GEE) within the network footprint compared to the land cover share of flux (GEE) within the network for selected countries.</b></p>'))
+
+    return True
     
 def initiate_monitoring_potential_maps(nwc, extended = False):
    
@@ -1640,8 +1662,9 @@ def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.cs
     stations = stc['signalsStations']
     timeselect_list = stc['timeOfDay']
     
-    f = IntProgress(min=0, max=len(stations)) # instantiate the bar
+    f = IntProgress(min=0, max=len(stations) + 1) # instantiate the bar
     display(f) 
+    f.value+=1
     
     date_range_whole = pd.date_range(dt.datetime(stc['startYear'],stc['startMonth'],stc['startDay'],0), (dt.datetime(stc['endYear'], stc['endMonth'], stc['endDay'], 21)), freq='3H')
     
@@ -1893,9 +1916,11 @@ def initiate_summer_winter_comparison():
 
         with contour_map:
 
-            display(HTML('<p style="font-size:18px;"><b>Figure 2a:</b><br>Improvements to the contour lines is expected in a coming release.</p>'))
+            display(HTML('<p style="font-size:18px;">Improvements to the contour lines is expected in a coming release.</p>'))
 
             contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter.png')
+            
+            display(HTML('<p style="font-size:15px;"><b>Figure 2a: 50% footprint area for summer (JJA) and winter (JFD) of a selected station, year, and hour(s). </b></p>'))
 
             file_path = os.path.join(output, 'contour_summer_winter.png')
             if os.path.exists(file_path):      
@@ -1904,9 +1929,9 @@ def initiate_summer_winter_comparison():
                 display(HTML('<p style="font-size:18px">' +  html_string))
 
         with landcover_bar: 
-            display(HTML('<p style="font-size:18px;"><b>Figure 2b:</b><br><br>Summer is on the left, winter on the right.</p>'))
-
+            
             land_cover_bar_graph_winter_summer(stc, output=output, pngfile='landcover_summer_winter.png')
+            display(HTML('<p style="font-size:15px;"><b>Figure 2b: Land cover shares within the summer (JJA) and winter (JFD) footprints split by direction. Bars representing summer are on the left and bars representing winter on the right. The summer and winter sums of percentages are shown in the legend.</b></p>'))
 
             file_path = os.path.join(output, 'landcover_summer_winter.png')
 
@@ -2141,6 +2166,10 @@ def contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter
 
 def land_cover_bar_graph_winter_summer(stc, output=output, pngfile='landcover_summer_winter.png'): 
     
+    f = IntProgress(min=0, max=5) 
+    display(f) 
+    f.value += 1
+    
     station = stc['specificStation']
     station_lat = stc['specificStationLat'] 
     station_lon = stc['specificStationLon'] 
@@ -2168,8 +2197,10 @@ def land_cover_bar_graph_winter_summer(stc, output=output, pngfile='landcover_su
 
     # take two date ranges for final graph
     fp1 = read_aggreg_footprints(station, date_range1)
+    f.value += 1
 
     fp2 = read_aggreg_footprints(station, date_range2)
+    f.value += 1
 
     #get all the land cover data from netcdfs 
     broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018')
@@ -2219,7 +2250,6 @@ def land_cover_bar_graph_winter_summer(stc, output=output, pngfile='landcover_su
     pasture_values2 = [item for sublist in pasture2[0] for item in sublist]
     urban_values2 = [item for sublist in urban2[0] for item in sublist]
     unknown_values2 = [item for sublist in unknown2[0] for item in sublist]
-
 
 
     #putting it into a dataframe: initially 192000 values (one per cell) for each of the aggregated land cover classes
@@ -2328,6 +2358,8 @@ def land_cover_bar_graph_winter_summer(stc, output=output, pngfile='landcover_su
 
     #changes the format:
     rosedata1=rosedata1.unstack(level='landcover_type')
+    
+    f.value += 1
 
     #want to sort the dataframe so that the land cover the station is the most
     #sensitive to is first. 
@@ -2461,3 +2493,6 @@ def land_cover_bar_graph_winter_summer(stc, output=output, pngfile='landcover_su
             os.makedirs(output)
   
         fig.savefig(output+'/'+pngfile,dpi=100,bbox_inches='tight')
+    
+    f.value += 1
+    plt.close()

@@ -347,8 +347,9 @@ def update_func(button_c):
 
         with average_map:
 
-            display(HTML('<p style="font-size:18px;"><b>Figure 4a:</b></p>'))      
             network_analysis_functions.display_selected_fp_file(nwc) 
+            
+            display(HTML('<p style="font-size:15px;"><b>Figure 4a: Average network footprint for the selected time-period.</b></p>'))
         
             file_path = os.path.join(output, 'average_map.png')
             if os.path.exists(file_path):      
@@ -358,8 +359,10 @@ def update_func(button_c):
 
         with landcover_view:
 
-            display(HTML('<p style="font-size:18px;"><b>Figure 4b:</b></p>'))
             network_analysis_functions.landcover_view(nwc, countries, pngfile = 'landcover_view.png', output = output)
+            
+            display(HTML('<p style="font-size:15px;"><b>Figure 4b: Land cover shares within the average network footprint compared to country shares of land cover for selected countries.</b></p>'))
+            
             
             file_path = os.path.join(output, 'landcover_view.png')
             if os.path.exists(file_path):      
@@ -367,28 +370,29 @@ def update_func(button_c):
                 
                 display(HTML('<p style="font-size:18px">' +  html_string))
 
-
         with flux_view:
 
-            display(HTML('<p style="font-size:18px;"><b>Figures 5a, 7a, and 8b:</b></p>'))
-            network_analysis_functions.flux_breakdown_countries_percentages(nwc, countries, pngfile='flux_view.png', output=output)
+            success = network_analysis_functions.flux_breakdown_countries_percentages(nwc, countries, pngfile='flux_view.png', output=output)
             
-                        
-            file_path = os.path.join(output, 'flux_view.png')
-            if os.path.exists(file_path):      
-                html_string = '<br>Access graph <a href='  + file_path + ' target="_blank">here</a><br><br>'
-                
-                display(HTML('<p style="font-size:18px">' +  html_string))
+            # success == True in case a new graph was produced. Happens unless there are no GEE fluxes (night-time)
+            if success:
+                file_path = os.path.join(output, 'flux_view.png')
+                if os.path.exists(file_path):      
+                    html_string = '<br>Access graph <a href='  + file_path + ' target="_blank">here</a><br><br>'
 
-        with representation: 
-            display(HTML('<p style="font-size:18px;">Data used to create <b>Figures 5b and 7b:</b><br><br>GEE representation ("network view" compared to an "equal view").</p>'))
-            network_analysis_functions.share_representaiton_table(nwc, countries, csvfile = 'representation.csv', output = output)
-            
-            file_path = os.path.join(output, 'representation.csv')
-            if os.path.exists(file_path):      
-                html_string = '<br>Access as csv-file <a href='  + file_path + ' target="_blank">here</a><br><br>'
-                
-                display(HTML('<p style="font-size:18px">' +  html_string))
+                    display(HTML('<p style="font-size:18px">' +  html_string))
+
+                with representation: 
+
+                    network_analysis_functions.share_representaiton_table(nwc, countries, csvfile = 'representation.csv', output = output)
+
+                    display(HTML('<p style="font-size:15px;">Data used to create <b>Figures 5b and 7b: Network representation of land cover associated fluxes (GEE). Representation is established by comparing the "network view" (the network footprints) of the fluxes to an "equal view" (sensing capacity evenly distributed within the country) of the fluxes within the selected countries.</b></p>'))
+
+                    file_path = os.path.join(output, 'representation.csv')
+                    if os.path.exists(file_path):      
+                        html_string = '<br>Access as csv-file <a href='  + file_path + ' target="_blank">here</a><br><br>'
+
+                        display(HTML('<p style="font-size:18px">' +  html_string))
 
         update_button.disabled = False
         update_button.tooltip = 'Unable to run'

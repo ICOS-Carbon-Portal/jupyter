@@ -187,9 +187,9 @@ def update_func(button_c):
 
     with signals_anthro:
         
-        display(HTML('<p style="font-size:18px;"><b>Table 1 (anthropogenic signal in ppm):</b></p>')) 
-        
         network_analysis_functions.signals_table_anthro(stc, output=output, csvfile='anthro_table.csv')
+        
+        display(HTML('<p style="font-size:15px;"><b>Table 1: Average anthropoegnic signals in ppm.</p>')) 
         
         file_path = os.path.join(output, 'anthro_table.csv')
         if os.path.exists(file_path):      
@@ -199,11 +199,13 @@ def update_func(button_c):
 
     with signals_bio:
         
-        display(HTML('<p style="font-size:18px;"><b>Table 1 (biogenic GEE signal in ppm):</b><br><br>Note that this takes a while to run, especially if many stations are selected and a long date range is chosen.</p>')) 
+        display(HTML('<p style="font-size:18px;">Note that this takes a while to run, especially if many stations are selected and a long date range is chosen.</p>')) 
         
         network_analysis_functions.signals_table_bio(stc, component = 'gee', output=output, csvfile='bio_table.csv')
         
-        display(HTML('<p style="font-size:12px;text-align:left"><b>*from online footprint calculation with hourly resolution combined with VPRM (GEE) as opposed to time-step aggregated footprints.</b></p>')) 
+        display(HTML('<p style="font-size:12px;text-align:left"><i>*from online footprint calculation with hourly resolution combined with VPRM (GEE) as opposed to time-step aggregated footprints.</i></p>')) 
+        
+        display(HTML('<p style="font-size:15px;"><b>Table 1: Average land cover (Gross Ecosystem Exchange) signals in ppm. The signals have been estimated using time-step aggregated footprints and should be used for qualitative analyses only (see Sect. 2.2. in the methods of the paper). </p>')) 
       
         file_path = os.path.join(output, 'bio_table.csv')
         if os.path.exists(file_path):      
@@ -223,7 +225,7 @@ layout = {'width': 'initial', 'height':'initial'}
 
 header_stations = Output()
 with header_stations:
-    display(HTML('<p style="font-size:15px;"><b>Select stations and date range for signals table:</b><br>Use the carbon portal on demand calculator to produce new footprints. Create footprints for the full year to make it show up in the lists.</p>'))
+    display(HTML('<p style="font-size:15px;"><b>Select stations and date range for signals table:</b><br>Use the carbon portal <a href= "https://stilt.icos-cp.eu/worker/" target="_blank">on demand calculator</a> to produce new footprints. Create footprints for the full year to make it show up in the lists.</p>'))
     
             
 year_options = Dropdown(options = list(range(2007,2022)),
