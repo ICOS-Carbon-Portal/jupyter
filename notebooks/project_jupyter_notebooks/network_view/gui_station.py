@@ -75,6 +75,8 @@ def change_year_options(c):
     
     stations_choice.options = list_optional_stations
     
+    selected_stations.options = []
+    
     s_year.options = [selected_year]
     s_year.value = selected_year
     e_year.options = [selected_year]
