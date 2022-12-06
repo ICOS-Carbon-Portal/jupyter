@@ -278,7 +278,7 @@ def create_network_fps_by_extension(stations, folder, name_save, notes=""):
     footprint_missing = network_info['missing']
     fp_percent = network_info['fpPercent']
     
-    f = IntProgress(min=0, max=len(date_range), style= {'description_width': 'initial'}) # instantiate the bar
+    f = IntProgress(min=0, max=len(date_range), description= 'Creating network footprints:', style= {'description_width': 'initial'}) # instantiate the bar
 
     display(f) # display the bar
 

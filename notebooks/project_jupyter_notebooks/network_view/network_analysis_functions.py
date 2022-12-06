@@ -678,7 +678,7 @@ def display_network_with_extended(nwc, vmax_footprint = 'extended'):
 
         added_stations_string = ', '.join([str(elem) for elem in added_stations])
 
-        display(HTML('<p style="font-size:14px;">Results for the reference network extended with station: ' + added_stations_string + '</p>'))
+        display(HTML('<p style="font-size:14px;">Results for the selected network extended with the following station(s): ' + added_stations_string + '</p>'))
 
     current_network = nwc['averageFp']
 
