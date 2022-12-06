@@ -41,13 +41,14 @@ style_scroll = """
         }
     </style>
     """
+
 # read or set the parameters from the widgets 
 def get_settings():
     s = {}
     
     # not from the user - but could make it
     s['vmaxPercentile'] = 99.9
-    
+
     if network_choice.value[-5:] == 'local': 
         s['networkFile'] = network_choice.value[:-6]
         s['pathFp'] = path_network_footprints_local
@@ -120,7 +121,6 @@ def get_settings():
             for footprint_station in stations:
                 stations_lon.append(stilt_stations[footprint_station]['lon'])
                 stations_lat.append(stilt_stations[footprint_station]['lat'])
-
 
             s['averageFpExtended'] = network_analysis_functions.read_aggreg_network_footprints(s, extended = True)
             s['stationsLonExtended'] = stations_lon
@@ -327,7 +327,7 @@ def update_func(button_c):
 
     if len(countries)>18:
         with output_warning:
-            display(HTML('<p style="font-size:18px;color:#900D09">Select a maximum of 18 countries at a time (for nice output graphs).</p>')) 
+            display(HTML('<p style="font-size:18px;color:#900D09">Select a maximum of 18 countries (for nice output graphs).</p>')) 
             header_countries_selection.layout={'border':'3px solid #900D09'}
         
         update_button.disabled = False
@@ -389,7 +389,7 @@ def update_func(button_c):
 
                     network_analysis_functions.share_representaiton_table(nwc, countries, csvfile = 'representation.csv', output = output)
 
-                    display(HTML('<p style="font-size:15px;">Data used to create <b>Figures 5b and 7b: Network representation of land cover associated fluxes (GEE). Representation is established by comparing the "network view" (the network footprints) of the fluxes to an "equal view" (sensing capacity evenly distributed within the country) of the fluxes within the selected countries.</b></p>'))
+                    display(HTML('<p style="font-size:15px;">Data used to create <b>Figures 5b and 7b: Network representation of land cover associated fluxes (GEE). Representation is established by comparing the "network views" (the network footprints) of the fluxes to "equal views" (sensing capacity evenly distributed) of the fluxes within selected countries for the time-steps in the selected date range.</b></p>'))
 
                     file_path = os.path.join(output, 'representation.csv')
                     if os.path.exists(file_path):      
@@ -411,7 +411,7 @@ file_info = Output()
 
 with file_info:
 
-    display(HTML('<p style="font-size:15px;font-weight:bold;">Available network footprint files: </p>'))
+    display(HTML('<p style="font-size:15px;font-weight:bold;">Available networks: </p>'))
     for root, dirs, files in os.walk(r'' + path_network_footprints):
         for file in files:
             if file.endswith('.json'):
@@ -420,7 +420,8 @@ with file_info:
 
                 stations_string = ', '.join([str(elem) for elem in network_footprint_info_load['stations']]) 
                 months = list(range(network_footprint_info_load['startMonth'], network_footprint_info_load['endMonth'] + 1))
-                display(HTML('<p style="font-size:15px;"><b>Name: </b> ' + str(network_footprint_info_load['fileName']) + '<br><b>Stations: </b> ' + stations_string + '<br><b>Year: </b> ' +  str(network_footprint_info_load['startYear']) + '<br><b>Month(s): </b> ' +  str(months)+ '<br><b>Threshold:</b> ' +  str(network_footprint_info_load['fpPercent']*100)+ '%</p>'))
+                months_string = ', '.join([str(month) for month in months])
+                display(HTML('<p style="font-size:15px;"><b>Name: </b> ' + str(network_footprint_info_load['fileName']) + '<br><b>Stations: </b> ' + stations_string + '<br><b>Year: </b> ' +  str(network_footprint_info_load['startYear']) + '<br><b>Month(s): </b> ' +  months_string + '<br><b>Threshold:</b> ' +  str(network_footprint_info_load['fpPercent']*100)+ '%</p>'))
 
 
     for root, dirs, files in os.walk(r'' + path_network_footprints_local):
@@ -430,17 +431,18 @@ with file_info:
                 break
             if file.endswith('.json'):
                 if first:
-                    display(HTML('<p style="font-size:15px;font-weight:bold;"><br>Available local network footprint files: </p>'))
+                    display(HTML('<p style="font-size:15px;font-weight:bold;"><br>Available locally created networks: </p>'))
                     first = False
 
                 network_footprint_info = open(os.path.join(path_network_footprints_local, file))
                 network_footprint_info_load = json.load(network_footprint_info)
                 stations_string = ', '.join([str(elem) for elem in network_footprint_info_load['stations']]) 
                 months = list(range(network_footprint_info_load['startMonth'], network_footprint_info_load['endMonth'] + 1))
+                months_string = ', '.join([str(month) for month in months])
                 date_created = network_footprint_info_load['dateCreated']
-                display(HTML('<p style="font-size:15px;"><b>Name: </b> ' + str(network_footprint_info_load['fileName']) + '<br><b>Date created: </b> ' + date_created + '<br><b>Stations: </b> ' + stations_string + '<br><b>Year: </b> ' +  str(network_footprint_info_load['startYear']) + '<br><b>Month(s): </b> ' +  str(months)+ '<br><b>Threshold:</b> ' +  str(network_footprint_info_load['fpPercent']*100)+ '%</p>'))
+                display(HTML('<p style="font-size:15px;"><b>Name: </b> ' + str(network_footprint_info_load['fileName']) + '<br><b>Date created: </b> ' + date_created + '<br><b>Stations: </b> ' + stations_string + '<br><b>Year: </b> ' +  str(network_footprint_info_load['startYear']) + '<br><b>Month(s): </b> ' +  months_string + '<br><b>Threshold:</b> ' +  str(network_footprint_info_load['fpPercent']*100)+ '%</p>'))
 
-    display(HTML('<p style="font-size:15px;">To analyse a <mark>different network</mark>, use the "<a href="network_view/create_network_analysis.ipynb" target="_blank">create_network_analysis</a>" notebook. The new network will automatically appear in the above list and below dropdowns.<br><br></p>'))
+    display(HTML('<p style="font-size:15px;">To analyse a <mark>different network</mark>, use the "<a href="network_view/create_network_analysis.ipynb" target="_blank">create_network_analysis</a>" notebook. The new network will automatically appear in the above list and below dropdowns once this notebook cell is run again.<br><br></p>'))
                 
 header_network = Output()
 with header_network:
@@ -504,7 +506,6 @@ e_day = Dropdown(options = [],
                 description = 'End Day',
                 disabled = False,
                 layout = layout)
-
 
 time_selection= SelectMultiple(
     options=[0, 3, 6, 9, 12, 15, 18, 21],

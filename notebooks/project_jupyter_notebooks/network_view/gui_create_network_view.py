@@ -214,13 +214,13 @@ def update_func(button_c):
 
     with create_network_footprints:
         
-        display(HTML('<p style="font-size:18px;"><b>Creating network footprints</b></p>')) 
+        display(HTML('<p style="font-size:18px;"><b>Creating network footprints (step 1/2)</b></p>')) 
         
         create_network_analysis.create_network_fps(stations, date_range, time_selection.value, name_save_choice, threshold_choice, notes_choice)
 
     with create_network_footprints_representation:
         
-        display(HTML('<p style="font-size:18px;"><b>Establishing representation</b></p>')) 
+        display(HTML('<p style="font-size:18px;"><b>Establishing representation (step 2/2)</b></p>')) 
         create_network_analysis.establish_representation(date_range, name_save_choice)
         
     update_button.disabled = False
@@ -234,7 +234,7 @@ layout = {'width': 'initial', 'height':'initial'}
 
 header_stations = Output()
 with header_stations:
-    display(HTML('<p style="font-size:15px;"><b>Select stations and date range for signals table:</b><br>Use the carbon portal on demand calculator to produce new footprints. Create footprints for the full year to make it show up in the lists.</p>'))
+    display(HTML('<p style="font-size:15px;">Use the carbon portal <a href= "https://stilt.icos-cp.eu/worker/" target="_blank">on demand calculator</a> to produce new footprints. Create footprints for a full year to make the station appear in the list (the station list to choose from changes depending on what year is selected).</p>'))
     
 name_save = Text(
     value='',

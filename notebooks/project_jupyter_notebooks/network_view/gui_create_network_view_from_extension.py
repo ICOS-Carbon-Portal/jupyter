@@ -58,7 +58,7 @@ layout = {'width': 'initial', 'height':'initial'}
 
 file_info = Output()
 with file_info:
-    display(HTML('<p style="font-size:15px;font-weight:bold;">Available network footprint files: </p>'))
+    display(HTML('<p style="font-size:15px;font-weight:bold;">Available networks: </p>'))
     for root, dirs, files in os.walk(r'' + path_network_footprints):
         for file in files:
             if file.endswith('.json'):
@@ -67,8 +67,9 @@ with file_info:
 
                 stations_string = ', '.join([str(elem) for elem in network_footprint_info_load['stations']]) 
                 months = list(range(network_footprint_info_load['startMonth'], network_footprint_info_load['endMonth'] + 1))
+                months_string = ', '.join([str(month) for month in months])
                 date_created = network_footprint_info_load['dateCreated']
-                display(HTML('<p style="font-size:15px;"><b>Name: </b> ' + str(network_footprint_info_load['fileName']) + '<br><b>Date created: </b> ' + date_created + '<br><b>Stations: </b> ' + stations_string + '<br><b>Year: </b> ' +  str(network_footprint_info_load['startYear']) + '<br><b>Month(s): </b> ' +  str(months)+ '<br><b>Threshold:</b> ' +  str(network_footprint_info_load['fpPercent']*100)+ '%</p>'))
+                display(HTML('<p style="font-size:15px;"><b>Name: </b> ' + str(network_footprint_info_load['fileName']) + '<br><b>Date created: </b> ' + date_created + '<br><b>Stations: </b> ' + stations_string + '<br><b>Year: </b> ' +  str(network_footprint_info_load['startYear']) + '<br><b>Month(s): </b> ' +  months_string + '<br><b>Threshold:</b> ' +  str(network_footprint_info_load['fpPercent']*100)+ '%</p>'))
 
     for root, dirs, files in os.walk(r'' + path_network_footprints_local):
         first = True
@@ -77,14 +78,15 @@ with file_info:
                 break
             if file.endswith('.json'):
                 if first:
-                    display(HTML('<p style="font-size:15px;font-weight:bold;"><br>Available local network footprint files: </p>'))
+                    display(HTML('<p style="font-size:15px;font-weight:bold;"><br>Available locally created networks: </p>'))
                     first = False
                 network_footprint_info = open(os.path.join(path_network_footprints_local, file))
                 network_footprint_info_load = json.load(network_footprint_info)
                 stations_string = ', '.join([str(elem) for elem in network_footprint_info_load['stations']]) 
                 months = list(range(network_footprint_info_load['startMonth'], network_footprint_info_load['endMonth'] + 1))
+                months_string = ', '.join([str(month) for month in months])
                 date_created = network_footprint_info_load['dateCreated']
-                display(HTML('<p style="font-size:15px;"><b>Name: </b> ' + str(network_footprint_info_load['fileName']) + '<br><b>Date created: </b> ' + date_created + '<br><b>Stations: </b> ' + stations_string + '<br><b>Year: </b> ' +  str(network_footprint_info_load['startYear']) + '<br><b>Month(s): </b> ' +  str(months)+ '<br><b>Threshold:</b> ' +  str(network_footprint_info_load['fpPercent']*100)+ '%</p>'))
+                display(HTML('<p style="font-size:15px;"><b>Name: </b> ' + str(network_footprint_info_load['fileName']) + '<br><b>Date created: </b> ' + date_created + '<br><b>Stations: </b> ' + stations_string + '<br><b>Year: </b> ' +  str(network_footprint_info_load['startYear']) + '<br><b>Month(s): </b> ' +  months_string + '<br><b>Threshold:</b> ' +  str(network_footprint_info_load['fpPercent']*100)+ '%</p>'))
 
 
 name_save = Text(

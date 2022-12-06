@@ -70,7 +70,6 @@ def change_year_options(c):
     selected_year = year_options.value 
     stations_choice.disabled = False
     selected_stations.disabled = False
-    update_button.disabled = False
     
     list_optional_stations = sorted([k for k, v in stilt_stations.items() if str(selected_year) in v['years'] if len(v[str(selected_year)]['months']) == 12])
     
@@ -99,6 +98,11 @@ def change_stations_choice(c):
     a = set(list_stations_choice + list(selected_stations.options))    
     selected_stations.options = sorted(a)
     
+    if len(selected_stations.options)>0:
+        update_button.disabled = False
+    else:
+        update_button.disabled = True
+    
 def change_selected_stations(c):
 
     stations_choice.value = [o for o in stations_choice.value if o not in list(selected_stations.value)]
@@ -106,6 +110,11 @@ def change_selected_stations(c):
     list_stations = list(selected_stations.value)
 
     selected_stations.options = [o for o in selected_stations.options if o not in list_stations]
+    
+    if len(selected_stations.options)>0:
+        update_button.disabled = False
+    else:
+        update_button.disabled = True
 
 def change_mt(c):
     
@@ -203,7 +212,7 @@ def update_func(button_c):
         
         network_analysis_functions.signals_table_bio(stc, component = 'gee', output=output, csvfile='bio_table.csv')
         
-        display(HTML('<p style="font-size:12px;text-align:left"><i>*from online footprint calculation with hourly resolution combined with VPRM (GEE) as opposed to time-step aggregated footprints.</i></p>')) 
+        display(HTML('<p style="font-size:12px;text-align:left"><i>*directly from the online footprint calculation with hourly resolution combined with fluxes (GEE from VPRM) as opposed to time-step aggregated footprints.</i></p>')) 
         
         display(HTML('<p style="font-size:15px;"><b>Table 1: Average land cover (Gross Ecosystem Exchange) signals in ppm. The signals have been estimated using time-step aggregated footprints and should be used for qualitative analyses only (see Sect. 2.2. in the methods of the paper). </p>')) 
       
@@ -225,7 +234,7 @@ layout = {'width': 'initial', 'height':'initial'}
 
 header_stations = Output()
 with header_stations:
-    display(HTML('<p style="font-size:15px;"><b>Select stations and date range for signals table:</b><br>Use the carbon portal <a href= "https://stilt.icos-cp.eu/worker/" target="_blank">on demand calculator</a> to produce new footprints. Create footprints for the full year to make it show up in the lists.</p>'))
+    display(HTML('<p style="font-size:15px;"><b>Select stations and date range for signals table:</b><br>Use the carbon portal <a href= "https://stilt.icos-cp.eu/worker/" target="_blank">on demand calculator</a> to produce new footprints. Create footprints for a full year to make the station appear in the list (the station list to choose from changes depending on what year is selected).</p>'))
     
             
 year_options = Dropdown(options = list(range(2007,2022)),

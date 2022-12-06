@@ -171,7 +171,7 @@ def create_network_fps(stations, date_range, time_selection, name_save, threshol
     
    
     # relevant for footprint creation 
-    f = IntProgress(min=0, max=len(date_range), description='Creating footprints (1/2):', style= {'description_width': 'initial'}) # instantiate the bar
+    f = IntProgress(min=0, max=len(date_range), description='Creating network footprints:', style= {'description_width': 'initial'}) # instantiate the bar
     display(f) # display the bar
 
     i = 0
@@ -278,7 +278,7 @@ def create_network_fps_by_extension(stations, folder, name_save, notes=""):
     footprint_missing = network_info['missing']
     fp_percent = network_info['fpPercent']
     
-    f = IntProgress(min=0, max=len(date_range), description='Creating footprints (1/2):', style= {'description_width': 'initial'}) # instantiate the bar
+    f = IntProgress(min=0, max=len(date_range), style= {'description_width': 'initial'}) # instantiate the bar
 
     display(f) # display the bar
 
@@ -346,7 +346,7 @@ def create_network_fps_by_extension(stations, folder, name_save, notes=""):
     ## create a json file with the information about the created network footprint
     today = date.today()
     today_string = today.strftime("%B %d, %Y")
-    network_fp_dict = {"fileName": name_save + '.csv', \
+    network_fp_dict = {"fileName": name_save, \
                       "startYear": min(date_range).year,
                       "startMonth": min(date_range).month,
                       "startDay": min(date_range).day,
@@ -369,7 +369,7 @@ def create_network_fps_by_extension(stations, folder, name_save, notes=""):
           
 def establish_representation(date_range, network_footprint):
     
-    f = IntProgress(min=0, max=len(date_range), description='Establish representation (2/2):', style= {'description_width': 'initial'}) # instantiate the bar
+    f = IntProgress(min=0, max=len(date_range), description='Establishing representation:', style= {'description_width': 'initial'}) # instantiate the bar
     display(f) # display the bar
 
     # relevant for establishing representation

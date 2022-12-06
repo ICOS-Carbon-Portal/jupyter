@@ -48,9 +48,6 @@ load_lat=loadtxt(os.path.join(data_folder, 'latitude.csv'), delimiter=',')
 load_lon=loadtxt(os.path.join(data_folder, 'longitude.csv'), delimiter=',')
 output = 'network_view/temp_output'
 
-if not os.path.exists(output):
-    os.makedirs(output)
-
 country_masks = Dataset(os.path.join(stcDataPath,'europe_STILT_masks.nc'))
 
 dictionary_area_choice = {'ALB':'Albania', 'AUT':'Austria','BLR':'Belarus',\
@@ -579,7 +576,7 @@ def plot_maps_country_zoom(field, lon, lat, nwc, country_code, output='monitorin
     plt.close()
         
 # compare the current and extended networks in a map with two different colors. 
-def plot_maps_two(field, field2, mask_threshold, lon, lat, footprint_stations='', title='', label='', unit='', linlog='linear', extend = 'both', station='', zoom='', vmin=None, vmax=None, colors='GnBu',pngfile='', directory='figures', mask=False, percent=False, date_time_predefined='', output=''): 
+def plot_maps_two(field, field2, lon, lat, footprint_stations='', title='', label='', unit='', linlog='linear', extend = 'both', station='', zoom='', vmin=None, vmax=None, colors='GnBu',pngfile='', directory='figures', mask=False, percent=False, date_time_predefined='', output=''): 
 
     fig = plt.figure(figsize=(18,10))
 
@@ -610,7 +607,7 @@ def plot_maps_two(field, field2, mask_threshold, lon, lat, footprint_stations=''
             im = ax.imshow(field[:,:], interpolation='none',origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
 
             # mask - remove so you cannot see - values that are below 0.0001 in the difference between the current and extended.
-            upd_field2 = np.ma.masked_array(field2, field2 < mask_threshold)
+            upd_field2 = np.ma.masked_array(field2, field2 < vmin)
             
             cmap2 = copy.copy(matplotlib.cm.get_cmap("Blues"))
 
@@ -647,7 +644,7 @@ def plot_maps_two(field, field2, mask_threshold, lon, lat, footprint_stations=''
 def display_network_with_extended(nwc, vmax_footprint = 'extended'):
     
     if nwc['extendedNetwork']== 'No extension':
-        display(HTML('<p style="font-size:14px;">Specify an "extended network" in the section "The view from the current ICOS network".</p>'))
+        display(HTML('<p style="font-size:14px;">Specify an "extended network" in the section "The view from a selected network".</p>'))
         return
 
     # compare so that the analysed network really is an extension to the reference network
@@ -704,16 +701,16 @@ def display_network_with_extended(nwc, vmax_footprint = 'extended'):
         
         extended_network_over_zero = df_values_fp[df_values_fp['sensitivity'] > 0] 
         vmax = np.percentile(extended_network_over_zero['sensitivity'],nwc['vmaxPercentile'])
-
-    mask_threshold = 0.0004
+    
+    vmin = vmax/100
     pngfile='current_extended_map'
-    plot_maps_two(current_network, difference , mask_threshold, load_lon, load_lat, linlog='linear', extend = 'max', 
-              vmin=0.0004, vmax=vmax, colors='Greens', label= 'sensitivity: ppm /(μmol / (m²s))', pngfile=pngfile, output=output)
+    plot_maps_two(current_network, difference , load_lon, load_lat, linlog='linear', extend = 'max', 
+              vmin=vmin, vmax=vmax, colors='Greens', label= 'sensitivity: ppm /(μmol / (m²s))', pngfile=pngfile, output=output)
 
     display(HTML('<p style="font-size:15px"><b>Figure 8: Average network and extended network footprints for the selected time-period. Only the colorbar for the extended network (blue) is displayed but has the same colorbar maximum as the average network (green).</b></p>'))
     file_path = os.path.join(output, pngfile + '.png')
     if os.path.exists(file_path):      
-        html_string = '<br>Download map <a href='  + file_path + ' target="_blank">here</a><br><br>'
+        html_string = '<br>Access map <a href='  + file_path + ' target="_blank">here</a><br><br>'
 
         display(HTML('<p style="font-size:18px">' +  html_string))
 
@@ -787,14 +784,16 @@ def overview_map(country_code):
 def display_selected_fp_file(nwc):
 
     fp_average_footprint = nwc['averageFp']
-    
     df_values_fp = pd.DataFrame()
     df_values_fp['sensitivity']=fp_average_footprint.flatten()
 
-    fp_average_footprint_over_zero = df_values_fp[df_values_fp['sensitivity'] > 0] 
-    vmax = np.percentile(fp_average_footprint_over_zero['sensitivity'],nwc['vmaxPercentile'])
+    fp_average_footprint_over_zero = df_values_fp[df_values_fp['sensitivity'] > 0]
     
-    plot_maps(fp_average_footprint, load_lon, load_lat, nwc, colors = 'Greens', vmax=vmax, vmin = 0.0004,\
+    vmax = np.percentile(fp_average_footprint_over_zero,nwc['vmaxPercentile'])
+
+    vmin = vmax / 100
+
+    plot_maps(fp_average_footprint, load_lon, load_lat, nwc, colors = 'Greens', vmax=vmax, vmin = vmin,\
               label= 'sensitivity: ppm /(μmol / (m²s))', output=output, extend = 'max', pngfile = 'average_map', linlog='linear')
     
 
@@ -1367,6 +1366,8 @@ def monitoring_potential_maps(nwc, country, extended = False):
     if extended: 
         # what happens when run the tool without an extended network presented
         if nwc['extendedNetwork']== 'No extension':
+            # finish the progress bar
+            f.value += len(date_range_subset)
             display(HTML('<p style="font-size:14px;">Specify an "extended network" in the section "The view from a selected network".</p>'))
             return
 
@@ -1391,7 +1392,7 @@ def monitoring_potential_maps(nwc, country, extended = False):
             
             check_feasibility_string = ', '.join([str(elem) for elem in check_feasibility])
             
-            display(HTML('<p style="font-size:14px;">This part of the tool is meant to compare an (extended) network to a reference network. In this case, the reference network contains stations that are not included in the extended network (' + check_feasibility_string + ')</p>'))
+            display(HTML('<p style="font-size:14px;">This part of the tool is meant to compare an (extended) network to a reference network. In this case, the reference network contains stations that are not included in the extended network (' + check_feasibility_string + ').</p>'))
             # finish the progress bar
             f.value += len(date_range_subset)
             return
@@ -1400,7 +1401,7 @@ def monitoring_potential_maps(nwc, country, extended = False):
             
             added_stations_string = ', '.join([str(elem) for elem in added_stations])
             
-            display(HTML('<p style="font-size:14px;">Results for the reference network extended with station: ' + added_stations_string + '</p>'))  
+            display(HTML('<p style="font-size:14px;">Results for the selected network extended with the following station(s): ' + added_stations_string + '</p>'))  
         
     if country == "Europe":
         country_mask = return_europe_mask()
@@ -1553,12 +1554,11 @@ def monitoring_potential_maps(nwc, country, extended = False):
         
         fp_network_even_gee_average_extended = fp_network_even_gee_average_extended_for_average / i
 
-    #if country != 'Europe':
+    if country != 'Europe':
         
-        #overview_map(country)
-    
-    # update here
-    percentile = 99.9
+        overview_map(country)
+      
+ 
     # for each land cover - show the representation
     for landcover_fractions, landcover_name in zip(list_landcover_fractions, list_landcover_names):
 
@@ -1931,15 +1931,13 @@ def initiate_summer_winter_comparison():
 
         with contour_map:
 
-            display(HTML('<p style="font-size:18px;">Improvements to the contour lines is expected in a coming release.</p>'))
-
             contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter.png')
             
             display(HTML('<p style="font-size:15px;"><b>Figure 2a: 50% footprint area for summer (JJA) and winter (JFD) of a selected station, year, and hour(s). </b></p>'))
 
             file_path = os.path.join(output, 'contour_summer_winter.png')
             if os.path.exists(file_path):      
-                html_string = '<br>Download map <a href='  + file_path + ' target="_blank">here</a><br><br>'
+                html_string = '<br>Access map <a href='  + file_path + ' target="_blank">here</a><br><br>'
 
                 display(HTML('<p style="font-size:18px">' +  html_string))
 
@@ -1951,7 +1949,7 @@ def initiate_summer_winter_comparison():
             file_path = os.path.join(output, 'landcover_summer_winter.png')
 
             if os.path.exists(file_path):      
-                html_string = '<br>Download graph <a href='  + file_path + ' target="_blank">here</a><br><br>'
+                html_string = '<br>Access graph <a href='  + file_path + ' target="_blank">here</a><br><br>'
 
                 display(HTML('<p style="font-size:18px">' +  html_string))
 
