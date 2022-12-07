@@ -20,7 +20,6 @@ global stilt_stations
 import create_network_analysis
 stilt_stations = stiltstation.find()
 button_color_able='#4169E1'
-button_color_disable='#900D09'
 
 path_network_footprints = '/data/project/obsnet/network_footprints'
 path_network_footprints_local = 'network_footprints'
@@ -122,7 +121,7 @@ selected_stations = SelectMultiple(options = [],
 
 notes = Textarea(
         value='',
-        placeholder='Notes about network',
+        placeholder='Optional notes about the network',
         description='Notes:',
         disabled=False,
         style = style)
@@ -130,7 +129,7 @@ notes = Textarea(
 update_button = Button(description='Run selection',
                    disabled=False, # disabed until a station has been selected
                    button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
-                   tooltip='Click me',)
+                   tooltip='Unable to run',)
 
 update_button.style.button_color='#4169E1'
 
@@ -180,7 +179,7 @@ def update_func(button_c):
     output_name_same.clear_output()
     output_create_network.clear_output()
     update_button.disabled = True
-
+    update_button.tooltip = 'Unable to run'
     stations = list(selected_stations.options)
     
     name_save_choice = name_save.value
@@ -198,8 +197,8 @@ def update_func(button_c):
                     display(HTML('<p style="font-size:15px;"><mark>"' + name_save_choice +'" is the name of an existing network</mark>. Try a different name and run the tool again.</p>')) 
                     
                 update_button.disabled = False
-                update_button.tooltip = 'Unable to run'
-                update_button.style.button_color=button_color_able
+                update_button.tooltip = 'Click to start the run'
+
                 return
     
     with output_create_network:
@@ -207,6 +206,7 @@ def update_func(button_c):
         create_network_analysis.create_network_fps_by_extension(stations, network_choice.value, name_save_choice, notes.value)
 
     update_button.disabled = False
+    update_button.tooltip = 'Click to start the run'
 
 network_choice.observe(change_network_choice, 'value')
 stations_choice.observe(change_stations_choice, 'value')

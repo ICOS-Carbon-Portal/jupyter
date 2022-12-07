@@ -18,7 +18,6 @@ import network_analysis_functions
 global stilt_stations
 stilt_stations = stiltstation.find()
 button_color_able='#4169E1'
-button_color_disable='#900D09'
 output = 'network_view/temp_output'
 if not os.path.exists(output):
     os.makedirs(output)
@@ -102,8 +101,10 @@ def change_stations_choice(c):
     
     if len(selected_stations.options)>0:
         update_button.disabled = False
+        update_button.tooltip = 'Click to start the run'
     else:
         update_button.disabled = True
+        update_button.tooltip = 'Unable to run'
     
 def change_selected_stations(c):
 
@@ -115,8 +116,10 @@ def change_selected_stations(c):
     
     if len(selected_stations.options)>0:
         update_button.disabled = False
+        update_button.tooltip = 'Click to start the run'
     else:
         update_button.disabled = True
+        update_button.tooltip = 'Unable to run'
 
 def change_mt(c):
     
@@ -191,7 +194,6 @@ def update_func(button_c):
    
     update_button.disabled = True
     update_button.tooltip = 'Unable to run'
-    update_button.style.button_color=button_color_disable
     
     global stc
     stc = get_settings()
@@ -200,7 +202,7 @@ def update_func(button_c):
         
         network_analysis_functions.signals_table_anthro(stc, output=output, csvfile='anthro_table.csv')
         
-        display(HTML('<p style="font-size:15px;"><b>Table 1: Average anthropoegnic signals in ppm.</p>')) 
+        display(HTML('<p style="font-size:15px;"><b>Table 1: Average anthropogenic signals in ppm.</p>')) 
         
         file_path = os.path.join(output, 'anthro_table.csv')
         if os.path.exists(file_path):      
@@ -225,8 +227,7 @@ def update_func(button_c):
             display(HTML('<p style="font-size:18px">' +  html_string))
 
     update_button.disabled = False
-    update_button.tooltip = 'Unable to run'
-    update_button.style.button_color=button_color_able
+    update_button.tooltip = 'Click to start the run'
     
 #-----------widgets definition -----------------
     
@@ -308,7 +309,7 @@ time_selection= SelectMultiple(
 update_button = Button(description='Run selection',
                        disabled=True, # disabed until a station has been selected
                        button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
-                       tooltip='Click me',)
+                       tooltip='Unable to run',)
 
 update_button.style.button_color=button_color_able
 

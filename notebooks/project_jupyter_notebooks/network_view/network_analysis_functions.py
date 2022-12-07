@@ -641,7 +641,7 @@ def plot_maps_two(field, field2, lon, lat, footprint_stations='', title='', labe
     
     plt.close()
     
-def display_network_with_extended(nwc, vmax_footprint = 'extended'):
+def display_network_with_extended(nwc, vmax_footprint = 'current'):
     
     if nwc['extendedNetwork']== 'No extension':
         display(HTML('<p style="font-size:14px;">Specify an "extended network" in the section "The view from a selected network".</p>'))
@@ -678,7 +678,7 @@ def display_network_with_extended(nwc, vmax_footprint = 'extended'):
 
         added_stations_string = ', '.join([str(elem) for elem in added_stations])
 
-        display(HTML('<p style="font-size:14px;">Results for the selected network extended with the following station(s): ' + added_stations_string + '</p>'))
+        display(HTML('<p style="font-size:14px;">Results for the reference network extended with the following station(s): ' + added_stations_string + '</p>'))
 
     current_network = nwc['averageFp']
 
@@ -688,12 +688,9 @@ def display_network_with_extended(nwc, vmax_footprint = 'extended'):
 
     if vmax_footprint == 'current':
         
-        df_values_fp = pd.DataFrame()
-        df_values_fp['sensitivity']=current_network.flatten()
-
-        current_network_over_zero = df_values_fp[df_values_fp['sensitivity'] > 0] 
-        vmax = np.percentile(current_network_over_zero['sensitivity'],nwc['vmaxPercentile'])
-
+        vmax = nwc['vmax'] 
+        vmin = nwc['vmin']
+ 
     else:
         
         df_values_fp = pd.DataFrame()
@@ -701,8 +698,8 @@ def display_network_with_extended(nwc, vmax_footprint = 'extended'):
         
         extended_network_over_zero = df_values_fp[df_values_fp['sensitivity'] > 0] 
         vmax = np.percentile(extended_network_over_zero['sensitivity'],nwc['vmaxPercentile'])
-    
-    vmin = vmax/100
+        vmin = vmax/100
+        
     pngfile='current_extended_map'
     plot_maps_two(current_network, difference , load_lon, load_lat, linlog='linear', extend = 'max', 
               vmin=vmin, vmax=vmax, colors='Greens', label= 'sensitivity: ppm /(μmol / (m²s))', pngfile=pngfile, output=output)
@@ -784,15 +781,10 @@ def overview_map(country_code):
 def display_selected_fp_file(nwc):
 
     fp_average_footprint = nwc['averageFp']
-    df_values_fp = pd.DataFrame()
-    df_values_fp['sensitivity']=fp_average_footprint.flatten()
-
-    fp_average_footprint_over_zero = df_values_fp[df_values_fp['sensitivity'] > 0]
     
-    vmax = np.percentile(fp_average_footprint_over_zero,nwc['vmaxPercentile'])
-
-    vmin = vmax / 100
-
+    vmax = nwc['vmax'] 
+    vmin = nwc['vmin']
+ 
     plot_maps(fp_average_footprint, load_lon, load_lat, nwc, colors = 'Greens', vmax=vmax, vmin = vmin,\
               label= 'sensitivity: ppm /(μmol / (m²s))', output=output, extend = 'max', pngfile = 'average_map', linlog='linear')
     
@@ -1323,13 +1315,14 @@ def initiate_monitoring_potential_maps(nwc, extended = False):
     update_button = Button(description='Run selection',
                        disabled=False, # disabed until a station has been selected
                        button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
-                       tooltip='Click me',)
+                       tooltip='Click to start the run',)
     
     update_button.style.button_color='#4169E1'
     
     def update_func(button_c):
         
         update_button.disabled = True
+        update_button.tooltip = 'Unable to run'
         
         result_monitoring_potential.clear_output()
         
@@ -1339,6 +1332,7 @@ def initiate_monitoring_potential_maps(nwc, extended = False):
             monitoring_potential_maps(nwc, country_choice.value, extended = extended)
             
         update_button.disabled = False
+        update_button.tooltip = 'Click to start the run'
         
     update_button.on_click(update_func)
     
@@ -1891,7 +1885,6 @@ def average_threshold_fp(station, date_range, threshold):
     
 def initiate_summer_winter_comparison():
     button_color_able='#4169E1'
-    button_color_disable='#900D09'
     stilt_stations = stiltstation.find()
     
     contour_map = Output()
@@ -1918,7 +1911,6 @@ def initiate_summer_winter_comparison():
 
         update_button.disabled = True
         update_button.tooltip = 'Unable to run'
-        update_button.style.button_color=button_color_disable
         
         stc = {}
         
@@ -1954,7 +1946,7 @@ def initiate_summer_winter_comparison():
                 display(HTML('<p style="font-size:18px">' +  html_string))
 
         update_button.disabled = False
-        update_button.tooltip = 'Start run'
+        update_button.tooltip = 'Click to start the run'
         update_button.style.button_color=button_color_able
     
     header_specific_station = Output()
@@ -1974,9 +1966,10 @@ def initiate_summer_winter_comparison():
     update_button = Button(description='Run selection',
                            disabled=True, # disabed until a station has been selected
                            button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
-                           tooltip='Click me',)
+                           tooltip='Unable to run',)
     
-    update_button.style.button_color=button_color_disable
+    update_button.style.button_color=button_color_able
+    
     
     year_options = Dropdown(options = list(range(2007,2022)),
                    description = 'Select year:',

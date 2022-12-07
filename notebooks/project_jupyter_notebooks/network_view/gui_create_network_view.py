@@ -19,7 +19,7 @@ import pandas as pd
 global stilt_stations
 stilt_stations = stiltstation.find()
 button_color_able='#4169E1'
-button_color_disable='#900D09'
+
 import create_network_analysis
 path_network_footprints_local = 'network_footprints'
 
@@ -71,6 +71,7 @@ def change_year_options(c):
     stations_choice.disabled = False
     selected_stations.disabled = False
     update_button.disabled = False
+    update_button.tooltip = 'Click to start the run'
     
     list_optional_stations = sorted([k for k, v in stilt_stations.items() if str(selected_year) in v['years'] if len(v[str(selected_year)]['months']) == 12])
     
@@ -180,7 +181,6 @@ def update_func(button_c):
    
     update_button.disabled = True
     update_button.tooltip = 'Unable to run'
-    update_button.style.button_color=button_color_disable
     
     date_range_full = pd.date_range(start=(str(s_year.value) + '-' + str(s_month.value) + '-' + str(s_day.value)+ ' 00:00:00'), end=(str(e_year.value) + '-' + str(e_month.value) + '-' + str(e_day.value) + ' 21:00:00'), freq='3H')
     
@@ -207,8 +207,7 @@ def update_func(button_c):
                     display(HTML('<p style="font-size:15px;"><mark>"' + name_save_choice +'" is the name of an existing network</mark>. Try a different name and run the tool again.</p>')) 
                     
                 update_button.disabled = False
-                update_button.tooltip = 'Unable to run'
-                update_button.style.button_color=button_color_able
+                update_button.tooltip = 'Click to start the run'
                 return
                 
 
@@ -224,8 +223,8 @@ def update_func(button_c):
         create_network_analysis.establish_representation(date_range, name_save_choice)
         
     update_button.disabled = False
-    update_button.tooltip = 'Unable to run'
-    update_button.style.button_color=button_color_able
+    update_button.tooltip = 'Click to start the run'
+
     
 #-----------widgets definition -----------------
     
@@ -322,7 +321,7 @@ threshold = BoundedIntText(
 
 notes = Textarea(
     value='',
-    placeholder='Notes about network',
+    placeholder='Optional notes about the network',
     description='Notes:',
     disabled=False,
     style = style)
@@ -330,7 +329,7 @@ notes = Textarea(
 update_button = Button(description='Run selection',
                        disabled=True, # disabed until a station has been selected
                        button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
-                       tooltip='Click me',)
+                       tooltip='Unable to run',)
 
 update_button.style.button_color=button_color_able
 

@@ -15,7 +15,6 @@ import ipywidgets as widgets
 from matplotlib import pyplot as plt
 import network_analysis_functions
 button_color_able='#4169E1'
-button_color_disable='#900D09'
 import pandas as pd
 import datetime as dt
 import numpy as np
@@ -47,8 +46,8 @@ def get_settings():
     s = {}
     
     # not from the user - but could make it
-    s['vmaxPercentile'] = 99.9
-
+    s['vmaxPercentile'] = 99.9 
+    
     if network_choice.value[-5:] == 'local': 
         s['networkFile'] = network_choice.value[:-6]
         s['pathFp'] = path_network_footprints_local
@@ -89,6 +88,16 @@ def get_settings():
     time_of_day = s['timeOfDay']
 
     s['averageFp'] = network_analysis_functions.read_aggreg_network_footprints(s)
+    
+    # calculate vmin and vmax values:
+    df_values_fp = pd.DataFrame()
+    df_values_fp['sensitivity']=s['averageFp'].flatten()
+
+    current_network_over_zero = df_values_fp[df_values_fp['sensitivity'] > 0] 
+    
+    s['vmax'] = np.percentile(current_network_over_zero['sensitivity'],s['vmaxPercentile'])
+    s['vmin'] = s['vmax']/100
+
 
     # extended network (if selected)
     if s['extendedNetwork'] != 'No extension':
@@ -146,7 +155,6 @@ def change_network(c):
  
     update_button.disabled = False
     update_button.tooltip = 'Click to start the run'
-    update_button.style.button_color=button_color_able
     
     # access the new json file and update what is in there. 
     json_file = network_choice.value +'.json'
@@ -318,7 +326,6 @@ def update_func(button_c):
    
     update_button.disabled = True
     update_button.tooltip = 'Unable to run'
-    update_button.style.button_color=button_color_disable
 
     countries = [selected_country[1] for selected_country in list(selected_countries.options)]
     
@@ -332,7 +339,7 @@ def update_func(button_c):
         
         update_button.disabled = False
         update_button.tooltip = 'Click to start the run'
-        update_button.style.button_color=button_color_able
+
         
     else:
         
@@ -345,7 +352,7 @@ def update_func(button_c):
         date_and_time_string = date_and_time_string_for_title(nwc)
 
         with header_output:
-            display(HTML('<p style="font-size:18px;"><b>Footprint folder</b>: ' + network_choice.value + '<br></p>'))
+            display(HTML('<p style="font-size:18px;"><b>Network name</b>: ' + network_choice.value + '<br></p>'))
             display(HTML('<p style="font-size:18px;"><b>Date range</b>: ' + date_and_time_string + '<br></p>'))
 
         with average_map:
@@ -398,9 +405,7 @@ def update_func(button_c):
                         display(HTML('<p style="font-size:18px">' +  html_string))
 
         update_button.disabled = False
-        update_button.tooltip = 'Unable to run'
-        update_button.style.button_color=button_color_able
-
+        update_button.tooltip = 'Click to start the run'
 
 #-----------widgets definition -----------------
     
@@ -446,7 +451,7 @@ with file_info:
                 
 header_network = Output()
 with header_network:
-    display(HTML('<p style="font-size:15px;font-weight:bold;">Select network footprint folder: </p>'))
+    display(HTML('<p style="font-size:15px;font-weight:bold;">Select network: </p>'))
     
 # options files (select in a dropdown):
 list_network_files = []
@@ -463,7 +468,7 @@ for root, dirs, files in os.walk(r'' + path_network_footprints_local):
             list_network_files.append(file[:-5] + '_local')
 
 network_choice = Dropdown(options = list_network_files,
-                   description = 'Network footprint folder',
+                   description = 'Network name',
                    value=None,
                    disabled= False,
                    layout = layout,
@@ -517,11 +522,11 @@ time_selection= SelectMultiple(
 
 header_countries = Output()
 with header_countries:
-    display(HTML('<p style="font-size:15px;"><br><b>Select countries for the different views and representation</b></p>'))
+    display(HTML('<p style="font-size:15px;"><br><b>Select countries for the different views and representation:</b></p>'))
     
 header_countries_selection = Output()
 with header_countries_selection:
-    display(HTML('<p style="font-size:15px;"><br>ICOS membership countries pre-selected (click to deselect)</p>'))
+    display(HTML('<p style="font-size:15px;"><br>ICOS membership countries pre-selected (click to deselect):</p>'))
     
 countries = [('Albania','ALB'),('Austria','AUT'),('Belarus','BLR'),('Belgium','BEL'),('Bosnia and Herzegovina','BIH'),('Bulgaria','BGR'),('Croatia','HRV'),('Cyprus','CYP'),('Czechia','CZE'),('Denmark','DNK'),('Estonia','EST'),('Finland','FIN'),('France','FRA'),('Germany','DEU'),('Greece','GRC'),('Hungary','HUN'),('Ireland','IRL'),('Italy','ITA'),('Kosovo','XKX'),('Latvia','LVA'),('Lithuania','LTU'),('Luxembourg','LUX'),('Macedonia','MKD'),('Moldova','MDA'),('Montenegro','MNE'),('Netherlands','NLD'),('Norway','NOR'),('Poland','POL'),('Portugal','PRT'),('Republic of Serbia','SRB'),('Romania','ROU'),('Slovakia','SVK'),('Slovenia','SVN'),('Spain','ESP'),('Sweden','SWE'),('Switzerland','CHE'),('United Kingdom','GBR')]
 
@@ -547,7 +552,7 @@ with header_extended_network:
     
 list_extended_network = ['No extension'] + list_network_files
 extended_network_choice = Dropdown(options = list_extended_network,
-                   description = 'Extended network',
+                   description = 'Extended network name',
                    value='No extension',
                    disabled= False,
                    layout = {'height':'initial'},
@@ -556,7 +561,7 @@ extended_network_choice = Dropdown(options = list_extended_network,
 update_button = Button(description='Run selection',
                        disabled=True, # disabed until a station has been selected
                        button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
-                       tooltip='Click me',)
+                       tooltip='Unable to run',)
 
 update_button.style.button_color=button_color_able
 
