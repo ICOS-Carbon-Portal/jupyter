@@ -1672,7 +1672,8 @@ def signals_table_anthro(stc, output=output, csvfile='anthro_table.csv'):
     display(df_save_sort_styled)
     
     df_save.to_csv(os.path.join(output, csvfile), index = False)  
-    
+
+
 def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.csv'):   
     
     stations = stc['signalsStations']
@@ -1702,28 +1703,16 @@ def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.cs
                         pasture, urban, unknown]
 
     # want vegetation fraction HILDA land cover maps (as opposed to km2 for the entire cell - "list_classes_km2")
-    list_classes = []
+    list_landcover_fractions = []
 
     for landcover in list_classes_km2:
 
         landcover_fraction = landcover/gridarea
 
-        list_classes.append(landcover_fraction)
+        list_landcover_fractions.append(landcover_fraction)
 
     df_save = pd.DataFrame(columns= ['Station',
-                                     'Respiration total', 
-                                     '(Respiration total (STILT))',
-                                    'GEE total', 'GEE total (STILT)*',
-                                    'Broad leaf forest (Resp)', 'Broad leaf forest (GEE)', 
-                                    'Coniferous forest (Resp)',  'Coniferous forest (GEE)',\
-                                    'Mixed forest (Resp)', 'Mixed forest (GEE)',\
-                                    'Ocean (Resp)','Ocean (GEE)', \
-                                    'Other (Resp)', 'Other (GEE)', \
-                                    'Grass and shrub (Resp)',  'Grass and shrub (GEE)',\
-                                    'Cropland (Resp)', 'Cropland (GEE)',\
-                                    'Pasture (Resp)', 'Pasture (GEE)',
-                                    'Urban (Resp)', 'Urban (GEE)',\
-                                    'Unknown (Resp)', 'Unknown (GEE)', 'Total GEE (ppm)'])
+                                    'GEE total', 'GEE total (STILT)*','Broad leaf forest (GEE)', 'Coniferous forest (GEE)', 'Mixed forest (GEE)','Ocean (GEE)','Other (GEE)','Grass and shrub (GEE)', 'Cropland (GEE)','Pasture (GEE)','Urban (GEE)', 'Unknown (GEE)'])
 
     # index for putting the data for each station (mean) in the correct place in the dataframe "df_save"
     i_outer = 0
@@ -1731,51 +1720,36 @@ def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.cs
     for station in stations:
 
         df_stilt_result = read_stilt_timeseries(station, date_range, timeselect_list)
-        df_stilt_result = df_stilt_result.reset_index()
+        df_stilt_result_only_numeber = df_stilt_result.select_dtypes(['number'])
 
-        df_save_station = pd.DataFrame(columns= ['Station','date', 'Respiration total', '(Respiration total (STILT))',\
-                                        'GEE total', 'GEE total (STILT)*',
-                                        'Broad leaf forest (Resp)', 'Broad leaf forest (GEE)', 
-                                        'Coniferous forest (Resp)',  'Coniferous forest (GEE)',\
-                                        'Mixed forest (Resp)', 'Mixed forest (GEE)',\
-                                        'Ocean (Resp)','Ocean (GEE)', \
-                                        'Other (Resp)', 'Other (GEE)',\
-                                        'Grass and shrub (Resp)',  'Grass and shrub (GEE)',\
-                                        'Cropland (Resp)', 'Cropland (GEE)',\
-                                        'Pasture (Resp)', 'Pasture (GEE)',
-                                        'Urban (Resp)', 'Urban (GEE)',\
-                                        'Unknown (Resp)', 'Unknown (GEE)', 'Total GEE (ppm)'])
-
-        # index for putting the data for each station for each date in the correct place in the dataframe "df_save_station"
+        average_df_stilt_result = df_stilt_result_only_numeber.mean()
+        gee_station_stilt = abs(average_df_stilt_result['co2.bio.gee'])
+        
         i = 0 
+
+        fp_gee_station_average = 0
         first = True
         current_year = 0
+        first_average = True
+        
         for date in date_range:
 
             # access the correct VPRM flux dataset
             if first or date.year!=current_year:
 
                 current_year = date.year
-
-                filename_resp = check_cp(path_cp,'VPRM_ECMWF_RESP_' + str(current_year) + '_CP.nc')
-
+                
                 filename_gee = check_cp(path_cp,'VPRM_ECMWF_GEE_' + str(current_year) + '_CP.nc')
-
-                f_resp = cdf.Dataset(filename_resp)
 
                 f_gee = cdf.Dataset(filename_gee)
 
-                # same for both datasets
-                times = f_resp.variables['time']
+                times = f_gee.variables['time']
 
                 first = False
-
 
             date_string = str(date.year) + '-' + str(date.month) + '-' + str(date.day) + ' ' +  str(date.hour)
 
             ntime = date2index(date,times,select='nearest')
-
-            resp = f_resp.variables['RESP'][ntime][:][:]
 
             gee = f_gee.variables['GEE'][ntime][:][:]
 
@@ -1784,74 +1758,53 @@ def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.cs
 
             if os.path.isfile(filename):
 
-
                 f_fp = cdf.Dataset(filename)
                 fp=f_fp.variables['foot'][:,:,:]
 
-                fp_resp_station = resp * fp 
-                respiration_station = fp_resp_station.sum()    
-
                 fp_gee_station = abs(gee) * fp
-                gee_station = fp_gee_station.sum()   
-                respiration_station_stilt = df_stilt_result[df_stilt_result['date'] == date]['co2.bio.resp'].to_list()[0]
-                gee_station_stilt = abs(df_stilt_result[df_stilt_result['date'] == date]['co2.bio.gee'].to_list()[0])
+                
+                if first_average: 
 
-                # to be extended with land cover data
-                data_row = [station, date_string, respiration_station, respiration_station_stilt, gee_station, gee_station_stilt]
-
-                total_gee = 0
-                for landcover_hilda, landcover_name in zip(list_classes, list_classes_names):
-
-                    fp_resp_station_landcover = fp_resp_station * landcover_hilda
-                    respiration_station_landcover_class = fp_resp_station_landcover.sum()    
-
-                    fp_gee_station_landcover = fp_gee_station * landcover_hilda
-                    gee_station_landcover_class = fp_gee_station_landcover.sum()    
-                    total_gee = total_gee + gee_station_landcover_class
+                    fp_gee_station_average = fp_gee_station
                     
-            
-                    data_row.extend([respiration_station_landcover_class, gee_station_landcover_class])
+                    first_average = False
+                    
+                else:
 
-                df_save_station.loc[i] = data_row + [total_gee]
-
-
+                    fp_gee_station_average = fp_gee_station_average + fp_gee_station
+                    
                 i = i + 1
 
-        # un-comment here to save the timeseries for each of the stations
-        #file_name = 'biogenic_summer2020_' + station + '_jun_aug_2020.csv'
-
-        df_save_station_only_number = df_save_station.select_dtypes(['number'])
-
-        df_save_station_mean = df_save_station_only_number.mean().to_list()
-
-        df_save_station_mean.insert(0, station)
+        fp_gee_station_average = fp_gee_station_average / i 
         
-        df_save.loc[i_outer] = df_save_station_mean
+        average_gee = fp_gee_station_average.sum()
+
+        # to be extended with land cover data
+        data_row = [station, average_gee, gee_station_stilt]
+
+        for landcover_fraction in list_landcover_fractions:
+
+            fp_gee_station_landcover = (fp_gee_station_average * landcover_fraction).sum()
+     
+            data_row.extend([fp_gee_station_landcover])
+
+        df_save.loc[i_outer] = data_row
 
         i_outer = i_outer + 1
         f.value+=1
         
-    df_save_sort = df_save.sort_values(by=['Total GEE (ppm)'])
+    df_save_sort = df_save.sort_values(by=['GEE total'])
     
-    if component == 'resp':
-        df_save_subset_resp = df_save[['Station',  'Broad leaf forest (Resp)', 'Coniferous forest (Resp)', 'Mixed forest (Resp)', 'Other (Resp)',  'Grass and shrub (Resp)',  'Cropland (Resp)',  'Pasture (Resp)',  'Urban (Resp)', 'Respiration total', '(Respiration total (STILT))']]
-        
-        df_save_sort = df_save_subset_resp.sort_values(by=['Station'])
-        df_save_sort_styled = df_save_sort.style.background_gradient(cmap = 'Reds', axis=None,subset = ['Broad leaf forest (Resp)', 'Coniferous forest (Resp)', 'Mixed forest (Resp)', 'Other (Resp)',  'Grass and shrub (Resp)',  'Cropland (Resp)',  'Pasture (Resp)',  'Urban (Resp)'])
-        
-    else:
-        
-        df_save_subset_gee = df_save[['Station',  'Broad leaf forest (GEE)', 'Coniferous forest (GEE)', 'Mixed forest (GEE)', 'Other (GEE)',  'Grass and shrub (GEE)',  'Cropland (GEE)',  'Pasture (GEE)',  'Urban (GEE)', 'GEE total', 'GEE total (STILT)*']]
-        
-        df_save_sort = df_save_subset_gee.sort_values(by=['Station'])
-        
-        subset_style = subset = ['Broad leaf forest (GEE)', 'Coniferous forest (GEE)', 'Mixed forest (GEE)', 'Other (GEE)',  'Grass and shrub (GEE)',  'Cropland (GEE)',  'Pasture (GEE)',  'Urban (GEE)']
-        subset_format = {key: "{:.2f}" for key in subset_style}
-        subset_format['GEE total'] = '{:.2f}'
-        subset_format['GEE total (STILT)*'] = '{:.2f}'
+    df_save_subset_gee = df_save_sort[['Station',  'Broad leaf forest (GEE)', 'Coniferous forest (GEE)', 'Mixed forest (GEE)', 'Other (GEE)',  'Grass and shrub (GEE)',  'Cropland (GEE)',  'Pasture (GEE)',  'Urban (GEE)', 'GEE total', 'GEE total (STILT)*']]
 
-        df_save_sort_styled = df_save_sort.style.background_gradient(cmap = 'Greens', axis=None, subset = subset_style)\
-                                          .format(subset_format)
+
+    subset_style = ['Broad leaf forest (GEE)', 'Coniferous forest (GEE)', 'Mixed forest (GEE)', 'Other (GEE)',  'Grass and shrub (GEE)',  'Cropland (GEE)',  'Pasture (GEE)',  'Urban (GEE)']
+    subset_format = {key: "{:.2f}" for key in subset_style}
+    subset_format['GEE total'] = '{:.2f}'
+    subset_format['GEE total (STILT)*'] = '{:.2f}'
+
+    df_save_sort_styled = df_save_subset_gee.style.background_gradient(cmap = 'Greens', axis=None, subset = subset_style)\
+                                      .format(subset_format)
 
     display(df_save_sort_styled)
     df_save.to_csv(os.path.join(output, csvfile), index = False)  
@@ -1888,7 +1841,6 @@ def average_threshold_fp(station, date_range, threshold):
         return average_fp
     else:
         return None
-    
     
 def initiate_summer_winter_comparison():
     button_color_able='#4169E1'
