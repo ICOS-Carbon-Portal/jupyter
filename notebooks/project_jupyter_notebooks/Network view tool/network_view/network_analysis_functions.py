@@ -644,7 +644,7 @@ def plot_maps_two(field, field2, lon, lat, footprint_stations='', title='', labe
 def display_network_with_extended(nwc, vmax_footprint = 'current'):
     
     if nwc['extendedNetwork']== 'No extension':
-        display(HTML('<p style="font-size:14px;">Specify an "extended network" in the section "The view from a selected network".</p>'))
+        display(HTML('<p style="font-size:14px;">Specify a valid "extended network" in the section "The view from a selected network".</p>'))
         return
 
     # compare so that the analysed network really is an extension to the reference network
@@ -1362,7 +1362,7 @@ def monitoring_potential_maps(nwc, country, extended = False):
         if nwc['extendedNetwork']== 'No extension':
             # finish the progress bar
             f.value += len(date_range_subset)
-            display(HTML('<p style="font-size:14px;">Specify an "extended network" in the section "The view from a selected network".</p>'))
+            display(HTML('<p style="font-size:14px;">Specify a valid "extended network" in the section "The view from a selected network".</p>'))
             return
 
         # station list extended network:
@@ -1793,10 +1793,9 @@ def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.cs
         i_outer = i_outer + 1
         f.value+=1
         
-    df_save_sort = df_save.sort_values(by=['GEE total'])
+    df_save_sort = df_save.sort_values(by=['Station'])
     
     df_save_subset_gee = df_save_sort[['Station',  'Broad leaf forest (GEE)', 'Coniferous forest (GEE)', 'Mixed forest (GEE)', 'Other (GEE)',  'Grass and shrub (GEE)',  'Cropland (GEE)',  'Pasture (GEE)',  'Urban (GEE)', 'GEE total', 'GEE total (STILT)*']]
-
 
     subset_style = ['Broad leaf forest (GEE)', 'Coniferous forest (GEE)', 'Mixed forest (GEE)', 'Other (GEE)',  'Grass and shrub (GEE)',  'Cropland (GEE)',  'Pasture (GEE)',  'Urban (GEE)']
     subset_format = {key: "{:.2f}" for key in subset_style}

@@ -72,7 +72,7 @@ def change_year_options(c):
     selected_stations.disabled = False
     update_button.disabled = False
     update_button.tooltip = 'Click to start the run'
-    
+    selected_stations.options = []
     list_optional_stations = sorted([k for k, v in stilt_stations.items() if str(selected_year) in v['years'] if len(v[str(selected_year)]['months']) == 12])
     
     stations_choice.options = list_optional_stations

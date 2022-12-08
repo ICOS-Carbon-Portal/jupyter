@@ -120,7 +120,10 @@ def get_settings():
             
             with output_extended_mismatch:
             
-                display(HTML('<p style="font-size:15px;">The current and extended networks have <mark>different date ranges</mark>. Results will be generated for the current network, but missing for the section "The view from the extended selected network"<br></p>'))
+                display(HTML('<p style="font-size:20px;">The current and extended networks have <mark>different date ranges</mark>. Results will be generated for the current network, but missing for the section "The view from the extended selected network"<br></p>'))
+                
+                #update so there is no extension to avoid errors when the tool is run
+                s['extendedNetwork'] = 'No extension'
 
         else:
             
@@ -426,7 +429,8 @@ with file_info:
                 stations_string = ', '.join([str(elem) for elem in network_footprint_info_load['stations']]) 
                 months = list(range(network_footprint_info_load['startMonth'], network_footprint_info_load['endMonth'] + 1))
                 months_string = ', '.join([str(month) for month in months])
-                display(HTML('<p style="font-size:15px;"><b>Name: </b> ' + str(network_footprint_info_load['fileName']) + '<br><b>Stations: </b> ' + stations_string + '<br><b>Year: </b> ' +  str(network_footprint_info_load['startYear']) + '<br><b>Month(s): </b> ' +  months_string + '<br><b>Threshold:</b> ' +  str(network_footprint_info_load['fpPercent']*100)+ '%</p>'))
+                date_created = network_footprint_info_load['dateCreated']
+                display(HTML('<p style="font-size:15px;"><b>Name: </b> ' + str(network_footprint_info_load['fileName']) + '<br><b>Date created: </b> ' + date_created + '<br><b>Stations: </b> ' + stations_string + '<br><b>Year: </b> ' +  str(network_footprint_info_load['startYear']) + '<br><b>Month(s): </b> ' +  months_string + '<br><b>Threshold:</b> ' +  str(network_footprint_info_load['fpPercent']*100)+ '%</p>'))
 
 
     for root, dirs, files in os.walk(r'' + path_network_footprints_local):
