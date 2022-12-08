@@ -1620,7 +1620,14 @@ def monitoring_potential_maps(nwc, country, extended = False):
 
                     display(HTML('<p style="font-size:18px">' +  html_string))
             else:
-                display(HTML('<p style="font-size:15px">Sensing of ' +  name +' in ' + country_name + ' is very low and it is not feasible to show monitoring potential of.</p>'))
+                if extended:
+            
+                    display(HTML('<p style="font-size:15px">Due to our definition of monitoring potential, the improved monitoring of ' +  name + ' in ' + country_name + ' is almost infinite in the extended network compared to the current network.  To see the monitoring potential of the extended network, select it when prompted for "Network name" in section 3.2. and run the tool without extension.</p>'))
+                    # if GEE has infinate improved monitoring potential, there will be no maps for the different land cover types. 
+                    if name == 'GEE':
+                        return
+                else:
+                    display(HTML('<p style="font-size:15px">Sensing of ' +  name +' in ' + country_name + ' is very low and it is not feasible to show monitoring potential of.</p>'))
 
 # Station characterization
 def signals_table_anthro(stc, output=output, csvfile='anthro_table.csv'):
