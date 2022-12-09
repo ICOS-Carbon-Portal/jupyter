@@ -17,6 +17,8 @@ The folder is divided by project. Every project has its own folder of notebooks 
 
 * **envrifair winterschool:** contains notebooks to demonstrate how to create interactive maps, load icos data and create interactive graphs.
 
+* **Network view tool:** includes a notebook that analyses user-defined networks of atmospheric measurement stations based on STILT footprints.
+
 ## Licence
 This work is licensed under a Creative Commons Attribution 4.0 International License (CC BY 4.0). <br>
 Copyright © 2019-2020 ICOS ERIC
