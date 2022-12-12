@@ -194,7 +194,8 @@ def plot_table(df_list, layer_list, t_list, plot_attr_obj):
 
 
         #Create figure:
-        p = figure(plot_width=900, plot_height=800,
+        p = figure(plot_width=plot_attr_obj.width,
+                   plot_height=plot_attr_obj.height,
                    title=plot_attr_obj.title_text,
                    tools=['hover', 'wheel_zoom', 'pan', 'reset', 'box_zoom'],
                    y_range=plot_attr_obj.y_range)
@@ -217,14 +218,14 @@ def plot_table(df_list, layer_list, t_list, plot_attr_obj):
         #Set x- & y-axis labels:
         p.xaxis.axis_label = plot_attr_obj.xaxis_label
         p.yaxis.axis_label = plot_attr_obj.yaxis_label
+        
 
         #Set label font style:
         p.xaxis.axis_label_text_font_style = plot_attr_obj.xaxis_label_font_style
         p.yaxis.axis_label_text_font_style = plot_attr_obj.yaxis_label_font_style
         p.xaxis.axis_label_standoff = plot_attr_obj.xaxis_label_standoff
         p.yaxis.axis_label_standoff = plot_attr_obj.yaxis_label_standoff
-        #p.yaxis.axis_label_text_font_size = '8pt'
-        p.yaxis.major_label_text_font_size = "5pt"
+        p.yaxis.major_label_text_font_size = plot_attr_obj.yaxis_label_text_font_size
 
         #Set the copyright label position:
         label_opts = dict(x=0, y=10,

@@ -46,6 +46,7 @@ class PlotAttr():
         self.yaxis_label = None
         self.yaxis_label_font_style = 'normal'
         self.yaxis_label_standoff = 15
+        self.yaxis_label_text_font_size = '8pt'
                 
         #Dataframe column name for x- & y-axis:
         self.col_name_xaxis = None
@@ -182,6 +183,15 @@ class PlotAttr():
     @yaxis_label_standoff.setter
     def yaxis_label_standoff(self, yaxis_label_standoff):
         self._yaxis_label_standoff = yaxis_label_standoff
+        
+    #-------------------------------------
+    @property
+    def yaxis_label_text_font_size(self):
+        return self._yaxis_label_text_font_size
+    
+    @yaxis_label_text_font_size.setter
+    def yaxis_label_text_font_size(self, yaxis_label_text_font_size):
+        self._yaxis_label_text_font_size = yaxis_label_text_font_size
         
     #-------------------------------------
     @property
