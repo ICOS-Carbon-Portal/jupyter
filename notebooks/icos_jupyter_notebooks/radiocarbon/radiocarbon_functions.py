@@ -32,7 +32,7 @@ import warnings
 from pandas.core.common import SettingWithCopyWarning
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 warnings.simplefilter(action='ignore', category=FutureWarning)
-
+from ipywidgets import IntProgress
 
 #change to 'radiocarbon' in case of functions used on exploredata ('' in the project folder)
 folder_w_data = 'radiocarbon'
@@ -1517,12 +1517,16 @@ def radiocarbon_cp_results(radiocarbonObjectMeas):
         user_date_range_start=pd.Timestamp(2006, 1, 1)
         user_date_range_end=pd.Timestamp(2030, 1, 1)
         
-
+    f = IntProgress(min=0, max=len(radiocarbon_data['14C'])) # instantiate the bar
+    display(f) 
+    
+    first=True
+    
     #access many at the same time (all the entries - one for each radiocarbon measurement)
     #for each entry at the carbon portal (not all will be used - only when footprints for the same time period)
-    first=True
     for (radiocarbon_measurement, measurement_start_date, integration_time, std_deviation) in zip(radiocarbon_data['14C'], radiocarbon_data['TIMESTAMP'], radiocarbon_data['IntegrationTime'], radiocarbon_data['WeightedStdErr']):
-               
+        
+        f.value += 1
     
         #want to keep the original date for the export.
         measurement_start_date_model = measurement_start_date
