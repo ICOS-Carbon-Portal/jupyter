@@ -56,7 +56,7 @@ def getSettings():
             s['icos'] = cpstation.get(s['stationCode'][0:3].upper()).info()
         s['stilt'] = stiltstations[s['stationCode']]
         s['timeOfDay'] = [0, 3, 6, 9, 12, 15, 18, 21]
-        s['backgroundFilename'] = 'IZOMHd24.csv'
+        s['backgroundFilename'] = '14c_mhd_integrals_noaa_smoothed_final.csv'
         s['downloadOption'] = download_choice.value
         
         s['codeMeasCP'] = station_choice_meas.value['station_code']
@@ -113,7 +113,7 @@ update_button = Button(description='Run selection',
 royal='#4169E1'
 update_button.style.button_color=royal
 
-output_grid=GridspecLayout(2, 2)
+output_grid=GridspecLayout(2, 3)
 output_grid[0:1, 0:1] = header_station
 output_grid[0:1, 1:2] = header_download
 output_grid[1:2, 0:1] = station_choice_meas

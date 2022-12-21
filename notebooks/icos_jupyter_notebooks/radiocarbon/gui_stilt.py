@@ -66,7 +66,7 @@ def getSettings():
         s['endMonth'] = e_month.value
         s['endDay'] = e_day.value
         s['timeOfDay'] = [0, 3, 6, 9, 12, 15, 18, 21]
-        s['backgroundFilename'] = 'IZOMHd24.csv'
+        s['backgroundFilename'] = '14c_mhd_integrals_noaa_smoothed_final.csv'
         s['downloadOption'] = download_choice.value
         s['facilityInclusion'] = facility_choice.value
         s['threshold'] = threshold_facility_inclusions.value
