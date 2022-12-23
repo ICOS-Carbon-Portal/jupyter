@@ -222,6 +222,20 @@
       },
       {
         "pid": "",
+        "description": "This notebook is dedicated on providing interactive visualizations of ICOS atmopsheric observations in combination with <a href=\"http://stilt-model.org/index.php/Main/HomePage\" target=\"_blank\">STILT model</a> results for the same station. The visualizations may be used for the purpose of comparison between modelled and observed measurements. The notebook also includes an interactive table presenting the availability of <a href=\"http://stilt-model.org/index.php/Main/HomePage\" target=\"_blank\">STILT model</a> results per station. The selection of stations and other parameters relevant to each visualization are handled by interactive elements called widgets (i.e. dropdown lists, checkboxes, etc.)",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/03_icos_JNBs/icos_ao_vs_stilt/TOR147_STILT_vs_ICOS.png",
+        "relative_path": "./icos_jupyter_notebooks/icos_atmObs_STILT.ipynb",
+        "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/icos_jupyter_notebooks",
+        "contact": [
+          "jupyter-info@icos-cp.eu"
+        ],
+        "categories": [
+          "ICOS Jupyter notebooks"
+        ],
+        "title": "ICOS atmospheric observations vs STILT modelled values"
+      },
+      {
+        "pid": "",
         "description": "This notebook is dedicated on producing summary stastics for ICOS atmosphere observations. The notebook also includes advanced interactive visualizations of maps, plots and tables that compare observations and/or statistic results from different ICOS atmosphere stations. The selection of stations and other parameters relevant to each visualization are handled by interactive elements called widgets (i.e. dropdown lists, checkboxes, etc.)",
         "thumbnail": "./icos_jupyter_notebooks/index-tools/img/03_icos_JNBs/icos_ao_stats/gat_co_co2.PNG",
         "relative_path": "./icos_jupyter_notebooks/icos_atmObs_statistics.ipynb",
@@ -395,7 +409,7 @@
       {
         "pid": "",
         "description": "This Jupyter notebook allows users to analyze the spatial coverage of networks of atmospheric measurement stations based on STILT footprints. Land cover and associated fluxes within the network are considered. The current network of ICOS atmospheric measurement stations (as of 2022-08-01) and an extended network with stations expected to join the network in the coming years can be analyzed directly and there is an option to create new networks based on hypothetical and/or existing stations.",
-        "thumbnail": "",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/04_proj_JNBs/network-view-tool/network_view.png",
         "relative_path": "./project_jupyter_notebooks/network-view-tool/network_view.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/project_jupyter_notebooks/network-view-tool",
         "contact": [
