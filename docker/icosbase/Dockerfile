@@ -1,8 +1,8 @@
 # We use a specific hash since :latest has broken spuriously in the
 # past.
 # https://hub.docker.com/r/jupyter/datascience-notebook
-# This hash is jupyter/datascience-notebook:latest on 2022-10-04.
-FROM jupyter/datascience-notebook@sha256:731da3b2844e168d677e622d6ce127e790117e291c57933deefd93bc5f79217d
+# This hash is jupyter/datascience-notebook:latest on 2023-01-17.
+FROM jupyter/datascience-notebook@sha256:2e57ec22f8b593227a8ca0007ce29da3bff1ae3e379459bc749530251be944f4
 
 # Remove the default xetex LaTeX installation of jupyter-lab and
 # install the full latest LaTeX version. It takes about 45 minutes to
@@ -65,6 +65,9 @@ ENV PROJ_LIB=/opt/conda/share/proj
 
 # Override configuration for jupyter lab settings.
 COPY overrides.json /opt/conda/share/jupyter/lab/settings/.
+# Install jupyter-lab extension icos-splash, to modify the splash
+# animation using the ICOS Carbon Portal logo.
+RUN pip install git+https://github.com/ZogopZ/icos-splash.git
 # Keep this in a separate line. It's the only library that changes
 # frequently and the new docker image will build faster.
 # Update version number according to latest release.
