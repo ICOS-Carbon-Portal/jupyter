@@ -1,8 +1,8 @@
 # We use a specific hash since :latest has broken spuriously in the
 # past.
 # https://hub.docker.com/r/jupyter/datascience-notebook
-# This hash is jupyter/datascience-notebook:latest on 2023-01-17.
-FROM jupyter/datascience-notebook@sha256:2e57ec22f8b593227a8ca0007ce29da3bff1ae3e379459bc749530251be944f4
+# This hash is jupyter/datascience-notebook:latest on 2023-02-17.
+FROM jupyter/datascience-notebook@sha256:2b48a4f6db9bfaa7eb2c3d32e184776115bd15fa87e56e05759276b533079708
 
 # Remove the default xetex LaTeX installation of jupyter-lab and
 # install the full latest LaTeX version. It takes about 45 minutes to
