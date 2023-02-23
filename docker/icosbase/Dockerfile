@@ -58,7 +58,7 @@ COPY pip_requirements.txt  pip_requirements.txt
 RUN pip install --quiet --requirement pip_requirements.txt
 RUN rm pip_requirements.txt
 # Version of nersc-refresh-announcements is 0.1.0.
-RUN pip install --quiet git+https://github.com/NERSC/nersc-refresh-announcements.git
+RUN pip install git+https://github.com/ZogopZ/nersc-refresh-announcements.git@patch-1
 
 # add env variable for PROJ (library used by cartopy and shapely)
 ENV PROJ_LIB=/opt/conda/share/proj
