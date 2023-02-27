@@ -199,9 +199,7 @@ def create_network_fps(stations, date_range, time_selection, name_save, threshol
             
         f.value += 1
 
-        index = 1
-
-        df_footprints_network = pd.DataFrame()
+        first_station = True
         for station in stations:
             filename=(pathFP+station+'/'+str(date.year)+'/'+str(date.month).zfill(2)+'/'
                  +str(date.year)+'x'+str(date.month).zfill(2)+'x'+str(date.day).zfill(2)+'x'+str(date.hour).zfill(2)+'/foot')
@@ -212,19 +210,23 @@ def create_network_fps(stations, date_range, time_selection, name_save, threshol
                 fp=f_fp.variables['foot'][:,:,:]
                 # make it the 50% most important
                 fp_50 = update_footprint_based_on_threshold(fp, threshold)
+                
+                if first_station:
+                    
+                    fp_50_network = fp_50 
 
-                df_footprints_network[('fp_' + str(index))]=fp_50.flatten()
+                    first_station = False
 
-                index = index + 1
+                else:
+
+                    fp_50_network = np.maximum.reduce([fp_50_network,fp_50])
 
             else:
                 missing.append(station + ':' + date_string)
 
-        # make a footprint based on all max values of the combined footprints. 
-        fp_network_50_list = df_footprints_network[df_footprints_network.columns].max(axis=1)
-              
-        xarray_individual = create_xarray(fp_network_50_list, date)
+        xarray_individual = create_xarray(fp_50_network, date)
         list_xarray.append(xarray_individual)
+        
 
     if len(list_xarray)>0:
         
@@ -252,7 +254,7 @@ def create_network_fps(stations, date_range, time_selection, name_save, threshol
     jsonFile = open(os.path.join('network_footprints', name_save + '.json'), "w")
     jsonFile.write(jsonString)
     jsonFile.close()
-
+    
 def create_network_fps_by_extension(stations, folder, name_save, notes=""):
     
     
@@ -305,11 +307,8 @@ def create_network_fps_by_extension(stations, folder, name_save, notes=""):
             footprints = xr.open_dataset(os.path.join(path, folder, folder + '_' + str(current_month) + '.nc'))
             first = False
 
-
-        # added station / network
-        df_footprints_network = pd.DataFrame()
         # take the netwrok footprint
-        df_footprints_network['starting_network'] = footprints.sel(time=date).network_foot.data.flatten()
+        fp_50_network = footprints.sel(time=date).network_foot.data
         
         for station in stations:
 
@@ -323,19 +322,15 @@ def create_network_fps_by_extension(stations, folder, name_save, notes=""):
                 fp=f_fp.variables['foot'][:,:,:]
 
                 fp_50=update_footprint_based_on_threshold(fp, 0.5)
-
-                df_footprints_network['fp_added_' + station]=fp_50.flatten()
+            
+                fp_50_network = np.maximum.reduce([fp_50_network,fp_50])
 
             else:
                 missing.append(station + ':' + date_string)
 
-        #network footprint for sites (before including also original network footprint)
-        stations_network_fp_list = df_footprints_network[df_footprints_network.columns].max(axis=1)
+        xarray_individual = create_xarray(fp_50_network, date)
 
-        xarray_individual = create_xarray(stations_network_fp_list, date)
-        
         list_xarray.append(xarray_individual)
-
    
     if len(list_xarray)>0:
 
