@@ -71,4 +71,4 @@ RUN pip install git+https://github.com/ZogopZ/icos-splash.git
 # Keep this in a separate line. It's the only library that changes
 # frequently and the new docker image will build faster.
 # Update version number according to latest release.
-RUN pip install --quiet icoscp==0.1.17
+RUN pip install git+https://github.com/icos-carbon-portal/pylib.git@66-implement-carbon-portal-authentication-for-pylib
