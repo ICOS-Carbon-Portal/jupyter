@@ -2159,143 +2159,143 @@ def land_cover_bar_graph_winter_summer(stc, output=output, pngfile='landcover_su
         degrees=degrees_from_point_to_grid_cells(station_lat, station_lon, load_lat, load_lon)
 
 
-    # take two date ranges for final graph
-    fp1 = read_aggreg_footprints(station, date_range1)
-    f.value += 1
-
-    fp2 = read_aggreg_footprints(station, date_range2)
-    f.value += 1
-
     #get all the land cover data from netcdfs 
     broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018')
+    
+    fp = read_aggreg_footprints(station, date_range1)
+    
+    f.value += 1
 
-    #land cover classes (imported in the land cover section):
-    broad_leaf_forest1=fp1*broad_leaf_forest
-    coniferous_forest1=fp1*coniferous_forest
-    mixed_forest1=fp1*mixed_forest
-    ocean1=fp1*ocean
-    other1=fp1*other
-    grass_shrub1=fp1*grass_shrub
-    cropland1=fp1*cropland
-    pasture1=fp1*pasture
-    urban1=fp1*urban
-    unknown1=fp1*unknown
-
-    broad_leaf_forest2=fp2*broad_leaf_forest
-    coniferous_forest2=fp2*coniferous_forest
-    mixed_forest2=fp2*mixed_forest
-    ocean2=fp2*ocean
-    other2=fp2*other
-    grass_shrub2=fp2*grass_shrub
-    cropland2=fp2*cropland
-    pasture2=fp2*pasture
-    urban2=fp2*urban
-    unknown2=fp2*unknown
+    broad_leaf_forest_fp=fp*broad_leaf_forest
+    coniferous_forest_fp=fp*coniferous_forest
+    mixed_forest_fp=fp*mixed_forest
+    ocean_fp=fp*ocean
+    other_fp=fp*other
+    grass_shrub_fp=fp*grass_shrub
+    cropland_fp=fp*cropland
+    pasture_fp=fp*pasture
+    urban_fp=fp*urban
+    unknown_fp=fp*unknown
 
     #lists of these values
-    broad_leaf_forest_values1 = [item for sublist in broad_leaf_forest1[0] for item in sublist]
-    coniferous_forest_values1 = [item for sublist in coniferous_forest1[0] for item in sublist]
-    mixed_forest_values1 = [item for sublist in mixed_forest1[0] for item in sublist]
-    ocean_values1 = [item for sublist in ocean1[0] for item in sublist]
-    other_values1 = [item for sublist in other1[0] for item in sublist]
-    grass_shrub_values1 = [item for sublist in grass_shrub1[0] for item in sublist]
-    cropland_values1 = [item for sublist in cropland1[0] for item in sublist]
-    pasture_values1 = [item for sublist in pasture1[0] for item in sublist]
-    urban_values1 = [item for sublist in urban1[0] for item in sublist]
-    unknown_values1 = [item for sublist in unknown1[0] for item in sublist]
-
-    broad_leaf_forest_values2 = [item for sublist in broad_leaf_forest2[0] for item in sublist]
-    coniferous_forest_values2 = [item for sublist in coniferous_forest2[0] for item in sublist]
-    mixed_forest_values2 = [item for sublist in mixed_forest2[0] for item in sublist]
-    ocean_values2 = [item for sublist in ocean2[0] for item in sublist]
-    other_values2 = [item for sublist in other2[0] for item in sublist]
-    grass_shrub_values2 = [item for sublist in grass_shrub2[0] for item in sublist]
-    cropland_values2 = [item for sublist in cropland2[0] for item in sublist]
-    pasture_values2 = [item for sublist in pasture2[0] for item in sublist]
-    urban_values2 = [item for sublist in urban2[0] for item in sublist]
-    unknown_values2 = [item for sublist in unknown2[0] for item in sublist]
-
-
+    broad_leaf_forest_values = [item for sublist in broad_leaf_forest_fp[0] for item in sublist]
+    coniferous_forest_values = [item for sublist in coniferous_forest_fp[0] for item in sublist]
+    mixed_forest_values = [item for sublist in mixed_forest_fp[0] for item in sublist]
+    ocean_values = [item for sublist in ocean_fp[0] for item in sublist]
+    other_values = [item for sublist in other_fp[0] for item in sublist]
+    grass_shrub_values = [item for sublist in grass_shrub_fp[0] for item in sublist]
+    cropland_values = [item for sublist in cropland_fp[0] for item in sublist]
+    pasture_values = [item for sublist in pasture_fp[0] for item in sublist]
+    urban_values = [item for sublist in urban_fp[0] for item in sublist]
+    unknown_values = [item for sublist in unknown_fp[0] for item in sublist]
+    
     #putting it into a dataframe: initially 192000 values (one per cell) for each of the aggregated land cover classes
     #into same dataframe - have the same coulmn heading. "landcover_type" will be used in "groupby" together with the "slice" (in degrees)
-    df_broad_leaf_forest1 = pd.DataFrame({'landcover_vals': broad_leaf_forest_values1,
+    df_broad_leaf_forest1 = pd.DataFrame({'landcover_vals': broad_leaf_forest_values,
                                'degrees': degrees,
                                'landcover_type':'Broad leaf forest'})
 
-    df_coniferous_forest1 = pd.DataFrame({'landcover_vals': coniferous_forest_values1,
+    df_coniferous_forest1 = pd.DataFrame({'landcover_vals': coniferous_forest_values,
                            'degrees': degrees,
                            'landcover_type':'Coniferous forest'})
 
-    df_mixed_forest1 = pd.DataFrame({'landcover_vals': mixed_forest_values1,
+    df_mixed_forest1 = pd.DataFrame({'landcover_vals': mixed_forest_values,
                            'degrees': degrees,
                            'landcover_type':'Mixed forest'})
 
-    df_ocean1 = pd.DataFrame({'landcover_vals': ocean_values1,
+    df_ocean1 = pd.DataFrame({'landcover_vals': ocean_values,
                            'degrees': degrees,
                            'landcover_type':'Ocean'})
 
-    df_other1 = pd.DataFrame({'landcover_vals': other_values1,
+    df_other1 = pd.DataFrame({'landcover_vals': other_values,
                            'degrees': degrees,
                            'landcover_type':'Other'})
 
-    df_grass_shrub1 = pd.DataFrame({'landcover_vals':  grass_shrub_values1,
+    df_grass_shrub1 = pd.DataFrame({'landcover_vals':  grass_shrub_values,
                            'degrees': degrees,
                            'landcover_type':'Grass/shrubland'})
 
-    df_cropland1 = pd.DataFrame({'landcover_vals':  cropland_values1,
+    df_cropland1 = pd.DataFrame({'landcover_vals':  cropland_values,
                            'degrees': degrees,
                            'landcover_type':'Cropland'})
 
-    df_pasture1 = pd.DataFrame({'landcover_vals': pasture_values1,
+    df_pasture1 = pd.DataFrame({'landcover_vals': pasture_values,
                            'degrees': degrees,
                            'landcover_type':'Pasture'})
 
-    df_urban1 = pd.DataFrame({'landcover_vals':  urban_values1,
+    df_urban1 = pd.DataFrame({'landcover_vals':  urban_values,
                            'degrees': degrees,
                            'landcover_type':'Urban'})
 
-    df_unknown1 = pd.DataFrame({'landcover_vals':  unknown_values1,
+    df_unknown1 = pd.DataFrame({'landcover_vals':  unknown_values,
                            'degrees': degrees,
                            'landcover_type':'Unknown'})
 
+    
+    fp = read_aggreg_footprints(station, date_range2)
+    f.value += 1
 
-    df_broad_leaf_forest2 = pd.DataFrame({'landcover_vals': broad_leaf_forest_values2,
+    broad_leaf_forest_fp=fp*broad_leaf_forest
+    coniferous_forest_fp=fp*coniferous_forest
+    mixed_forest_fp=fp*mixed_forest
+    ocean_fp=fp*ocean
+    other_fp=fp*other
+    grass_shrub_fp=fp*grass_shrub
+    cropland_fp=fp*cropland
+    pasture_fp=fp*pasture
+    urban_fp=fp*urban
+    unknown_fp=fp*unknown
+
+    #lists of these values
+    broad_leaf_forest_values = [item for sublist in broad_leaf_forest_fp[0] for item in sublist]
+    coniferous_forest_values = [item for sublist in coniferous_forest_fp[0] for item in sublist]
+    mixed_forest_values = [item for sublist in mixed_forest_fp[0] for item in sublist]
+    ocean_values = [item for sublist in ocean_fp[0] for item in sublist]
+    other_values = [item for sublist in other_fp[0] for item in sublist]
+    grass_shrub_values = [item for sublist in grass_shrub_fp[0] for item in sublist]
+    cropland_values = [item for sublist in cropland_fp[0] for item in sublist]
+    pasture_values = [item for sublist in pasture_fp[0] for item in sublist]
+    urban_values = [item for sublist in urban_fp[0] for item in sublist]
+    unknown_values = [item for sublist in unknown_fp[0] for item in sublist]
+    
+
+    df_broad_leaf_forest2 = pd.DataFrame({'landcover_vals': broad_leaf_forest_values,
                                'degrees': degrees,
                                'landcover_type':'Broad leaf forest'})
 
-    df_coniferous_forest2 = pd.DataFrame({'landcover_vals': coniferous_forest_values2,
+    df_coniferous_forest2 = pd.DataFrame({'landcover_vals': coniferous_forest_values,
                            'degrees': degrees,
                            'landcover_type':'Coniferous forest'})
 
-    df_mixed_forest2 = pd.DataFrame({'landcover_vals': mixed_forest_values2,
+    df_mixed_forest2 = pd.DataFrame({'landcover_vals': mixed_forest_values,
                            'degrees': degrees,
                            'landcover_type':'Mixed forest'})
 
-    df_ocean2 = pd.DataFrame({'landcover_vals': ocean_values2,
+    df_ocean2 = pd.DataFrame({'landcover_vals': ocean_values,
                            'degrees': degrees,
                            'landcover_type':'Ocean'})
 
-    df_other2 = pd.DataFrame({'landcover_vals': other_values2,
+    df_other2 = pd.DataFrame({'landcover_vals': other_values,
                            'degrees': degrees,
                            'landcover_type':'Other'})
 
-    df_grass_shrub2 = pd.DataFrame({'landcover_vals':  grass_shrub_values2,
+    df_grass_shrub2 = pd.DataFrame({'landcover_vals':  grass_shrub_values,
                            'degrees': degrees,
                            'landcover_type':'Grass/shrubland'})
 
-    df_cropland2 = pd.DataFrame({'landcover_vals':  cropland_values2,
+    df_cropland2 = pd.DataFrame({'landcover_vals':  cropland_values,
                            'degrees': degrees,
                            'landcover_type':'Cropland'})
 
-    df_pasture2 = pd.DataFrame({'landcover_vals': pasture_values2,
+    df_pasture2 = pd.DataFrame({'landcover_vals': pasture_values,
                            'degrees': degrees,
                            'landcover_type':'Pasture'})
 
-    df_urban2 = pd.DataFrame({'landcover_vals':  urban_values2,
+    df_urban2 = pd.DataFrame({'landcover_vals':  urban_values,
                            'degrees': degrees,
                            'landcover_type':'Urban'})
 
-    df_unknown2 = pd.DataFrame({'landcover_vals':  unknown_values2,
+    df_unknown2 = pd.DataFrame({'landcover_vals':  unknown_values,
                            'degrees': degrees,
                            'landcover_type':'Unknown'})
 
