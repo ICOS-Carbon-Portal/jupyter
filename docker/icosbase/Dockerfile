@@ -1,8 +1,8 @@
 # We use a specific hash since :latest has broken spuriously in the
 # past.
 # https://hub.docker.com/r/jupyter/datascience-notebook
-# This hash is jupyter/datascience-notebook:latest on 2023-01-17.
-FROM jupyter/datascience-notebook@sha256:2e57ec22f8b593227a8ca0007ce29da3bff1ae3e379459bc749530251be944f4
+# This hash is jupyter/datascience-notebook:latest on 2023-02-28.
+FROM jupyter/datascience-notebook@sha256:b466eacd0c44164303afd6a22eefee31e0a430b81f2c3e96f5394198144bb10b
 
 # Remove the default xetex LaTeX installation of jupyter-lab and
 # install the full latest LaTeX version. It takes about 45 minutes to
@@ -71,4 +71,5 @@ RUN pip install git+https://github.com/ZogopZ/icos-splash.git
 # Keep this in a separate line. It's the only library that changes
 # frequently and the new docker image will build faster.
 # Update version number according to latest release.
-RUN pip install git+https://github.com/icos-carbon-portal/pylib.git@66-implement-carbon-portal-authentication-for-pylib
+RUN pip install -i https://test.pypi.org/simple/ icoscp==0.1.18
+#RUN pip install git+https://github.com/icos-carbon-portal/pylib.git@66-implement-carbon-portal-authentication-for-pylib
