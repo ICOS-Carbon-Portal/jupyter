@@ -1,8 +1,8 @@
 # We use a specific hash since :latest has broken spuriously in the
 # past.
 # https://hub.docker.com/r/jupyter/datascience-notebook
-# This hash is jupyter/datascience-notebook:latest on 2023-02-28.
-FROM jupyter/datascience-notebook@sha256:b466eacd0c44164303afd6a22eefee31e0a430b81f2c3e96f5394198144bb10b
+# This hash is jupyter/datascience-notebook:latest on 2022-10-04.
+FROM jupyter/datascience-notebook@sha256:731da3b2844e168d677e622d6ce127e790117e291c57933deefd93bc5f79217d
 
 # Remove the default xetex LaTeX installation of jupyter-lab and
 # install the full latest LaTeX version. It takes about 45 minutes to
@@ -58,18 +58,15 @@ COPY pip_requirements.txt  pip_requirements.txt
 RUN pip install --quiet --requirement pip_requirements.txt
 RUN rm pip_requirements.txt
 # Version of nersc-refresh-announcements is 0.1.0.
-RUN pip install git+https://github.com/ZogopZ/nersc-refresh-announcements.git@patch-1
+RUN pip install --quiet git+https://github.com/NERSC/nersc-refresh-announcements.git
 
 # add env variable for PROJ (library used by cartopy and shapely)
 ENV PROJ_LIB=/opt/conda/share/proj
 
 # Override configuration for jupyter lab settings.
 COPY overrides.json /opt/conda/share/jupyter/lab/settings/.
-# Install jupyter-lab extension icos-splash, to modify the splash
-# animation using the ICOS Carbon Portal logo.
-RUN pip install git+https://github.com/ZogopZ/icos-splash.git
 # Keep this in a separate line. It's the only library that changes
 # frequently and the new docker image will build faster.
 # Update version number according to latest release.
+#RUN pip install --quiet icoscp==0.1.17
 RUN pip install -i https://test.pypi.org/simple/ icoscp==0.1.18
-#RUN pip install git+https://github.com/icos-carbon-portal/pylib.git@66-implement-carbon-portal-authentication-for-pylib
