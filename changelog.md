@@ -2,6 +2,10 @@
 
  - **Note**: The python package of the ICOS Carbon Portal, `icoscp`, is always the latest version. For details we refer the user to [ICOS Carbon Portal pylib - Changelog](https://icos-carbon-portal.github.io/pylib/changelog/).
 
+## 2.1.0 <p>(03/03/2023)</p>
+- Add [icos-splash](https://github.com/ZogopZ/icos-splash) to the docker
+  image installation.
+
 ## 2.0.1 <p>(15/11/2022)</p>
 - Add PyGeodesy version 22.11.3 library to the docker image installation.
 - Add utm version 0.7.0 library to the docker image installation.
