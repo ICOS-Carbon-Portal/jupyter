@@ -1,4 +1,29 @@
 {% extends "page.html" %}
+{% set announcement = '
+<p style="text-align: left">
+    Dear ICOS CP Jupyter Hub users, we would like to inform you about the latest updates regarding our Jupyter services.
+<ul>
+    <li style="text-align: left">
+        Please find
+        <a href="https://icos-carbon-portal.github.io/jupyter/changelog/#210-07032023" target="_blank">
+            here
+        </a>
+        a full list of updates regarding our docker image and notebook fixes.
+    </li>
+    <li style="text-align: left">
+        Under project-specific Jupyter notebooks, you can find the latest addition to our collection called the
+    <b>Network View tool</b>. The tool is associated with a paper currently published as a
+        <a href="https://acp.copernicus.org/preprints/acp-2022-756/" target="_blank">preprint in ACP.</a></li>
+</ul>
+<p style="text-align: left">
+    <br>
+    We recommend that you restart your Jupyter instance by following the instructions provided
+    <a href="https://icos-carbon-portal.github.io/jupyter/how_to/#restart-your-jupyter-instance" target="_blank">
+        here
+    </a>
+    to ensure that you have the most recent updates.
+</p>
+' %}
 {% if announcement_login %}
   {% set announcement = announcement_login %}
 {% endif %}
