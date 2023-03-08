@@ -27,6 +27,7 @@ RUN /tmp/install-tl --profile=/tmp/texlive.profile
 ENV PATH="/usr/local/texlive/2021/bin/x86_64-linux:${PATH}"
 
 # add zip to the system 
+RUN apt update
 RUN apt-get install zip
 
 # switch back to normal user
