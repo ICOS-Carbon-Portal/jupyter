@@ -25,6 +25,10 @@ COPY Texlive2021/texlive.profile /tmp/.
 RUN /tmp/install-tl --profile=/tmp/texlive.profile
 # Export path to texlive2021
 ENV PATH="/usr/local/texlive/2021/bin/x86_64-linux:${PATH}"
+
+# add zip to the system 
+apt install zip
+
 # switch back to normal user
 USER jovyan
 
@@ -69,6 +73,7 @@ COPY overrides.json /opt/conda/share/jupyter/lab/settings/.
 # Install jupyter-lab extension icos-splash, to modify the splash
 # animation using the ICOS Carbon Portal logo.
 RUN pip install git+https://github.com/ZogopZ/icos-splash.git
+
 # Keep this in a separate line. It's the only library that changes
 # frequently and the new docker image will build faster.
 # Update version number according to latest release.
