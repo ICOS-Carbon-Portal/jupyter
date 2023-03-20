@@ -23,14 +23,14 @@ RUN tar -xf /tmp/install-tl-unx.tar.gz --strip-components=1 -C /tmp/
 # Add profile and start intallation.
 COPY Texlive2021/texlive.profile /tmp/.
 RUN /tmp/install-tl --profile=/tmp/texlive.profile
-# Export path to texlive2021
+# Export path to texlive2021.
 ENV PATH="/usr/local/texlive/2021/bin/x86_64-linux:${PATH}"
 
-# add zip to the system 
+# Add zip to the system.
 RUN apt-get update
 RUN apt-get install zip
 
-# switch back to normal user
+# Switch back to normal user.
 USER jovyan
 
 # This directory is added by jupyter/base-notebook, for backwards
@@ -66,7 +66,7 @@ RUN rm pip_requirements.txt
 # RUN pip install --quiet git+https://github.com/NERSC/nersc-refresh-announcements.git
 RUN pip install git+https://github.com/ZogopZ/nersc-refresh-announcements.git@patch-1
 
-# add env variable for PROJ (library used by cartopy and shapely)
+# Add env variable for PROJ (library used by cartopy and shapely).
 ENV PROJ_LIB=/opt/conda/share/proj
 
 # Override configuration for jupyter lab settings.
