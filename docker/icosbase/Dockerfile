@@ -23,9 +23,14 @@ RUN tar -xf /tmp/install-tl-unx.tar.gz --strip-components=1 -C /tmp/
 # Add profile and start intallation.
 COPY Texlive2021/texlive.profile /tmp/.
 RUN /tmp/install-tl --profile=/tmp/texlive.profile
-# Export path to texlive2021
+# Export path to texlive2021.
 ENV PATH="/usr/local/texlive/2021/bin/x86_64-linux:${PATH}"
-# switch back to normal user
+
+# Add zip to the system.
+RUN apt-get update
+RUN apt-get install zip
+
+# Switch back to normal user.
 USER jovyan
 
 # This directory is added by jupyter/base-notebook, for backwards
@@ -61,7 +66,7 @@ RUN rm pip_requirements.txt
 # RUN pip install --quiet git+https://github.com/NERSC/nersc-refresh-announcements.git
 RUN pip install git+https://github.com/ZogopZ/nersc-refresh-announcements.git@patch-1
 
-# add env variable for PROJ (library used by cartopy and shapely)
+# Add env variable for PROJ (library used by cartopy and shapely).
 ENV PROJ_LIB=/opt/conda/share/proj
 
 # Override configuration for jupyter lab settings.
@@ -69,6 +74,7 @@ COPY overrides.json /opt/conda/share/jupyter/lab/settings/.
 # Install jupyter-lab extension icos-splash, to modify the splash
 # animation using the ICOS Carbon Portal logo.
 RUN pip install git+https://github.com/ZogopZ/icos-splash.git
+
 # Keep this in a separate line. It's the only library that changes
 # frequently and the new docker image will build faster.
 # Update version number according to latest release.
