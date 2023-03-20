@@ -12,6 +12,7 @@ issues.
 https://github.com/jupyter-server/jupyter-resource-usage) to pip 
 requirements.
 - Add [paramiko](https://github.com/paramiko/paramiko) to pip requirements.
+- Add `zip` library to the docker image installation (20/03/2023).
 - Other notebook fixes mentioned [here](
 https://github.com/ICOS-Carbon-Portal/jupyter/issues/262).
 
