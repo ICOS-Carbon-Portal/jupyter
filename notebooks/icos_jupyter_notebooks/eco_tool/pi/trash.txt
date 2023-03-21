@@ -1,0 +1,610 @@
+    def font_style(self,key):
+        
+        if key in Translator.__layout['font_style'].keys():
+            self['font_style'] = Translator.__layout['font_style'][key]
+        else:
+            self['font_style'] = Translator.__layout['font_style']['rm']
+        
+    
+    @property
+    def size(self):
+        key = self['size']
+        if key in self.__layout['size'].keys():
+            value = Translator.__layout['font_style'][key]
+        else:
+            value = Translator.__layout['font_style']['rm']
+        return  value
+
+    
+        return self['size']
+    
+    @size.setter
+    def size(self,value):
+        print(11111111111111111111111111,"Translator.__layout['size']", Translator.__layout['size'])
+        if value in Translator.__layout['size']:
+            self['size'] = Translator.__layout['size'][value]
+        else:
+            self['size'] = Translator.__layout['size'][8]
+              
+    @property
+    def use_exp(self):
+        return self['use_exp']
+    
+    @use_exp.setter
+    def use_exp(self,value):
+        if isinstance(value,bool):
+            self['use_exp'] = value
+            
+    @property
+    def debug(self):
+        return self['debug']
+    
+    @debug.setter
+    def debug(self,value):
+        if isinstance(value,bool):
+            self['debug'] = value
+
+
+    def _set_dollars(self,latex_txt):
+        """ 
+        Returns a latex string of latex_txt 
+        with size according to the layout
+        """
+
+        # See the "Warning" paragraph in the file comments
+        latex_txt = fr'${{{self.size}{latex_txt}}}$'
+        return latex_txt
+
+
+    def var_to_latex(self,var):
+        """ 
+        Converts ICOS-variables to latex-strings.
+
+        Parameters
+        ----------
+        var : str
+            Expects a string having the format of an ICOS-variable
+            (see the formats _var_to_latex)
+
+        Returns
+        -------
+        str 
+        """
+          # var,unit:  
+          # AS :  {('AP', 'hPa'), ('AP-Flag', 'No unit'), ('AP-NbPoints', 'No unit'),
+          #        ('AP-Stdev', 'hPa'), ('AT', '°C'), ('AT-Flag', 'No unit'), 
+          #        ('AT-NbPoints', 'No unit'), ('AT-Stdev', '°C'), ('Flag', 'No unit'), 
+          #        ('NbPoints', 'No unit'), ('RH', '%'), ('RH-Flag', 'No unit'), 
+          #        ('RH-NbPoints', 'No unit'), ('RH-Stdev', '%'), ('Stdev', 'nmol mol-1'),
+          #        ('TIMESTAMP', 'No unit'), ('WD', '°'), ('WD-Flag', 'No unit'), 
+          #        ('WD-NbPoints', 'No unit'), ('WD-Stdev', '°'), ('WS', 'm s-1'), 
+          #        ('WS-Flag', 'No unit'), ('WS-NbPoints', 'No unit'), 
+          #        ('WS-Stdev', 'm s-1'), ('ch4', 'nmol mol-1'), ('co', 'nmol mol-1'), 
+          #        ('co2', 'µmol mol-1'), ('n2o', 'nmol mol-1'), ('rn', 'Bq m-3')}
+          # OS :  {('Atmospheric Pressure [hPa]', 'hPa'), ('Atmospheric Pressure [hPa] QC Flag', 'No unit'),
+          #        ('Latitude', '°'), ('Longitude', '°'), ('P_sal [psu]', 'psu'), 
+          #        ('P_sal [psu] QC Flag', 'No unit'), ('QC Flag', 'No unit'), 
+          #        ('TIMESTAMP', 'No unit'), ('Temp [degC]', '°C'), ('Temp [degC] QC Flag', 'No unit'), 
+          #        ('fCO2 [uatm]', 'µatm'), ('fCO2 [uatm] QC Flag', 'No unit'), 
+          #        ('fCO2 in atmosphere [uatm]', 'µatm'), ('fCO2 in atmosphere [uatm] QC Flag', 'No unit'), 
+          #        ('pCO2 [uatm]', 'µatm'), ('pCO2 [uatm] QC Flag', 'No unit'),
+          #        ('pCO2 in atmosphere [uatm]', 'µatm'), ('pCO2 in atmosphere [uatm] QC Flag', 'No unit')})
+          # ES :  {('CO2', 'µmol mol-1'), ('D_SNOW', 'cm'), ('D_SNOW_1_1_1', 'cm'), ..., 
+          #        ('FC', 'µmol m-2 s-1'), ('G_1', 'W m-2'), ('G_10_1_1', 'W m-2'), ...
+          #        ('H', 'W m-2'), ('H2O', 'mmol mol-1'), ('H_UNCLEANED', 'W m-2'), ('LE', 'W m-2'),
+          #        ('LE_UNCLEANED', 'W m-2'), ('LW_IN', 'W m-2'), ('LW_IN_1_1_1', 'W m-2'), ...
+          #        ('LW_OUT', 'W m-2'), ('LW_OUT_1_1_1', 'W m-2'), ('LW_OUT_1_1_2', 'W m-2'),
+          #        ('NEE', 'µmol m-2 s-1'), ('NEE_UNCLEANED', 'µmol m-2 s-1'), ('P', 'mm'), 
+          #        ('PA', 'kPa'), ('PA_1_1_1', 'kPa'), ...
+          #        ('PPFD_BC_IN', 'µmol m-2 s-1'), ('PPFD_BC_IN_1', 'µmol m-2 s-1'), ...
+          #        ('PPFD_BC_IN_10_1_1', 'µmol m-2 s-1'), ...
+          #        ('PPFD_DIF', 'µmol m-2 s-1'), ('PPFD_DIF_1_1_1', 'µmol m-2 s-1'), ...
+          #        ('PPFD_IN', 'µmol m-2 s-1'), ('PPFD_IN_1_1_1', 'µmol m-2 s-1'), ...
+          #        ('PPFD_OUT', 'µmol m-2 s-1'), ('PPFD_OUT_1_1_1', 'µmol m-2 s-1'), ...
+          #        ('P_12_1_1', 'mm'), ...
+          #        ('RH', '%'), ('RH_1', '%'), ('RH_10', '%'),...
+          #        ('RH_1_10_1', '%'), ...
+          #        ('SC', 'µmol m-2 s-1'), ('SG_10_1_1', 'W m-2'), ...
+          #        ('SWC_1', '%'), ('SWC_10', '%'), ('SWC_10_1_1', '%'), ...
+          #        ('SW_DIF', 'W m-2'), ('SW_DIF_1_1_1', 'W m-2'), ('SW_IN', 'W m-2'), ('SW_IN_1_1_1', 'W m-2'),...
+          #        ('SW_OUT', 'W m-2'), ('SW_OUT_1_1_1', 'W m-2'), ...
+          #        ('TA', '°C'), ('TAU', 'kg m-1 s-2'), ('TA_1', '°C'),...
+          #        ('TA_1_10_1', '°C'), ...
+          #        ('TIMESTAMP', 'No unit'), ('TIMESTAMP_END', 'No unit'), ...
+          #        ('TS_1', '°C'), ('TS_10_1_1', '°C'),...
+          #        ('USTAR', 'm s-1'), ('VPD', 'hPa'), ('VPD_1', 'hPa'), ('VPD_10', 'hPa'),...
+          #        ('VPD_1_10_1', 'hPa'), ('VPD_1_11_1', 'hPa'),...
+          #        ('WD', '°'), ('WD_1', '°'), ('WD_1_1_1', '°'), ('WD_1_1_2', '°'),...
+          #        ('WS', 'm s-1'), ('WS_1', 'm s-1'), ('WS_1_1_1', 'm s-1'), ...
+          #        ('WTD', 'm'), ('WTD_10_1_1', 'm'), ('WTD_11_1_1', 'm'), ...
+          #        ('W_SIGMA', 'm s-1'), ('ZL', 'No unit')}
+
+        latex_var = Translator.__var_to_latex(var)
+
+        cmd = self.font_style
+
+        latex_var = f'{{{cmd}{{{latex_var}}}}}'
+
+        return self._set_dollars(latex_var,**layout)
+
+    
+    def _var_to_latex(self,var):
+        """ 
+        Converts ICOS-variables to latex-strings.
+
+        Parameters
+        ----------
+        var : str
+            Expects a string having the format of an ICOS-variable
+            (see the formats below)
+
+        Returns
+        -------
+        str 
+        """
+          # var,unit:  
+          # AS :  {('AP', 'hPa'), ('AP-Flag', 'No unit'), ('AP-NbPoints', 'No unit'),
+          #        ('AP-Stdev', 'hPa'), ('AT', '°C'), ('AT-Flag', 'No unit'), 
+          #        ('AT-NbPoints', 'No unit'), ('AT-Stdev', '°C'), ('Flag', 'No unit'), 
+          #        ('NbPoints', 'No unit'), ('RH', '%'), ('RH-Flag', 'No unit'), 
+          #        ('RH-NbPoints', 'No unit'), ('RH-Stdev', '%'), ('Stdev', 'nmol mol-1'),
+          #        ('TIMESTAMP', 'No unit'), ('WD', '°'), ('WD-Flag', 'No unit'), 
+          #        ('WD-NbPoints', 'No unit'), ('WD-Stdev', '°'), ('WS', 'm s-1'), 
+          #        ('WS-Flag', 'No unit'), ('WS-NbPoints', 'No unit'), 
+          #        ('WS-Stdev', 'm s-1'), ('ch4', 'nmol mol-1'), ('co', 'nmol mol-1'), 
+          #        ('co2', 'µmol mol-1'), ('n2o', 'nmol mol-1'), ('rn', 'Bq m-3')}
+          # OS :  {('Atmospheric Pressure [hPa]', 'hPa'), ('Atmospheric Pressure [hPa] QC Flag', 'No unit'),
+          #        ('Latitude', '°'), ('Longitude', '°'), ('P_sal [psu]', 'psu'), 
+          #        ('P_sal [psu] QC Flag', 'No unit'), ('QC Flag', 'No unit'), 
+          #        ('TIMESTAMP', 'No unit'), ('Temp [degC]', '°C'), ('Temp [degC] QC Flag', 'No unit'), 
+          #        ('fCO2 [uatm]', 'µatm'), ('fCO2 [uatm] QC Flag', 'No unit'), 
+          #        ('fCO2 in atmosphere [uatm]', 'µatm'), ('fCO2 in atmosphere [uatm] QC Flag', 'No unit'), 
+          #        ('pCO2 [uatm]', 'µatm'), ('pCO2 [uatm] QC Flag', 'No unit'),
+          #        ('pCO2 in atmosphere [uatm]', 'µatm'), ('pCO2 in atmosphere [uatm] QC Flag', 'No unit')})
+          # ES :  {('CO2', 'µmol mol-1'), ('D_SNOW', 'cm'), ('D_SNOW_1_1_1', 'cm'), ..., 
+          #        ('FC', 'µmol m-2 s-1'), ('G_1', 'W m-2'), ('G_10_1_1', 'W m-2'), ...
+          #        ('H', 'W m-2'), ('H2O', 'mmol mol-1'), ('H_UNCLEANED', 'W m-2'), ('LE', 'W m-2'),
+          #        ('LE_UNCLEANED', 'W m-2'), ('LW_IN', 'W m-2'), ('LW_IN_1_1_1', 'W m-2'), ...
+          #        ('LW_OUT', 'W m-2'), ('LW_OUT_1_1_1', 'W m-2'), ('LW_OUT_1_1_2', 'W m-2'),
+          #        ('NEE', 'µmol m-2 s-1'), ('NEE_UNCLEANED', 'µmol m-2 s-1'), ('P', 'mm'), 
+          #        ('PA', 'kPa'), ('PA_1_1_1', 'kPa'), ...
+          #        ('PPFD_BC_IN', 'µmol m-2 s-1'), ('PPFD_BC_IN_1', 'µmol m-2 s-1'), ...
+          #        ('PPFD_BC_IN_10_1_1', 'µmol m-2 s-1'), ...
+          #        ('PPFD_DIF', 'µmol m-2 s-1'), ('PPFD_DIF_1_1_1', 'µmol m-2 s-1'), ...
+          #        ('PPFD_IN', 'µmol m-2 s-1'), ('PPFD_IN_1_1_1', 'µmol m-2 s-1'), ...
+          #        ('PPFD_OUT', 'µmol m-2 s-1'), ('PPFD_OUT_1_1_1', 'µmol m-2 s-1'), ...
+          #        ('P_12_1_1', 'mm'), ...
+          #        ('RH', '%'), ('RH_1', '%'), ('RH_10', '%'),...
+          #        ('RH_1_10_1', '%'), ...
+          #        ('SC', 'µmol m-2 s-1'), ('SG_10_1_1', 'W m-2'), ...
+          #        ('SWC_1', '%'), ('SWC_10', '%'), ('SWC_10_1_1', '%'), ...
+          #        ('SW_DIF', 'W m-2'), ('SW_DIF_1_1_1', 'W m-2'), ('SW_IN', 'W m-2'), ('SW_IN_1_1_1', 'W m-2'),...
+          #        ('SW_OUT', 'W m-2'), ('SW_OUT_1_1_1', 'W m-2'), ...
+          #        ('TA', '°C'), ('TAU', 'kg m-1 s-2'), ('TA_1', '°C'),...
+          #        ('TA_1_10_1', '°C'), ...
+          #        ('TIMESTAMP', 'No unit'), ('TIMESTAMP_END', 'No unit'), ...
+          #        ('TS_1', '°C'), ('TS_10_1_1', '°C'),...
+          #        ('USTAR', 'm s-1'), ('VPD', 'hPa'), ('VPD_1', 'hPa'), ('VPD_10', 'hPa'),...
+          #        ('VPD_1_10_1', 'hPa'), ('VPD_1_11_1', 'hPa'),...
+          #        ('WD', '°'), ('WD_1', '°'), ('WD_1_1_1', '°'), ('WD_1_1_2', '°'),...
+          #        ('WS', 'm s-1'), ('WS_1', 'm s-1'), ('WS_1_1_1', 'm s-1'), ...
+          #        ('WTD', 'm'), ('WTD_10_1_1', 'm'), ('WTD_11_1_1', 'm'), ...
+          #        ('W_SIGMA', 'm s-1'), ('ZL', 'No unit')}
+
+        trans_dict = {'CO2'    : r'{{CO_2}}',
+                      'co2'    : r'{{CO_2}}',
+                      'fCO2'   : r'{{fCO_2}}',
+                      'pCO2'   : r'{{pCO_2}}',
+                      'co'     : r'{{CO}}',
+                      'ch4'    : r'{{CH_4}}',
+                      'H2O'    : r'{{H_2O}}',
+                      'n2o'    : r'{{N_2O}}',
+                      'rn'     : r'{{RN}}',
+                      '[degC]' : r'{{[^{\circ}C]}}',
+                      '[uatm]' : r'{{[\mu {atm}]}}'}
+        
+        var_ls = var.split(' ')
+        latex_ls = []
+        var_word_ls = []
+
+        for word in var_ls:
+            word_parts = word.split('_')
+            latex_parts = []
+            while word_parts:
+                word_part = word_parts.pop(0)
+                if word_part in trans_dict.keys():
+                    tex_txt = trans_dict[word_part]
+                elif word_part.isdigit():
+                    digit_ls = [word_part]
+                    while word_parts and word_parts[0].isdigit():
+                        digit_ls.append(word_parts.pop(0))
+                    if len(digit_ls)==1:
+                        tex_txt = '*' + digit_ls[0]
+                    else:
+                        digits = ','.join(digit_ls)
+                        tex_txt = f'*{{({digits})}}'
+                else:
+                    tex_txt = f'{{{word_part}}}'
+
+                latex_parts.append(tex_txt)
+
+            if latex_parts:
+                latex_part = latex_parts.pop(0)
+            else:
+                latex_part = ''
+            while latex_parts:
+                part = latex_parts.pop(0)
+                if part[0] == '*':
+                    latex_part += '_' + part[1:]
+                else:
+                    latex_part += r'\_' + part
+
+            latex_ls.append(latex_part)
+
+        latex_var = r'\ '.join(latex_ls)
+        
+        return latex_var
+
+
+    def unit_to_latex(self,unit):
+        """ 
+        Converts ICOS-units to latex-strings 
+        WITH $-signs, using settings from the layout 
+
+        Parameters
+        ----------
+        unit : str
+            Expects a string having the format of an 
+            ICOS-unit (see formats in __unit_to_latex()).
+
+        Returns
+        -------
+        str 
+        """
+        
+        latex_unit = self.__unit_to_latex(unit, self.use_exp)
+
+        cmd = self.font_style
+        latex_unit = fr'{{{cmd}{{{latex_unit}}}}}'
+
+        return self._set_dollars(latex_unit)
+
+
+    def var_unit_to_latex(self,var,unit):
+        """ 
+        Converts ICOS-vars and ICOS-units into latex-strings.
+
+        Parameters
+        ----------
+        var  : str
+            Expects a string having the format of an ICOS-variable
+            see doc of Translator.__var_to_latex 
+
+        unit : str
+            Expects a string having the format of an ICOS-unit
+            see doc of Translator.__unit_to_latex
+            
+
+        Returns
+        -------
+        str 
+        """
+
+        latex_var = Translator.__var_to_latex(var)
+        latex_unit = Translator.__unit_to_latex(unit, self.use_exp)
+        latex_unit = f'({latex_unit})'
+
+        latex_var_unit = f'${latex_var}\ {latex_unit}$'
+
+        return latex_var_unit
+
+
+
+
+2222222222222
+
+
+def font_style(self,key):
+        
+        if key in Translator.__layout['font_style'].keys():
+            self['font_style'] = Translator.__layout['font_style'][key]
+        else:
+            self['font_style'] = Translator.__layout['font_style']['rm']
+        
+    
+    @property
+    def size(self):
+        key = self['size']
+        if key in self.__layout['size'].keys():
+            value = Translator.__layout['font_style'][key]
+        else:
+            value = Translator.__layout['font_style']['rm']
+        return  value
+
+    
+        return self['size']
+    
+    @size.setter
+    def size(self,value):
+        print(11111111111111111111111111,"Translator.__layout['size']", Translator.__layout['size'])
+        if value in Translator.__layout['size']:
+            self['size'] = Translator.__layout['size'][value]
+        else:
+            self['size'] = Translator.__layout['size'][8]
+              
+    @property
+    def use_exp(self):
+        return self['use_exp']
+    
+    @use_exp.setter
+    def use_exp(self,value):
+        if isinstance(value,bool):
+            self['use_exp'] = value
+            
+    @property
+    def debug(self):
+        return self['debug']
+    
+    @debug.setter
+    def debug(self,value):
+        print('set debug', value)
+        if isinstance(value,bool):
+            self['debug'] = value
+
+
+    def _set_dollars(self,latex_txt, **layout):
+        """ 
+        Returns a latex string of latex_txt 
+        with size according to the layout
+        """
+
+        # See the "Warning" paragraph in the file comments
+        latex_txt = fr'${{{self.size}{latex_txt}}}$'
+        return latex_txt
+
+
+    def var_to_latex(self,var):
+        """ 
+        Converts ICOS-variables to latex-strings.
+
+        Parameters
+        ----------
+        var : str
+            Expects a string having the format of an ICOS-variable
+            (see the formats _var_to_latex)
+
+        Returns
+        -------
+        str 
+        """
+          # var,unit:  
+          # AS :  {('AP', 'hPa'), ('AP-Flag', 'No unit'), ('AP-NbPoints', 'No unit'),
+          #        ('AP-Stdev', 'hPa'), ('AT', '°C'), ('AT-Flag', 'No unit'), 
+          #        ('AT-NbPoints', 'No unit'), ('AT-Stdev', '°C'), ('Flag', 'No unit'), 
+          #        ('NbPoints', 'No unit'), ('RH', '%'), ('RH-Flag', 'No unit'), 
+          #        ('RH-NbPoints', 'No unit'), ('RH-Stdev', '%'), ('Stdev', 'nmol mol-1'),
+          #        ('TIMESTAMP', 'No unit'), ('WD', '°'), ('WD-Flag', 'No unit'), 
+          #        ('WD-NbPoints', 'No unit'), ('WD-Stdev', '°'), ('WS', 'm s-1'), 
+          #        ('WS-Flag', 'No unit'), ('WS-NbPoints', 'No unit'), 
+          #        ('WS-Stdev', 'm s-1'), ('ch4', 'nmol mol-1'), ('co', 'nmol mol-1'), 
+          #        ('co2', 'µmol mol-1'), ('n2o', 'nmol mol-1'), ('rn', 'Bq m-3')}
+          # OS :  {('Atmospheric Pressure [hPa]', 'hPa'), ('Atmospheric Pressure [hPa] QC Flag', 'No unit'),
+          #        ('Latitude', '°'), ('Longitude', '°'), ('P_sal [psu]', 'psu'), 
+          #        ('P_sal [psu] QC Flag', 'No unit'), ('QC Flag', 'No unit'), 
+          #        ('TIMESTAMP', 'No unit'), ('Temp [degC]', '°C'), ('Temp [degC] QC Flag', 'No unit'), 
+          #        ('fCO2 [uatm]', 'µatm'), ('fCO2 [uatm] QC Flag', 'No unit'), 
+          #        ('fCO2 in atmosphere [uatm]', 'µatm'), ('fCO2 in atmosphere [uatm] QC Flag', 'No unit'), 
+          #        ('pCO2 [uatm]', 'µatm'), ('pCO2 [uatm] QC Flag', 'No unit'),
+          #        ('pCO2 in atmosphere [uatm]', 'µatm'), ('pCO2 in atmosphere [uatm] QC Flag', 'No unit')})
+          # ES :  {('CO2', 'µmol mol-1'), ('D_SNOW', 'cm'), ('D_SNOW_1_1_1', 'cm'), ..., 
+          #        ('FC', 'µmol m-2 s-1'), ('G_1', 'W m-2'), ('G_10_1_1', 'W m-2'), ...
+          #        ('H', 'W m-2'), ('H2O', 'mmol mol-1'), ('H_UNCLEANED', 'W m-2'), ('LE', 'W m-2'),
+          #        ('LE_UNCLEANED', 'W m-2'), ('LW_IN', 'W m-2'), ('LW_IN_1_1_1', 'W m-2'), ...
+          #        ('LW_OUT', 'W m-2'), ('LW_OUT_1_1_1', 'W m-2'), ('LW_OUT_1_1_2', 'W m-2'),
+          #        ('NEE', 'µmol m-2 s-1'), ('NEE_UNCLEANED', 'µmol m-2 s-1'), ('P', 'mm'), 
+          #        ('PA', 'kPa'), ('PA_1_1_1', 'kPa'), ...
+          #        ('PPFD_BC_IN', 'µmol m-2 s-1'), ('PPFD_BC_IN_1', 'µmol m-2 s-1'), ...
+          #        ('PPFD_BC_IN_10_1_1', 'µmol m-2 s-1'), ...
+          #        ('PPFD_DIF', 'µmol m-2 s-1'), ('PPFD_DIF_1_1_1', 'µmol m-2 s-1'), ...
+          #        ('PPFD_IN', 'µmol m-2 s-1'), ('PPFD_IN_1_1_1', 'µmol m-2 s-1'), ...
+          #        ('PPFD_OUT', 'µmol m-2 s-1'), ('PPFD_OUT_1_1_1', 'µmol m-2 s-1'), ...
+          #        ('P_12_1_1', 'mm'), ...
+          #        ('RH', '%'), ('RH_1', '%'), ('RH_10', '%'),...
+          #        ('RH_1_10_1', '%'), ...
+          #        ('SC', 'µmol m-2 s-1'), ('SG_10_1_1', 'W m-2'), ...
+          #        ('SWC_1', '%'), ('SWC_10', '%'), ('SWC_10_1_1', '%'), ...
+          #        ('SW_DIF', 'W m-2'), ('SW_DIF_1_1_1', 'W m-2'), ('SW_IN', 'W m-2'), ('SW_IN_1_1_1', 'W m-2'),...
+          #        ('SW_OUT', 'W m-2'), ('SW_OUT_1_1_1', 'W m-2'), ...
+          #        ('TA', '°C'), ('TAU', 'kg m-1 s-2'), ('TA_1', '°C'),...
+          #        ('TA_1_10_1', '°C'), ...
+          #        ('TIMESTAMP', 'No unit'), ('TIMESTAMP_END', 'No unit'), ...
+          #        ('TS_1', '°C'), ('TS_10_1_1', '°C'),...
+          #        ('USTAR', 'm s-1'), ('VPD', 'hPa'), ('VPD_1', 'hPa'), ('VPD_10', 'hPa'),...
+          #        ('VPD_1_10_1', 'hPa'), ('VPD_1_11_1', 'hPa'),...
+          #        ('WD', '°'), ('WD_1', '°'), ('WD_1_1_1', '°'), ('WD_1_1_2', '°'),...
+          #        ('WS', 'm s-1'), ('WS_1', 'm s-1'), ('WS_1_1_1', 'm s-1'), ...
+          #        ('WTD', 'm'), ('WTD_10_1_1', 'm'), ('WTD_11_1_1', 'm'), ...
+          #        ('W_SIGMA', 'm s-1'), ('ZL', 'No unit')}
+
+        latex_var = Translator.__var_to_latex(var)
+
+        cmd = self.font_style
+
+        latex_var = f'{{{cmd}{{{latex_var}}}}}'
+
+        return self._set_dollars(latex_var,**layout)
+
+    
+    def _var_to_latex(self,var):
+        """ 
+        Converts ICOS-variables to latex-strings.
+
+        Parameters
+        ----------
+        var : str
+            Expects a string having the format of an ICOS-variable
+            (see the formats below)
+
+        Returns
+        -------
+        str 
+        """
+          # var,unit:  
+          # AS :  {('AP', 'hPa'), ('AP-Flag', 'No unit'), ('AP-NbPoints', 'No unit'),
+          #        ('AP-Stdev', 'hPa'), ('AT', '°C'), ('AT-Flag', 'No unit'), 
+          #        ('AT-NbPoints', 'No unit'), ('AT-Stdev', '°C'), ('Flag', 'No unit'), 
+          #        ('NbPoints', 'No unit'), ('RH', '%'), ('RH-Flag', 'No unit'), 
+          #        ('RH-NbPoints', 'No unit'), ('RH-Stdev', '%'), ('Stdev', 'nmol mol-1'),
+          #        ('TIMESTAMP', 'No unit'), ('WD', '°'), ('WD-Flag', 'No unit'), 
+          #        ('WD-NbPoints', 'No unit'), ('WD-Stdev', '°'), ('WS', 'm s-1'), 
+          #        ('WS-Flag', 'No unit'), ('WS-NbPoints', 'No unit'), 
+          #        ('WS-Stdev', 'm s-1'), ('ch4', 'nmol mol-1'), ('co', 'nmol mol-1'), 
+          #        ('co2', 'µmol mol-1'), ('n2o', 'nmol mol-1'), ('rn', 'Bq m-3')}
+          # OS :  {('Atmospheric Pressure [hPa]', 'hPa'), ('Atmospheric Pressure [hPa] QC Flag', 'No unit'),
+          #        ('Latitude', '°'), ('Longitude', '°'), ('P_sal [psu]', 'psu'), 
+          #        ('P_sal [psu] QC Flag', 'No unit'), ('QC Flag', 'No unit'), 
+          #        ('TIMESTAMP', 'No unit'), ('Temp [degC]', '°C'), ('Temp [degC] QC Flag', 'No unit'), 
+          #        ('fCO2 [uatm]', 'µatm'), ('fCO2 [uatm] QC Flag', 'No unit'), 
+          #        ('fCO2 in atmosphere [uatm]', 'µatm'), ('fCO2 in atmosphere [uatm] QC Flag', 'No unit'), 
+          #        ('pCO2 [uatm]', 'µatm'), ('pCO2 [uatm] QC Flag', 'No unit'),
+          #        ('pCO2 in atmosphere [uatm]', 'µatm'), ('pCO2 in atmosphere [uatm] QC Flag', 'No unit')})
+          # ES :  {('CO2', 'µmol mol-1'), ('D_SNOW', 'cm'), ('D_SNOW_1_1_1', 'cm'), ..., 
+          #        ('FC', 'µmol m-2 s-1'), ('G_1', 'W m-2'), ('G_10_1_1', 'W m-2'), ...
+          #        ('H', 'W m-2'), ('H2O', 'mmol mol-1'), ('H_UNCLEANED', 'W m-2'), ('LE', 'W m-2'),
+          #        ('LE_UNCLEANED', 'W m-2'), ('LW_IN', 'W m-2'), ('LW_IN_1_1_1', 'W m-2'), ...
+          #        ('LW_OUT', 'W m-2'), ('LW_OUT_1_1_1', 'W m-2'), ('LW_OUT_1_1_2', 'W m-2'),
+          #        ('NEE', 'µmol m-2 s-1'), ('NEE_UNCLEANED', 'µmol m-2 s-1'), ('P', 'mm'), 
+          #        ('PA', 'kPa'), ('PA_1_1_1', 'kPa'), ...
+          #        ('PPFD_BC_IN', 'µmol m-2 s-1'), ('PPFD_BC_IN_1', 'µmol m-2 s-1'), ...
+          #        ('PPFD_BC_IN_10_1_1', 'µmol m-2 s-1'), ...
+          #        ('PPFD_DIF', 'µmol m-2 s-1'), ('PPFD_DIF_1_1_1', 'µmol m-2 s-1'), ...
+          #        ('PPFD_IN', 'µmol m-2 s-1'), ('PPFD_IN_1_1_1', 'µmol m-2 s-1'), ...
+          #        ('PPFD_OUT', 'µmol m-2 s-1'), ('PPFD_OUT_1_1_1', 'µmol m-2 s-1'), ...
+          #        ('P_12_1_1', 'mm'), ...
+          #        ('RH', '%'), ('RH_1', '%'), ('RH_10', '%'),...
+          #        ('RH_1_10_1', '%'), ...
+          #        ('SC', 'µmol m-2 s-1'), ('SG_10_1_1', 'W m-2'), ...
+          #        ('SWC_1', '%'), ('SWC_10', '%'), ('SWC_10_1_1', '%'), ...
+          #        ('SW_DIF', 'W m-2'), ('SW_DIF_1_1_1', 'W m-2'), ('SW_IN', 'W m-2'), ('SW_IN_1_1_1', 'W m-2'),...
+          #        ('SW_OUT', 'W m-2'), ('SW_OUT_1_1_1', 'W m-2'), ...
+          #        ('TA', '°C'), ('TAU', 'kg m-1 s-2'), ('TA_1', '°C'),...
+          #        ('TA_1_10_1', '°C'), ...
+          #        ('TIMESTAMP', 'No unit'), ('TIMESTAMP_END', 'No unit'), ...
+          #        ('TS_1', '°C'), ('TS_10_1_1', '°C'),...
+          #        ('USTAR', 'm s-1'), ('VPD', 'hPa'), ('VPD_1', 'hPa'), ('VPD_10', 'hPa'),...
+          #        ('VPD_1_10_1', 'hPa'), ('VPD_1_11_1', 'hPa'),...
+          #        ('WD', '°'), ('WD_1', '°'), ('WD_1_1_1', '°'), ('WD_1_1_2', '°'),...
+          #        ('WS', 'm s-1'), ('WS_1', 'm s-1'), ('WS_1_1_1', 'm s-1'), ...
+          #        ('WTD', 'm'), ('WTD_10_1_1', 'm'), ('WTD_11_1_1', 'm'), ...
+          #        ('W_SIGMA', 'm s-1'), ('ZL', 'No unit')}
+
+        trans_dict = {'CO2'    : r'{{CO_2}}',
+                      'co2'    : r'{{CO_2}}',
+                      'fCO2'   : r'{{fCO_2}}',
+                      'pCO2'   : r'{{pCO_2}}',
+                      'co'     : r'{{CO}}',
+                      'ch4'    : r'{{CH_4}}',
+                      'H2O'    : r'{{H_2O}}',
+                      'n2o'    : r'{{N_2O}}',
+                      'rn'     : r'{{RN}}',
+                      '[degC]' : r'{{[^{\circ}C]}}',
+                      '[uatm]' : r'{{[\mu {atm}]}}'}
+        
+        var_ls = var.split(' ')
+        latex_ls = []
+        var_word_ls = []
+
+        for word in var_ls:
+            word_parts = word.split('_')
+            latex_parts = []
+            while word_parts:
+                word_part = word_parts.pop(0)
+                if word_part in trans_dict.keys():
+                    tex_txt = trans_dict[word_part]
+                elif word_part.isdigit():
+                    digit_ls = [word_part]
+                    while word_parts and word_parts[0].isdigit():
+                        digit_ls.append(word_parts.pop(0))
+                    if len(digit_ls)==1:
+                        tex_txt = '*' + digit_ls[0]
+                    else:
+                        digits = ','.join(digit_ls)
+                        tex_txt = f'*{{({digits})}}'
+                else:
+                    tex_txt = f'{{{word_part}}}'
+
+                latex_parts.append(tex_txt)
+
+            if latex_parts:
+                latex_part = latex_parts.pop(0)
+            else:
+                latex_part = ''
+            while latex_parts:
+                part = latex_parts.pop(0)
+                if part[0] == '*':
+                    latex_part += '_' + part[1:]
+                else:
+                    latex_part += r'\_' + part
+
+            latex_ls.append(latex_part)
+
+        latex_var = r'\ '.join(latex_ls)
+        
+        return latex_var
+
+
+    def unit_to_latex(self,unit):
+        """ 
+        Converts ICOS-units to latex-strings 
+        WITH $-signs, using settings from the layout 
+
+        Parameters
+        ----------
+        unit : str
+            Expects a string having the format of an 
+            ICOS-unit (see formats in __unit_to_latex()).
+
+        Returns
+        -------
+        str 
+        """
+        
+        latex_unit = self.__unit_to_latex(unit, self.use_exp)
+
+        cmd = self.font_style
+        latex_unit = fr'{{{cmd}{{{latex_unit}}}}}'
+
+        return self._set_dollars(latex_unit)
+
+
+    def var_unit_to_latex(self,var,unit):
+        """ 
+        Converts ICOS-vars and ICOS-units into latex-strings.
+
+        Parameters
+        ----------
+        var  : str
+            Expects a string having the format of an ICOS-variable
+            see doc of Translator.__var_to_latex 
+
+        unit : str
+            Expects a string having the format of an ICOS-unit
+            see doc of Translator.__unit_to_latex
+            
+
+        Returns
+        -------
+        str 
+        """
+
+        latex_var = Translator.__var_to_latex(var)
+        latex_unit = Translator.__unit_to_latex(unit, self.use_exp)
+        latex_unit = f'({latex_unit})'
+
+        latex_var_unit = f'${latex_var}\ {latex_unit}$'
+
+        return latex_var_unit
+
+
+
+
