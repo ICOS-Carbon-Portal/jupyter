@@ -1685,9 +1685,10 @@ def signals_table_anthro(stc, output=output, csvfile='anthro_table.csv'):
     
     df_save.to_csv(os.path.join(output, csvfile), index = False)  
 
-
+    
 def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.csv'):   
     
+    component = stc['component']
     stations = stc['signalsStations']
     timeselect_list = stc['timeOfDay']
     
@@ -1723,8 +1724,9 @@ def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.cs
 
         list_landcover_fractions.append(landcover_fraction)
 
-    df_save = pd.DataFrame(columns= ['Station',
-                                    'GEE total', 'GEE total (STILT)*','Broad leaf forest (GEE)', 'Coniferous forest (GEE)', 'Mixed forest (GEE)','Ocean (GEE)','Other (GEE)','Grass and shrub (GEE)', 'Cropland (GEE)','Pasture (GEE)','Urban (GEE)', 'Unknown (GEE)'])
+    df_save = pd.DataFrame(columns= ['Station', component + ' total', component + ' total (STILT)*','Broad leaf forest (' + component + ')', 'Coniferous forest (' + component + ')', 'Mixed forest (' + component + ')',\
+                                     'Ocean (' + component + ')','Other (' + component + ')','Grass and shrub (' + component + ')', 'Cropland (' + component + ')','Pasture (' + component + ')',\
+                                     'Urban (' + component + ')', 'Unknown (' + component + ')'])
 
     # index for putting the data for each station (mean) in the correct place in the dataframe "df_save"
     i_outer = 0
@@ -1735,7 +1737,11 @@ def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.cs
         df_stilt_result_only_numeber = df_stilt_result.select_dtypes(['number'])
 
         average_df_stilt_result = df_stilt_result_only_numeber.mean()
-        gee_station_stilt = abs(average_df_stilt_result['co2.bio.gee'])
+        
+        if component == 'GEE':
+            component_station_stilt = abs(average_df_stilt_result['co2.bio.gee'])
+        else:
+            component_station_stilt = abs(average_df_stilt_result['co2.bio.resp'])
         
         i = 0 
 
@@ -1747,15 +1753,20 @@ def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.cs
         for date in date_range:
 
             # access the correct VPRM flux dataset
-            if first or date.year!=current_year:
+            if first or date.month!=current_month:
 
                 current_year = date.year
                 
-                filename_gee = check_cp(path_cp,'VPRM_ECMWF_GEE_' + str(current_year) + '_CP.nc')
+                current_month = date.month
+                
+                if component == 'GEE':
+                    filename_component = '/data/project/obsnet/VPRM_10day/gee/GEE_10day_' +str(current_year) + '_' + str(current_month) + '.nc'
+                else:
+                    filename_component = '/data/project/obsnet/VPRM_10day/respiration/RESP_10day_' +str(current_year) + '_' + str(current_month) + '.nc'
 
-                f_gee = cdf.Dataset(filename_gee)
+                f_component = cdf.Dataset(filename_component)
 
-                times = f_gee.variables['time']
+                times = f_component.variables['time']
 
                 first = False
 
@@ -1763,7 +1774,11 @@ def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.cs
 
             ntime = date2index(date,times,select='nearest')
 
-            gee = f_gee.variables['GEE'][ntime][:][:]
+            if component == 'GEE':
+                
+                component_selected = f_component.variables['gee_10day'][ntime][:][:]
+            else:
+                component_selected = f_component.variables['resp_10day'][ntime][:][:]
 
             filename=(pathFP+station+'/'+str(date.year)+'/'+str(date.month).zfill(2)+'/'
                  +str(date.year)+'x'+str(date.month).zfill(2)+'x'+str(date.day).zfill(2)+'x'+str(date.hour).zfill(2)+'/foot')
@@ -1773,32 +1788,32 @@ def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.cs
                 f_fp = cdf.Dataset(filename)
                 fp=f_fp.variables['foot'][:,:,:]
 
-                fp_gee_station = abs(gee) * fp
+                fp_component_station = abs(component_selected) * fp
                 
                 if first_average: 
 
-                    fp_gee_station_average = fp_gee_station
+                    fp_component_station_average = fp_component_station
                     
                     first_average = False
                     
                 else:
 
-                    fp_gee_station_average = fp_gee_station_average + fp_gee_station
+                    fp_component_station_average = fp_component_station_average + fp_component_station
                     
                 i = i + 1
 
-        fp_gee_station_average = fp_gee_station_average / i 
+        fp_component_station_average = fp_component_station_average / i 
         
-        average_gee = fp_gee_station_average.sum()
+        average_component = fp_component_station_average.sum()
 
         # to be extended with land cover data
-        data_row = [station, average_gee, gee_station_stilt]
+        data_row = [station, average_component, component_station_stilt]
 
         for landcover_fraction in list_landcover_fractions:
 
-            fp_gee_station_landcover = (fp_gee_station_average * landcover_fraction).sum()
+            fp_component_station_landcover = (fp_component_station_average * landcover_fraction).sum()
      
-            data_row.extend([fp_gee_station_landcover])
+            data_row.extend([fp_component_station_landcover])
 
         df_save.loc[i_outer] = data_row
 
@@ -1807,18 +1822,26 @@ def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.cs
         
     df_save_sort = df_save.sort_values(by=['Station'])
     
-    df_save_subset_gee = df_save_sort[['Station',  'Broad leaf forest (GEE)', 'Coniferous forest (GEE)', 'Mixed forest (GEE)', 'Other (GEE)',  'Grass and shrub (GEE)',  'Cropland (GEE)',  'Pasture (GEE)',  'Urban (GEE)', 'GEE total', 'GEE total (STILT)*']]
+    df_save_subset_component = df_save_sort[['Station',  'Broad leaf forest (' + component + ')', 'Coniferous forest (' + component + ')', 'Mixed forest (' + component + ')', \
+                                             'Other (' + component + ')',  'Grass and shrub (' + component + ')',  'Cropland (' + component + ')',  'Pasture (' + component + ')',\
+                                             'Urban (' + component + ')', component + ' total', component +' total (STILT)*']]
 
-    subset_style = ['Broad leaf forest (GEE)', 'Coniferous forest (GEE)', 'Mixed forest (GEE)', 'Other (GEE)',  'Grass and shrub (GEE)',  'Cropland (GEE)',  'Pasture (GEE)',  'Urban (GEE)']
+    subset_style = ['Broad leaf forest (' + component + ')', 'Coniferous forest (' + component + ')', 'Mixed forest (' + component + ')', 'Other (' + component + ')', \
+                    'Grass and shrub (' + component + ')',  'Cropland (' + component + ')',  'Pasture (' + component + ')',  'Urban (' + component + ')']
     subset_format = {key: "{:.2f}" for key in subset_style}
-    subset_format['GEE total'] = '{:.2f}'
-    subset_format['GEE total (STILT)*'] = '{:.2f}'
+    subset_format[component + ' total'] = '{:.2f}'
+    subset_format[component + ' total (STILT)*'] = '{:.2f}'
+    
+    if component == 'GEE':
 
-    df_save_sort_styled = df_save_subset_gee.style.background_gradient(cmap = 'Greens', axis=None, subset = subset_style)\
-                                      .format(subset_format)
-
+        df_save_sort_styled = df_save_subset_component.style.background_gradient(cmap = 'Greens', axis=None, subset = subset_style)\
+                                          .format(subset_format)
+    else:
+        
+        df_save_sort_styled = df_save_subset_component.style.background_gradient(cmap = 'Reds', axis=None, subset = subset_style)\
+                                          .format(subset_format)
     display(df_save_sort_styled)
-    df_save.to_csv(os.path.join(output, csvfile), index = False)  
+    df_save.to_csv(os.path.join(output, csvfile), index = False)
     
 def average_threshold_fp(station, date_range, threshold):
     
