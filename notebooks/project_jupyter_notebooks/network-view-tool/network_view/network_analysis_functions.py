@@ -6,7 +6,6 @@ from IPython.core.display import display, HTML
 from ipywidgets import Dropdown, Button, Output, SelectMultiple,GridspecLayout
 import numpy as np
 import json
-from numpy import loadtxt
 import pandas as pd
 import netCDF4 as cdf
 from netCDF4 import Dataset, date2index
@@ -18,10 +17,12 @@ from icoscp.sparql.runsparql import RunSparql
 from matplotlib.colors import LogNorm
 import matplotlib
 import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+import matplotlib.ticker as mticker
+from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 from cartopy.io.shapereader import Reader
 import cartopy
 import cartopy.feature as cfeature
-import cartopy.crs as ccrs
 import cartopy.io.shapereader as shpreader
 from cartopy.feature import ShapelyFeature
 cartopy.config['data_dir'] = '/data/project/cartopy/'
@@ -39,13 +40,11 @@ from matplotlib.legend import Legend
 import textwrap
 import statistics
 import warnings
-
 pathFP='/data/stiltweb/stations/'
 stcDataPath = '/data/project/stc/'
 path_cp = '/data/dataAppStorage/netcdf/'
-data_folder = '/data/project/stc/footprints_2018_averaged'
-load_lat=loadtxt(os.path.join(data_folder, 'latitude.csv'), delimiter=',')
-load_lon=loadtxt(os.path.join(data_folder, 'longitude.csv'), delimiter=',')
+load_lat = np.arange(33+((1/12)/2), 73, 1/12)
+load_lon = np.arange(-15 + ((1/8)/2), 35, 1/8)
 output = 'network_view/temp_output'
 
 country_masks = Dataset(os.path.join(stcDataPath,'europe_STILT_masks.nc'))
@@ -118,7 +117,7 @@ emission_for_cmap[:, 2] = np.linspace(106/256, 1, N)  # B
 emission_for_cmap_r = np.flip(emission_for_cmap, 0)
 emission_cmp = ListedColormap(emission_for_cmap_r)
 
-color_name_dict = {'gee':{'color':copy.copy(matplotlib.cm.get_cmap("Greens")), 'name' : 'GEE'}, 'resp':{'color':copy.copy(matplotlib.cm.get_cmap("Reds")), 'name' : 'Respiration'},
+color_name_dict = {'gee':{'color':copy.copy(matplotlib.cm.get_cmap("Greens")), 'name' : 'Total'}, 'resp':{'color':copy.copy(matplotlib.cm.get_cmap("Reds")), 'name' : 'Total'},
                    'broad_leaf_forest':{'color':blf_cmp, 'name' : 'Broad leaf forest'}, 'coniferous_forest':{'color':cf_cmp, 'name' : 'Coniferous forest'},\
         'grass_shrub':{'color':gs_cmp, 'name' : 'Grass and shrubland'}, 'mixed_forest':{'color':mf_cmp, 'name' : 'Mixed forest'},\
         'pasture':{'color':pasture_cmp, 'name' : 'Pasture'}, 'cropland':{'color':cropland_cmap, 'name' : 'Cropland'}, 'urban':{'color':copy.copy(matplotlib.cm.get_cmap("Reds")),'name' : 'Urban'}}
@@ -452,7 +451,13 @@ def plot_maps(field, lon, lat, nwc, footprint_stations='', title='', label='', u
         cbar = plt.colorbar(cs, orientation='horizontal',pad=0.03,fraction=0.055,extend=extend)
 
     cbar.set_label(label)
-     
+    
+    # grid lines:
+    gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
+                  linewidth=0.5, color='gray', alpha=0.5)
+    gl.xformatter, gl.yformatter  = LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+    gl.xlabel_style, gl.ylabel_style = {'size': 10, 'color': 'gray', 'alpha':0.5}, {'size': 10, 'color': 'gray', 'alpha':0.5}
+
     plt.title(title)
     
     if extended:
@@ -468,7 +473,7 @@ def plot_maps(field, lon, lat, nwc, footprint_stations='', title='', label='', u
         if not os.path.exists(output):
             os.makedirs(output)
   
-        fig.savefig(output+'/'+pngfile+'.png',dpi=100,bbox_inches='tight')
+        fig.savefig(output+'/'+pngfile+'.png',dpi=300,bbox_inches='tight')
         
         return plt
     
@@ -553,6 +558,12 @@ def plot_maps_country_zoom(field, lon, lat, nwc, country_code, output='monitorin
         cbar = plt.colorbar(cs, orientation='horizontal',pad=0.03,fraction=0.055,extend='both')
 
     cbar.set_label(label)
+    
+    # grid lines:
+    gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
+                  linewidth=0.5, color='gray', alpha=0.5)
+    gl.xformatter, gl.yformatter  = LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+    gl.xlabel_style, gl.ylabel_style = {'size': 10, 'color': 'gray', 'alpha':0.5}, {'size': 10, 'color': 'gray', 'alpha':0.5}
 
     plt.title(title)
     
@@ -571,7 +582,7 @@ def plot_maps_country_zoom(field, lon, lat, nwc, country_code, output='monitorin
         if not os.path.exists(output):
             os.makedirs(output)
   
-        fig.savefig(output+'/'+pngfile+'.png',dpi=100,bbox_inches='tight')
+        fig.savefig(output+'/'+pngfile+'.png',dpi=300,bbox_inches='tight')
     
     plt.close()
         
@@ -623,6 +634,12 @@ def plot_maps_two(field, field2, lon, lat, footprint_stations='', title='', labe
     ax.plot([-9.111, -59.111], [-9.112, -59.112], '-', label='Extended network', linewidth=8, color='#2171b5')
     
     ax.legend(loc='upper left', fontsize='medium')
+    
+    # grid lines:
+    gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
+                  linewidth=0.5, color='gray', alpha=0.5)
+    gl.xformatter, gl.yformatter  = LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+    gl.xlabel_style, gl.ylabel_style = {'size': 10, 'color': 'gray', 'alpha':0.5}, {'size': 10, 'color': 'gray', 'alpha':0.5}
 
     plt.title(title)
  
@@ -635,7 +652,7 @@ def plot_maps_two(field, field2, lon, lat, footprint_stations='', title='', labe
         if not os.path.exists(output):
             os.makedirs(output)
   
-        fig.savefig(output+'/'+pngfile+'.png',dpi=100,bbox_inches='tight')
+        fig.savefig(output+'/'+pngfile+'.png',dpi=300,bbox_inches='tight')
         
         return plt
     
@@ -990,7 +1007,7 @@ def landcover_view(nwc, countries, pngfile = '', output= ''):
     for country_code in sorted_country_list:
         if country_code == 'GBR':
             country_name = 'UK\n'
-        if country_code == 'SRB':
+        elif country_code == 'SRB':
             country_name = 'Serbia'
         else:
             country_name = dictionary_area_choice[country_code]
@@ -1020,12 +1037,13 @@ def landcover_view(nwc, countries, pngfile = '', output= ''):
         if not os.path.exists(output):
             os.makedirs(output)
   
-        plt.savefig(output+'/'+pngfile,dpi=100,bbox_inches='tight')
+        plt.savefig(output+'/'+pngfile,dpi=300,bbox_inches='tight')
     
     plt.show()
     
 def share_representaiton_table(nwc, countries, csvfile = '', output = ''):
 
+    selected_component = nwc['component']
     countries = list(countries)
     countries.insert(0, 'Europe')
     representation_file = nwc['networkFile'] + '_representation.csv'
@@ -1039,8 +1057,9 @@ def share_representaiton_table(nwc, countries, csvfile = '', output = ''):
     # usually the df_to_analyze contains a longer date range than the one of interest. 
     df_to_analyze_subset = df_to_analyze.loc[df_to_analyze['date'].isin(date_range_string_alt)]
     
-    columns =  ['Country', 'Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Other', 'Grass and shrubland', 'Cropland', \
-              'Pastures', 'Urban']
+    columns =  ['Country', 'Broad leaf forest (' + selected_component.upper() +')', 'Coniferous forest (' + selected_component.upper()+')', \
+                'Mixed forest (' + selected_component.upper()+')', 'Other (' + selected_component.upper()+')', 'Grass and shrubland (' + selected_component.upper()+')', 'Cropland (' + selected_component.upper()+')', \
+              'Pastures (' + selected_component.upper()+')', 'Urban (' + selected_component.upper()+')']
     
     df_country_flux_representation = pd.DataFrame(columns = columns)
 
@@ -1050,7 +1069,7 @@ def share_representaiton_table(nwc, countries, csvfile = '', output = ''):
 
         for column in df_to_analyze_subset.columns:
 
-            if country in column and 'gee' in column:
+            if country in column and selected_component.lower() in column:
                 
                 if 'broad_leaf_forest' in column or 'coniferous_forest' in column or 'mixed_forest' in column \
                 or 'cropland' in column or 'pasture' in column or 'urban' in column or 'grass_shrub' in column or 'other' in column:
@@ -1080,6 +1099,8 @@ def share_representaiton_table(nwc, countries, csvfile = '', output = ''):
     display(df_country_flux_representation) 
     
 def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
+    
+    selected_component = nwc['component'] 
     
     representation_file = nwc['networkFile'] + '_representation.csv'
     
@@ -1149,8 +1170,8 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
 
         for column in df_fluxes.columns:
             if country in column:
-                if 'gee' in column:
-
+                #if 'gee' in column:
+                if selected_component.lower() in column:
                     if 'total' not in column:
 
                         # added
@@ -1194,10 +1215,10 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
         for landcover, landcover_color in zip(land_cover_types, colors): 
             
             # now percent
-            value = float(df_network_mean_percent[country + '_' + landcover + '_gee'])
+            value = float(df_network_mean_percent[country + '_' + landcover + '_' + selected_component.lower()])
             
             # compare to percent country for every country (not just Europe)
-            value_country = float(df_even_mean_percent[country + '_' + landcover + '_gee_even'])
+            value_country = float(df_even_mean_percent[country + '_' + landcover + '_' + selected_component.lower() +'_even'])
 
             if first and landcover == 'broad_leaf_forest':
                     
@@ -1285,7 +1306,7 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
     plt.axvline(x=y_pos_minus-(y_pos_steps*1.5), color = 'black', ls= '--')
     ax.set_ylabel('%')
               
-    fig.text(.5, 1, "GEE sensed by the network within country (left) vs. present in country (right)", ha='center')
+    fig.text(.5, 1, selected_component.upper()+ " sensed by the network within country (left) vs. present in country (right)", ha='center')
     fig.text(0.5, 0, "Country (sensitivity/km²)", ha='center')
     
     plt.tight_layout()
@@ -1294,11 +1315,11 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
         if not os.path.exists(output):
             os.makedirs(output)
   
-        plt.savefig(output+'/'+pngfile,dpi=100,bbox_inches='tight')
+        plt.savefig(output+'/'+pngfile,dpi=300,bbox_inches='tight')
 
     plt.show()
 
-    display(HTML('<p style="font-size:15px;"><b>Figures 5a, 7a, and 8b: Land cover share of flux (GEE) within the network footprint compared to the land cover share of flux (GEE) within the network for selected countries.</b></p>'))
+    display(HTML('<p style="font-size:15px;"><b>Figures 5a, 7a, and 8b: Land cover share of flux (' + nwc['component'].upper() + ') within the network footprint compared to the land cover share of flux (' + nwc['component'].upper() + ') within the network for selected countries.</b></p>'))
 
     return True
     
@@ -1347,6 +1368,7 @@ def initiate_monitoring_potential_maps(nwc, extended = False):
 
 def monitoring_potential_maps(nwc, country, extended = False):
 
+    selected_component = nwc['component']
     folder = nwc['networkFile']
     path = nwc['pathFp']
 
@@ -1446,13 +1468,13 @@ def monitoring_potential_maps(nwc, country, extended = False):
         if first_vprm or date.year!=current_year:
 
             current_year = date.year
-            filename_resp = check_cp(path_cp,'VPRM_ECMWF_RESP_' + str(current_year) + '_CP.nc')
-            f_resp = cdf.Dataset(filename_resp)
-            filename_gee = check_cp(path_cp,'VPRM_ECMWF_GEE_' + str(current_year) + '_CP.nc')
-            f_gee = cdf.Dataset(filename_gee)
+            filename_component = check_cp(path_cp,'VPRM_ECMWF_' + selected_component.upper() + '_' + str(current_year) + '_CP.nc')
+            f_component = cdf.Dataset(filename_component)
+            #filename_gee = check_cp(path_cp,'VPRM_ECMWF_GEE_' + str(current_year) + '_CP.nc')
+            #f_gee = cdf.Dataset(filename_gee)
 
             # same for both datasets (GEE and resp)
-            times = f_gee.variables['time']
+            times = f_component.variables['time']
            
             first_vprm = False
         
@@ -1472,8 +1494,7 @@ def monitoring_potential_maps(nwc, country, extended = False):
         ntime = date2index(date,times,select='nearest')
         
         # GEE and respiration map for specific date/time
-        resp = f_resp.variables['RESP'][ntime][:][:]
-        gee = f_gee.variables['GEE'][ntime][:][:]
+        component = f_component.variables[selected_component.upper()][ntime][:][:]
 
         if extended:
             fp_network = footprints_extended.sel(time=date).network_foot.data
@@ -1488,13 +1509,13 @@ def monitoring_potential_maps(nwc, country, extended = False):
             sens_per_cell_list_for_extended_representation = [average_sens_for_extended_representation]*192000
             fp_network_even_for_extended_representation=np.array(sens_per_cell_list_for_extended_representation).reshape(480, 400)
             
-            fp_network_even_gee_average_extended = fp_network_even_for_extended_representation * gee * country_mask
+            fp_network_even_component_average_extended = fp_network_even_for_extended_representation * component * country_mask
             if first_average_for_extended_representation:
-                fp_network_even_gee_average_extended_for_average = fp_network_even_gee_average_extended
+                fp_network_even_component_average_extended_for_average = fp_network_even_component_average_extended
                 first_average_for_extended_representation = False
             else:
                 
-                fp_network_even_gee_average_extended_for_average = fp_network_even_gee_average_extended_for_average + fp_network_even_gee_average_extended
+                fp_network_even_component_average_extended_for_average = fp_network_even_component_average_extended_for_average + fp_network_even_component_average_extended
 
         else:
             fp_network = footprints.sel(time=date).network_foot.data
@@ -1507,46 +1528,37 @@ def monitoring_potential_maps(nwc, country, extended = False):
         fp_network_even=np.array(sens_per_cell_list).reshape(480, 400)
 
         # network view of fluxes
-        fp_network_resp = fp_network * resp * country_mask
-        fp_network_gee = fp_network * gee * country_mask
+        fp_network_component = fp_network * component * country_mask
 
         # equal view of fluxes
-        fp_network_even_resp = fp_network_even * resp * country_mask 
-        fp_network_even_gee = fp_network_even * gee * country_mask 
+        fp_network_even_component = fp_network_even * component * country_mask 
         
         # want the average for the selected date range
         if first_average:
-            
-            fp_network_resp_for_average = fp_network_resp
-            fp_network_gee_for_average = fp_network_gee
+
+            fp_network_component_for_average = fp_network_component
 
             # equal view of fluxes
-            fp_network_even_resp_for_average = fp_network_even_resp
-            fp_network_even_gee_for_average = fp_network_even_gee
+            fp_network_even_component_for_average = fp_network_even_component
             
             first_average = False
             
         else:    
-            
-            fp_network_resp_for_average = fp_network_resp_for_average + fp_network_resp
-            fp_network_gee_for_average = fp_network_gee_for_average + fp_network_gee
+            fp_network_component_for_average = fp_network_component_for_average + fp_network_component
 
             # equal view of fluxes
-            fp_network_even_resp_for_average = fp_network_even_resp_for_average + fp_network_even_resp
-            fp_network_even_gee_for_average = fp_network_even_gee_for_average + fp_network_even_gee
+            fp_network_even_component_for_average = fp_network_even_component_for_average + fp_network_even_component
         
         i = i + 1
     
-    fp_network_resp_average = fp_network_resp_for_average / i
-    fp_network_gee_average = fp_network_gee_for_average / i
+    fp_network_component_average = fp_network_component_for_average / i
 
     # equal view of fluxes
-    fp_network_even_resp_average = fp_network_even_resp_for_average / i
-    fp_network_even_gee_average = fp_network_even_gee_for_average / i
+    fp_network_even_component_average = fp_network_even_component_for_average / i
     
     if extended:
-        
-        fp_network_even_gee_average_extended = fp_network_even_gee_average_extended_for_average / i
+
+        fp_network_even_component_average_extended = fp_network_even_component_average_extended_for_average / i
 
     if country != 'Europe':
         
@@ -1559,22 +1571,22 @@ def monitoring_potential_maps(nwc, country, extended = False):
         colors = color_name_dict[landcover_name]['color']
         name = color_name_dict[landcover_name]['name']
 
-        footprint = fp_network_gee_average * landcover_fractions
-        footprint_even = fp_network_even_gee_average * landcover_fractions
+        footprint = fp_network_component_average * landcover_fractions
+        footprint_even = fp_network_even_component_average * landcover_fractions
 
         if footprint.sum() == 0:
             country_name = dictionary_area_choice[country]
             display(HTML('<p style="font-size:15px">Sensing of ' +  name +' in ' + country_name + ' is zero which means no monitoring potential maps can be created.</p>'))
             
             # if GEE is zero, it means the monitoring potential will be zero for all classes and we break out of the function. Otherwise, just break out of the loop.
-            if name == 'GEE':
+            if name == 'GEE' or name == 'Respiration':
                 return
             else:
                 continue
         
         # will not work for extended network - need to havethe even extended file also (for the representation value, only compare with the equal view of reference network to see the change
         if extended:
-            percent = (footprint.sum() / (fp_network_even_gee_average_extended* landcover_fractions).sum()) * 100
+            percent = (footprint.sum() / (fp_network_even_component_average_extended* landcover_fractions).sum()) * 100
             percent_compare = percent - 100 
         
         else:
@@ -1582,16 +1594,16 @@ def monitoring_potential_maps(nwc, country, extended = False):
             percent_compare = percent - 100 
 
         if percent_compare > 0:
-            add_for_title = '(+' + str("%.1f" % percent_compare) + '% representation)' 
+            add_for_title = '+' + str("%.1f" % percent_compare) + '% representation' 
 
         else:
-            add_for_title =  '(-' + str("%.1f" % abs(percent_compare)) + '% representation)'   
+            add_for_title =  '-' + str("%.1f" % abs(percent_compare)) + '% representation'   
 
         if country == 'Europe':
 
             name_underscore = name.replace(' ', '_')
             pngfile = name_underscore + '_monitoring_potential_Europe'
-            plot_maps(abs(footprint_even)-abs(footprint), load_lon, load_lat,nwc, title = (name + ' monitoring potential '+ add_for_title), colors = colors, label = 'relatively low potential                                                                           relatively high potential', monitoring_potential = True,  output=output, pngfile = pngfile, extend = 'max', extended = extended)
+            plot_maps(abs(footprint_even)-abs(footprint), load_lon, load_lat,nwc, title = (name + ' monitoring potential (' + selected_component.upper() + '): ' + add_for_title), colors = colors, label = 'relatively low potential                                                                           relatively high potential', monitoring_potential = True,  output=output, pngfile = pngfile, extend = 'max', extended = extended)
 
             file_path = os.path.join(output, pngfile + '.png')
             if os.path.exists(file_path):
@@ -1612,7 +1624,7 @@ def monitoring_potential_maps(nwc, country, extended = False):
             pngfile = name_underscore + '_monitoring_potential' + country.replace(' ', '_')
             
             if (abs(footprint_even)-abs(footprint)).max() > 0.0000001:
-                plot_maps_country_zoom(abs(footprint_even)-abs(footprint), load_lon, load_lat, nwc, country, title = (name + ' monitoring potential ' + country_name + ' ' + add_for_title), colors = colors,label = 'relatively low potential                                                                           relatively high potential', monitoring_potential = True, output=output, pngfile = pngfile, extend='max', extended = extended)
+                plot_maps_country_zoom(abs(footprint_even)-abs(footprint), load_lon, load_lat, nwc, country, title = (name + ' monitoring potential (' + selected_component.upper() + ') ' + country_name + ': ' + add_for_title), colors = colors,label = 'relatively low potential                                                                           relatively high potential', monitoring_potential = True, output=output, pngfile = pngfile, extend='max', extended = extended)
 
                 file_path = os.path.join(output, pngfile + '.png')
                 if os.path.exists(file_path):      
@@ -1624,7 +1636,7 @@ def monitoring_potential_maps(nwc, country, extended = False):
             
                     display(HTML('<p style="font-size:15px">Due to our definition of monitoring potential, the improved monitoring of ' +  name + ' in ' + country_name + ' is almost infinite in the extended network compared to the current network.  To see the monitoring potential of the extended network, select it when prompted for "Network name" in section 3.2. and run the tool without extension.</p>'))
                     # if GEE has infinate improved monitoring potential, there will be no maps for the different land cover types. 
-                    if name == 'GEE':
+                    if name == 'GEE' or name == 'Respiration':
                         return
                 else:
                     display(HTML('<p style="font-size:15px">Sensing of ' +  name +' in ' + country_name + ' is very low and it is not feasible to show monitoring potential of.</p>'))
@@ -2114,6 +2126,13 @@ def contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter
 
     #show station location 
     ax.plot(station_lon,station_lat,'+',color='Blue',ms=5,transform=ccrs.PlateCarree(), label = station_name)
+    
+    # grid
+    gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
+                  linewidth=0.5, color='gray', alpha=0.5)
+    gl.xformatter, gl.yformatter  = LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+    gl.xlabel_style, gl.ylabel_style = {'size': 10, 'color': 'gray', 'alpha':0.5}, {'size': 10, 'color': 'gray', 'alpha':0.5}
+
 
     ax.legend(loc='lower right', fontsize='medium')
 
@@ -2126,7 +2145,7 @@ def contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter
         if not os.path.exists(output):
             os.makedirs(output)
 
-        fig.savefig(output+'/'+pngfile,dpi=100,bbox_inches='tight')
+        fig.savefig(output+'/'+pngfile,dpi=300,bbox_inches='tight')
 
 def land_cover_bar_graph_winter_summer(stc, output=output, pngfile='landcover_summer_winter.png'): 
     
@@ -2158,144 +2177,144 @@ def land_cover_bar_graph_winter_summer(stc, output=output, pngfile='landcover_su
     else:
         degrees=degrees_from_point_to_grid_cells(station_lat, station_lon, load_lat, load_lon)
 
-
-    # take two date ranges for final graph
-    fp1 = read_aggreg_footprints(station, date_range1)
-    f.value += 1
-
-    fp2 = read_aggreg_footprints(station, date_range2)
-    f.value += 1
-
     #get all the land cover data from netcdfs 
     broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018')
 
-    #land cover classes (imported in the land cover section):
-    broad_leaf_forest1=fp1*broad_leaf_forest
-    coniferous_forest1=fp1*coniferous_forest
-    mixed_forest1=fp1*mixed_forest
-    ocean1=fp1*ocean
-    other1=fp1*other
-    grass_shrub1=fp1*grass_shrub
-    cropland1=fp1*cropland
-    pasture1=fp1*pasture
-    urban1=fp1*urban
-    unknown1=fp1*unknown
+    # take first out of two date ranges for final graph
+    fp = read_aggreg_footprints(station, date_range1)
+    
+    f.value += 1
 
-    broad_leaf_forest2=fp2*broad_leaf_forest
-    coniferous_forest2=fp2*coniferous_forest
-    mixed_forest2=fp2*mixed_forest
-    ocean2=fp2*ocean
-    other2=fp2*other
-    grass_shrub2=fp2*grass_shrub
-    cropland2=fp2*cropland
-    pasture2=fp2*pasture
-    urban2=fp2*urban
-    unknown2=fp2*unknown
+    broad_leaf_forest_fp=fp*broad_leaf_forest
+    coniferous_forest_fp=fp*coniferous_forest
+    mixed_forest_fp=fp*mixed_forest
+    ocean_fp=fp*ocean
+    other_fp=fp*other
+    grass_shrub_fp=fp*grass_shrub
+    cropland_fp=fp*cropland
+    pasture_fp=fp*pasture
+    urban_fp=fp*urban
+    unknown_fp=fp*unknown
 
     #lists of these values
-    broad_leaf_forest_values1 = [item for sublist in broad_leaf_forest1[0] for item in sublist]
-    coniferous_forest_values1 = [item for sublist in coniferous_forest1[0] for item in sublist]
-    mixed_forest_values1 = [item for sublist in mixed_forest1[0] for item in sublist]
-    ocean_values1 = [item for sublist in ocean1[0] for item in sublist]
-    other_values1 = [item for sublist in other1[0] for item in sublist]
-    grass_shrub_values1 = [item for sublist in grass_shrub1[0] for item in sublist]
-    cropland_values1 = [item for sublist in cropland1[0] for item in sublist]
-    pasture_values1 = [item for sublist in pasture1[0] for item in sublist]
-    urban_values1 = [item for sublist in urban1[0] for item in sublist]
-    unknown_values1 = [item for sublist in unknown1[0] for item in sublist]
-
-    broad_leaf_forest_values2 = [item for sublist in broad_leaf_forest2[0] for item in sublist]
-    coniferous_forest_values2 = [item for sublist in coniferous_forest2[0] for item in sublist]
-    mixed_forest_values2 = [item for sublist in mixed_forest2[0] for item in sublist]
-    ocean_values2 = [item for sublist in ocean2[0] for item in sublist]
-    other_values2 = [item for sublist in other2[0] for item in sublist]
-    grass_shrub_values2 = [item for sublist in grass_shrub2[0] for item in sublist]
-    cropland_values2 = [item for sublist in cropland2[0] for item in sublist]
-    pasture_values2 = [item for sublist in pasture2[0] for item in sublist]
-    urban_values2 = [item for sublist in urban2[0] for item in sublist]
-    unknown_values2 = [item for sublist in unknown2[0] for item in sublist]
-
-
+    broad_leaf_forest_values = [item for sublist in broad_leaf_forest_fp[0] for item in sublist]
+    coniferous_forest_values = [item for sublist in coniferous_forest_fp[0] for item in sublist]
+    mixed_forest_values = [item for sublist in mixed_forest_fp[0] for item in sublist]
+    ocean_values = [item for sublist in ocean_fp[0] for item in sublist]
+    other_values = [item for sublist in other_fp[0] for item in sublist]
+    grass_shrub_values = [item for sublist in grass_shrub_fp[0] for item in sublist]
+    cropland_values = [item for sublist in cropland_fp[0] for item in sublist]
+    pasture_values = [item for sublist in pasture_fp[0] for item in sublist]
+    urban_values = [item for sublist in urban_fp[0] for item in sublist]
+    unknown_values = [item for sublist in unknown_fp[0] for item in sublist]
+    
     #putting it into a dataframe: initially 192000 values (one per cell) for each of the aggregated land cover classes
     #into same dataframe - have the same coulmn heading. "landcover_type" will be used in "groupby" together with the "slice" (in degrees)
-    df_broad_leaf_forest1 = pd.DataFrame({'landcover_vals': broad_leaf_forest_values1,
+    df_broad_leaf_forest1 = pd.DataFrame({'landcover_vals': broad_leaf_forest_values,
                                'degrees': degrees,
                                'landcover_type':'Broad leaf forest'})
 
-    df_coniferous_forest1 = pd.DataFrame({'landcover_vals': coniferous_forest_values1,
+    df_coniferous_forest1 = pd.DataFrame({'landcover_vals': coniferous_forest_values,
                            'degrees': degrees,
                            'landcover_type':'Coniferous forest'})
 
-    df_mixed_forest1 = pd.DataFrame({'landcover_vals': mixed_forest_values1,
+    df_mixed_forest1 = pd.DataFrame({'landcover_vals': mixed_forest_values,
                            'degrees': degrees,
                            'landcover_type':'Mixed forest'})
 
-    df_ocean1 = pd.DataFrame({'landcover_vals': ocean_values1,
+    df_ocean1 = pd.DataFrame({'landcover_vals': ocean_values,
                            'degrees': degrees,
                            'landcover_type':'Ocean'})
 
-    df_other1 = pd.DataFrame({'landcover_vals': other_values1,
+    df_other1 = pd.DataFrame({'landcover_vals': other_values,
                            'degrees': degrees,
                            'landcover_type':'Other'})
 
-    df_grass_shrub1 = pd.DataFrame({'landcover_vals':  grass_shrub_values1,
+    df_grass_shrub1 = pd.DataFrame({'landcover_vals':  grass_shrub_values,
                            'degrees': degrees,
                            'landcover_type':'Grass/shrubland'})
 
-    df_cropland1 = pd.DataFrame({'landcover_vals':  cropland_values1,
+    df_cropland1 = pd.DataFrame({'landcover_vals':  cropland_values,
                            'degrees': degrees,
                            'landcover_type':'Cropland'})
 
-    df_pasture1 = pd.DataFrame({'landcover_vals': pasture_values1,
+    df_pasture1 = pd.DataFrame({'landcover_vals': pasture_values,
                            'degrees': degrees,
                            'landcover_type':'Pasture'})
 
-    df_urban1 = pd.DataFrame({'landcover_vals':  urban_values1,
+    df_urban1 = pd.DataFrame({'landcover_vals':  urban_values,
                            'degrees': degrees,
                            'landcover_type':'Urban'})
 
-    df_unknown1 = pd.DataFrame({'landcover_vals':  unknown_values1,
+    df_unknown1 = pd.DataFrame({'landcover_vals':  unknown_values,
                            'degrees': degrees,
                            'landcover_type':'Unknown'})
 
+    
+    fp = read_aggreg_footprints(station, date_range2)
+    f.value += 1
 
-    df_broad_leaf_forest2 = pd.DataFrame({'landcover_vals': broad_leaf_forest_values2,
+    broad_leaf_forest_fp=fp*broad_leaf_forest
+    coniferous_forest_fp=fp*coniferous_forest
+    mixed_forest_fp=fp*mixed_forest
+    ocean_fp=fp*ocean
+    other_fp=fp*other
+    grass_shrub_fp=fp*grass_shrub
+    cropland_fp=fp*cropland
+    pasture_fp=fp*pasture
+    urban_fp=fp*urban
+    unknown_fp=fp*unknown
+
+    #lists of these values
+    broad_leaf_forest_values = [item for sublist in broad_leaf_forest_fp[0] for item in sublist]
+    coniferous_forest_values = [item for sublist in coniferous_forest_fp[0] for item in sublist]
+    mixed_forest_values = [item for sublist in mixed_forest_fp[0] for item in sublist]
+    ocean_values = [item for sublist in ocean_fp[0] for item in sublist]
+    other_values = [item for sublist in other_fp[0] for item in sublist]
+    grass_shrub_values = [item for sublist in grass_shrub_fp[0] for item in sublist]
+    cropland_values = [item for sublist in cropland_fp[0] for item in sublist]
+    pasture_values = [item for sublist in pasture_fp[0] for item in sublist]
+    urban_values = [item for sublist in urban_fp[0] for item in sublist]
+    unknown_values = [item for sublist in unknown_fp[0] for item in sublist]
+    
+
+    df_broad_leaf_forest2 = pd.DataFrame({'landcover_vals': broad_leaf_forest_values,
                                'degrees': degrees,
                                'landcover_type':'Broad leaf forest'})
 
-    df_coniferous_forest2 = pd.DataFrame({'landcover_vals': coniferous_forest_values2,
+    df_coniferous_forest2 = pd.DataFrame({'landcover_vals': coniferous_forest_values,
                            'degrees': degrees,
                            'landcover_type':'Coniferous forest'})
 
-    df_mixed_forest2 = pd.DataFrame({'landcover_vals': mixed_forest_values2,
+    df_mixed_forest2 = pd.DataFrame({'landcover_vals': mixed_forest_values,
                            'degrees': degrees,
                            'landcover_type':'Mixed forest'})
 
-    df_ocean2 = pd.DataFrame({'landcover_vals': ocean_values2,
+    df_ocean2 = pd.DataFrame({'landcover_vals': ocean_values,
                            'degrees': degrees,
                            'landcover_type':'Ocean'})
 
-    df_other2 = pd.DataFrame({'landcover_vals': other_values2,
+    df_other2 = pd.DataFrame({'landcover_vals': other_values,
                            'degrees': degrees,
                            'landcover_type':'Other'})
 
-    df_grass_shrub2 = pd.DataFrame({'landcover_vals':  grass_shrub_values2,
+    df_grass_shrub2 = pd.DataFrame({'landcover_vals':  grass_shrub_values,
                            'degrees': degrees,
                            'landcover_type':'Grass/shrubland'})
 
-    df_cropland2 = pd.DataFrame({'landcover_vals':  cropland_values2,
+    df_cropland2 = pd.DataFrame({'landcover_vals':  cropland_values,
                            'degrees': degrees,
                            'landcover_type':'Cropland'})
 
-    df_pasture2 = pd.DataFrame({'landcover_vals': pasture_values2,
+    df_pasture2 = pd.DataFrame({'landcover_vals': pasture_values,
                            'degrees': degrees,
                            'landcover_type':'Pasture'})
 
-    df_urban2 = pd.DataFrame({'landcover_vals':  urban_values2,
+    df_urban2 = pd.DataFrame({'landcover_vals':  urban_values,
                            'degrees': degrees,
                            'landcover_type':'Urban'})
 
-    df_unknown2 = pd.DataFrame({'landcover_vals':  unknown_values2,
+    df_unknown2 = pd.DataFrame({'landcover_vals':  unknown_values,
                            'degrees': degrees,
                            'landcover_type':'Unknown'})
 
@@ -2306,7 +2325,6 @@ def land_cover_bar_graph_winter_summer(stc, output=output, pngfile='landcover_su
 
     df_all2 = df_cropland2.append([df_broad_leaf_forest2, df_coniferous_forest2, df_mixed_forest2, df_ocean2, df_other2, \
                                    df_grass_shrub2, df_pasture2, df_urban2, df_unknown2])
-
     #not change with user input
     dir_bins = np.arange(22.5, 383.5, 45)
     dir_bins= np.asarray([0, 22.5,67.5,112.5,157.5,202.5,247.5,292.5,337.5,383.5])
@@ -2364,30 +2382,44 @@ def land_cover_bar_graph_winter_summer(stc, output=output, pngfile='landcover_su
     # for one land cover type to be displayed in a stacked bar
     # there will be one array per land cover type (10)
     list_land_cover_values=[]
+    list_of_list_totals = []
     for land_cover_type in list_land_cover_names_sorted:
 
         list_date_range1 = rosedata1[land_cover_type].values
         list_date_range2 = rosedata2[land_cover_type].values
+        
+        totals = []
+        
+        totals.append(sum(list_date_range1))
+        totals.append(sum(list_date_range2))
 
         # every second value should be from the 1st date range (summer for instance)
         # and every other value should be from the 2nd date range (winter for instance)
         aggreg_list = []
+        
+        # added:
         for value_date_range1, value_date_range2 in zip(list_date_range1, list_date_range2):
             aggreg_list.append(value_date_range1)
             aggreg_list.append(value_date_range2)
 
         list_land_cover_values.append(np.array(aggreg_list))
+        
+        list_of_list_totals.append(np.array(totals))
 
     matplotlib.rcParams.update({'font.size': 12})
-    fig = plt.figure(figsize=(12,8)) 
+    fig = plt.figure(figsize=(8,8)) 
 
     ax = fig.add_subplot(111)
+    
+    ax2 = ax.twinx()
 
     # space it in a way summer and winter are close.
     ind = np.array([ 0,  0.5,  2,  2.5,  4,  4.5,  6,  6.5,  8,  8.5, 10, 10.5, 12, 12.5, 14, 14.5])
 
+    ind2 = np.array([16,16.5])
+    
     width = 0.35       
-
+    
     # p1 is the first land cover type (with largest share for date range 1).
     # the remaining (9) land cover classes are stacked on top (with the below - "bottom" - land cover types under)
     p1 = ax.bar(ind, list_land_cover_values[0], width, color=dictionary_color[list_land_cover_names_sorted[0]]['color'], edgecolor='black')
@@ -2418,12 +2450,46 @@ def land_cover_bar_graph_winter_summer(stc, output=output, pngfile='landcover_su
     p10 = ax.bar(ind, list_land_cover_values[9], width, color=dictionary_color[list_land_cover_names_sorted[9]]['color'], edgecolor='black', \
                  bottom=list_land_cover_values[0]+list_land_cover_values[1]+list_land_cover_values[2]+list_land_cover_values[3]+\
                  list_land_cover_values[4]+list_land_cover_values[5]+list_land_cover_values[6]+ list_land_cover_values[7]+list_land_cover_values[8])
-
+    
+    
     #want to reverese the order (ex if oceans at the "bottom" in the graph - ocean label should be furthest down)
     handles=(p1[0], p2[0], p3[0], p4[0], p5[0], p6[0], p7[0], p8[0], p9[0])
 
+    # second axis:
+    q1 = ax2.bar(ind2, list_of_list_totals[0], width, color=dictionary_color[list_land_cover_names_sorted[0]]['color'], edgecolor='black')
+
+    q2 = ax2.bar(ind2, list_of_list_totals[1], width, color=dictionary_color[list_land_cover_names_sorted[1]]['color'],edgecolor='black',
+                 bottom=list_of_list_totals[0])
+    q3 = ax2.bar(ind2, list_of_list_totals[2], width, color=dictionary_color[list_land_cover_names_sorted[2]]['color'], edgecolor='black',
+                 bottom=list_of_list_totals[0]+list_of_list_totals[1])
+    q4 = ax2.bar(ind2, list_of_list_totals[3], width, color=dictionary_color[list_land_cover_names_sorted[3]]['color'], edgecolor='black',
+                 bottom=list_of_list_totals[0]+list_of_list_totals[1]+list_of_list_totals[2])
+    q5 = ax2.bar(ind2, list_of_list_totals[4], width, color=dictionary_color[list_land_cover_names_sorted[4]]['color'], edgecolor='black',
+                 bottom=list_of_list_totals[0]+list_of_list_totals[1]+list_of_list_totals[2]+list_of_list_totals[3])
+    q6 = ax2.bar(ind2, list_of_list_totals[5], width, color=dictionary_color[list_land_cover_names_sorted[5]]['color'], edgecolor='black',
+                 bottom=list_of_list_totals[0]+list_of_list_totals[1]+list_of_list_totals[2]+list_of_list_totals[3]+\
+                 list_of_list_totals[4])
+    q7 = ax2.bar(ind2, list_of_list_totals[6], width, color=dictionary_color[list_land_cover_names_sorted[6]]['color'], edgecolor='black',
+                 bottom=list_of_list_totals[0]+list_of_list_totals[1]+list_of_list_totals[2]+list_of_list_totals[3]+\
+                 list_of_list_totals[4]+list_of_list_totals[5])
+
+    q8 = ax2.bar(ind2, list_of_list_totals[7], width, color=dictionary_color[list_land_cover_names_sorted[7]]['color'], edgecolor='black', 
+                bottom=list_of_list_totals[0]+list_of_list_totals[1]+list_of_list_totals[2]+list_of_list_totals[3]+\
+                 list_of_list_totals[4]+list_of_list_totals[5]+list_of_list_totals[6])
+
+    q9 = ax2.bar(ind2, list_of_list_totals[8], width, color=dictionary_color[list_land_cover_names_sorted[8]]['color'], edgecolor='black', \
+                bottom=list_of_list_totals[0]+list_of_list_totals[1]+list_of_list_totals[2]+list_of_list_totals[3]+\
+                 list_of_list_totals[4]+list_of_list_totals[5]+list_of_list_totals[6]+list_of_list_totals[7])
+
+    q10 = ax2.bar(ind2, list_of_list_totals[9], width, color=dictionary_color[list_land_cover_names_sorted[9]]['color'], edgecolor='black', \
+                 bottom=list_of_list_totals[0]+list_of_list_totals[1]+list_of_list_totals[2]+list_of_list_totals[3]+\
+                 list_of_list_totals[4]+list_of_list_totals[5]+list_of_list_totals[6]+ list_of_list_totals[7]+list_of_list_totals[8])
+
     index=0
-    list_labels=[]
+    list_labels= []
+    
+    list_summer= []
+    list_winter = []
     for land_cover_name in list_land_cover_names_sorted:
 
         # date ramge 1 and 2 (summer and winter), sum every second (how the data is stored - 16 (8 directions x2) 
@@ -2432,21 +2498,35 @@ def land_cover_bar_graph_winter_summer(stc, output=output, pngfile='landcover_su
         if not land_cover_name == 'Unknown':
         
             list_labels.append(for_lable)
-        index=index+1
 
+        index=index+1
+        
     labels=[textwrap.fill(text,25) for text in list_labels]
 
+
     #other way - smallest in legend up top which is how 
-    plt.legend(handles[::-1], labels[::-1],bbox_to_anchor=(1, 0.56), title = "     Summer (%), Winter (%)")
+    #plt.legend(handles[::-1], labels[::-1], title = "         Summer (%), Winter (%)")#,bbox_to_anchor=(1, 0.56)
+        #other way - smallest in legend up top which is how 
+    # first one - second one I 
+    plt.legend(handles[::-1], labels[::-1],bbox_to_anchor=(1, 0.4), title = "     Summer (%), Winter (%)")
 
-    plt.ylabel('%')
+    
+    # set it to + 10 and round it to closest 10th
+    y_max = int(math.ceil((ax.get_ylim()[1]) / 10.0)) * 10
+    ax.set_ylim([0, y_max])
+    ax2.set_ylim([0, 100])
 
+    #plt.ylabel('%')
+    ax.set_ylabel('Share direction (%)')
+    ax2.set_ylabel('Share total (%)')
+    
     #first one is not north (in rosedata - rather 22.5 to 67.5 (NE).
     # two values (date range 1 and 2) for each direction
-    plt.xticks(ind, ('N', 'E','   E','','S','E', '   S',  '', 'S','W','   W', '','N', 'W','   N',''))
+    plt.xticks(np.concatenate((ind, ind2), axis=None), ('N', 'E','   E','','S','E', '    S',  '', 'S','W','    W', '','N', 'W','    N','', 'TOT', '   AL'))
+
     ax.yaxis.grid(True)
 
-    fig.set_size_inches(11, 13)
+    #fig.set_size_inches(11, 13)
     
     plt.show()
     if len(pngfile)>0:
@@ -2456,7 +2536,7 @@ def land_cover_bar_graph_winter_summer(stc, output=output, pngfile='landcover_su
         if not os.path.exists(output):
             os.makedirs(output)
   
-        fig.savefig(output+'/'+pngfile,dpi=100,bbox_inches='tight')
+        fig.savefig(output+'/'+pngfile,dpi=300,bbox_inches='tight')
     
     f.value += 1
     plt.close()
