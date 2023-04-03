@@ -416,41 +416,23 @@ def establish_representation(date_range, network_footprint):
     first_vprm = True
     first_month = True
     for date in date_range:
+        current_year = date.year
         
-        # access the correct VPRM flux dataset (yearly files)
-        if first_vprm or date.year!=current_year:
-
-            current_year = date.year
-
-            filename_resp = check_cp(path_cp,'VPRM_ECMWF_RESP_' + str(current_year) + '_CP.nc')
-
-            filename_gee = check_cp(path_cp,'VPRM_ECMWF_GEE_' + str(current_year) + '_CP.nc')
-
-            f_resp = cdf.Dataset(filename_resp)
-
-            f_gee = cdf.Dataset(filename_gee)
-
-            # same for both datasets
-            times = f_gee.variables['time']
-
-            first_vprm = False
-            
         if first_month or date.month!=current_month:
-            
+
             current_month = date.month
             xarray_data = xr.open_dataset(os.path.join('network_footprints', network_footprint, network_footprint + '_' + str(current_month) + '.nc'))
-            
+            xarray_data_resp = xr.open_dataset('/data/project/obsnet/VPRM_10day/respiration/RESP_10day_' +str(current_year) + '_' + str(current_month) + '.nc')
+            xarray_data_gee = xr.open_dataset('/data/project/obsnet/VPRM_10day/gee/GEE_10day_' +str(current_year) + '_' + str(current_month) + '.nc')
+
             first_month = False
 
         date_string = str(date.year) + '-' + str(date.month) + '-' + str(date.day) + ' ' +  str(date.hour)
 
         fp_network_50 = xarray_data.sel(time=date).network_foot.data
 
-        # use network footprint to calculate representation:
-        ntime = date2index(date,times,select='nearest')
-
-        resp = f_resp.variables['RESP'][ntime][:][:]
-        gee = f_gee.variables['GEE'][ntime][:][:]
+        resp = xarray_data_resp.sel(time=date).resp_10day.data
+        gee = xarray_data_gee.sel(time=date).gee_10day.data
 
         fp_network_50_resp = fp_network_50 * resp 
         fp_network_50_gee = fp_network_50 * gee 
@@ -512,5 +494,5 @@ def establish_representation(date_range, network_footprint):
         i = i + 1
         
         f.value += 1
-
+        
     df_to_analyze.to_csv(os.path.join('network_footprints_representation', network_footprint + '_representation.csv'))
