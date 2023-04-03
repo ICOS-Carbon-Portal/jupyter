@@ -1319,7 +1319,7 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
 
     plt.show()
 
-    display(HTML('<p style="font-size:15px;"><b>Figures 5a, 7a, and 8b: Land cover share of flux (' + nwc['component'].upper() + ') within the network footprint compared to the land cover share of flux (' + nwc['component'].upper() + ') within the network for selected countries.</b></p>'))
+    display(HTML('<p style="font-size:15px;"><b>Figures 5a, 8a: Land cover share of flux (' + nwc['component'].upper() + ') within the network footprint compared to the land cover share of flux (' + nwc['component'].upper() + ') within the network for selected countries.</b></p>'))
 
     return True
     
@@ -1929,7 +1929,7 @@ def initiate_summer_winter_comparison():
         with landcover_bar: 
             
             land_cover_bar_graph_winter_summer(stc, output=output, pngfile='landcover_summer_winter.png')
-            display(HTML('<p style="font-size:15px;"><b>Figure 2b: Land cover shares within the summer (JJA) and winter (JFD) footprints split by direction. Bars representing summer are on the left and bars representing winter on the right. The summer and winter sums of percentages are shown in the legend.</b></p>'))
+            display(HTML('<p style="font-size:15px;"><b>Figure 2b: Land cover shares weighed by the seasonal footprints split by direction. Bars representing summer are on the left and bars representing winter on the right.</b></p>'))
 
             file_path = os.path.join(output, 'landcover_summer_winter.png')
 

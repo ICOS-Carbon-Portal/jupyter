@@ -401,7 +401,7 @@ def update_func(button_c):
 
                     network_analysis_functions.share_representaiton_table(nwc, countries, csvfile = 'representation.csv', output = output)
 
-                    display(HTML('<p style="font-size:15px;">Data used to create <b>Figures 5b and 7b: Network representation of land cover associated fluxes (' + nwc['component'].upper() + '). Representation is established by comparing the "network views" (the network footprints) of the fluxes to "equal views" (sensing capacity evenly distributed) of the fluxes within selected countries for the time-steps in the selected date range.</b></p>'))
+                    display(HTML('<p style="font-size:15px;">Data used to create <b>Figures 5b and 8b: Network representation of land cover associated fluxes (' + nwc['component'].upper() + '). Representation is established by comparing the "network views" (the network footprints) of the fluxes to "equal views" (sensing capacity evenly distributed) of the fluxes within selected countries for the time-steps in the selected date range.</b></p>'))
 
                     file_path = os.path.join(output, 'representation.csv')
                     if os.path.exists(file_path):      
