@@ -254,7 +254,7 @@ year_options = Dropdown(options = list(range(2007,2022)),
 
 header_component = Output()
 with header_component:
-    display(HTML('<p style="font-size:15px;font-weight:bold;">Select component: </p>'))
+    display(HTML('<p style="font-size:15px;font-weight:bold;">Select component (anthropogenic components are preselected): </p>'))
 
 #selection percent/absolut: 
 selection_component = RadioButtons(
