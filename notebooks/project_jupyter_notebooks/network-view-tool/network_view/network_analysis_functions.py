@@ -1108,6 +1108,7 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
         
     date_range = pd.date_range(dt.datetime(nwc['startYear'],nwc['startMonth'],nwc['startDay'],0), (dt.datetime(nwc['endYear'], nwc['endMonth'], nwc['endDay'], 21)), freq='3H')
     date_range_subset = [date for date in date_range if date.hour in nwc['timeOfDay']]
+
     date_range_string_alt = [str(date.year) + '-' + str(date.month) + '-' + str(date.day) + ' ' + str(date.hour) for date in date_range_subset]
 
     # usually the df_fluxes_full contains a longer date range than the one of interest. 
@@ -1191,16 +1192,6 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
 
         df_even_mean = df_even.mean()
         
-        # see if all are the same (zero):
-        df_even_mean_test_unique = df_even_mean.to_numpy() 
-        
-        # if all zero: return without table
-        if (df_even_mean_test_unique[0] == df_even_mean_test_unique).all():
-            
-            plt.close()
-            display(HTML('<p style="font-size:15px;"><mark>No GEE during the selected time-period</mark> (probably night-time selected). No GEE-based output created.</p>'))
-            return False
-
         df_even_mean_percent = (df_even_mean/df_even_mean.sum())*100
 
         df_network_mean = df_network.mean()
