@@ -1687,7 +1687,6 @@ def signals_table_anthro(stc, output=output, csvfile='anthro_table.csv'):
 
     
 def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.csv'):   
-    
     component = stc['component']
     stations = stc['signalsStations']
     timeselect_list = stc['timeOfDay']
@@ -1764,21 +1763,17 @@ def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.cs
                 else:
                     filename_component = '/data/project/obsnet/VPRM_10day/respiration/RESP_10day_' +str(current_year) + '_' + str(current_month) + '.nc'
 
-                f_component = cdf.Dataset(filename_component)
-
-                times = f_component.variables['time']
+                f_component = xr.open_dataset(filename_component)
 
                 first = False
 
             date_string = str(date.year) + '-' + str(date.month) + '-' + str(date.day) + ' ' +  str(date.hour)
 
-            ntime = date2index(date,times,select='nearest')
-
             if component == 'GEE':
                 
-                component_selected = f_component.variables['gee_10day'][ntime][:][:]
+                component_selected = f_component.sel(time=date).gee_10day.data
             else:
-                component_selected = f_component.variables['resp_10day'][ntime][:][:]
+                component_selected = f_component.sel(time=date).resp_10day.data
 
             filename=(pathFP+station+'/'+str(date.year)+'/'+str(date.month).zfill(2)+'/'
                  +str(date.year)+'x'+str(date.month).zfill(2)+'x'+str(date.day).zfill(2)+'x'+str(date.hour).zfill(2)+'/foot')
@@ -1842,7 +1837,7 @@ def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.cs
                                           .format(subset_format)
     display(df_save_sort_styled)
     df_save.to_csv(os.path.join(output, csvfile), index = False)
-    
+
 def average_threshold_fp(station, date_range, threshold):
     
     pathFP='/data/stiltweb/stations/'

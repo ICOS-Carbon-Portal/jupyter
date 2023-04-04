@@ -219,7 +219,11 @@ def update_func(button_c):
         
         display(HTML('<p style="font-size:12px;text-align:left"><i>*directly from the online footprint calculation with hourly resolution combined with fluxes (GEE or respiration from VPRM) as opposed to time-step aggregated footprints.</i></p>')) 
         
-        display(HTML('<p style="font-size:15px;"><b>Table 1: Average land cover (Gross Ecosystem Exchange) signals in ppm. The signals have been estimated using time-step aggregated footprints and should be used for qualitative analyses only (see Sect. 2.2. in the methods of the paper). </p>')) 
+        if stc['component'] == 'GEE':
+        
+            display(HTML('<p style="font-size:15px;"><b>Table 1: Average land cover (Gross Ecosystem Exchange) signals in ppm. The signals have been estimated using time-step aggregated footprints and should be used for qualitative analyses only (see Sect. 2.2. in the methods of the paper). </p>'))
+        else:
+            display(HTML('<p style="font-size:15px;"><b>Table 1: Average land cover (respiration) signals in ppm. The signals have been estimated using time-step aggregated footprints and should be used for qualitative analyses only (see Sect. 2.2. in the methods of the paper). </p>'))
       
         file_path = os.path.join(output, 'bio_table.csv')
         if os.path.exists(file_path):      
