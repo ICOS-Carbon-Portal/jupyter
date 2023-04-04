@@ -1699,11 +1699,13 @@ def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.cs
 
     broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018')
 
-    list_classes_names = ['broad_leaf_forest', 'coniferous_forest', 'mixed_forest', 'ocean', 'other', 'grass_shrub', 'cropland', \
-                          'pasture', 'urban', 'unknown']
+    #ocean, other, unknown are fractional grids put into "other" derived from the total. 
+    list_classes_names = ['broad_leaf_forest', 'coniferous_forest', 'mixed_forest', 'grass_shrub', 'cropland', \
+                          'pasture', 'urban']
 
-    list_classes_km2 = [broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, \
-                        pasture, urban, unknown]
+    list_classes_km2 = [broad_leaf_forest, coniferous_forest, mixed_forest, grass_shrub, cropland, \
+                        pasture, urban]
+        
 
     # want vegetation fraction HILDA land cover maps (as opposed to km2 for the entire cell - "list_classes_km2")
     list_landcover_fractions = []
@@ -1715,8 +1717,8 @@ def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.cs
         list_landcover_fractions.append(landcover_fraction)
 
     df_save = pd.DataFrame(columns= ['Station', component + ' total', component + ' total (STILT)*','Broad leaf forest (' + component + ')', 'Coniferous forest (' + component + ')', 'Mixed forest (' + component + ')',\
-                                     'Ocean (' + component + ')','Other (' + component + ')','Grass and shrub (' + component + ')', 'Cropland (' + component + ')','Pasture (' + component + ')',\
-                                     'Urban (' + component + ')', 'Unknown (' + component + ')'])
+                                     'Grass and shrub (' + component + ')', 'Cropland (' + component + ')','Pasture (' + component + ')',\
+                                     'Urban (' + component + ')', 'Other (' + component + ')'])
 
     # index for putting the data for each station (mean) in the correct place in the dataframe "df_save"
     i_outer = 0
@@ -1795,13 +1797,16 @@ def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.cs
         # to be extended with land cover data
         data_row = [station, average_component, component_station_stilt]
 
+        other_fluxes = average_component
         for landcover_fraction in list_landcover_fractions:
 
             fp_component_station_landcover = (fp_component_station_average * landcover_fraction).sum()
      
             data_row.extend([fp_component_station_landcover])
+        
+            other_fluxes = other_fluxes - fp_component_station_landcover
 
-        df_save.loc[i_outer] = data_row
+        df_save.loc[i_outer] = data_row + [other_fluxes]
 
         i_outer = i_outer + 1
         f.value+=1
@@ -1809,11 +1814,12 @@ def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.cs
     df_save_sort = df_save.sort_values(by=['Station'])
     
     df_save_subset_component = df_save_sort[['Station',  'Broad leaf forest (' + component + ')', 'Coniferous forest (' + component + ')', 'Mixed forest (' + component + ')', \
-                                             'Other (' + component + ')',  'Grass and shrub (' + component + ')',  'Cropland (' + component + ')',  'Pasture (' + component + ')',\
-                                             'Urban (' + component + ')', component + ' total', component +' total (STILT)*']]
+                                            'Grass and shrub (' + component + ')',  'Cropland (' + component + ')',  'Pasture (' + component + ')',\
+                                             'Urban (' + component + ')', 'Other (' + component + ')', component + ' total', component +' total (STILT)*']]
 
-    subset_style = ['Broad leaf forest (' + component + ')', 'Coniferous forest (' + component + ')', 'Mixed forest (' + component + ')', 'Other (' + component + ')', \
-                    'Grass and shrub (' + component + ')',  'Cropland (' + component + ')',  'Pasture (' + component + ')',  'Urban (' + component + ')']
+    subset_style = ['Broad leaf forest (' + component + ')', 'Coniferous forest (' + component + ')', 'Mixed forest (' + component + ')',\
+                    'Grass and shrub (' + component + ')',  'Cropland (' + component + ')',  'Pasture (' + component + ')',  'Urban (' + component + ')','Other (' + component + ')']
+    
     subset_format = {key: "{:.2f}" for key in subset_style}
     subset_format[component + ' total'] = '{:.2f}'
     subset_format[component + ' total (STILT)*'] = '{:.2f}'
