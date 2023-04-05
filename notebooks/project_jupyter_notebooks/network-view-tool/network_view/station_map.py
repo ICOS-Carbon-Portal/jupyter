@@ -26,12 +26,24 @@ def create_stations_dfs():
             except:
                 uri = ''
 
-            df_icos_stations.loc[i_icos] = [key, name, lat, lon, uri, country]
-            i_icos = i_icos + 1
+
+            if lat in df_icos_stations.values and lon in df_icos_stations.values:
+
+                df_icos_stations.loc[(df_icos_stations['lat'] == lat) & (df_icos_stations['lon'] == lon), ['id']] = df_icos_stations.loc[df_icos_stations['lat'] == lat]['id'] +  '; ' + key
+
+            else:
+                df_icos_stations.loc[i_icos] = [key, name, lat, lon, uri, country]
+                i_icos = i_icos + 1
+
         else:
-            df_stilt_stations.loc[i_stilt] = [key, name, lat, lon, country]
-            i_stilt = i_stilt + 1
-            
+
+            if lat in df_stilt_stations.values and lon in df_stilt_stations.values:
+
+                df_stilt_stations.loc[(df_stilt_stations['lat'] == lat) & (df_stilt_stations['lon'] == lon), ['id']] = df_stilt_stations.loc[df_stilt_stations['lat'] == lat]['id'] +  '; ' + key
+            else:    
+                df_stilt_stations.loc[i_stilt] = [key, name, lat, lon, country]
+                i_stilt = i_stilt + 1
+
     return df_stilt_stations, df_icos_stations 
 
 def station_map():
