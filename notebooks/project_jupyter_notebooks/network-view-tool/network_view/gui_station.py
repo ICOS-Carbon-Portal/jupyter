@@ -70,8 +70,10 @@ def change_year_options(c):
     selected_year = year_options.value 
     stations_choice.disabled = False
     selected_stations.disabled = False
-    
-    list_optional_stations = sorted([k for k, v in stilt_stations.items() if str(selected_year) in v['years'] if len(v[str(selected_year)]['months']) == 12])
+
+    list_optional_stations_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stilt_stations.items() if str(selected_year) in v['years'] if len(v[str(selected_year)]['months']) == 12 if v['geoinfo']])
+    list_optional_stations_not_located =  [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stilt_stations.items() if str(selected_year) in v['years'] if len(v[str(selected_year)]['months']) == 12 if not v['geoinfo']]
+    list_optional_stations = list_optional_stations_located + list_optional_stations_not_located
     
     stations_choice.options = list_optional_stations
     
@@ -203,7 +205,7 @@ def update_func(button_c):
         
         network_analysis_functions.signals_table_anthro(stc, output=output, csvfile='anthro_table.csv')
         
-        display(HTML('<p style="font-size:15px;"><b>Table 1: Average anthropogenic signals in ppm.</p>')) 
+        display(HTML('<p style="font-size:15px;"><b>Table 1: Average anthropogenic signals in ppm. The total is split into either source categories (left of "total" column) or fuel categories (right of "total" column)</p>')) 
         
         file_path = os.path.join(output, 'anthro_table.csv')
         if os.path.exists(file_path):      
@@ -221,9 +223,9 @@ def update_func(button_c):
         
         if stc['component'] == 'GEE':
         
-            display(HTML('<p style="font-size:15px;"><b>Table 1: Average land cover (Gross Ecosystem Exchange) signals in ppm. The signals have been estimated using time-step aggregated footprints and should be used for qualitative analyses only (see Sect. 2.2. in the methods of the paper). </p>'))
+            display(HTML('<p style="font-size:15px;"><b>Table 1: Average land cover (Gross Ecosystem Exchange = uptake) signals in ppm. The signals have been estimated using time-step aggregated footprints and should be used for qualitative analyses only (different in the paper, see in the discussion section of the paper). </p>'))
         else:
-            display(HTML('<p style="font-size:15px;"><b>Table 1: Average land cover (respiration) signals in ppm. The signals have been estimated using time-step aggregated footprints and should be used for qualitative analyses only (see Sect. 2.2. in the methods of the paper). </p>'))
+            display(HTML('<p style="font-size:15px;"><b>Table 1: Average land cover (respiration) signals in ppm. The signals have been estimated using time-step aggregated footprints and should be used for qualitative analyses only (different in the paper, see in the discussion section of the paper). </p>'))
       
         file_path = os.path.join(output, 'bio_table.csv')
         if os.path.exists(file_path):      
