@@ -2059,8 +2059,8 @@ def contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter
     average_fp_winter = read_aggreg_footprints(station, date_range_winter)
     f.value += 1
     
-    average_fp_summer = update_footprint_based_on_threshold(average_fp_summer, 0.5)
-    average_fp_winter = update_footprint_based_on_threshold(average_fp_winter, 0.5)
+    average_fp_summer = update_footprint_based_on_threshold(average_fp_summer, threshold)
+    average_fp_winter = update_footprint_based_on_threshold(average_fp_winter, threshold)
     
     list_fps = [average_fp_summer, average_fp_winter]
     
