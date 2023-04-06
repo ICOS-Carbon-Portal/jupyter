@@ -134,15 +134,20 @@ def return_europe_mask():
     return europe_mask
 
 
-def create_xarray(fp_array,date_range_array):
+
+def create_xarray(fp_array,date):
+    
+    data=np.array(fp_array).reshape(1, 480, 400)
+    
+    time = [date]
 
     # put data into a dataset
     ds = xr.Dataset(
         data_vars=dict(
-            network_foot=(["time","lat", "lon"], fp_array.reshape(len(date_range_array), 480, 400))
+            network_foot=(["time","lat", "lon"], data)
         ),
         coords=dict(
-            time=(["time"], date_range_array),
+            time=(["time"], time),
             lat=(["lat"], load_lat),
             lon=(["lon"], load_lon),
         ),
@@ -150,7 +155,6 @@ def create_xarray(fp_array,date_range_array):
     )
  
     return ds
-
 
 def create_network_fps(stations, date_range, time_selection, name_save, threshold, notes = ''):
 
@@ -167,9 +171,8 @@ def create_network_fps(stations, date_range, time_selection, name_save, threshol
 
     i = 0
     missing = []
+    list_xarray = []
     first = True
-    first_array = True
-    list_dates = []
     for date in date_range:
         
         date_start_array = date
@@ -178,17 +181,16 @@ def create_network_fps(stations, date_range, time_selection, name_save, threshol
             
             if not first:
                 
-                xarray_month = create_xarray(array_for_xarray,list_dates)
+                xarray_month = xr.concat(list_xarray, dim='time')
 
                 file_path = os.path.join('network_footprints', name_save, name_save + '_' + str(month_current) + '.nc')
                 
                 xarray_month.to_netcdf(file_path)
+
+                #empty the xarray list:
+                list_xarray = []
                 
                 del xarray_month
-                list_dates = []
-
-                # start appending to a new array
-                first_array = True
                 
             month_current = date.month
                 
@@ -221,27 +223,16 @@ def create_network_fps(stations, date_range, time_selection, name_save, threshol
             else:
                 missing.append(station + ':' + date_string)
                 
+        xarray_individual = create_xarray(fp_50_network, date)
         # append to an array for the month being looped over.
-        if first_array:
-            
-            array_for_xarray = fp_50_network
-            
-            # start appending to the array for the next date.
-            first_array = False
-            
-        else:
-            
-            array_for_xarray = np.append(array_for_xarray,fp_50_network, axis = 0)
-            
-        list_dates.append(date)
+        list_xarray.append(xarray_individual)
+
+    if len(list_xarray)>0:   
         
-    if not first_array:
-        
-        xarray_month = create_xarray(array_for_xarray,list_dates)
+        xarray_month = xr.concat(list_xarray, dim='time')
         file_path = os.path.join('network_footprints', name_save, name_save + '_' + str(month_current) + '.nc')
         xarray_month.to_netcdf(file_path)
         del xarray_month
-        del list_dates
 
     today = date.today()
     today_string = today.strftime("%B %d, %Y")
@@ -294,9 +285,8 @@ def create_network_fps_by_extension(stations, folder, name_save, notes=""):
     display(f) # display the bar
 
     missing = []
+    list_xarray = []
     first = True
-    first_array = True
-    list_dates = []
     for date in date_range:
         f.value += 1
         date_string = str(date.year) + '_' + str(date.month) + '_' + str(date.day) + '_' +  str(date.hour)
@@ -306,18 +296,15 @@ def create_network_fps_by_extension(stations, folder, name_save, notes=""):
             
             if not first:
                 
-                #xarray_month = xr.concat(list_xarray, dim='time')
-                xarray_month = create_xarray(array_for_xarray,list_dates)
-                
+                xarray_month = xr.concat(list_xarray, dim='time')
+
                 file_path = os.path.join('network_footprints', name_save, name_save + '_' + str(current_month) + '.nc')
                 xarray_month.to_netcdf(file_path)
 
+                #empty the xarray list:
+                list_xarray = []
+                
                 del xarray_month
-                
-                list_dates = []
-                
-                # start appending to a new array
-                first_array = True
                 
             current_month = date.month
             footprints = xr.open_dataset(os.path.join(path, folder, folder + '_' + str(current_month) + '.nc'))
@@ -344,31 +331,16 @@ def create_network_fps_by_extension(stations, folder, name_save, notes=""):
             else:
                 missing.append(station + ':' + date_string)
                 
-        # append to an array for the month being looped over.
-        if first_array:
-            
-            array_for_xarray = fp_50_network
-            
-            # start appending to the array for the next date.
-            first_array = False
-            
-        else:
-            
-            array_for_xarray = np.append(array_for_xarray,fp_50_network, axis = 0)
-            
-        list_dates.append(date)
+        xarray_individual = create_xarray(fp_50_network, date)
 
-        #xarray_individual = create_xarray(fp_50_network, date)
-
-        #list_xarray.append(xarray_individual)
+        list_xarray.append(xarray_individual)
         
-    if not first_array:
+    if len(list_xarray)>0:   
         
-        xarray_month = create_xarray(array_for_xarray,list_dates)
+        xarray_month = xr.concat(list_xarray, dim='time')
         file_path = os.path.join('network_footprints', name_save, name_save + '_' + str(current_month) + '.nc')
         xarray_month.to_netcdf(file_path)
         del xarray_month
-        del list_dates
 
     
     ## create a json file with the information about the created network footprint
