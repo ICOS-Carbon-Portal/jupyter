@@ -155,8 +155,10 @@ def change_network_choice(c):
 
     stations = network_footprint_info_load['stations']
 
-    list_optional_stations = sorted([k for k, v in stilt_stations.items() if str(selected_year) in v['years'] if len(v[str(selected_year)]['months']) == 12 if k not in stations])
-
+    list_optional_stations_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stilt_stations.items() if str(selected_year) in v['years'] if len(v[str(selected_year)]['months']) == 12 if v['geoinfo']])
+    list_optional_stations_not_located =  [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stilt_stations.items() if str(selected_year) in v['years'] if len(v[str(selected_year)]['months']) == 12 if not v['geoinfo']]
+    list_optional_stations = list_optional_stations_located + list_optional_stations_not_located
+    
     stations_choice.options = list_optional_stations
 
 def change_stations_choice(c):

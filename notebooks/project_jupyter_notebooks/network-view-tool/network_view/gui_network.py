@@ -45,6 +45,8 @@ style_scroll = """
 def get_settings():
     s = {}
     
+    s['component'] = selection_component.value
+
     # not from the user - but could make it
     s['vmaxPercentile'] = 99.9 
     
@@ -399,7 +401,7 @@ def update_func(button_c):
 
                     network_analysis_functions.share_representaiton_table(nwc, countries, csvfile = 'representation.csv', output = output)
 
-                    display(HTML('<p style="font-size:15px;">Data used to create <b>Figures 5b and 7b: Network representation of land cover associated fluxes (GEE). Representation is established by comparing the "network views" (the network footprints) of the fluxes to "equal views" (sensing capacity evenly distributed) of the fluxes within selected countries for the time-steps in the selected date range.</b></p>'))
+                    display(HTML('<p style="font-size:15px;">Data used to create <b>Figures 5b and 8b: Network representation of land cover associated fluxes (' + nwc['component'].upper() + '). Representation is established by comparing the "network views" (the network footprints) of the fluxes to "equal views" (sensing capacity evenly distributed) of the fluxes within selected countries for the time-steps in the selected date range.</b></p>'))
 
                     file_path = os.path.join(output, 'representation.csv')
                     if os.path.exists(file_path):      
@@ -477,6 +479,19 @@ network_choice = Dropdown(options = list_network_files,
                    disabled= False,
                    layout = layout,
                    style = style)
+
+header_component = Output()
+with header_component:
+    display(HTML('<p style="font-size:15px;font-weight:bold;">Select component: </p>'))
+
+#selection percent/absolut: 
+selection_component = RadioButtons(
+        description = '', 
+        options=[('GEE','GEE'), ('Respiration','RESP')],
+        value='GEE',
+        disabled=False, 
+        layout = layout,
+        style = style)
 
 header_date_time = Output()
 with header_date_time:
@@ -570,10 +585,12 @@ update_button = Button(description='Run selection',
 update_button.style.button_color=button_color_able
 
 # structure how the output should be presented 
-settings_grid_1 =GridspecLayout(2, 3)
+settings_grid_1 =GridspecLayout(4, 3)
 
 settings_grid_1[0:1, 0:1] = header_network
 settings_grid_1[1:2, 0:1] = network_choice
+settings_grid_1[2:3, 0:1] = header_component
+settings_grid_1[3:4, 0:1] = selection_component
 
 settings_grid_2 =GridspecLayout(3, 3)
 settings_grid_2[0:1, 0:1] = header_date_time
