@@ -107,3 +107,13 @@ def read_stilt_timeseries_RINGO_T13_update(station,year,loc_ident):
     df.set_index(['date'],inplace=True)
     #print(df)
     return df
+
+#------------------------------------------------------------------------------
+# function to convert UTC to mean solar time MST
+def utc_mst(utc_hour, longitude):
+    #convert hours in UTC to mean solar time MST using longitude at location
+    #longitude in degree (-180 to 180) or (0 to 360)
+    local_hour = utc_hour + round(np.deg2rad(longitude) / np.pi * 12)
+    if local_hour >= 24:
+        local_hour = local_hour - 24
+    return local_hour
