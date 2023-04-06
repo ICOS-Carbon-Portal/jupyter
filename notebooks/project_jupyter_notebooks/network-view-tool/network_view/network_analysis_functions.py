@@ -1886,8 +1886,6 @@ def initiate_summer_winter_comparison():
         list_optional_stations_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stilt_stations.items() if str(selected_year) in v['years'] if len(v[str(selected_year)]['months']) == 12 if v['geoinfo']])
         list_optional_stations_not_located =  [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stilt_stations.items() if str(selected_year) in v['years'] if len(v[str(selected_year)]['months']) == 12 if not v['geoinfo']]
         list_optional_stations = list_optional_stations_located + list_optional_stations_not_located
-        print(list_optional_stations)
-        #list_optional_stations = sorted([k for k, v in stilt_stations.items() if str(selected_year) in v['years'] if len(v[str(selected_year)]['months']) == 12])
 
         specific_station_choice.options = list_optional_stations
         specific_station_choice.value = list_optional_stations[0][1]
