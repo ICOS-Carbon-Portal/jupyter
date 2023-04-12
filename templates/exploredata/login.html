@@ -75,6 +75,17 @@ th, td {
  }
 </style>
 
+<script>
+function enableSignInButton() {
+  // Get references to the checkboxes and sign-in button.
+  const checkboxLicense = document.getElementById("checkbox-license");
+  const checkboxTerms = document.getElementById("checkbox-terms");
+  const signInButton = document.getElementById("login-submit");
+  // Check if both checkboxes are checked.
+  signInButton.disabled = !(checkboxLicense.checked && checkboxTerms.checked);
+}
+</script>
+
 <div>
 	<img class='header'src='https://www.icos-cp.eu/themes/cp_theme_d8/images/icos-header.jpg'>
 	<a href="https://www.icos-cp.eu/" >
@@ -127,34 +138,44 @@ th, td {
       tabindex="2"
     />
     </td></tr>
-    <tr><td>
-    <input    
-      type="checkbox"      
-      name="licence"
-      id="licence_check"
-      onchange="document.getElementById('login_submit').disabled = !this.checked;"
-      tabindex="3"
-    />
-    <label for='licence'>
-    &nbsp I accept that ICOS data is under a<br>
-        <a href="https://data.icos-cp.eu/licence"
-           target="_blank">&nbsp CC BY 4.0 licence</a> &nbsp
-        <img src="https://www.icos-cp.eu/sites/default/files/inline-images/creativecommons.png">
-    </label>
-    </td><td>
-    <div class="feedback-container">
-      <input
-        id="login_submit"
-        type="submit"
-        class='btn btn-jupyter'
-        value='Sign In'
-        tabindex="4"
-        disabled='true'
-        />
-      <div class="feedback-widget hidden">
-        <i class="fa fa-spinner"></i>
-      </div>
-    </div>
+    <tr>
+        <td>
+            <input style="vertical-align: 7px" type="checkbox" name="licence"
+                   id="checkbox-license"
+                   onchange="enableSignInButton()"
+                   tabindex="3"/>
+            <label for='licence'>
+                &nbsp; I accept that ICOS data is under a<br>
+                <a href="https://data.icos-cp.eu/licence" target="_blank">
+                    &nbsp CC BY 4.0 licence
+                </a>&nbsp;
+                <img src="https://www.icos-cp.eu/sites/default/files/inline-images/creativecommons.png">
+            </label>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <input type="checkbox" name="licence"
+                   id="checkbox-terms"
+                   onchange="enableSignInButton()"
+                   tabindex="3"/>
+            <label for='terms'>
+                &nbsp; I accept the ICOS
+                <a href="https://www.icos-cp.eu/terms-of-use" target="_blank">
+                    Terms of Use
+                </a>
+            </label>
+        </td>
+        <td>
+            <div class="feedback-container">
+                <input id="login-submit" type="submit"
+                       class="btn btn-jupyter" value="Sign In"
+                       tabindex="4" disabled="true"/>
+                <div class="feedback-widget hidden">
+                    <i class="fa fa-spinner"></i>
+                </div>
+            </div>
+        </td>
   </div>
 </form>
 
