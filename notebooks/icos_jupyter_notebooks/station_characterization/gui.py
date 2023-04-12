@@ -101,6 +101,13 @@ def set_settings(s):
     except:
         fig_format.value = 'pdf'
 
+        
+# check if it is a valid date range, enable/disable update button in accordance.
+def check_date_range():
+    if s_year.value==e_year.value and s_month.value == e_month.value and e_day.value == s_day.value:
+        update_button.disabled = True
+    else:
+        update_button.disabled = False
 # observer functions: things that happen when specific widgets changes
 #---------------------------------------------------------
 def change_stn_type(c): 
@@ -149,15 +156,15 @@ def change_stn(c):
 def change_yr(c):
     
     years = [x for x in s_year.options if x >= s_year.value]
-    e_year.options = years
-        
     #extract available months 
     month = sorted(stiltstations[station_choice.value][str(s_year.value)]['months'])
     month = [int(x) for x in month]
     s_month.options= month
     s_month.value = min(month)
+    e_year.options = years
     e_month.options = month
     e_month.value = min(month)
+    check_date_range()
 
 def change_mt(c):
     
@@ -184,6 +191,8 @@ def change_mt(c):
         day = [x for x in s_day.options if x >= s_day.value]
         e_day.options=day
         e_day.value = min(day)
+        
+    check_date_range()
 
 def change_yr_end(c):
     
@@ -216,6 +225,7 @@ def change_yr_end(c):
             e_day.options=list(range(1,29))
             
         e_day.value = 1
+    check_date_range()
 
 def change_day(c):
     
@@ -228,7 +238,8 @@ def change_day(c):
         if original_value in allowed_days:
             e_day.value = original_value
         else:
-            e_day.value = min(allowed_days)
+            e_day.value = min(allowed_days)          
+    check_date_range()
     
 def change_month_end(c):
     
@@ -249,27 +260,28 @@ def change_month_end(c):
         else:
             e_day.options=list(range(1,29))          
         e_day.value = 1
+    check_date_range()
+    
+def change_day_end(c):
+    check_date_range()
         
 def file_set_widgets(c):
     
     uploaded_file = file_name.value
     
     #check if there is content in the dictionary (uploaded file)
-    if bool(uploaded_file):
-        
-        if type(uploaded_file) is tuple:
+    if type(uploaded_file) is tuple:
             # unless tobytes() is used, settings_concent will be of type "memoryview"
             settings_content = uploaded_file[0]['content'].tobytes()
             settings_dict = json.loads(settings_content)
             set_settings(settings_dict)
-        
-        #this works on exploredata (uploaded_file = dictionary)
-        else:
-            settings_file=uploaded_file[list(uploaded_file.keys())[0]]['content']
-            settings_json = settings_file.decode('utf8').replace("'", '"')
-            settings_dict = json.loads(settings_file.tobytes())
-            set_settings(settings_dict)
-    
+
+    #this works on exploredata (uploaded_file = dictionary)
+    else:
+        settings_file=uploaded_file[list(uploaded_file.keys())[0]]['content']
+        settings_json = settings_file.decode('utf8').replace("'", '"')
+        settings_dict = json.loads(settings_file.tobytes())
+        set_settings(settings_dict)
 #----------- start processing -----------------
      
 def updateProgress(f, desc=''):
@@ -720,6 +732,7 @@ def observe():
     s_day.observe(change_day, 'value')
     e_year.observe(change_yr_end, 'value')
     e_month.observe(change_month_end, 'value')
+    e_day.observe(change_day_end, 'value')
     file_name.observe(file_set_widgets, 'value')
     
     #Call update-function when button is clicked:
@@ -733,6 +746,7 @@ def unobserve():
     s_day.unobserve(change_day, 'value')    
     e_year.unobserve(change_yr_end, 'value')
     e_month.unobserve(change_month_end, 'value')
+    e_day.unobserve(change_day_end, 'value')
     
 # start observation
 observe()
