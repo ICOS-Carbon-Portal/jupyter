@@ -40,7 +40,6 @@ list_2018_not_located = [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for
 list_2018 = list_2018_not_located + list_2018_located 
 
 def prepare_footprints_change(c):
-    station_choice.options = () 
 
     if prepared_footprints.value == False:
         
@@ -71,13 +70,6 @@ def prepare_footprints_change(c):
         e_day.disabled = True
 
         time_selection.disabled = True
-        
-# check if it is a valid date range, enable/disable update button in accordance.
-def check_date_range():
-    if s_year.value==e_year.value and s_month.value == e_month.value and e_day.value == s_day.value:
-        update_button.disabled = True
-    else:
-        update_button.disabled = False
 
 # observer functions
 def change_stn(c): 
@@ -101,7 +93,6 @@ def change_yr(c):
     e_year.options = years
     e_month.options = month
     e_month.value = min(month)
-    check_date_range()
 
 def change_mt(c):
     
@@ -128,8 +119,6 @@ def change_mt(c):
         day = [x for x in s_day.options if x >= s_day.value]
         e_day.options=day
         e_day.value = min(day)
-        
-    check_date_range()
 
 def change_yr_end(c):
     
@@ -163,8 +152,6 @@ def change_yr_end(c):
             
         e_day.value = 1
     
-    check_date_range()
-
 def change_day(c):
     
     #when change the day... if the same month and year (start) - update
@@ -177,8 +164,6 @@ def change_day(c):
             e_day.value = original_value
         else:
             e_day.value = min(allowed_days)
-    
-    check_date_range()
     
 def change_month_end(c):
     
@@ -199,12 +184,6 @@ def change_month_end(c):
         else:
             e_day.options=list(range(1,29))          
         e_day.value = 1
-    
-    check_date_range()
-    
-def change_day_end(c):
-    
-    check_date_range()
 
 def update_func(button_c):
 
@@ -336,7 +315,7 @@ colorbar_choice = Dropdown(
 
 #Create a Button widget to control execution:
 update_button = Button(description='Run selection',
-                       disabled=True,
+                       disabled=False,
                        button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
                        tooltip='Click me',)
 
@@ -405,8 +384,7 @@ def observe():
     s_day.observe(change_day, 'value')
     e_year.observe(change_yr_end, 'value')
     e_month.observe(change_month_end, 'value')
-    e_day.observe(change_day_end, 'value')
-    
+
     update_button.on_click(update_func)
 
 def unobserve():    
