@@ -21,6 +21,7 @@ import ipywidgets as widgets
 from bokeh.io import show, output_notebook, reset_output
 import matplotlib.pyplot as plt
 
+
 # style to supress scrolling in the output 
 style_scroll = """
     <style>
@@ -272,20 +273,22 @@ def change_selected_countries(c):
 def file_set_widgets(c):
     
     uploaded_file = file_name.value
-
+    
     #check if there is content in the dictionary (uploaded file)
-    if type(uploaded_file) is tuple:
+    if bool(uploaded_file):
+        
+        if type(uploaded_file) is tuple:
             # unless tobytes() is used, settings_concent will be of type "memoryview"
             settings_content = uploaded_file[0]['content'].tobytes()
             settings_dict = json.loads(settings_content)
             set_settings(settings_dict)
-
-    #this works on exploredata (uploaded_file = dictionary)
-    else:
-        settings_file=uploaded_file[list(uploaded_file.keys())[0]]['content']
-        settings_json = settings_file.decode('utf8').replace("'", '"')
-        settings_dict = json.loads(settings_file.tobytes())
-        set_settings(settings_dict)
+        
+        #this works on exploredata (uploaded_file = dictionary)
+        else:
+            settings_file=uploaded_file[list(uploaded_file.keys())[0]]['content']
+            settings_json = settings_file.decode('utf8').replace("'", '"')
+            settings_dict = json.loads(settings_file.tobytes())
+            set_settings(settings_dict)
 
 def change_yr(c):
     
@@ -397,7 +400,8 @@ def clear_selection_compare(button_c):
 #----------- start processing -----------------
 
 def update_func(button_c):
-
+    
+    
     update_button.disabled = True
     clear_all_output()
     
@@ -634,7 +638,7 @@ selected_compare_network_stations.layout.margin = '0px 0px 0px 70px' #top, right
 
 
 #Create a Dropdown widget with year values (start year):
-s_year = Dropdown(options = range(2006, 2022),
+s_year = Dropdown(options = range(2006, 2021),
                   value = 2018,
                   description = 'Start Year',
                   disabled= False,
@@ -649,7 +653,7 @@ s_month = Dropdown(options = range(1, 13),
                   layout=layout)
 
 #Create a Dropdown widget with year values (end year):
-e_year = Dropdown(options = range(2018, 2022),
+e_year = Dropdown(options = range(2018, 2021),
                   value = 2018,
                   description = 'End Year',
                   disabled= False,
