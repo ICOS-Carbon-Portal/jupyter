@@ -15,7 +15,6 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import json
 button_color_able='#4169E1'
-button_color_disable='#900D09'
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -106,17 +105,20 @@ def set_settings(s):
         resample_str = s['resample']
         resample_int = int(resample_str[:-1])
         resample.value = resample_int
+
+# check if it is a valid date range, enable/disable update button in accordance.
+def check_date_range():
+    if s_year.value==e_year.value and s_month.value == e_month.value and e_day.value == s_day.value:
+        update_button.disabled = True
+    else:
+        update_button.disabled = False
         
 # observer functions
-
-#---------------------------------------------------------
-    
 def change_stn_type(c): 
     
     # disable update button until date and time defined (see how these are reset below)
     update_button.disabled = True
     update_button.tooltip = 'Unable to run'
-    update_button.style.button_color=button_color_disable
 
     # make sure the new 'options' are not selected..
     unobserve()    
@@ -156,17 +158,17 @@ def change_stn(c):
     
 
 def change_yr(c):
-    
+
     years = [x for x in s_year.options if x >= s_year.value]
-    e_year.options = years
-        
     #extract available months 
     month = sorted(stiltstations[station_choice.value][str(s_year.value)]['months'])
     month = [int(x) for x in month]
     s_month.options= month
     s_month.value = min(month)
+    e_year.options = years
     e_month.options = month
     e_month.value = min(month)
+    check_date_range()
 
 def change_mt(c):
     
@@ -193,11 +195,13 @@ def change_mt(c):
         day = [x for x in s_day.options if x >= s_day.value]
         e_day.options=day
         e_day.value = min(day)
+        
+    check_date_range()
 
 def change_yr_end(c):
     
     if s_year.value==e_year.value:
-        month = [x for x in s_month.options if x >= s_month.value]        
+        month = [x for x in s_month.options if x >= s_month.value]
         e_month.options = month
         e_month.value = min(month)
     else:
@@ -225,6 +229,8 @@ def change_yr_end(c):
             e_day.options=list(range(1,29))
             
         e_day.value = 1
+        
+    check_date_range()
 
 def change_day(c):
     
@@ -238,6 +244,8 @@ def change_day(c):
             e_day.value = original_value
         else:
             e_day.value = min(allowed_days)
+            
+    check_date_range()
     
 def change_month_end(c):
     
@@ -259,12 +267,11 @@ def change_month_end(c):
             e_day.options=list(range(1,29))          
         e_day.value = 1
     
+    check_date_range()
+    
 def change_day_end(c):
     
-    if s_year.value==e_year.value and s_month.value == e_month.value and e_day.value == s_day.value:
-        update_button.disabled = True
-    else:
-        update_button.disabled = False
+    check_date_range()
 
 def change_resample_monthly(c):
     
@@ -281,25 +288,20 @@ def change_facility_choice(c):
         threshold_facility_inclusions.disabled = True
         
 def file_set_widgets(c):
-    
-    uploaded_file = file_name.value
-    
-    #check if there is content in the dictionary (uploaded file)
-    if bool(uploaded_file):
-        
-        if type(uploaded_file) is tuple:
-            # unless tobytes() is used, settings_concent will be of type "memoryview"
-            settings_content = uploaded_file[0]['content'].tobytes()
-            settings_dict = json.loads(settings_content)
-            set_settings(settings_dict)
-        
-        #this works on exploredata (uploaded_file = dictionary)
-        else:
-            settings_file=uploaded_file[list(uploaded_file.keys())[0]]['content']
-            settings_json = settings_file.decode('utf8').replace("'", '"')
-            settings_dict = json.loads(settings_file.tobytes())
-            set_settings(settings_dict)
 
+    uploaded_file = file_name.value
+
+    # If the content of the file is loaded as a dictionary or tuple
+    # depends on the version of ipywidgets.
+    # Case of Dictionary.
+    if isinstance(uploaded_file, dict):
+        settings_content = uploaded_file[list(uploaded_file.keys())[0]]['content']
+    # Case of Tuple.
+    else:
+        settings_content = uploaded_file[0]['content'].tobytes()
+    settings_dict = json.loads(settings_content)
+    set_settings(settings_dict)
+        
 #----------- start processing -----------------
 
 def updateProgress(f, desc=''):

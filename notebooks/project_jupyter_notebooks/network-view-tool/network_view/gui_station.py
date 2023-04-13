@@ -40,6 +40,7 @@ style_scroll = """
 def get_settings():
     s = {}
 
+    s['component'] = selection_component.value
     s['startYear'] = s_year.value
     s['startMonth'] = s_month.value
     s['startDay'] = s_day.value
@@ -69,8 +70,10 @@ def change_year_options(c):
     selected_year = year_options.value 
     stations_choice.disabled = False
     selected_stations.disabled = False
-    
-    list_optional_stations = sorted([k for k, v in stilt_stations.items() if str(selected_year) in v['years'] if len(v[str(selected_year)]['months']) == 12])
+
+    list_optional_stations_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stilt_stations.items() if str(selected_year) in v['years'] if len(v[str(selected_year)]['months']) == 12 if v['geoinfo']])
+    list_optional_stations_not_located =  [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stilt_stations.items() if str(selected_year) in v['years'] if len(v[str(selected_year)]['months']) == 12 if not v['geoinfo']]
+    list_optional_stations = list_optional_stations_located + list_optional_stations_not_located
     
     stations_choice.options = list_optional_stations
     
@@ -202,7 +205,7 @@ def update_func(button_c):
         
         network_analysis_functions.signals_table_anthro(stc, output=output, csvfile='anthro_table.csv')
         
-        display(HTML('<p style="font-size:15px;"><b>Table 1: Average anthropogenic signals in ppm.</p>')) 
+        display(HTML('<p style="font-size:15px;"><b>Table 1: Average anthropogenic signals in ppm. The total is split into either source categories (left of "total" column) or fuel categories (right of "total" column)</p>')) 
         
         file_path = os.path.join(output, 'anthro_table.csv')
         if os.path.exists(file_path):      
@@ -216,9 +219,13 @@ def update_func(button_c):
         
         network_analysis_functions.signals_table_bio(stc, component = 'gee', output=output, csvfile='bio_table.csv')
         
-        display(HTML('<p style="font-size:12px;text-align:left"><i>*directly from the online footprint calculation with hourly resolution combined with fluxes (GEE from VPRM) as opposed to time-step aggregated footprints.</i></p>')) 
+        display(HTML('<p style="font-size:12px;text-align:left"><i>*directly from the online footprint calculation with hourly resolution combined with fluxes (GEE or respiration from VPRM) as opposed to time-step aggregated footprints.</i></p>')) 
         
-        display(HTML('<p style="font-size:15px;"><b>Table 1: Average land cover (Gross Ecosystem Exchange) signals in ppm. The signals have been estimated using time-step aggregated footprints and should be used for qualitative analyses only (see Sect. 2.2. in the methods of the paper). </p>')) 
+        if stc['component'] == 'GEE':
+        
+            display(HTML('<p style="font-size:15px;"><b>Table 1: Average land cover (Gross Ecosystem Exchange = uptake) signals in ppm. The signals have been estimated using time-step aggregated footprints and should be used for qualitative analyses only (different in the paper, see in the discussion section of the paper). </p>'))
+        else:
+            display(HTML('<p style="font-size:15px;"><b>Table 1: Average land cover (respiration) signals in ppm. The signals have been estimated using time-step aggregated footprints and should be used for qualitative analyses only (different in the paper, see in the discussion section of the paper). </p>'))
       
         file_path = os.path.join(output, 'bio_table.csv')
         if os.path.exists(file_path):      
@@ -246,6 +253,20 @@ year_options = Dropdown(options = list(range(2007,2022)),
                    disabled= False,
                    layout = layout,
                    style = style)
+
+header_component = Output()
+with header_component:
+    display(HTML('<p style="font-size:15px;font-weight:bold;">Select component (anthropogenic components are preselected): </p>'))
+
+#selection percent/absolut: 
+selection_component = RadioButtons(
+        description = '', 
+        options=[('GEE','GEE'), ('Respiration','RESP')],
+        value='GEE',
+        disabled=False, 
+        layout = layout,
+        style = style)
+
 
 stations_choice = SelectMultiple(options = [],
                    description = 'Select stations:',
@@ -317,6 +338,9 @@ update_button.style.button_color=button_color_able
 settings_grid_0 = GridspecLayout(1, 3)
 settings_grid_0[0:1, 0:1] = year_options
 
+settings_grid_component = GridspecLayout(1, 3)
+settings_grid_component[0:1, 0:1] = selection_component
+
 settings_grid_1 =GridspecLayout(1, 3)
 settings_grid_1[0:1, 0:1] =  stations_choice
 settings_grid_1[0:1, 1:2] = selected_stations
@@ -368,7 +392,7 @@ observe()
 #--------------------------------------------------------------------
 #Open form object:
 with form_out:
-    display(header_stations, settings_grid_0, settings_grid_1,settings_grid_2,settings_grid_3, update_button, signals_anthro, signals_bio)
+    display(header_stations, settings_grid_0, header_component, settings_grid_component, settings_grid_1,settings_grid_2,settings_grid_3, update_button, signals_anthro, signals_bio)
 
 #Display form:
 display(widgets.HTML(style_scroll),form_out)   

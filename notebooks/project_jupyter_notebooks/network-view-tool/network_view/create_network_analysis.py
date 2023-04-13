@@ -19,41 +19,35 @@ import xarray as xr
 path_network_footprints = '/data/project/obsnet/network_footprints'
 path_network_footprints_local = 'network_footprints'
 
-def update_footprint_based_on_threshold(input_footprint, threshold):
-
-    threshold_sensitivity=input_footprint.sum()*threshold
-
-    #create a dataframe that will have the updated sensitivity values + the steps on the way
-    df_sensitivity = pd.DataFrame()
-
-    #one column with the original sensitivity values. Has an index that will be used to sort back to 
-    #this order (flattened 2D... back to 2D with updated sensitivity values in last step)
-    df_sensitivity['sensitivity']=input_footprint.flatten()
+def update_footprint_based_on_threshold(fp, threshold):
     
-    #sensitivity values sorterd from largest to smallest
-    df_sensitivity_sorted=df_sensitivity.sort_values(by=['sensitivity'], ascending=False)
+    # the cumulative sum to reach:
+    cutoff = fp.sum()*threshold
     
-    #another column that has the cumilated sum of the values in the sensitivity column.
-    #used to determine when the footprint threshold is met. 
-    df_sensitivity_sorted['cumsum_sens']=df_sensitivity_sorted.cumsum()
+    fp_flatten = fp.flatten()
 
-    if threshold==1:
-
-        df_sensitivity_sorted['mask_threshold']= np.where(df_sensitivity_sorted['sensitivity']==0, 0, 1)
-    else:
-        df_sensitivity_sorted['mask_threshold']= np.where(df_sensitivity_sorted['cumsum_sens']>=threshold_sensitivity, 0, 1)
+    # -fp_flatten = indices of the largest cell values first
+    sort_indices = np.argsort(-fp_flatten)
     
-    #mask*sensitivity = for "new" footprint that only has sensitivity values in the cells that have the value 1.
-    df_sensitivity_sorted['mask_sensitivity']=df_sensitivity_sorted['mask_threshold']*df_sensitivity_sorted['sensitivity']
+    # indices to reverse the sorting
+    sort_indices_reverse = np.argsort(sort_indices)
 
-    #sort it back (so in correct lat/lon order for "packing back up" to 2D)
-    df_sensitivity_upd=df_sensitivity_sorted.sort_index()
+    # create a mask based on the cumulative sum
+    # sort largest to smallest
+    fp_cumsum_mask = fp_flatten[sort_indices]
 
-    list_updated_sensitivity=df_sensitivity_upd['mask_sensitivity'].tolist()
+    #cumsum
+    fp_cumsum_mask = np.cumsum(fp_cumsum_mask)
     
-    upd_footprint_sens=np.array(list_updated_sensitivity).reshape(480, 400)
+    # if adding to the cumulative sum below the cutoff = 1, else 0. 
+    fp_cumsum_mask = np.where(fp_cumsum_mask < cutoff, 1, 0)
 
-    return upd_footprint_sens
+    # mask sorted back to the original footprint
+    fp_cumsum_mask = fp_cumsum_mask[sort_indices_reverse]
+
+    fp_50 = (fp_flatten * fp_cumsum_mask).reshape(480, 400)
+
+    return fp_50
 
 def find_dobj_from_name(filename):
 
@@ -139,10 +133,12 @@ def return_europe_mask():
             
     return europe_mask
 
-def create_xarray(fp_list,date):
 
-    data=np.array(fp_list).reshape(1, 480, 400)
 
+def create_xarray(fp_array,date):
+    
+    data=np.array(fp_array).reshape(1, 480, 400)
+    
     time = [date]
 
     # put data into a dataset
@@ -160,9 +156,8 @@ def create_xarray(fp_list,date):
  
     return ds
 
-
 def create_network_fps(stations, date_range, time_selection, name_save, threshold, notes = ''):
-    
+
     if not os.path.exists(os.path.join('network_footprints', name_save)):
         os.makedirs(os.path.join('network_footprints', name_save))
         
@@ -179,6 +174,8 @@ def create_network_fps(stations, date_range, time_selection, name_save, threshol
     list_xarray = []
     first = True
     for date in date_range:
+        
+        date_start_array = date
         date_string = str(date.year) + '-' + str(date.month) + '-' + str(date.day) + ' ' +  str(date.hour)
         if first or date.month != month_current:
             
@@ -193,15 +190,15 @@ def create_network_fps(stations, date_range, time_selection, name_save, threshol
                 #empty the xarray list:
                 list_xarray = []
                 
+                del xarray_month
+                
             month_current = date.month
                 
         first = False
             
         f.value += 1
 
-        index = 1
-
-        df_footprints_network = pd.DataFrame()
+        first_station = True
         for station in stations:
             filename=(pathFP+station+'/'+str(date.year)+'/'+str(date.month).zfill(2)+'/'
                  +str(date.year)+'x'+str(date.month).zfill(2)+'x'+str(date.day).zfill(2)+'x'+str(date.hour).zfill(2)+'/foot')
@@ -210,27 +207,32 @@ def create_network_fps(stations, date_range, time_selection, name_save, threshol
 
                 f_fp = cdf.Dataset(filename)
                 fp=f_fp.variables['foot'][:,:,:]
-                # make it the 50% most important
+                
                 fp_50 = update_footprint_based_on_threshold(fp, threshold)
+                
+                if first_station:
+                    
+                    fp_50_network = fp_50 
 
-                df_footprints_network[('fp_' + str(index))]=fp_50.flatten()
+                    first_station = False
 
-                index = index + 1
+                else:
+
+                    fp_50_network = np.maximum.reduce([fp_50_network,fp_50])
 
             else:
                 missing.append(station + ':' + date_string)
-
-        # make a footprint based on all max values of the combined footprints. 
-        fp_network_50_list = df_footprints_network[df_footprints_network.columns].max(axis=1)
-              
-        xarray_individual = create_xarray(fp_network_50_list, date)
+                
+        xarray_individual = create_xarray(fp_50_network, date)
+        # append to an array for the month being looped over.
         list_xarray.append(xarray_individual)
 
-    if len(list_xarray)>0:
+    if len(list_xarray)>0:   
         
         xarray_month = xr.concat(list_xarray, dim='time')
         file_path = os.path.join('network_footprints', name_save, name_save + '_' + str(month_current) + '.nc')
         xarray_month.to_netcdf(file_path)
+        del xarray_month
 
     today = date.today()
     today_string = today.strftime("%B %d, %Y")
@@ -301,15 +303,15 @@ def create_network_fps_by_extension(stations, folder, name_save, notes=""):
 
                 #empty the xarray list:
                 list_xarray = []
+                
+                del xarray_month
+                
             current_month = date.month
             footprints = xr.open_dataset(os.path.join(path, folder, folder + '_' + str(current_month) + '.nc'))
             first = False
 
-
-        # added station / network
-        df_footprints_network = pd.DataFrame()
         # take the netwrok footprint
-        df_footprints_network['starting_network'] = footprints.sel(time=date).network_foot.data.flatten()
+        fp_50_network = footprints.sel(time=date).network_foot.data
         
         for station in stations:
 
@@ -322,26 +324,24 @@ def create_network_fps_by_extension(stations, folder, name_save, notes=""):
 
                 fp=f_fp.variables['foot'][:,:,:]
 
-                fp_50=update_footprint_based_on_threshold(fp, 0.5)
-
-                df_footprints_network['fp_added_' + station]=fp_50.flatten()
+                fp_50=update_footprint_based_on_threshold(fp, fp_percent)
+            
+                fp_50_network = np.maximum.reduce([fp_50_network,fp_50])
 
             else:
                 missing.append(station + ':' + date_string)
+                
+        xarray_individual = create_xarray(fp_50_network, date)
 
-        #network footprint for sites (before including also original network footprint)
-        stations_network_fp_list = df_footprints_network[df_footprints_network.columns].max(axis=1)
-
-        xarray_individual = create_xarray(stations_network_fp_list, date)
-        
         list_xarray.append(xarray_individual)
-
-   
-    if len(list_xarray)>0:
-
+        
+    if len(list_xarray)>0:   
+        
         xarray_month = xr.concat(list_xarray, dim='time')
         file_path = os.path.join('network_footprints', name_save, name_save + '_' + str(current_month) + '.nc')
         xarray_month.to_netcdf(file_path)
+        del xarray_month
+
     
     ## create a json file with the information about the created network footprint
     today = date.today()
@@ -421,41 +421,23 @@ def establish_representation(date_range, network_footprint):
     first_vprm = True
     first_month = True
     for date in date_range:
+        current_year = date.year
         
-        # access the correct VPRM flux dataset (yearly files)
-        if first_vprm or date.year!=current_year:
-
-            current_year = date.year
-
-            filename_resp = check_cp(path_cp,'VPRM_ECMWF_RESP_' + str(current_year) + '_CP.nc')
-
-            filename_gee = check_cp(path_cp,'VPRM_ECMWF_GEE_' + str(current_year) + '_CP.nc')
-
-            f_resp = cdf.Dataset(filename_resp)
-
-            f_gee = cdf.Dataset(filename_gee)
-
-            # same for both datasets
-            times = f_gee.variables['time']
-
-            first_vprm = False
-            
         if first_month or date.month!=current_month:
-            
+
             current_month = date.month
             xarray_data = xr.open_dataset(os.path.join('network_footprints', network_footprint, network_footprint + '_' + str(current_month) + '.nc'))
-            
+            xarray_data_resp = xr.open_dataset('/data/project/obsnet/VPRM_10day/respiration/RESP_10day_' +str(current_year) + '_' + str(current_month) + '.nc')
+            xarray_data_gee = xr.open_dataset('/data/project/obsnet/VPRM_10day/gee/GEE_10day_' +str(current_year) + '_' + str(current_month) + '.nc')
+
             first_month = False
 
         date_string = str(date.year) + '-' + str(date.month) + '-' + str(date.day) + ' ' +  str(date.hour)
 
         fp_network_50 = xarray_data.sel(time=date).network_foot.data
 
-        # use network footprint to calculate representation:
-        ntime = date2index(date,times,select='nearest')
-
-        resp = f_resp.variables['RESP'][ntime][:][:]
-        gee = f_gee.variables['GEE'][ntime][:][:]
+        resp = xarray_data_resp.sel(time=date).resp_10day.data
+        gee = xarray_data_gee.sel(time=date).gee_10day.data
 
         fp_network_50_resp = fp_network_50 * resp 
         fp_network_50_gee = fp_network_50 * gee 
@@ -517,5 +499,5 @@ def establish_representation(date_range, network_footprint):
         i = i + 1
         
         f.value += 1
-
+        
     df_to_analyze.to_csv(os.path.join('network_footprints_representation', network_footprint + '_representation.csv'))
