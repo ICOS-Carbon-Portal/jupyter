@@ -270,22 +270,19 @@ def change_selected_countries(c):
     selected_countries.options = [o for o in selected_countries.options if o not in list_tuple]
 
 def file_set_widgets(c):
-    
+
     uploaded_file = file_name.value
 
-    #check if there is content in the dictionary (uploaded file)
-    if type(uploaded_file) is tuple:
-            # unless tobytes() is used, settings_concent will be of type "memoryview"
-            settings_content = uploaded_file[0]['content'].tobytes()
-            settings_dict = json.loads(settings_content)
-            set_settings(settings_dict)
-
-    #this works on exploredata (uploaded_file = dictionary)
+    # If the content of the file is loaded as a dictionary or tuple
+    # depends on the version of ipywidgets.
+    # Case of Dictionary.
+    if isinstance(uploaded_file, dict):
+        settings_content = uploaded_file[list(uploaded_file.keys())[0]]['content']
+    # Case of Tuple.
     else:
-        settings_file=uploaded_file[list(uploaded_file.keys())[0]]['content']
-        settings_json = settings_file.decode('utf8').replace("'", '"')
-        settings_dict = json.loads(settings_file.tobytes())
-        set_settings(settings_dict)
+        settings_content = uploaded_file[0]['content'].tobytes()
+    settings_dict = json.loads(settings_content)
+    set_settings(settings_dict)
 
 def change_yr(c):
     
