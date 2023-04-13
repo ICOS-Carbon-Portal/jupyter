@@ -288,20 +288,19 @@ def change_facility_choice(c):
         threshold_facility_inclusions.disabled = True
         
 def file_set_widgets(c):
-    
+
     uploaded_file = file_name.value
-    
-    # if the content of the file is loaded as a dictionary or tuple depends on the version of ipywidgets
-    # dictionary
+
+    # If the content of the file is loaded as a dictionary or tuple
+    # depends on the version of ipywidgets.
+    # Case of Dictionary.
     if isinstance(uploaded_file, dict):
-        settings_file = uploaded_file[list(uploaded_file.keys())[0]]['content']
-        settings_dict = json.loads(settings_file)
-        set_settings(settings_dict)
-    # tulple
+        settings_content = uploaded_file[list(uploaded_file.keys())[0]]['content']
+    # Case of Tuple.
     else:
         settings_content = uploaded_file[0]['content'].tobytes()
-        settings_dict = json.loads(settings_content)
-        set_settings(settings_dict)
+    settings_dict = json.loads(settings_content)
+    set_settings(settings_dict)
         
 #----------- start processing -----------------
 
