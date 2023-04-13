@@ -15,6 +15,9 @@ requirements.
 - Add `zip` library to the docker image installation (20/03/2023).
 - Other notebook fixes mentioned [here](
 https://github.com/ICOS-Carbon-Portal/jupyter/issues/262).
+- Update `ipywidgets` to version 8.0.4 and `plotly` to version 5.14.1 (13/04/2023).
+
+
 
 ## 2.0.1 <p>(15/11/2022)</p>
 - Add PyGeodesy version 22.11.3 library to the docker image installation.
