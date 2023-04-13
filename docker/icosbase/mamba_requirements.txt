@@ -10,6 +10,7 @@ gmt=6.4.0
 holoviews=1.15.1
 hvplot=0.8.1
 ipyleaflet=0.17.1
+ipywidgets=8.0.4
 kml2geojson=5.1.0
 mpld3=0.5.8
 nco=5.1.0
