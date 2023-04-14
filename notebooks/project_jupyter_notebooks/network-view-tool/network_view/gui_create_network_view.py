@@ -73,7 +73,11 @@ def change_year_options(c):
     update_button.disabled = False
     update_button.tooltip = 'Click to start the run'
     selected_stations.options = []
-    list_optional_stations = sorted([k for k, v in stilt_stations.items() if str(selected_year) in v['years'] if len(v[str(selected_year)]['months']) == 12])
+
+    list_optional_stations_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stilt_stations.items() if str(selected_year) in v['years'] if len(v[str(selected_year)]['months']) == 12 if v['geoinfo']])
+    list_optional_stations_not_located =  [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stilt_stations.items() if str(selected_year) in v['years'] if len(v[str(selected_year)]['months']) == 12 if not v['geoinfo']]
+    list_optional_stations = list_optional_stations_located + list_optional_stations_not_located
+    
     
     stations_choice.options = list_optional_stations
     
