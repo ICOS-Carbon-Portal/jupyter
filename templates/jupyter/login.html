@@ -139,46 +139,38 @@ th, td {
       tabindex="2"
     />
     </td></tr>
-    <tr>
-        <td>
-            <input style="vertical-align: 7px" type="checkbox" name="licence"
-                   id="checkbox-license"
-                   onchange="enableSignInButton()"
-                   tabindex="3"/>
-            <label for='licence'>
-                &nbsp; I accept that ICOS data is under a<br>
-                <a href="https://data.icos-cp.eu/licence" target="_blank">
-                    &nbsp CC BY 4.0 licence
-                </a>&nbsp;
-                <img src="https://www.icos-cp.eu/sites/default/files/inline-images/creativecommons.png">
-            </label>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <div style="display: flex; justify-content: space-between;">
-                <div>
-                    <input type="checkbox" name="licence"
-                           id="checkbox-terms"
-                           onchange="enableSignInButton()"
-                           tabindex="3"/>
-                    <label for='checkbox-terms'>
-                        &nbsp; I accept the ICOS
-                        <a href="https://www.icos-cp.eu/terms-of-use" target="_blank">
-                            Terms of Use
-                        </a>
-                    </label>
-                </div>
-                <div class="feedback-container" style="margin-top: 10px; margin-left: 20px">
-                    <input id="login-submit" type="submit"
-                           class="btn btn-jupyter" value="Sign In"
-                           tabindex="4" disabled="true"/>
-                    <div class="feedback-widget hidden">
-                        <i class="fa fa-spinner"></i>
-                    </div>
-                </div>
-            </div>
-        </td>
+    <tr><td>
+    <input
+      type="checkbox"
+      name="licence"
+      id="licence_check"
+      onchange="document.getElementById('login_submit').disabled = !this.checked;"
+      tabindex="3"
+    />
+    <label for='licence'>
+    &nbsp I accept that ICOS data is under a<br>
+        <a href="https://data.icos-cp.eu/licence"
+           target="_blank">&nbsp CC BY 4.0 licence</a> &nbsp
+        <img src="https://www.icos-cp.eu/sites/default/files/inline-images/creativecommons.png">
+    </label>
+    </td><td>
+    <div class="feedback-container">
+      <input
+        id="login_submit"
+        type="submit"
+        class='btn btn-jupyter'
+        value='Sign In'
+        tabindex="4"
+        disabled='true'
+        />
+      <div class="feedback-widget hidden">
+        <i class="fa fa-spinner"></i>
+      </div>
+    </div>
+  </div>
+</form>
+
+</div>
 {% endblock login %}
 
 	</td>

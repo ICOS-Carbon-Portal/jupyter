@@ -40,7 +40,6 @@ list_2018_not_located = [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for
 list_2018 = list_2018_not_located + list_2018_located 
 
 def prepare_footprints_change(c):
-    station_choice.options = () 
 
     if prepared_footprints.value == False:
         
@@ -72,10 +71,9 @@ def prepare_footprints_change(c):
 
         time_selection.disabled = True
 
+# observer functions
 def change_stn(c): 
  
-    update_button.disabled = False
-
     years = sorted(stiltstations[station_choice.value]['years'])    
     years = [int(x) for x in years] 
 
@@ -87,13 +85,12 @@ def change_stn(c):
 def change_yr(c):
     
     years = [x for x in s_year.options if x >= s_year.value]
-    e_year.options = years
-        
     #extract available months 
     month = sorted(stiltstations[station_choice.value][str(s_year.value)]['months'])
     month = [int(x) for x in month]
     s_month.options= month
     s_month.value = min(month)
+    e_year.options = years
     e_month.options = month
     e_month.value = min(month)
 
@@ -154,7 +151,7 @@ def change_yr_end(c):
             e_day.options=list(range(1,29))
             
         e_day.value = 1
-
+    
 def change_day(c):
     
     #when change the day... if the same month and year (start) - update
@@ -187,7 +184,6 @@ def change_month_end(c):
         else:
             e_day.options=list(range(1,29))          
         e_day.value = 1
-            
 
 def update_func(button_c):
 
@@ -319,7 +315,7 @@ colorbar_choice = Dropdown(
 
 #Create a Button widget to control execution:
 update_button = Button(description='Run selection',
-                       #disabled=True,
+                       disabled=False,
                        button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
                        tooltip='Click me',)
 
@@ -388,7 +384,7 @@ def observe():
     s_day.observe(change_day, 'value')
     e_year.observe(change_yr_end, 'value')
     e_month.observe(change_month_end, 'value')
-    
+
     update_button.on_click(update_func)
 
 def unobserve():    
@@ -398,6 +394,7 @@ def unobserve():
     s_day.unobserve(change_day, 'value')    
     e_year.unobserve(change_yr_end, 'value')
     e_month.unobserve(change_month_end, 'value')
+    e_day.unobserve(change_day_end, 'value')
     
 # start observation
 observe()
