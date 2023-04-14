@@ -83,14 +83,7 @@
         const signInButton = document.getElementById("login-submit");
 
         // Check if both checkboxes are checked.
-        if (checkboxLicense.checked && checkboxTerms.checked) {
-            // Enable the sign-in button
-            signInButton.disabled = false;
-        }
-        else {
-            // Disable the sign-in button.
-            signInButton.disabled = true;
-        }
+        signInButton.disabled = !(checkboxLicense.checked && checkboxTerms.checked);
     }
 </script>
 
