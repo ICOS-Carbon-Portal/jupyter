@@ -31,10 +31,12 @@ import plot_interface_anomaly
 data_path = '/data/project/flux_anomalies/flux_data'
 # Create the output directory of the notebook:
 # "/home/user/output/ecosystem_site_anomaly_visualization_output"
-output_flux_anomalies = Path.home() \
-                        / 'output' \
-                        / 'ecosystem_site_anomaly_visualization_output'
-output_flux_anomalies.mkdir(parents=True, exist_ok=True)
+output_path = os.path.join(os.path.expanduser('~'), 'output')
+output_anomalies_path = os.path.join(
+    output_path, 'ecosystem_site_anomaly_visualization_output'
+)
+if not os.path.exists(output_path):
+    os.makedirs(output_anomalies_path)
 
 button_color_able='#4169E1'
 colors_negative_anomalies = {'GPP_DT_VUT_REF':'#115C0A',
@@ -467,9 +469,8 @@ def update_func(button_c):
     now = datetime.now()
     dt_string = now.strftime("%d_%m_%Y_%H_%M_%S")
     
-    # data_filename = 'ecosystem_site_anomaly_visualization_output/flux_anomaly_data_' + dt_string + '.csv'
     data_filename = \
-        f'{output_flux_anomalies}flux_anomaly_data_{dt_string}.csv'
+        f'{output_anomalies_path}/flux_anomaly_data_{dt_string}.csv'
 
     number_cols = len(df_final.columns)
     
@@ -538,7 +539,7 @@ def update_func(button_c):
         # specify output (yearly or monthly) - looks nicer to have in this widget than the next.
         display(HTML('<p style="font-size:16px"><b>Specify output:</b><br></p>'))
     
-    with output_`plot_anomal`ies:
+    with output_plot_anomalies:
         
         plot_interface_anomaly.plot_anomalies(df_final, data_filename, selection_dict, colors_positive_anomalies_dict, colors_negative_anomalies_dict)
             
