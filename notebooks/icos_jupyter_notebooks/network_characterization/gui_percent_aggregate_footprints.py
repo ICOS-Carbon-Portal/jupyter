@@ -226,10 +226,10 @@ def update_func(button_c):
     start_date=min(date_range)
     end_date=max(date_range)
     
-
-    if start_date==pd.Timestamp(2018, 1, 1, 0) and end_date==pd.Timestamp(2018,12,31,0) and len(timeselect_list)==8:
-
-        name_load_footprint_csv='fp_' + station + '.csv'
+    name_load_footprint_csv='fp_' + station + '.csv'
+    
+    if start_date==pd.Timestamp(2018, 1, 1, 0) and end_date==pd.Timestamp(2018,12,31,0) and len(timeselect_list)==8 and os.path.exists(os.path.join(data_folder, name_load_footprint_csv)):
+        
         fp=loadtxt(os.path.join(data_folder, name_load_footprint_csv), delimiter=',')
         
     else:
