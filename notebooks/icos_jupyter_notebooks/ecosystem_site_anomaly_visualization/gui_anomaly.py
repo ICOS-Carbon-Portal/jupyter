@@ -58,7 +58,7 @@ output_path = os.path.join(os.path.expanduser('~'), 'output')
 output_anomalies_path = os.path.join(
     output_path, 'ecosystem-site-anomaly'
 )
-if not os.path.exists(output_path):
+if not os.path.exists(output_anomalies_path):
     os.makedirs(output_anomalies_path)
 ##############################################################################
 button_color_able='#4169E1'

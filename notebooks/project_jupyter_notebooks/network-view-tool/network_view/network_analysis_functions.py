@@ -1617,13 +1617,22 @@ def monitoring_potential_maps(nwc, country, extended = False):
             pngfile = name_underscore + '_monitoring_potential_Europe'
             plot_maps(abs(footprint_even)-abs(footprint), load_lon, load_lat,nwc, title = (name + ' monitoring potential (' + selected_component.upper() + '): ' + add_for_title), colors = colors, label = 'relatively low potential                                                                           relatively high potential', monitoring_potential = True,  output=output_network_path, pngfile = pngfile, extend = 'max', extended = extended)
 
-            file_path = os.path.join(output, pngfile + '.png')
+            file_path = os.path.join(
+                output_network_path,
+                f'{pngfile}.png'
+            )
+            relative_file_path = os.path.join(
+                relative_network_path,
+                f'{pngfile}.png'
+            )
             if os.path.exists(file_path):
-
-                html_string = '<br>Access map <a href='  + file_path + ' target="_blank">here</a><br><br>'
-
-                display(HTML('<p style="font-size:18px">' +  html_string))
-
+                html_string = (
+                    '<p style="font-size:18px">'
+                    f'<br>Access map <a href={relative_file_path}'
+                    ' target="_blank">here'
+                    '</a><br><br>'
+                )
+                display(HTML(html_string))
             else:
                 display(HTML('<p style="font-size:15px">Sensing of ' +  name +' in ' + country_name + ' is very low and it is not feasible to show monitoring potential of.</p>'))
                 
@@ -1637,12 +1646,22 @@ def monitoring_potential_maps(nwc, country, extended = False):
             
             if (abs(footprint_even)-abs(footprint)).max() > 0.0000001:
                 plot_maps_country_zoom(abs(footprint_even)-abs(footprint), load_lon, load_lat, nwc, country, title = (name + ' monitoring potential (' + selected_component.upper() + ') ' + country_name + ': ' + add_for_title), colors = colors,label = 'relatively low potential                                                                           relatively high potential', monitoring_potential = True, output=output_network_path, pngfile = pngfile, extend='max', extended = extended)
-
-                file_path = os.path.join(output, pngfile + '.png')
-                if os.path.exists(file_path):      
-                    html_string = '<br>Access map <a href='  + file_path + ' target="_blank">here</a><br><br>'
-
-                    display(HTML('<p style="font-size:18px">' +  html_string))
+                file_path = os.path.join(
+                    output_network_path,
+                    f'{pngfile}.png'
+                )
+                relative_file_path = os.path.join(
+                    relative_network_path,
+                    f'{pngfile}.png'
+                )
+                if os.path.exists(file_path):
+                    html_string = (
+                        '<p style="font-size:18px">'
+                        f'<br>Access map <a href={relative_file_path}'
+                        ' target="_blank">here'
+                        '</a><br><br>'
+                    )
+                    display(HTML(html_string))
             else:
                 if extended:
             
