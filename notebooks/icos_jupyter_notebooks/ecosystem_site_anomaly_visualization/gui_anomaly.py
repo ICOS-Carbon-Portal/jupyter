@@ -22,22 +22,45 @@ import requests
 # Local application/library specific imports.
 import plot_interface_anomaly
 
-
-# path to the pre-processed flux data 
-# if run in the notebook package (https://doi.org/10.18160/Q10G-9CTJ) local data will be used
-#data_path = 'ecosystem_site_anomaly_visualization/flux_data'
-
-# if run at the Carbon Portal exploredata data from the Carbon Portal (project) will be used
+##############################################################################
+# Note to developers/uploaders or to whom it may concern:
+# The ecosystem_site_anomaly_visualization.ipynb notebook also comes as
+# a package available for download from the ICOS data portal and can be
+# found here: https://doi.org/10.18160/Q10G-9CTJ. Users can run this
+# package locally in their own environments without any external data
+# dependencies. In order to do so, users need to specify the
+# `data_path` below:
+#
+# Path to the pre-processed flux data.
+# Use this location to run the notebook package locally:
+# data_path = 'ecosystem_site_anomaly_visualization/flux_data'
+# Use this location to run the notebook on the ICOS Jupyter services
+# (default):
 data_path = '/data/project/flux_anomalies/flux_data'
-# Create the output directory of the notebook:
-# "/home/user/output/ecosystem-site-anomaly"
+#
+# To ensure proper handling of permissions for file reading, writing,
+# and linking on the ICOS Jupyter services, we have designated the
+# "/home/user/output" directory as the destination for all notebook
+# output. In case of a new version of the notebook package:
+# https://doi.org/10.18160/Q10G-9CTJ we need to make sure that the
+# notebook's output directory is set within the working directory
+# instead.
+#
+# Use this location for the notebook's output when running the
+# package locally ("output"):
+# output_path = os.path.join('output')
+# output_anomalies_path = os.path.join(
+#     output_path, 'ecosystem-site-anomaly'
+# )
+# Use this location for the notebook's output on the ICOS Jupyter
+# services ("/home/user/output/ecosystem-site-anomaly") (default):
 output_path = os.path.join(os.path.expanduser('~'), 'output')
 output_anomalies_path = os.path.join(
     output_path, 'ecosystem-site-anomaly'
 )
 if not os.path.exists(output_path):
     os.makedirs(output_anomalies_path)
-
+##############################################################################
 button_color_able='#4169E1'
 colors_negative_anomalies = {'GPP_DT_VUT_REF':'#115C0A',
                              'SW_IN_F':'#994C00',

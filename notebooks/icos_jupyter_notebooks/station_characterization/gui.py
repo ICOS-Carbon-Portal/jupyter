@@ -12,6 +12,7 @@ from icoscp.station import station as cpstation
 import stationchar
 import stc_functions
 import os
+import re
 from datetime import datetime
 import json
 from icoscp.stilt import stiltstation
@@ -19,7 +20,12 @@ import ipywidgets as widgets
 from matplotlib import pyplot as plt
 button_color_able='#4169E1'
 button_color_disable='#900D09'
-
+output_path = os.path.join(os.path.expanduser('~'), 'output')
+output_stc_path = os.path.join(
+    output_path, 'station-characterization'
+)
+relative_stc_path = \
+    f'../../{re.search("output.*", output_stc_path)[0]}'
 # style to supress scrolling in the output 
 style_scroll = """
     <style>
@@ -482,14 +488,29 @@ def update_func(button_c):
             
             html_string_individual_figures = ''
             for figure in list_individual_figures:
-                
-                path = os.path.join('../output/station_characterisation', file_folder, figure + '.' + stc.settings['figFormat'])
-                
+                # path = os.path.join('../output/station_characterisation', file_folder, figure + '.' + stc.settings['figFormat'])
+                path = os.path.join(
+                    output_stc_path,
+                    file_folder,
+                    f'{figure}.{stc.settings["figFormat"]}'
+                )
+                relative_path = (
+                    f'{relative_stc_path}/{file_folder}/'
+                    f'{figure}.{stc.settings["figFormat"]}'
+                )
+                ###
+                # file_path = f'{output_anomalies_path}/{name_save}.png'
+                # relative_file_path = f'{relative_anomalies_path}/{name_save}.png'
+                # output[0].savefig(file_path)
+
                 if os.path.exists(path):
-                    
-                    html_string_individual_figures = html_string_individual_figures + '<a href='  + path + ' target="_blank">' + figure + '.' + stc.settings['figFormat'] + '</a><br>'
-            
-            settings_file_path = os.path.join('../output/station_characterisation', file_folder, 'settings.json')  
+                    html_string_individual_figures += (
+                     '<a href='
+                     f'{relative_path} target="_blank">{figure}.'
+                     f'{stc.settings["figFormat"]}'
+                     '</a><br>'
+                    )
+            settings_file_path = os.path.join(relative_stc_path, file_folder, 'settings.json')
             
             html_string_settings = '<br><br>Settings:</br><a href='  + settings_file_path + ' target="_blank">settings.json</a><br>'
             
