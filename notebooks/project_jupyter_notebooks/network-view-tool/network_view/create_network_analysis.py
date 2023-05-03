@@ -2,6 +2,7 @@ import pandas as pd
 import datetime as dt
 from ipywidgets import IntProgress
 import os
+import re
 import numpy as np
 import netCDF4 as cdf
 import json
@@ -17,7 +18,17 @@ load_lat=loadtxt(os.path.join(data_folder, 'latitude.csv'), delimiter=',')
 load_lon=loadtxt(os.path.join(data_folder, 'longitude.csv'), delimiter=',')
 import xarray as xr
 path_network_footprints = '/data/project/obsnet/network_footprints'
-path_network_footprints_local = 'network_footprints'
+# Create the output directory of the notebook:
+# "/home/user/output/network-footprints"
+output_path = os.path.join(os.path.expanduser('~'), 'output')
+output_footprint_path = os.path.join(output_path, 'network-footprints')
+relative_footprint_path = \
+    f'../../../{re.search("output.*", output_footprint_path)[0]}'
+output_representation_path = os.path.join(output_path,
+                                          'network-footprints-representation')
+relative_representation_path = \
+    f'../../../{re.search("output.*", output_representation_path)[0]}'
+
 
 def update_footprint_based_on_threshold(fp, threshold):
     
@@ -158,11 +169,11 @@ def create_xarray(fp_array,date):
 
 def create_network_fps(stations, date_range, time_selection, name_save, threshold, notes = ''):
 
-    if not os.path.exists(os.path.join('network_footprints', name_save)):
-        os.makedirs(os.path.join('network_footprints', name_save))
+    if not os.path.exists(os.path.join(output_footprint_path, name_save)):
+        os.makedirs(os.path.join(output_footprint_path, name_save))
         
-    if not os.path.exists('network_footprints_representation'):
-        os.makedirs('network_footprints_representation')
+    if not os.path.exists(output_representation_path):
+        os.makedirs(output_representation_path)
     
    
     # relevant for footprint creation 
@@ -182,9 +193,11 @@ def create_network_fps(stations, date_range, time_selection, name_save, threshol
             if not first:
                 
                 xarray_month = xr.concat(list_xarray, dim='time')
-
-                file_path = os.path.join('network_footprints', name_save, name_save + '_' + str(month_current) + '.nc')
-                
+                file_path = os.path.join(
+                    output_footprint_path,
+                    name_save,
+                    f'{name_save}_{str(month_current)}.nc'
+                )
                 xarray_month.to_netcdf(file_path)
 
                 #empty the xarray list:
@@ -230,7 +243,11 @@ def create_network_fps(stations, date_range, time_selection, name_save, threshol
     if len(list_xarray)>0:   
         
         xarray_month = xr.concat(list_xarray, dim='time')
-        file_path = os.path.join('network_footprints', name_save, name_save + '_' + str(month_current) + '.nc')
+        file_path = os.path.join(
+            output_footprint_path,
+            name_save,
+            f'{name_save}_{str(month_current)}.nc'
+        )
         xarray_month.to_netcdf(file_path)
         del xarray_month
 
@@ -251,22 +268,20 @@ def create_network_fps(stations, date_range, time_selection, name_save, threshol
                       "notes": notes}
 
     jsonString = json.dumps(network_fp_dict)
-    jsonFile = open(os.path.join('network_footprints', name_save + '.json'), "w")
+    jsonFile = open(os.path.join(output_footprint_path, name_save + '.json'), "w")
     jsonFile.write(jsonString)
     jsonFile.close()
 
+
 def create_network_fps_by_extension(stations, folder, name_save, notes=""):
-    
-    
-    if not os.path.exists(os.path.join('network_footprints', name_save)):
-        os.makedirs(os.path.join('network_footprints', name_save))
-        
-    if not os.path.exists('network_footprints_representation'):
-        os.makedirs('network_footprints_representation')
+    if not os.path.exists(os.path.join(output_footprint_path, name_save)):
+        os.makedirs(os.path.join(output_footprint_path, name_save))
+    if not os.path.exists(output_representation_path):
+        os.makedirs(output_representation_path)
 
     if folder[-5:] == 'local': 
         folder = folder[:-6]
-        path = path_network_footprints_local
+        path = output_footprint_path
     else:
         folder = folder
         path = path_network_footprints
@@ -297,8 +312,11 @@ def create_network_fps_by_extension(stations, folder, name_save, notes=""):
             if not first:
                 
                 xarray_month = xr.concat(list_xarray, dim='time')
-
-                file_path = os.path.join('network_footprints', name_save, name_save + '_' + str(current_month) + '.nc')
+                file_path = os.path.join(
+                    output_footprint_path,
+                    name_save,
+                    f'{name_save}_{str(current_month)}.nc'
+                )
                 xarray_month.to_netcdf(file_path)
 
                 #empty the xarray list:
@@ -338,7 +356,11 @@ def create_network_fps_by_extension(stations, folder, name_save, notes=""):
     if len(list_xarray)>0:   
         
         xarray_month = xr.concat(list_xarray, dim='time')
-        file_path = os.path.join('network_footprints', name_save, name_save + '_' + str(current_month) + '.nc')
+        file_path = os.path.join(
+            output_footprint_path,
+            name_save,
+            f'{name_save}_{str(current_month)}.nc'
+        )
         xarray_month.to_netcdf(file_path)
         del xarray_month
 
@@ -361,7 +383,9 @@ def create_network_fps_by_extension(stations, folder, name_save, notes=""):
                       "notes": notes}
 
     jsonString = json.dumps(network_fp_dict)
-    jsonFile = open(os.path.join('network_footprints', name_save + '.json'), "w")
+    jsonFile = open(os.path.join(
+        output_footprint_path, name_save + '.json'), "w"
+    )
     jsonFile.write(jsonString)
     jsonFile.close()
     
@@ -426,7 +450,14 @@ def establish_representation(date_range, network_footprint):
         if first_month or date.month!=current_month:
 
             current_month = date.month
-            xarray_data = xr.open_dataset(os.path.join('network_footprints', network_footprint, network_footprint + '_' + str(current_month) + '.nc'))
+
+            xarray_data = xr.open_dataset(
+                os.path.join(
+                    output_footprint_path,
+                    network_footprint,
+                    f'{network_footprint}_{str(current_month)}.nc'
+                )
+            )
             xarray_data_resp = xr.open_dataset('/data/project/obsnet/VPRM_10day/respiration/RESP_10day_' +str(current_year) + '_' + str(current_month) + '.nc')
             xarray_data_gee = xr.open_dataset('/data/project/obsnet/VPRM_10day/gee/GEE_10day_' +str(current_year) + '_' + str(current_month) + '.nc')
 
@@ -500,4 +531,6 @@ def establish_representation(date_range, network_footprint):
         
         f.value += 1
         
-    df_to_analyze.to_csv(os.path.join('network_footprints_representation', network_footprint + '_representation.csv'))
+    df_to_analyze.to_csv(os.path.join(output_representation_path,
+                                      network_footprint +
+                                      '_representation.csv'))
