@@ -1,6 +1,7 @@
 # station 
 import requests
 import os
+import re
 os.environ['PROJ_LIB'] = '/opt/conda/share/proj'
 from IPython.core.display import display, HTML 
 from ipywidgets import Dropdown, Button, Output, SelectMultiple,GridspecLayout
@@ -45,7 +46,13 @@ stcDataPath = '/data/project/stc/'
 path_cp = '/data/dataAppStorage/netcdf/'
 load_lat = np.arange(33+((1/12)/2), 73, 1/12)
 load_lon = np.arange(-15 + ((1/8)/2), 35, 1/8)
-output = 'network_view/temp_output'
+# output = 'network_view/temp_output'
+# Create the output directory of the notebook:
+# "/home/user/output/network-view"
+output_path = os.path.join(os.path.expanduser('~'), 'output')
+output_network_path = os.path.join(output_path, 'network-view')
+relative_network_path = \
+    f'../../../{re.search("output.*", output_network_path)[0]}'
 
 country_masks = Dataset(os.path.join(stcDataPath,'europe_STILT_masks.nc'))
 
@@ -719,14 +726,28 @@ def display_network_with_extended(nwc, vmax_footprint = 'current'):
         
     pngfile='current_extended_map'
     plot_maps_two(current_network, difference , load_lon, load_lat, linlog='linear', extend = 'max', 
-              vmin=vmin, vmax=vmax, colors='Greens', label= 'sensitivity: ppm /(μmol / (m²s))', pngfile=pngfile, output=output)
-
-    display(HTML('<p style="font-size:15px"><b>Figure 8: Average network and extended network footprints for the selected time-period. Only the colorbar for the extended network (blue) is displayed but has the same colorbar maximum as the average network (green).</b></p>'))
-    file_path = os.path.join(output, pngfile + '.png')
-    if os.path.exists(file_path):      
-        html_string = '<br>Access map <a href='  + file_path + ' target="_blank">here</a><br><br>'
-
-        display(HTML('<p style="font-size:18px">' +  html_string))
+              vmin=vmin, vmax=vmax, colors='Greens', label= 'sensitivity: ppm /(μmol / (m²s))', pngfile=pngfile, output=output_network_path)
+    html_string = (
+        '<p style="font-size:15px">'
+        '<b>Figure 8: Average network and extended network footprints for the'
+        ' selected time-period. Only the colorbar for the extended network '
+        '(blue) is displayed but has the same colorbar maximum as the average'
+        ' network (green).</b>'
+        '</p>'
+    )
+    display(HTML(html_string))
+    file_path = os.path.join(output_network_path, f'{pngfile}.png')
+    relative_file_path = os.path.join(
+        relative_network_path, f'{pngfile}.png'
+    )
+    if os.path.exists(file_path):
+        html_string = (
+            '<p style="font-size:18px">'
+            '<br>Access map <a href='
+            f'{relative_file_path} target="_blank">here'
+            f'</a><br><br>'
+        )
+        display(HTML(html_string))
 
 def import_landcover_HILDA(year='2018'):
     
@@ -803,7 +824,7 @@ def display_selected_fp_file(nwc):
     vmin = nwc['vmin']
  
     plot_maps(fp_average_footprint, load_lon, load_lat, nwc, colors = 'Greens', vmax=vmax, vmin = vmin,\
-              label= 'sensitivity: ppm /(μmol / (m²s))', output=output, extend = 'max', pngfile = 'average_map', linlog='linear')
+              label= 'sensitivity: ppm /(μmol / (m²s))', output=output_network_path, extend = 'max', pngfile = 'average_map', linlog='linear')
     
 
 def landcover_view(nwc, countries, pngfile = '', output= ''):
@@ -1594,7 +1615,7 @@ def monitoring_potential_maps(nwc, country, extended = False):
 
             name_underscore = name.replace(' ', '_')
             pngfile = name_underscore + '_monitoring_potential_Europe'
-            plot_maps(abs(footprint_even)-abs(footprint), load_lon, load_lat,nwc, title = (name + ' monitoring potential (' + selected_component.upper() + '): ' + add_for_title), colors = colors, label = 'relatively low potential                                                                           relatively high potential', monitoring_potential = True,  output=output, pngfile = pngfile, extend = 'max', extended = extended)
+            plot_maps(abs(footprint_even)-abs(footprint), load_lon, load_lat,nwc, title = (name + ' monitoring potential (' + selected_component.upper() + '): ' + add_for_title), colors = colors, label = 'relatively low potential                                                                           relatively high potential', monitoring_potential = True,  output=output_network_path, pngfile = pngfile, extend = 'max', extended = extended)
 
             file_path = os.path.join(output, pngfile + '.png')
             if os.path.exists(file_path):
@@ -1615,7 +1636,7 @@ def monitoring_potential_maps(nwc, country, extended = False):
             pngfile = name_underscore + '_monitoring_potential' + country.replace(' ', '_')
             
             if (abs(footprint_even)-abs(footprint)).max() > 0.0000001:
-                plot_maps_country_zoom(abs(footprint_even)-abs(footprint), load_lon, load_lat, nwc, country, title = (name + ' monitoring potential (' + selected_component.upper() + ') ' + country_name + ': ' + add_for_title), colors = colors,label = 'relatively low potential                                                                           relatively high potential', monitoring_potential = True, output=output, pngfile = pngfile, extend='max', extended = extended)
+                plot_maps_country_zoom(abs(footprint_even)-abs(footprint), load_lon, load_lat, nwc, country, title = (name + ' monitoring potential (' + selected_component.upper() + ') ' + country_name + ': ' + add_for_title), colors = colors,label = 'relatively low potential                                                                           relatively high potential', monitoring_potential = True, output=output_network_path, pngfile = pngfile, extend='max', extended = extended)
 
                 file_path = os.path.join(output, pngfile + '.png')
                 if os.path.exists(file_path):      
@@ -1633,7 +1654,7 @@ def monitoring_potential_maps(nwc, country, extended = False):
                     display(HTML('<p style="font-size:15px">Sensing of ' +  name +' in ' + country_name + ' is very low and it is not feasible to show monitoring potential of.</p>'))
 
 # Station characterization
-def signals_table_anthro(stc, output=output, csvfile='anthro_table.csv'):
+def signals_table_anthro(stc, output=output_network_path, csvfile='anthro_table.csv'):
     
     stations = stc['signalsStations']
     timeselect_list = stc['timeOfDay']
@@ -1677,7 +1698,7 @@ def signals_table_anthro(stc, output=output, csvfile='anthro_table.csv'):
     df_save.to_csv(os.path.join(output, csvfile), index = False)  
 
     
-def signals_table_bio(stc, component='gee', output=output, csvfile='bio_table.csv'):   
+def signals_table_bio(stc, component='gee', output=output_network_path, csvfile='bio_table.csv'):
     component = stc['component']
     stations = stc['signalsStations']
     timeselect_list = stc['timeOfDay']
@@ -1909,28 +1930,53 @@ def initiate_summer_winter_comparison():
         stc['timeOfDay'] = time_selection.value
 
         with contour_map:
+            contour_map_summer_winter(
+                stc,
+                output=output_network_path,
+                pngfile='contour_summer_winter.png'
+            )
+            html_string = (
+                '<p style="font-size:15px;">'
+                '<b>Figure 2a: 50% footprint area for summer (JJA) and winter'
+                ' (JFD) of a selected station, year, and hour(s). </b>'
+                '</p>'
+            )
+            display(HTML(html_string))
+            file_path = os.path.join(output_network_path,
+                                     'contour_summer_winter.png')
+            relative_file_path = os.path.join(
+                relative_network_path, 'contour_summer_winter.png'
+            )
+            if os.path.exists(file_path):
+                html_string = ('<br>Access map <a href='
+                               f'{relative_file_path}'
+                               f' target="_blank">here</a><br><br>')
+                display(HTML('<p style="font-size:18px">' + html_string))
 
-            contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter.png')
-            
-            display(HTML('<p style="font-size:15px;"><b>Figure 2a: 50% footprint area for summer (JJA) and winter (JFD) of a selected station, year, and hour(s). </b></p>'))
-
-            file_path = os.path.join(output, 'contour_summer_winter.png')
-            if os.path.exists(file_path):      
-                html_string = '<br>Access map <a href='  + file_path + ' target="_blank">here</a><br><br>'
-
-                display(HTML('<p style="font-size:18px">' +  html_string))
-
-        with landcover_bar: 
-            
-            land_cover_bar_graph_winter_summer(stc, output=output, pngfile='landcover_summer_winter.png')
-            display(HTML('<p style="font-size:15px;"><b>Figure 2b: Land cover shares weighed by the seasonal footprints split by direction. Bars representing summer are on the left and bars representing winter on the right.</b></p>'))
-
-            file_path = os.path.join(output, 'landcover_summer_winter.png')
-
-            if os.path.exists(file_path):      
-                html_string = '<br>Access graph <a href='  + file_path + ' target="_blank">here</a><br><br>'
-
-                display(HTML('<p style="font-size:18px">' +  html_string))
+        with landcover_bar:
+            land_cover_bar_graph_winter_summer(
+                stc,
+                output=output_network_path,
+                pngfile='landcover_summer_winter.png'
+            )
+            html_string = (
+                '<p style="font-size:15px;">'
+                '<b>Figure 2b: Land cover shares weighed by the seasonal '
+                'footprints split by direction. Bars representing summer are '
+                'on the left and bars representing winter on the right.</b>'
+                '</p>'
+            )
+            display(HTML(html_string))
+            file_path = os.path.join(output_network_path,
+                                     'landcover_summer_winter.png')
+            relative_file_path = os.path.join(
+                relative_network_path, 'landcover_summer_winter.png'
+            )
+            if os.path.exists(file_path):
+                html_string = ('<br>Access graph <a href='
+                               f'{relative_file_path}'
+                               f' target="_blank">here</a><br><br>')
+                display(HTML('<p style="font-size:18px">' + html_string))
 
         update_button.disabled = False
         update_button.tooltip = 'Click to start the run'
@@ -2019,7 +2065,8 @@ def return_extent_info(input_map):
     
     return extent_info
 
-def contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter.csv'):   
+def contour_map_summer_winter(stc, output=output_network_path,
+                              pngfile='contour_summer_winter.csv'):
     warnings.filterwarnings("ignore")
     matplotlib.rcParams.update({'font.size': 12})
     
@@ -2164,7 +2211,8 @@ def contour_map_summer_winter(stc, output=output, pngfile='contour_summer_winter
 
         fig.savefig(output+'/'+pngfile,dpi=300,bbox_inches='tight')
 
-def land_cover_bar_graph_winter_summer(stc, output=output, pngfile='landcover_summer_winter.png'): 
+def land_cover_bar_graph_winter_summer(stc, output=output_network_path,
+                                       pngfile='landcover_summer_winter.png'):
     
     f = IntProgress(min=0, max=5) 
     display(f) 

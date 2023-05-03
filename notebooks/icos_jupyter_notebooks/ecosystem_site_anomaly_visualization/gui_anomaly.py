@@ -30,10 +30,10 @@ import plot_interface_anomaly
 # if run at the Carbon Portal exploredata data from the Carbon Portal (project) will be used
 data_path = '/data/project/flux_anomalies/flux_data'
 # Create the output directory of the notebook:
-# "/home/user/output/ecosystem_site_anomaly_visualization_output"
+# "/home/user/output/ecosystem-site-anomaly"
 output_path = os.path.join(os.path.expanduser('~'), 'output')
 output_anomalies_path = os.path.join(
-    output_path, 'ecosystem_site_anomaly_visualization_output'
+    output_path, 'ecosystem-site-anomaly'
 )
 if not os.path.exists(output_path):
     os.makedirs(output_anomalies_path)

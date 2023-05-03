@@ -354,7 +354,7 @@ def make_plot_anomalies(df,
     output_path = os.path.join(os.path.expanduser('~'), 'output')
     output_anomalies_path = os.path.join(
         output_path,
-        'ecosystem_site_anomaly_visualization_output'
+        'ecosystem-site-anomaly'
     )
     relative_anomalies_path = \
         f'../../{re.search("output.*", output_anomalies_path)[0]}'
