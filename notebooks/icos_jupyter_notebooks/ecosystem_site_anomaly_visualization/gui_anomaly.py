@@ -1,28 +1,66 @@
-from ipywidgets import Dropdown, ColorPicker, HBox, Button, Output, RadioButtons, GridspecLayout
-from IPython.core.display import display, HTML 
-import os
-from datetime import datetime
+# Format read from https://peps.python.org/pep-0008/#imports.
+# Standard library imports.
 from datetime import date as current_date
+from datetime import datetime
+from pathlib import Path
 import json
+import os
+import re
 import urllib.request
-import ipywidgets as widgets
+
+# Related third party imports.
+from IPython.core.display import display, HTML
+from icoscp.sparql.runsparql import RunSparql
+from icoscp.station import station
+from ipywidgets import Dropdown, ColorPicker, HBox, Button, Output, RadioButtons, GridspecLayout
 from matplotlib import pyplot as plt
+import ipywidgets as widgets
+import numpy as np
 import pandas as pd
 import requests
-import numpy as np
-import re
-from icoscp.sparql.runsparql import RunSparql  
-from icoscp.station import station
-# import the other python file in the notebook package:
+
+# Local application/library specific imports.
 import plot_interface_anomaly
 
-# path to the pre-processed flux data 
-# if run in the notebook package (https://doi.org/10.18160/Q10G-9CTJ) local data will be used
-#data_path = 'ecosystem_site_anomaly_visualization/flux_data'
-
-# if run at the Carbon Portal exploredata data from the Carbon Portal (project) will be used
+##############################################################################
+# Note to developers/uploaders or to whom it may concern:
+# The ecosystem_site_anomaly_visualization.ipynb notebook also comes as
+# a package available for download from the ICOS data portal and can be
+# found here: https://doi.org/10.18160/Q10G-9CTJ. Users can run this
+# package locally in their own environments without any external data
+# dependencies. In order to do so, users need to specify the
+# `data_path` below:
+#
+# Path to the pre-processed flux data.
+# Use this location to run the notebook package locally:
+# data_path = 'ecosystem_site_anomaly_visualization/flux_data'
+# Use this location to run the notebook on the ICOS Jupyter services
+# (default):
 data_path = '/data/project/flux_anomalies/flux_data'
-
+#
+# To ensure proper handling of permissions for file reading, writing,
+# and linking on the ICOS Jupyter services, we have designated the
+# "/home/user/output" directory as the destination for all notebook
+# output. In case of a new version of the notebook package:
+# https://doi.org/10.18160/Q10G-9CTJ we need to make sure that the
+# notebook's output directory is set within the working directory
+# instead.
+#
+# Use this location for the notebook's output when running the
+# package locally ("output"):
+# output_path = os.path.join('output')
+# output_anomalies_path = os.path.join(
+#     output_path, 'ecosystem-site-anomaly'
+# )
+# Use this location for the notebook's output on the ICOS Jupyter
+# services ("/home/user/output/ecosystem-site-anomaly") (default):
+output_path = os.path.join(os.path.expanduser('~'), 'output')
+output_anomalies_path = os.path.join(
+    output_path, 'ecosystem-site-anomaly'
+)
+if not os.path.exists(output_anomalies_path):
+    os.makedirs(output_anomalies_path)
+##############################################################################
 button_color_able='#4169E1'
 colors_negative_anomalies = {'GPP_DT_VUT_REF':'#115C0A',
                              'SW_IN_F':'#994C00',
@@ -450,17 +488,13 @@ def update_func(button_c):
     df_final.month = df_final.month.astype(int)
     df_final.day = df_final.day.astype(int)
 
-    # save the dataframe so it can be downloaded as a csv-file in a folder called "ecosystem_site_anomaly_visualization_output".
-    # do not change the name of the folder as it is referred to in other places. 
-    if not os.path.exists('ecosystem_site_anomaly_visualization_output'):
-        os.mkdir('ecosystem_site_anomaly_visualization_output') 
-        
     # date time string for the name of the saved file
     now = datetime.now()
     dt_string = now.strftime("%d_%m_%Y_%H_%M_%S")
     
-    data_filename = 'ecosystem_site_anomaly_visualization_output/flux_anomaly_data_' + dt_string + '.csv'
-    
+    data_filename = \
+        f'{output_anomalies_path}/flux_anomaly_data_{dt_string}.csv'
+
     number_cols = len(df_final.columns)
     
     semi_colons = ";" * number_cols
@@ -483,7 +517,9 @@ def update_func(button_c):
         
     f.write('Cite the notebook package if a figure is used:; \n')
     f.write('Storm, I., Klasen, V,, 2023. Ecosystem site anomalies notebook tool. ICOS ERIC - Carbon Portal. https://doi.org/10.18160/AMET-9KWT;\n')
-
+    # Save the dataframe, so it can be downloaded as a csv-file in a
+    # folder called "ecosystem_site_anomaly_visualization_output" under
+    # "/home/user/output/" directory.
     df_final.to_csv(f,index=False, sep=";")
 
     # dictionary with the information from the gui to pass to the plot interface
