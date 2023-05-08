@@ -401,7 +401,7 @@ def make_plot_anomalies(df,
         output_b[0].savefig(file_path)
 
         if os.path.exists(file_path):
-            html_string = '<br>Access figure for site a <a href=' + relative_file_path + ' target="_blank">here</a>.'
+            html_string = 'Access figure for site b <a href=' + relative_file_path + ' target="_blank">here</a>.'
             display(HTML('<p style="font-size:16px">' +  html_string))
 
     # link to the csv-file (already saved in gui_anomaly)
