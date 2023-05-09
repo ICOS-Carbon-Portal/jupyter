@@ -1,264 +1,215 @@
 {% extends "page.html" %}
-{% set announcement = '
-<p style="text-align: left">
-    Dear ICOS CP Jupyter Hub users, we would like to announce the latest updates to our platform,
-    including additions to our docker image and the updated version of the icoscp python library.
-</p>
-<ul>
-    <li style="text-align: left">
-        Click
-        <a href="https://icos-carbon-portal.github.io/jupyter/changelog/#210-07032023"
-           target="_blank">
-            here
-        </a>
-        for a full list of updates regarding the Jupyter service.
-    </li>
-    <li style="text-align: left">
-        Click
-        <a href="https://icos-carbon-portal.github.io/pylib/changelog/#0118"
-           target="_blank">
-            here
-        </a>
-        for more information regarding icoscp version 0.1.18.
-    </li>
-</ul>
-<p style="text-align: left">
-    <br>
-    We recommend that you restart your Jupyter instance by following the instructions provided
-    <a href="https://icos-carbon-portal.github.io/jupyter/how_to/#restart-your-jupyter-instance"
-       target="_blank">
-        here
-    </a>
-    to ensure that you have the most recent updates.
-</p>
-' %}
-{% if announcement_login %}
-{% set announcement = announcement_login %}
-{% endif %}
-
 {% block login_widget %}
 {% endblock %}
 
 {% block main %}
 
-<style>
-    table, th, td {
-        border: 0px solid black;
-        border-collapse: collapse;
-    }
-    th, td {
-        padding: 10px 30px;
-        vertical-align: top;
-    }
-    .btn-jupyter, .btn-jupyter:active, .btn-jupyter:active:hover, .btn-jupyter:active:focus,
-    .btn-jupyter:focus { background-color: #00abc9; border-color: rgba(0,171,201,0.85); }
-    .btn-jupyter:hover { background: rgba(0,171,201,0.85); border-color: rgba(0,171,201,0.85); }
-    .btn-jupyter:active { filter: brightness(85%); }
+    <style>
+        table, th, td {
+            border: 0px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px 30px;
+            vertical-align: top;
+        }
+        .btn-jupyter, .btn-jupyter:active, .btn-jupyter:active:hover, .btn-jupyter:active:focus,
+        .btn-jupyter:focus { background-color: #00abc9; border-color: rgba(0,171,201,0.85); }
+        .btn-jupyter:hover { background: rgba(0,171,201,0.85); border-color: rgba(0,171,201,0.85); }
+        .btn-jupyter:active { filter: brightness(85%); }
 
-    .info-txt{
-        font-size: 14px;
-        font-family: “Open Sans”,sans-serif;
-        max-width: 800px;
-    }
+        .info-txt{
+            font-size: 14px;
+            font-family: “Open Sans”,sans-serif;
+            max-width: 800px;
+        }
 
-    .header{
-        height: 150px;
-        width: 100%;
-    }
-    .header-top {
-        position: absolute;
-        height: 72px;
-        left: 100px;
-        top: 300px;
-        border: 0px solid black;
-        z-index: 1;
-    }
-</style>
+        .header{
+            height: 150px;
+            width: 100%;
+        }
+        .header-top {
+            position: absolute;
+            height: 72px;
+            left: 100px;
+            top: 100px;
+            border: 0px solid black;
+            z-index: 1;
+        }
+        .announcement-container {
+            /*Warning colors*/
+            background-color: #FFD700;
+            color: #000;
 
-<script>
-    function enableSignInButton() {
-        // Get references to the checkboxes and sign-in button.
-        const checkboxLicense = document.getElementById("checkbox-license");
-        const checkboxTerms = document.getElementById("checkbox-terms");
-        const signInButton = document.getElementById("login-submit");
+            /*No warning colors*/
+            /*background-color: #8FBC8F;*/
+            /*color: #FFF;*/
 
-        // Check if both checkboxes are checked.
-        signInButton.disabled = !(checkboxLicense.checked && checkboxTerms.checked);
-    }
-</script>
+            /*Jupyter standard colors*/
+            /*color: #8a6d3b;*/
+            /*background-color: #fcf8e3;*/
+            /*border-color: #faebcc;*/
 
-<div>
-    <img class='header'src='https://www.icos-cp.eu/themes/cp_theme_d8/images/icos-header.jpg'>
-    <a href="https://www.icos-cp.eu/" >
-        <img class='header-top' src='https://www.icos-cp.eu/sites/default/files/ICOS-logo.svg'
-             alt='Home'>
-    </a>
-</div>
-<br>
-<table>
-    <tr><td colspan="3">
+            width: 50vw;
+            overflow: hidden;
+            /*position: absolute;*/
+            margin-top: 1.2%;
+            margin-left: 2%;
+            float: left;
+            /*display: flex;*/
+            border-color: #faebcc;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 2px;
+        }
+    </style>
 
+    <script>
+        function enableSignInButton() {
+            // Get references to the checkboxes and sign-in button.
+            const checkboxLicense = document.getElementById("checkbox-license");
+            const checkboxTerms = document.getElementById("checkbox-terms");
+            const signInButton = document.getElementById("login-submit");
+
+            // Check if both checkboxes are checked.
+            signInButton.disabled = !(checkboxLicense.checked && checkboxTerms.checked);
+        }
+    </script>
+
+    <div>
+        <img class='header'src='https://www.icos-cp.eu/themes/cp_theme_d8/images/icos-header.jpg'>
+        <a href="https://www.icos-cp.eu/" >
+            <img class='header-top' src='https://www.icos-cp.eu/sites/default/files/ICOS-logo.svg'
+                 alt='Home'>
+        </a>
+    </div>
+    <br>
+    <div style="margin-left: 1.2%;margin-top: 1.2%">
         {% block login %}
-
-        <div >
-            <form action="{{login_url}}?next={{next}}" method="post" role="form">
-                <div class='info-txt'>
-                    <h2>Sign in to Exploredata</h2>
-                </div>
-                <div class='auth-form-body'>
-
-                    <p id='insecure-login-warning' class='hidden'>
-                        Warning: JupyterHub seems to be served over an unsecured HTTP connection.
-                        We strongly recommend enabling HTTPS for JupyterHub.
-                    </p>
-    </td></tr>
-    <tr>
-        <td width= '40%'>
-            {% if login_error %}
-            <p class="login_error">
-                {{login_error}}
-            </p>
-            {% endif %}
-            <label for="username_input">Username:</label>
-            <input
-                    id="username_input"
-                    type="text"
-                    autocapitalize="off"
-                    autocorrect="off"
-                    class="form-control"
-                    name="username"
-                    val="{{username}}"
-                    tabindex="1"
-                    autofocus="autofocus"
-            />
-            <label for='password_input'>Password:</label>
-            <input
-                    type="password"
-                    class="form-control"
-                    name="password"
-                    id="password_input"
-                    tabindex="2"
-            />
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <input style="vertical-align: 7px" type="checkbox" name="licence"
-                   id="checkbox-license"
-                   onchange="enableSignInButton()"
-                   tabindex="3"/>
-            <label for='licence'>
-                &nbsp; I accept that ICOS data is under a<br>
-                <a href="https://data.icos-cp.eu/licence" target="_blank">
-                    &nbsp CC BY 4.0 licence
-                </a>&nbsp;
-                <img src="https://www.icos-cp.eu/sites/default/files/inline-images/creativecommons.png">
-            </label>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <div style="display: flex; justify-content: space-between;">
+            <div>
                 <div>
-                    <input type="checkbox" name="licence"
-                           id="checkbox-terms"
-                           onchange="enableSignInButton()"
-                           tabindex="3"/>
-                    <label for='checkbox-terms'>
-                        &nbsp; I accept the ICOS
-                        <a href="https://www.icos-cp.eu/terms-of-use" target="_blank">
-                            Terms of Use
-                        </a>
-                    </label>
+                    <form action="{{login_url}}?next={{next}}" method="post" role="form">
+                        <div class='info-txt'>
+                            <h2>Sign in to Exploredata</h2>
+                        </div>
+                        <div class='auth-form-body'>
+                            <p id='insecure-login-warning' class='hidden'>
+                                Warning: JupyterHub seems to be served over an unsecured HTTP connection.
+                                We strongly recommend enabling HTTPS for JupyterHub.
+                            </p>
+                        </div>
                 </div>
-                <div class="feedback-container" style="margin-top: 10px; margin-left: 20px">
-                    <input id="login-submit" type="submit"
-                           class="btn btn-jupyter" value="Sign In"
-                           tabindex="4" disabled="true"/>
-                    <div class="feedback-widget hidden">
-                        <i class="fa fa-spinner"></i>
+                <div style="width: 13%;margin-top: 0.8%;float: left">
+                    {% if login_error %}
+                        <p class="login_error">
+                            {{login_error}}
+                        </p>
+                    {% endif %}
+                    <label for="username_input">Username:</label>
+                    <input
+                            id="username_input"
+                            type="text"
+                            autocapitalize="off"
+                            autocorrect="off"
+                            class="form-control"
+                            name="username"
+                            val="{{username}}"
+                            tabindex="1"
+                            autofocus="autofocus"
+                    />
+                    <label for='password_input'>Password:</label>
+                    <input
+                            type="password"
+                            class="form-control"
+                            name="password"
+                            id="password_input"
+                            tabindex="2"
+                    />
+                </div>
+                <div class='announcement-container'>
+                    <div style="flex: 1">Announcements:<br><br>Dear ICOS CP Jupyter Hub users, we would like to
+                        inform you about the scheduled maintenance on our servers. The maintenance is
+                        planned for Saturday, 13th May 2023, starting at 10:00 AM (CEST). We expect a
+                        temporary interruption in our service for approximately 3 hours. We kindly request
+                        that you plan your activities accordingly, ensuring that any ongoing work is saved.
+                        Thank you for your understanding and cooperation.
                     </div>
                 </div>
             </div>
-        </td>
+            <div style="clear: both"></div>
+            <div style="position: absolute; margin-top: -1%">
+            <div>
+                <input style="vertical-align: 7px" type="checkbox" name="licence" id="checkbox-license" onchange="enableSignInButton()" tabindex="3"/>
+                <label for='licence'>
+                    &nbsp; I accept that ICOS data is under a<br>
+                    <a href="https://data.icos-cp.eu/licence" target="_blank">
+                        &nbsp CC BY 4.0 licence
+                    </a>&nbsp;
+                    <img src="https://www.icos-cp.eu/sites/default/files/inline-images/creativecommons.png">
+                </label>
+            </div>
+            <div style="margin-top: 2.4%">
+                <div>
+                    <div style="float: left">
+                        <input type="checkbox" name="licence" id="checkbox-terms" onchange="enableSignInButton()" tabindex="3"/>
+                        <label for='checkbox-terms'>
+                            &nbsp; I accept the ICOS
+                            <a href="https://www.icos-cp.eu/terms-of-use" target="_blank">
+                                Terms of Use
+                            </a>
+                        </label>
+                    </div>
+                    <div class="feedback-container" style="float: left;margin-left: 2.2%;margin-top: 1.2%">
+                        <input id="login-submit" type="submit" class="btn btn-jupyter" value="Sign In" tabindex="4" disabled="true"/>
+                        <div class="feedback-widget hidden">
+                            <i class="fa fa-spinner"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
         {% endblock login %}
-        <td width =200>&nbsp</td>
-    </tr>
-    <tr>
-        <td colspan="3">
-            <div class='info-txt'>
+        <div>
+            <div class='info-txt' style="clear: both;margin-top: 10%">
                 <p>
                     This is a service from the ICOS Carbon Portal to showcase how Python Notebooks
                     with Jupyter can be used to access the ICOS data products. The <b>password</b>
-                    required to access this service is provided when you attend one of our
-                    <a href='https://www.icos-cp.eu/cp-webinar' target=_blank>webinars</a> or you
-                    can request it
-                    <a href='https://www.icos-cp.eu/data-services/tools/jupyter-notebook/exploredata-password' target=_blank>here</a>.
-                    Please read our <a href='https://icos-carbon-portal.github.io/jupyter/icos_notebooks/' target=_blank>documentation</a>.
-                    Once you login, you will find the following structure with examples to play with:</p>
+                    required to access this service is provided when you attend one of our <a href='https://www.icos-cp.eu/cp-webinar' target=_blank>webinars</a> or you can request it <a href='https://www.icos-cp.eu/data-services/tools/jupyter-notebook/exploredata-password' target=_blank>here</a>. Please read our <a href='https://icos-carbon-portal.github.io/jupyter/icos_notebooks/' target=_blank>documentation</a>. Once you login, you will find the following structure with examples to play with:</p>
                 <ul>
-                    <li><b>Education:</b> includes notebooks that use ICOS data to introduce students to
-                        basic principles of climate science and programming</li>
-                    <li><b>ICOS Jupyter Notebooks:</b> contains notebooks processing and presenting ICOS
-                        data in interactive visualizations</li>
-                    <li><b>Introduction:</b> contains notebooks that quickly introduce the fundamental
-                        principles of Python programming</li>
-                    <li><b>Project-specific Jupyter Notebooks:</b> includes notebooks presenting the
-                        scientific output of ICOS projects</li>
-                    <li><b>pylib_examples:</b> includes notebooks with examples on using our 'icoscp'
-                        python library to access ICOS data
-                        <br>Source: <a href='https://github.com/ICOS-Carbon-Portal/pylib/' target=_blank>
-                            https://github.com/ICOS-Carbon-Portal/pylib/</a>
-                        <br>Documentation <a href='https://icos-carbon-portal.github.io/pylib/' target=_blank>
-                            https://icos-carbon-portal.github.io/pylib/</a>
-                    </li>
+                    <li><b>Education:</b> includes notebooks that use ICOS data to introduce students to basic principles of climate science and programming</li>
+                    <li><b>ICOS Jupyter Notebooks:</b> contains notebooks processing and presenting ICOS data in interactive visualizations</li>
+                    <li><b>Introduction:</b> contains notebooks that quickly introduce the fundamental principles of Python programming</li>
+                    <li><b>Project-specific Jupyter Notebooks:</b> includes notebooks presenting the scientific output of ICOS projects</li>
+                    <li><b>pylib_examples:</b> includes notebooks with examples on using our 'icoscp' python library to access ICOS data<br>Source: <a href='https://github.com/ICOS-Carbon-Portal/pylib/' target=_blank>https://github.com/ICOS-Carbon-Portal/pylib/</a><br>Documentation <a href='https://icos-carbon-portal.github.io/pylib/' target=_blank>https://icos-carbon-portal.github.io/pylib/</a></li>
                 </ul>
             </div>
-        </td></tr>
-    <tr ><td colspan="3">
-        <div class='info-txt'>
-            <p>Please be aware, that this service is <b>restricted</b>. We allow only a limited
-                amount of users to login and <b>data is not persistent</b>. After inactivity, you
-                will be logged out automatically. If you want to save a file you have
-                created/changed, you need to download the file to your computer.</p>
-
-            <p>If you are interested in using our Jupyter Notebook Service to do research with ICOS
-                data and elaborated products, please apply for a
-                <a href='https://www.icos-cp.eu/jupyter-personal-account-application'
-                   target=_blank>personal account</a>.
-                Project folders (collaboration space) allow groups of users to have a shared space
-                which is only visible to the members of the group.
-                <a href='https://www.icos-cp.eu/jupyter-collaboration-space-application'
-                   target=_blank>​Apply for collaborative space</a>.</br>
-                If you have a general question, email us to jupyter-info (at) icos-cp.eu.
-
-            <p>If you would like to explore the examples on your own computer, everything is public
-                available on
-                <a href='https://github.com/ICOS-Carbon-Portal/jupyter' target=_blank>Github</a>.
-                More information and documentation about our Jupyter Services can be found at
-                <a href='https://icos-carbon-portal.github.io/jupyter/' target=_blank>
-                    https://icos-carbon-portal.github.io/jupyter/</a>.
-            </p>
         </div>
-    </td></tr>
-</table>
+        <div class='info-txt' style="margin-top: 4%">
+            <p>Please be aware, that this service is <b>restricted</b>. We allow only a limited amount of users to login and <b>data is not persistent</b>. After inactivity, you will be logged out automatically. If you want to save a file you have created/changed, you need to download the file to your computer.</p>
+
+            <p>If you are interested in using our Jupyter Notebook Service to do research with ICOS data and elaborated products, please apply for a <a href='https://www.icos-cp.eu/jupyter-personal-account-application' target=_blank>personal account</a>. Project folders (collaboration space) allow groups of users to have a shared space which is only visible to the members of the group. <a href='https://www.icos-cp.eu/jupyter-collaboration-space-application' target=_blank>Apply for collaborative space</a>.</br>
+                If you have a general question, email us to jupyter-info (at) icos-cp.eu.</p>
+
+            <p>If you would like to explore the examples on your own computer, everything is public available on <a href='https://github.com/ICOS-Carbon-Portal/jupyter' target=_blank>Github</a>. More information and documentation about our Jupyter Services can be found at <a href='https://icos-carbon-portal.github.io/jupyter/' target=_blank>https://icos-carbon-portal.github.io/jupyter/</a>.</p>
+        </div>
+        </div>
+    </div>
 
 {% endblock %}
 
 {% block script %}
-{{ super() }}
-<script>
-    if (window.location.protocol === "http:") {
-        // unhide http warning
-        var warning = document.getElementById('insecure-login-warning');
-        warning.className = warning.className.replace(/\bhidden\b/, '');
-    }
-    // setup onSubmit feedback
-    $('form').submit((e) => {
-        var form = $(e.target);
-        form.find('.feedback-container>input').attr('disabled', true);
-        form.find('.feedback-container>*').toggleClass('hidden');
-        form.find('.feedback-widget>*').toggleClass('fa-pulse');
-    });
-</script>
+    {{ super() }}
+    <script>
+        if (window.location.protocol === "http:") {
+            // unhide http warning
+            var warning = document.getElementById('insecure-login-warning');
+            warning.className = warning.className.replace(/\bhidden\b/, '');
+        }
+        // setup onSubmit feedback
+        $('form').submit((e) => {
+            var form = $(e.target);
+            form.find('.feedback-container>input').attr('disabled', true);
+            form.find('.feedback-container>*').toggleClass('hidden');
+            form.find('.feedback-widget>*').toggleClass('fa-pulse');
+        });
+    </script>
 {% endblock %}
