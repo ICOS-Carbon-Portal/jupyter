@@ -1,78 +1,103 @@
 {% extends "page.html" %}
-{% set announcement = '
-<p style="text-align: left">
-    Dear ICOS CP Jupyter Hub users, we would like to announce the latest updates to our platform,
-    including additions to our docker image and the updated version of the icoscp python library.
-</p>
-<ul>
-    <li style="text-align: left">
-        Click
-        <a href="https://icos-carbon-portal.github.io/jupyter/changelog/#210-07032023"
-        target="_blank">
-            here
-        </a>
-        for a full list of updates regarding the Jupyter service.
-    </li>
-    <li style="text-align: left">
-        Click
-        <a href="https://icos-carbon-portal.github.io/pylib/changelog/#0118"
-        target="_blank">
-            here
-        </a>
-        for more information regarding icoscp version 0.1.18.
-    </li>
-</ul>
-<p style="text-align: left">
-    <br>
-    We recommend that you restart your Jupyter instance by following the instructions provided
-    <a href="https://icos-carbon-portal.github.io/jupyter/how_to/#restart-your-jupyter-instance"
-    target="_blank">
-        here
-    </a>
-    to ensure that you have the most recent updates.
-</p>
-' %}
-{% if announcement_login %}
-  {% set announcement = announcement_login %}
-{% endif %}
-
 {% block login_widget %}
 {% endblock %}
 
 {% block main %}
 
 <style>
-table, th, td {
-  border: 0px solid black;
-  border-collapse: collapse;
-}
-th, td {
-  padding: 10px 30px;
-  vertical-align: top;
-}
-.btn-jupyter, .btn-jupyter:active, .btn-jupyter:active:hover, .btn-jupyter:active:focus,
-.btn-jupyter:focus { background-color: #00abc9; border-color: rgba(0,171,201,0.85); }
-.btn-jupyter:hover { background: rgba(0,171,201,0.85); border-color: rgba(0,171,201,0.85); }
-.btn-jupyter:active { filter: brightness(85%); }
+    table, th, td {
+        border: 0px solid black;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 10px 30px;
+        vertical-align: top;
+    }
+    .btn-jupyter, .btn-jupyter:active, .btn-jupyter:active:hover, .btn-jupyter:active:focus,
+    .btn-jupyter:focus { background-color: #00abc9; border-color: rgba(0,171,201,0.85); }
+    .btn-jupyter:hover { background: rgba(0,171,201,0.85); border-color: rgba(0,171,201,0.85); }
+    .btn-jupyter:active { filter: brightness(85%); }
 
-.info-txt{
-  font-size: 14px;
-  font-family: “Open Sans”,sans-serif;
-  max-width: 800px;
-}
+    .info-txt{
+        font-size: 14px;
+        font-family: “Open Sans”,sans-serif;
+        max-width: 800px;
+    }
 
-.header{
-  height: 150px;
-  width: 100%;
-}
-.header-top {
-  position: absolute;
-  height: 72px;
-  left: 100px;
-  top: 300px;
-  border: 0px solid black;
-  z-index: 1;
- }
+    .header{
+        height: 150px;
+        width: 100%;
+    }
+    .header-top {
+        position: absolute;
+        height: 72px;
+        left: 100px;
+        top: 100px;
+        border: 0px solid black;
+        z-index: 1;
+    }
+    .announcement-container {
+        /*Warning colors*/
+        background-color: #FFD700;
+        color: #000;
+
+        /*No warning colors*/
+        /*background-color: #8FBC8F;*/
+        /*color: #FFF;*/
+
+        /*Jupyter standard colors*/
+        /*color: #8a6d3b;*/
+        /*background-color: #fcf8e3;*/
+        /*border-color: #faebcc;*/
+
+        width: 50vw;
+        overflow: hidden;
+        /*position: absolute;*/
+        margin-top: 1.2%;
+        margin-left: 2%;
+        float: left;
+        /*display: flex;*/
+        border-color: #faebcc;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 2px;
+    }
+    /*.announcement-container-1 {*/
+    /*    background-color: #FCA5A5;*/
+    /*    color: #FFF;*/
+    /*    width: 25%;*/
+    /*    overflow: hidden;*/
+    /*}*/
+    /*.announcement-container-2 {*/
+    /*    background-color: #FFD700;*/
+    /*    color: #000;*/
+    /*    width: 25%;*/
+    /*    overflow: hidden;*/
+    /*}*/
+    /*.announcement-container-3 {*/
+    /*    background-color: #6495ED;*/
+    /*    color: #FFF;*/
+    /*    width: 25%;*/
+    /*    overflow: hidden;*/
+    /*}*/
+    /*.announcement-container-4 {*/
+    /*    background-color: #FFA500;*/
+    /*    color: #FFF;*/
+    /*    width: 25%;*/
+    /*    overflow: hidden;*/
+    /*}*/
+    /*.announcement-container-5 {*/
+    /*    background-color: #8FBC8F;*/
+    /*    color: #FFF;*/
+    /*    width: 25%;*/
+    /*    overflow: hidden;*/
+    /*}*/
+    /*.announcement-container-6 {*/
+    /*    !*background-color: #FFD700;*!*/
+    /*    !*color: #000;*!*/
+    /*    width: 25%;*/
+    /*    overflow: hidden;*/
+    /*}*/
 </style>
 
 <script>
@@ -88,63 +113,111 @@ th, td {
 </script>
 
 <div>
-	<img class='header'src='https://www.icos-cp.eu/themes/cp_theme_d8/images/icos-header.jpg'>
-	<a href="https://www.icos-cp.eu/" >
-		<img class='header-top'
-             src='https://www.icos-cp.eu/sites/default/files/ICOS-logo.svg' alt='Home'>
-	</a>
+    <img class='header'src='https://www.icos-cp.eu/themes/cp_theme_d8/images/icos-header.jpg'>
+    <a href="https://www.icos-cp.eu/" >
+        <img class='header-top' src='https://www.icos-cp.eu/sites/default/files/ICOS-logo.svg'
+             alt='Home'>
+    </a>
 </div>
 <br>
-<table>
-	<tr><td colspan="3">
-
-{% block login %}
-
-<div >
-<form action="{{login_url}}?next={{next}}" method="post" role="form">
-  <div class='info-txt'>
-    <p><h2>Sign in to Collaboration Server</h2></p>
-  </div>
-  <div class='auth-form-body'>
-
-    <p id='insecure-login-warning' class='hidden'>
-    Warning: JupyterHub seems to be served over an unsecured HTTP connection.
-    We strongly recommend enabling HTTPS for JupyterHub.
-    </p>
-    </td></tr>
-    <tr><td width= '40%'>
-    {% if login_error %}
-    <p class="login_error">
-      {{login_error}}
-    </p>
-    {% endif %}
-    <label for="username_input">Username:</label>
-    <input
-      id="username_input"
-      type="text"
-      autocapitalize="off"
-      autocorrect="off"
-      class="form-control"
-      name="username"
-      val="{{username}}"
-      tabindex="1"
-      autofocus="autofocus"
-    />
-    <label for='password_input'>Password:</label>
-    <input
-      type="password"
-      class="form-control"`
-      name="password"
-      id="password_input"
-      tabindex="2"
-    />
-    </td></tr>
-    <tr>
-        <td>
-            <input style="vertical-align: 7px" type="checkbox" name="licence"
-                   id="checkbox-license"
-                   onchange="enableSignInButton()"
-                   tabindex="3"/>
+<!--<div class="announcement-container-1">1. Dear ICOS CP Jupyter Hub users, we would like to inform you about the scheduled-->
+<!--    maintenance on our servers. The maintenance is planned for Saturday, 13th May 2023,-->
+<!--    starting at 10:00 AM (CEST). We expect a temporary interruption in our service for-->
+<!--    approximately 3 hours. We kindly request that you plan your activities accordingly,-->
+<!--    ensuring that any ongoing work is saved. Thank you for your understanding and-->
+<!--    cooperation.-->
+<!--</div>-->
+<!--<div class="announcement-container-2">2. Dear ICOS CP Jupyter Hub users, we would like to inform you about the scheduled-->
+<!--    maintenance on our servers. The maintenance is planned for Saturday, 13th May 2023,-->
+<!--    starting at 10:00 AM (CEST). We expect a temporary interruption in our service for-->
+<!--    approximately 3 hours. We kindly request that you plan your activities accordingly,-->
+<!--    ensuring that any ongoing work is saved. Thank you for your understanding and-->
+<!--    cooperation.-->
+<!--</div>-->
+<!--<div class="announcement-container-3">3. Dear ICOS CP Jupyter Hub users, we would like to inform you about the scheduled-->
+<!--    maintenance on our servers. The maintenance is planned for Saturday, 13th May 2023,-->
+<!--    starting at 10:00 AM (CEST). We expect a temporary interruption in our service for-->
+<!--    approximately 3 hours. We kindly request that you plan your activities accordingly,-->
+<!--    ensuring that any ongoing work is saved. Thank you for your understanding and-->
+<!--    cooperation.-->
+<!--</div>-->
+<!--<div class="announcement-container-4">4. Dear ICOS CP Jupyter Hub users, we would like to inform you about the scheduled-->
+<!--    maintenance on our servers. The maintenance is planned for Saturday, 13th May 2023,-->
+<!--    starting at 10:00 AM (CEST). We expect a temporary interruption in our service for-->
+<!--    approximately 3 hours. We kindly request that you plan your activities accordingly,-->
+<!--    ensuring that any ongoing work is saved. Thank you for your understanding and-->
+<!--    cooperation.-->
+<!--</div>-->
+<!--<div class="announcement-container-5">5. Dear ICOS CP Jupyter Hub users, we would like to inform you about the scheduled-->
+<!--    maintenance on our servers. The maintenance is planned for Saturday, 13th May 2023,-->
+<!--    starting at 10:00 AM (CEST). We expect a temporary interruption in our service for-->
+<!--    approximately 3 hours. We kindly request that you plan your activities accordingly,-->
+<!--    ensuring that any ongoing work is saved. Thank you for your understanding and-->
+<!--    cooperation.-->
+<!--</div>-->
+<!--<div class="announcement-container-6">6. Dear ICOS CP Jupyter Hub users, we would like to inform you about the scheduled-->
+<!--    maintenance on our servers. The maintenance is planned for Saturday, 13th May 2023,-->
+<!--    starting at 10:00 AM (CEST). We expect a temporary interruption in our service for-->
+<!--    approximately 3 hours. We kindly request that you plan your activities accordingly,-->
+<!--    ensuring that any ongoing work is saved. Thank you for your understanding and-->
+<!--    cooperation.-->
+<!--</div>-->
+<div style="margin-left: 1.2%;margin-top: 1.2%">
+    {% block login %}
+    <div>
+        <div>
+            <form action="{{login_url}}?next={{next}}" method="post" role="form">
+                <div class='info-txt'>
+                    <h2>Sign in to Collaboration Server</h2>
+                </div>
+                <div class='auth-form-body'>
+                    <p id='insecure-login-warning' class='hidden'>
+                        Warning: JupyterHub seems to be served over an unsecured HTTP connection.
+                        We strongly recommend enabling HTTPS for JupyterHub.
+                    </p>
+                </div>
+        </div>
+        <div style="width: 13%;margin-top: 0.8%;float: left">
+            {% if login_error %}
+            <p class="login_error">
+                {{login_error}}
+            </p>
+            {% endif %}
+            <label for="username_input">Username:</label>
+            <input
+                    id="username_input"
+                    type="text"
+                    autocapitalize="off"
+                    autocorrect="off"
+                    class="form-control"
+                    name="username"
+                    val="{{username}}"
+                    tabindex="1"
+                    autofocus="autofocus"
+            />
+            <label for='password_input'>Password:</label>
+            <input
+                    type="password"
+                    class="form-control"
+                    name="password"
+                    id="password_input"
+                    tabindex="2"
+            />
+        </div>
+        <div class='announcement-container'>
+            <div style="flex: 1">Announcements:<br><br>Dear ICOS CP Jupyter Hub users, we would like to inform you about the scheduled
+                maintenance on our servers. The maintenance is planned for Saturday, 13th May 2023,
+                starting at 10:00 AM (CEST). We expect a temporary interruption in our service for
+                approximately 3 hours. We kindly request that you plan your activities accordingly,
+                ensuring that any ongoing work is saved. Thank you for your understanding and
+                cooperation.
+            </div>
+        </div>
+    </div>
+    <div style="clear: both"></div>
+    <div style="position: absolute; margin-top: -1%">
+        <div>
+            <input style="vertical-align: 7px" type="checkbox" name="licence" id="checkbox-license" onchange="enableSignInButton()" tabindex="3"/>
             <label for='licence'>
                 &nbsp; I accept that ICOS data is under a<br>
                 <a href="https://data.icos-cp.eu/licence" target="_blank">
@@ -152,16 +225,11 @@ th, td {
                 </a>&nbsp;
                 <img src="https://www.icos-cp.eu/sites/default/files/inline-images/creativecommons.png">
             </label>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <div style="display: flex; justify-content: space-between;">
-                <div>
-                    <input type="checkbox" name="licence"
-                           id="checkbox-terms"
-                           onchange="enableSignInButton()"
-                           tabindex="3"/>
+        </div>
+        <div style="margin-top: 2.4%">
+            <div>
+                <div style="float: left">
+                    <input type="checkbox" name="licence" id="checkbox-terms" onchange="enableSignInButton()" tabindex="3"/>
                     <label for='checkbox-terms'>
                         &nbsp; I accept the ICOS
                         <a href="https://www.icos-cp.eu/terms-of-use" target="_blank">
@@ -169,59 +237,55 @@ th, td {
                         </a>
                     </label>
                 </div>
-                <div class="feedback-container" style="margin-top: 10px; margin-left: 20px">
-                    <input id="login-submit" type="submit"
-                           class="btn btn-jupyter" value="Sign In"
-                           tabindex="4" disabled="true"/>
+                <div class="feedback-container" style="float: left;margin-left: 2.2%;margin-top: 1.2%">
+                    <input id="login-submit" type="submit" class="btn btn-jupyter" value="Sign In" tabindex="4" disabled="true"/>
                     <div class="feedback-widget hidden">
                         <i class="fa fa-spinner"></i>
                     </div>
                 </div>
             </div>
-        </td>
-{% endblock login %}
+        </div>
+        {% endblock login %}
+        <div>
+            <div class='info-txt' style="clear: both;margin-top: 10%">
+                <p>
+                    Our collaborative Jupyter Hub service is for <b>registered users</b> and offers advanced
+                    options like<br></p>
+                <ul>
+                    <li>sharing notebooks and data</li>
+                    <li>uploading ancillary data for analysis together with ICOS data</li>
+                    <li>permanent storage of notebooks and data</li>
 
-	</td>
-	<td width =200>&nbsp</td>
-	</tr>
-	<tr>
-	<td colspan="3">
-		<div class='info-txt'><p>
-		Our collaborative Jupyter Hub service is for <b>registered users</b> and offers advanced
-            options like<br></p>
-		<ul>
-			<li>sharing notebooks and data</li>
-			<li>uploading ancillary data for analysis together with ICOS data</li>
-			<li>permanent storage of notebooks and data</li>
-
-		</ul>
-		<p>This service is continuously expanded in close consultation with
-            our users and the ICOS community to support their scientific analysis and
-            interpretation of ICOS data and products. All data and notebooks are "private", hence
-            you can use this as a safe space to do research with unpublished data.</p>
-		<p>If you are interested in using our Jupyter Notebook Service to do research with ICOS
-            data and elaborated products, but you don't have an account yet, please send your
-            request to jupyter-info (at) icos-cp.eu .
-		</p></div>
-	</td></tr>
-</table>
+                </ul>
+                <p>This service is continuously expanded in close consultation with
+                    our users and the ICOS community to support their scientific analysis and
+                    interpretation of ICOS data and products. All data and notebooks are "private", hence
+                    you can use this as a safe space to do research with unpublished data.</p>
+                <p>If you are interested in using our Jupyter Notebook Service to do research with ICOS
+                    data and elaborated products, but you don't have an account yet, please send your
+                    request to jupyter-info (at) icos-cp.eu .
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
 
 {% block script %}
 {{ super() }}
 <script>
-if (window.location.protocol === "http:") {
-  // unhide http warning
-  var warning = document.getElementById('insecure-login-warning');
-  warning.className = warning.className.replace(/\bhidden\b/, '');
-}
-// setup onSubmit feedback
-$('form').submit((e) => {
-  var form = $(e.target);
-  form.find('.feedback-container>input').attr('disabled', true);
-  form.find('.feedback-container>*').toggleClass('hidden');
-  form.find('.feedback-widget>*').toggleClass('fa-pulse');
-});
+    if (window.location.protocol === "http:") {
+        // unhide http warning
+        var warning = document.getElementById('insecure-login-warning');
+        warning.className = warning.className.replace(/\bhidden\b/, '');
+    }
+    // setup onSubmit feedback
+    $('form').submit((e) => {
+        var form = $(e.target);
+        form.find('.feedback-container>input').attr('disabled', true);
+        form.find('.feedback-container>*').toggleClass('hidden');
+        form.find('.feedback-widget>*').toggleClass('fa-pulse');
+    });
 </script>
 {% endblock %}
