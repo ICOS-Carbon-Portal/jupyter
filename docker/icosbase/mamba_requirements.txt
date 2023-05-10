@@ -7,6 +7,7 @@ folium=0.13.0
 geopandas=0.11.1
 geoviews=1.9.5
 gmt=6.4.0
+h5netcdf=1.1.0
 holoviews=1.15.1
 hvplot=0.8.1
 ipyleaflet=0.17.1
