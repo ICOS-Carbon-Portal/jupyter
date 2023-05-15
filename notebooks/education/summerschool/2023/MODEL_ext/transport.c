@@ -35,7 +35,7 @@
 #include <errno.h>
 #include "globals.h"
 /* #include "/usr/include/hdf/hdf.h"   */
-#include "/home/wouter/include/hdf.h"  
+#include "/home/jovyan/education/summerschool/include/hdf.h"
 /* #include "/sw/arch/Debian10/EB_production/2019/software/HDF/4.2.14-GCCcore-8.3.0/include/hdf/hdf.h" */
 /* #include "/storage/imau/HDFvers/HDF4.1r2/include/hdf.h" */
 
