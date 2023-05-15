@@ -1,0 +1,39 @@
+TITLE basefunc_base
+NAME CO2
+       note that emissions are mornally expressed in gram C (and not gram CO2)
+MOLMASS 12.0
+START_DATE 20000101
+END_DATE 20080101
+START_CONCENTRATION 369e3
+           this is given in ppb 
+LIFE_TIME -1
+SINK FILE co2_sink_ocbio.dat
+   Th new option EXTRA_LAND calculates extra land sink of xxx PgC/year
+SINK EXTRA_LAND_NH 0.0
+SINK EXTRA_LAND_TR 0.0
+SINK EXTRA_LAND_SH 0.0
+  8 years of total emitted amounts in ktonnes per year follow:
+EMISSION DISTRIBUTION emission_dist_co2.dat 8    
+  2000      6765e3
+  2001      6927e3
+  2002      6996e3
+  2003      7416e3
+  2004      7807e3
+  2005      8093e3
+  2006      8370e3
+  2007      8370e3
+        the values are given in kt / yr
+STATION_OUTPUT MONTHLY
+STATION Mauna_Loa      19N 156W
+STATION Mace_Head      53N 11W
+STATION Barbados       13N 59W
+STATION Samoa          14S 171W
+STATION Cape_Grim      41S 145E
+STATION South_Pole     90S 25W
+STATION Alert          82N 63W
+STATION Ny_Alesund     79N 12E
+STATION Hyytiala       62N 24E
+STATION Crozet_Island  46S 52E
+STATION Trinidad_Head  45N 124W
+END
+

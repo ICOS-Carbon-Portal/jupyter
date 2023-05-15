@@ -1,0 +1,16 @@
+ START_DATE        2000           1           1
+ END_DATE        2008           1           1
+ NAME  CO2     
+ MOLMASS     64.0000000    
+ START_CONCENTRATION   1.00000000    
+ LIFE_TIME    -1.00000000    
+ STATION_OUTPUT         360
+ STATION            1 Mace_Head(53N,11W)            35           4           1
+ STATION            2 Trinidad_Head_Califo          24           5           1
+ STATION            3 Barbados(13N,59W)             31           8           1
+ STATION            4 Samoa(14S,171W)               19          11           1
+ STATION            5 Tasmania(41S,145E)            15          14           1
+ OUTPUT MONTHLY LATLON level           1
+ OUTPUT MONTHLY ZONAL_AVERAGE T
+ END
+ Point_source:           1   8.42000026E+17          35           3           1
