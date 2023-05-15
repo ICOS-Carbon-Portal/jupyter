@@ -13,7 +13,7 @@
         2004   7516000.00    
         2005   7616000.00    
         2006   7716000.00    
- SINK FILE /home/wouter/summerschool/2023/DATA/co2_sink_ocbio.dat                                          
+ SINK FILE /home/jovyan/summerschool/2023/DATA/co2_sink_ocbio.dat
  SINK STRENGTH GLOBAL    2.09999990    
  STATION_OUTPUT         360
  STATION            1 Mauna_Loa                     21           8           1
