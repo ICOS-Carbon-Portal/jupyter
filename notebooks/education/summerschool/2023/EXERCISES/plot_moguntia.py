@@ -19,9 +19,23 @@ class plot_moguntia:
         #os.chdir('/home/lcur0000/JHL_notebooks/MAQ11306_P01_Moguntia/')
        # teacher_dir  = os.getenv('TEACHER_DIR')
        #self.moguntiapath = os.path.join(teacher_dir,'JHL_notebooks/P01_Moguntia')
-        self.moguntiapath = '//home/wouter/summerschool/2023/'
-        self.moguntiapathe = '/home/wouter/summerschool/2023/'
+        # self.moguntiapath = '//home/wouter/summerschool/2023/'
+        # self.moguntiapathe = '/home/wouter/summerschool/2023/'
         #self.moguntiapathe = '/home/lcur0571/JHL_prepare/P06_Moguntia_ENKF/'
+        self.moguntiapath = os.path.join(
+            '/',
+            os.path.expanduser('~'),
+            'education',
+            'summerschool',
+            '2023'
+        )
+        self.moguntiapathe = os.path.join(
+            os.path.expanduser('~'),
+            'education',
+            'summerschool',
+            '2023'
+        )
+
         self.localpath = os.getcwd()
         self.nlev = 10
         self.conv = 1.0
