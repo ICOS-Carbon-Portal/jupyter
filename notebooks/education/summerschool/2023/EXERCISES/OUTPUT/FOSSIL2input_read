@@ -10,7 +10,7 @@
         2001   6927000.00    
         2002   6996000.00    
         2003   7416000.00    
- SINK FILE /home/jovyan/summerschool/2023/DATA/co2_sink_ocbio.dat
+ SINK FILE /home/jovyan/education/summerschool/2023/DATA/co2_sink_ocbio.dat
  STATION_OUTPUT         360
  STATION            1 Mauna_Loa                     21           8           1
  STATION            2 Mace_Head                     35           4           1

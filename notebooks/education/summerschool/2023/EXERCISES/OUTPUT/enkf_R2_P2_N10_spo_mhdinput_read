@@ -4,7 +4,7 @@
  END_DATE        2008           1           1
  START_CONCENTRATION   369000.000    
  LIFE_TIME    -1.00000000    
- SINK FILE /home/jovyan/summerschool/2023/DATA/co2_sink_ocbio.dat
+ SINK FILE /home/jovyan/education/summerschool/2023/DATA/co2_sink_ocbio.dat
  SINK STRENGTH NH    3.44703102    
  SINK STRENGTH TR   0.943715990    
  SINK STRENGTH SH  -0.605319023    

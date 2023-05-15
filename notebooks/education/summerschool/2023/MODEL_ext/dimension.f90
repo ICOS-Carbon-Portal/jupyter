@@ -3,7 +3,7 @@ implicit none
 
 ! to adapt with implimentation
  !character(len=46)  :: path = '/project/jhlwur009/JHL_data/P01_Moguntia/DATA/'
- character(len=36)  :: path = '/home/jovyan/summerschool/2023/DATA/'
+ character(len=36)  :: path = '/home/jovyan/education/summerschool/2023/DATA/'
  character(len=9)  :: outpath = './OUTPUT/'
  integer, parameter :: nu = 36, nv = 18, nw = 10, nu2 = 37 
  integer, parameter :: nl = 36, np = 18, nr = 10, nl1 = 37
