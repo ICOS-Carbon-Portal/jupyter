@@ -30,7 +30,7 @@ output_network_path = os.path.join(output_path, 'network-view')
 relative_network_path = \
     f'../../../{re.search("output.*", output_network_path)[0]}'
 
-path_network_footprints = '/data/project/obsnet/network_footprints'
+path_network_footprints = '/data/project/obsnet/network-footprints'
 output_footprint_path_local = os.path.join(output_path, 'network-footprints')
 path_network_footprints_local = \
     f'../../{re.search("output.*", output_footprint_path_local)[0]}'

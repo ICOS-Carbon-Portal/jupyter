@@ -22,7 +22,7 @@ import create_network_analysis
 stilt_stations = stiltstation.find()
 button_color_able='#4169E1'
 
-path_network_footprints = '/data/project/obsnet/network_footprints'
+path_network_footprints = '/data/project/obsnet/network-footprints'
 output_path = os.path.join(os.path.expanduser('~'), 'output')
 output_footprint_path_local = os.path.join(output_path, 'network-footprints')
 path_network_footprints_local = \
