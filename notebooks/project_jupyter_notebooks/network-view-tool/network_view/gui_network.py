@@ -23,15 +23,17 @@ from icoscp.stilt import stiltstation
 import network_analysis_functions
 stilt_stations = stiltstation.find()
 
-path_network_footprints = '/data/project/obsnet/network_footprints'
-path_network_footprints_local = 'network_view/network_footprints'
 # Create the output directory of the notebook:
-# "/home/user/output/network-view"
 output_path = os.path.join(os.path.expanduser('~'), 'output')
 output_network_path = os.path.join(output_path, 'network-view')
+
 relative_network_path = \
     f'../../../{re.search("output.*", output_network_path)[0]}'
-# output = 'network_view/temp_output'
+
+path_network_footprints = '/data/project/obsnet/network_footprints'
+output_footprint_path_local = os.path.join(output_path, 'network-footprints')
+path_network_footprints_local = \
+    f'../../{re.search("output.*", output_footprint_path_local)[0]}'
 
 # style to supress scrolling in the output 
 style_scroll = """
