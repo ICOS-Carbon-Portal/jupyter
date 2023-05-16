@@ -16,12 +16,17 @@ import ipywidgets as widgets
 from matplotlib import pyplot as plt
 import network_analysis_functions
 import pandas as pd
+import re
 global stilt_stations
 stilt_stations = stiltstation.find()
 button_color_able='#4169E1'
 
 import create_network_analysis
-path_network_footprints_local = 'network_footprints'
+
+output_path = os.path.join(os.path.expanduser('~'), 'output')
+output_footprint_path_local = os.path.join(output_path, 'network-footprints')
+path_network_footprints_local = \
+    f'../../../{re.search("output.*", output_footprint_path_local)[0]}'
 
 # style to supress scrolling in the output 
 style_scroll = """
