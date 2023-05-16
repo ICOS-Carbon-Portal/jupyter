@@ -146,7 +146,7 @@ void init_transport_(){
   /*  openfile(&coefdata, "transcoef.dat", "r"); */
   /* to adapt */
   itransport = SDstart(
-  "/home/wouter/summerschool/2023/DATA/transport.hdf",
+  "/home/jovyan/education/summerschool/2023/DATA/transport.hdf",
   DFACC_READ);
   printf("itransport %d\n", itransport);
   setfluxptr();
