@@ -8,7 +8,7 @@ CFILES = globals.c transport.c
 
 OBJECTS = dimension.o hdf.o units.o convection.o input.o moguntia.o globals.o transport.o readmet.o init.o tools.o 
 
-LIBDIR= /home/jovyan/education/summerschool/local/gnu_11.2.0
+LIBDIR= /home/jovyan/education/Summer-school-2023/build/local/gnu_11.2.0
 HDF4= $(LIBDIR)/hdf-4.2.15/lib/
 JPEG= $(LIBDIR)/jpegsrc.v6b/lib/
 SZIP= $(LIBDIR)/szip-2.1/lib/
