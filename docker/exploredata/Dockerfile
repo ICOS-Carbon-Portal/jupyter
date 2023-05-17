@@ -18,3 +18,5 @@ ADD --chown=1000:100 *.ipynb ./
 RUN jupyter trust index_notebook.ipynb
 RUN jupyter trust project_jupyter_notebooks/RINGO_T1.3/ICOS_flasksampling_fossilfuel.ipynb
 RUN jupyter trust project_jupyter_notebooks/RINGO_T1.3/RINGO_T1.3_flasksampling_v5.ipynb
+WORKDIR /home/jovyan/education/
+RUN git clone https://git.wur.nl/peter050/hyytiala-practicals.git
