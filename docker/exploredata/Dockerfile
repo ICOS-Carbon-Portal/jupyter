@@ -22,3 +22,4 @@ WORKDIR /home/jovyan/education/
 RUN git clone https://git.wur.nl/peter050/hyytiala-practicals.git
 RUN ln -s /home/jovyan/education/hyytiala-practicals/EXERCISES -t /home/jovyan/education/Summer-school-2023/.
 RUN ln -s /home/jovyan/education/hyytiala-practicals/MEASUREMENTS -t /home/jovyan/education/Summer-school-2023/.
+RUN echo 'cd /home/jovyan/education/hyytiala-practicals && git pull' > ~/.bash_profile
