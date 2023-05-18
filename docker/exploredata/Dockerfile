@@ -20,5 +20,5 @@ RUN jupyter trust project_jupyter_notebooks/RINGO_T1.3/ICOS_flasksampling_fossil
 RUN jupyter trust project_jupyter_notebooks/RINGO_T1.3/RINGO_T1.3_flasksampling_v5.ipynb
 WORKDIR /home/jovyan/education/
 RUN git clone https://git.wur.nl/peter050/hyytiala-practicals.git
-RUN ln -s hyytiala-practicals/EXERCISES -t Summer-school-2023
-RUN ln -s hyytiala-practicals/MEASUREMENTS -t Summer-school-2023
+RUN ln -s /home/jovyan/education/hyytiala-practicals/EXERCISES -t /home/jovyan/education/Summer-school-2023/.
+RUN ln -s /home/jovyan/education/hyytiala-practicals/MEASUREMENTS -t /home/jovyan/education/Summer-school-2023/.
