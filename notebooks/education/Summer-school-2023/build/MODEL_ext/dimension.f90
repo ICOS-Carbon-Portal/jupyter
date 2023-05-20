@@ -3,7 +3,7 @@ implicit none
 
 ! to adapt with implimentation
  character(len=47)  :: path = '/home/jovyan/education/Summer-school-2023/DATA/'
- character(len=61)  :: outpath = '/home/jovyan/education/Summer-school-2023/build/MODEL/OUTPUT/'
+ character(len=65)  :: outpath = '/home/jovyan/education/Summer-school-2023/build/MODEL_ext/OUTPUT/'
 
  integer, parameter :: nu = 36, nv = 18, nw = 10, nu2 = 37 
  integer, parameter :: nl = 36, np = 18, nr = 10, nl1 = 37
