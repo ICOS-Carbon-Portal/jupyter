@@ -38,28 +38,26 @@
     }
     .announcement-container {
         /*Warning colors*/
-        background-color: #FFD700;
-        color: #000;
+        /*background-color: #FFD700;*/
+        /*color: #000;*/
 
         /*No warning colors*/
-        /*background-color: #8FBC8F;*/
-        /*color: #FFF;*/
+        background-color: #8FBC8F;
+        color: #FFF;
 
         /*Jupyter standard colors*/
         /*color: #8a6d3b;*/
         /*background-color: #fcf8e3;*/
         /*border-color: #faebcc;*/
-
+        display: inline-block;
         width: 50vw;
         overflow: hidden;
-        /*position: absolute;*/
-        margin-top: 1.2%;
-        margin-left: 2%;
+        margin-top: 6%;
+        margin-left: -10%;
+        margin-bottom: 11%;
         float: left;
-        /*display: flex;*/
         border-color: #faebcc;
         padding: 15px;
-        margin-bottom: 20px;
         border-radius: 2px;
     }
 </style>
@@ -77,80 +75,67 @@
 </script>
 
 <div>
-    <img class='header'src='https://www.icos-cp.eu/themes/cp_theme_d8/images/icos-header.jpg'>
-    <a href="https://www.icos-cp.eu/" >
-        <img class='header-top' src='https://www.icos-cp.eu/sites/default/files/ICOS-logo.svg'
-             alt='Home'>
-    </a>
-</div>
-<br>
-<div style="margin-left: 1.2%;margin-top: 1.2%">
-    {% block login %}
     <div>
-        <div>
-            <form action="{{login_url}}?next={{next}}" method="post" role="form">
-                <div class='info-txt'>
-                    <h2>Sign in to Collaboration Server</h2>
-                </div>
-                <div class='auth-form-body'>
-                    <p id='insecure-login-warning' class='hidden'>
-                        Warning: JupyterHub seems to be served over an unsecured HTTP connection.
-                        We strongly recommend enabling HTTPS for JupyterHub.
-                    </p>
-                </div>
-        </div>
-        <div style="width: 13%;margin-top: 0.8%;float: left">
-            {% if login_error %}
-            <p class="login_error">
-                {{login_error}}
-            </p>
-            {% endif %}
-            <label for="username_input">Username:</label>
-            <input
-                    id="username_input"
-                    type="text"
-                    autocapitalize="off"
-                    autocorrect="off"
-                    class="form-control"
-                    name="username"
-                    val="{{username}}"
-                    tabindex="1"
-                    autofocus="autofocus"
-            />
-            <label for='password_input'>Password:</label>
-            <input
-                    type="password"
-                    class="form-control"
-                    name="password"
-                    id="password_input"
-                    tabindex="2"
-            />
-        </div>
-{#        <div class='announcement-container'>#}
-{#            <div style="flex: 1">Announcements:<br><br>Dear ICOS CP Jupyter Hub users, we would like to inform you about the scheduled#}
-{#                maintenance on our servers. The maintenance is planned for Saturday, 13th May 2023,#}
-{#                starting at 10:00 AM (CEST). We expect a temporary interruption in our service for#}
-{#                approximately 3 hours. We kindly request that you plan your activities accordingly,#}
-{#                ensuring that any ongoing work is saved. Thank you for your understanding and#}
-{#                cooperation.#}
-{#            </div>#}
-{#        </div>#}
+        <img class='header'src='https://www.icos-cp.eu/themes/cp_theme_d8/images/icos-header.jpg'>
+        <a href="https://www.icos-cp.eu/" >
+            <img class='header-top' src='https://www.icos-cp.eu/sites/default/files/ICOS-logo.svg'
+                 alt='Home'>
+        </a>
     </div>
-    <div style="clear: both"></div>
-    <div style="position: absolute; margin-top: 1%">
-        <div>
-            <input style="vertical-align: 7px" type="checkbox" name="licence" id="checkbox-license" onchange="enableSignInButton()" tabindex="3"/>
-            <label for='licence'>
-                &nbsp; I accept that ICOS data is under a<br>
-                <a href="https://data.icos-cp.eu/licence" target="_blank">
-                    &nbsp CC BY 4.0 licence
-                </a>&nbsp;
-                <img src="https://www.icos-cp.eu/sites/default/files/inline-images/creativecommons.png">
-            </label>
-        </div>
-        <div style="margin-top: 2.4%">
-            <div>
-                <div style="float: left">
+    <div style="margin-left: 1.2%;margin-top: 1.2%;display: inline-block">
+        {% block login %}
+        <div style="display: flex;flex-direction: row">
+            <div style="display: flex;flex-direction: column;">
+                <div>
+                    <form action="{{login_url}}?next={{next}}" method="post" role="form">
+                        <div class='info-txt' style="white-space: nowrap">
+                            <h2>Sign in to Collaboration Server</h2>
+                        </div>
+                        <div class='auth-form-body'>
+                            <p id='insecure-login-warning' class='hidden'>
+                                Warning: JupyterHub seems to be served over an unsecured HTTP connection.
+                                We strongly recommend enabling HTTPS for JupyterHub.
+                            </p>
+                        </div>
+                </div>
+                <div style="width: 13vw;margin-top: 5%;float: left">
+                    {% if login_error %}
+                    <p class="login_error">
+                        {{login_error}}
+                    </p>
+                    {% endif %}
+                    <label for="username_input">Username:</label>
+                    <input
+                            id="username_input"
+                            type="text"
+                            autocapitalize="off"
+                            autocorrect="off"
+                            class="form-control"
+                            name="username"
+                            val="{{username}}"
+                            tabindex="1"
+                            autofocus="autofocus"
+                    />
+                    <label for='password_input'>Password:</label>
+                    <input
+                            type="password"
+                            class="form-control"
+                            name="password"
+                            id="password_input"
+                            tabindex="2"
+                    />
+                </div>
+                <div style="margin-top: 6%">
+                    <input style="vertical-align: 7px" type="checkbox" name="licence" id="checkbox-license" onchange="enableSignInButton()" tabindex="3"/>
+                    <label for='licence'>
+                        &nbsp; I accept that ICOS data is under a<br>
+                        <a href="https://data.icos-cp.eu/licence" target="_blank">
+                            &nbsp CC BY 4.0 licence
+                        </a>&nbsp;
+                        <img src="https://www.icos-cp.eu/sites/default/files/inline-images/creativecommons.png">
+                    </label>
+                </div>
+                <div style="margin-top: 6%">
                     <input type="checkbox" name="licence" id="checkbox-terms" onchange="enableSignInButton()" tabindex="3"/>
                     <label for='checkbox-terms'>
                         &nbsp; I accept the ICOS
@@ -159,17 +144,27 @@
                         </a>
                     </label>
                 </div>
-                <div class="feedback-container" style="float: left;margin-left: 2.2%;margin-top: 1.2%">
+                <div class="feedback-container" style="margin-top: -1%;margin-left: 55%">
                     <input id="login-submit" type="submit" class="btn btn-jupyter" value="Sign In" tabindex="4" disabled="true"/>
                     <div class="feedback-widget hidden">
                         <i class="fa fa-spinner"></i>
                     </div>
                 </div>
             </div>
+            <div class='announcement-container'>
+                Announcements:<br>
+                <span style="display: block;margin-bottom: 0.5em"></span>
+                Dear ICOS CP JupyterHub users, the
+                latest development on our JupyterHub is a notebook
+                (ecosystem_site_anomaly_visualization.ipynb) that allows users to visualize
+                anomalies in ecosystem variables including Gross Primary Production (GPP),
+                shortwave incoming radiation and vapor pressure deficit.<br>
+                You can find the notebook under <code>common/icos_jupyter_notebooks</code> directory.
+            </div>
         </div>
         {% endblock login %}
-        <div>
-            <div class='info-txt' style="clear: both;margin-top: 10%">
+        <div style="display: flex;flex-direction: column">
+            <div class='info-txt' style="clear: both;margin-top: 1%">
                 <p>
                     Our collaborative Jupyter Hub service is for <b>registered users</b> and offers advanced
                     options like<br></p>
