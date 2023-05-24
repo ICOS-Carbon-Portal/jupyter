@@ -1069,7 +1069,7 @@ def share_representaiton_table(nwc, countries, csvfile = '', output = ''):
     countries.insert(0, 'Europe')
     representation_file = nwc['networkFile'] + '_representation.csv'
     
-    df_to_analyze = pd.read_csv(os.path.join(nwc['pathFp'] + '_representation', representation_file))
+    df_to_analyze = pd.read_csv(os.path.join(nwc['pathFp'] + '-representation', representation_file))
         
     date_range = pd.date_range(dt.datetime(nwc['startYear'],nwc['startMonth'],nwc['startDay'],0), (dt.datetime(nwc['endYear'], nwc['endMonth'], nwc['endDay'], 21)), freq='3H')
     date_range_subset = [date for date in date_range if date.hour in nwc['timeOfDay']]
@@ -1125,7 +1125,7 @@ def flux_breakdown_countries_percentages(nwc, countries, pngfile='', output=''):
     
     representation_file = nwc['networkFile'] + '_representation.csv'
     
-    df_fluxes_full = pd.read_csv(os.path.join(nwc['pathFp'] + '_representation', representation_file))
+    df_fluxes_full = pd.read_csv(os.path.join(nwc['pathFp'] + '-representation', representation_file))
         
     date_range = pd.date_range(dt.datetime(nwc['startYear'],nwc['startMonth'],nwc['startDay'],0), (dt.datetime(nwc['endYear'], nwc['endMonth'], nwc['endDay'], 21)), freq='3H')
     date_range_subset = [date for date in date_range if date.hour in nwc['timeOfDay']]

@@ -2,6 +2,7 @@ from icoscp.stilt import stiltstation
 stilt_stations = stiltstation.find()
 import pandas as pd
 import folium
+from ipywidgets import Button, Output
 
 def create_stations_dfs():
     df_stilt_stations = pd.DataFrame(columns = ['id','name', 'lat', 'lon', 'country'])
@@ -104,3 +105,43 @@ def station_map():
     folium.LayerControl().add_to(m)
     
     return m
+
+# make it possible to show/hide the station map
+overview_map = Output()
+form_out = Output()
+with overview_map:
+    map_of_sites = station_map()
+    display(map_of_sites)
+
+# botton to show/hide the map
+hide_map_button = Button(description='Hide map',
+                       disabled=False,
+                       button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
+                       tooltip='Click to confirm selection',
+                       layout = {'width': 'initial', 'height':'initial'},
+                       style = {'description_width': 'initial'})
+hide_map_button.style.button_color='#40a837'
+
+# what happens when a user clicks the button
+def hide_map_func(button_c):
+    hide_map_button.disabled = True
+    if hide_map_button.description == 'Hide map':
+        overview_map.clear_output()
+        hide_map_button.description = 'Show map'
+    
+    else:
+        with overview_map:
+            map_of_sites = station_map()
+            display(map_of_sites)
+            
+        hide_map_button.description = 'Hide map'
+    hide_map_button.disabled = False
+    
+hide_map_button.on_click(hide_map_func)
+    
+# output:
+with form_out:
+    display(hide_map_button, overview_map)
+
+#Display form:
+display(form_out)
