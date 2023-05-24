@@ -31,4 +31,4 @@ RUN ./MOGUNTIA < basefunct_nh
 RUN ./MOGUNTIA < basefunct_tr
 RUN ./MOGUNTIA < basefunct_sh
 RUN ./MOGUNTIA < basefunct_base
-RUN chmod g+w OUPUT/*
+RUN chmod g+w /home/jovyan/education/Summer-school-2023/build/MODEL_ext/OUPUT/*
