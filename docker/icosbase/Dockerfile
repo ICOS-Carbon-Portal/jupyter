@@ -79,3 +79,5 @@ RUN pip install git+https://github.com/ZogopZ/icos-splash.git
 # frequently and the new docker image will build faster.
 # Update version number according to latest release.
 RUN pip install --quiet icoscp==0.1.18
+# Set the entrypoint to the script with CMD arguments
+CMD ["git", "clone", "https://git.wur.nl/peter050/hyytiala-practicals.git", "/home/jovyan/education/hyytiala-practicals"]

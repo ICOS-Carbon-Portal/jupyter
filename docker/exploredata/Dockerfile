@@ -19,7 +19,6 @@ RUN jupyter trust index_notebook.ipynb
 RUN jupyter trust project_jupyter_notebooks/RINGO_T1.3/ICOS_flasksampling_fossilfuel.ipynb
 RUN jupyter trust project_jupyter_notebooks/RINGO_T1.3/RINGO_T1.3_flasksampling_v5.ipynb
 # Summer-school-2023
-ADD --chown=1000:100 summer_school_2023.sh summer_school_2023.sh
 USER jovyan
 #WORKDIR /home/jovyan/education/
 #RUN git clone https://git.wur.nl/peter050/hyytiala-practicals.git
@@ -35,5 +34,3 @@ RUN ./MOGUNTIA < basefunct_tr
 RUN ./MOGUNTIA < basefunct_sh
 RUN ./MOGUNTIA < basefunct_base
 RUN chmod g+w OUTPUT/*
-# Set the entrypoint to the script with CMD arguments
-CMD ["git", "clone", "https://git.wur.nl/peter050/hyytiala-practicals.git", "/home/jovyan/education/hyytiala-practicals"]
