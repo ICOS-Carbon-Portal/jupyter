@@ -20,21 +20,21 @@ RUN jupyter trust project_jupyter_notebooks/RINGO_T1.3/ICOS_flasksampling_fossil
 RUN jupyter trust project_jupyter_notebooks/RINGO_T1.3/RINGO_T1.3_flasksampling_v5.ipynb
 # Summer-school-2023
 USER jovyan
-RUN echo -e  \
-    "git clone https://git.wur.nl/peter050/hyytiala-practicals.git /home/jovyan/education/hyytiala-practicals\n" \
-    "cd /home/jovyan/education/hyytiala-practicals\n" \
-    "git fetch origin && git pull" \
-    "ln -s /home/jovyan/education/hyytiala-practicals/EXERCISES -t /home/jovyan/education/Summer-school-2023/.\n" \
-    "ln -s /home/jovyan/education/hyytiala-practicals/MEASUREMENTS -t /home/jovyan/education/Summer-school-2023/.\n" \
-    > ~/.bash_profile
+#RUN echo -e  \
+#    "git clone https://git.wur.nl/peter050/hyytiala-practicals.git /home/jovyan/education/hyytiala-practicals\n" \
+#    "cd /home/jovyan/education/hyytiala-practicals\n" \
+#    "git fetch origin && git pull" \
+#    "ln -s /home/jovyan/education/hyytiala-practicals/EXERCISES -t /home/jovyan/education/Summer-school-2023/.\n" \
+#    "ln -s /home/jovyan/education/hyytiala-practicals/MEASUREMENTS -t /home/jovyan/education/Summer-school-2023/.\n" \
+#    > ~/.bash_profile
 
-#WORKDIR /home/jovyan/education/
-#RUN git clone https://git.wur.nl/peter050/hyytiala-practicals.git
-#WORKDIR /home/jovyan/education/hyytiala-practicals
-#RUN git fetch origin && git pull
-#RUN ln -s /home/jovyan/education/hyytiala-practicals/EXERCISES -t /home/jovyan/education/Summer-school-2023/.
-#RUN ln -s /home/jovyan/education/hyytiala-practicals/MEASUREMENTS -t /home/jovyan/education/Summer-school-2023/.
-#RUN echo 'cd /home/jovyan/education/hyytiala-practicals && git pull' > ~/.bash_profile
+WORKDIR /home/jovyan/education/
+RUN git clone https://git.wur.nl/peter050/hyytiala-practicals.git
+WORKDIR /home/jovyan/education/hyytiala-practicals
+RUN git fetch origin && git pull
+RUN ln -s /home/jovyan/education/hyytiala-practicals/EXERCISES -t /home/jovyan/education/Summer-school-2023/.
+RUN ln -s /home/jovyan/education/hyytiala-practicals/MEASUREMENTS -t /home/jovyan/education/Summer-school-2023/.
+RUN echo 'cd /home/jovyan/education/hyytiala-practicals && git pull' > ~/.bash_profile
 WORKDIR /home/jovyan/education/Summer-school-2023/build/MODEL_ext
 RUN ./MOGUNTIA < basefunct_gl
 RUN ./MOGUNTIA < basefunct_nh
@@ -42,4 +42,4 @@ RUN ./MOGUNTIA < basefunct_tr
 RUN ./MOGUNTIA < basefunct_sh
 RUN ./MOGUNTIA < basefunct_base
 RUN chmod g+w OUTPUT/*
-ENTRYPOINT ["bash", "~/.bash_profile"]
+#ENTRYPOINT ["bash", "~/.bash_profile"]
