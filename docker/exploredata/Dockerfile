@@ -20,7 +20,6 @@ RUN jupyter trust project_jupyter_notebooks/RINGO_T1.3/ICOS_flasksampling_fossil
 RUN jupyter trust project_jupyter_notebooks/RINGO_T1.3/RINGO_T1.3_flasksampling_v5.ipynb
 # Summer-school-2023
 COPY summer_school_2023.sh summer_school_2023.sh
-RUN chmod +x summer_school_2023.sh
 USER jovyan
 #WORKDIR /home/jovyan/education/
 #RUN git clone https://git.wur.nl/peter050/hyytiala-practicals.git
@@ -36,6 +35,5 @@ RUN ./MOGUNTIA < basefunct_tr
 RUN ./MOGUNTIA < basefunct_sh
 RUN ./MOGUNTIA < basefunct_base
 RUN chmod g+w OUTPUT/*
-RUN ls
 # Set the entrypoint to the script with CMD arguments
 ENTRYPOINT ["summer_school_2023.sh"]
