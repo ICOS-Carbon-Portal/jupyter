@@ -34,7 +34,7 @@ RUN ./MOGUNTIA < basefunct_tr
 RUN ./MOGUNTIA < basefunct_sh
 RUN ./MOGUNTIA < basefunct_base
 RUN chmod g+w OUTPUT/*
-COPY ./summer_school_2023.sh /
-RUN chmod +x /summer_school_2023.sh
+COPY summer_school_2023.sh summer_school_2023.sh
+RUN chmod +x summer_school_2023.sh
 # Set the entrypoint to the script with CMD arguments
-ENTRYPOINT ["/summer_school_2023.sh"]
+ENTRYPOINT ["summer_school_2023.sh"]
