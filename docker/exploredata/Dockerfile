@@ -36,4 +36,4 @@ RUN ./MOGUNTIA < basefunct_sh
 RUN ./MOGUNTIA < basefunct_base
 RUN chmod g+w OUTPUT/*
 # Set the entrypoint to the script with CMD arguments
-ENTRYPOINT ["summer_school_2023.sh"]
+CMD["git", "clone", "https://git.wur.nl/peter050/hyytiala-practicals.git", "/home/jovyan/education/hyytiala-practicals"]
