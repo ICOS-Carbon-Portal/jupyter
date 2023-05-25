@@ -26,14 +26,7 @@ WORKDIR /home/jovyan/education/hyytiala-practicals
 RUN git fetch origin && git pull
 RUN ln -s /home/jovyan/education/hyytiala-practicals/EXERCISES -t /home/jovyan/education/Summer-school-2023/.
 RUN ln -s /home/jovyan/education/hyytiala-practicals/MEASUREMENTS -t /home/jovyan/education/Summer-school-2023/.
-RUN echo -e \
-    "unlink /home/jovyan/education/Summer-school-2023/EXERCISES\n" \
-    "unlink /home/jovyan/education/Summer-school-2023/MEASUREMENTS\n" \
-    "cd /home/jovyan/education/hyytiala-practicals\n" \
-    "git fetch origin && git pull\n" \
-    "ln -s /home/jovyan/education/hyytiala-practicals/EXERCISES -t /home/jovyan/education/Summer-school-2023/.\n" \
-    "ln -s /home/jovyan/education/hyytiala-practicals/MEASUREMENTS -t /home/jovyan/education/Summer-school-2023/.\n" \
-    > ~/.bash_profile
+RUN echo "cd /home/jovyan/education/hyytiala-practicals && git fetch origin && git pull" > ~/.bash_profile
 WORKDIR /home/jovyan/education/Summer-school-2023/build/MODEL_ext
 RUN ./MOGUNTIA < basefunct_gl
 RUN ./MOGUNTIA < basefunct_nh
