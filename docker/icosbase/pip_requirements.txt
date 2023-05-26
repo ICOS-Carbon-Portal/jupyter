@@ -1,3 +1,4 @@
+GitPython==3.1.31
 PyGeodesy==22.11.3
 cyclebars @ git+https://github.com/klavere/cyclebars.git#egg=cyclebars
 jupyter-module-loader==0.0.1

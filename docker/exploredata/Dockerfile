@@ -22,11 +22,11 @@ RUN jupyter trust project_jupyter_notebooks/RINGO_T1.3/RINGO_T1.3_flasksampling_
 USER jovyan
 WORKDIR /home/jovyan/education/
 RUN git clone https://git.wur.nl/peter050/hyytiala-practicals.git
-WORKDIR /home/jovyan/education/hyytiala-practicals
-RUN git fetch origin && git pull
 RUN ln -s /home/jovyan/education/hyytiala-practicals/EXERCISES -t /home/jovyan/education/Summer-school-2023/.
 RUN ln -s /home/jovyan/education/hyytiala-practicals/MEASUREMENTS -t /home/jovyan/education/Summer-school-2023/.
 RUN echo "cd /home/jovyan/education/hyytiala-practicals && git fetch origin && git pull" > ~/.bash_profile
+RUN mkdir -p ~/.ipython/profile_default/startup/
+COPY 00_summer_school_2023.py ~/.ipython/profile_default/startup/
 WORKDIR /home/jovyan/education/Summer-school-2023/build/MODEL_ext
 RUN ./MOGUNTIA < basefunct_gl
 RUN ./MOGUNTIA < basefunct_nh
@@ -34,3 +34,5 @@ RUN ./MOGUNTIA < basefunct_tr
 RUN ./MOGUNTIA < basefunct_sh
 RUN ./MOGUNTIA < basefunct_base
 RUN chmod g+w OUTPUT/*
+WORKDIR /home/jovyan/educatin/Summer-school-2023/
+
