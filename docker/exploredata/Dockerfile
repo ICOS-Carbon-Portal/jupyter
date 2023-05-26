@@ -34,5 +34,5 @@ RUN ./MOGUNTIA < basefunct_tr
 RUN ./MOGUNTIA < basefunct_sh
 RUN ./MOGUNTIA < basefunct_base
 RUN chmod g+w OUTPUT/*
-WORKDIR /home/jovyan/educatin/Summer-school-2023/
+WORKDIR /home/jovyan/education/Summer-school-2023/
 
