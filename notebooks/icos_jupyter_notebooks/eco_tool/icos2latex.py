@@ -3,10 +3,27 @@
 
 """
     Convert ICOS variables and ICOS units into LaTeX-snippets. 
-    
+    For details on LaTeX we refer to
+        https://www.ctan.org/tex-archive/info/lshort/english/
+
+    The implementation is directed towards javascript applications.
+
+        (***) Warning:
+        --------------
+        Regarding the size commands, they *should* not be used in math
+        mode. Compiling ${\small {x}}$ (outside python) yields a LaTeX-
+        warning. A correct LaTeX-string would be \small{$x$}.
+        A guess is that MathJax (a javascript interpreter for LaTeX, mathML
+        and AsciiMath - see mathjax.org), expects all LaTeX-code to be
+        within $-signs.
+        At least plotly use mathjax, while e.g. matplotlib use either mathjax or
+        compiled images.
+        -- Thus, if by some reason code compilation fails, try to set
+        font_size = 0 in your call.
+
     Examples
     --------
-    >>> lat = Translator(size = 10)
+    >>> lat = Translator(font_size = 10)
     >>> lat.var_to_latex('CO2')
     '${\\small  {\\mathrm  {CO_2}}}$'
 
@@ -22,19 +39,6 @@
     >>> lat.var_unit_to_latex('CO2','µmol mol-1')
     '${\\scriptsize  {\\mathrm  {CO_2}\\ (\\mu{mol}\\,\\,{mol}^{-1})}}$'
 
-    
-    Warning (***)
-    -------
-    Regarding the size commands, they *should* not be used in math
-    mode. Compiling ${\small {x}}$ (outside python) yields a LaTeX-
-    warning. A correct LaTeX-string would be \small{$x$}. 
-    My guess is that MathJax, a common javascript interpreter for 
-    math, expects all LaTeX-code to be within $-signs. 
-    At least plotly use mathjax, other packages might have other 
-    solutions. 
-    Thus, if by some reason code compilation fails, try to set 
-    size = 0 in your call.
-    
 """
 
 __author__ = ["Anders Dahlner"]
@@ -48,33 +52,30 @@ __email__ = ['info@icos-cp.eu', 'anders.dahlner@nateko.lu.se']
 class Translator():
     # We use some class members in order to improve
     # the performance reasons. These are all private.
-    __layout = {'size':
-                    {'default': r'\scriptsize ',  # ~8pt, *default
-                     6: r'\tiny ',  # ~6pt
-                     7: r'\scriptsize ',  # Note: ~8pt
-                     8: r'\scriptsize ',  # ~8pt, *default
+    __layout = {'font_size':
+                    {6: r'\tiny ',          # ~6pt
+                     8: r'\scriptsize ',    # ~8pt, *default
                      9: r'\footnotesize ',  # ~9pt
-                     10: r'\small ',  # ~10pt
-                     11: r'\normalsize ',  # ~11pt
-                     12: r'\large ',  # etc...
+                     10: r'\small ',        # ~10pt
+                     11: r'\normalsize ',   # ...
+                     12: r'\large ',
                      14: r'\Large ',
                      17: r'\LARGE ',
                      21: r'\huge ',
                      25: r'\Huge ',
-                     0: ''},  # default latex style
+                     0: None},  # default latex style
                 # see (***) above
                 'font_style':
-                    {'default': r'\mathrm ',  # serif, ~times roman, *default
-                     'rm': r'\mathrm ',  # serif, ~times roman, *default
+                    {'rm': r'\mathrm ',  # serif, ~times roman, *default
                      'sf': r'\mathsf ',  # sans-serif, no serifs, web-text
-                     'sans': r'\mathsf ',  # ---
                      'tt': r'\mathtt ',  # serif, typewriter text
                      'it': r'\mathit ',  # serif, italic, ~ like default latex
                      'bf': r'\mathbf ',  # serif, bold
                      'bb': r'\mathbb ',  # black-board bold, for capitals
                      'cal': r'\mathcal ',  # calligraphy, for capitals
                      'frak': r'\mathfrak ',  # fraktur, for capitals
-                     'none': ''},  # default latex style
+                     'normal': r'\mathnormal ',  # "Normal font"
+                     'none': None},  # default latex style
                 'use_exp': False,  # Applies to units, if True output
                 # use negative exponents instead of
                 # div-signs. e.g 'm/s' or m s^{-1}
@@ -271,8 +272,7 @@ class Translator():
     def __init__(self, **configs):
         """
             Use this in order to convert ICOS variables and ICOS units 
-            into LaTeX strings to prettify plots etc. 
-            
+            into LaTeX strings to prettify plots etc.
             
             The object has three public methods:
              + var_to_latex(icos_var: str) -> str
@@ -282,17 +282,19 @@ class Translator():
             With configs the user can set stylings of the LaTeX code.
             
             Possible configuration keys:
-            
-             font_style: str.
-                 Default is 'rm'. Possible choices are 'rm', 
-                 'roman', 'sf', 'sans', 'tt', 'it', 'bf', 
-                 'bb', 'cal', 'frak', 'none', 'default'
 
-                - size: int
-                    Default is 8. Possible choices are 
-                    0, 6, 7, 8, 9, 10, 11, 12, 14, 17, 21, 25
+                - font_style: str.
+                    Default is 'rm'. Possible choices are 'rm',
+                    'roman', 'sf', 'sans', 'tt', 'it', 'bf',
+                    'bb', 'cal', 'frak', 'none',
+
+                - font_size: int or str
+                    Default is 8. Possible choices are
+                    0, 6, 8, 9, 10, 11, 12, 14, 17, 21, 25
                     0 is a flag to use LaTeX default size, otherwise 
-                    it is somewhat similar to fontsize points.
+                    it is somewhat similar to font-size points.
+                    If `font_size` is not an `int` it will be converted
+                    into an `int` or to the default value.
 
                 - use_exp: bool
                     Default is False. If True, output use negative 
@@ -301,6 +303,11 @@ class Translator():
 
                 - debug: bool
                     Default is False. If True, messages are printed.
+
+                - compiler: str
+                    Default value 'mathjax'. At this moment the code is implemented
+                    for MathJax engine https://www.mathjax.org/
+                    See the warning in (***)
         """
 
         self._config = {}
@@ -308,12 +315,15 @@ class Translator():
 
     def __process_configs(self, **configs):
 
-        all_known_keys = set(Translator.__layout.keys()).union(['debug'])
+        all_known_keys = set(Translator.__layout.keys()).union(['debug',
+                                                                'compiler'])
 
         debug = configs.pop('debug', False)
         self['debug'] = debug if isinstance(debug, bool) else False
-        known_keys = all_known_keys.difference(['debug'])
 
+        self['compiler'] = configs.pop('compiler', None)
+
+        known_keys = all_known_keys.difference(['debug', 'compiler'])
         # Only set known keys:
         for k in known_keys:
             if k in configs.keys():
@@ -322,79 +332,71 @@ class Translator():
                 self[k] = None
 
         unknown_keys = set(configs.keys()).difference(all_known_keys)
-
         if unknown_keys and self.debug:
-            msg = f'''\tUnknown key(s) sent to `icos2latex`: \n\t\t{", ".join(unknown_keys)}.\
-            \n\tKnown keys are:  \n\t\t{", ".join(known_keys)}.'''
+            msg = f'''\tUnknown key(s) sent to `icos2latex`: \
+            \n\t\t{", ".join(list(unknown_keys))}.\
+            \n\tKnown keys are:  \
+            \n\t\t{", ".join(known_keys)}.'''
             print(msg)
 
     def __setitem__(self, key, value):
-        """
-        Possible configuration keys:
-        
-            - font_style: str.
-                Default is 'rm'. Possible choices are 'rm', 
-                'roman', 'sf', 'sans', 'tt', 'it', 'bf', 
-                'bb', 'cal', 'frak', 'none', 'default'
-                
-            - size: int
-                Default is 8. Possible choices are 
-                0, 6, 7, 8, 9, 10, 11, 12, 14, 17, 21, 25
-                0 is a flag to use LaTeX default size, otherwise 
-                it is somewhat similar to fontsize points.
-                
-            - use_exp: bool
-                Default is False. If True, output use negative 
-                exponents instead of div-signs (e.g. 'm/s' or 
-                'm s^{-1}').
-
-            - debug: bool
-                Default is False. If True, messages are printed.
-    """
-
-        if value is None:
-            value = 'default'
-            validate = False
-        else:
-            validate = True
-
         value_error = False
-
         if key in ['debug', 'use_exp']:
             if isinstance(value, bool):
                 self._config[key] = value
             else:
                 self._config[key] = False
                 value_error = True
-        elif key in Translator.__layout.keys() and isinstance(
-                Translator.__layout[key], dict):
-            if value in Translator.__layout[key].keys():
+        elif key == 'font_size':
+            if value is None:
+                self._config[key] = None
+            else:
+                try:
+                    val_int = int(value)
+                except Exception:
+                    value_error = True
+                    val_int = 8
+                if val_int in Translator.__layout[key].keys():
+                    self._config[key] = Translator.__layout[key][value]
+                else:
+                    self._config[key] = Translator.__layout[key][8]
+                    value_error = True
+        elif key == 'font_style':
+            if value is None:
+                self._config[key] = None
+            elif value in Translator.__layout[key].keys():
                 self._config[key] = Translator.__layout[key][value]
             else:
-                self._config[key] = Translator.__layout[key]['default']
+                self._config[key] = Translator.__layout[key]['rm']
                 value_error = True
+        elif key == 'compiler':
+            if value is None:
+                self._config[key] = 'mathjax'
+            else:
+                self._config[key] = value
         else:
             if self.debug:
-                msg = f"""\tUnknown key '{key}' sent to `icos2latex`. \
-                \n\t{self.__setitem__.__doc__}"""
+                msg = f"""\tError in the call to `icos2latex`: """ \
+                      f"""\n\t\tUnknown parameter `{key}`. """ \
+                      f"""\n\t{self.__init__.__doc__}"""
                 print(msg)
 
         if self.debug:
-            if validate and value_error:
-                msg = f"""\tUnknown value of key '{key}' sent to `icos2latex`: {value}\
-                \n\t{self.__setitem__.__doc__}"""
+            if value_error:
+                msg = f"""\tError in the call to `icos2latex`: """ \
+                      f"""\n\t\tThe parameter `{key}` got the unknown value: """ \
+                      f"""`{value}`\n\t{self.__init__.__doc__}"""
                 print(msg)
 
     def __getitem__(self, key):
         return self._config[key]
 
     def __str__(self, msg=None):
-
         return self.__init__.__doc__
 
     @property
-    def size(self):
-        return self['size']
+    def font_size(self):
+        return self['font_size']
 
     @property
     def font_style(self):
@@ -408,51 +410,74 @@ class Translator():
     def debug(self):
         return self['debug']
 
-    def __set_dollars(self, latex_txt):
+    @property
+    def compiler(self):
+        return self['compiler']
+
+    def __set_style(self, latex_txt, no_dollars: bool = False):
         """ 
         Returns a latex string of latex_txt 
         with size according to the layout
         """
 
-        latex_styled = f'{{{self.font_style} {{{latex_txt}}}}}'
+        if self.font_style is not None:
+            txt = f'{{{self.font_style} {{{latex_txt}}}}}'
+        else:
+            txt = latex_txt
 
         # See the "Warning" paragraph in the file documentation
-        latex_final = fr'${{{self.size} {latex_styled}}}$'
+        if self.font_size is not None:
+            if self.compiler == 'mathjax' and not no_dollars:
+                latex_final = fr'${{{self.font_size} {txt}}}$'
+            elif not no_dollars:
+                latex_final = fr'{self.font_size} {{${txt}$}}'
+            else:
+                latex_final = fr'{self.font_size} {{{txt}}}'
+        elif not no_dollars:
+            latex_final = f'${txt}$'
+        else:
+            latex_final = f'{txt}'
 
         return latex_final
 
-    def var_to_latex(self, var: str = None):
+    def var_to_latex(self, var: str = None,
+                     no_dollar: bool = False):
         """ 
         Converts ICOS-variables to latex-strings.
 
         Parameters
         ----------
-        var : str
-            Expects a string having the format of an ICOS-variable
-            (see the formats __var_to_latex())
+            var: str
+                Expects a string having the format of an ICOS-variable
+                (see the formats __var_to_latex())
+            no_dollar: bool
+                If True the return value is without '$' signs.
 
         Returns
         -------
         str 
+
         """
 
         if not isinstance(var, str):
-            return '$ $'
+            return ''
 
         latex_var = Translator.__var_to_latex(var)
 
-        return self.__set_dollars(latex_var)
+        return self.__set_style(latex_txt=latex_var, no_dollars=no_dollar)
 
-    def unit_to_latex(self, unit: str = None):
+    def unit_to_latex(self, unit: str = None, no_dollar: bool = False):
         """ 
         Converts ICOS-units to latex-strings 
         WITH $-signs, using settings from the layout 
 
         Parameters
         ----------
-        unit : str
-            Expects a string having the format of an 
-            ICOS-unit (see formats in __unit_to_latex()).
+            unit: str
+                Expects a string having the format of an
+                ICOS-unit (see formats in __unit_to_latex()).
+            no_dollar: bool
+                If True the return value is without '$' signs.
 
         Returns
         -------
@@ -460,11 +485,11 @@ class Translator():
         """
 
         if not isinstance(unit, str):
-            return '$ $'
+            return ''
 
         latex_unit = self.__unit_to_latex(unit, self.use_exp)
 
-        return self.__set_dollars(latex_unit)
+        return self.__set_style(latex_txt=latex_unit, no_dollars=no_dollar)
 
     def var_unit_to_latex(self, var_unit: (str, str) = None, var: str = None,
                           unit: str = None):
@@ -502,4 +527,4 @@ class Translator():
 
         latex_var_unit = f'{latex_var}\ {latex_unit}'
 
-        return self.__set_dollars(latex_var_unit)
+        return self.__set_style(latex_var_unit)

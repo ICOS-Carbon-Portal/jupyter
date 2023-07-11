@@ -25,6 +25,7 @@
     icos_previousVersion -> str
     icos_station_name -> str
     icos_station_id -> str
+    icos_station_uri -> str
     icos_product -> str
     icos_citationBibTex -> str
     icos_citationRis -> str
@@ -309,23 +310,33 @@ class IcosFrame(pd.DataFrame):
 
             keys = ['accessUrl', 'pid', 'previousVersion', 'citationBibTex',
                     'citationRis', 'citationString', 'stationName',
-                    'stationId', 'product', 'title', 'columns', 'varUnitList']
+                    'stationId', 'uri', 'product', 'title', 'columns',
+                    'varUnitList']
 
             for k in keys:
                 m[k] = d.pop(k, None)
 
-            if not m['stationName']:
+            if not (m['stationName'] and m['stationId'] and m['uri']):
                 try:
-                    n = d['specificInfo']['acquisition']['station']['org']['name']
-                    m['stationName'] = n
+                    stn_data = d['specificInfo']['acquisition']['station']
                 except:
-                    pass
-            if not m['stationId']:
-                try:
-                    st_id = d['specificInfo']['acquisition']['station']['id']
-                    m['stationId'] = st_id
-                except:
-                    pass
+                    stn_data = None
+
+                if stn_data and not m['stationName']:
+                    try:
+                        m['stationName'] = stn_data['org']['name']
+                    except:
+                        pass
+                if stn_data and not m['stationId']:
+                    try:
+                        m['stationId'] = stn_data['id']
+                    except:
+                        pass
+                if stn_data and not m['uri']:
+                    try:
+                        m['uri'] = stn_data['org']['self']['uri']
+                    except:
+                        pass
             if not m['product']:
                 try:
                     m['product'] = d['specification']['self']['label']
@@ -580,6 +591,14 @@ class IcosFrame(pd.DataFrame):
         except:
             st_id = ''
         return st_id
+
+    @property
+    def icos_station_uri(self) -> str:
+        try:
+            st_uri = self._icos_meta['uri']
+        except:
+            st_uri = ''
+        return st_uri
 
     @property
     def icos_product(self) -> str:

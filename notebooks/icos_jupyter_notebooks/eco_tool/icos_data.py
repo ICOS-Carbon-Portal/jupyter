@@ -16,15 +16,14 @@
     --------
     >>> # Ex 1. Get a list of all AS-stations together with
     >>> # their level 2 products
-    >>> from pi.icos_data import StationData
+    >>> from eco_tool.icos_data import StationData
     >>> as_stations = StationData(theme='AS', level = '2')
     >>> df = as_stations.stations_df
     ...
     >>> # Ex 2. Get the timeseries and look up variables and units
-    >>> ts_df = as_stations.icos_ts(pid = '11676/gzsZmFSwlOyPtBmCPzQXU9QY')
+    >>> ts_df = as_stations.get_ts(pid = '11676/gzsZmFSwlOyPtBmCPzQXU9QY')
     >>> ts_df.icos_var_unit_ls
-
-    ...
+    [('AP', 'hPa'), ('AP-Flag', 'Unitless'), ('AP-NbPoints', 'Unitless'), ('AP-Stdev', 'hPa'), ('AT', '°C'), ('AT-Flag', 'Unitless'), ('AT-NbPoints', 'Unitless'), ('AT-Stdev', '°C'), ('RH', '%'), ('RH-Flag', 'Unitless'), ('RH-NbPoints', 'Unitless'), ('RH-Stdev', '%'), ('TIMESTAMP', 'Unitless'), ('WD', '°'), ('WD-Flag', 'Unitless'), ('WD-NbPoints', 'Unitless'), ('WD-Stdev', '°'), ('WS', 'm s-1'), ('WS-Flag', 'Unitless'), ('WS-NbPoints', 'Unitless'), ('WS-Stdev', 'm s-1')]
 """
 
 import warnings
@@ -32,13 +31,14 @@ import warnings
 warnings.simplefilter("ignore", FutureWarning)
 
 import pandas as pd
+import numpy as np
 from icoscp.cpb.dobj import Dobj
 from icoscp.station import station as st
 from icoscp.sparql import sparqls, runsparql
-from pi.icos_timeseries import IcosFrame
+from eco_tool.icos_timeseries import IcosFrame
 
 
-class StationData():
+class StationData:
 
     def __init__(self, **configs):
         """
@@ -171,16 +171,10 @@ class StationData():
         # Finally, we remove all columns that we will not use, sort
         # the remaining df with respect to station name, specLabel, date 
         # remove and objects created.
-        col_ls = ['id', 'name', 'specLabel',
+        col_ls = ['id', 'name', 'specLabel', 'samplingheight',
                   'dobj', 'timeStart', 'timeEnd']
         sort_ls = ['name', 'specLabel', 'timeEnd']
         ascending_ls = [True, True, False]
-        if self.theme == 'AS' or self.theme == 'ALL':
-            # For atmospheric stations we
-            # also need the sampling height.
-            col_ls.append('samplingheight')
-            sort_ls.insert(2, 'samplingheight')
-            ascending_ls.insert(2, False)
 
         final_df = stns_and_prod_df[col_ls].copy()
 
@@ -203,8 +197,8 @@ class StationData():
         return column_meta
 
     def get_ts(self, pid: str = None, stn_id: str = None,
-                stn_name: str = None, product: str = None,
-                col_ls: list = None, **kwargs) -> IcosFrame:
+               stn_name: str = None, product: str = None,
+               col_ls: list = None, **kwargs) -> IcosFrame or None:
         """
         Returns a pandas dataframe df with an ICOS timeseries
         and attached metadata (an instance of IcosFrame which
@@ -226,7 +220,7 @@ class StationData():
         stn_name: str
             ICOS station name
         product: str
-            Name of a product of an ICOS station.
+            Name of a product/file of an ICOS station.
         col_ls: list of strings
             List of columns to retrieve. The column 'TIMESTAMP' 
             will be added if it is not in the list.
@@ -248,12 +242,12 @@ class StationData():
                     row = df.loc[(df.name == stn_name) & (df.specLabel == product)]
                     pid = row.dobj.values[0]
                 else:
-                    if debug:
+                    if self.debug:
                         print('Immature call of `StationData.get_ts`. ' +
                               f'\n{self.get_ts().__doc__}')
-                    return
+                    return None
             else:
-                return
+                return None
 
         do = Dobj(pid)
         df = do.data
@@ -274,8 +268,8 @@ class StationData():
 
     @staticmethod
     def group_ts(var_tuple_ls: list = None,
-                 start_date: str = None,
-                 end_date: str = None) -> IcosFrame:
+                 start_date=None,
+                 end_date=None) -> IcosFrame:
         """
         Returns a pandas dataframe df with an ICOS timeseries
         and attached metadata (an instance of IcosFrame which
@@ -289,15 +283,31 @@ class StationData():
                 (<variable>, <pid>)
             where the <variable> belongs to the ICOS product/file with pid <pid>
 
-        start_date: str
-            Of the form 'YYYY-MM-DD'
-        end_date: str
-            Of the form 'YYYY-MM-DD'
-
+        start_date:
+            This is the start date of the timeseries. 
+            Returns sampled data from start date at 00:00:00 (included). 
+            Accepts any date object that can be casted to np.datetime64, 
+            for example a string in the format 'YYYY-MM-DD'
+        
+        end_date:
+            This is the end date of the timeseries. 
+            Returns sampled data before the end date at 00:00:00 (excluded). 
+            Accepts any date object that can be casted to np.datetime64, 
+            for example a string in the format 'YYYY-MM-DD'
+            
         Returns
         -------
         IcosFrame (see above)
         """
+
+        # 0. Fix dates.
+        if start_date:
+            if not isinstance(start_date, np.datetime64):
+                start_date = np.datetime64(start_date)
+
+        if end_date:
+            if not isinstance(end_date, np.datetime64):
+                end_date = np.datetime64(end_date)
 
         # 1. Before we merge the data we need to take care of the name and the
         #    order of the variables
@@ -327,8 +337,9 @@ class StationData():
                 order_dict[p]['product'] = p_meta['product']
                 order_dict[p]['stn_id'] = p_meta['stationId']
         else:
-            p_meta = IcosFrame.trim_icos_meta(order_dict[p]['dobj'].meta)
-            order_dict[p]['meta'] = p_meta
+            for p in order_dict.keys():
+                p_meta = IcosFrame.trim_icos_meta(order_dict[p]['dobj'].meta)
+                order_dict[p]['meta'] = p_meta
 
         if len(products) > 1:
             for p in order_dict.keys():
@@ -354,8 +365,14 @@ class StationData():
             do = order_dict[p]['dobj']
             col_ls = order_dict[p]['cols'] + ['TIMESTAMP']
             df = do.data[col_ls]
+            if start_date:
+                df = df.loc[df['TIMESTAMP'] >= start_date]
+            if end_date:
+                df = df.loc[df['TIMESTAMP'] < end_date]
+
             if 'rename_cols' in order_dict[p].keys():
-                df.rename(columns=order_dict[p]['rename_cols'], inplace=True)
+                rename_dict = order_dict[p]['rename_cols']
+                df = df.rename(rename_dict, axis="columns")
                 total_col_order.update({i: order_dict[p]['rename_cols'].get(v)
                                         for i, v in
                                         order_dict[p]['compose_order'].items()})
@@ -370,11 +387,6 @@ class StationData():
         # We use timestamp as index and restrict the set with respect to dates
         df_m.set_index(keys='TIMESTAMP', inplace=True)
 
-        if start_date:
-            df_m = df_m[start_date:]
-        if end_date:
-            df_m = df_m[:end_date]
-
         col_order = [total_col_order[i] for i in range(len(total_col_order))]
         df_m = df_m[col_order]
 
@@ -384,7 +396,8 @@ class StationData():
         if len(order_dict.keys()) == 1:
             meta_ls = meta_ls.pop(0)
 
-        df = IcosFrame(data=df_m, icos_meta=meta_ls,
+        df = IcosFrame(data=df_m,
+                       icos_meta=meta_ls,
                        icos_columns=original_columns)
 
         return df
