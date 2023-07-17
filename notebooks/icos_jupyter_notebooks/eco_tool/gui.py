@@ -650,13 +650,14 @@ class AnalysisGui:
         stations. There are two main blocks:
         <br>
         <br>
-        <div><img src="./pi/images/Tools.png" alt="Group menu" style="width: 
+        <div><img src="./eco_tool/images/Tools.png" alt="Group menu" style="width: 
         120px;"/>  In the tools view you can setup different methods to 
         investigate variables of a group.            
         </div>
         <br>
         <br>
-        <div><img src="./pi/images/GroupMenu.png" alt="Group menu" style="width: 
+        <div><img src="./eco_tool/images/GroupMenu.png" alt="Group menu" 
+        style="width: 
         120px;"/>  In the group view you can create groups of variables.
            
          </div>
@@ -1540,7 +1541,7 @@ class AnalysisGui:
                 if self.debug:
                     iii += 1
                     print(f'\n\t -- iii ={iii} --')
-                    print(111144444, 'batch_name_changed()\t', batch_drop.value)
+                    print('batch_name_changed()\t', batch_drop.value)
                 update_batch_dict(upd_dict)
 
         def get_var_translation_dict() -> dict:

@@ -59,13 +59,12 @@ class Plot:
                     Plotly settings for split_plot
         """
         debug = kwargs.pop('debug', False)
-        print(1111, debug)
+
         if isinstance(debug, bool):
             self.debug = debug
         else:
             self.debug = False
 
-        print(222, self.debug)
         use_latex = kwargs.pop('use_latex', True)
         if self.debug:
             print(f'plot2, use_latex = {use_latex}')
@@ -289,7 +288,7 @@ class Plot:
         else:
             lat = False
         if self.debug:
-            print('xxxxxxxxxxxxxxxxxxxx in multi-plot')
+            print('in multi-plot')
             print(use_latex)
             print(lat)
 
