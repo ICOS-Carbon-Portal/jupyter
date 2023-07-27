@@ -192,7 +192,7 @@
       },
 	  {
         "pid": "",
-        "description": "This Jupyter notebook presents an examples on how to read the European Obspack compilation. (<a href='https://www.icos-cp.eu/data-products' target='_blank'>ICOS Data Products</a>). Search for 'Historic Observational Time Series for ICOS and Non-ICOS Stations'. You could for example combine this, with our example for curve fitting, based on the ccgcrv method used by NOAA. Have a look at 'ICOS Jupyter Notebooks / Curve fitting methods for CO2 time series'",
+        "description": "This Jupyter notebook presents an examples on how to read the European Obspack compilation. Check out <a href='https://www.icos-cp.eu/data-products' target='_blank' style='text-decoration:underline;color:blue'>ICOS Data Products</a>, search for 'Historic Observational Time Series for ICOS and Non-ICOS Stations'. You could for example combine this, with our example for curve fitting, based on the ccgcrv method used by NOAA. Have a look at 'ICOS Jupyter Notebooks / Curve fitting methods for CO2 time series'",
         "thumbnail": "./icos_jupyter_notebooks/index-tools/img/02_pylib_ex/ex7.png",
         "relative_path": "./pylib_examples/ex7_ObsPackData.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/pylib_examples",
