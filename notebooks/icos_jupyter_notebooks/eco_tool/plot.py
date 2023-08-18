@@ -42,9 +42,6 @@ class Plot:
         """
         Keys of settings:
         -----------------
-        - use_latex: bool
-                    Default is True. This affect axis-labels, when used
-                    variables and units will be formatted using LaTeX.
         - debug: bool
                     If true, messages will be printed.
         - latex_kwargs: dict
@@ -65,17 +62,10 @@ class Plot:
         else:
             self.debug = False
 
-        use_latex = kwargs.pop('use_latex', True)
+        latex_settings = kwargs.pop('latex_kwargs', {})
+        self.latex = icos2latex.Translator(**latex_settings)
         if self.debug:
-            print(f'plot2, use_latex = {use_latex}')
-
-        if use_latex:
-            latex_settings = kwargs.pop('latex_kwargs', {})
-            self.latex = icos2latex.Translator(**latex_settings)
-            if self.debug:
-                print(f'plot2, latex_settings = {latex_settings}')
-        else:
-            self.latex = None
+            print(f'plot, latex_settings = {latex_settings}')
 
         if self.debug:
             print(f'plot2, self.latex = {self.latex}')

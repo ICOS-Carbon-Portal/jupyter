@@ -24,7 +24,7 @@ __email__ = ['info@icos-cp.eu', 'anders.dahlner@nateko.lu.se']
 import warnings
 
 from ipywidgets import widgets as wd
-from IPython.display import display, clear_output
+from IPython.display import display, Math, clear_output
 from icoscp.cpb.dobj import Dobj
 import datetime as dt
 
@@ -435,6 +435,10 @@ class AnalysisGui:
                             pass
 
         def run(c):
+            def link(url, url_txt) -> str:
+                return f'<a href="{url}" target="_blank">' \
+                       f'<font color="DarkBlue">{url_txt}</font></a>'
+
             with out:
                 clear_output()
             df = get_data()
@@ -453,8 +457,7 @@ class AnalysisGui:
             rep_title2 = 'Data from '
             rep_title3 = ''
             if all((isinstance(x, str) for x in [stations, products, urls])):
-                rep_title2 += f'<a href="{urls}" target = "_blank">\
-                <font color="DarkBlue">{products}</font></a> of {stations}.'
+                rep_title2 += f'{link(urls,products)} of {stations}.'
             elif all(
                     (isinstance(x, list) for x in [stations, products, urls])) and \
                     len(stations) == len(products) and len(products) == len(urls):
@@ -474,8 +477,7 @@ class AnalysisGui:
                 for s, v in d.items():
                     rep_title2 += last_char
                     for tup in v:
-                        rep_title2 += f'<a href="{tup[1]}" target = "_blank">\
-                        <font color="DarkBlue">{tup[0]}</font></a>, '
+                        rep_title2 += f'{link(tup[1],tup[0])}, '
                     rep_title2 += f' of {s}'
                     last_char = ';<br>'
                 rep_title2 += '.'
@@ -494,11 +496,11 @@ class AnalysisGui:
                 rep_title2 = f'<h2>{rep_title2}</h2><br>'
 
                 if isinstance(urls, str):
-                    rep_title3 += f'Link to data:  <a href="{urls}">{urls}</a>.'
+                    rep_title3 += f'Link to data:  {link(urls,urls)}.'
                 else:
                     rep_title3 += 'Links to data:  '
                     for u in urls:
-                        rep_title3 += f'<a href = "{u}" target = "_blank"> {u} </a>.'
+                        rep_title3 += f'{link(u,u)}.'
 
             rep_title2 = f'<h3>{rep_title2}</h3>'
             report_title = rep_title1 + rep_title2 + rep_title3
@@ -638,40 +640,108 @@ class AnalysisGui:
 
     def _help(self):
         # static help text
+        def link(url, url_txt) -> str:
+            return f'<a href="{url}" target="_blank">' \
+                   f'<font color="DarkBlue">{url_txt}</font></a>'
+
+        with open('./eco_tool/images/StartMenu.png', 'rb') as f:
+            start_img = wd.Image(value=f.read())
+            start_img.layout.height = '28px'
+
         with open('./eco_tool/images/GroupMenu.png', 'rb') as f:
-            group_menu = f.read()
-        group_img = wd.Image(value=group_menu)
-        group_img.layout.height = '28px'
+            group_img = wd.Image(value=f.read())
+            group_img.layout.height = '28px'
 
-        user_guide = wd.HTMLMath(disabled=True,
-                                 layout=wd.Layout(width='auto', height='auto'))
-        user_guide.value = f'''This application is aimed to help 
-        principal investigators (PI) to analyse near real time variables of ICOS 
-        stations. There are two main blocks:
-        <br>
-        <br>
-        <div><img src="./eco_tool/images/Tools.png" alt="Group menu" style="width: 
-        120px;"/>  In the tools view you can setup different methods to 
-        investigate variables of a group.            
-        </div>
-        <br>
-        <br>
-        <div><img src="./eco_tool/images/GroupMenu.png" alt="Group menu" 
-        style="width: 
-        120px;"/>  In the group view you can create groups of variables.
-           
-         </div>
-        
-        <br> 
-        In the Tools menu    
-        The starting point for a new user is...
-                        Use the Group menu to create groups of variables.
-        <br>
-        <br>
-        For questions or feedback, please contact $\\tt info@icos-cp.eu$ or 
-        $\\tt anders.dahlner@nateko.lu.se$'''
+        with open('./eco_tool/images/ConfigMenu.png', 'rb') as f:
+            config_img = wd.Image(value=f.read())
+            config_img.layout.height = '28px'
 
-        display(user_guide)
+        wide_layout = wd.Layout(width='auto', height='auto', max_width='80%')
+        column_layout = wd.Layout(width='auto', height='auto', max_width='60%')
+        p_class_txt = wd.HTML()
+        p_class_txt.value = '<style> ' \
+                            '    p.line_height {line-height: 1.3; } ' \
+                            '</style>'
+        p_class = '<p class="line_height">'
+        main_txt1 = wd.HTML(disabled=True,
+                            layout=wide_layout)
+        main_txt2 = wd.HTML(disabled=True,
+                            layout=wide_layout)
+        start_txt = wd.HTML(disabled=True,
+                            layout=column_layout)
+        group_txt1 = wd.HTML(disabled=True,
+                             layout=column_layout)
+        group_txt2 = wd.HTML(disabled=True,
+                             layout=column_layout)
+        definition_txt = wd.HTML(disabled=True,
+                                 layout=wd.Layout(width='auto', height='auto',
+                                                  max_width='50%'))
+        config_txt = wd.HTML(disabled=True,
+                             layout=column_layout)
+        margin_str = '&nbsp' * 6
+        margin = wd.HTML(value=margin_str)
+        link_cp = link("https://data.icos-cp.eu/portal/", "ICOS Carbon Portal")
+        mail_cp = link("mailto:info@icos-cp.eu", "info@icos-cp.eu")
+        mail_ad = link("mailto:anders.dahlner@nateko.lu.se",
+                       "anders.dahlner@nateko.lu.se")
+
+        widgets = wd.VBox([p_class_txt,
+                           main_txt1,
+                           wd.HBox([start_img, start_txt]),
+                           wd.HBox([group_img, wd.VBox([group_txt1,
+                                                        wd.HBox([margin,
+                                                                 definition_txt]),
+                                                        group_txt2])
+                                    ]),
+                           wd.HBox([config_img, config_txt]),
+                           main_txt2])
+
+        main_txt1.value = f'{p_class}<br>' \
+                          'This application is aimed to ' \
+                          'assist ' \
+                          'principal investigators of ICOS Ecosystem stations ' \
+                          'to quality check and analyse NRT data. ' \
+                          'from stations.<br><br>' \
+                          'The menus:</p>'
+        start_txt.value = f'{p_class}The <i>Start</i>-menu is the ' \
+                          f'standard view of the application, basically ' \
+                          f'it is a report writer. Here the user can run ' \
+                          f'reports to produce plots and statistics on ICOS ' \
+                          f'data.<br></p>'
+        group_txt1.value = f'{p_class}In the <i>Group</i>-menu the user can ' \
+                           'create <i>groups of variables</i>.<br> '
+        definition_txt.value = f'{p_class}<i><b>Definition: </b>' \
+                               'A group of variables is a list of variables ' \
+                               'where each variable is an ingested ' \
+                               'variable<sup>1</sup> from one of the files ' \
+                               '<b>ETC NRT Fluxes</b>, <b>ETC NRT Meteo</b>,' \
+                               '<b>ETC NRT Meteosens</b>, of some ICOS ' \
+                               'station.</i><br>'
+        group_txt2.value = f'{p_class}In particular a group of variables may ' \
+                           'contain variables from different station and ' \
+                           'files.<br>' \
+                           f'<u>{margin_str}{margin_str}{margin_str}</u><br>' \
+                           '<sup>1</sup> <i>That a variable is ingested means ' \
+                           'that it is previewable at the ' \
+                           f'{link_cp}.'
+
+        config_txt.value = f'{p_class}In the <i>Configurations</i>-menu the ' \
+                           'user can:<br> ' \
+                           f'{margin_str} - change the <i>Default settings</i> ' \
+                           'on what data to fetch and manipulate ' \
+                           'layouts of plots.<br>' \
+                           f'{margin_str} - use the <i>Batch jobs</i> to set ' \
+                           'up sequences of outputs, i.e. plots of statistics, ' \
+                           'to produce. Here variables for the outputs are ' \
+                           'selected from a group of variables.'
+
+        main_txt2.value = f'<br>{p_class}For comments, questions, bug reports ' \
+                          f'or ' \
+                          'any other kind of feedback, ' \
+                          f'please feel free to contact: {mail_cp} or ' \
+                          f'{mail_ad}.</p>'
+
+        display(widgets)
 
     def _tool_settings(self):
         pass
@@ -725,7 +795,7 @@ class AnalysisGui:
                                 f'there_are_groups = {there_are_groups}']
                     debug_value(debug_ls)
                 html_msg(text_ls=['First you need to create a group of ',
-                                  'variables using the group menu'])
+                                  'variables using the "Group menu".'])
             if self.debug:
                 debug_ls = [0, 'init()', '--- end ---']
                 debug_value(debug_ls)
@@ -873,9 +943,11 @@ class AnalysisGui:
                     batch_drop.value = list(batch_dict.values())[0]
             else:
                 batch_drop.options = [('Press new...', 0)]
+                display_user_guide('display_guide')
+
                 batch_drop.value = 0
                 html_msg(text=f'Press "New", in order to create a batch job for '
-                              f'the group <it>{group}.</it>.')
+                              f'the group <i>{group}</i>.')
             if self.debug:
                 debug_ls = [9, 'init_batch_drop()', 'step 3',
                             f'batch_drop.label = {batch_drop.label}',
@@ -897,11 +969,13 @@ class AnalysisGui:
 
             if batch != 0:
                 batch_version = batch.pop('_version', '0')
-                set_batch_upd_dict(dict(_tools=batch,
+                set_batch_upd_dict(dict(_upd_mode='read_mode_with_batch',
+                                        _tools=batch,
                                         _selected_tool_index=None,
                                         _version=batch_version))
             else:
-                set_batch_upd_dict(dict(_tools={}))
+                set_batch_upd_dict(dict(_upd_mode='read_mode_no_batch',
+                                        _tools={}))
 
             if self.debug:
                 debug_ls = [11, 'changed_batch_drop()', '- step 2 - ',
@@ -1125,10 +1199,9 @@ class AnalysisGui:
         def move_selected(c):
             index = selected_tools.value
             if self.debug:
-                debug_ls = [112, f'move_selected()',
-                            f'tool index = {index}',
-                            f'c.old = {c.old}',
-                            f'c.new = {c.new}']
+                print(c)
+                debug_ls = [113, f'move_selected()',
+                            f'tool index = {index}']
                 debug_value(debug_ls)
 
             if index is None:
@@ -1152,7 +1225,7 @@ class AnalysisGui:
 
         def tool_click(tool):
             if self.debug:
-                debug_ls = [112, f'tool_click()',
+                debug_ls = [114, f'tool_click()',
                             f'tool.description = {tool.description}',
                             f'tool.icon = {tool.icon}']
                 debug_value(debug_ls)
@@ -1177,7 +1250,7 @@ class AnalysisGui:
             # remove empty rows
             tools = cleanup_tools(selection_dict.get('_tools', {}))
             if self.debug:
-                debug_ls = [112, f'tool_selections()',
+                debug_ls = [115, f'tool_selections()',
                             f'add_tool = {add_tool}',
                             f'tool_name = {tool_name}',
                             f'selection_dict = {selection_dict}',
@@ -1205,7 +1278,7 @@ class AnalysisGui:
             upd_dict = get_batch_upd_dict()['_tools']
             row_index = selected_tools.value
             if self.debug:
-                debug_ls = [112, f'var_button_click()',
+                debug_ls = [116, f'var_button_click()',
                             f'btn.description = {btn.description}',
                             f'row_index = {row_index}',
                             f'before:'
@@ -1242,7 +1315,7 @@ class AnalysisGui:
                         selected_var_codes.remove(axis_of_var)
                 upd_dict[row_index] = {tool_code: selected_var_codes}
                 if self.debug:
-                    debug_ls = [112, f'var_button_click()',
+                    debug_ls = [116, f'var_button_click()',
                                 f'after:',
                                 f' - upd_dict[row_index] = {upd_dict[row_index]}']
                     debug_value(debug_ls)
@@ -1250,18 +1323,18 @@ class AnalysisGui:
                 update_batch_dict(dict(_tools=upd_dict,
                                        _selected_tool_index=row_index))
 
-        def selections2batch_dict() -> dict:
-            if self.debug:
-                debug_ls = [112, f'selections2batch_dict()']
-                debug_value(debug_ls)
-
-            d = dict()
-            t_ls = selected_tools.options
-            v_ls = [v[1][1] for v in selected_vars.options]
-            ind = range(len(t_ls))
-            d['_tools'] = {k: {name2tool_dict[t_ls[k][0]]: v_ls[k]} for k in ind}
-            d['_selected_tool_index'] = selected_tools.index
-            return d
+        # def selections2batch_dict() -> dict:
+        #     if self.debug:
+        #         debug_ls = [117, f'selections2batch_dict()']
+        #         debug_value(debug_ls)
+        #
+        #     d = dict()
+        #     t_ls = selected_tools.options
+        #     v_ls = [v[1][1] for v in selected_vars.options]
+        #     ind = range(len(t_ls))
+        #     d['_tools'] = {k: {name2tool_dict[t_ls[k][0]]: v_ls[k]} for k in ind}
+        #     d['_selected_tool_index'] = selected_tools.index
+        #     return d
 
         def var2unit(var):
             if self.debug:
@@ -1412,7 +1485,7 @@ class AnalysisGui:
                      title: str = None,
                      error: bool = None):
             if self.debug:
-                debug_ls = [112, f'html_msg()']
+                debug_ls = [118, f'html_msg()']
                 debug_value(debug_ls)
 
             margin = '&nbsp' * 6  # html space
@@ -1443,17 +1516,108 @@ class AnalysisGui:
                 msg += '</h3></span>'
             with out:
                 clear_output()
+                user_guide.value = msg
                 display(wd.HTML(msg))
 
         def html_error_msg(error_ls: list = None):
             if self.debug:
-                debug_ls = [112, f'html_error_msg()']
+                debug_ls = [119, f'html_error_msg()']
                 debug_value(debug_ls)
             html_msg(text_ls=error_ls, error=True)
 
+        def set_info_msg(error_ls=None):
+            upd_dict = get_batch_upd_dict()
+            upd_mode = upd_dict['_upd_mode']
+            grp = group_drop.value
+
+            if upd_mode == 'new':
+                index = upd_dict['_selected_tool_index']
+                index = str(index)
+                if index in upd_dict['_tools'].keys():
+                    tool = list(upd_dict['_tools'][index].keys())[0]
+                else:
+                    tool = None
+
+                if tool == 'multi_plot':
+                    info_ls = ['Please note that <i>Multi-plot</i> will '
+                               'use at most <i>two $y$-axes</i> , and by '
+                               'default the variables are divided according '
+                               'to their unit.']
+                elif tool == 'corr_plot':
+                    info_ls = ['Please note that <i>Correlation-plot</i> '
+                               'is a plot for <i>exactly two '
+                               'variables</i>.',
+                               'The first variable belongs to the '
+                               'horizontal axis (the $x$-axis), while the '
+                               'second variable '
+                               'belongs to the vertical axis (the $y$-axis).']
+                else:
+                    info_ls = [f'To create a batch job for the group {grp}:',
+                               '1. Select <i>tools</i> (one at a time) from '
+                               'the list in <i>Available tools</i> below. '
+                               'These will be displayed in the 1:st list to the '
+                               'right of the label <i>Current setup</i>.',
+                               '2. Select/deselect preferred variables for the '
+                               'chosen tool. These will be displayed in the 2:st '
+                               'list to the right of the label <i>Current'
+                               ' setup</i>.',
+                               '3. Choose a name for the batch job in '
+                               'the area <span style="color:black">"Name of '
+                               'batch job"</span>.',
+                               '4. Press save.',
+                               '',
+                               '<b> - A batch job may contain several '
+                               '<i>tools</i>.</b>',
+                               '<b> - The list of the tools also represents the '
+                               'order of execution of the batch job, and the '
+                               'order of the variables will be the order of '
+                               'presentation in plots, etc.</b>',
+                               '<b> - To rearrange the order of execution '
+                               'select a tool to the right of the '
+                               '<i>"Up"</i>-button and click "Up".</b>']
+            elif upd_mode == 'update':
+                info_ls = ['In update mode you can:',
+                           '1. Add or remove variables of a group.',
+                           '2. Change the group name.',
+                           '3. Delete the group.',
+                           '',
+                           '<b>The order of the variables is the order of '
+                           'presentation in plots, etc.</b>',
+                           '<b>Changes are logged in the file '
+                           '"/appdata/cache_bak.json".</b>']
+            else:
+                info_ls = []
+
+            margin = '&nbsp' * 3
+
+            if info_ls:
+                info_color = self.ipyw_style_colors['primary:active']
+                msg = f'<span style="color:{info_color}">{margin}{margin}<h4>' \
+                      f'{info_ls[0]}</h4><b>'
+
+                for row in info_ls[1:]:
+                    msg += f'{margin}{row}<br>'
+                msg += '</b></span>'
+            else:
+                msg = ''
+
+            if error_ls:
+                warning_emoji = '\u26a0\ufe0f'
+                error_color = self.ipyw_style_colors['danger:active']
+                msg += f'<br><span style="color:{error_color}">{margin}{margin}'
+                msg += f'<h3>To do: {warning_emoji}</h3><b>'
+                for error in error_ls:
+                    msg += f'{margin}{error}<br>'
+                msg += '</b></span>'
+
+            if error_ls and user_guide_container.layout.display == 'none':
+                display_user_guide('display_guide')
+
+            user_guide.value = msg
+
         def cleanup_tools(d: dict):
             if self.debug:
-                debug_ls = [112, f'cleanup_tools()',
+                debug_ls = [120, f'cleanup_tools()',
                             f'd (before) = {d}']
                 debug_value(debug_ls)
                 global iii
@@ -1471,8 +1635,9 @@ class AnalysisGui:
                             d.pop(tool_number)
                 # reset the tool number
                 d = dict(zip(range(len(d.keys())), d.values()))
+
             if self.debug:
-                debug_ls = [112, f'cleanup_tools()',
+                debug_ls = [120, f'cleanup_tools()',
                             f'd (after) = {d}']
                 debug_value(debug_ls)
             return d
@@ -1492,8 +1657,8 @@ class AnalysisGui:
                     upd_dict = get_batch_upd_dict()
                     if name != upd_dict['_orig_name']:
                         error_ls.append(
-                            f'There is already a batch job called <it'
-                            f'>{name}</i>,')
+                            f'There is already a batch job called '
+                            f'<i>{name}</i>,')
                         error_ls.append('please pick another name.')
 
             if error_ls:
@@ -1503,7 +1668,7 @@ class AnalysisGui:
                 name_of_batch_job.layout = _get_layout(name)
 
             if self.debug:
-                debug_ls = [112, f'validate_name()',
+                debug_ls = [121, f'validate_name()',
                             f'name = {name}',
                             f'error_ls = {error_ls}']
                 debug_value(debug_ls)
@@ -1513,7 +1678,7 @@ class AnalysisGui:
         def batch_name_changed(change):
 
             if self.debug:
-                debug_ls = [112, f'validate_name()',
+                debug_ls = [122, f'validate_name()',
                             f'change = {change}']
                 debug_value(debug_ls)
                 global iii
@@ -1552,9 +1717,7 @@ class AnalysisGui:
             return eval(var_translation_dict.value)
 
         def get_batch_upd_dict() -> dict:
-            if self.debug:
-                debug_ls = [14, f'get_batch_upd_dict()']
-                debug_value(debug_ls)
+
             d = eval(upd_dict_log.value)
 
             if isinstance(d, dict):
@@ -1562,6 +1725,11 @@ class AnalysisGui:
                     d['_tools'] = {int(k): v for k, v in d['_tools'].items()}
             else:
                 d = dict()
+
+            if self.debug:
+                debug_ls = [14, 'get_batch_upd_dict()', f'd ={d}']
+                debug_value(debug_ls)
+
             return d
 
         def set_batch_upd_dict(d: dict):
@@ -1572,15 +1740,19 @@ class AnalysisGui:
             json_safe_dict = {k: v for k, v in d.items() if k != '_tools'}
             json_safe_dict['_tools'] = {str(k): v for k, v in d['_tools'].items()}
 
+            if '_upd_mode' in d.keys():
+                if d['_upd_mode'] == 'read_mode_no_batch':
+                    user_guide.value = ''
+
             upd_dict_log.value = str(json_safe_dict)
             if self.debug:
                 debug_ls = [12, 'set_batch_upd_dict()', 'step 2',
                             f'upd_dict_log.value ={upd_dict_log.value}']
                 debug_value(debug_ls)
 
-        def update_batch_dict(d: dict = None):
+        def update_batch_dict(d: dict):
             if self.debug:
-                debug_ls = [112, f'update_batch_dict()',
+                debug_ls = [123, f'update_batch_dict()',
                             f'd = {d}']
                 debug_value(debug_ls)
             upd_dict = get_batch_upd_dict()
@@ -1588,51 +1760,56 @@ class AnalysisGui:
                 upd_dict[k] = v
             set_batch_upd_dict(upd_dict)
 
-        def set_batch_upd_selections(d: dict = None):
-
-            if self.debug:
-                global iii
-                iii += 1
-                print(f'\n\t -- iii ={iii} --')
-                print('set_batch_upd_selections()')
-                print(f'\tinput_param d = {d}')
-
-            if d is None:
-                d = selections2batch_dict()
-                if self.debug:
-                    iii += 1
-                    print(f'\n\t -- iii ={iii} --')
-                    print(f'\tafter selections2batch_dict d = {d}')
-
-            upd_dict = get_batch_upd_dict()
-            if self.debug:
-                iii += 1
-                print(f'\n\t -- iii ={iii} --')
-                print(f'\tupd_dict = {upd_dict}')
-
-            upd_dict['_tools'] = {str(k): v for k, v in d['_tools'].items()}
-            upd_dict['_selected_tool_index'] = d.get('_selected_tool_index', -1)
-            if self.debug:
-                iii += 1
-                print(f'\n\t -- iii ={iii} --')
-                print(f'\tupd_dict = {upd_dict}')
-            set_batch_upd_dict(upd_dict)
+        # def set_batch_upd_selections(d: dict = None):
+        #
+        #     if self.debug:
+        #         global iii
+        #         iii += 1
+        #         print(f'\n\t -- iii ={iii} --')
+        #         print('set_batch_upd_selections()')
+        #         print(f'\tinput_param d = {d}')
+        #
+        #     if d is None:
+        #         d = selections2batch_dict()
+        #         if self.debug:
+        #             iii += 1
+        #             print(f'\n\t -- iii ={iii} --')
+        #             print(f'\tafter selections2batch_dict d = {d}')
+        #
+        #     upd_dict = get_batch_upd_dict()
+        #     if self.debug:
+        #         iii += 1
+        #         print(f'\n\t -- iii ={iii} --')
+        #         print(f'\tupd_dict = {upd_dict}')
+        #
+        #     upd_dict['_tools'] = {str(k): v for k, v in d['_tools'].items()}
+        #     upd_dict['_selected_tool_index'] = d.get('_selected_tool_index', -1)
+        #     if self.debug:
+        #         iii += 1
+        #         print(f'\n\t -- iii ={iii} --')
+        #         print(f'\tupd_dict = {upd_dict}')
+        #     set_batch_upd_dict(upd_dict)
 
         def new_batch(c):
+
+            upd_dict = {'_upd_mode': 'new',
+                        '_version': 0,
+                        '_orig_name': '',
+                        '_new_name': '',
+                        '_tools': {},
+                        '_selected_tool_index': None}
+
             if self.debug:
-                debug_ls = [112, f'new_batch()']
+                debug_ls = [124, 'new_batch()', f'upd_dict = {upd_dict}']
                 debug_value(debug_ls)
-            set_batch_upd_dict({'_version': 0,
-                                '_orig_name': '',
-                                '_new_name': '',
-                                '_tools': {},
-                                '_selected_tool_index': None})
+
+            set_batch_upd_dict(upd_dict)
             name_of_batch_job.value = "Name of batch job"
             activate_gui('new')
 
         def update_batch(c):
             if self.debug:
-                debug_ls = [112, f'update_batch()',
+                debug_ls = [125, f'update_batch()',
                             f'batch_drop.label = {batch_drop.label}',
                             f'batch_drop.value = {batch_drop.value}']
                 debug_value(debug_ls)
@@ -1643,13 +1820,15 @@ class AnalysisGui:
                 print(f'\n\t -- iii ={iii} --')
                 print('update_batch() ', batch_drop.label, batch_drop.value,
                       type(batch_drop.value))
-            batch_upd = dict()
+
             stored_batch = batch_drop.value.copy()
-            batch_upd['_version'] = int(stored_batch.pop('_version', 1))
-            batch_upd['_tools'] = stored_batch
-            batch_upd['_orig_name'] = batch_drop.label
-            batch_upd['_new_name'] = batch_drop.label
-            batch_upd['_selected_tool_index'] = None
+            batch_version = int(stored_batch.pop('_version', 1))
+            batch_upd = dict(_upd_mode='update',
+                             _version=batch_version,
+                             _tools=stored_batch,
+                             _orig_name=batch_drop.label,
+                             _new_name= batch_drop.label,
+                             _selected_tool_index=None)
             name_of_batch_job.value = batch_drop.label
             set_batch_upd_dict(batch_upd)
             activate_gui('update')
@@ -1665,7 +1844,7 @@ class AnalysisGui:
             batches = cache['_groups'][grp].get('_batches', {})
 
             if self.debug:
-                debug_ls = [20, 'save_batch()', f'upd_dict = {upd_dict}']
+                debug_ls = [125, 'save_batch()', f'upd_dict = {upd_dict}']
                 debug_value(debug_ls)
                 global iii
                 iii += 1
@@ -1700,14 +1879,14 @@ class AnalysisGui:
 
         def cancel_batch(c):
             if self.debug:
-                debug_ls = [112, 'cancel_batch()']
+                debug_ls = [126, 'cancel_batch()']
                 debug_value(debug_ls)
 
             activate_gui('cancel')
 
         def delete_batch(c):
             if self.debug:
-                debug_ls = [112, 'delete_batch()']
+                debug_ls = [127, 'delete_batch()']
                 debug_value(debug_ls)
 
             upd_dict = eval(upd_dict_log.value)
@@ -1761,18 +1940,27 @@ class AnalysisGui:
                 init(grp)
                 activate_gui('delete')
 
-            # activate/deactivate upd-widgets
+        def display_user_guide(c):
 
+            if c == 'display_guide':
+                user_guide_container.selected_index = 0
+                user_guide_container.layout.display = 'block'
+            elif user_guide_container.layout.display == 'none':
+                user_guide_container.layout.display = 'block'
+            else:
+                user_guide_container.layout.display = 'none'
+
+        # activate/deactivate upd-widgets
         def activate_gui(upd_active: str):
             if self.debug:
                 debug_ls = [10, 'activate_gui()',
                             f'upd_active = {upd_active}']
                 debug_value(debug_ls)
 
-            def set_state(wd_input,
-                          disable: bool = None,
-                          tooltip: str = None,
-                          show_widget: bool = None):
+            def set_widget_state(wd_input,
+                                 disable: bool = None,
+                                 tooltip: str = None,
+                                 show_widget: bool = None):
 
                 if isinstance(wd_input, wd.Widget):
                     if show_widget is not None and 'layout' in wd_input.keys:
@@ -1786,7 +1974,7 @@ class AnalysisGui:
                     if {disable, tooltip, show_widget} != {None}:
                         if 'children' in wd_input.keys:
                             for w in wd_input.children:
-                                set_state(w, disable, tooltip, show_widget)
+                                set_widget_state(w, disable, tooltip, show_widget)
                         else:
                             if disable is not None and 'disabled' in wd_input.keys:
                                 wd_input.disabled = disable
@@ -1794,7 +1982,7 @@ class AnalysisGui:
                                 wd_input.tooltip = tooltip
                 elif isinstance(wd_input, list):
                     for w in wd_input:
-                        set_state(w, disable, tooltip, show_widget)
+                        set_widget_state(w, disable, tooltip, show_widget)
 
             with out:
                 clear_output()
@@ -1820,6 +2008,7 @@ class AnalysisGui:
                 save_btn.on_click(save_batch, remove=False)
                 delete_btn.on_click(delete_batch, remove=False)
                 cancel_btn.on_click(cancel_batch, remove=False)
+                user_guide_btn.on_click(display_user_guide, remove=False)
 
                 name_of_batch_job.observe(batch_name_changed, 'value')
                 try:
@@ -1831,17 +2020,16 @@ class AnalysisGui:
                 except ValueError:
                     pass
 
-                set_state(update_enable_list, disable=False)
-                set_state(update_disable_list, disable=True)
-                set_state(update_display_list, show_widget=True)
+                set_widget_state(update_enable_list, disable=False)
+                set_widget_state(update_disable_list, disable=True)
+                set_widget_state(update_display_list, show_widget=True)
 
-                # help_btn.on_click(display_user_guide, remove=False)
-                set_state(create_buttons, disable=True,
+                set_widget_state(create_buttons, disable=True,
                           tooltip='Disabled in update mode...')
-                set_state(save_btn, disable=False, tooltip='Save settings...')
-                set_state(cancel_btn, disable=False, tooltip='Cancel...')
+                set_widget_state(save_btn, disable=False, tooltip='Save settings...')
+                set_widget_state(cancel_btn, disable=False, tooltip='Cancel...')
+                set_widget_state(user_guide_btn, disable=False, tooltip='User guide...')
 
-                # help_btn.disabled = False
                 if upd_active == 'update':
                     delete_btn.disabled = False
                     delete_btn.tooltip = 'Delete...'
@@ -1855,10 +2043,10 @@ class AnalysisGui:
                 # read mode
                 if batch_drop.value is None or isinstance(batch_drop.value, int):
                     upd_btn.on_click(update_batch, remove=True)
-                    set_state(upd_btn, disable=True)
+                    set_widget_state(upd_btn, disable=True)
                 else:
                     changed_batch_drop('init')
-                    set_state(upd_btn, disable=False)
+                    set_widget_state(upd_btn, disable=False)
                     upd_btn.on_click(update_batch, remove=False)
             else:
                 # read mode
@@ -1868,10 +2056,10 @@ class AnalysisGui:
 
                 if batch_drop.value is None or isinstance(batch_drop.value, int):
                     upd_btn.on_click(update_batch, remove=True)
-                    set_state(upd_btn, disable=True)
+                    set_widget_state(upd_btn, disable=True)
                 else:
                     changed_batch_drop('init')
-                    set_state(upd_btn, disable=False)
+                    set_widget_state(upd_btn, disable=False)
                     upd_btn.on_click(update_batch, remove=False)
 
                 # reset update interaction widgets
@@ -1880,6 +2068,7 @@ class AnalysisGui:
                 save_btn.on_click(save_batch, remove=True)
                 delete_btn.on_click(delete_batch, remove=True)
                 cancel_btn.on_click(cancel_batch, remove=True)
+                user_guide_btn.on_click(display_user_guide, remove=True)
                 group_drop.observe(changed_group_drop, names='value')
                 batch_drop.observe(changed_batch_drop, names='value')
 
@@ -1888,17 +2077,17 @@ class AnalysisGui:
                 except ValueError:
                     pass
 
-                set_state(update_enable_list, disable=True)
-                set_state(update_disable_list, disable=False)
-                set_state(update_display_list, show_widget=False)
+                set_widget_state(update_enable_list, disable=True)
+                set_widget_state(update_disable_list, disable=False)
+                set_widget_state(update_display_list, show_widget=False)
 
                 # upd_dict_log.value = '{}'
-                set_state(new_btn, disable=False)
+                set_widget_state(new_btn, disable=False)
 
                 new_btn.tooltip = 'New batch job...'
                 upd_btn.tooltip = 'Update batch job...'
                 #        help_btn.disabled = False
-                set_state(save_buttons, disable=True,
+                set_widget_state(save_buttons, disable=True,
                           tooltip='Enabled in update mode...')
 
         st_df = self.stations_df
@@ -1912,15 +2101,6 @@ class AnalysisGui:
         name2tool_dict = {v: k for k, v in tool2name_dict.items()}
 
         # Widgets
-        # Control widgets:
-        # - var_translation_dict
-        #   maps button names to a variable of the group
-        # - upd_dict_log
-        #   keeps track on updates of the batch job
-        var_translation_dict = wd.Textarea(disabled=True)
-        upd_dict_log = wd.Textarea(value='{}',
-                                   disabled=True)
-        upd_dict_log.observe(reset_selection, names='value')
 
         # layouts
         drop_layout = wd.Layout(width='auto',
@@ -1934,6 +2114,17 @@ class AnalysisGui:
                                 flex_flow='row wrap',
                                 align_content='flex-start')
         label_layout = wd.Layout(min_width='125px')
+
+        # Control widgets:
+        # - var_translation_dict
+        #   maps button names to a variable of the group
+        # - upd_dict_log (if debug-mode this is displayed in the user guide)
+        #   keeps track on updates of the batch job
+        var_translation_dict = wd.Textarea(disabled=True)
+        upd_dict_log = wd.Textarea(value='{}',
+                                   disabled=True,
+                                   layout=flex_layout)
+        upd_dict_log.observe(reset_selection, names='value')
 
         # 1:st row
         group_drop = wd.Dropdown(layout=drop_layout)
@@ -1964,24 +2155,49 @@ class AnalysisGui:
         delete_btn = wd.Button(description='Delete',
                                icon='trash',
                                button_style='danger')
+        user_guide_btn = wd.Button(description='User guide',
+                                   icon='fa-info-circle',
+                                   button_style='info')
+
         create_buttons = wd.HBox([new_btn, upd_btn])
-        save_buttons = wd.HBox([save_btn, cancel_btn, delete_btn])
+        save_buttons = wd.HBox([save_btn, cancel_btn,
+                                delete_btn, user_guide_btn])
         row_list.append(wd.HBox([create_buttons, save_buttons],
                                 layout=flex_layout))
 
-        # 3:rd row. update section: Batch name
+        # 3:rd row User guide
+        user_guide_container = wd.Accordion(selected_index=None,
+                                            layout=wd.Layout(width='auto',
+                                                             min_width='45%',
+                                                             height='auto',
+                                                             display='none'))
+        # Help text to user
+        user_guide = wd.HTMLMath(disabled=True,
+                                 layout=wd.Layout(width='90%',
+                                                  max_width='90%',
+                                                  height='auto'))
+        if self.debug:
+            user_guide_container.children = [wd.VBox([user_guide,
+                                                      upd_dict_log])]
+        else:
+            user_guide_container.children = [wd.VBox([user_guide])]
+        user_guide_container.set_title(0, 'User guide')
+
+        row_list.append(user_guide_container)
+
+        # 4:th row. update section: Batch name
         name_of_batch_job = wd.Text(value='Name of batch job',
                                     layout=_get_layout('Name of batch job'))
         row_list.append(name_of_batch_job)
 
-        # 4:rd row. update section: Tools
+        # 5:th row. update section: Tools
         tool_label = wd.HTML('<b><i>Available tools: </i></b>',
                              layout=label_layout)
         tool_buttons = wd.HBox()
         tool_row = wd.HBox([tool_label, tool_buttons])
         row_list.append(tool_row)
 
-        # 5:rd row. update section: Vars
+        # 6:th row. update section: Vars
         var_label = wd.HTML('<b><i>Available variables: </i></b>',
                             layout=label_layout)
         var_buttons = wd.HBox(layout=flex_layout)
@@ -2044,39 +2260,68 @@ class AnalysisGui:
 
             time_configs = settings.get('time_configs', {})
             latex_kwargs = settings.get('latex_kwargs', {})
-            split_plot_kwargs = settings.get('split_plot_kwargs', {})
-            multi_plot_kwargs = settings.get('multi_plot_kwargs', {})
-            corr_plot_kwargs = settings.get('corr_plot_kwargs', {})
-            corr_table_kwargs = settings.get('corr_table_kwargs', {})
+            split_p_kwargs = settings.get('split_plot_kwargs', {})
+            multi_p_kwargs = settings.get('multi_plot_kwargs', {})
+            corr_p_kwargs = settings.get('corr_plot_kwargs', {})
+            corr_t_kwargs = settings.get('corr_table_kwargs', {})
             statistics_kwargs = settings.get('statistics_kwargs', {})
+
+            time_end_date.value = time_configs.get('end_date', 0)
+            time_start_date.value = time_configs.get('start_date', 10)
+            time_fetch_date.value = time_configs.get('fetch_date', 6)
 
             latex_font.value = latex_kwargs.get('font_style', 'rm')
             latex_size.value = latex_kwargs.get('font_size', 8)
             latex_use_exp_cb.value = latex_kwargs.get('use_exp', False)
             latex_changed(0)
 
-            split_p_zoom_sliders.value = split_plot_kwargs.get('zoom_sliders', 2)
-            split_p_use_latex_cb.value = split_plot_kwargs.get('use_latex', True)
-            split_p_height.value = split_plot_kwargs.get('height', 0)
-            split_p_width.value = split_plot_kwargs.get('width', 0)
-            split_p_title_font.value = split_plot_kwargs.get('title_font',
-                                                             plotly_fonts[0])
-            split_p_title_size.value = split_plot_kwargs.get('title_size',
+            split_p_zoom_sliders.value = split_p_kwargs.get('zoom_sliders', 2)
+            split_p_use_latex_cb.value = split_p_kwargs.get('use_latex', True)
+            split_p_plotly_templates.value = split_p_kwargs.get('template',
+                                                                'plotly')
+            split_p_height.value = split_p_kwargs.get('height', 0)
+            split_p_width.value = split_p_kwargs.get('width', 0)
+            split_p_title_font.value = split_p_kwargs.get('title_font',
+                                                          plotly_fonts[0])
+            split_p_title_size.value = split_p_kwargs.get('title_size',
+                                                          'Default')
+            split_p_subtitle_size.value = split_p_kwargs.get('subtitle_size',
                                                              'Default')
-            split_p_subtitle_size.value = split_plot_kwargs.get('subtitle_size',
-                                                                'Default')
 
-            multi_p_use_latex_cb.value = multi_plot_kwargs.get('use_latex', True)
-            multi_p_height.value = multi_plot_kwargs.get('height', 0)
-            multi_p_width.value = multi_plot_kwargs.get('width', 0)
+            multi_p_use_latex_cb.value = multi_p_kwargs.get('use_latex', True)
+            multi_p_plotly_templates.value = multi_p_kwargs.get('template',
+                                                                'plotly')
+            multi_p_height.value = multi_p_kwargs.get('height', 0)
+            multi_p_width.value = multi_p_kwargs.get('width', 0)
+            multi_p_title_font.value = multi_p_kwargs.get('title_font',
+                                                          plotly_fonts[0])
+            multi_p_title_size.value = multi_p_kwargs.get('title_size',
+                                                          'Default')
+            multi_p_subtitle_size.value = multi_p_kwargs.get('subtitle_size',
+                                                             'Default')
 
-            corr_p_use_latex_cb.value = corr_plot_kwargs.get('use_latex', True)
-            corr_p_height.value = corr_plot_kwargs.get('height', 0)
-            corr_p_width.value = corr_plot_kwargs.get('width', 0)
+            corr_p_use_latex_cb.value = corr_p_kwargs.get('use_latex', True)
+            corr_p_plotly_templates.value = corr_p_kwargs.get('template',
+                                                              'plotly')
+            corr_p_height.value = corr_p_kwargs.get('height', 0)
+            corr_p_width.value = corr_p_kwargs.get('width', 0)
+            corr_p_title_font.value = corr_p_kwargs.get('title_font',
+                                                        plotly_fonts[0])
+            corr_p_title_size.value = corr_p_kwargs.get('title_size',
+                                                        'Default')
+            corr_p_subtitle_size.value = corr_p_kwargs.get('subtitle_size',
+                                                           'Default')
+            corr_p_color_scale_drop.value = corr_p_kwargs.get('color_scale',
+                                                              'blues')
 
-            time_end_date.value = time_configs.get('end_date', 0)
-            time_start_date.value = time_configs.get('start_date', 10)
-            time_fetch_date.value = time_configs.get('fetch_date', 6)
+            corr_t_title_font.value = corr_t_kwargs.get('title_font',
+                                                        plotly_fonts[0])
+            corr_t_title_size.value = corr_t_kwargs.get('title_size',
+                                                        'Default')
+            corr_t_subtitle_size.value = corr_t_kwargs.get('subtitle_size',
+                                                           'Default')
+            corr_t_color_scale_drop.value = corr_t_kwargs.get('color_scale',
+                                                              'blues')
 
             for w in observe_latex:
                 w.observe(latex_changed, names='value')
@@ -2096,9 +2341,14 @@ class AnalysisGui:
             latex = icos2latex.Translator(use_exp=latex_use_exp_cb.value,
                                           font_size=latex_size.value,
                                           font_style=latex_font.value)
-            var_unit = ("CO2", "\u00b5mol mol-1")
-            latex_text2.value = '$\qquad \qquad \qquad$' + \
-                                latex.var_unit_to_latex(var_unit=var_unit)
+            tex_str = '$\\qquad $ '*3 + \
+                      latex.var_unit_to_latex(var_unit=("CO2", "\u00b5mol mol-1"))
+            if self.debug:
+                print('latex_changed()', f'tex_str = {tex_str}')
+
+            with latex_output_area:
+                clear_output()
+                display(Math(tex_str))
 
         def settings_changed(c):
             cancel_btn.disabled = False
@@ -2129,23 +2379,34 @@ class AnalysisGui:
                             {'zoom_sliders': split_p_zoom_sliders.value,
                              'use_latex': split_p_use_latex_cb.value,
                              'template': split_p_plotly_templates.value,
+                             'title_font': split_p_title_font.value,
+                             'title_size': split_p_title_size.value,
+                             'subtitle_size': split_p_subtitle_size.value,
                              'width': split_p_width.value,
                              'height': split_p_height.value},
                         'multi_plot_kwargs':
                             {'use_latex': multi_p_use_latex_cb.value,
                              'template': multi_p_plotly_templates.value,
+                             'title_font': multi_p_title_font.value,
+                             'title_size': multi_p_title_size.value,
+                             'subtitle_size': multi_p_subtitle_size.value,
                              'width': multi_p_width.value,
                              'height': multi_p_height.value},
                         'corr_plot_kwargs':
                             {'use_latex': corr_p_use_latex_cb.value,
                              'template': corr_p_plotly_templates.value,
                              'color_scale': corr_p_color_scale_drop.value,
+                             'title_font': corr_p_title_font.value,
+                             'title_size': corr_p_title_size.value,
+                             'subtitle_size': corr_p_subtitle_size.value,
                              'width': corr_p_width.value,
                              'height': corr_p_height.value},
                         'corr_table_kwargs':
-                            {'use_latex': True,
-                             'width': 0,
-                             'height': 0},
+
+                            {'color_scale': corr_t_color_scale_drop.value,
+                             'title_font': corr_t_title_font.value,
+                             'title_size': corr_t_title_size.value,
+                             'subtitle_size': corr_t_subtitle_size.value},
                         'statistics_kwargs': {}
                         }
 
@@ -2157,6 +2418,10 @@ class AnalysisGui:
 
         def cancel_general_settings(c):
             init_general_settings()
+
+        def link(url, url_txt) -> str:
+            return f'<a href="{url}" target="_blank">' \
+                   f'<font color="DarkBlue">{url_txt}</font></a>'
 
         # plotly color-scales
         plotly_color_scales = ['aggrnyl', 'agsunset', 'blackbody', 'bluered',
@@ -2189,6 +2454,30 @@ class AnalysisGui:
                         "PT Sans Narrow", "Raleway", "Times New Roman"]
         plotly_sizes = ['Default', 6, 8, 10, 11, 12, 14, 17]
 
+        # common texts
+        col_href = link("https://www.aao.org/eye-health/"
+                        "diseases/what-is-color-blindness", "color deficiencies")
+        color_ref = f'the color scale can be changed in order to ' \
+                    f'ease variants of {col_href}.'
+        plotly_templ_href = link("https://plotly.com/python/templates/",
+                                 "Plotly template")
+        plotly_templ_ref = f'The background color can be changed by switching ' \
+                           f'the <b><i>{plotly_templ_href}</i></b>.<br>'
+        height_or_width_min = 'Setting <b><i>Height</i></b> or '\
+                              '<b><i>Width</i></b> to a value below '\
+                              '200 will lead to plotly default '\
+                              'value. '
+
+        # common label widgets
+        plotly_templ_label = wd.HTML(value='<b>Plotly template:</b>')
+        use_latex_label = wd.HTML(value='<b>Use LaTeX:</b>')
+        height_label = wd.HTML(value='<b>Height:</b>')
+        width_label = wd.HTML(value='<b>Width:</b> ')
+        title_font_label = wd.HTML(value='<b>Title font:</b> ')
+        title_size_label = wd.HTML(value='<b>Title size:</b> ')
+        subtitle_size_label = wd.HTML(value='<b>Subtitle size:</b> ')
+        color_scale_label = wd.HTML(value='<b>Plotly color scale:</b> ')
+
         # widgets
         drop_layout = wd.Layout(width='55px')
         save_btn = wd.Button(description='Save',
@@ -2205,18 +2494,29 @@ class AnalysisGui:
         observe_pos_ls = []
         observe_height_width_ls = []
 
+        def_settings_guide = wd.HTML(value='<span>Here you can modify certain '
+                                           'settings such as: what data to use, '
+                                           'visualizations of different plots '
+                                           'and texts. <i>Please note</i> that '
+                                           'the <b>Save</b>-button below is '
+                                           'enabled when a value is '
+                                           'changed and the user press &lttab&gt '
+                                           'or clicks outside the widget holding '
+                                           'the value.</span')
+
         time_start_end_date_guide = wd.HTML(value='<span><b>Guide:</b><br>'
                                                   'Plots and statistics are '
                                                   'based on values measured '
                                                   'between the <b>start</b> '
                                                   'and <b>end dates</b>, '
                                                   'displayed in the <b>Start</b> '
-                                                  'menu. </span> <br>'
-                                                  'These dates can be changed '
-                                                  'within each run, however '
-                                                  'their default values are '
-                                                  'calculated using the below '
-                                                  'methods.')
+                                                  'menu. '
+                                                  'Here, you can modify the '
+                                                  'default method on how to '
+                                                  'calculate these dates. '
+                                                  '</span> <br>'
+                                                  'The displayed dates can be '
+                                                  'changed for each run. ')
         time_fetch_date_guide = wd.HTML(value='<span>The <b>fetch date</b> '
                                               'is used to <i>speed up '
                                               'computations</i>.</span> '
@@ -2257,16 +2557,14 @@ class AnalysisGui:
         time_length_settings = wd.Accordion(children=[time_date_box],
                                             titles=('Length of time series',))
 
-        latex_text1 = wd.HTML('<span><b>Guide:</b><br>'
-                              '<b><i>LaTeX settings</i></b> '
-                              'applies to the axes of all '
-                              'plots.<br>For example, if the plot '
-                              'represent CO2-measurements the y-axis will, '
-                              'depending on the settings, look '
-                              'similar to: </span>')
-        latex_text2 = wd.HTMLMath('$\qquad \qquad \qquad$' +
-                                  '$ {CO_2}\\ (\\mu{mol}/{mol})$ ')
-        latex_text3 = wd.HTML('When <b><i>Keep exponents</i></b> deselected '
+        latex_text1 = wd.HTML('<span><b>Guide:<br> <i>LaTeX settings</i></b> '
+                              'applies to axis labels of plots.<br>For example, '
+                              'if a plot represent CO2-measurements the y-axis '
+                              'will, depending on the settings, look similar '
+                              'to: </span>')
+        latex_output_area = wd.Output()
+        latex_text2 = wd.HTML('When <b><i>Keep exponents</i></b> is '
+                              '<i>deselected</i> '
                               'negative exponents in units will be '
                               'converted into fractions.')
         latex_use_exp_label = wd.HTML('<b>Keep exponents: </b>')
@@ -2295,8 +2593,8 @@ class AnalysisGui:
         observe_ordinary_ls.extend(observe_latex)
 
         latex_box = wd.VBox([latex_text1,
+                             latex_output_area,
                              latex_text2,
-                             latex_text3,
                              wd.HBox([wd.VBox([wd.HBox([latex_use_exp_label,
                                                         latex_use_exp_cb])
                                                ]),
@@ -2314,11 +2612,10 @@ class AnalysisGui:
                                          'displayed before the '
                                          'first zoom-slider in a split '
                                          'plot.<br>'
-                                         'The <b><i>Height</i></b> and '
-                                         '<i><b>Width</i></b> values will be '
-                                         'applied for each split plot '
-                                         '(values below 200 lead plotly '
-                                         'default value).<br>'
+                                         f'{plotly_templ_ref}'
+                                         f'{height_or_width_min}'
+                                         'These values will be applied for each '
+                                         'split plot.<br>'
                                          '</span>')
         split_p_zoom_sliders_label = wd.HTML(value='<b>Split plot grouping:</b>')
         split_p_zoom_sliders = wd.Dropdown(options=range(1, 10),
@@ -2327,46 +2624,41 @@ class AnalysisGui:
         split_p_zoom_box = wd.HBox([split_p_zoom_sliders_label,
                                     split_p_zoom_sliders])
 
-        split_p_use_latex_label = wd.HTML(value='<b>Use LaTeX:</b>')
         split_p_use_latex_cb = wd.Checkbox(value=True,
                                            disabled=False,
                                            indent=False,
                                            tooltip="Applies to the y-axis")
-        split_p_latex_box = wd.HBox([split_p_use_latex_label,
+        split_p_latex_box = wd.HBox([use_latex_label,
                                      split_p_use_latex_cb])
 
-        split_p_plotly_templates_lbl = wd.HTML(value='<b>Plotly templates:</b> ')
-        split_p_plotly_templates = wd.Dropdown(options=plotly_templates,
-                                               value='plotly')
-        split_p_plotly_template_box = wd.HBox([split_p_plotly_templates_lbl,
+        split_p_plotly_templates = wd.Dropdown(options=plotly_templates)
+        split_p_plotly_template_box = wd.HBox([plotly_templ_label,
                                                split_p_plotly_templates])
 
-        split_p_height_label = wd.HTML(value='<b>Height:</b>')
-        split_p_height = wd.IntText(layout=_get_layout('9999999999'))
-        split_p_height_box = wd.HBox([split_p_height_label,
+        split_p_height = wd.FloatText(layout=_get_layout('9999999999'))
+        split_p_height_box = wd.HBox([height_label,
                                       split_p_height])
-        split_p_width_label = wd.HTML(value='<b>Width:</b> ')
-        split_p_width = wd.IntText(layout=_get_layout('9999999999'))
-        split_p_width_box = wd.HBox([split_p_width_label,
+
+        split_p_width = wd.FloatText(layout=_get_layout('9999999999'))
+        split_p_width_box = wd.HBox([width_label,
                                      split_p_width])
-        split_p_title_font_label = wd.HTML(value='<b>Title font:</b> ')
+
         split_p_title_font = wd.Dropdown(options=plotly_fonts)
-        split_p_title_font_box = wd.HBox([split_p_title_font_label,
+        split_p_title_font_box = wd.HBox([title_font_label,
                                           split_p_title_font])
-        split_p_title_size_label = wd.HTML(value='<b>Title size:</b> ')
+
         split_p_title_size = wd.Dropdown(options=plotly_sizes)
-        split_p_title_size_box = wd.HBox([split_p_title_size_label,
+        split_p_title_size_box = wd.HBox([title_size_label,
                                           split_p_title_size])
-        split_p_subtitle_size_label = wd.HTML(value='<b>Subtitle size:</b> ')
+
         split_p_subtitle_size = wd.Dropdown(options=plotly_sizes)
-        split_p_subtitle_size_box = wd.HBox([split_p_subtitle_size_label,
+        split_p_subtitle_size_box = wd.HBox([subtitle_size_label,
                                              split_p_subtitle_size])
 
         split_box = wd.VBox([split_plot_guide,
                              wd.HBox([wd.VBox([split_p_latex_box,
                                                split_p_plotly_template_box,
-                                               split_p_zoom_box
-                                               ]),
+                                               split_p_zoom_box]),
                                       wd.VBox([split_p_title_font_box,
                                                split_p_title_size_box,
                                                split_p_subtitle_size_box,
@@ -2381,54 +2673,50 @@ class AnalysisGui:
         observe_ordinary_ls.append(split_p_use_latex_cb)
         observe_height_width_ls.append(split_p_width)
         observe_height_width_ls.append(split_p_height)
+        observe_ordinary_ls.append(split_p_title_font)
+        observe_ordinary_ls.append(split_p_title_size)
+        observe_ordinary_ls.append(split_p_subtitle_size)
 
         multi_plot_guide = wd.HTML(value='<span><b>Guide:</b><br>'
-                                         'In a <b><i>multi plot</i></b> '
+                                         'In a <b><i>Multi-plot</i></b> '
                                          'you can visualize several variables '
                                          'in one plot. Variables of the same '
                                          '<i>unit</i> will be mapped into the '
-                                         'same y-axis. The maximum of '
+                                         'same <i>y</i>-axis. The maximum of '
                                          'units for a multi plot, '
                                          'and hence y-axes is limited to 2.<br>'
-                                         'The <b><i>Height</i></b> and '
-                                         '<b><i>Width</i></b> values will be '
-                                         'applied for each split plot '
-                                         '(values below 200 lead plotly '
-                                         'default value).<br>'
+                                         f'{plotly_templ_ref}'
+                                         f'{height_or_width_min}<br>'
                                          '</span>')
-        multi_p_use_latex_label = wd.HTML(value='<b>Use LaTeX:</b>')
+
         multi_p_use_latex_cb = wd.Checkbox(value=True,
                                            disabled=False,
                                            indent=False,
                                            tooltip="Applies to the y-axes")
-        multi_p_latex_box = wd.HBox([multi_p_use_latex_label,
+        multi_p_latex_box = wd.HBox([use_latex_label,
                                      multi_p_use_latex_cb])
 
-        multi_p_height_label = wd.HTML(value='<b>Height:</b>')
-        multi_p_height = wd.IntText(layout=_get_layout('9999999999'))
-        multi_p_height_box = wd.HBox([multi_p_height_label,
+        multi_p_height = wd.FloatText(layout=_get_layout('9999999999'))
+        multi_p_height_box = wd.HBox([height_label,
                                       multi_p_height])
-        multi_p_width_label = wd.HTML(value='<b>Width:</b> ')
-        multi_p_width = wd.IntText(layout=_get_layout('9999999999'))
-        multi_p_width_box = wd.HBox([multi_p_width_label,
+
+        multi_p_width = wd.FloatText(layout=_get_layout('9999999999'))
+        multi_p_width_box = wd.HBox([width_label,
                                      multi_p_width])
-        multi_p_plotly_templates_label = wd.HTML(
-            value='<b>Plotly templates:</b> ')
-        multi_p_plotly_templates = wd.Dropdown(options=plotly_templates,
-                                               value='plotly')
-        multi_p_plotly_template_box = wd.HBox([multi_p_plotly_templates_label,
+        multi_p_plotly_templates = wd.Dropdown(options=plotly_templates)
+        multi_p_plotly_template_box = wd.HBox([plotly_templ_label,
                                                multi_p_plotly_templates])
-        multi_p_title_font_label = wd.HTML(value='<b>Title font:</b> ')
+
         multi_p_title_font = wd.Dropdown(options=plotly_fonts)
-        multi_p_title_font_box = wd.HBox([multi_p_title_font_label,
+        multi_p_title_font_box = wd.HBox([title_font_label,
                                           multi_p_title_font])
-        multi_p_title_size_label = wd.HTML(value='<b>Title size:</b> ')
+
         multi_p_title_size = wd.Dropdown(options=plotly_sizes)
-        multi_p_title_size_box = wd.HBox([multi_p_title_size_label,
+        multi_p_title_size_box = wd.HBox([title_size_label,
                                           multi_p_title_size])
-        multi_p_subtitle_size_label = wd.HTML(value='<b>Subtitle size:</b> ')
+
         multi_p_subtitle_size = wd.Dropdown(options=plotly_sizes)
-        multi_p_subtitle_size_box = wd.HBox([multi_p_subtitle_size_label,
+        multi_p_subtitle_size_box = wd.HBox([subtitle_size_label,
                                              multi_p_subtitle_size])
         multi_box = wd.VBox([multi_plot_guide,
                              wd.HBox([wd.VBox([multi_p_latex_box,
@@ -2444,6 +2732,9 @@ class AnalysisGui:
         observe_height_width_ls.append(multi_p_height)
         observe_ordinary_ls.append(multi_p_plotly_templates)
         observe_ordinary_ls.append(multi_p_use_latex_cb)
+        observe_ordinary_ls.append(multi_p_title_font)
+        observe_ordinary_ls.append(multi_p_title_size)
+        observe_ordinary_ls.append(multi_p_subtitle_size)
 
         multi_plot_settings = wd.Accordion(children=[multi_box],
                                            titles=('Multi-plot settings',))
@@ -2452,83 +2743,120 @@ class AnalysisGui:
                                         'In a <b><i>Correlation plot</i></b> '
                                         'you can compare <i>two</i> variables '
                                         'against each other. <br>'
-                                        'The <b><i>Height</i></b> and '
-                                        '<b><i>Width</i></b> values will be '
-                                        'applied for each split plot '
-                                        '(values below 200 lead plotly '
-                                        'default value).<br>'
-                                        'The <b><i>Plotly template</i></b> '
-                                        'reflects '
-                                        'the background colors etc.<br>'
+                                        f'{plotly_templ_ref}'
+                                        f'{height_or_width_min}<br>'
                                         'The <b><i>Plotly color scale</i></b> '
                                         'is used in order to visualize '
                                         'the timestamps of the sampling of '
-                                        'the data.</span>')
-        corr_p_use_latex_label = wd.HTML(value='<b>Use LaTeX:</b>')
+                                        f'the data, {color_ref}'
+                                        '</span>')
+
         corr_p_use_latex_cb = wd.Checkbox(value=True,
                                           disabled=False,
                                           indent=False,
                                           tooltip="Applies to the x- and "
                                                   "y-axes")
-        corr_p_latex_box = wd.HBox([corr_p_use_latex_label,
+        corr_p_latex_box = wd.HBox([use_latex_label,
                                     corr_p_use_latex_cb])
 
-        corr_p_height_label = wd.HTML(value='<b>Height:</b>')
-        corr_p_height = wd.IntText(layout=_get_layout('9999999999'))
-        corr_p_height_box = wd.HBox([corr_p_height_label,
+        corr_p_height = wd.FloatText(layout=_get_layout('9999999999'))
+        corr_p_height_box = wd.HBox([height_label,
                                      corr_p_height])
-        corr_p_width_label = wd.HTML(value='<b>Width:</b> ')
-        corr_p_width = wd.IntText(layout=_get_layout('9999999999'))
-        corr_p_width_box = wd.HBox([corr_p_width_label,
+
+        corr_p_width = wd.FloatText(layout=_get_layout('9999999999'))
+        corr_p_width_box = wd.HBox([width_label,
                                     corr_p_width])
-        corr_p_title_font_label = wd.HTML(value='<b>Title font:</b> ')
+
         corr_p_title_font = wd.Dropdown(options=plotly_fonts)
-        corr_p_title_font_box = wd.HBox([corr_p_title_font_label,
+        corr_p_title_font_box = wd.HBox([title_font_label,
                                          corr_p_title_font])
-        corr_p_title_size_label = wd.HTML(value='<b>Title size:</b> ')
+
         corr_p_title_size = wd.Dropdown(options=plotly_sizes)
-        corr_p_title_size_box = wd.HBox([corr_p_title_size_label,
+        corr_p_title_size_box = wd.HBox([title_size_label,
                                          corr_p_title_size])
-        corr_p_subtitle_size_label = wd.HTML(value='<b>Subtitle size:</b> ')
+
         corr_p_subtitle_size = wd.Dropdown(options=plotly_sizes)
-        corr_p_subtitle_size_box = wd.HBox([corr_p_subtitle_size_label,
+        corr_p_subtitle_size_box = wd.HBox([subtitle_size_label,
                                             corr_p_subtitle_size])
-        corr_p_color_scale_label = wd.HTML(value='<b>Plotly color scale:</b> ')
-        corr_p_color_scale_drop = wd.Dropdown(options=plotly_color_scales,
-                                              value='blues')
-        corr_p_color_scale_box = wd.HBox([corr_p_color_scale_label,
+
+        corr_p_color_scale_drop = wd.Dropdown(options=plotly_color_scales)
+        corr_p_color_scale_box = wd.HBox([color_scale_label,
                                           corr_p_color_scale_drop])
-        corr_p_plotly_templates_label = wd.HTML(value='<b>Plotly templates:</b> ')
-        corr_p_plotly_templates = wd.Dropdown(options=plotly_templates,
-                                              value='plotly')
-        corr_p_plotly_template_box = wd.HBox([corr_p_plotly_templates_label,
+
+        corr_p_plotly_templates = wd.Dropdown(options=plotly_templates)
+        corr_p_plotly_template_box = wd.HBox([plotly_templ_label,
                                               corr_p_plotly_templates])
-        corr_box = wd.VBox([corr_plot_guide,
-                            wd.HBox([wd.VBox([corr_p_latex_box,
-                                              corr_p_plotly_template_box,
-                                              corr_p_color_scale_box]),
-                                     wd.VBox([corr_p_title_font_box,
-                                              corr_p_title_size_box,
-                                              corr_p_subtitle_size_box,
-                                              corr_p_height_box,
-                                              corr_p_width_box]),
-                                     ])
-                            ])
-        corr_plot_settings = wd.Accordion(children=[corr_box],
+        corr_p_box = wd.VBox([corr_plot_guide,
+                              wd.HBox([wd.VBox([corr_p_latex_box,
+                                                corr_p_plotly_template_box,
+                                                corr_p_color_scale_box]),
+                                       wd.VBox([corr_p_title_font_box,
+                                                corr_p_title_size_box,
+                                                corr_p_subtitle_size_box,
+                                                corr_p_height_box,
+                                                corr_p_width_box]),
+                                       ])
+                              ])
+        corr_plot_settings = wd.Accordion(children=[corr_p_box],
                                           titles=('Correlation-plot settings',))
         observe_ordinary_ls.append(corr_p_use_latex_cb)
         observe_ordinary_ls.append(corr_p_plotly_templates)
         observe_ordinary_ls.append(corr_p_color_scale_drop)
+        observe_ordinary_ls.append(corr_p_title_font)
+        observe_ordinary_ls.append(corr_p_title_size)
+        observe_ordinary_ls.append(corr_p_subtitle_size)
         observe_height_width_ls.append(corr_p_width)
         observe_height_width_ls.append(corr_p_height)
 
-        corr_table_settings = wd.Accordion(children=[split_box],
-                                           titles=('Correlation table settings',))
-        statistics_settings = wd.Accordion(children=[split_box],
-                                           titles=(
-                                           'Numerical statistics settings',))
+        corr_table_guide = wd.HTML(value='<span><b>Guide:</b><br>'
+                                         'The <b><i>Correlation table</i></b> '
+                                         'can be used to visualize linear '
+                                         'dependency between multiple '
+                                         'variables (assumed to have the same '
+                                         'statistical distribution).<br>'
+                                         'The <b><i>Plotly color scale</i></b> '
+                                         'is used in order to visualize '
+                                         'the correlation coefficients, '
+                                         f'{color_ref}.'
+                                         '</span>')
+        corr_t_color_scale_drop = wd.Dropdown(options=plotly_color_scales,
+                                              value='blues')
+        corr_t_color_scale_box = wd.HBox([color_scale_label,
+                                          corr_t_color_scale_drop])
+        corr_t_title_font = wd.Dropdown(options=plotly_fonts)
+        corr_t_title_font_box = wd.HBox([title_font_label,
+                                         corr_t_title_font])
 
-        general_accordion = wd.Accordion(children=[wd.VBox([time_length_settings,
+        corr_t_title_size = wd.Dropdown(options=plotly_sizes)
+        corr_t_title_size_box = wd.HBox([title_size_label,
+                                         corr_t_title_size])
+
+        corr_t_subtitle_size = wd.Dropdown(options=plotly_sizes)
+        corr_t_subtitle_size_box = wd.HBox([subtitle_size_label,
+                                            corr_t_subtitle_size])
+
+        corr_t_box = wd.VBox([corr_table_guide,
+                              wd.HBox([wd.VBox([corr_t_color_scale_box]),
+                                       wd.VBox([corr_t_title_font_box,
+                                                corr_t_title_size_box,
+                                                corr_t_subtitle_size_box]),
+                                       ])
+                              ])
+        corr_table_settings = wd.Accordion(children=[corr_t_box],
+                                           titles=('Correlation table settings',))
+        observe_ordinary_ls.append(corr_t_color_scale_drop)
+        observe_ordinary_ls.append(corr_t_title_font)
+        observe_ordinary_ls.append(corr_t_title_size)
+        observe_ordinary_ls.append(corr_t_subtitle_size)
+
+        statistics_guide = wd.HTML(value='<span><b>Guide:</b><br>...............'
+                                         '.............')
+        statistics_settings = wd.Accordion(children=[statistics_guide],
+                                           titles=('Numerical statistics '
+                                                   'settings',))
+
+        general_accordion = wd.Accordion(children=[wd.VBox([def_settings_guide,
+                                                            time_length_settings,
                                                             latex_settings,
                                                             split_plot_settings,
                                                             multi_plot_settings,
@@ -2553,7 +2881,7 @@ class AnalysisGui:
                 print('update_cache()', group_dict)
 
             # Structure of group_dict
-            # group_dict = {'_change': 'new'| 'update'| 'delete',
+            # group_dict = {'_upd_mode': 'new'| 'update'| 'delete',
             #               '_group_name': '<some groupname>',
             #               '_saved_group_name': 'old name of group',
             #               '_var_list': [['var1','spec1','some station'],
@@ -2589,7 +2917,7 @@ class AnalysisGui:
             #                                ['NEE_UNCLEANED','ETC NRT Fluxes',
             #                                'Hyltemossa']]}}
 
-            if '_change' not in group_dict.keys() or \
+            if '_upd_mode' not in group_dict.keys() or \
                     '_group_name' not in group_dict.keys():
                 return
 
@@ -2598,7 +2926,7 @@ class AnalysisGui:
             old_grp = ''
             cache = self._load_cache()
 
-            if group_dict['_change'] == 'new':
+            if group_dict['_upd_mode'] == 'new':
                 cache['_groups'][grp] = {'_group_vars': var_ls}
 
                 # update "last"-flags
@@ -2606,7 +2934,7 @@ class AnalysisGui:
                 cache['_last_group'] = grp
                 cache['_last_station_id'] = last_var_tuple[-1]
 
-            elif group_dict['_change'] == 'update':
+            elif group_dict['_upd_mode'] == 'update':
                 if '_saved_group_name' in group_dict.keys():
                     old_grp = group_dict['_saved_group_name']
                     if grp != old_grp:
@@ -2620,7 +2948,7 @@ class AnalysisGui:
                 cache['_last_group'] = grp
                 cache['_last_station_id'] = last_var_tuple[-1]
 
-            elif group_dict['_change'] == 'delete':
+            elif group_dict['_upd_mode'] == 'delete':
                 if grp in cache['_groups'].keys():
                     cache['_groups'].pop(grp)
                     if cache['_last_group'] == grp:
@@ -2647,7 +2975,7 @@ class AnalysisGui:
             val = set_group_drop('')
 
             if val == 'first_run':
-                create_group(val)
+                new_group(val)
                 display_user_guide('display_guide')
             else:
                 activate_gui('init_read_mode')
@@ -3024,7 +3352,6 @@ class AnalysisGui:
             if change.name == 'value':
                 new_name = change.owner.value
                 upd_group_dict = get_temp_dict()
-                upd_mode = upd_group_dict['_change']
 
                 error_ls = validate_name(upd_group_dict, new_name)
                 upd_group_dict['_name_error'] = error_ls
@@ -3046,11 +3373,11 @@ class AnalysisGui:
         # new and update data is stored in the dictionary 
         # handled by get_temp_dict()/set_temp_dict(dict)
 
-        def create_group(click):
+        def new_group(click):
             if self.debug:
-                print('create_group()')
+                print('new_group()')
 
-            upd_group_dict = {'_change': 'new',
+            upd_group_dict = {'_upd_mode': 'new',
                               '_group_name': 'Group name',
                               '_var_list': []}
 
@@ -3066,7 +3393,7 @@ class AnalysisGui:
 
             grp = group_drop.value
             cache = self._load_cache()
-            upd_group_dict = {'_change': 'update',
+            upd_group_dict = {'_upd_mode': 'update',
                               '_group_name': grp,
                               '_saved_group_name': grp,
                               '_var_list': cache['_groups'][grp]['_group_vars']}
@@ -3085,7 +3412,7 @@ class AnalysisGui:
                 print(f'save_group()\t cache.keys(): {cache.keys()}')
                 print(f'save_group()\t upd_group_dict: {upd_group_dict}')
 
-            if not upd_group_dict['_change'] in ['new', 'update']:
+            if not upd_group_dict['_upd_mode'] in ['new', 'update']:
                 return
 
             # Valid name?
@@ -3147,7 +3474,7 @@ class AnalysisGui:
                 set_temp_dict(upd_group_dict)
                 set_reset_error_msg()
             else:
-                upd_group_dict['_change'] = 'delete'
+                upd_group_dict['_upd_mode'] = 'delete'
                 update_cache(upd_group_dict)
                 init()
                 set_group_vars('')
@@ -3163,7 +3490,7 @@ class AnalysisGui:
         def validate_name(upd_dict, grp_name):
 
             cache = self._load_cache()
-            upd_mode = upd_dict['_change']
+            upd_mode = upd_dict['_upd_mode']
 
             error_ls = []
 
@@ -3177,12 +3504,12 @@ class AnalysisGui:
             elif grp_name in cache['_groups'].keys():
                 if upd_mode == 'new':
                     error_ls.append(
-                        f'There is already a group called <it>{grp_name}</i>,')
+                        f'There is already a group called <i>{grp_name}</i>,')
                     error_ls.append('please pick another name.')
                 elif upd_mode == 'update':
                     if grp_name != upd_dict['_saved_group_name']:
                         error_ls.append(
-                            f'There is already a group called <it>{grp_name}</i>,')
+                            f'There is already a group called <i>{grp_name}</i>,')
                         error_ls.append('please pick another name.')
 
             if error_ls:
@@ -3219,7 +3546,7 @@ class AnalysisGui:
         # Messages on what to do and errors
         def set_info_msg(error_ls=None):
             upd_group_dict = get_temp_dict()
-            upd_mode = upd_group_dict['_change']
+            upd_mode = upd_group_dict['_upd_mode']
 
             if upd_mode == 'new':
                 info_ls = ['How to create a group of variables:',
@@ -3300,12 +3627,12 @@ class AnalysisGui:
                 # init update widgets..
                 set_info_msg()
                 update_group_btn.on_click(update_group, remove=True)
-                create_group_btn.on_click(create_group, remove=True)
+                new_group_btn.on_click(new_group, remove=True)
                 save_group_btn.on_click(save_group, remove=False)
                 delete_group_btn.on_click(delete_group, remove=False)
                 cancel_group_btn.on_click(cancel_group, remove=False)
                 var_info_btn.on_click(display_var_info, remove=False)
-                help_btn.on_click(display_user_guide, remove=False)
+                user_guide_btn.on_click(display_user_guide, remove=False)
 
                 set_station_drop()
                 set_spec_drop(upd_active)
@@ -3328,7 +3655,7 @@ class AnalysisGui:
                 save_group_btn.disabled = False
                 cancel_group_btn.disabled = False
                 var_info_btn.disabled = False
-                help_btn.disabled = False
+                user_guide_btn.disabled = False
                 save_group_btn.tooltip = 'Save settings...'
                 cancel_group_btn.tooltip = 'Cancel...'
                 if upd_active == 'update':
@@ -3343,12 +3670,12 @@ class AnalysisGui:
                 cache = self._load_cache()
                 no_groups = not cache['_groups'].keys()
                 update_group_btn.on_click(update_group, remove=no_groups)
-                create_group_btn.on_click(create_group, remove=False)
+                new_group_btn.on_click(new_group, remove=False)
                 save_group_btn.on_click(save_group, remove=True)
                 delete_group_btn.on_click(delete_group, remove=True)
                 cancel_group_btn.on_click(cancel_group, remove=True)
                 var_info_btn.on_click(display_var_info, remove=True)
-                help_btn.on_click(display_user_guide, remove=True)
+                user_guide_btn.on_click(display_user_guide, remove=True)
 
                 station_drop.unobserve(set_spec_drop)
                 spec_drop.unobserve(set_var_drop)
@@ -3361,10 +3688,10 @@ class AnalysisGui:
                     b.disabled = False
                     update_group_btn.disabled = no_groups
                 group_drop.disabled = False
-                create_group_btn.tooltip = 'New group...'
+                new_group_btn.tooltip = 'New group...'
                 update_group_btn.tooltip = 'Update group...'
                 var_info_btn.disabled = True
-                help_btn.disabled = True
+                user_guide_btn.disabled = True
 
                 for b in non_create_btns.children:
                     b.tooltip = 'Enabled in update mode...'
@@ -3417,7 +3744,7 @@ class AnalysisGui:
         var_box = wd.VBox([var_label, var_cbs_box])
 
         # Create group buttons
-        create_group_btn = wd.Button(description='New', icon='plus',
+        new_group_btn = wd.Button(description='New', icon='plus',
                                      button_style='primary')
         update_group_btn = wd.Button(description='Update', icon='pen',
                                      button_style='info')
@@ -3427,24 +3754,28 @@ class AnalysisGui:
                                      button_style='info')
         delete_group_btn = wd.Button(description='Delete', icon='trash',
                                      button_style='danger')
-        create_btns = wd.HBox([create_group_btn, update_group_btn])
+        create_btns = wd.HBox([new_group_btn, update_group_btn])
 
-        help_btn = wd.Button(description='User guide',
-                             icon='fa-info-circle',
-                             button_style='info')
-        var_info_btn = wd.Button(description='Variable',
+        user_guide_btn = wd.Button(description='User guide',
+                                   icon='fa-info-circle',
+                                   button_style='info')
+        var_info_btn = wd.Button(description='Variable info',
                                  icon='fa-info-circle',
                                  button_style='info')
 
-        non_create_btns = wd.HBox(
-            [save_group_btn, cancel_group_btn, delete_group_btn])
-        btns = wd.HBox([create_btns, non_create_btns, help_btn, var_info_btn])
+        non_create_btns = wd.HBox([save_group_btn,
+                                   cancel_group_btn,
+                                   delete_group_btn])
+        all_btns = wd.HBox([create_btns,
+                            non_create_btns,
+                            user_guide_btn,
+                            var_info_btn])
 
         # Variable info-text
         var_info_text = wd.HTML(layout=wd.Layout(width='100%',
                                                  max_width='90%',
                                                  height='auto'))
-        # Text to user
+        # Help text to user
         user_guide = wd.HTMLMath(disabled=True,
                                  layout=wd.Layout(width='90%',
                                                   max_width='90%',
@@ -3486,4 +3817,4 @@ class AnalysisGui:
         if not self.debug:
             group_dict_log.layout.display = 'None'
 
-        display(wd.VBox([wd.HBox([group_drop, g_vars]), btns, upd_box]))
+        display(wd.VBox([wd.HBox([group_drop, g_vars]), all_btns, upd_box]))

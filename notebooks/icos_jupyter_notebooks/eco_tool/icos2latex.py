@@ -23,21 +23,26 @@
 
     Examples
     --------
-    >>> lat = Translator(font_size = 10)
-    >>> lat.var_to_latex('CO2')
-    '${\\small  {\\mathrm  {CO_2}}}$'
+    >>>import icos2latex
+    >>>lat = icos2latex.Translator()
+    >>>lat.var_unit_to_latex(('CO2','µmol mol-1'))
+    '${CO_2}\ (\mu{mol}/{mol})$'
 
-    >>> lat = Translator(font_style = 'sans')
-    >>> lat.unit_to_latex('nmol mol-1')
-    '${\\scriptsize  {\\mathsf  {nmol}/{mol}}}$'
+    >>>lat = icos2latex.Translator(font_size = 10)
+    >>>lat.var_to_latex('CO2')
+    '${\\small  {CO_2}}$'
 
-    >>> lat = Translator(use_exp=False)
-    >>> lat.unit_to_latex('nmol mol-1')
-    '${\\scriptsize  {\\mathsf  {nmol}/{mol}}}$'
+    >>>lat = icos2latex.Translator(font_style = 'sans')
+    >>>lat.unit_to_latex('nmol mol-1')
+    '${\\mathrm  {{nmol}/{mol}}}$'
+
+    >>>lat = icos2latex.Translator(use_exp=False)
+    >>>lat.unit_to_latex('nmol mol-1')
+    '${nmol}/{mol}$'
     
-    >>> lat = Translator(use_exp=True)
-    >>> lat.var_unit_to_latex('CO2','µmol mol-1')
-    '${\\scriptsize  {\\mathrm  {CO_2}\\ (\\mu{mol}\\,\\,{mol}^{-1})}}$'
+    >>>lat = icos2latex.Translator(use_exp=True, font_size=10, font_style='tt')
+    >>>lat.var_unit_to_latex(('CO2','µmol mol-1'))
+    '${\\small  {\\mathtt  {{CO_2}\\ (\\mu{mol}\\,\\,{mol}^{-1})}}}$'
 
 """
 

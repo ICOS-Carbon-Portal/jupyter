@@ -42,8 +42,7 @@ class ReportWriter:
         user_plot_settings = self._load_user_settings()
         if self.debug:
             print(f'rw init: user_plot_settings: {user_plot_settings}')
-        self.plot = plot.Plot(use_latex=True,
-                              debug=self.debug,
+        self.plot = plot.Plot(debug=self.debug,
                               **user_plot_settings)
 
         self.icos_info = icos_info
