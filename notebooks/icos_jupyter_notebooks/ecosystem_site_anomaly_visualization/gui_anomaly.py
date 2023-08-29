@@ -538,7 +538,7 @@ def update_func(button_c):
     f.write('Shortwave incoming radiation in W/m2 (SW_IN_F);\n')
     f.write('Vapor pressure deficit in hPa (VPD_F);\n')
     f.write('Identify the selected year(s) for the site(s) based on the column heading ending with the variable name(s). The reference period(s) are provided with a dash indicating the start and end of each reference period.;\n')
-    f.write('The column(s) ending with '_std_count' represent the number of times that a specific date (row) within the reference period was flagged. These flagged values were excluded from the calculation of the standard deviation value (found in columns ending with "_std").;\n')
+    f.write('The column(s) ending with "_std_count" represent the number of times that a specific date (row) within the reference period was flagged. These flagged values were excluded from the calculation of the standard deviation value (found in columns ending with "_std").;\n')
     f.write('The column(s) ending with "_std_count_month" represent the number of times a day within a specific month (referenced in the"month" column) was flagged during the reference period. These flagged values were excluded from the calculation of the standard deviation value (found in columns ending with "_std_month"). Note that the values in these columns are the same when the month is the same.;\n')
     
     date_today = current_date.today()
