@@ -142,8 +142,9 @@ class Plot:
         if title is None:
             title = f'Correlation plot of {x_col} and {y_col}.'
         if subtitle is None:
-            subtitle = f'{x_col} vs {y_col} (<i>colors: light = early ' \
-                       f'timestamp, dark latest timestamp</i>)'
+            subtitle = f'{x_col} (on the <i>x</i>-axis) vs  ' \
+                       f'{y_col} (on the <i>y</i>-axis) ' \
+
         if not isinstance(units, list):
             units = [x_col, y_col]
 

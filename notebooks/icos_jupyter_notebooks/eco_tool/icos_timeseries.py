@@ -19,19 +19,19 @@
     
     Properties
     ----------
-    icos_meta -> dict
     icos_accessUrl -> str
-    icos_pid -> str
-    icos_previousVersion -> str
-    icos_station_name -> str
-    icos_station_id -> str
-    icos_station_uri -> str
-    icos_product -> str
     icos_citationBibTex -> str
     icos_citationRis -> str
     icos_citationString -> str
-    icos_title -> str
     icos_columns -> dict
+    icos_meta -> dict
+    icos_pid -> str
+    icos_previousVersion -> str
+    icos_product -> str
+    icos_station_id -> str
+    icos_station_name -> str
+    icos_station_uri -> str
+    icos_title -> str
     icos_var_unit_ls -> list
     
     Examples

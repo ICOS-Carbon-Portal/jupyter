@@ -25,8 +25,8 @@ import warnings
 
 from ipywidgets import widgets as wd
 from IPython.display import display, Math, clear_output
-from icoscp.cpb.dobj import Dobj
 import datetime as dt
+import copy
 
 warnings.simplefilter("ignore", FutureWarning)
 import os
@@ -45,39 +45,6 @@ else:
     from eco_tool.icos_timeseries import IcosFrame
     from eco_tool import json_handler
     from eco_tool import icos2latex
-
-
-def _var_tup2station_dict(var_tuples: list = None):
-    """
-    var_tuple: list of tuples
-        Each tuple is of the form
-            (variable, file, station)
-
-     Returns
-     a dictionary of the form
-
-    """
-    station_dict = {}
-    for v_tuple in var_tuples:
-        st = v_tuple[-1]
-        prod = v_tuple[-2]
-        var = v_tuple[0]
-        if st in station_dict.keys():
-            if prod in station_dict[st].keys():
-                station_dict[st][prod].append(var)
-            else:
-                station_dict[st][prod] = [var]
-        else:
-            station_dict[st] = {prod: [var]}
-    return station_dict
-
-
-def _get_layout(text: str = None):
-    min_width = max(40, len(text) * 8)
-    max_width = min(150, len(text) * 9 + 12)
-    this_layout = wd.Layout(min_width=f'{min_width}px',
-                            max_width=f'{max_width}px')
-    return this_layout
 
 
 class _AppDataRetriever:
@@ -147,6 +114,39 @@ class AnalysisGui:
                          'warning': '#FF9800', 'warning:active': '#F57C00',
                          'danger': '#F44336', 'danger:active': '#D32F2F'}
 
+    @staticmethod
+    def _var_tup2station_dict(var_tuples: list = None):
+        """
+        var_tuple: list of tuples
+            Each tuple is of the form
+                (variable, file, station)
+
+         Returns
+         a dictionary of the form
+
+        """
+        station_dict = {}
+        for v_tuple in var_tuples:
+            st = v_tuple[-1]
+            prod = v_tuple[-2]
+            var = v_tuple[0]
+            if st in station_dict.keys():
+                if prod in station_dict[st].keys():
+                    station_dict[st][prod].append(var)
+                else:
+                    station_dict[st][prod] = [var]
+            else:
+                station_dict[st] = {prod: [var]}
+        return station_dict
+
+    @staticmethod
+    def _get_layout(text: str = None):
+        min_width = max(40, len(text) * 8)
+        max_width = 'auto' #min(150, len(text) * 9 + 12)
+        this_layout = wd.Layout(min_width=f'{min_width}px',
+                                max_width=max_width)
+        return this_layout
+
     def __init__(self, theme=None, level=None, debug=None):
         if not theme:
             theme = 'ES'
@@ -201,6 +201,48 @@ class AnalysisGui:
 
         return self.report_writer
 
+    def _validate_batch_of_grp(self, cache_dict: dict = None) -> dict:
+        # expects a dict like cache['_groups'][grp] see the 'save_group'
+        # when variables are removed from a group with batches
+        # we might get crashes
+        var_ls = cache_dict['_group_vars']
+
+        d = cache_dict['_batches']
+        er_dict = {}
+        for b_name in d.keys():
+            for index, k in d[b_name].items():
+                if isinstance(k, str):
+                    continue
+                for tool, v_ls in k.items():
+                    if tool in ['split_plot', 'corr_plot', 'corr_table',
+                                'statistics']:
+                        if isinstance(v_ls, list) and not all(v in
+                                                              var_ls for
+                                                              v in v_ls):
+                            if b_name not in er_dict.keys():
+                                er_dict[b_name] = {}
+                            if index not in er_dict[b_name].keys():
+                                er_dict[b_name][index] = {}
+                            er_dict[b_name][index][tool] = [x for x in v_ls if
+                                                            x not in var_ls]
+                    else:
+                        # multi-plot
+                        for x in v_ls:
+                            if not all(v in var_ls for v in x[1]):
+                                if b_name not in er_dict.keys():
+                                    er_dict[b_name] = {}
+                                if index not in er_dict[b_name].keys():
+                                    er_dict[b_name][index] = {}
+                                if tool in er_dict[b_name][index].keys():
+                                    er_dict[b_name][index][tool].extend(
+                                        [y for y in x[1] if y not in var_ls])
+                                else:
+                                    er_dict[b_name][index][tool] = [y for y in
+                                                                    x[1] if y
+                                                                    not in
+                                                                    var_ls]
+        return er_dict
+
     def go(self):
 
         def main_change(change):
@@ -253,6 +295,29 @@ class AnalysisGui:
 
         display(wd.VBox([main, out]))
 
+    def get_data(self, grp: str = None) -> IcosFrame or None:
+        d = self.get_data_dict
+        if d:
+            if grp and grp in d.keys():
+                df = d[grp]['df']
+            elif grp:
+                df = None
+            else:
+                grp = list(d.keys())[-1]
+                df = d[grp]['df']
+        else:
+            df = None
+        return df
+
+    @property
+    def get_data_dict(self) -> dict:
+
+        if self.report_writer is None:
+            d = {}
+        else:
+            d = self.report_writer.stored_timeseries
+        return d
+
     def _start(self):
 
         if self.debug:
@@ -303,7 +368,7 @@ class AnalysisGui:
                     b_ls = [wd.Button(description=b_name,
                                       style={'button_width': '100px',
                                              'button_color': 'LightSeaGreen'},
-                                      layout=_get_layout(b_name))
+                                      layout=AnalysisGui._get_layout(b_name))
                             for b_name in batches.keys()]
                     if b_ls:
                         all_title = 'Run all batch jobs'
@@ -311,7 +376,8 @@ class AnalysisGui:
                                               style={'button_width': '100px',
                                                      'button_color':
                                                          'MediumSeaGreen'},
-                                              layout=_get_layout(all_title)))
+                                              layout=AnalysisGui._get_layout(
+                                                  all_title)))
                     for bt in b_ls:
                         bt.on_click(run_batch)
                     batch_jobs.children = b_ls
@@ -381,6 +447,49 @@ class AnalysisGui:
 
             return df
 
+        def batch_validation_errors(jobs):
+            cache = self._load_cache()
+            grp = group_drop.value
+            error_ls = []
+            if '_var_mismatch' in cache['_groups'][grp]:
+                for b, v in cache["_groups"][grp]["_var_mismatch"].items():
+                    if b in jobs or jobs == 'all':
+                        error_ls.append((b, v))
+
+            return error_ls
+
+        def set_error_message(er_ls):
+            tool2name_dict = {'split_plot': 'Split-plot',
+                              'multi_plot': 'Multi-plot',
+                              'corr_plot': 'Correlation plot (2 vars)',
+                              'corr_table': 'Correlation table',
+                              'statistics': 'Numerical Statistics'}
+            grp = group_drop.value
+            error_msg = f'<b>The group <i>{grp}</i> and it\'s ' \
+                        f'batch jobs do not match.</b><br> '
+            print(str(er_ls))
+            with out:
+                print(er_ls)
+            for e in er_ls:
+                error_msg += f'The batch job <b><i>{e[0]}</i></b> include <br>'
+                for index, tool_dict in e[1].items():
+                    for tool, var_ls in tool_dict.items():
+                        error_msg += f'a <b><i>{tool2name_dict[tool]}</i></b> ' \
+                                     f'(tool number {int(index)+1}) with ' \
+                                     f'the variable(s): <br>'
+
+                    for v in var_ls:
+                        error_msg += f'<b><i>{v[0]}</i></b> (from {v[1]} of' \
+                                     f' {v[2]}) <br>'
+            error_msg += '<br><i> Probably the above variable has been removed ' \
+                         'from the group, but not from the batch jobs</i><br>' \
+                         'Suggestion: Either update the group and add the ' \
+                         'variables, or update the batch jobs.'
+
+            with out:
+                clear_output()
+                display(wd.HTML(error_msg))
+
         def run_batch(c):
             if c == 0 or c.description == 'Run all batch jobs':
                 jobs = 'all'
@@ -392,6 +501,11 @@ class AnalysisGui:
                     print('run_batch()',
                           jobs,
                           group_drop.value)
+            errors = batch_validation_errors(jobs)
+
+            if errors:
+                set_error_message(errors)
+                return
 
             with out:
                 clear_output()
@@ -808,7 +922,7 @@ class AnalysisGui:
                 bt = wd.Button(description=tool,
                                style={'button_width': '100px',
                                       'button_color': 'LightGreen'},
-                               layout=_get_layout(tool))
+                               layout=AnalysisGui._get_layout(tool))
                 bt.on_click(tool_click)
                 tool_ls.append(bt)
             tool_buttons.children = tool_ls
@@ -901,7 +1015,7 @@ class AnalysisGui:
                                 disabled=True,
                                 tooltip=var2unit(var_ls),
                                 style={'button_color': 'LightSeaGreen'},
-                                layout=_get_layout(var_name))
+                                layout=AnalysisGui._get_layout(var_name))
                 btn.on_click(var_button_click)
                 btn_ls.append(btn)
             var_name = 'Select all'
@@ -909,7 +1023,7 @@ class AnalysisGui:
                             disabled=True,
                             tooltip='',
                             style={'button_color': 'MediumSeaGreen'},
-                            layout=_get_layout(var_name))
+                            layout=AnalysisGui._get_layout(var_name))
             btn.on_click(var_button_click)
             btn_ls.append(btn)
             var_buttons.children = btn_ls
@@ -1048,6 +1162,7 @@ class AnalysisGui:
             # this is why we have default value -1.
             if self.debug:
                 debug_ls = [16, f'set_selections()',
+                            'step 1',
                             f'sel_tool_ls = {sel_tool_ls}',
                             f'sel_tool_index = {sel_tool_index}',
                             f'sel_var_ls = {sel_var_ls}']
@@ -1065,13 +1180,41 @@ class AnalysisGui:
             selected_tools.rows = rows
             if isinstance(sel_var_ls, list):
                 selected_vars.options = sel_var_ls
+            if selected_tools.value is not None:
+                try:
+
+                    ind = selected_tools.value
+                    selected_vars.tooltip = selected_vars.options[ind][0]
+                except:
+                    if self.debug:
+                        debug_ls = [16, f'set_selections()', 'exception',
+                                    f'selected_vars.options = '
+                                    f'{selected_vars.options}',
+                                    f'ind = {ind}']
+                        debug_value(debug_ls)
+                    selected_vars.tooltip = ''
+            else:
+                selected_vars.tooltip = ''
+            # if len(sel_var_ls):
+                #     selected_vars.tooltip = sel_var_ls[0]
+                # else:
+                #     selected_vars.tooltip = ''
             selected_vars.rows = rows
+            if self.debug:
+                debug_ls = [16, f'set_selections()', 'end ',
+                            f'selected_tools.value = {selected_tools.value}',
+                            f'selected_tools.options = {selected_tools.options}',
+                            f'selected_vars.options = {selected_vars.options}',
+                            f'selected_vars.tooltip = {selected_vars.tooltip}']
+                debug_value(debug_ls)
 
         def changed_selected_tool(c):
             if self.debug:
                 debug_ls = [112, f'changed_selected_tool()',
                             f'c.old = {c.old}',
-                            f'c.new = {c.new}']
+                            f'c.new = {c.new}',
+                            f'selected_tools = {selected_tools}',
+                            f'selected_vars = {selected_vars}']
                 debug_value(debug_ls)
                 global iii
                 iii += 1
@@ -1091,15 +1234,53 @@ class AnalysisGui:
                 selected_tools.unobserve(changed_selected_tool, names='value')
                 selected_tools.options = tool_ls
                 selected_vars.options = sel_vars
+                # if len(sel_vars):
+                #     selected_vars.tooltip = sel_vars[0]
+                # else:
+                #     selected_vars.tooltip = ''
                 if c.new is None:
                     value = None
                 elif c.new > c.old:
                     value = c.new - 1
                 else:
                     value = c.new
+
                 selected_tools.value = value
+                if value:
+                    try:
+                        selected_vars.tooltip = sel_vars[value][0]
+                    except:
+                        selected_vars.tooltip = ''
+                else:
+                    selected_vars.tooltip = ''
                 selected_tools.observe(changed_selected_tool, names='value')
+
+            if selected_tools.value is None:
+                selected_vars.tooltip = ''
+            else:
+                if selected_tools.value <= len(selected_vars.options) - 1:
+                    try:
+                        ind = selected_tools.value
+                        selected_vars.tooltip = selected_vars.options[ind][0]
+                    except:
+                        selected_vars.tooltip = ''
+                else:
+                    selected_vars.tooltip = ''
+
             reset_var_buttons()
+
+        def reset_multi_plot_options(hide: bool = True):
+            if hide:
+                multi_select.layout.display = 'none'
+                multi_select.disabled = True
+                multi_selector.layout.display = 'none'
+                multi_selector.disabled = True
+            else:
+                multi_select.layout.display = 'block'
+                multi_select.disabled = False
+                multi_selector.layout.display = 'block'
+                if multi_select.value is False:
+                    multi_select.disabled = False
 
         def reset_var_buttons():
             tool_index = selected_tools.value
@@ -1111,6 +1292,7 @@ class AnalysisGui:
                     debug_ls.append('  -- index = None')
                     debug_ls.append('  -- deselecting and disabling all '
                                     'var-buttons and the "Up"-btn')
+                info_guide.value = ''
                 move_up.disabled = True
                 for btn in var_buttons.children:
                     btn.disabled = True
@@ -1127,6 +1309,13 @@ class AnalysisGui:
                         debug_ls.append(f'  --- case of tool_code = {tool_code}')
                         debug_ls.append(f'  --- var_codes = {var_codes}')
                     if tool_code == 'multi_plot':
+                        info_guide.value = f'<i>Multi-plot</i> can not handle ' \
+                                           f'more than 2 units. By defatult ' \
+                                           'variables are ' \
+                                           f'automatically distributed among ' \
+                                           f'the axes. <br>'
+                        reset_multi_plot_options(hide=False)
+
                         if self.debug:
                             debug_ls.append('  ---- Multi-plot can not handle '
                                             'more than 2 units.')
@@ -1161,6 +1350,13 @@ class AnalysisGui:
                                 btn.icon = ''
                                 btn.disabled = False
                     elif tool_code == 'corr_plot':
+                        info_guide.value = f'<i>Correlation plot</i> plots two ' \
+                                           f'variables against each other, ' \
+                                           f'the first selected variable is ' \
+                                           f'mapped to the x-axis while the ' \
+                                           f'second variable is mapped to  ' \
+                                           f'the y-axis.'
+                        reset_multi_plot_options(hide=True)
                         if self.debug:
                             debug_ls.append(f'  ---- Corr-plot can only have 2 '
                                             f'vars.')
@@ -1176,6 +1372,8 @@ class AnalysisGui:
                                 btn.icon = ''
                                 btn.disabled = False
                     else:
+                        info_guide.value = ''
+                        reset_multi_plot_options(hide=True)
                         if var_codes == 'all':
                             for btn in var_buttons.children:
                                 if btn.description == 'Select all':
@@ -1300,19 +1498,24 @@ class AnalysisGui:
                     else:
                         selected_var_codes.append(var_code)
                 elif tool_code == 'multi_plot':
-                    unit = var2unit(var_code)
-                    axis_of_var = None
-                    for v in selected_var_codes:
-                        if v[0] == unit:
-                            axis_of_var = v
-                            if var_code in v[1]:
-                                v[1].remove(var_code)
-                            else:
-                                v[1].append(var_code)
-                    if axis_of_var is None:
-                        selected_var_codes.append((unit, [var_code]))
-                    elif len(axis_of_var[1]) == 0:
-                        selected_var_codes.remove(axis_of_var)
+                    if multi_select.value:
+                        unit = var2unit(var_code)
+                        axis_of_var = None
+                        for v in selected_var_codes:
+                            if v[0] == unit:
+                                axis_of_var = v
+                                if var_code in v[1]:
+                                    v[1].remove(var_code)
+                                else:
+                                    v[1].append(var_code)
+                        if axis_of_var is None:
+                            selected_var_codes.append((unit, [var_code]))
+                        elif len(axis_of_var[1]) == 0:
+                            selected_var_codes.remove(axis_of_var)
+                    elif multi_selector.value:
+                        print(111111111, multi_selector.value)
+                    else:
+                        print(222222222, multi_selector.value)
                 upd_dict[row_index] = {tool_code: selected_var_codes}
                 if self.debug:
                     debug_ls = [116, f'var_button_click()',
@@ -1355,8 +1558,7 @@ class AnalysisGui:
             if update_var2units:
                 pid = st_df.loc[(st_df.id == var[-1]) & (
                         st_df.specLabel == var[1])].dobj.values[0]
-                do = Dobj(pid)
-                meta = IcosFrame.trim_icos_meta(do.meta)
+                meta = icos_data.StationData.icos_pid2meta(pid)
                 var_unit_list = meta['varUnitList']
                 var2unit_dict.update({v[0]: v[1] for v in var_unit_list})
                 app_configs['_var2unit_map'].update(var2unit_dict)
@@ -1410,7 +1612,7 @@ class AnalysisGui:
                 text_tag = 'b'
                 separator = '<br>'
                 margin = '&nbsp' * 10
-                station_dict = _var_tup2station_dict(var_tuples)
+                station_dict = AnalysisGui._var_tup2station_dict(var_tuples)
 
                 # We loop over stations and products to concatenate
                 # a proper text in html
@@ -1665,7 +1867,7 @@ class AnalysisGui:
                 name_of_batch_job.style.text_color = 'red'
             else:
                 name_of_batch_job.style.text_color = 'darkgreen'
-                name_of_batch_job.layout = _get_layout(name)
+                name_of_batch_job.layout = AnalysisGui._get_layout(name)
 
             if self.debug:
                 debug_ls = [121, f'validate_name()',
@@ -1790,6 +1992,54 @@ class AnalysisGui:
         #         print(f'\tupd_dict = {upd_dict}')
         #     set_batch_upd_dict(upd_dict)
 
+        def get_valid_batch():
+            cache = self._load_cache()
+            grp = group_drop.value
+            b = batch_drop.label
+            batch2validate = batch_drop.value.copy()
+
+            if '_var_mismatch' in cache['_groups'][grp].keys():
+                if b in cache['_groups'][grp]['_var_mismatch'].keys():
+                    er_dict = cache["_groups"][grp]["_var_mismatch"][b]
+                    if self.debug:
+                        debug_ls = [128, f'validate_batch()',
+                                    f'batch_drop.label = {batch_drop.label}',
+                                    f'batch_drop.value = {batch2validate}',
+                                    f'er_dict = {er_dict}']
+                        debug_value(debug_ls)
+
+                    reindex = False
+                    for index, tool_vars in er_dict.items():
+                        for v_ls in tool_vars.values():
+                            for v in v_ls:
+                                for tool, val in batch2validate[index].items():
+                                    if tool == 'multi_plot':
+                                        for y in val:
+                                            if v in y[1]:
+                                                y[1].remove(v)
+                                            if not y[1]:
+                                                val.remove(y)
+                                    else:
+                                        if v in val:
+                                            val.remove(v)
+                                            if tool == 'corr_plot':
+                                                val=[]
+                                    if not val:
+                                        batch2validate.pop(index)
+                                        reindex = True
+
+                    if reindex:
+                        j = 0
+                        d = {}
+                        for i in batch2validate.keys():
+                            if i != '_version':
+                                d[str(j)] = batch2validate[i]
+                                j += 1
+                            else:
+                                d[i] = batch2validate[i]
+
+            return batch2validate
+
         def new_batch(c):
 
             upd_dict = {'_upd_mode': 'new',
@@ -1821,7 +2071,7 @@ class AnalysisGui:
                 print('update_batch() ', batch_drop.label, batch_drop.value,
                       type(batch_drop.value))
 
-            stored_batch = batch_drop.value.copy()
+            stored_batch = get_valid_batch()
             batch_version = int(stored_batch.pop('_version', 1))
             batch_upd = dict(_upd_mode='update',
                              _version=batch_version,
@@ -1873,6 +2123,13 @@ class AnalysisGui:
                     debug_value(debug_ls)
 
                 cache['_groups'][grp]['_batches'] = batches
+                d = cache['_groups'][grp]
+
+                var_mismatch_dict = self._validate_batch_of_grp(d)
+                if var_mismatch_dict:
+                    cache['_groups'][grp]['_var_mismatch'] = var_mismatch_dict
+                else:
+                    cache['_groups'][grp].pop('_var_mismatch', None)
                 self._set_cache(cache_dict=cache)
                 init(grp, b_name)
                 activate_gui('save')
@@ -1930,6 +2187,12 @@ class AnalysisGui:
                 batches = cache['_groups'][grp].get('_batches', {})
                 batches.pop(b_name, None)
                 cache['_groups'][grp]['_batches'] = batches
+                d = cache['_groups'][grp]
+                var_mismatch_dict = self._validate_batch_of_grp(d)
+                if var_mismatch_dict:
+                    cache['_groups'][grp]['_var_mismatch'] = var_mismatch_dict
+                else:
+                    cache['_groups'][grp].pop('_var_mismatch', None)
 
                 self._set_cache(cache_dict=cache)
 
@@ -1939,6 +2202,10 @@ class AnalysisGui:
                     print('delete_batch()\n\t deleted:', b_name)
                 init(grp)
                 activate_gui('delete')
+
+        def clear_debug_list(c):
+            with debug_out:
+                clear_output()
 
         def display_user_guide(c):
 
@@ -1984,11 +2251,13 @@ class AnalysisGui:
                     for w in wd_input:
                         set_widget_state(w, disable, tooltip, show_widget)
 
+            set_widget_state(info_box, show_widget=False, disable=True)
+
             with out:
                 clear_output()
             update_enable_list = [selected_tools]
             update_disable_list = [group_drop, batch_drop]
-            update_display_list = [name_of_batch_job, tool_row, var_row, move_up]
+            update_display_list = [name_row, tool_row, var_row, move_up]
 
             if any(tool_buttons.children):
                 for tool in tool_buttons.children:
@@ -2009,6 +2278,9 @@ class AnalysisGui:
                 delete_btn.on_click(delete_batch, remove=False)
                 cancel_btn.on_click(cancel_batch, remove=False)
                 user_guide_btn.on_click(display_user_guide, remove=False)
+                set_widget_state(update_display_list, show_widget=False)
+                set_widget_state(info_box, show_widget=True)
+                reset_multi_plot_options(hide=True)
 
                 name_of_batch_job.observe(batch_name_changed, 'value')
                 try:
@@ -2025,7 +2297,7 @@ class AnalysisGui:
                 set_widget_state(update_display_list, show_widget=True)
 
                 set_widget_state(create_buttons, disable=True,
-                          tooltip='Disabled in update mode...')
+                                 tooltip='Disabled in update mode...')
                 set_widget_state(save_btn, disable=False, tooltip='Save settings...')
                 set_widget_state(cancel_btn, disable=False, tooltip='Cancel...')
                 set_widget_state(user_guide_btn, disable=False, tooltip='User guide...')
@@ -2088,7 +2360,7 @@ class AnalysisGui:
                 upd_btn.tooltip = 'Update batch job...'
                 #        help_btn.disabled = False
                 set_widget_state(save_buttons, disable=True,
-                          tooltip='Enabled in update mode...')
+                                 tooltip='Enabled in update mode...')
 
         st_df = self.stations_df
 
@@ -2106,14 +2378,19 @@ class AnalysisGui:
         drop_layout = wd.Layout(width='auto',
                                 height='40px')
         var_txt_layout = wd.Layout(width='99%',
-                                   height='100%')
-        full_layout = wd.Layout(width='100%',
-                                height='100%')
-        flex_layout = wd.Layout(width='100%',
+                                   height='99%')
+        full_layout = wd.Layout(width='99%',
+                                height='99%')
+        flex_layout = wd.Layout(width='99%',
                                 display='inline-flex',
                                 flex_flow='row wrap',
                                 align_content='flex-start')
         label_layout = wd.Layout(min_width='125px')
+        hideable_flex_layout = wd.Layout(width='99%',
+                                         display='inline-flex',
+                                         flex_flow='row wrap',
+                                         align_content='flex-start')
+        hideable_label_layout = wd.Layout(min_width='125px')
 
         # Control widgets:
         # - var_translation_dict
@@ -2127,8 +2404,13 @@ class AnalysisGui:
         upd_dict_log.observe(reset_selection, names='value')
 
         # 1:st row
-        group_drop = wd.Dropdown(layout=drop_layout)
-        batch_drop = wd.Dropdown(layout=drop_layout)
+
+        group_drop = wd.Dropdown(layout=drop_layout, description_tooltip='Group '
+                                                                         'name')
+        batch_drop = wd.Dropdown(layout=drop_layout, description_tooltip='Name '
+                                                                         'of '
+                                                                         'batch '
+                                                                         'job')
         group_vars = wd.HTML(layout=var_txt_layout,
                              value='Variables: ',
                              disabled=True)
@@ -2159,9 +2441,9 @@ class AnalysisGui:
                                    icon='fa-info-circle',
                                    button_style='info')
 
-        create_buttons = wd.HBox([new_btn, upd_btn])
+        create_buttons = wd.HBox([new_btn, upd_btn], layout=flex_layout)
         save_buttons = wd.HBox([save_btn, cancel_btn,
-                                delete_btn, user_guide_btn])
+                                delete_btn, user_guide_btn], layout=flex_layout)
         row_list.append(wd.HBox([create_buttons, save_buttons],
                                 layout=flex_layout))
 
@@ -2186,14 +2468,18 @@ class AnalysisGui:
         row_list.append(user_guide_container)
 
         # 4:th row. update section: Batch name
+        name_label = wd.HTML('<b><i>Batch name: </i></b>',
+                             layout=hideable_label_layout)
         name_of_batch_job = wd.Text(value='Name of batch job',
-                                    layout=_get_layout('Name of batch job'))
-        row_list.append(name_of_batch_job)
+                                    layout=AnalysisGui._get_layout('Name of '
+                                                                   'batch job'))
+        name_row = wd.HBox([name_label, name_of_batch_job])
+        row_list.append(name_row)
 
         # 5:th row. update section: Tools
         tool_label = wd.HTML('<b><i>Available tools: </i></b>',
                              layout=label_layout)
-        tool_buttons = wd.HBox()
+        tool_buttons = wd.HBox(layout=flex_layout)
         tool_row = wd.HBox([tool_label, tool_buttons])
         row_list.append(tool_row)
 
@@ -2204,13 +2490,14 @@ class AnalysisGui:
         var_row = wd.HBox([var_label, var_buttons])
         row_list.append(var_row)
 
-        # 6:rd row. update section: Selections
+        # 7:rd row. update section: Selections
         selection_label = wd.HTML('<b><i>Current setup: </i></b>',
                                   layout=label_layout)
-        selected_tools_tooltip = """The tools are listed in order of """ \
-                                 """execution.\n - New tools are inserted """ \
-                                 """above selected row, \nor below all if """ \
-                                 """none is selected."""
+        selected_tools_tooltip = "The tools are listed in order of execution." \
+                                 "\nUse the Up-button (displayed in " \
+                                 "update-mode)" \
+                                 "\nto change the order of " \
+                                 "\nexecution."
         selected_tools = wd.Select(disabled=False,
                                    layout=wd.Layout(max_width='150px'),
                                    tooltip=selected_tools_tooltip)
@@ -2231,6 +2518,20 @@ class AnalysisGui:
                                  selected_tools,
                                  selected_vars]))
 
+        # 8:rd row. info, special settings
+        info_guide = wd.HTML(layout=hideable_flex_layout)
+
+        multi_select = wd.Checkbox(description='Default',
+                                   value=True,
+                                   layout=hideable_label_layout)
+        multi_selector = wd.RadioButtons(options=['Left y-axis', 'Right y-axis'],
+                                         value=None,
+                                         disabled=True,
+                                         layout=hideable_label_layout)
+        # special_settings = wd.VBox([multi_select, multi_selector])
+        info_box = wd.VBox([info_guide, multi_select, multi_selector])
+        row_list.append(info_box)
+
         out = wd.Output()
         debug_out = wd.Output()
 
@@ -2244,6 +2545,9 @@ class AnalysisGui:
 
         row_list.append(out)
         if self.debug:
+            debug_btn = wd.Button(description='Clear debug list')
+            debug_btn.on_click(clear_debug_list)
+            row_list.append(debug_btn)
             row_list.append(debug_out)
 
         return_widget = wd.VBox(row_list)
@@ -2467,6 +2771,7 @@ class AnalysisGui:
                               '<b><i>Width</i></b> to a value below '\
                               '200 will lead to plotly default '\
                               'value. '
+        dummy_txt = '9999999999'
 
         # common label widgets
         plotly_templ_label = wd.HTML(value='<b>Plotly template:</b>')
@@ -2571,14 +2876,15 @@ class AnalysisGui:
         latex_use_exp_cb = wd.Checkbox(value=True,
                                        disabled=False,
                                        indent=False,
-                                       layout=_get_layout('Keep exponents '
-                                                          'xxxxx'))
+                                       layout=AnalysisGui._get_layout('Keep '
+                                                                      'exponents '
+                                                                      'xxxxx'))
         latex_size = wd.Dropdown(options=[6, 8, 10, 11,
                                           12, 14, 17],
                                  description='Font size',
                                  value=8,
                                  disabled=False,
-                                 layout=_get_layout('Font size 2222'))
+                                 layout=AnalysisGui._get_layout('Font size 2222'))
         latex_font = wd.Dropdown(options=[('Roman (serifs, default)', 'rm'),
                                           ('Sans Serif (no serifs)', 'sf'),
                                           ('Italic (serifs)', 'it'),
@@ -2587,8 +2893,9 @@ class AnalysisGui:
                                           ('Normal', 'normal')],
                                  description='Font style',
                                  value='rm', disabled=False,
-                                 layout=_get_layout('Font style Roman (serifs, '
-                                                    'default)'))
+                                 layout=AnalysisGui._get_layout('Font style '
+                                                                'Roman (serifs, '
+                                                                'default)'))
         observe_latex = [latex_use_exp_cb, latex_size, latex_font]
         observe_ordinary_ls.extend(observe_latex)
 
@@ -2635,11 +2942,12 @@ class AnalysisGui:
         split_p_plotly_template_box = wd.HBox([plotly_templ_label,
                                                split_p_plotly_templates])
 
-        split_p_height = wd.FloatText(layout=_get_layout('9999999999'))
+        split_p_height = wd.FloatText(layout=AnalysisGui._get_layout(
+            dummy_txt))
         split_p_height_box = wd.HBox([height_label,
                                       split_p_height])
 
-        split_p_width = wd.FloatText(layout=_get_layout('9999999999'))
+        split_p_width = wd.FloatText(layout=AnalysisGui._get_layout(dummy_txt))
         split_p_width_box = wd.HBox([width_label,
                                      split_p_width])
 
@@ -2696,11 +3004,11 @@ class AnalysisGui:
         multi_p_latex_box = wd.HBox([use_latex_label,
                                      multi_p_use_latex_cb])
 
-        multi_p_height = wd.FloatText(layout=_get_layout('9999999999'))
+        multi_p_height = wd.FloatText(layout=AnalysisGui._get_layout(dummy_txt))
         multi_p_height_box = wd.HBox([height_label,
                                       multi_p_height])
 
-        multi_p_width = wd.FloatText(layout=_get_layout('9999999999'))
+        multi_p_width = wd.FloatText(layout=AnalysisGui._get_layout(dummy_txt))
         multi_p_width_box = wd.HBox([width_label,
                                      multi_p_width])
         multi_p_plotly_templates = wd.Dropdown(options=plotly_templates)
@@ -2759,11 +3067,11 @@ class AnalysisGui:
         corr_p_latex_box = wd.HBox([use_latex_label,
                                     corr_p_use_latex_cb])
 
-        corr_p_height = wd.FloatText(layout=_get_layout('9999999999'))
+        corr_p_height = wd.FloatText(layout=AnalysisGui._get_layout(dummy_txt))
         corr_p_height_box = wd.HBox([height_label,
                                      corr_p_height])
 
-        corr_p_width = wd.FloatText(layout=_get_layout('9999999999'))
+        corr_p_width = wd.FloatText(layout=AnalysisGui._get_layout(dummy_txt))
         corr_p_width_box = wd.HBox([width_label,
                                     corr_p_width])
 
@@ -2893,29 +3201,38 @@ class AnalysisGui:
             # Structure of cache dict:
             # {'_last_station_id': 'Hyltemossa',
             #  '_last_group': 'Group 1',
-            #  '_groups': {'Group 1': [['SWC_1', 'ETC NRT Meteo', 'Hyltemossa'],
+            #  '_groups': {
+            #      'Group 1': {
+            #          '_group_vars': [['SWC_1', 'ETC NRT Meteo', 'Hyltemossa'],
             #                          ['SWC_2', 'ETC NRT Meteo', 'Hyltemossa'],
             #                          ['SWC_3', 'ETC NRT Meteo', 'Hyltemossa']],
-            #              'LCA' : [['LE', 'ETC NRT Fluxes', 'Hyltemossa'],
-            #                       ['LE_UNCLEANED', 'ETC NRT Fluxes',
-            #                       'Hyltemossa'],
-            #                       ['NEE', 'ETC NRT Fluxes', 'Hyltemossa'],
-            #                       ['NEE_UNCLEANED', 'ETC NRT Fluxes',
-            #                       'Hyltemossa']],
-            #              'Another group': [['SWC_1', 'ETC NRT Meteo',
-            #                                'Hyltemossa'],
-            #                                ['SWC_2', 'ETC NRT Meteo',
-            #                                'Hyltemossa'],
-            #                                ['SWC_3', 'ETC NRT Meteo',
-            #                                'Hyltemossa'],
-            #                                ['LE', 'ETC NRT Fluxes',
-            #                                'Hyltemossa'],
-            #                                ['LE_UNCLEANED','ETC NRT Fluxes',
-            #                                'Hyltemossa'],
-            #                                ['NEE','ETC NRT Fluxes',
-            #                                'Hyltemossa'],
-            #                                ['NEE_UNCLEANED','ETC NRT Fluxes',
-            #                                'Hyltemossa']]}}
+            #          '_batches': {
+            #              'flux stat': {
+            #                  '0': {
+            #                      'split_plot': [['SWC_1', 'ETC NRT Meteo',
+            #                                      'Hyltemossa'],
+            #                                     ['SWC_2', 'ETC NRT Meteo',
+            #                                      'Hyltemossa']]}}}},
+            #      'Group 2': {
+            #          '_group_vars': [['SWC_1', 'ETC NRT Meteo', 'Hyltemossa'],
+            #                          ['SWC_2', 'ETC NRT Meteo', 'Hyltemossa'],
+            #                          ['SWC_3', 'ETC NRT Meteo', 'Hyltemossa'],
+            #                          ['LE', 'ETC NRT Fluxes', 'Hyltemossa'],
+            #                          ['LE_UNCLEANED','ETC NRT Fluxes',
+            #                           'Hyltemossa'],
+            #                          ['NEE','ETC NRT Fluxes', 'Hyltemossa'],
+            #                          ['NEE_UNCLEANED','ETC NRT Fluxes',
+            #                           'Hyltemossa']],
+            #          '_batches': {
+            #              'batch with error': {
+            #                  '0': {
+            #                      'split_plot': [['SWC_1', 'ETC NRT Meteo', 'Hyltemossa'],
+            #                                     ['SWC_4', 'ETC NRT Meteo',
+            #                                      'Hyltemossa']]}}},
+            #          '_var_mismatch': {
+            #              'batch with error': {
+            #                  'split_plot': [['SWC_4', 'ETC NRT Meteo',
+            #                                  'Hyltemossa']]}}}}}
 
             if '_upd_mode' not in group_dict.keys() or \
                     '_group_name' not in group_dict.keys():
@@ -2964,6 +3281,16 @@ class AnalysisGui:
                             cache['_last_group'] = ''
                             cache['_last_station_id'] = ''
 
+            # validate_batches
+            if grp in cache['_groups'].keys() and '_batches' in \
+                    cache['_groups'][grp].keys():
+                d = cache['_groups'][grp]
+                var_mismatch_dict = self._validate_batch_of_grp(d)
+                if var_mismatch_dict:
+                    cache['_groups'][grp]['_var_mismatch'] = var_mismatch_dict
+                else:
+                    cache['_groups'][grp].pop('_var_mismatch', None)
+
             # Remove timeseries from local storage
             self._flush_store(grp)
             if old_grp:
@@ -2980,14 +3307,18 @@ class AnalysisGui:
             else:
                 activate_gui('init_read_mode')
 
-        def set_station_drop():
-            if self.debug:
-                print('set_station_drop()')
-
+        def get_station_list():
             id_ls = list(st_df.id)
             name_ls = list(st_df.name)
             station_ls = list(set(zip(name_ls, id_ls)))
             station_ls.sort(key=lambda v: v[0].lower())
+            return station_ls
+
+        def set_station_drop():
+            if self.debug:
+                print('set_station_drop()')
+
+            station_ls = get_station_list()
 
             # Try to use station from last added variable
             upd_dict = get_temp_dict()
@@ -3017,7 +3348,7 @@ class AnalysisGui:
 
             cache = self._load_cache()
             if station_drop.value == 'dummy':
-                spec_ls = ['Products...']
+                spec_ls = ['Files...']
                 dobj_ls = ['dummy']
             else:
                 df = st_df.loc[st_df.id == station_drop.value]
@@ -3062,10 +3393,13 @@ class AnalysisGui:
                 var_drop.value = var_drop.options[0][1]
             else:
                 pid = spec_drop.value
-                var_dict = self.icos_info.icos_product_meta(pid)
+                var_dict = icos_data.StationData.icos_pid2meta(pid)['columns']
                 var_ls = sorted([key for key in var_dict.keys() if key not in
                                  ['TIMESTAMP', 'TIMESTAMP_END']])
                 var_info = [var_dict[key] for key in var_ls]
+                if self.debug:
+                    print(' - list(zip(var_ls, var_info)) = ',
+                          list(zip(var_ls, var_info)))
                 var_drop.options = list(zip(var_ls, var_info))
                 var_drop.value = var_drop.options[0][1]
 
@@ -3075,22 +3409,27 @@ class AnalysisGui:
 
             # Show info of a variable
             if isinstance(change, dict):
-                if change['name'] == 'value' and change['new']:
-                    if isinstance(change['owner'], wd.Dropdown):
-                        if var_drop.value == 'dummy':
-                            return
-                        else:
-                            var_name = change['owner'].label
-                            var_dict = change['owner'].value
-                    elif isinstance(change['owner'], wd.Checkbox):
-                        var_name = change['owner'].description
-                        var_dict = [x[1] for x in var_drop.options
-                                    if x[0] == var_name].pop()
-                        var_drop.value = var_dict
-                    else:
+                if isinstance(change['owner'], wd.Dropdown):
+                    if var_drop.value == 'dummy':
                         return
+                    else:
+                        var_name = change['owner'].label
+                        var_dict = change['owner'].value
+                elif isinstance(change['owner'], wd.Checkbox):
+                    var_name = change['owner'].description
+                    var_drop.label = var_name
+                    var_dict = var_drop.value
+                    # var_dict = [x[1] for x in var_drop.options
+                    #             if x[0] == var_name].pop()
+                    var_drop.label = var_name
+                    if self.debug:
+                        print(f' - var_drop.options = {var_drop.options},'
+                              f'\n- var_dict = {var_dict} ',
+                              f'\n- change["owner"].description = '
+                              f'{change["owner"].description} ')
                 else:
                     return
+
             else:
                 var_name = var_drop.label
                 var_dict = var_drop.value
@@ -3153,63 +3492,119 @@ class AnalysisGui:
 
             if upd_mode:
                 upd_dict = get_temp_dict()
-                var_tuples = upd_dict['_var_list']
-                var_ls = [v[0] for v in var_tuples]
+                var_tuples = copy.deepcopy(upd_dict['_var_list'])
                 text_tag = 'i'
                 separator = ' || '
-                margin = '&nbsp' * 2
+                margin = '&nbsp' * 42
+                t1 = f'<{text_tag}>Variables in update mode: </{text_tag}>'
             else:
                 grp = group_drop.value
                 cache = self._load_cache()
-                var_tuples = cache['_groups'][grp]['_group_vars']
-                var_ls = [v[0] for v in var_tuples]
+                var_tuples = copy.deepcopy(cache['_groups'][grp]['_group_vars'])
                 text_tag = 'b'
                 separator = '<br>'
-                margin = '&nbsp' * 10
 
-            station_dict = _var_tup2station_dict(var_tuples)
+                t1 = f'<{text_tag}>Variables: </{text_tag}>'
+                margin = '&nbsp' * 18
 
-            # We loop over stations and products to concatenate
-            # a proper text in html
-            t1 = f'<{text_tag}>Variables: </{text_tag}>'
-            t2 = ', '.join(var_ls)
-            t3 = ''
-            if upd_mode and len(t1 + t2) > 100:
-                t2 += '<br>'
-                first_break = 0
-            else:
-                first_break = 1
-
-            one_stn = (len(station_dict.keys()) == 1)
-            for stn in station_dict.keys():
-                if one_stn:
-                    t1 = f'<{text_tag}>Variables (of {stn}): </{text_tag}>'
-                    one_prod = (len(station_dict[stn].keys()) == 1)
-                    for prod in station_dict[stn].keys():
-                        if one_prod:
-                            t1 = f'<{text_tag}>Variables (of {prod} at {stn}): </{text_tag}>'
-                        else:
-                            t3 += f'{separator}{margin}<{text_tag}>{prod}: </{text_tag}>' + \
-                                  ", ".join(station_dict[stn][prod])
-                            if not upd_mode:
-                                t3 += f'{separator}'
-                        if upd_mode and len(t3) + len(
-                                t1 + t2) * first_break > 100:
-                            first_break = 0
-                            t3 += '<br>'
-                else:
-                    t3 += f'{separator}{margin}<{text_tag}>Station {stn}</{text_tag}> '
-                    for prod in station_dict[stn].keys():
-                        t3 += f'{separator}{margin}<{text_tag}>{prod}: </{text_tag}>'
-                        t3 += ", ".join(station_dict[stn][prod])
-                    if upd_mode:
-                        if len(t3) + len(t1 + t2) * first_break > 100:
-                            t3 += '<br>'
+            # Next we rename possible duplicate variable names
+            var_ls = [v[0] for v in var_tuples]
+            n = len(var_ls)
+            var_duplicates = {}
+            for i, v in enumerate(var_ls):
+                if i != n - 1 and v in var_ls[i + 1:]:
+                    if v not in var_duplicates.keys():
+                        var_duplicates[v] = [(i, 1)]
                     else:
-                        t3 += '<br>'
+                        count = var_duplicates[v][-1][1] + 1
+                        var_duplicates[v].append((i, count))
 
-            if t3:
-                t3 += f'{margin}<i>(In order of appearance)</i>'
+                elif v in var_duplicates.keys():
+                    count = var_duplicates[v][-1][1] + 1
+                    var_duplicates[v].append((i, count))
+
+            for v, i_ls in var_duplicates.items():
+                for x in i_ls:
+                    var_ls[x[0]] = f'{v}<sub>{x[1]}</sub>'
+                    var_tuples[x[0]][0] = f'{v}<sub>{x[1]}</sub>'
+
+            station_dict = AnalysisGui._var_tup2station_dict(var_tuples)
+            if self.debug:
+                print(f'get_group_var_text()\tvar_tuples = {var_tuples} ')
+                print(f'get_group_var_text()\tstation_dict = {station_dict} ')
+
+            t2 = f',<br>{margin}'.join([', '.join(var_ls[i:i + 12])
+                                        for i in range(0, len(var_ls),
+                                                       12)]) + '<br>'
+
+            # Next we loop over stations and products to concatenate
+            # a proper html text
+            t3 = ''
+
+            stn_ls = get_station_list()
+            one_stn = (len(station_dict.keys()) == 1)
+            rows = []
+            for stn in station_dict.keys():
+                stn_name = [s[0] for s in stn_ls if s[1] == stn].pop()
+                if one_stn:
+                    one_prod = (len(station_dict[stn].keys()) == 1)
+                    if one_prod:
+                        for prod in station_dict[stn].keys():
+                            t3 = f'Here, all variables are from ' \
+                                 f'<{text_tag}>{prod}</{text_tag}> '
+                    else:
+                        for prod in station_dict[stn].keys():
+                            if not t3:
+                                t3 += 'Where the variables '
+                            else:
+                                t3 += ', while '
+
+                            prod_vars = station_dict[stn][prod]
+                            last_var = prod_vars.pop()
+                            var_row = ',<br>'.join(['</b>, <b>'.join(prod_vars[
+                                                                     i:i + 12])
+                                                    for i in range(0,
+                                                                   len(prod_vars),
+                                                                   12)])
+                            if prod_vars:
+                                t3 += f'<b>{var_row}</b> and ' \
+                                      f'<b>{last_var}</b> are '
+                            else:
+                                t3 += f'<b>{last_var}</b> is '
+
+                            t3 += f' from <{text_tag}>{prod}</{text_tag}> '
+                        t3 += f'of the station ' \
+                              f'<{text_tag}>{stn_name}</{text_tag}> ' \
+                              f'(<{text_tag}>{stn}</{text_tag}>)'
+                    t3 += '.'
+                else:
+                    t4 = ''
+                    prods = []
+                    for prod in station_dict[stn].keys():
+                        if not t4:
+                            t4 += f'Where the variables '
+                        else:
+                            t4 += f',<br>while '
+
+                        prod_vars = station_dict[stn][prod]
+                        last_var = prod_vars.pop()
+                        var_row = ',<br>'.join(['</b>, <b>'.join(prod_vars[
+                                                                   i:i + 12])
+                                                for i in range(0, len(prod_vars),
+                                                               12)])
+                        if prod_vars:
+                            t4 += f'<b>{var_row}</b> and <b>{last_var}</b> are '
+                        else:
+                            t4 += f'<b>{last_var}</b> is '
+
+                        t4 += f' from <{text_tag}>{prod}</{text_tag}>'
+                    t4 += f'of the station ' \
+                          f'<{text_tag}>{stn_name}</{text_tag}> ' \
+                          f'(<{text_tag}>{stn}</{text_tag}>)'
+                    rows.append(t4)
+            if rows:
+                t3 = ';<br> '.join(rows) + '.'
+
             return t1 + t2 + t3
 
         def set_group_vars(c):
@@ -3708,15 +4103,29 @@ class AnalysisGui:
         drop_layout = wd.Layout(width='auto', height='40px')
         var_txt_layout = wd.Layout(width='99%', height='100%')
         grp_txt_layout = wd.Layout(width='148pt', height='28px')
+        label_layout = wd.Layout(min_width='125px')
 
-        # Dropdowns
+        # row 1
+        group_label = wd.HTML('<b><i>Available groups: </i></b>',
+                              layout=label_layout)
         group_drop = wd.Dropdown(layout=wd.Layout(width='148pt',
-                                                  height='40px'))
-        station_drop = wd.Dropdown(layout=drop_layout)
-        spec_drop = wd.Dropdown(layout=drop_layout)
+                                                  height='40px'),
+                                 description_tooltip='Group name')
+        group_box = wd.VBox([group_label, group_drop])
+
+        station_label = wd.HTML('<b><i>ICOS Stations: </i></b>',
+                                layout=label_layout)
+        station_drop = wd.Dropdown(layout=drop_layout,
+                                   description_tooltip='ICOS Station')
+        station_box = wd.HBox([group_label, group_drop])
+        product_label = wd.HTML('<b><i>Files: </i></b>',
+                                layout=label_layout)
+        spec_drop = wd.Dropdown(layout=drop_layout,
+                                description_tooltip='File name')
         var_drop = wd.Dropdown(layout=wd.Layout(width='148pt',
                                                 flex='inline-flex',
                                                 align="flex-end"))
+
 
         # Group stuff  n(children=[page1, page2], width=400)
         group_vars = wd.HTML(layout=var_txt_layout,
@@ -3745,7 +4154,7 @@ class AnalysisGui:
 
         # Create group buttons
         new_group_btn = wd.Button(description='New', icon='plus',
-                                     button_style='primary')
+                                  button_style='primary')
         update_group_btn = wd.Button(description='Update', icon='pen',
                                      button_style='info')
         save_group_btn = wd.Button(description='Save', icon='save',
@@ -3803,8 +4212,9 @@ class AnalysisGui:
             user_guide_container.children = [wd.VBox([user_guide])]
         user_guide_container.set_title(0, 'User guide')
 
-        upd_box = wd.VBox([wd.HBox([station_drop, spec_drop]),
-                           wd.HBox([user_guide_container, var_info_container]),
+        upd_box = wd.VBox([wd.HBox([user_guide_container,
+                                    var_info_container]),
+                           wd.HBox([station_drop, spec_drop]),
                            wd.HBox([group_name, group_vars_upd]),
                            var_box])
 

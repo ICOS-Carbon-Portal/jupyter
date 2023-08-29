@@ -185,16 +185,17 @@ class StationData:
 
         return final_df
 
-    def icos_product_meta(self, pid: str = None) -> dict:
+    @staticmethod
+    def icos_pid2meta(pid: str = None) -> dict:
         if not pid:
             return {}
         do = Dobj(pid)
         meta = do.meta
         parsed_meta = IcosFrame.trim_icos_meta(meta)
-        column_meta = parsed_meta['columns']
+
         del do
 
-        return column_meta
+        return parsed_meta
 
     def get_ts(self, pid: str = None, stn_id: str = None,
                stn_name: str = None, product: str = None,
