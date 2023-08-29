@@ -109,7 +109,13 @@ def make_plot_anomalies(df,
         # The error was discovered for Hainich Jan 2018. It happens here: posAnomalyAngle = radians((totalPositiveAnomaly/totalValues)*180)
         for df_column in df.columns:
             if df[df_column].sum() == 0:
-                return display(HTML('<p style="font-size:16px">0 for all days in the selected month</p>'))
+                # okay if it is no standard deviation bar (it will not be any in case there are more than 5/11 days in the reference period that had flagged data.
+                if 'std' not in df_column:
+                    if 'reference_b_std' in locals():
+                        return display(HTML('<p style="font-size:16px">no valid data in the selected month for at least one of the sites</p>'))
+                    
+                    else:
+                        return display(HTML('<p style="font-size:16px">no valid data in the selected month</p>'))
 
         bintype = 'day'
         if selection_dict["selected_site_b"] is not None:
@@ -130,9 +136,25 @@ def make_plot_anomalies(df,
     else:
         return 'Choose a temporal scope!'
 
+    
+    # now we have used the original data with nan to calculate all values needed for the legend.
+    # here we give the values 0 where there simply should not be anything in the graph.
+    df_nan_0 = df.copy()
+    
+    # the reference values were kept for the average
+    # now replaced wiht nan (and then changed to zero) because do not want to show it in the output
+    df_nan_0[reference_a] = np.where(np.isnan(df_nan_0[values_a]), np.nan, df_nan_0[reference_a])
+    
+    # in case of a second site
+    if not single_plot:
+        df_nan_0[reference_b] = np.where(np.isnan(df_nan_0[values_b]), np.nan, df_nan_0[reference_b])
+    
+    df_nan_0.fillna(0, inplace=True)
+    
     if single_plot:
+        
         output = cyclebars_anomalies(
-            data = df,
+            data = df_nan_0,
             labels = bintype,
             values_a = values_a,
             reference_values_a = reference_a,
@@ -144,10 +166,11 @@ def make_plot_anomalies(df,
             plot_legends=False,
             pie_offset=0,
         )
+        
     else:
         if same_variable:
             output = cyclebars_anomalies(
-                data = df,
+                data = df_nan_0,
                 labels = bintype,
                 values_a = values_a,
                 reference_values_a = reference_a,
@@ -164,7 +187,7 @@ def make_plot_anomalies(df,
             )
         else:
             output_a = cyclebars_anomalies(
-                data = df,
+                data = df_nan_0,
                 labels = bintype,
                 values_a = values_a,
                 reference_values_a = reference_a,
@@ -177,7 +200,7 @@ def make_plot_anomalies(df,
                 pie_offset=0,
             )
             output_b = cyclebars_anomalies(
-                data = df,
+                data = df_nan_0,
                 labels = bintype,
                 values_a = values_b,
                 reference_values_a = reference_b,

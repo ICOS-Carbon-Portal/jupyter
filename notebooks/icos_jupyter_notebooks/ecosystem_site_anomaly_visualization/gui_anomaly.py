@@ -76,16 +76,17 @@ path_ten = os.path.join(data_path, 'FULLSET_DD', 'ten_year')
 path_twenty = os.path.join(data_path, 'FULLSET_DD', 'twenty_year')
 
 # use data from one variable to list all the available sites:
-data_2010_2020 = pd.read_csv(os.path.join(data_path, 'all_sites_2010_2020_GPP_DT_VUT_REF.csv'))
+data_2010_2020 = pd.read_csv(os.path.join(data_path, 'all_sites_2010_2020_GPP_DT_VUT_REF_v2.csv'))
 
 # make a tuple for use in the dropdowns
-list_all_2010_2020 = list(data_2010_2020.columns)[4:]
+list_all_2010_2020 = list(data_2010_2020.columns)[5:]
 list_all_2010_2020 = sorted(list_all_2010_2020)
 dropdown_tuple_2010_2020 = [(list(sites_dataframe.loc[sites_dataframe['id'] == (site_string.split('_')[0])]['name'])[0] + ' (' + site_string.split('_')[0] + ')', site_string) for site_string in list_all_2010_2020 if not 'std' in site_string]
 
 # same as above but for the full reference period
-data_2000_2020 = pd.read_csv(os.path.join(data_path, 'all_sites_2000_2020_GPP_DT_VUT_REF.csv'))
-list_all_2000_2020 = list(data_2000_2020.columns)[4:]
+data_2000_2020 = pd.read_csv(os.path.join(data_path, 'all_sites_2000_2020_GPP_DT_VUT_REF_v2.csv'))
+
+list_all_2000_2020 = list(data_2000_2020.columns)[5:]
 list_all_2000_2020 = sorted(list_all_2000_2020)
 dropdown_tuple_2000_2020 = [(list(sites_dataframe.loc[sites_dataframe['id'] == (site_string.split('_')[0])]['name'])[0] + ' (' + site_string.split('_')[0] + ')', site_string) for site_string in list_all_2000_2020 if not 'std' in site_string]
 
@@ -153,8 +154,15 @@ def return_year_data(reference_path, site_name, year, variable):
                     df = pd.read_csv(path_ten + "/" + file)          
 
                     df_time = df.loc[(df['TIMESTAMP'] >= int(str_date_start)) &(df['TIMESTAMP'] <= int(str_date_end))]
+                    
+                    if variable == 'GPP_DT_VUT_REF':
+                        variable_qc = 'NEE_VUT_REF_QC'
+                    if variable == 'SW_IN_F':
+                        variable_qc = 'SW_IN_F_QC'
+                    if variable == 'VPD_F':
+                        variable_qc = 'VPD_F_QC'
 
-                    df_time = df_time[["TIMESTAMP", variable]]
+                    df_time = df_time[["TIMESTAMP", variable, variable_qc]]
 
                     month= [int(str(time)[4:6]) for time in list(df_time['TIMESTAMP'])]
                     df_time['month'] = month
@@ -163,8 +171,16 @@ def return_year_data(reference_path, site_name, year, variable):
                     df_time['day'] = day
 
                     df_time = df_time.drop(df_time[(df_time.month == 2) & (df_time.day == 29)].index)
+                    
+                    df_time_for_merge = pd.DataFrame()
+                    
+                    df_time_for_merge["TIMESTAMP"] = df_time["TIMESTAMP"]
+                    
+                    df_time_qc = df_time.loc[df_time[variable_qc] > 0.7]
+                
+                    df_time_qc_full = pd.merge(df_time_for_merge, df_time_qc, how='left', left_on="TIMESTAMP", right_on = "TIMESTAMP")
 
-                    list_values = list(df_time[variable])
+                    list_values = list(df_time_qc_full[variable])
                     
                     return list_values
 
@@ -403,10 +419,12 @@ def update_func(button_c):
     
     # reference data is pre-computed and accessed depending on what variable was selected. 
     # the pre-computed data has columns for all sites, for instance: Dk-Sor_2000_2020. The name of the file has both the variable name and reference period in the name, for instance: all_sites_2000_2020_SW_IN_F
-    reference_data_a_df = pd.read_csv(os.path.join(data_path, 'all_sites_' + reference_string + '_' + variable_a_value + '.csv'))
+    reference_data_a_df = pd.read_csv(os.path.join(data_path, 'all_sites_' + reference_string + '_' + variable_a_value + '_v2.csv'))
     reference_data_a = reference_data_a_df[selected_site_a + "_" + reference_string]
     reference_data_a_std = reference_data_a_df[selected_site_a + "_" + reference_string + '_std']
+    reference_data_a_std_count = reference_data_a_df[selected_site_a + "_" + reference_string + '_std_count']
     reference_data_a_std_month = reference_data_a_df[selected_site_a + "_" + reference_string + '_std_month']
+    reference_data_a_std_month_count = reference_data_a_df[selected_site_a + "_" + reference_string + '_std_month_count']
     
     # create the dataframe with only the data that is necessary to create the figures.
     # it has the daily average reference data and daily average data for the specific year and variable. 
@@ -420,7 +438,9 @@ def update_func(button_c):
     # dictionary with filed names (used in df_final and accessed in the plot py file
     reference_values_a_col_name = selected_site_a + "_" + reference_string + '_' + variable_a_value
     sd_a_col_name = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_std'
+    sd_a_col_name_count = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_std_count'
     sd_a_month_col_name = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_std_month'
+    sd_a_month_col_name_count = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_std_month_count'
     values_a_col_name = column_name_a + '_' + variable_a_value
     
     site_b = site_choice_b.value
@@ -429,19 +449,26 @@ def update_func(button_c):
         selected_site_b = site_b.split("_")[0]
         reference_values_b_col_name =selected_site_b + "_" + reference_string + '_' + variable_b_value
         sd_b_col_name = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std'
+        sd_b_col_name_count = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_count'
         sd_b_month_col_name = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_month'
+        sd_b_month_col_name_count = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_month_count'
         values_b_col_name = selected_site_b + "_" + str(year_b) + '_' + variable_b_value
         #True if (selection_dict["variable_a_value"] == selection_dict["variable_b_value"]) else False
     else:
         reference_values_b_col_name = None
         sd_b_col_name = None
+        sd_b_col_name_count = None
         sd_b_month_col_name = None
+        sd_b_month_col_name_count = None
         values_b_col_name = None
 
    
     df_final[reference_values_a_col_name] = reference_data_a
     df_final[sd_a_col_name] = reference_data_a_std
+    df_final[sd_a_col_name_count] = reference_data_a_std_count
     df_final[sd_a_month_col_name] = reference_data_a_std_month
+    df_final[sd_a_month_col_name_count] = reference_data_a_std_month_count
+    
     
     # if a second site is selected
     if site_b is not None:     
@@ -465,15 +492,19 @@ def update_func(button_c):
     if site_b is not None: 
         column_name_b = selected_site_b + "_" + str(year_b)
         values_site_b = return_year_data(path_selected, selected_site_b, year_b, variable_b_value)
-        reference_data_b_df = pd.read_csv(os.path.join(data_path, 'all_sites_' + reference_string + '_' + variable_b_value + '.csv'))
+        reference_data_b_df = pd.read_csv(os.path.join(data_path, 'all_sites_' + reference_string + '_' + variable_b_value + '_v2.csv'))
         
         reference_data_b = reference_data_b_df[selected_site_b + "_" + reference_string]
         reference_data_b_std = reference_data_b_df[selected_site_b + "_" + reference_string + '_std']
+        reference_data_b_std_count = reference_data_b_df[selected_site_b + "_" + reference_string + '_std_count']
         reference_data_b_std_month = reference_data_b_df[selected_site_b + "_" + reference_string + '_std_month']
+        reference_data_b_std_month_count = reference_data_b_df[selected_site_b + "_" + reference_string + '_std_month_count']
         
         df_final[reference_values_b_col_name] = reference_data_b
         df_final[sd_b_col_name] = reference_data_b_std
+        df_final[sd_b_col_name_count] = reference_data_b_std_count
         df_final[sd_b_month_col_name] = reference_data_b_std_month
+        df_final[sd_b_month_col_name_count] = reference_data_b_std_month_count
         
         # this order of the columns need to remain which is why column a is insert here
         df_final[values_a_col_name] = values_site_a
@@ -506,6 +537,9 @@ def update_func(button_c):
     f.write('Gross Primary Production daytime in micromol/m2/s (GPP_DT_VUT_REF);\n')
     f.write('Shortwave incoming radiation in W/m2 (SW_IN_F);\n')
     f.write('Vapor pressure deficit in hPa (VPD_F);\n')
+    f.write('Identify the selected year(s) for the site(s) based on the column heading ending with the variable name(s). The reference period(s) are provided with a dash indicating the start and end of each reference period.;\n')
+    f.write('The column(s) ending with '_std_count' represent the number of times that a specific date (row) within the reference period was flagged. These flagged values were excluded from the calculation of the standard deviation value (found in columns ending with "_std").;\n')
+    f.write('The column(s) ending with "_std_count_month" represent the number of times a day within a specific month (referenced in the"month" column) was flagged during the reference period. These flagged values were excluded from the calculation of the standard deviation value (found in columns ending with "_std_month"). Note that the values in these columns are the same when the month is the same.;\n')
     
     date_today = current_date.today()
     f.write('Date of file creation: '+ str(date_today) +';\n')
@@ -516,7 +550,7 @@ def update_func(button_c):
         f.write(citation_string_site_b + ';\n')
         
     f.write('Cite the notebook package if a figure is used:; \n')
-    f.write('Storm, I., Klasen, V,, 2023. Ecosystem site anomalies notebook tool. ICOS ERIC - Carbon Portal. https://doi.org/10.18160/AMET-9KWT;\n')
+    f.write('Storm, I., Klasen, V,, 2023. Ecosystem site anomalies notebook tool. ICOS ERIC - Carbon Portal. https://doi.org/10.18160/0GP0-HW10;\n')
     # Save the dataframe, so it can be downloaded as a csv-file in a
     # folder called "ecosystem_site_anomaly_visualization_output" under
     # "/home/user/output/" directory.
@@ -563,10 +597,36 @@ def update_func(button_c):
         display(HTML('<p style="font-size:16px"><b>Specify output:</b><br></p>'))
     
     with output_plot_anomalies:
+
+        # Some updates to the dataframe to account for the flagged data
         
+        # not show standard deviation values in case of no values
+        # here when showing days in a month
+        df_final[sd_a_col_name] = np.where(np.isnan(df_final[values_a_col_name]), np.nan, df_final[sd_a_col_name])
+        # here when showing months in a year: all values in the month must be missing
+        count_vals_per_month = df_final.groupby('month', dropna=True).count()
+        # list of months that have no values:
+        count_vals_per_month = count_vals_per_month.loc[count_vals_per_month[values_a_col_name] == 0]
+        exclude_std_months = list(count_vals_per_month.index)         
+        df_final[sd_a_month_col_name] = np.where(np.isin(df_final["month"], exclude_std_months), np.nan, df_final[sd_a_month_col_name])
+   
+        # not show standard deviation bar in case of too few values (set to five currently). Only up to 11 for individual days std.
+        # assumes all reference periods will have enough values for the standard deviations for months
+        df_final[sd_a_col_name] = np.where(df_final[sd_a_col_name_count]>5,  np.nan, df_final[sd_a_col_name])
+                       
+        if site_b is not None:
+
+            # same updates made to the data associated with the second selection
+            df_final[sd_b_col_name] = np.where(np.isnan(df_final[values_b_col_name]), np.nan, df_final[sd_b_col_name])
+            count_vals_per_month = count_vals_per_month.loc[count_vals_per_month[values_b_col_name] == 0]
+            exclude_std_months = list(count_vals_per_month.index)         
+            df_final[sd_b_month_col_name] = np.where(np.isin(df_final["month"], exclude_std_months), np.nan, df_final[sd_b_month_col_name])
+            
+            df_final[sd_b_col_name] = np.where(df_final[sd_b_col_name_count]>5,  np.nan, df_final[sd_b_col_name])
+
         plot_interface_anomaly.plot_anomalies(df_final, data_filename, selection_dict, colors_positive_anomalies_dict, colors_negative_anomalies_dict)
             
-    # after the tool is done running, it is possible to make a new tool run (hence the update button can be pressed given that the necessary widgets are populated)
+    # after the tool is done running, it is possible to make a new tool run (hence the update buttn can be pressed given that the necessary widgets are populated)
     update_button.tooltip='Click to start the run'
     update_button.style.button_color=button_color_able  
     update_button.disabled = False
