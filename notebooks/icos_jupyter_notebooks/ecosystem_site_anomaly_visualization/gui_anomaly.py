@@ -612,8 +612,11 @@ def update_func(button_c):
    
         # not show standard deviation bar in case of too few values (set to five currently). Only up to 11 for individual days std.
         # assumes all reference periods will have enough values for the standard deviations for months
-        df_final[sd_a_col_name] = np.where(df_final[sd_a_col_name_count]>5,  np.nan, df_final[sd_a_col_name])
-                       
+        if reference == '2010-2020':  
+            df_final[sd_a_col_name] = np.where(df_final[sd_a_col_name_count]>5,  np.nan, df_final[sd_a_col_name])
+        else: # if reference = 2000-2020
+            df_final[sd_a_col_name] = np.where(df_final[sd_a_col_name_count]>15,  np.nan, df_final[sd_a_col_name])
+            
         if site_b is not None:
 
             # same updates made to the data associated with the second selection
@@ -622,8 +625,10 @@ def update_func(button_c):
             exclude_std_months = list(count_vals_per_month.index)         
             df_final[sd_b_month_col_name] = np.where(np.isin(df_final["month"], exclude_std_months), np.nan, df_final[sd_b_month_col_name])
             
-            df_final[sd_b_col_name] = np.where(df_final[sd_b_col_name_count]>5,  np.nan, df_final[sd_b_col_name])
-
+            if reference == '2010-2020': 
+                df_final[sd_b_col_name] = np.where(df_final[sd_b_col_name_count]>5,  np.nan, df_final[sd_b_col_name])
+            else: # if reference = 2000-2020
+                df_final[sd_b_col_name] = np.where(df_final[sd_b_col_name_count]>15,  np.nan, df_final[sd_b_col_name])
         plot_interface_anomaly.plot_anomalies(df_final, data_filename, selection_dict, colors_positive_anomalies_dict, colors_negative_anomalies_dict)
             
     # after the tool is done running, it is possible to make a new tool run (hence the update buttn can be pressed given that the necessary widgets are populated)
