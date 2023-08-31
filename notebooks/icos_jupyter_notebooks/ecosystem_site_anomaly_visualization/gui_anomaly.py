@@ -435,23 +435,23 @@ def update_func(button_c):
     df_final['month'] =reference_data_a_df["month"]
     df_final['day'] = reference_data_a_df["day"]
     
-    # dictionary with filed names (used in df_final and accessed in the plot py file
-    reference_values_a_col_name = selected_site_a + "_" + reference_string + '_' + variable_a_value
-    sd_a_col_name = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_std'
-    sd_a_col_name_count = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_std_count'
-    sd_a_month_col_name = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_std_month'
-    sd_a_month_col_name_count = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_std_month_count'
+    # dictionary with field names (used in df_final and accessed in the plot py file)
+    reference_values_a_col_name = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_a'
+    sd_a_col_name = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_std_a'
+    sd_a_col_name_count = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_std_count_a'
+    sd_a_month_col_name = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_std_month_a'
+    sd_a_month_col_name_count = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_std_month_count_a'
     values_a_col_name = column_name_a + '_' + variable_a_value
     
     site_b = site_choice_b.value
     if site_b is not None:
         year_b = s_year_b.value
         selected_site_b = site_b.split("_")[0]
-        reference_values_b_col_name =selected_site_b + "_" + reference_string + '_' + variable_b_value
-        sd_b_col_name = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std'
-        sd_b_col_name_count = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_count'
-        sd_b_month_col_name = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_month'
-        sd_b_month_col_name_count = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_month_count'
+        reference_values_b_col_name =selected_site_b + "_" + reference_string + '_' + variable_b_value + '_b'
+        sd_b_col_name = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_b'
+        sd_b_col_name_count = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_count_b'
+        sd_b_month_col_name = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_month_b'
+        sd_b_month_col_name_count = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_month_count_b'
         values_b_col_name = selected_site_b + "_" + str(year_b) + '_' + variable_b_value
         #True if (selection_dict["variable_a_value"] == selection_dict["variable_b_value"]) else False
     else:
