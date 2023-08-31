@@ -621,6 +621,7 @@ def update_func(button_c):
 
             # same updates made to the data associated with the second selection
             df_final[sd_b_col_name] = np.where(np.isnan(df_final[values_b_col_name]), np.nan, df_final[sd_b_col_name])
+            count_vals_per_month = df_final.groupby('month', dropna=True).count()
             count_vals_per_month = count_vals_per_month.loc[count_vals_per_month[values_b_col_name] == 0]
             exclude_std_months = list(count_vals_per_month.index)         
             df_final[sd_b_month_col_name] = np.where(np.isin(df_final["month"], exclude_std_months), np.nan, df_final[sd_b_month_col_name])
