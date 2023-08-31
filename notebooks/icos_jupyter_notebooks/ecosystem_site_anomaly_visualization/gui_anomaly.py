@@ -74,6 +74,7 @@ sites_dataframe = station.getIdList('ES')
 
 path_ten = os.path.join(data_path, 'FULLSET_DD', 'ten_year')
 path_twenty = os.path.join(data_path, 'FULLSET_DD', 'twenty_year')
+path_icos = os.path.join(data_path, 'FULLSET_DD', 'ICOS')
 
 # use data from one variable to list all the available sites:
 data_2010_2020 = pd.read_csv(os.path.join(data_path, 'all_sites_2010_2020_GPP_DT_VUT_REF_v2.csv'))
@@ -98,11 +99,13 @@ list_site_ids_2000_2020 = [column.split('_')[0] for column in data_2000_2020.col
 filtered_2010_2020 = sites_dataframe.loc[sites_dataframe['id'].isin(list_site_ids_2010_2020)]
 filtered_2000_2020 = sites_dataframe.loc[sites_dataframe['id'].isin(list_site_ids_2000_2020)]
 
+sites_w_ICOS_data = ['DE-Kli','FR-Aur','CZ-wet','BE-Lon','DE-Gri','DE-Hai','SE-Deg','IT-Tor','FI-Let','FR-Fon','FI-Hyy']
+
 # the overview map will show from start, but the user can change this. 
 global map_showing
 map_showing = True
 
-# get pandas dataframe with links to the different sites landing pages (and in turn citation strings):
+# get pandas dataframe with links to the different sites specific landing pages for the warm winter product (and in turn citation strings):
 query = '''
 prefix cpmeta: <http://meta.icos-cp.eu/ontologies/cpmeta/>
 prefix prov: <http://www.w3.org/ns/prov#>
@@ -126,14 +129,46 @@ order by desc(?submTime)
 '''
 result = RunSparql(query, 'pandas')   # look at the documentation for different outputformats...
 result.run()
-df_ecosystem = result.data()
+df_warm_winter = result.data()
+
+# get pandas dataframe with links to the different sites specific landing pages for the level 2 product (and in turn citation strings):
+query_level2 = '''
+prefix cpmeta: <http://meta.icos-cp.eu/ontologies/cpmeta/>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+select ?dobj ?hasNextVersion ?spec ?fileName ?size ?submTime ?timeStart ?timeEnd
+where {
+VALUES ?spec {<http://meta.icos-cp.eu/resources/cpmeta/etcArchiveProduct>}
+?dobj cpmeta:hasObjectSpec ?spec .
+BIND(EXISTS{[] cpmeta:isNextVersionOf ?dobj} AS ?hasNextVersion)
+?dobj cpmeta:hasSizeInBytes ?size .
+?dobj cpmeta:hasName ?fileName .
+?dobj cpmeta:wasSubmittedBy/prov:endedAtTime ?submTime .
+?dobj cpmeta:hasStartTime | (cpmeta:wasAcquiredBy / prov:startedAtTime) ?timeStart .
+?dobj cpmeta:hasEndTime | (cpmeta:wasAcquiredBy / prov:endedAtTime) ?timeEnd .
+FILTER NOT EXISTS {[] cpmeta:isNextVersionOf ?dobj}
+}
+order by desc(?submTime)
+'''
+result_icos = RunSparql(query_level2, 'pandas')   # look at the documentation for different outputformats...
+result_icos.run()
+df_icos = result_icos.data()
 
 #--------definition of general functions--------------
 
-def return_link_es_data(site_name):
+def return_link_es_data(site_name, icos = False):
     df_ecosystem_selected = df_ecosystem.loc[df_ecosystem['fileName'].str.contains(site_name)]
     
-    link_landingpage = df_ecosystem_selected['dobj'].values[0]
+    if icos: 
+        
+        df = df_icos
+        
+    else:
+        df = df_warm_winter
+        
+    df_selected = df.loc[df['fileName'].str.contains(site_name)]
+    
+    link_landingpage = df_selected['dobj'].values[0]
     
     return link_landingpage
 
@@ -151,7 +186,7 @@ def return_year_data(reference_path, site_name, year, variable):
 
                 if site_name in file:
 
-                    df = pd.read_csv(path_ten + "/" + file)          
+                    df = pd.read_csv(reference_path + "/" + file)          
 
                     df_time = df.loc[(df['TIMESTAMP'] >= int(str_date_start)) &(df['TIMESTAMP'] <= int(str_date_end))]
                     
@@ -244,7 +279,10 @@ def change_site_a(c):
 
                     start_year = int(file[-20:-16])
                     
-    years = list(range(start_year, 2021))
+    if selected_site in sites_w_ICOS_data:
+        years = list(range(start_year, 2023))
+    else:
+        years = list(range(start_year, 2021))
 
     s_year_a.options=years 
     s_year_a.value = min(years)
@@ -278,7 +316,10 @@ def change_site_b(c):
 
                     start_year = int(file[-20:-16])
                     
-    years = list(range(start_year, 2021))
+    if selected_site in sites_w_ICOS_data:
+        years = list(range(start_year, 2023))
+    else:
+        years = list(range(start_year, 2021))
 
     s_year_b.options=years 
     s_year_b.value = min(years)
@@ -379,6 +420,9 @@ def update_func(button_c):
     variable_a_value = variable_a.value
     variable_b_value = variable_b.value
     
+    # access the data for the slected year (to be compared to the selected reference data)
+    year_a = s_year_a.value
+    
     # put colors into dictionaries which are passed to the functions. 
     colors_positive_anomalies_dict = {variable_b_value:color_b_pos.value, variable_a_value:color_a_pos.value}
     colors_negative_anomalies_dict = { variable_b_value:color_b_neg.value, variable_a_value:color_a_neg.value}
@@ -409,13 +453,21 @@ def update_func(button_c):
     json_data = json.loads(json_url_response.read())
     citation_string_site_a = json_data['references']['citationString']
     
-    # access the data for the slected year (to be compared to the selected reference data)
-    year_a = s_year_a.value
+    if  year_a > 2020:
+        landingpage_site_a_icos = return_link_es_data(selected_site_a, icos = True)
+        # use the url to the site landing page to access its metadata. 
+        json_url = landingpage_site_a_icos + '/json_file.json'
+        json_url_response = urllib.request.urlopen(json_url)
+        json_data = json.loads(json_url_response.read())
+        citation_string_site_a_icos = json_data['references']['citationString']
     
     column_name_a = selected_site_a + "_" + str(year_a)
     
     # return year data is a function defined in this py-file. 
-    values_site_a = return_year_data(path_selected, selected_site_a, year_a, variable_a_value)
+    if year_a > 2020:
+        values_site_a = return_year_data(path_icos, selected_site_a, year_a, variable_a_value)
+    else:
+        values_site_a = return_year_data(path_selected, selected_site_a, year_a, variable_a_value)
     
     # reference data is pre-computed and accessed depending on what variable was selected. 
     # the pre-computed data has columns for all sites, for instance: Dk-Sor_2000_2020. The name of the file has both the variable name and reference period in the name, for instance: all_sites_2000_2020_SW_IN_F
@@ -482,6 +534,15 @@ def update_func(button_c):
         json_data = json.loads(json_url_response.read())
 
         citation_string_site_b = json_data['references']['citationString']
+        
+        if year_b > 2020:
+            landingpage_site_b_icos = return_link_es_data(selected_site_b, icos = True)
+            # use the url to the site landing page to access its metadata. 
+            json_url = landingpage_site_b_icos + '/json_file.json'
+            json_url_response = urllib.request.urlopen(json_url)
+            json_data = json.loads(json_url_response.read())
+            citation_string_site_b_icos = json_data['references']['citationString']
+    
 
         # set site_b to None in case the same site and year as site a
         if site_b == site_a and year_a == year_b and variable_a_value == variable_b_value:
@@ -491,7 +552,10 @@ def update_func(button_c):
     # therefore, check if None again:
     if site_b is not None: 
         column_name_b = selected_site_b + "_" + str(year_b)
-        values_site_b = return_year_data(path_selected, selected_site_b, year_b, variable_b_value)
+        if year_b > 2020:
+            values_site_b = return_year_data(path_icos, selected_site_b, year_b, variable_b_value)
+        else:
+            values_site_b = return_year_data(path_selected, selected_site_b, year_b, variable_b_value)
         reference_data_b_df = pd.read_csv(os.path.join(data_path, 'all_sites_' + reference_string + '_' + variable_b_value + '_v2.csv'))
         
         reference_data_b = reference_data_b_df[selected_site_b + "_" + reference_string]
@@ -538,15 +602,18 @@ def update_func(button_c):
     f.write('Shortwave incoming radiation in W/m2 (SW_IN_F);\n')
     f.write('Vapor pressure deficit in hPa (VPD_F);\n')
     f.write('Identify the selected year(s) for the site(s) based on the column heading ending with the variable name(s). The reference period(s) are provided with a dash indicating the start and end of each reference period.;\n')
-    f.write('The column(s) ending with "_std_count" represent the number of times that a specific date (row) within the reference period was flagged. These flagged values were excluded from the calculation of the standard deviation value (found in columns ending with "_std").;\n')
+    f.write('The column(s) ending with "_std_count" represent the number of times that a specific date (row) within the reference period was flagged (QC < 0.7). These flagged values were excluded from the calculation of the standard deviation value (found in columns ending with "_std").;\n')
     f.write('The column(s) ending with "_std_count_month" represent the number of times a day within a specific month (referenced in the"month" column) was flagged during the reference period. These flagged values were excluded from the calculation of the standard deviation value (found in columns ending with "_std_month"). Note that the values in these columns are the same when the month is the same.;\n')
     
     date_today = current_date.today()
     f.write('Date of file creation: '+ str(date_today) +';\n')
     f.write('Cite the data:; \n')
+    if year_a > 2020:
+        f.write(citation_string_site_a_icos + ';\n')
     f.write(citation_string_site_a + ';\n')
-    if site_b is not None and variable_a_value != variable_b_value:
-        
+    if site_b is not None:
+        if year_b > 2020:
+            f.write(citation_string_site_b_icos + ';\n')
         f.write(citation_string_site_b + ';\n')
         
     f.write('Cite the notebook package if a figure is used:; \n')
@@ -570,31 +637,39 @@ def update_func(button_c):
     # message which will change of the selections the user have done.
     # it shows the selected site names and links to their landing page(s).
     with message:
+        
+                
+        display(HTML('<p style="font-size:16px"><b>Selected site(s):</b><br></p>'))
+        
+        if year_a > 2020:
+            display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' (' + selected_site_a + '), ' + variable_a_value + ':<br>Daily averages for year ' + str(year_a) + ' from the <a href="' + landingpage_site_a_icos +'" target="_blank">"ICOS Level 2" release</a>' + ' are compared to daily averages during ' + reference + ' from the <a href="' + landingpage_site_a +'" target="_blank">"Warm Winter 2020" release</a>.'))
+        else: 
+            display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' (' + selected_site_a + '), ' + variable_a_value + ':<br>Daily averages for year ' + str(year_a) + ' are compared to daily averages during ' + reference + ' from the <a href="' + landingpage_site_a +'" target="_blank">"Warm Winter 2020" release</a>.'))
+            
 
         if site_b is not None:
             
-            display(HTML('<p style="font-size:16px"><b>Selected sites:</b><br><a href="' + landingpage_site_a +'" target="_blank">' + selected_site_a_name + '</a> (year ' + str(year_a) + ', ' + variable_a_value + \
-                         ') and <a href="' + landingpage_site_b +'" target="_blank">' + selected_site_b_name +\
-                        '</a> (year ' + str(year_b) + ', ' + variable_b_value + '). Their daily average daytime flux values are compared to those of the reference period ' + reference +'.</p>'))
-        else:
-            display(HTML('<p style="font-size:16px"><b>Selected site:</b><br><a href="' + landingpage_site_a +'" target="_blank">' + selected_site_a_name + '</a> (year ' + str(year_a) + ', ' + variable_a_value + \
-                         '). Its daily average daytime flux values are compared to those of the reference period ' + reference +'.</p>'))
-    
+            if year_b > 2020:
+                display(HTML('<p style="font-size:16px">' + selected_site_b_name + ' (' + selected_site_b + '), ' + variable_b_value + ':<br>Daily averages for year ' + str(year_b) + ' from the <a href="' + landingpage_site_b_icos +'" target="_blank">"ICOS Level 2" release</a>' + ' are compared to daily averages during ' + reference + ' from the <a href="' + landingpage_site_b +'" target="_blank">"Warm Winter 2020" release</a>.'))
+            else: 
+                display(HTML('<p style="font-size:16px">' + selected_site_b_name + ' (' + selected_site_b + '), ' + variable_b_value + ':<br>Daily averages for year ' + str(year_b) + ' are compared to daily averages during ' + reference + ' from the <a href="' + landingpage_site_b +'" target="_blank">"Warm Winter 2020" release</a>.'))
+
     # show the citation strings associated with the output figures
     with output_citation:
         
-        # in case of two citation strings:
-        # not two if site b is not defined, and not two if it is data from the same site. 
+        display(HTML('<p style="font-size:16px"><b>Citation:</b><br></p>'))
+        if year_a > 2020:        
+            display(HTML('<p style="font-size:16px">' + citation_string_site_a_icos + '<br></p>'))
+        
+        display(HTML('<p style="font-size:16px">' + citation_string_site_a + '<br></p>'))
+        
         if site_b is not None and citation_string_site_a!=citation_string_site_b:
-        
-            display(HTML('<p style="font-size:16px"><b>Citation:</b><br>' + citation_string_site_a + '<br>' + citation_string_site_b +'<br><br></p>'))
             
-        # else only one citation string
-        else:
-            display(HTML('<p style="font-size:16px"><b>Citation:</b><br>' + citation_string_site_a +'<br><br></p>'))
-        
-        # specify output (yearly or monthly) - looks nicer to have in this widget than the next.
-        display(HTML('<p style="font-size:16px"><b>Specify output:</b><br></p>'))
+            if year_b > 2020:
+                
+                display(HTML('<p style="font-size:16px">' + citation_string_site_b_icos + '<br></p>'))
+                
+            display(HTML('<p style="font-size:16px">' + citation_string_site_b + '<br></p>'))
     
     with output_plot_anomalies:
 
