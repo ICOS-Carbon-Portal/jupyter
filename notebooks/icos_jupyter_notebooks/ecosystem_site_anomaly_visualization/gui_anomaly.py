@@ -626,7 +626,7 @@ def update_func(button_c):
         display(HTML('<p style="font-size:16px"><b>Selected site(s):</b><br></p>'))
         
         if year_a > 2020:
-            display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' (' + selected_site_a + '), ' + variable_a_value + ':<br>Daily averages for year ' + str(year_a) + ' from the "<a href="' + landingpage_site_a_icos +'" target="_blank">ICOS Level 2</a>" release' + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_a +'" target="_blank">Warm Winter 2020</a>" release.'))
+            display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' (' + selected_site_a + '), ' + variable_a_value + ':<br>Daily averages for year ' + str(year_a) + ' from the "<a href="' + landingpage_site_a_icos +'" target="_blank">ICOS Level 2</a>" release' + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_a +'" target="_blank">Warm Winter 2020</a>" release. In the year 2020, both releases have data for this site and show a strong agreement (correlation coefficient R > 0.95)'))
         else: 
             display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' (' + selected_site_a + '), ' + variable_a_value + ':<br>Daily averages for year ' + str(year_a) + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_a +'" target="_blank">Warm Winter 2020</a>" release.'))
             
@@ -634,7 +634,7 @@ def update_func(button_c):
         if site_b is not None:
             
             if year_b > 2020:
-                display(HTML('<p style="font-size:16px">' + selected_site_b_name + ' (' + selected_site_b + '), ' + variable_b_value + ':<br>Daily averages for year ' + str(year_b) + ' from the "<a href="' + landingpage_site_b_icos +'" target="_blank">ICOS Level 2</a>" release' + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_b +'" target="_blank">Warm Winter 2020</a>" release.'))
+                display(HTML('<p style="font-size:16px">' + selected_site_b_name + ' (' + selected_site_b + '), ' + variable_b_value + ':<br>Daily averages for year ' + str(year_b) + ' from the "<a href="' + landingpage_site_b_icos +'" target="_blank">ICOS Level 2</a>" release' + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_b +'" target="_blank">Warm Winter 2020</a>" release. In the year 2020, both releases have data for this site and show a strong agreement (correlation coefficient R > 0.95)'))
             else: 
                 display(HTML('<p style="font-size:16px">' + selected_site_b_name + ' (' + selected_site_b + '), ' + variable_b_value + ':<br>Daily averages for year ' + str(year_b) + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_b +'" target="_blank">Warm Winter 2020</a>" release.'))
 
