@@ -157,8 +157,7 @@ df_icos = result_icos.data()
 #--------definition of general functions--------------
 
 def return_link_es_data(site_name, icos = False):
-    df_ecosystem_selected = df_ecosystem.loc[df_ecosystem['fileName'].str.contains(site_name)]
-    
+
     if icos: 
         
         df = df_icos
@@ -434,8 +433,7 @@ def update_func(button_c):
     else:
         path_selected = path_twenty    
         reference_string = '2000_2020'
-        
-    
+
     site_a = site_choice_a.value
     selected_site_a = site_a.split("_")[0]
     
@@ -455,16 +453,11 @@ def update_func(button_c):
     
     if  year_a > 2020:
         landingpage_site_a_icos = return_link_es_data(selected_site_a, icos = True)
-        # use the url to the site landing page to access its metadata. 
+        # use the url to the product landing page to the selected site to access its metadata. 
         json_url = landingpage_site_a_icos + '/json_file.json'
         json_url_response = urllib.request.urlopen(json_url)
         json_data = json.loads(json_url_response.read())
         citation_string_site_a_icos = json_data['references']['citationString']
-    
-    column_name_a = selected_site_a + "_" + str(year_a)
-    
-    # return year data is a function defined in this py-file. 
-    if year_a > 2020:
         values_site_a = return_year_data(path_icos, selected_site_a, year_a, variable_a_value)
     else:
         values_site_a = return_year_data(path_selected, selected_site_a, year_a, variable_a_value)
@@ -493,56 +486,33 @@ def update_func(button_c):
     sd_a_col_name_count = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_std_count_a'
     sd_a_month_col_name = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_std_month_a'
     sd_a_month_col_name_count = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_std_month_count_a'
+    column_name_a = selected_site_a + "_" + str(year_a)
     values_a_col_name = column_name_a + '_' + variable_a_value
-    
-    site_b = site_choice_b.value
-    if site_b is not None:
-        year_b = s_year_b.value
-        selected_site_b = site_b.split("_")[0]
-        reference_values_b_col_name =selected_site_b + "_" + reference_string + '_' + variable_b_value + '_b'
-        sd_b_col_name = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_b'
-        sd_b_col_name_count = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_count_b'
-        sd_b_month_col_name = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_month_b'
-        sd_b_month_col_name_count = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_month_count_b'
-        values_b_col_name = selected_site_b + "_" + str(year_b) + '_' + variable_b_value
-        #True if (selection_dict["variable_a_value"] == selection_dict["variable_b_value"]) else False
-    else:
-        reference_values_b_col_name = None
-        sd_b_col_name = None
-        sd_b_col_name_count = None
-        sd_b_month_col_name = None
-        sd_b_month_col_name_count = None
-        values_b_col_name = None
-
    
+    # use the field names to put into final dataset
     df_final[reference_values_a_col_name] = reference_data_a
     df_final[sd_a_col_name] = reference_data_a_std
     df_final[sd_a_col_name_count] = reference_data_a_std_count
     df_final[sd_a_month_col_name] = reference_data_a_std_month
     df_final[sd_a_month_col_name_count] = reference_data_a_std_month_count
     
-    
-    # if a second site is selected
-    if site_b is not None:     
-            
-        selected_site_b_name = list(sites_dataframe.loc[sites_dataframe['id'] == selected_site_b]['name'])[0]
-                            
+    site_b = site_choice_b.value
+    if site_b is not None:
+        year_b = s_year_b.value
+        selected_site_b = site_b.split("_")[0]
+        selected_site_b_name = list(sites_dataframe.loc[sites_dataframe['id'] == selected_site_b]['name'])[0]             
         landingpage_site_b = return_link_es_data(selected_site_b)
-        
         json_url = landingpage_site_b + '/json_file.json'
         json_url_response = urllib.request.urlopen(json_url)
         json_data = json.loads(json_url_response.read())
-
         citation_string_site_b = json_data['references']['citationString']
         
         if year_b > 2020:
             landingpage_site_b_icos = return_link_es_data(selected_site_b, icos = True)
-            # use the url to the site landing page to access its metadata. 
             json_url = landingpage_site_b_icos + '/json_file.json'
             json_url_response = urllib.request.urlopen(json_url)
             json_data = json.loads(json_url_response.read())
             citation_string_site_b_icos = json_data['references']['citationString']
-    
 
         # set site_b to None in case the same site and year as site a
         if site_b == site_a and year_a == year_b and variable_a_value == variable_b_value:
@@ -551,6 +521,14 @@ def update_func(button_c):
     # site b might NOW be None (see above lines) - "set site_b to None in case the same site and year as site a"
     # therefore, check if None again:
     if site_b is not None: 
+        # dictionary with field names (used in df_final and accessed in the plot py file) 
+        reference_values_b_col_name =selected_site_b + "_" + reference_string + '_' + variable_b_value + '_b'
+        sd_b_col_name = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_b'
+        sd_b_col_name_count = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_count_b'
+        sd_b_month_col_name = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_month_b'
+        sd_b_month_col_name_count = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_month_count_b'
+        values_b_col_name = selected_site_b + "_" + str(year_b) + '_' + variable_b_value
+
         column_name_b = selected_site_b + "_" + str(year_b)
         if year_b > 2020:
             values_site_b = return_year_data(path_icos, selected_site_b, year_b, variable_b_value)
@@ -574,7 +552,13 @@ def update_func(button_c):
         df_final[values_a_col_name] = values_site_a
         df_final[values_b_col_name] = values_site_b
     else:
-        # this order of the columns need to remain which is why column a is insert here
+
+        reference_values_b_col_name = None
+        sd_b_col_name = None
+        sd_b_col_name_count = None
+        sd_b_month_col_name = None
+        sd_b_month_col_name_count = None
+        values_b_col_name = None
         df_final[values_a_col_name] = values_site_a
         selected_site_b = None
         selected_site_b_name = None
@@ -642,17 +626,17 @@ def update_func(button_c):
         display(HTML('<p style="font-size:16px"><b>Selected site(s):</b><br></p>'))
         
         if year_a > 2020:
-            display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' (' + selected_site_a + '), ' + variable_a_value + ':<br>Daily averages for year ' + str(year_a) + ' from the <a href="' + landingpage_site_a_icos +'" target="_blank">"ICOS Level 2" release</a>' + ' are compared to daily averages during ' + reference + ' from the <a href="' + landingpage_site_a +'" target="_blank">"Warm Winter 2020" release</a>.'))
+            display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' (' + selected_site_a + '), ' + variable_a_value + ':<br>Daily averages for year ' + str(year_a) + ' from the "<a href="' + landingpage_site_a_icos +'" target="_blank">ICOS Level 2</a>" release' + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_a +'" target="_blank">Warm Winter 2020</a>" release.'))
         else: 
-            display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' (' + selected_site_a + '), ' + variable_a_value + ':<br>Daily averages for year ' + str(year_a) + ' are compared to daily averages during ' + reference + ' from the <a href="' + landingpage_site_a +'" target="_blank">"Warm Winter 2020" release</a>.'))
+            display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' (' + selected_site_a + '), ' + variable_a_value + ':<br>Daily averages for year ' + str(year_a) + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_a +'" target="_blank">Warm Winter 2020</a>" release.'))
             
 
         if site_b is not None:
             
             if year_b > 2020:
-                display(HTML('<p style="font-size:16px">' + selected_site_b_name + ' (' + selected_site_b + '), ' + variable_b_value + ':<br>Daily averages for year ' + str(year_b) + ' from the <a href="' + landingpage_site_b_icos +'" target="_blank">"ICOS Level 2" release</a>' + ' are compared to daily averages during ' + reference + ' from the <a href="' + landingpage_site_b +'" target="_blank">"Warm Winter 2020" release</a>.'))
+                display(HTML('<p style="font-size:16px">' + selected_site_b_name + ' (' + selected_site_b + '), ' + variable_b_value + ':<br>Daily averages for year ' + str(year_b) + ' from the "<a href="' + landingpage_site_b_icos +'" target="_blank">ICOS Level 2</a>" release' + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_b +'" target="_blank">Warm Winter 2020</a>" release.'))
             else: 
-                display(HTML('<p style="font-size:16px">' + selected_site_b_name + ' (' + selected_site_b + '), ' + variable_b_value + ':<br>Daily averages for year ' + str(year_b) + ' are compared to daily averages during ' + reference + ' from the <a href="' + landingpage_site_b +'" target="_blank">"Warm Winter 2020" release</a>.'))
+                display(HTML('<p style="font-size:16px">' + selected_site_b_name + ' (' + selected_site_b + '), ' + variable_b_value + ':<br>Daily averages for year ' + str(year_b) + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_b +'" target="_blank">Warm Winter 2020</a>" release.'))
 
     # show the citation strings associated with the output figures
     with output_citation:
@@ -733,7 +717,7 @@ with overview_map:
 
 header_site = Output()
 with header_site:
-    display(HTML('<p style="font-size:15px;font-weight:bold;">Select reference period and sites/years to analyse: </p>'))
+    display(HTML('<p style="font-size:15px;font-weight:bold;">Select reference period and site(s)/year(s) to analyse: </p>'))
     
 reference_period=RadioButtons(
         options=['2010-2020', '2000-2020'],
