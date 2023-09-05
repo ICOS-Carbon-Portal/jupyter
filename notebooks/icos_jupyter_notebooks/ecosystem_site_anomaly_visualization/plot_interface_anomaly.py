@@ -112,10 +112,10 @@ def make_plot_anomalies(df,
                 # okay if it is no standard deviation bar (it will not be any in case there are more than 5/11 days in the reference period that had flagged data.
                 if 'std' not in df_column:
                     if 'reference_b_std' in locals():
-                        return display(HTML('<p style="font-size:16px">no valid data in the selected month for at least one of the sites</p>'))
+                        return display(HTML('<p style="font-size:16px">Less than 7 days of non-flagged data, or zero for all non-flagged values, in the selected month for at least one of the sites.</p>'))
                     
                     else:
-                        return display(HTML('<p style="font-size:16px">no valid data in the selected month</p>'))
+                        return display(HTML('<p style="font-size:16px">Less than 7 days of non-flagged data, or zero for all non-flagged values, in the selected month.</p>'))
 
         bintype = 'day'
         if selection_dict["selected_site_b"] is not None:
@@ -140,7 +140,6 @@ def make_plot_anomalies(df,
     # now we have used the original data with nan to calculate all values needed for the legend.
     # here we give the values 0 where there simply should not be anything in the graph.
     df_nan_0 = df.copy()
-    
     # the reference values were kept for the average
     # now replaced wiht nan (and then changed to zero) because do not want to show it in the output
     df_nan_0[reference_a] = np.where(np.isnan(df_nan_0[values_a]), np.nan, df_nan_0[reference_a])
