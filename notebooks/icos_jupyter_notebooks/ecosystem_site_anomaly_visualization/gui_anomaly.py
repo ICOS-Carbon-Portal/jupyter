@@ -450,6 +450,20 @@ def update_func(button_c):
     json_url_response = urllib.request.urlopen(json_url)
     json_data = json.loads(json_url_response.read())
     citation_string_site_a = json_data['references']['citationString']
+
+    try: 
+        ecosystem_type_site_a = json_data['specificInfo']['acquisition']['station']['specificInfo']['ecosystemType']['label']
+    except:
+        ecosystem_type_site_a = 'not defined'
+    try:
+        ecosystem_comment_site_a = json_data['specificInfo']['acquisition']['station']['specificInfo']['ecosystemType']['comments']
+
+        if isinstance(ecosystem_comment_site_a, list):
+            ecosystem_comment_site_a = ' '.join(ecosystem_comment_site_a)
+        else:
+            ecosystem_comment_site_a = ecosystem_comment_site_a
+    except:
+        ecosystem_comment_site_a = 'not defined'
     
     if  year_a > 2020:
         landingpage_site_a_icos = return_link_es_data(selected_site_a, icos = True)
@@ -506,7 +520,20 @@ def update_func(button_c):
         json_url_response = urllib.request.urlopen(json_url)
         json_data = json.loads(json_url_response.read())
         citation_string_site_b = json_data['references']['citationString']
-        
+        try: 
+            ecosystem_type_site_b = json_data['specificInfo']['acquisition']['station']['specificInfo']['ecosystemType']['label']
+        except:
+            ecosystem_type_site_b = 'not defined'
+        try:
+            ecosystem_comment_site_b = json_data['specificInfo']['acquisition']['station']['specificInfo']['ecosystemType']['comments']
+            
+            if isinstance(ecosystem_comment_site_b, list):
+                ecosystem_comment_site_b = ' '.join(ecosystem_comment_site_b)
+            else:
+                ecosystem_comment_site_b = ecosystem_comment_site_b
+        except:
+            ecosystem_comment_site_b = 'not defined'
+            
         if year_b > 2020:
             landingpage_site_b_icos = return_link_es_data(selected_site_b, icos = True)
             json_url = landingpage_site_b_icos + '/json_file.json'
@@ -630,6 +657,8 @@ def update_func(button_c):
         else: 
             display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' (' + selected_site_a + '), ' + variable_a_value + ':<br>Daily averages for year ' + str(year_a) + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_a +'" target="_blank">Warm Winter 2020</a>" release.'))
             
+        display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' has the ecosystem type labeled as "<b>' + ecosystem_type_site_a + '</b>". The following comment is attached to this label: "' +  ecosystem_comment_site_a + '"'))
+            
 
         if site_b is not None:
             
@@ -637,6 +666,12 @@ def update_func(button_c):
                 display(HTML('<p style="font-size:16px">' + selected_site_b_name + ' (' + selected_site_b + '), ' + variable_b_value + ':<br>Daily averages for year ' + str(year_b) + ' from the "<a href="' + landingpage_site_b_icos +'" target="_blank">ICOS Level 2</a>" release' + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_b +'" target="_blank">Warm Winter 2020</a>" release. In the year 2020, both releases have data for this site and show a strong agreement (correlation coefficient R > 0.95)'))
             else: 
                 display(HTML('<p style="font-size:16px">' + selected_site_b_name + ' (' + selected_site_b + '), ' + variable_b_value + ':<br>Daily averages for year ' + str(year_b) + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_b +'" target="_blank">Warm Winter 2020</a>" release.'))
+                
+                        
+            display(HTML('<p style="font-size:16px">' + selected_site_b_name + ' has the ecosystem type labeled as "<b>' + ecosystem_type_site_b + '</b>". The following comment is attached to this label: "' +  ecosystem_comment_site_b + '"'))
+          
+        
+        
 
     # show the citation strings associated with the output figures
     with output_citation:
