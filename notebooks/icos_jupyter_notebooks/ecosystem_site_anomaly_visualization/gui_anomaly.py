@@ -74,18 +74,20 @@ sites_dataframe = station.getIdList('ES')
 
 path_ten = os.path.join(data_path, 'FULLSET_DD', 'ten_year')
 path_twenty = os.path.join(data_path, 'FULLSET_DD', 'twenty_year')
+path_icos = os.path.join(data_path, 'FULLSET_DD', 'ICOS')
 
 # use data from one variable to list all the available sites:
-data_2010_2020 = pd.read_csv(os.path.join(data_path, 'all_sites_2010_2020_GPP_DT_VUT_REF.csv'))
+data_2010_2020 = pd.read_csv(os.path.join(data_path, 'all_sites_2010_2020_GPP_DT_VUT_REF_v2.csv'))
 
 # make a tuple for use in the dropdowns
-list_all_2010_2020 = list(data_2010_2020.columns)[4:]
+list_all_2010_2020 = list(data_2010_2020.columns)[5:]
 list_all_2010_2020 = sorted(list_all_2010_2020)
 dropdown_tuple_2010_2020 = [(list(sites_dataframe.loc[sites_dataframe['id'] == (site_string.split('_')[0])]['name'])[0] + ' (' + site_string.split('_')[0] + ')', site_string) for site_string in list_all_2010_2020 if not 'std' in site_string]
 
 # same as above but for the full reference period
-data_2000_2020 = pd.read_csv(os.path.join(data_path, 'all_sites_2000_2020_GPP_DT_VUT_REF.csv'))
-list_all_2000_2020 = list(data_2000_2020.columns)[4:]
+data_2000_2020 = pd.read_csv(os.path.join(data_path, 'all_sites_2000_2020_GPP_DT_VUT_REF_v2.csv'))
+
+list_all_2000_2020 = list(data_2000_2020.columns)[5:]
 list_all_2000_2020 = sorted(list_all_2000_2020)
 dropdown_tuple_2000_2020 = [(list(sites_dataframe.loc[sites_dataframe['id'] == (site_string.split('_')[0])]['name'])[0] + ' (' + site_string.split('_')[0] + ')', site_string) for site_string in list_all_2000_2020 if not 'std' in site_string]
 
@@ -97,11 +99,13 @@ list_site_ids_2000_2020 = [column.split('_')[0] for column in data_2000_2020.col
 filtered_2010_2020 = sites_dataframe.loc[sites_dataframe['id'].isin(list_site_ids_2010_2020)]
 filtered_2000_2020 = sites_dataframe.loc[sites_dataframe['id'].isin(list_site_ids_2000_2020)]
 
+sites_w_ICOS_data = ['DE-Kli','FR-Aur','CZ-wet','BE-Lon','DE-Gri','DE-Hai','SE-Deg','IT-Tor','FI-Let','FR-Fon','FI-Hyy']
+
 # the overview map will show from start, but the user can change this. 
 global map_showing
 map_showing = True
 
-# get pandas dataframe with links to the different sites landing pages (and in turn citation strings):
+# get pandas dataframe with links to the different sites specific landing pages for the warm winter product (and in turn citation strings):
 query = '''
 prefix cpmeta: <http://meta.icos-cp.eu/ontologies/cpmeta/>
 prefix prov: <http://www.w3.org/ns/prov#>
@@ -125,14 +129,45 @@ order by desc(?submTime)
 '''
 result = RunSparql(query, 'pandas')   # look at the documentation for different outputformats...
 result.run()
-df_ecosystem = result.data()
+df_warm_winter = result.data()
+
+# get pandas dataframe with links to the different sites specific landing pages for the level 2 product (and in turn citation strings):
+query_level2 = '''
+prefix cpmeta: <http://meta.icos-cp.eu/ontologies/cpmeta/>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+select ?dobj ?hasNextVersion ?spec ?fileName ?size ?submTime ?timeStart ?timeEnd
+where {
+VALUES ?spec {<http://meta.icos-cp.eu/resources/cpmeta/etcArchiveProduct>}
+?dobj cpmeta:hasObjectSpec ?spec .
+BIND(EXISTS{[] cpmeta:isNextVersionOf ?dobj} AS ?hasNextVersion)
+?dobj cpmeta:hasSizeInBytes ?size .
+?dobj cpmeta:hasName ?fileName .
+?dobj cpmeta:wasSubmittedBy/prov:endedAtTime ?submTime .
+?dobj cpmeta:hasStartTime | (cpmeta:wasAcquiredBy / prov:startedAtTime) ?timeStart .
+?dobj cpmeta:hasEndTime | (cpmeta:wasAcquiredBy / prov:endedAtTime) ?timeEnd .
+FILTER NOT EXISTS {[] cpmeta:isNextVersionOf ?dobj}
+}
+order by desc(?submTime)
+'''
+result_icos = RunSparql(query_level2, 'pandas')   # look at the documentation for different outputformats...
+result_icos.run()
+df_icos = result_icos.data()
 
 #--------definition of general functions--------------
 
-def return_link_es_data(site_name):
-    df_ecosystem_selected = df_ecosystem.loc[df_ecosystem['fileName'].str.contains(site_name)]
+def return_link_es_data(site_name, icos = False):
+
+    if icos: 
+        
+        df = df_icos
+        
+    else:
+        df = df_warm_winter
+        
+    df_selected = df.loc[df['fileName'].str.contains(site_name)]
     
-    link_landingpage = df_ecosystem_selected['dobj'].values[0]
+    link_landingpage = df_selected['dobj'].values[0]
     
     return link_landingpage
 
@@ -150,11 +185,18 @@ def return_year_data(reference_path, site_name, year, variable):
 
                 if site_name in file:
 
-                    df = pd.read_csv(path_ten + "/" + file)          
+                    df = pd.read_csv(reference_path + "/" + file)          
 
                     df_time = df.loc[(df['TIMESTAMP'] >= int(str_date_start)) &(df['TIMESTAMP'] <= int(str_date_end))]
+                    
+                    if variable == 'GPP_DT_VUT_REF':
+                        variable_qc = 'NEE_VUT_REF_QC'
+                    if variable == 'SW_IN_F':
+                        variable_qc = 'SW_IN_F_QC'
+                    if variable == 'VPD_F':
+                        variable_qc = 'VPD_F_QC'
 
-                    df_time = df_time[["TIMESTAMP", variable]]
+                    df_time = df_time[["TIMESTAMP", variable, variable_qc]]
 
                     month= [int(str(time)[4:6]) for time in list(df_time['TIMESTAMP'])]
                     df_time['month'] = month
@@ -163,8 +205,16 @@ def return_year_data(reference_path, site_name, year, variable):
                     df_time['day'] = day
 
                     df_time = df_time.drop(df_time[(df_time.month == 2) & (df_time.day == 29)].index)
+                    
+                    df_time_for_merge = pd.DataFrame()
+                    
+                    df_time_for_merge["TIMESTAMP"] = df_time["TIMESTAMP"]
+                    
+                    df_time_qc = df_time.loc[df_time[variable_qc] > 0.7]
+                
+                    df_time_qc_full = pd.merge(df_time_for_merge, df_time_qc, how='left', left_on="TIMESTAMP", right_on = "TIMESTAMP")
 
-                    list_values = list(df_time[variable])
+                    list_values = list(df_time_qc_full[variable])
                     
                     return list_values
 
@@ -228,7 +278,10 @@ def change_site_a(c):
 
                     start_year = int(file[-20:-16])
                     
-    years = list(range(start_year, 2021))
+    if selected_site in sites_w_ICOS_data:
+        years = list(range(start_year, 2023))
+    else:
+        years = list(range(start_year, 2021))
 
     s_year_a.options=years 
     s_year_a.value = min(years)
@@ -262,7 +315,10 @@ def change_site_b(c):
 
                     start_year = int(file[-20:-16])
                     
-    years = list(range(start_year, 2021))
+    if selected_site in sites_w_ICOS_data:
+        years = list(range(start_year, 2023))
+    else:
+        years = list(range(start_year, 2021))
 
     s_year_b.options=years 
     s_year_b.value = min(years)
@@ -363,6 +419,9 @@ def update_func(button_c):
     variable_a_value = variable_a.value
     variable_b_value = variable_b.value
     
+    # access the data for the slected year (to be compared to the selected reference data)
+    year_a = s_year_a.value
+    
     # put colors into dictionaries which are passed to the functions. 
     colors_positive_anomalies_dict = {variable_b_value:color_b_pos.value, variable_a_value:color_a_pos.value}
     colors_negative_anomalies_dict = { variable_b_value:color_b_neg.value, variable_a_value:color_a_neg.value}
@@ -374,8 +433,7 @@ def update_func(button_c):
     else:
         path_selected = path_twenty    
         reference_string = '2000_2020'
-        
-    
+
     site_a = site_choice_a.value
     selected_site_a = site_a.split("_")[0]
     
@@ -392,21 +450,40 @@ def update_func(button_c):
     json_url_response = urllib.request.urlopen(json_url)
     json_data = json.loads(json_url_response.read())
     citation_string_site_a = json_data['references']['citationString']
+
+    try: 
+        ecosystem_type_site_a = json_data['specificInfo']['acquisition']['station']['specificInfo']['ecosystemType']['label']
+    except:
+        ecosystem_type_site_a = 'not defined'
+    try:
+        ecosystem_comment_site_a = json_data['specificInfo']['acquisition']['station']['specificInfo']['ecosystemType']['comments']
+
+        if isinstance(ecosystem_comment_site_a, list):
+            ecosystem_comment_site_a = ' '.join(ecosystem_comment_site_a)
+        else:
+            ecosystem_comment_site_a = ecosystem_comment_site_a
+    except:
+        ecosystem_comment_site_a = 'not defined'
     
-    # access the data for the slected year (to be compared to the selected reference data)
-    year_a = s_year_a.value
-    
-    column_name_a = selected_site_a + "_" + str(year_a)
-    
-    # return year data is a function defined in this py-file. 
-    values_site_a = return_year_data(path_selected, selected_site_a, year_a, variable_a_value)
+    if  year_a > 2020:
+        landingpage_site_a_icos = return_link_es_data(selected_site_a, icos = True)
+        # use the url to the product landing page to the selected site to access its metadata. 
+        json_url = landingpage_site_a_icos + '/json_file.json'
+        json_url_response = urllib.request.urlopen(json_url)
+        json_data = json.loads(json_url_response.read())
+        citation_string_site_a_icos = json_data['references']['citationString']
+        values_site_a = return_year_data(path_icos, selected_site_a, year_a, variable_a_value)
+    else:
+        values_site_a = return_year_data(path_selected, selected_site_a, year_a, variable_a_value)
     
     # reference data is pre-computed and accessed depending on what variable was selected. 
     # the pre-computed data has columns for all sites, for instance: Dk-Sor_2000_2020. The name of the file has both the variable name and reference period in the name, for instance: all_sites_2000_2020_SW_IN_F
-    reference_data_a_df = pd.read_csv(os.path.join(data_path, 'all_sites_' + reference_string + '_' + variable_a_value + '.csv'))
+    reference_data_a_df = pd.read_csv(os.path.join(data_path, 'all_sites_' + reference_string + '_' + variable_a_value + '_v2.csv'))
     reference_data_a = reference_data_a_df[selected_site_a + "_" + reference_string]
     reference_data_a_std = reference_data_a_df[selected_site_a + "_" + reference_string + '_std']
+    reference_data_a_std_count = reference_data_a_df[selected_site_a + "_" + reference_string + '_std_count']
     reference_data_a_std_month = reference_data_a_df[selected_site_a + "_" + reference_string + '_std_month']
+    reference_data_a_std_month_count = reference_data_a_df[selected_site_a + "_" + reference_string + '_std_month_count']
     
     # create the dataframe with only the data that is necessary to create the figures.
     # it has the daily average reference data and daily average data for the specific year and variable. 
@@ -417,44 +494,52 @@ def update_func(button_c):
     df_final['month'] =reference_data_a_df["month"]
     df_final['day'] = reference_data_a_df["day"]
     
-    # dictionary with filed names (used in df_final and accessed in the plot py file
-    reference_values_a_col_name = selected_site_a + "_" + reference_string + '_' + variable_a_value
-    sd_a_col_name = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_std'
-    sd_a_month_col_name = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_std_month'
+    # dictionary with field names (used in df_final and accessed in the plot py file)
+    reference_values_a_col_name = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_a'
+    sd_a_col_name = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_std_a'
+    sd_a_col_name_count = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_std_count_a'
+    sd_a_month_col_name = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_std_month_a'
+    sd_a_month_col_name_count = selected_site_a + "_" + reference_string + '_' + variable_a_value + '_std_month_count_a'
+    column_name_a = selected_site_a + "_" + str(year_a)
     values_a_col_name = column_name_a + '_' + variable_a_value
+   
+    # use the field names to put into final dataset
+    df_final[reference_values_a_col_name] = reference_data_a
+    df_final[sd_a_col_name] = reference_data_a_std
+    df_final[sd_a_col_name_count] = reference_data_a_std_count
+    df_final[sd_a_month_col_name] = reference_data_a_std_month
+    df_final[sd_a_month_col_name_count] = reference_data_a_std_month_count
     
     site_b = site_choice_b.value
     if site_b is not None:
         year_b = s_year_b.value
         selected_site_b = site_b.split("_")[0]
-        reference_values_b_col_name =selected_site_b + "_" + reference_string + '_' + variable_b_value
-        sd_b_col_name = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std'
-        sd_b_month_col_name = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_month'
-        values_b_col_name = selected_site_b + "_" + str(year_b) + '_' + variable_b_value
-        #True if (selection_dict["variable_a_value"] == selection_dict["variable_b_value"]) else False
-    else:
-        reference_values_b_col_name = None
-        sd_b_col_name = None
-        sd_b_month_col_name = None
-        values_b_col_name = None
-
-   
-    df_final[reference_values_a_col_name] = reference_data_a
-    df_final[sd_a_col_name] = reference_data_a_std
-    df_final[sd_a_month_col_name] = reference_data_a_std_month
-    
-    # if a second site is selected
-    if site_b is not None:     
-            
-        selected_site_b_name = list(sites_dataframe.loc[sites_dataframe['id'] == selected_site_b]['name'])[0]
-                            
+        selected_site_b_name = list(sites_dataframe.loc[sites_dataframe['id'] == selected_site_b]['name'])[0]             
         landingpage_site_b = return_link_es_data(selected_site_b)
-        
         json_url = landingpage_site_b + '/json_file.json'
         json_url_response = urllib.request.urlopen(json_url)
         json_data = json.loads(json_url_response.read())
-
         citation_string_site_b = json_data['references']['citationString']
+        try: 
+            ecosystem_type_site_b = json_data['specificInfo']['acquisition']['station']['specificInfo']['ecosystemType']['label']
+        except:
+            ecosystem_type_site_b = 'not defined'
+        try:
+            ecosystem_comment_site_b = json_data['specificInfo']['acquisition']['station']['specificInfo']['ecosystemType']['comments']
+            
+            if isinstance(ecosystem_comment_site_b, list):
+                ecosystem_comment_site_b = ' '.join(ecosystem_comment_site_b)
+            else:
+                ecosystem_comment_site_b = ecosystem_comment_site_b
+        except:
+            ecosystem_comment_site_b = 'not defined'
+            
+        if year_b > 2020:
+            landingpage_site_b_icos = return_link_es_data(selected_site_b, icos = True)
+            json_url = landingpage_site_b_icos + '/json_file.json'
+            json_url_response = urllib.request.urlopen(json_url)
+            json_data = json.loads(json_url_response.read())
+            citation_string_site_b_icos = json_data['references']['citationString']
 
         # set site_b to None in case the same site and year as site a
         if site_b == site_a and year_a == year_b and variable_a_value == variable_b_value:
@@ -463,23 +548,44 @@ def update_func(button_c):
     # site b might NOW be None (see above lines) - "set site_b to None in case the same site and year as site a"
     # therefore, check if None again:
     if site_b is not None: 
+        # dictionary with field names (used in df_final and accessed in the plot py file) 
+        reference_values_b_col_name =selected_site_b + "_" + reference_string + '_' + variable_b_value + '_b'
+        sd_b_col_name = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_b'
+        sd_b_col_name_count = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_count_b'
+        sd_b_month_col_name = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_month_b'
+        sd_b_month_col_name_count = selected_site_b + "_" + reference_string + '_' + variable_b_value + '_std_month_count_b'
+        values_b_col_name = selected_site_b + "_" + str(year_b) + '_' + variable_b_value
+
         column_name_b = selected_site_b + "_" + str(year_b)
-        values_site_b = return_year_data(path_selected, selected_site_b, year_b, variable_b_value)
-        reference_data_b_df = pd.read_csv(os.path.join(data_path, 'all_sites_' + reference_string + '_' + variable_b_value + '.csv'))
+        if year_b > 2020:
+            values_site_b = return_year_data(path_icos, selected_site_b, year_b, variable_b_value)
+        else:
+            values_site_b = return_year_data(path_selected, selected_site_b, year_b, variable_b_value)
+        reference_data_b_df = pd.read_csv(os.path.join(data_path, 'all_sites_' + reference_string + '_' + variable_b_value + '_v2.csv'))
         
         reference_data_b = reference_data_b_df[selected_site_b + "_" + reference_string]
         reference_data_b_std = reference_data_b_df[selected_site_b + "_" + reference_string + '_std']
+        reference_data_b_std_count = reference_data_b_df[selected_site_b + "_" + reference_string + '_std_count']
         reference_data_b_std_month = reference_data_b_df[selected_site_b + "_" + reference_string + '_std_month']
+        reference_data_b_std_month_count = reference_data_b_df[selected_site_b + "_" + reference_string + '_std_month_count']
         
         df_final[reference_values_b_col_name] = reference_data_b
         df_final[sd_b_col_name] = reference_data_b_std
+        df_final[sd_b_col_name_count] = reference_data_b_std_count
         df_final[sd_b_month_col_name] = reference_data_b_std_month
+        df_final[sd_b_month_col_name_count] = reference_data_b_std_month_count
         
         # this order of the columns need to remain which is why column a is insert here
         df_final[values_a_col_name] = values_site_a
         df_final[values_b_col_name] = values_site_b
     else:
-        # this order of the columns need to remain which is why column a is insert here
+
+        reference_values_b_col_name = None
+        sd_b_col_name = None
+        sd_b_col_name_count = None
+        sd_b_month_col_name = None
+        sd_b_month_col_name_count = None
+        values_b_col_name = None
         df_final[values_a_col_name] = values_site_a
         selected_site_b = None
         selected_site_b_name = None
@@ -506,17 +612,23 @@ def update_func(button_c):
     f.write('Gross Primary Production daytime in micromol/m2/s (GPP_DT_VUT_REF);\n')
     f.write('Shortwave incoming radiation in W/m2 (SW_IN_F);\n')
     f.write('Vapor pressure deficit in hPa (VPD_F);\n')
+    f.write('Identify the selected year(s) for the site(s) based on the column heading ending with the variable name(s). The reference period(s) are provided with a dash indicating the start and end of each reference period.;\n')
+    f.write('The column(s) ending with "_std_count" represent the number of times that a specific date (row) within the reference period was flagged (QC < 0.7). These flagged values were excluded from the calculation of the standard deviation value (found in columns ending with "_std").;\n')
+    f.write('The column(s) ending with "_std_count_month" represent the number of times a day within a specific month (referenced in the"month" column) was flagged during the reference period. These flagged values were excluded from the calculation of the standard deviation value (found in columns ending with "_std_month"). Note that the values in these columns are the same when the month is the same.;\n')
     
     date_today = current_date.today()
     f.write('Date of file creation: '+ str(date_today) +';\n')
     f.write('Cite the data:; \n')
+    if year_a > 2020:
+        f.write(citation_string_site_a_icos + ';\n')
     f.write(citation_string_site_a + ';\n')
-    if site_b is not None and variable_a_value != variable_b_value:
-        
+    if site_b is not None:
+        if year_b > 2020:
+            f.write(citation_string_site_b_icos + ';\n')
         f.write(citation_string_site_b + ';\n')
         
     f.write('Cite the notebook package if a figure is used:; \n')
-    f.write('Storm, I., Klasen, V,, 2023. Ecosystem site anomalies notebook tool. ICOS ERIC - Carbon Portal. https://doi.org/10.18160/AMET-9KWT;\n')
+    f.write('Storm, I., Klasen, V,, 2023. Ecosystem site anomalies notebook tool. ICOS ERIC - Carbon Portal. https://doi.org/10.18160/0GP0-HW10;\n')
     # Save the dataframe, so it can be downloaded as a csv-file in a
     # folder called "ecosystem_site_anomaly_visualization_output" under
     # "/home/user/output/" directory.
@@ -536,37 +648,87 @@ def update_func(button_c):
     # message which will change of the selections the user have done.
     # it shows the selected site names and links to their landing page(s).
     with message:
+                
+        display(HTML('<p style="font-size:16px"><b>Selected site(s):</b><br></p>'))
+        
+        if year_a > 2020:
+            display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' (' + selected_site_a + '), ' + variable_a_value + ':<br>Daily averages for year ' + str(year_a) + ' from the "<a href="' + landingpage_site_a_icos +'" target="_blank">ICOS Level 2</a>" release' + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_a +'" target="_blank">Warm Winter 2020</a>" release. In the year 2020, both releases have data for this site and show a strong agreement (correlation coefficient R > 0.95)'))
+        else: 
+            display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' (' + selected_site_a + '), ' + variable_a_value + ':<br>Daily averages for year ' + str(year_a) + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_a +'" target="_blank">Warm Winter 2020</a>" release.'))
+            
+        if site_b != site_a:
+            
+            display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' has the ecosystem type labeled as "<b>' + ecosystem_type_site_a + '</b>". The following comment is attached to this label: "' +  ecosystem_comment_site_a + '"'))
+            
 
         if site_b is not None:
             
-            display(HTML('<p style="font-size:16px"><b>Selected sites:</b><br><a href="' + landingpage_site_a +'" target="_blank">' + selected_site_a_name + '</a> (year ' + str(year_a) + ', ' + variable_a_value + \
-                         ') and <a href="' + landingpage_site_b +'" target="_blank">' + selected_site_b_name +\
-                        '</a> (year ' + str(year_b) + ', ' + variable_b_value + '). Their daily average daytime flux values are compared to those of the reference period ' + reference +'.</p>'))
-        else:
-            display(HTML('<p style="font-size:16px"><b>Selected site:</b><br><a href="' + landingpage_site_a +'" target="_blank">' + selected_site_a_name + '</a> (year ' + str(year_a) + ', ' + variable_a_value + \
-                         '). Its daily average daytime flux values are compared to those of the reference period ' + reference +'.</p>'))
-    
+            if year_b > 2020:
+                display(HTML('<p style="font-size:16px">' + selected_site_b_name + ' (' + selected_site_b + '), ' + variable_b_value + ':<br>Daily averages for year ' + str(year_b) + ' from the "<a href="' + landingpage_site_b_icos +'" target="_blank">ICOS Level 2</a>" release' + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_b +'" target="_blank">Warm Winter 2020</a>" release. In the year 2020, both releases have data for this site and show a strong agreement (correlation coefficient R > 0.95)'))
+            else: 
+                display(HTML('<p style="font-size:16px">' + selected_site_b_name + ' (' + selected_site_b + '), ' + variable_b_value + ':<br>Daily averages for year ' + str(year_b) + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_b +'" target="_blank">Warm Winter 2020</a>" release.'))
+                
+                        
+            display(HTML('<p style="font-size:16px">' + selected_site_b_name + ' has the ecosystem type labeled as "<b>' + ecosystem_type_site_b + '</b>". The following comment is attached to this label: "' +  ecosystem_comment_site_b + '"'))
+          
+
     # show the citation strings associated with the output figures
     with output_citation:
         
-        # in case of two citation strings:
-        # not two if site b is not defined, and not two if it is data from the same site. 
+        display(HTML('<p style="font-size:16px"><b>Citation:</b><br></p>'))
+        if year_a > 2020:        
+            display(HTML('<p style="font-size:16px">' + citation_string_site_a_icos + '<br></p>'))
+        
+        display(HTML('<p style="font-size:16px">' + citation_string_site_a + '<br></p>'))
+        
         if site_b is not None and citation_string_site_a!=citation_string_site_b:
-        
-            display(HTML('<p style="font-size:16px"><b>Citation:</b><br>' + citation_string_site_a + '<br>' + citation_string_site_b +'<br><br></p>'))
             
-        # else only one citation string
-        else:
-            display(HTML('<p style="font-size:16px"><b>Citation:</b><br>' + citation_string_site_a +'<br><br></p>'))
-        
-        # specify output (yearly or monthly) - looks nicer to have in this widget than the next.
-        display(HTML('<p style="font-size:16px"><b>Specify output:</b><br></p>'))
+            if year_b > 2020:
+                
+                display(HTML('<p style="font-size:16px">' + citation_string_site_b_icos + '<br></p>'))
+                
+            display(HTML('<p style="font-size:16px">' + citation_string_site_b + '<br></p>'))
     
     with output_plot_anomalies:
+
+        # Some updates to the dataframe to account for the flagged data
         
+        # not show standard deviation values in case of no values
+        # here when showing days in a month
+        df_final[sd_a_col_name] = np.where(np.isnan(df_final[values_a_col_name]), np.nan, df_final[sd_a_col_name])
+        # here when showing months in a year: all values in the month must be missing
+        count_vals_per_month = df_final.groupby('month', dropna=True).count()
+        # list of months that have less than 7 values (these will have all values set to NaN):
+        count_vals_per_month = count_vals_per_month.loc[count_vals_per_month[values_a_col_name] < 7]
+        exclude_months = list(count_vals_per_month.index)         
+        df_final[sd_a_month_col_name] = np.where(np.isin(df_final["month"], exclude_months), np.nan, df_final[sd_a_month_col_name])
+        df_final[values_a_col_name] = np.where(np.isin(df_final["month"], exclude_months), np.nan, df_final[values_a_col_name])
+   
+        # not show standard deviation bar in case of too few values (set to five currently). Only up to 11 for individual days std.
+        # assumes all reference periods will have enough values for the standard deviations for months
+        if reference == '2010-2020':  
+            df_final[sd_a_col_name] = np.where(df_final[sd_a_col_name_count]>5,  np.nan, df_final[sd_a_col_name])
+        else: # if reference = 2000-2020
+            df_final[sd_a_col_name] = np.where(df_final[sd_a_col_name_count]>15,  np.nan, df_final[sd_a_col_name])
+            
+        if site_b is not None:
+
+            # same updates made to the data associated with the second selection
+            df_final[sd_b_col_name] = np.where(np.isnan(df_final[values_b_col_name]), np.nan, df_final[sd_b_col_name])
+            count_vals_per_month = df_final.groupby('month', dropna=True).count()
+            # list of months that have less than 7 values (these will have all values set to NaN):
+            count_vals_per_month = count_vals_per_month.loc[count_vals_per_month[values_b_col_name] < 7]
+            exclude_months = list(count_vals_per_month.index)         
+            df_final[sd_b_month_col_name] = np.where(np.isin(df_final["month"], exclude_months), np.nan, df_final[sd_b_month_col_name])
+            df_final[values_b_col_name] = np.where(np.isin(df_final["month"], exclude_months), np.nan, df_final[values_b_col_name])
+
+            if reference == '2010-2020': 
+                df_final[sd_b_col_name] = np.where(df_final[sd_b_col_name_count]>5,  np.nan, df_final[sd_b_col_name])
+            else: # if reference = 2000-2020
+                df_final[sd_b_col_name] = np.where(df_final[sd_b_col_name_count]>15,  np.nan, df_final[sd_b_col_name])
         plot_interface_anomaly.plot_anomalies(df_final, data_filename, selection_dict, colors_positive_anomalies_dict, colors_negative_anomalies_dict)
             
-    # after the tool is done running, it is possible to make a new tool run (hence the update button can be pressed given that the necessary widgets are populated)
+    # after the tool is done running, it is possible to make a new tool run (hence the update buttn can be pressed given that the necessary widgets are populated)
     update_button.tooltip='Click to start the run'
     update_button.style.button_color=button_color_able  
     update_button.disabled = False
@@ -592,7 +754,7 @@ with overview_map:
 
 header_site = Output()
 with header_site:
-    display(HTML('<p style="font-size:15px;font-weight:bold;">Select reference period and sites/years to analyse: </p>'))
+    display(HTML('<p style="font-size:15px;font-weight:bold;">Select reference period and site(s)/year(s) to analyse: </p>'))
     
 reference_period=RadioButtons(
         options=['2010-2020', '2000-2020'],
