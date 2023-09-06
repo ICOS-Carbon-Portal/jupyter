@@ -648,7 +648,6 @@ def update_func(button_c):
     # message which will change of the selections the user have done.
     # it shows the selected site names and links to their landing page(s).
     with message:
-        
                 
         display(HTML('<p style="font-size:16px"><b>Selected site(s):</b><br></p>'))
         
@@ -657,7 +656,9 @@ def update_func(button_c):
         else: 
             display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' (' + selected_site_a + '), ' + variable_a_value + ':<br>Daily averages for year ' + str(year_a) + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_a +'" target="_blank">Warm Winter 2020</a>" release.'))
             
-        display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' has the ecosystem type labeled as "<b>' + ecosystem_type_site_a + '</b>". The following comment is attached to this label: "' +  ecosystem_comment_site_a + '"'))
+        if site_b != site_a:
+            
+            display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' has the ecosystem type labeled as "<b>' + ecosystem_type_site_a + '</b>". The following comment is attached to this label: "' +  ecosystem_comment_site_a + '"'))
             
 
         if site_b is not None:
@@ -670,8 +671,6 @@ def update_func(button_c):
                         
             display(HTML('<p style="font-size:16px">' + selected_site_b_name + ' has the ecosystem type labeled as "<b>' + ecosystem_type_site_b + '</b>". The following comment is attached to this label: "' +  ecosystem_comment_site_b + '"'))
           
-        
-        
 
     # show the citation strings associated with the output figures
     with output_citation:
