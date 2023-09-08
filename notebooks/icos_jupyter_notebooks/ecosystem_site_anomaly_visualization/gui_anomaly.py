@@ -55,9 +55,7 @@ data_path = '/data/project/flux_anomalies/flux_data'
 # Use this location for the notebook's output on the ICOS Jupyter
 # services ("/home/user/output/ecosystem-site-anomaly") (default):
 output_path = os.path.join(os.path.expanduser('~'), 'output')
-output_anomalies_path = os.path.join(
-    output_path, 'ecosystem-site-anomaly'
-)
+output_anomalies_path = os.path.join(output_path, 'ecosystem-site-anomaly')
 if not os.path.exists(output_anomalies_path):
     os.makedirs(output_anomalies_path)
 ##############################################################################
@@ -100,6 +98,7 @@ filtered_2010_2020 = sites_dataframe.loc[sites_dataframe['id'].isin(list_site_id
 filtered_2000_2020 = sites_dataframe.loc[sites_dataframe['id'].isin(list_site_ids_2000_2020)]
 
 sites_w_ICOS_data = ['DE-Kli','FR-Aur','CZ-wet','BE-Lon','DE-Gri','DE-Hai','SE-Deg','IT-Tor','FI-Let','FR-Fon','FI-Hyy']
+comparison_table = pd.read_csv(os.path.join(path_icos, 'corr_bias_table_GPP_DT_VUT_REF_2020.csv'))
 
 # the overview map will show from start, but the user can change this. 
 global map_showing
@@ -473,6 +472,10 @@ def update_func(button_c):
         json_data = json.loads(json_url_response.read())
         citation_string_site_a_icos = json_data['references']['citationString']
         values_site_a = return_year_data(path_icos, selected_site_a, year_a, variable_a_value)
+        correlation_site_a = str(round(list(comparison_table.loc[comparison_table['site'] == selected_site_a]['correlation'])[0], 2))
+        rmse_site_a = str(round(list(comparison_table.loc[comparison_table['site'] == selected_site_a]['RMSE'])[0], 2))
+        bias_site_a = str(round(list(comparison_table.loc[comparison_table['site'] == selected_site_a]['bias (warm winter - new release)'])[0], 2))
+        
     else:
         values_site_a = return_year_data(path_selected, selected_site_a, year_a, variable_a_value)
     
@@ -540,6 +543,9 @@ def update_func(button_c):
             json_url_response = urllib.request.urlopen(json_url)
             json_data = json.loads(json_url_response.read())
             citation_string_site_b_icos = json_data['references']['citationString']
+            correlation_site_b = str(round(list(comparison_table.loc[comparison_table['site'] == selected_site_b]['correlation'])[0], 2))
+            rmse_site_b = str(round(list(comparison_table.loc[comparison_table['site'] == selected_site_b]['RMSE'])[0], 2))
+            bias_site_b = str(round(list(comparison_table.loc[comparison_table['site'] == selected_site_b]['bias (warm winter - new release)'])[0], 2))
 
         # set site_b to None in case the same site and year as site a
         if site_b == site_a and year_a == year_b and variable_a_value == variable_b_value:
@@ -621,10 +627,18 @@ def update_func(button_c):
     f.write('Cite the data:; \n')
     if year_a > 2020:
         f.write(citation_string_site_a_icos + ';\n')
+        f.write('Please note that the Warm Winter release contains PI-processed data and can sometimes differ significantly from the ICOS Level 2 data. Here is how they compare for the overlapping year 2020 at this site:;\n')
+        f.write('Correlation (R): ' + correlation_site_a+ '; \n')
+        f.write('RMSE: ' + rmse_site_a+ '; \n')
+        f.write('Bias (Warm Winter release minus ICOS Level 2 release: ' + bias_site_a+ '; \n')
     f.write(citation_string_site_a + ';\n')
     if site_b is not None:
         if year_b > 2020:
             f.write(citation_string_site_b_icos + ';\n')
+            f.write('Please note that the Warm Winter release contains PI-processed data and can sometimes differ significantly from the ICOS Level 2 data. Here is how they compare for the overlapping year 2020 at this site:;\n')
+            f.write('Correlation (R): ' + correlation_site_b + '; \n')
+            f.write('RMSE: ' + rmse_site_b+ '; \n')
+            f.write('Bias (Warm Winter release minus ICOS Level 2 release: ' + bias_site_b+ '; \n')
         f.write(citation_string_site_b + ';\n')
         
     f.write('Cite the notebook package if a figure is used:; \n')
@@ -652,7 +666,8 @@ def update_func(button_c):
         display(HTML('<p style="font-size:16px"><b>Selected site(s):</b><br></p>'))
         
         if year_a > 2020:
-            display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' (' + selected_site_a + '), ' + variable_a_value + ':<br>Daily averages for year ' + str(year_a) + ' from the "<a href="' + landingpage_site_a_icos +'" target="_blank">ICOS Level 2</a>" release' + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_a +'" target="_blank">Warm Winter 2020</a>" release. In the year 2020, both releases have data for this site and show a strong agreement (correlation coefficient R > 0.95)'))
+            
+            display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' (' + selected_site_a + '), ' + variable_a_value + ':<br>Daily averages for year ' + str(year_a) + ' from the "<a href="' + landingpage_site_a_icos +'" target="_blank">ICOS Level 2</a>" release' + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_a +'" target="_blank">Warm Winter 2020</a>" release. In the year 2020, both releases contain data for this site, and they exhibit a strong correlation in the variable GPP_DT_VUT_REF, with a correlation coefficient (R) exceeding 0.95. The RMSE is ' + rmse_site_a + ' and bias (Warm Winter minus ICOS Level 2) ' + bias_site_a + ' µmol/m²/s.'))
         else: 
             display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' (' + selected_site_a + '), ' + variable_a_value + ':<br>Daily averages for year ' + str(year_a) + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_a +'" target="_blank">Warm Winter 2020</a>" release.'))
             
@@ -664,7 +679,7 @@ def update_func(button_c):
         if site_b is not None:
             
             if year_b > 2020:
-                display(HTML('<p style="font-size:16px">' + selected_site_b_name + ' (' + selected_site_b + '), ' + variable_b_value + ':<br>Daily averages for year ' + str(year_b) + ' from the "<a href="' + landingpage_site_b_icos +'" target="_blank">ICOS Level 2</a>" release' + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_b +'" target="_blank">Warm Winter 2020</a>" release. In the year 2020, both releases have data for this site and show a strong agreement (correlation coefficient R > 0.95)'))
+                display(HTML('<p style="font-size:16px">' + selected_site_b_name + ' (' + selected_site_b + '), ' + variable_b_value + ':<br>Daily averages for year ' + str(year_b) + ' from the "<a href="' + landingpage_site_b_icos +'" target="_blank">ICOS Level 2</a>" release' + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_b +'" target="_blank">Warm Winter 2020</a>" release. In the year 2020, both releases contain data for this site, and they exhibit a strong correlation in the variable GPP_DT_VUT_REF, with a correlation coefficient (R) exceeding 0.95. The RMSE is ' + rmse_site_b + ' and bias (Warm Winter minus ICOS Level 2) ' + bias_site_b + ' µmol/m²/s.'))
             else: 
                 display(HTML('<p style="font-size:16px">' + selected_site_b_name + ' (' + selected_site_b + '), ' + variable_b_value + ':<br>Daily averages for year ' + str(year_b) + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_b +'" target="_blank">Warm Winter 2020</a>" release.'))
                 
