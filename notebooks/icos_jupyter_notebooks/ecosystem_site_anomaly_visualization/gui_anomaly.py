@@ -628,7 +628,7 @@ def update_func(button_c):
         f.write('Please note that the Warm Winter release contains PI-processed data and can sometimes differ significantly from the ICOS Level 2 data. Here is how they compare for the overlapping year 2020 at this site:;\n')
         f.write('Correlation (R): ' + correlation_site_a+ '; \n')
         f.write('RMSE: ' + rmse_site_a+ '; \n')
-        f.write('Bias (Warm Winter release minus ICOS Level 2 release: ' + bias_site_a+ '; \n')
+        f.write('Bias (Warm Winter release minus ICOS Level 2 release): ' + bias_site_a+ '; \n')
     f.write(citation_string_site_a + ';\n')
     if site_b is not None:
         if year_b > 2020:
@@ -636,7 +636,7 @@ def update_func(button_c):
             f.write('Please note that the Warm Winter release contains PI-processed data and can sometimes differ significantly from the ICOS Level 2 data. Here is how they compare for the overlapping year 2020 at this site:;\n')
             f.write('Correlation (R): ' + correlation_site_b + '; \n')
             f.write('RMSE: ' + rmse_site_b+ '; \n')
-            f.write('Bias (Warm Winter release minus ICOS Level 2 release: ' + bias_site_b+ '; \n')
+            f.write('Bias (Warm Winter release minus ICOS Level 2 release): ' + bias_site_b+ '; \n')
         f.write(citation_string_site_b + ';\n')
         
     f.write('Cite the notebook package if a figure is used:; \n')
