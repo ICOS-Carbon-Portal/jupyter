@@ -622,8 +622,6 @@ def update_func(button_c):
     f.write('The column(s) ending with "_std_count" represent the number of times that a specific date (row) within the reference period was flagged (QC < 0.7). These flagged values were excluded from the calculation of the standard deviation value (found in columns ending with "_std").;\n')
     f.write('The column(s) ending with "_std_count_month" represent the number of times a day within a specific month (referenced in the"month" column) was flagged during the reference period. These flagged values were excluded from the calculation of the standard deviation value (found in columns ending with "_std_month"). Note that the values in these columns are the same when the month is the same.;\n')
     
-    date_today = current_date.today()
-    f.write('Date of file creation: '+ str(date_today) +';\n')
     f.write('Cite the data:; \n')
     if year_a > 2020:
         f.write(citation_string_site_a_icos + ';\n')
@@ -643,6 +641,9 @@ def update_func(button_c):
         
     f.write('Cite the notebook package if a figure is used:; \n')
     f.write('Storm, I., Klasen, V,, 2023. Ecosystem site anomalies notebook tool. ICOS ERIC - Carbon Portal. https://doi.org/10.18160/0GP0-HW10;\n')
+    
+    date_today = current_date.today()
+    f.write('Date of file creation: '+ str(date_today) +';\n')
     # Save the dataframe, so it can be downloaded as a csv-file in a
     # folder called "ecosystem_site_anomaly_visualization_output" under
     # "/home/user/output/" directory.
