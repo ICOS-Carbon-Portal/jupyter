@@ -62,10 +62,12 @@ if not os.path.exists(output_anomalies_path):
 button_color_able='#4169E1'
 colors_negative_anomalies = {'GPP_DT_VUT_REF':'#115C0A',
                              'SW_IN_F':'#994C00',
-                             'VPD_F':'#0F3957'}
+                             'VPD_F':'#0F3957',
+                             'RECO_DT_VUT_REF': '#bd0026'}
 colors_positive_anomalies = {'GPP_DT_VUT_REF':'#4ABF40',
                              'SW_IN_F':'#E07306',
-                             'VPD_F':'#06BBE0'}
+                             'VPD_F':'#06BBE0',
+                             'RECO_DT_VUT_REF': '#fc4e2a'}
 
 # site information for dropdowns and for the overview map. 
 sites_dataframe = station.getIdList('ES')
@@ -188,7 +190,7 @@ def return_year_data(reference_path, site_name, year, variable):
 
                     df_time = df.loc[(df['TIMESTAMP'] >= int(str_date_start)) &(df['TIMESTAMP'] <= int(str_date_end))]
                     
-                    if variable == 'GPP_DT_VUT_REF':
+                    if variable == 'GPP_DT_VUT_REF' or variable == 'RECO_DT_VUT_REF':
                         variable_qc = 'NEE_VUT_REF_QC'
                     if variable == 'SW_IN_F':
                         variable_qc = 'SW_IN_F_QC'
@@ -616,8 +618,10 @@ def update_func(button_c):
     f.write('Analysed year(s) column(s) (column titel(s) contains the analysed year of selected site(s)): Daily average values ("DD" in flux product).;\n')
     f.write('Variable definitions (found in column titles: one or two of these variables):;\n')
     f.write('Gross Primary Production daytime in micromol/m2/s (GPP_DT_VUT_REF);\n')
+    f.write('Respiration daytime in micromol/m2/s (RECO_DT_VUT_REF);\n')
     f.write('Shortwave incoming radiation in W/m2 (SW_IN_F);\n')
     f.write('Vapor pressure deficit in hPa (VPD_F);\n')
+    f.write('Quality control (QC) flags associated with the individual variables have been applied using a threshold of QC > 0.7, where 1 represents the best possible value.;\n')
     f.write('Identify the selected year(s) for the site(s) based on the column heading ending with the variable name(s). The reference period(s) are provided with a dash indicating the start and end of each reference period.;\n')
     f.write('The column(s) ending with "_std_count" represent the number of times that a specific date (row) within the reference period was flagged (QC < 0.7). These flagged values were excluded from the calculation of the standard deviation value (found in columns ending with "_std").;\n')
     f.write('The column(s) ending with "_std_count_month" represent the number of times a day within a specific month (referenced in the"month" column) was flagged during the reference period. These flagged values were excluded from the calculation of the standard deviation value (found in columns ending with "_std_month"). Note that the values in these columns are the same when the month is the same.;\n')
@@ -793,7 +797,7 @@ s_year_a = Dropdown(options = [],
                    layout = layout,
                    style = style)
 
-variable_a = Dropdown(options = [('Daytime Gross Primary Production (GPP_DT_VUT_REF)', "GPP_DT_VUT_REF"), ('Shortwave incoming radiation (SW_IN_F)', "SW_IN_F"), ('Vapor pressure deficit (VPD_F)', "VPD_F")],
+variable_a = Dropdown(options = [('Daytime Gross Primary Production (GPP_DT_VUT_REF)', "GPP_DT_VUT_REF"),('Daytime Respiration (RECO_DT_VUT_REF)', "RECO_DT_VUT_REF"), ('Shortwave incoming radiation (SW_IN_F)', "SW_IN_F"), ('Vapor pressure deficit (VPD_F)', "VPD_F")],
                    description = 'Variable a*',
                    value ="GPP_DT_VUT_REF",
                    disabled= True,
@@ -839,7 +843,7 @@ s_year_b = Dropdown(options = [],
                   layout = layout,
                   style = style)
 
-variable_b = Dropdown(options = [('Daytime Gross Primary Production (GPP_DT_VUT_REF)', "GPP_DT_VUT_REF"), ('Shortwave incoming radiation (SW_IN_F)', "SW_IN_F"), ('Vapor pressure deficit (VPD_F)', "VPD_F")],
+variable_b = Dropdown(options = [('Daytime Gross Primary Production (GPP_DT_VUT_REF)', "GPP_DT_VUT_REF"),('Daytime Respiration (RECO_DT_VUT_REF)', "RECO_DT_VUT_REF"), ('Shortwave incoming radiation (SW_IN_F)', "SW_IN_F"), ('Vapor pressure deficit (VPD_F)', "VPD_F")],
                   description = 'Variable b (optional)',
                   value = "GPP_DT_VUT_REF",
                   disabled= True,
