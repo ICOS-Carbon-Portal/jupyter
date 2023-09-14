@@ -797,7 +797,7 @@ s_year_a = Dropdown(options = [],
                    layout = layout,
                    style = style)
 
-variable_a = Dropdown(options = [('Daytime Gross Primary Production (GPP_DT_VUT_REF)', "GPP_DT_VUT_REF"),('Daytime Respiration (RECO_DT_VUT_REF)', "RECO_DT_VUT_REF"), ('Shortwave incoming radiation (SW_IN_F)', "SW_IN_F"), ('Vapor pressure deficit (VPD_F)', "VPD_F")],
+variable_a = Dropdown(options = [('Gross Primary Production (GPP_DT_VUT_REF)', "GPP_DT_VUT_REF"),('Respiration (RECO_DT_VUT_REF)', "RECO_DT_VUT_REF"), ('Shortwave incoming radiation (SW_IN_F)', "SW_IN_F"), ('Vapor pressure deficit (VPD_F)', "VPD_F")],
                    description = 'Variable a*',
                    value ="GPP_DT_VUT_REF",
                    disabled= True,
@@ -843,7 +843,7 @@ s_year_b = Dropdown(options = [],
                   layout = layout,
                   style = style)
 
-variable_b = Dropdown(options = [('Daytime Gross Primary Production (GPP_DT_VUT_REF)', "GPP_DT_VUT_REF"),('Daytime Respiration (RECO_DT_VUT_REF)', "RECO_DT_VUT_REF"), ('Shortwave incoming radiation (SW_IN_F)', "SW_IN_F"), ('Vapor pressure deficit (VPD_F)', "VPD_F")],
+variable_b = Dropdown(options = [('Gross Primary Production (GPP_DT_VUT_REF)', "GPP_DT_VUT_REF"),('Respiration (RECO_DT_VUT_REF)', "RECO_DT_VUT_REF"), ('Shortwave incoming radiation (SW_IN_F)', "SW_IN_F"), ('Vapor pressure deficit (VPD_F)', "VPD_F")],
                   description = 'Variable b (optional)',
                   value = "GPP_DT_VUT_REF",
                   disabled= True,
