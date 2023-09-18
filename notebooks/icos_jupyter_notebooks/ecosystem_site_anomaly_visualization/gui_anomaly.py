@@ -710,42 +710,6 @@ def update_func(button_c):
             display(HTML('<p style="font-size:16px">' + citation_string_site_b + '<br></p>'))
     
     with output_plot_anomalies:
-
-        # Some updates to the dataframe to account for the flagged data
-        
-        # not show standard deviation values in case of no values
-        # here when showing days in a month
-        df_final[sd_a_col_name] = np.where(np.isnan(df_final[values_a_col_name]), np.nan, df_final[sd_a_col_name])
-        # here when showing months in a year: all values in the month must be missing
-        count_vals_per_month = df_final.groupby('month', dropna=True).count()
-        # list of months that have less than 7 values (these will have all values set to NaN):
-        count_vals_per_month = count_vals_per_month.loc[count_vals_per_month[values_a_col_name] < 7]
-        exclude_months = list(count_vals_per_month.index)         
-        df_final[sd_a_month_col_name] = np.where(np.isin(df_final["month"], exclude_months), np.nan, df_final[sd_a_month_col_name])
-        df_final[values_a_col_name] = np.where(np.isin(df_final["month"], exclude_months), np.nan, df_final[values_a_col_name])
-   
-        # not show standard deviation bar in case of too few values (set to five currently). Only up to 11 for individual days std.
-        # assumes all reference periods will have enough values for the standard deviations for months
-        if reference == '2010-2020':  
-            df_final[sd_a_col_name] = np.where(df_final[sd_a_col_name_count]>5,  np.nan, df_final[sd_a_col_name])
-        else: # if reference = 2000-2020
-            df_final[sd_a_col_name] = np.where(df_final[sd_a_col_name_count]>15,  np.nan, df_final[sd_a_col_name])
-            
-        if site_b is not None:
-
-            # same updates made to the data associated with the second selection
-            df_final[sd_b_col_name] = np.where(np.isnan(df_final[values_b_col_name]), np.nan, df_final[sd_b_col_name])
-            count_vals_per_month = df_final.groupby('month', dropna=True).count()
-            # list of months that have less than 7 values (these will have all values set to NaN):
-            count_vals_per_month = count_vals_per_month.loc[count_vals_per_month[values_b_col_name] < 7]
-            exclude_months = list(count_vals_per_month.index)         
-            df_final[sd_b_month_col_name] = np.where(np.isin(df_final["month"], exclude_months), np.nan, df_final[sd_b_month_col_name])
-            df_final[values_b_col_name] = np.where(np.isin(df_final["month"], exclude_months), np.nan, df_final[values_b_col_name])
-
-            if reference == '2010-2020': 
-                df_final[sd_b_col_name] = np.where(df_final[sd_b_col_name_count]>5,  np.nan, df_final[sd_b_col_name])
-            else: # if reference = 2000-2020
-                df_final[sd_b_col_name] = np.where(df_final[sd_b_col_name_count]>15,  np.nan, df_final[sd_b_col_name])
         plot_interface_anomaly.plot_anomalies(df_final, data_filename, selection_dict, colors_positive_anomalies_dict, colors_negative_anomalies_dict)
             
     # after the tool is done running, it is possible to make a new tool run (hence the update buttn can be pressed given that the necessary widgets are populated)
