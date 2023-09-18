@@ -51,12 +51,14 @@ def make_plot_anomalies(df,
 
     reference_a = selection_dict["reference_values_a"]
     reference_a_std = selection_dict["sd_a"]
+    reference_a_std_count = selection_dict["sd_a_count"]
     reference_a_std_month = selection_dict["sd_a_month"]
     values_a = selection_dict["values_a"]
     agg_anom_columns = [values_a, reference_a, reference_a_std, reference_a_std_month]
     if not single_plot:
         reference_b = selection_dict["reference_values_b"]
         reference_b_std = selection_dict["sd_b"]
+        reference_b_std_count = selection_dict["sd_b_count"]
         reference_b_std_month = selection_dict["sd_b_month"]
         values_b = selection_dict["values_b"]
         agg_anom_columns.extend([values_b, reference_b, reference_b_std, reference_b_std_month])
@@ -64,7 +66,7 @@ def make_plot_anomalies(df,
     # Some updates to the dataframe to account for the flagged data
     # we still need the original dataframe (df) for establishing the average. 
     df_nan = df.copy()
-    
+
     # alter the dataframe that will be displayed:
     df_nan[reference_a_std_month] = np.where(np.isnan(df_nan[values_a]), np.nan, df_nan[reference_a_std_month])
     
@@ -80,9 +82,9 @@ def make_plot_anomalies(df,
     # not show standard deviation bar in case of too few values (set to five currently). Only up to 11 for individual days std.
     # assumes all reference periods will have enough values for the standard deviations for months
     if selection_dict["reference"] == '2010-2020':  
-        df_nan[reference_a_std] = np.where(df_nan[reference_a_std]>5,  np.nan, df_nan[reference_a_std])
+        df_nan[reference_a_std] = np.where(df_nan[reference_a_std_count]>5,  np.nan, df_nan[reference_a_std])
     else: # if selection_dict["reference"]  = 2000-2020
-        df_nan[reference_a_std] = np.where(df_nan[reference_a_std]>15,  np.nan, df_nan[reference_a_std])
+        df_nan[reference_a_std] = np.where(df_nan[reference_a_std_count]>15,  np.nan, df_nan[reference_a_std])
         
     if selection_dict["selected_site_b"] is not None:
 
@@ -97,9 +99,9 @@ def make_plot_anomalies(df,
         df_nan[reference_b] = np.where(np.isin(df_nan["month"], exclude_months), np.nan, df_nan[reference_b])
 
         if selection_dict["reference"] == '2010-2020': 
-            df_nan[reference_b_std] = np.where(df_nan[reference_b_std]>5,  np.nan, df_nan[reference_b_std])
+            df_nan[reference_b_std] = np.where(df_nan[reference_b_std_count]>5,  np.nan, df_nan[reference_b_std])
         else: # if selection_dict["reference"] = 2000-2020
-            df_nan[reference_b_std] = np.where(df_nan[reference_b_std]>15,  np.nan, df_nan[reference_b_std])
+            df_nan[reference_b_std] = np.where(df_nan[reference_b_std_count]>15,  np.nan, df_nan[reference_b_std])
 
     ### aggregate according to scope
     if temporal_scope == 'year':
@@ -138,7 +140,7 @@ def make_plot_anomalies(df,
         if 'reference_b_std' in locals():
             reference_b_std_scope_specific = reference_b_std
 
-        df = df_nan[df_nan.month == month]
+        df_nan = df_nan[df_nan.month == month]
         # does not change anything as already daily values (would be needed if we had multiple values for different times of the day though).
         d_agg_anom = {col: 'mean' for col in agg_anom_columns}
         df_nan = df_nan.groupby(['day']).agg(d_agg_anom).reset_index()
@@ -174,8 +176,17 @@ def make_plot_anomalies(df,
     else:
         return 'Choose a temporal scope!'
     
-    
     df_nan_0 = df_nan.copy()
+    
+    # the reference values were kept for the average
+    # now replaced wiht nan (and then changed to zero) because do not want to show it in the output
+    df_nan_0[reference_a] = np.where(np.isnan(df_nan_0[values_a]), np.nan, df_nan_0[reference_a])
+    
+    # in case of a second site
+    if not single_plot:
+        df_nan_0[reference_b] = np.where(np.isnan(df_nan_0[values_b]), np.nan, df_nan_0[reference_b])
+    
+    
     df_nan_0.fillna(0, inplace=True)
 
     if single_plot:

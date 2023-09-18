@@ -657,13 +657,15 @@ def update_func(button_c):
     selection_dict = {"reference":reference,"selected_site_a":selected_site_a,"selected_site_a_name":selected_site_a_name,"year_a":year_a,"selected_site_b":selected_site_b,"selected_site_b_name":selected_site_b_name,"year_b":year_b,"variable_a_value":variable_a_value,"variable_b_value":variable_b_value, \
 "reference_values_a": reference_values_a_col_name,
 "sd_a": sd_a_col_name,
+"sd_a_count": sd_a_col_name_count,
 "sd_a_month":sd_a_month_col_name,
 "reference_values_b": reference_values_b_col_name,
 "sd_b": sd_b_col_name,
+"sd_b_count": sd_b_col_name_count,
 "sd_b_month":sd_b_month_col_name,
 "values_a": values_a_col_name,
 "values_b":values_b_col_name}
- 
+    
     # message which will change of the selections the user have done.
     # it shows the selected site names and links to their landing page(s).
     with message:
