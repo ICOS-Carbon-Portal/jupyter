@@ -62,10 +62,12 @@ if not os.path.exists(output_anomalies_path):
 button_color_able='#4169E1'
 colors_negative_anomalies = {'GPP_DT_VUT_REF':'#115C0A',
                              'SW_IN_F':'#994C00',
-                             'VPD_F':'#0F3957'}
+                             'VPD_F':'#0F3957',
+                             'RECO_DT_VUT_REF': '#bd0026'}
 colors_positive_anomalies = {'GPP_DT_VUT_REF':'#4ABF40',
                              'SW_IN_F':'#E07306',
-                             'VPD_F':'#06BBE0'}
+                             'VPD_F':'#06BBE0',
+                             'RECO_DT_VUT_REF': '#fc4e2a'}
 
 # site information for dropdowns and for the overview map. 
 sites_dataframe = station.getIdList('ES')
@@ -188,7 +190,7 @@ def return_year_data(reference_path, site_name, year, variable):
 
                     df_time = df.loc[(df['TIMESTAMP'] >= int(str_date_start)) &(df['TIMESTAMP'] <= int(str_date_end))]
                     
-                    if variable == 'GPP_DT_VUT_REF':
+                    if variable == 'GPP_DT_VUT_REF' or variable == 'RECO_DT_VUT_REF':
                         variable_qc = 'NEE_VUT_REF_QC'
                     if variable == 'SW_IN_F':
                         variable_qc = 'SW_IN_F_QC'
@@ -615,9 +617,11 @@ def update_func(button_c):
     f.write('Reference period columns (columns without years in title): Averages and standard deviations of daily average values ("DD" in flux product) over the years '  + reference_string + ' for selected site(s)' + semi_colons + '\n')
     f.write('Analysed year(s) column(s) (column titel(s) contains the analysed year of selected site(s)): Daily average values ("DD" in flux product).;\n')
     f.write('Variable definitions (found in column titles: one or two of these variables):;\n')
-    f.write('Gross Primary Production daytime in micromol/m2/s (GPP_DT_VUT_REF);\n')
+    f.write('Gross Primary Production in micromol/m2/s using the daytime partitioning method (GPP_DT_VUT_REF);\n')
+    f.write('Respiration in micromol/m2/s using the daytime partitioning method (RECO_DT_VUT_REF);\n')
     f.write('Shortwave incoming radiation in W/m2 (SW_IN_F);\n')
     f.write('Vapor pressure deficit in hPa (VPD_F);\n')
+    f.write('Quality control (_QC) flags associated with the individual variables have been applied. The values represent a percentage of measured or good quality gap-filled records aggregated from finer temporal resolutions. A threshold of 0.7 was used when creating this data set.;\n')
     f.write('Identify the selected year(s) for the site(s) based on the column heading ending with the variable name(s). The reference period(s) are provided with a dash indicating the start and end of each reference period.;\n')
     f.write('The column(s) ending with "_std_count" represent the number of times that a specific date (row) within the reference period was flagged (QC < 0.7). These flagged values were excluded from the calculation of the standard deviation value (found in columns ending with "_std").;\n')
     f.write('The column(s) ending with "_std_count_month" represent the number of times a day within a specific month (referenced in the"month" column) was flagged during the reference period. These flagged values were excluded from the calculation of the standard deviation value (found in columns ending with "_std_month"). Note that the values in these columns are the same when the month is the same.;\n')
@@ -653,13 +657,15 @@ def update_func(button_c):
     selection_dict = {"reference":reference,"selected_site_a":selected_site_a,"selected_site_a_name":selected_site_a_name,"year_a":year_a,"selected_site_b":selected_site_b,"selected_site_b_name":selected_site_b_name,"year_b":year_b,"variable_a_value":variable_a_value,"variable_b_value":variable_b_value, \
 "reference_values_a": reference_values_a_col_name,
 "sd_a": sd_a_col_name,
+"sd_a_count": sd_a_col_name_count,
 "sd_a_month":sd_a_month_col_name,
 "reference_values_b": reference_values_b_col_name,
 "sd_b": sd_b_col_name,
+"sd_b_count": sd_b_col_name_count,
 "sd_b_month":sd_b_month_col_name,
 "values_a": values_a_col_name,
 "values_b":values_b_col_name}
- 
+    
     # message which will change of the selections the user have done.
     # it shows the selected site names and links to their landing page(s).
     with message:
@@ -706,42 +712,6 @@ def update_func(button_c):
             display(HTML('<p style="font-size:16px">' + citation_string_site_b + '<br></p>'))
     
     with output_plot_anomalies:
-
-        # Some updates to the dataframe to account for the flagged data
-        
-        # not show standard deviation values in case of no values
-        # here when showing days in a month
-        df_final[sd_a_col_name] = np.where(np.isnan(df_final[values_a_col_name]), np.nan, df_final[sd_a_col_name])
-        # here when showing months in a year: all values in the month must be missing
-        count_vals_per_month = df_final.groupby('month', dropna=True).count()
-        # list of months that have less than 7 values (these will have all values set to NaN):
-        count_vals_per_month = count_vals_per_month.loc[count_vals_per_month[values_a_col_name] < 7]
-        exclude_months = list(count_vals_per_month.index)         
-        df_final[sd_a_month_col_name] = np.where(np.isin(df_final["month"], exclude_months), np.nan, df_final[sd_a_month_col_name])
-        df_final[values_a_col_name] = np.where(np.isin(df_final["month"], exclude_months), np.nan, df_final[values_a_col_name])
-   
-        # not show standard deviation bar in case of too few values (set to five currently). Only up to 11 for individual days std.
-        # assumes all reference periods will have enough values for the standard deviations for months
-        if reference == '2010-2020':  
-            df_final[sd_a_col_name] = np.where(df_final[sd_a_col_name_count]>5,  np.nan, df_final[sd_a_col_name])
-        else: # if reference = 2000-2020
-            df_final[sd_a_col_name] = np.where(df_final[sd_a_col_name_count]>15,  np.nan, df_final[sd_a_col_name])
-            
-        if site_b is not None:
-
-            # same updates made to the data associated with the second selection
-            df_final[sd_b_col_name] = np.where(np.isnan(df_final[values_b_col_name]), np.nan, df_final[sd_b_col_name])
-            count_vals_per_month = df_final.groupby('month', dropna=True).count()
-            # list of months that have less than 7 values (these will have all values set to NaN):
-            count_vals_per_month = count_vals_per_month.loc[count_vals_per_month[values_b_col_name] < 7]
-            exclude_months = list(count_vals_per_month.index)         
-            df_final[sd_b_month_col_name] = np.where(np.isin(df_final["month"], exclude_months), np.nan, df_final[sd_b_month_col_name])
-            df_final[values_b_col_name] = np.where(np.isin(df_final["month"], exclude_months), np.nan, df_final[values_b_col_name])
-
-            if reference == '2010-2020': 
-                df_final[sd_b_col_name] = np.where(df_final[sd_b_col_name_count]>5,  np.nan, df_final[sd_b_col_name])
-            else: # if reference = 2000-2020
-                df_final[sd_b_col_name] = np.where(df_final[sd_b_col_name_count]>15,  np.nan, df_final[sd_b_col_name])
         plot_interface_anomaly.plot_anomalies(df_final, data_filename, selection_dict, colors_positive_anomalies_dict, colors_negative_anomalies_dict)
             
     # after the tool is done running, it is possible to make a new tool run (hence the update buttn can be pressed given that the necessary widgets are populated)
@@ -793,7 +763,7 @@ s_year_a = Dropdown(options = [],
                    layout = layout,
                    style = style)
 
-variable_a = Dropdown(options = [('Daytime Gross Primary Production (GPP_DT_VUT_REF)', "GPP_DT_VUT_REF"), ('Shortwave incoming radiation (SW_IN_F)', "SW_IN_F"), ('Vapor pressure deficit (VPD_F)', "VPD_F")],
+variable_a = Dropdown(options = [('Gross Primary Production (GPP_DT_VUT_REF)', "GPP_DT_VUT_REF"),('Respiration (RECO_DT_VUT_REF)', "RECO_DT_VUT_REF"), ('Shortwave incoming radiation (SW_IN_F)', "SW_IN_F"), ('Vapor pressure deficit (VPD_F)', "VPD_F")],
                    description = 'Variable a*',
                    value ="GPP_DT_VUT_REF",
                    disabled= True,
@@ -839,7 +809,7 @@ s_year_b = Dropdown(options = [],
                   layout = layout,
                   style = style)
 
-variable_b = Dropdown(options = [('Daytime Gross Primary Production (GPP_DT_VUT_REF)', "GPP_DT_VUT_REF"), ('Shortwave incoming radiation (SW_IN_F)', "SW_IN_F"), ('Vapor pressure deficit (VPD_F)', "VPD_F")],
+variable_b = Dropdown(options = [('Gross Primary Production (GPP_DT_VUT_REF)', "GPP_DT_VUT_REF"),('Respiration (RECO_DT_VUT_REF)', "RECO_DT_VUT_REF"), ('Shortwave incoming radiation (SW_IN_F)', "SW_IN_F"), ('Vapor pressure deficit (VPD_F)', "VPD_F")],
                   description = 'Variable b (optional)',
                   value = "GPP_DT_VUT_REF",
                   disabled= True,
