@@ -46,6 +46,7 @@ def make_plot_anomalies(df,
                         month = 1,
                         plot_with_sd = True,
                        ):
+    
     single_plot = True if (selection_dict["values_b"] == None) else False
     same_variable = True if (selection_dict["variable_a_value"] == selection_dict["variable_b_value"]) else False
 
@@ -68,9 +69,10 @@ def make_plot_anomalies(df,
     df_nan = df.copy()
 
     # alter the dataframe that will be displayed:
-    df_nan[reference_a_std_month] = np.where(np.isnan(df_nan[values_a]), np.nan, df_nan[reference_a_std_month])
+    # with regards to the days of the month (as opposed to yearly): no stnadard deviation values in case of no valid data that day
+    df_nan[reference_a_std] = np.where(np.isnan(df_nan[values_a]), np.nan, df_nan[reference_a_std])
     
-    # here when showing months in a year: all values in the month must be missing
+    # here when showing yearly: exclude bars in case of less than 7 values during that month.
     count_vals_per_month = df_nan.groupby('month', dropna=True).count()
     # list of months that have less than 7 values (these will have all values set to NaN):
     count_vals_per_month = count_vals_per_month.loc[count_vals_per_month[values_a] < 7]
@@ -79,7 +81,7 @@ def make_plot_anomalies(df,
     df_nan[values_a] = np.where(np.isin(df_nan["month"], exclude_months), np.nan, df_nan[values_a])
     df_nan[reference_a] = np.where(np.isin(df_nan["month"], exclude_months), np.nan, df_nan[reference_a])
 
-    # not show standard deviation bar in case of too few values (set to five currently). Only up to 11 for individual days std.
+    # not show standard deviation bar in case of too few values for its creation (set to five currently). Only up to 11 for individual days std.
     # assumes all reference periods will have enough values for the standard deviations for months
     if selection_dict["reference"] == '2010-2020':  
         df_nan[reference_a_std] = np.where(df_nan[reference_a_std_count]>5,  np.nan, df_nan[reference_a_std])
@@ -89,7 +91,7 @@ def make_plot_anomalies(df,
     if selection_dict["selected_site_b"] is not None:
 
         # same updates made to the data associated with the second selection
-        df_nan[reference_b_std_month] = np.where(np.isnan(df_nan[values_b]), np.nan, df_nan[reference_b_std_month])
+        df_nan[reference_b_std] = np.where(np.isnan(df_nan[values_b]), np.nan, df_nan[reference_b_std])
         count_vals_per_month = df_nan.groupby('month', dropna=True).count()
         # list of months that have less than 7 values (these will have all values set to NaN):
         count_vals_per_month = count_vals_per_month.loc[count_vals_per_month[values_b] < 7]
@@ -134,6 +136,9 @@ def make_plot_anomalies(df,
         time_unit = 'month(s)'
 
     elif temporal_scope == 'month':
+        
+        # df is unchanged other than here. When the monthly scope is used, the average is based on only the values in the month. 
+        df = df[df.month == month]
 
         # column with the standard deviation values based on the difference in the monthly mean values
         reference_a_std_scope_specific = reference_a_std
@@ -144,7 +149,7 @@ def make_plot_anomalies(df,
         # does not change anything as already daily values (would be needed if we had multiple values for different times of the day though).
         d_agg_anom = {col: 'mean' for col in agg_anom_columns}
         df_nan = df_nan.groupby(['day']).agg(d_agg_anom).reset_index()
-
+        
         # check if all zeros in any of the columns (fails if so with error: "ValueError: 'vertices' must be 2D with shape (M, 2). Your input has shape (0,)." 
         # The error was discovered for Hainich Jan 2018. It happens here: posAnomalyAngle = radians((totalPositiveAnomaly/totalValues)*180)
         for df_column in df_nan.columns:
@@ -166,7 +171,7 @@ def make_plot_anomalies(df,
             else:
                 legendTitle_a = 'Mean daily ' + selection_dict["variable_a_value"] + ' for ' + calendar.month_name[month] + ' at ' +\
                     selection_dict["selected_site_a_name"] + ' (' + str(selection_dict["year_a"]) + ')'
-                legendTitle_b = 'Mean daily ' + selection_dict["variable_b_value"] + ' at ' +\
+                legendTitle_b = 'Mean daily ' + selection_dict["variable_b_value"]  + ' for ' + calendar.month_name[month] + ' at ' +\
                     selection_dict["selected_site_b_name"] + ' (' + str(selection_dict["year_b"]) + ')'
 
         else:
@@ -175,7 +180,8 @@ def make_plot_anomalies(df,
         time_unit = 'day(s)'
     else:
         return 'Choose a temporal scope!'
-    
+
+    # need to make a copy. The df_nan version of the dataframe is used for counting the months with anomalies (and their averages). 
     df_nan_0 = df_nan.copy()
     
     # the reference values were kept for the average
@@ -255,7 +261,7 @@ def make_plot_anomalies(df,
         ### legend for single plot
         mean_values_a = np.round(df[values_a].mean(),2)
         mean_ref_a = np.round(df[reference_a].mean(),2)
-        
+     
         # want to show average monthly anomalies in case of if the month is displayed
         anomalies_a = df_nan[values_a]-df_nan[reference_a]
         positive_anomalies_a = []
@@ -381,7 +387,7 @@ def make_plot_anomalies(df,
             ### legend for plot b
             mean_values_b = np.round(df[values_b].mean(),2)
             mean_ref_b = np.round(df[reference_b].mean(),2)
-            anomalies_b = df[values_b]-df[reference_b]
+            anomalies_b = df_nan[values_b]-df_nan[reference_b]
             positive_anomalies_b = []
             negative_anomalies_b = []
             for a in anomalies_b:
