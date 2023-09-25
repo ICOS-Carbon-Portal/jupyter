@@ -23,7 +23,7 @@
 
     Examples
     --------
-    >>>import icos2latex
+    >>>import eco_tool.icos2latex
     >>>lat = icos2latex.Translator()
     >>>lat.var_unit_to_latex(('CO2','µmol mol-1'))
     '${CO_2}\ (\mu{mol}/{mol})$'

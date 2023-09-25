@@ -1535,7 +1535,8 @@ class AnalysisGui:
         #     t_ls = selected_tools.options
         #     v_ls = [v[1][1] for v in selected_vars.options]
         #     ind = range(len(t_ls))
-        #     d['_tools'] = {k: {name2tool_dict[t_ls[k][0]]: v_ls[k]} for k in ind}
+        #     d['_tools'] = {k: {name2tool_dict[t_ls[k][0]]: v_ls[k]} for k in
+        #     ind}
         #     d['_selected_tool_index'] = selected_tools.index
         #     return d
 
@@ -2469,7 +2470,7 @@ class AnalysisGui:
 
         # 4:th row. update section: Batch name
         name_label = wd.HTML('<b><i>Batch name: </i></b>',
-                             layout=hideable_label_layout)
+                             layout=wd.Layout(min_width='125px'))
         name_of_batch_job = wd.Text(value='Name of batch job',
                                     layout=AnalysisGui._get_layout('Name of '
                                                                    'batch job'))
@@ -3311,6 +3312,7 @@ class AnalysisGui:
             id_ls = list(st_df.id)
             name_ls = list(st_df.name)
             station_ls = list(set(zip(name_ls, id_ls)))
+            station_ls = [(f'{v[0]} ({v[1]})', v[1]) for v in station_ls]
             station_ls.sort(key=lambda v: v[0].lower())
             return station_ls
 

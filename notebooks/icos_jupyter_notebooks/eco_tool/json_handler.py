@@ -7,13 +7,15 @@ import json
 import os
 
 
-def _valid_dir(settings_dir):
+def _check_dir(settings_dir):
     if settings_dir is None:
         settings_dir = 'eco_tool/appdata'
 
     # create directory if it does not exist
     if not os.path.exists(settings_dir):
         os.mkdir(settings_dir)
+    if not os.path.isdir(settings_dir):
+        raise FileNotFoundError(settings_dir)
 
 
 def _get_backup(json_file: str = None,
@@ -52,7 +54,7 @@ def _write_backup(json_file: str = None,
 def get_restore_point(timestamps: list = None,
                       json_file: str = None,
                       settings_dir: str = None) -> dict:
-    _valid_dir(settings_dir)
+    _check_dir(settings_dir)
     bak_dict = _get_backup(json_file=json_file,
                            settings_dir=settings_dir)
     if isinstance(timestamps,str):
@@ -62,7 +64,7 @@ def get_restore_point(timestamps: list = None,
 
 def get_restore_point_timestamps(json_file: str = None,
                                  settings_dir: str = None) -> list:
-    _valid_dir(settings_dir)
+    _check_dir(settings_dir)
     bak_dict = _get_backup(json_file=json_file,
                            settings_dir=settings_dir)
     restore_points = bak_dict.get('timestamps', [])
@@ -73,7 +75,7 @@ def get_restore_point_timestamps(json_file: str = None,
 def read(json_file: str = None,
          settings_dir: str = None) -> dict:
 
-    _valid_dir(settings_dir)
+    _check_dir(settings_dir)
 
     # read cache
     file = settings_dir + '/' + json_file
@@ -88,7 +90,7 @@ def read(json_file: str = None,
 def update(data_piece: dict = None,
            json_file: str = None,
            settings_dir: str = None):
-    _valid_dir(settings_dir)
+    _check_dir(settings_dir)
     data_to_update = read(json_file=json_file,
                           settings_dir=settings_dir)
     data_to_update.update(data_piece)
@@ -100,7 +102,7 @@ def update(data_piece: dict = None,
 def write(data: dict = None,
           json_file: str = None,
           settings_dir: str = None):
-    _valid_dir(settings_dir)
+    _check_dir(settings_dir)
     # Make backup before saving
     _write_backup(json_file, settings_dir)
 
