@@ -7,104 +7,92 @@ import json
 import os
 
 
-def _check_dir(settings_dir):
-    if settings_dir is None:
-        settings_dir = 'eco_tool/appdata'
-
+def _check_dir(path_to_json_dictionary: str):
     # create directory if it does not exist
-    if not os.path.exists(settings_dir):
-        os.mkdir(settings_dir)
-    if not os.path.isdir(settings_dir):
-        raise FileNotFoundError(settings_dir)
+    if not os.path.exists(path_to_json_dictionary):
+        os.makedirs(path_to_json_dictionary)
+    if not os.path.isdir(path_to_json_dictionary):
+        raise FileNotFoundError(path_to_json_dictionary)
 
 
-def _get_backup(json_file: str = None,
-                settings_dir: str = None) -> dict:
-    bak_name = json_file.split('.')
-    if bak_name[0][-4:] == '_bak':
-        bak_name = bak_name[0] + '.json'
+def _get_backup(path_to_json_file: str = None) -> dict:
+    file, _ = os.path.splitext(path_to_json_file)
+    if file[-4:] == '_bak':
+        file += '.json'
     else:
-        bak_name = bak_name[0] + '_bak.json'
-    backup_dict = read(json_file=bak_name,
-                       settings_dir=settings_dir)
+        file += '_bak.json'
+    backup_dict = read(file)
     return backup_dict
 
 
-def _write_backup(json_file: str = None,
-                  settings_dir: str = None):
-    bak_name = json_file.split('.')
-    bak_name = bak_name[0] + '_bak.json'
+def _write_backup(path_to_json_file: str = None):
 
-    # backup previous settings before update
-    timestamp = str(datetime.today())
-    backup_dict = read(json_file=bak_name, settings_dir=settings_dir)
-    latest_dict = read(json_file=json_file, settings_dir=settings_dir)
+    latest_dict = read(path_to_json_file)
 
     if latest_dict:
+        file, _ = os.path.splitext(path_to_json_file)
+        bak_file = file + '_bak.json'
+
+        # backup previous settings before update
+        timestamp = str(datetime.today())
+        backup_dict = read(bak_file)
+
         if isinstance(backup_dict, dict) and 'timestamps' in backup_dict.keys():
             backup_dict['timestamps'].append(timestamp)
         else:
             backup_dict['timestamps'] = [timestamp]
         backup_dict[timestamp] = latest_dict
 
-        with open(settings_dir + '/' + bak_name, 'w') as new_bak_file:
+        with open(bak_file, 'w') as new_bak_file:
             json.dump(backup_dict, new_bak_file)
 
 
 def get_restore_point(timestamps: list = None,
-                      json_file: str = None,
-                      settings_dir: str = None) -> dict:
-    _check_dir(settings_dir)
-    bak_dict = _get_backup(json_file=json_file,
-                           settings_dir=settings_dir)
-    if isinstance(timestamps,str):
+                      path_to_json_file: str = None) -> dict:
+
+    if isinstance(timestamps, str):
         timestamps = [timestamps]
+
+    bak_dict = _get_backup(path_to_json_file)
+
     return {k: bak_dict.get(k, {}) for k in timestamps}
 
 
-def get_restore_point_timestamps(json_file: str = None,
-                                 settings_dir: str = None) -> list:
-    _check_dir(settings_dir)
-    bak_dict = _get_backup(json_file=json_file,
-                           settings_dir=settings_dir)
+def get_restore_point_timestamps(path_to_json_file: str = None) -> list:
+    bak_dict = _get_backup(path_to_json_file)
     restore_points = bak_dict.get('timestamps', [])
     restore_points.reverse()
     return restore_points
 
 
-def read(json_file: str = None,
-         settings_dir: str = None) -> dict:
-
-    _check_dir(settings_dir)
-
-    # read cache
-    file = settings_dir + '/' + json_file
-    try:
-        with open(file, 'r') as f:
-            cache = json.load(f)
-    except:
-        cache = dict()
-    return cache
+def read(path_to_json_file: str = None) -> dict:
+    # read json to dict
+    # This is where the path to the file is created
+    if os.path.isfile(path_to_json_file):
+        try:
+            with open(path_to_json_file, 'r') as f:
+                json_dict = json.load(f)
+        except:
+            json_dict = dict()
+    else:
+        json_dict = dict()
+        path, file = os.path.split(path_to_json_file)
+        _check_dir(path)
+    return json_dict
 
 
 def update(data_piece: dict = None,
-           json_file: str = None,
-           settings_dir: str = None):
-    _check_dir(settings_dir)
-    data_to_update = read(json_file=json_file,
-                          settings_dir=settings_dir)
+           path_to_json_file: str = None):
+    data_to_update = read(path_to_json_file)
     data_to_update.update(data_piece)
     write(data=data_to_update,
-          json_file=json_file,
-          settings_dir=settings_dir)
+          path_to_json_file=path_to_json_file)
 
 
-def write(data: dict = None,
-          json_file: str = None,
-          settings_dir: str = None):
-    _check_dir(settings_dir)
+def write(data: dict,
+          path_to_json_file: str):
     # Make backup before saving
-    _write_backup(json_file, settings_dir)
+    _write_backup(path_to_json_file)
 
-    with open(settings_dir + '/' + json_file, 'w') as json_file:
+    with open(path_to_json_file, 'w') as json_file:
         json.dump(data, json_file)

@@ -54,7 +54,9 @@ class LaTeX:
                    output_folder: str = None,
                    compile_type: str = None,
                    remove_garbage: bool = None,
+                   no_compile_exception: bool = None,
                    debug: bool = None) -> str:
+
         r"""
             Compiles latex file into pdf.
 
@@ -81,14 +83,22 @@ class LaTeX:
                                     This requires 3 pdflatex runs and 1
                                     bibtex run.
                         'default'   in order to execute just one pdflatex.
+                    Will raise an OS-Error in case the tex-code leads to a
+                    compilation error, unless no_compile_exception = True
 
-           - remove_garbage:bool
+            - remove_garbage:bool
                     Default = True
                     When True and the pdf-compilation is successful all
                     compilation related files except for the pdf-file
                     will be removed.
 
-           - debug: bool
+            - no_compile_exception: bool
+                    Default = False
+                    If True, compilation errors will not lead to raised
+                    exception but errors we be saved to file in the
+                    output-folder.
+
+            - debug: bool
                     Default = False
                     When True error messages will be printed.
 
@@ -96,10 +106,11 @@ class LaTeX:
             ------
             - relative path to created pdf
         """
-
         debug = True if bool(debug) is True else False
         if not isinstance(remove_garbage, bool):
             remove_garbage = True
+        if not isinstance(no_compile_exception, bool):
+            no_compile_exception = False
 
         if debug:
             print('LaTeX.create_pdf inputs: ',
@@ -154,7 +165,7 @@ class LaTeX:
         pdf_latex_standard = ['pdflatex', tex_file_path,
                               f'-output-directory={output_folder}',
                               '-interaction=nonstopmode']
-        pdf_latex_draft = pdf_latex_standard.extend(['-draftmode'])
+        pdf_latex_draft = pdf_latex_standard + ['-draftmode']
         bibtex = ['bibtex', aux_file]
 
         if compile_type == 'default':
@@ -174,42 +185,59 @@ class LaTeX:
         for cmd in cmds:
             completed_proc = subprocess.run(cmd, stdout=subprocess.PIPE)
             if completed_proc.returncode != 0:
-                error_ls.append((f'\nCommand: {completed_proc.args}. '
-                                 f'\nReturncode: {completed_proc.returncode}. '
-                                 f'\nOutput: \n', completed_proc.stdout))
+                byte_str = completed_proc.stdout
+                byte_str = byte_str.replace(b'\r\n', b'\n\t\t')
+                byte_str = byte_str.decode("utf-8")
+                error_ls.append(f'\nCommand: {completed_proc.args}. '
+                                f'\nReturncode: {completed_proc.returncode}. '
+                                f'\nOutput: \n\t\t{byte_str}')
         if error_ls:
             error_file_path = os.path.join(output_folder,
                                            file_name + '_error.log')
-            error_header_msg = f'Problem in the pdflatex compilation of ' + \
-                               f'\n\t-- The file: {tex_file_path} ' + \
-                               f'\n\t-- Using the destination folder: ' + \
-                               f'{output_folder}' + \
-                               f'\n\t-- Path to error file: {error_file_path}'
+            error_msg = f'Problem in the pdflatex compilation of ' + \
+                        f'\n\t-- The file: {tex_file_path} ' + \
+                        f'\n\t-- Using the destination folder: ' + \
+                        f'{output_folder}' + \
+                        f'\n\t-- Path to error file: {error_file_path}'
+
             if os.path.isfile(pdf_file):
-                error_header_msg += f'\n\n\t* Make sure that the file ' + \
-                                    f'{pdf_file} is not open (perhaps by ' + \
-                                    f'some other application)' + \
-                                    f'\n\t  which might lock the file in ' + \
-                                    f'"read-only" mode.'
+                error_msg += f'\n\n\t* Make sure that the file {pdf_file} ' \
+                             f'is not open (perhaps by some other ' \
+                             f'application)' + \
+                             f'\n\t  which might lock the file in ' + \
+                             f'"read-only" mode.'
             if os.path.isfile(log_file):
-                error_header_msg += f'\n\n\t* More details might be found in ' + \
-                                    f'the log-file: {log_file}.'
-            error_header_msg += f'\n\n'
+                error_msg += f'\n\n\t* Detailed compilation errors ' \
+                             f'might be found in the log-file: {log_file}.'
             with open(error_file_path, 'w') as f:
-                f.write(''.join(error_header_msg))
+                f.write(error_msg)
+
+            if os.path.isfile(error_file_path):
+                error_append_msg = f'\n\n\t* Shorter compilation details ' \
+                                   f'might be found in the error-log-file: ' \
+                                   f'{error_file_path}.'
+                with open(error_file_path, 'a') as f:
+                    f.write(error_append_msg)
+                error_msg += error_append_msg
+
+            error_msg += f'\n\n'
             for i in range(len(error_ls)):
                 e = error_ls[i]
-                err_msg = f'\n\n\t***Error {1 + i} (out of {len(error_ls)}' \
-                          f' errors)***\n{e[0]}'
+                error_append_msg = f'\n\n\t***Error {1 + i} (out of ' \
+                                   f'{len(error_ls)} errors)***\n{e}'
                 with open(error_file_path, 'a') as f:
-                    f.write(err_msg)
-                with open(error_file_path, 'ab') as f:
-                    f.write(e[1])
+                    f.write(error_append_msg)
+                error_msg += error_append_msg
+                # error_append_bytes_msg = e[1].decode("utf-8")
+                # with open(error_file_path, 'ab') as f:
+                #     f.write(error_append_bytes_msg)
+                # error_msg += str(error_append_bytes_msg)
 
             if debug:
                 print(f'LaTeX.create_pdf error_file is stored here:'
                       f' {error_file_path}')
-            raise OSError(error_header_msg)
+            if not no_compile_exception:
+                raise OSError(error_msg)
         elif remove_garbage:
             for f in os.listdir(output_folder):
                 f_name, f_ext = os.path.splitext(f)
@@ -290,6 +318,7 @@ class LaTeX:
 
     @staticmethod
     def create_tex_file(tex_code: str = None,
+                        full_code: bool = None,
                         tex_file_path: str = None,
                         tex_dir: str = None,
                         preamble: str = None,
@@ -302,11 +331,24 @@ class LaTeX:
             -------
             - tex_code: str
                     Default = ' '
-                    the document-part of a tex-file,
-                    i.e. like this
+                    In the case full_code is
+                     False:
+                        then tex_code will be handled as the
+                        document-part of a tex-file, i.e. like in
+                        ...
                         \begin{document}
-                            tex_code  % the code goes here.
-                         \end{document}
+                            tex_code
+                        \end{document}
+                        otherwise an example tex-file and pdf is created.
+                    True:
+                        and tex_code is a non-empty string, then tex_code
+                        will be handled as the full latex otherwise an
+                        example tex-file and pdf is created.
+
+            - full_code: bool
+                    Default: False
+                    if True then tex_code is expected to be the full
+                    content of the tex-file, see above comment.
 
             - tex_file_path: str
                     Default = 'tex-file.tex'
@@ -320,6 +362,7 @@ class LaTeX:
                     Only used if no path is given in tex_file_path
 
             - preamble: str
+                    Valid only if full_code is False:
                     Default = LaTeX.default_settings['_preamble']
                     The preamble-part of the tex-file,
                     i.e. like this
@@ -333,6 +376,7 @@ class LaTeX:
         """
 
         debug = debug if isinstance(debug, bool) else False
+        full_code = full_code if isinstance(full_code,bool) else False
         if debug:
             print('LaTeX.create_tex_file inputs: ',
                   f'\n\ttex_file_path = {tex_file_path}')
@@ -346,14 +390,16 @@ class LaTeX:
         file_relpath = LaTeX._prepare_tex_file_path(tex_file_path=tex_file_path,
                                                     tex_dir=tex_dir,
                                                     debug=debug)
+        if full_code:
+            file_content = tex_code
+        else:
+            if not isinstance(preamble, str):
+                preamble = LaTeX.default_settings['_preamble']
 
-        if not isinstance(preamble, str):
-            preamble = LaTeX.default_settings['_preamble']
-
-        file_content = '\n'.join([preamble,
-                                  r'\begin{document}',
-                                  tex_code,
-                                  r'\end{document}'])
+            file_content = '\n'.join([preamble,
+                                      r'\begin{document}',
+                                      tex_code,
+                                      r'\end{document}'])
         try:
             with open(file_relpath, "w") as f:
                 f.write(file_content)
@@ -484,6 +530,7 @@ class LaTeX:
 
     def code_to_pdf(self,
                     tex_code: str = None,
+                    full_code: bool = None,
                     tex_file_path: str = None,
                     compile_type: str = None) -> str:
         r"""
@@ -493,17 +540,32 @@ class LaTeX:
             Inputs:
             -------
             - tex_code: str
-                    if tex_code is a non-empty string it will be handled
-                    as the document-part of a tex-file, i.e. like in
-                    \begin{document}
-                        tex_code
-                    \end{document}
-                    otherwise an example tex-file and pdf is created.
+                    Default = ' '
+                    In the case full_code is
+                     False:
+                        then tex_code will be handled as the
+                        document-part of a tex-file, i.e. like in
+                        ...
+                        \begin{document}
+                            tex_code
+                        \end{document}
+                        otherwise an example tex-file and pdf is created.
+                    True:
+                        and tex_code is a non-empty string, then tex_code
+                        will be handled as the full latex otherwise an
+                        example tex-file and pdf is created.
+
+            - full_code: bool
+                    Default: False
+                    if True then tex_code is expected to be the full
+                    content of the tex-file, see above comment.
+
             - tex_file_path: str
                     Suggested file name, or local path to latex-file.
                     If no name is provided
                     "self.tex_folder/tex-file_<date_timestamp>.tex"
                     will be used.
+
             - compile_type: str
                     overrides self.compile_type
 
@@ -523,6 +585,7 @@ class LaTeX:
             compile_type = self.compile_type
 
         file_path = LaTeX.create_tex_file(tex_code=tex_code,
+                                          full_code=full_code,
                                           tex_file_path=tex_file_path,
                                           tex_dir=self.tex_folder,
                                           debug=self.debug)

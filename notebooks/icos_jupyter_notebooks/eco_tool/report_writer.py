@@ -41,7 +41,7 @@ class ReportWriter:
 
         user_plot_settings = self._load_user_settings()
         if self.debug:
-            print(f'rw init: user_plot_settings: {user_plot_settings}')
+            print(f'rw reset_batch_gui: user_plot_settings: {user_plot_settings}')
         self.plot = plot.Plot(debug=self.debug,
                               **user_plot_settings)
 
@@ -71,13 +71,12 @@ class ReportWriter:
         if default_dict is None:
             default_dict = {}
         try:
-            return_dict = json_manager.read(json_file=json_file,
-                                            settings_dir=self.appdata_dir)
+            return_dict = json_manager.read(path_to_json_file=json_file)
         except Exception as e:
             return_dict = {}
             if self.debug:
                 print('Exception from "_load_json()"!')
-                print(f'\nCheck the file: {self.appdata_dir}/{json_file}\n\n', e)
+                print(f'\n\t\tCheck the file: {json_file}\n\n\t\t{e}')
         finally:
             for k, v in default_dict.items():
                 return_dict[k] = return_dict.get(k, v)
