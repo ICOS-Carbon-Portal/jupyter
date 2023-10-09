@@ -377,10 +377,10 @@ class AnalysisGui:
             end_shift = 0
             start_shift = -8
             fetch_shift = 6
-            if 'time_configs' in settings.keys():
-                end_shift = - settings['time_configs'].get('end_date', 0)
-                start_shift = - settings['time_configs'].get('start_date', 8)
-                fetch_shift = settings['time_configs'].get('fetch_date', 6)
+            if 'run_configs' in settings.keys():
+                end_shift = - settings['run_configs'].get('end_date', 0)
+                start_shift = - settings['run_configs'].get('start_date', 8)
+                fetch_shift = settings['run_configs'].get('fetch_date', 6)
 
             end_date.value = dt.date.today() + dt.timedelta(days=end_shift)
             start_date.value = end_date.value + dt.timedelta(days=start_shift)
@@ -496,7 +496,6 @@ class AnalysisGui:
             grp = group_drop.value
             error_msg = f'<b>The group <i>{grp}</i> and it\'s ' \
                         f'batch jobs do not match.</b><br> '
-            print(str(er_ls))
             with out:
                 print(er_ls)
             for e in er_ls:
@@ -747,9 +746,17 @@ class AnalysisGui:
                              batch_jobs,
                              out]))  # layout=right_aligned_column))
 
+            # By default we run all batch jobs of latest group.
+            # this can be changed in configurations
+            settings = self._load_user_settings()
+            if 'run_configs' in settings.keys():
+                auto_run = settings['run_configs'].get('auto_run', True)
+            else:
+                auto_run = True
+
             if self.debug:
                 pass
-            else:
+            elif auto_run:
                 if batch_jobs.children:
                     run_batch('all')
                 else:
@@ -1058,15 +1065,12 @@ class AnalysisGui:
                             f"cache['_groups']['{group}'] = "
                             f"{cache['_groups'][group]}")
 
-            if '_batches' in cache['_groups'][group].keys():
-                batch_dict = cache['_groups'][group]['_batches']
-
-                if self.debug:
-                    debug_value(9, 'init_batch_drop()', 'step 2',
-                                f'batches = {batch_dict}')
-
+            batch_dict = cache['_groups'][group].get('_batches',{})
+            if self.debug:
+                debug_value(9, 'init_batch_drop()', 'step 2',
+                            f'batches = {batch_dict}')
+            if batch_dict:
                 batch_labels = sorted(list(batch_dict.keys()))
-
                 batch_drop.options = [(k, batch_dict[k]) for k in batch_labels]
                 if batch_name and batch_name in batch_dict.keys():
                     batch_drop.value = batch_dict[batch_name]
@@ -1075,8 +1079,7 @@ class AnalysisGui:
                     batch_drop.value = list(batch_dict.values())[0]
             else:
                 batch_drop.options = [('Press new...', 0)]
-                display_user_guide('display_guide')
-                batch_drop.value = 0
+                #batch_drop.value = 0
                 html_msg(text_ls=[f'Press "New", in order to create a batch '
                                   f'job for the group <i>{group}</i>.'])
             if self.debug:
@@ -1086,8 +1089,10 @@ class AnalysisGui:
                             f'-- end--')
 
         def changed_batch_drop(c):
-            batch = batch_drop.value.copy()
-
+            if batch_drop.value:
+                batch = batch_drop.value.copy()
+            else:
+                batch = 0
             if self.debug:
                 debug_ls = [11, 'changed_batch_drop()', '- step 1 - batch '
                                                         'value changed, '
@@ -1227,14 +1232,14 @@ class AnalysisGui:
             # Triggered when a tool is selected,
             # not triggered by tool buttons
             if self.debug:
-                debug_value(112, f'changed_selected_tool()',
-                            f'c = {c}',
-                            f'c.old = {c.old} = (index of previous tool)',
-                            f'c.new = {c.new} = (index of selected tool)',
-                            f'selected_tools = {selected_tools}',
-                            f'selected_vars = {selected_vars}',
-                            f"Old tool have no var = "
-                            f"{('', (c.old, [])) in selected_vars.options}")
+                debug_value(112, f'changed_selected_tool() -- triggered tool',
+                            f'c = {c}')
+
+            # Depending on c.old we might have to modify the selection index
+            selected_index = c.new
+
+            # Also, in order to avoid more work than necessary we set
+            upd_changed = False
 
             # In case of a deselected tool with no variables we must
             # clean up the selected_vars widget
@@ -1243,129 +1248,117 @@ class AnalysisGui:
                 tools = upd_dict.get('_tools', {})
                 upd_dict['_tools'], upd_changed = cleanup_tools(tools)
 
-                if c.new is None:
-                    select_index = None
-                elif c.new > c.old:
-                    select_index = c.new - 1
-                else:
-                    select_index = c.new
-                if upd_dict['_selected_tool_index'] != select_index:
-                    upd_dict['_selected_tool_index'] = select_index
-                    upd_changed = True
                 if upd_changed:
+                    if isinstance(selected_index, int) and selected_index > c.old:
+                        selected_index = selected_index - 1
+                if upd_dict['_selected_tool_index'] != selected_index:
+                    upd_dict['_selected_tool_index'] = selected_index
+                    upd_changed = True
+
+                if upd_changed:
+                    # this will trigger reset_var_buttons()
                     set_batch_upd_dict(upd_dict)
 
-            set_info_guide(info_type='upd')
-            reset_tool_selection()
-            reset_var_buttons()
-
-        def reset_tool_selection():
-            pass
-            # var_ls = [v for axis in var_codes for v in
-            #                                axis[1]]
-            #             axis_ls = [axis[0] for axis in var_codes]
-            #             if len(axis_ls) == len(set(axis_ls)):
-            #                 reset_multi_plot_auto(hide=False,
-            #                                       enable=True,
-            #                                       value=False)
-
-        def set_selected_var_tooltip(tool_name: str = None,
-                                     sel_vars: list = None):
-            # reset tooltip for selected variables
-            if tool_name and sel_vars:
-                var_tooltip = f'Variables of the tool {tool_name}: {sel_vars}'
-            elif tool_name:
-                var_tooltip = f'Variables of the tool {tool_name} goes ' \
-                              f'here...'
+            if selected_index is None:
+                info_type = 'upd'
             else:
-                var_tooltip = f'Variables of each tool...'
-            selected_vars.tooltip = var_tooltip
+                sel_tools = list(selected_tools.options)
+                tool_name = sel_tools[selected_index][0]
+                info_type = name2tool_dict[tool_name]
 
-        def set_info_guide(info_type: str = None, upd_mode: str = None):
+            if info_type != 'multi_plot':
+                reset_multi_plot_auto(hide=True)
+            else:
+                upd_dict = get_batch_upd_dict()
+                var_codes = list(upd_dict['_tools'][selected_index].values())[0]
+                axis_ls = [axis[0] for axis in var_codes]
+                mp_auto_enable = not len(axis_ls) == 2
+                mp_auto_value = not len(axis_ls) != len(set(axis_ls))
+                reset_multi_plot_auto(hide=False,
+                                      enable=mp_auto_enable,
+                                      value=mp_auto_value)
+
+            set_info_guide(info_type=info_type)
+
+            if not upd_changed:
+                reset_var_buttons()
+
+        def set_info_guide(info_type: str = None):
             # set info text depending on update mode and tool
             # show/hide buttons etc
+            # cases of info_type:
+            # 'upd', 'new', 'update', multi_plot, 'corr_plot',
+            # 'split_plot', 'corr_table', 'statistics'
+
             if self.debug:
-                debug_ls = [129, f'set_info_guide()',
-                            f'info_type = {info_type}',
-                            f'selected_tools.value = {selected_tools.value}',
-                            f'selected_tools.options = {selected_tools.options}',
-                            f'selected_vars.options = {selected_vars.options}',
-                            'test']
-                debug_value(*debug_ls)
+                debug_value(129, f'set_info_guide()',
+                            f'info_type = {info_type}')
 
-
-            txt_ls = []
-            if info_type not in ['upd', 'new', 'update']:
-                txt_ls.append('<b>Select a group of variables, and choose '
-                              '<i>New</i> or <i>Update</i>.</b>')
+            if info_type == 'reset_gui':
+                msg_ls = ['<b>You are in <i>read mode</i>.</b> '
+                          'Either select a group of variables or a ' 
+                          'batch job, and choose <i>New</i>, or <i>Update</i>.']
             else:
-                ind = selected_tools.value
-                txt_title_ls = ['<b>You are in <i>update mode</i>.</b>']
-                if name_of_batch_job.value == 'Name of batch job':
-                    txt_title_ls.append('Remember to choose a name for the '
-                                        'batch job in the area <b><i>Batch '
-                                        'name<b></i> above.')
-                if not selected_tools.options:
-                    txt_title_ls.append('Add a tool and some variables to '
-                                        'analyse.')
-                elif ind is None:
-                    txt_title_ls.append('Either add a new tool or select a tool, '
-                                        'in order to add variables to it.')
-                else:
-                    tool_name = selected_tools.options[ind][0]
-                    if tool_name == 'Multi-plot':
-                        txt_title_ls.append(f'<i>Multi-plot</i> selected.')
-                        txt_ls.append('With a multi-plot you can plot '
-                                      'several variables in the same canvas.')
-                        txt_ls.append('Please note that there are at most two '
-                                      '$y$-axes, and <i>each axis will only hold '
-                                      'variables of '
-                                      'the same unit</i> (where unitless is '
-                                      'regarded as a unit). ')
-                        txt_ls.append(f'By default, variables are automatically ' 
-                                      f'distributed among the axes depending on ' 
-                                      f'their units. This behaviour can be '
-                                      f'changed with '
-                                      f'<i>'
-                                      f'{multi_plot_auto_cb.description}</i>. ')
-                        txt_ls.append(f'If unchecked, the first click on a '
-                                      f'variable will add it to the left '
-                                      f'$y$-axis, '
-                                      f'the second click will move it to the '
-                                      f'right $y$-axis provided both axis '
-                                      f'have the same unit.')
-                    elif tool_name == 'Correlation plot (2 vars)':
-                        txt_title_ls.append(f'<i>Correlation plot</i> selected.')
-                        txt_ls.append('The correlation plot is used to plot two '
-                                      'variables against each other. ')
-                        txt_ls.append('The first selected variable is mapped to '
-                                      'the $x$-axis while the second variable is '
-                                      'mapped to the $y$-axis.')
-                    elif tool_name == 'Split-plot':
-                        txt_title_ls.append(f'<i>Split-plot</i> selected.')
-                        txt_ls.append('With the split-plot you plot several '
-                                      'variables in different canvases, '
-                                      'having a shared '
-                                      'zoom-tool.)')
-                        txt_ls.append('There is no restriction on the variables.')
-                    else:
-                        txt_title_ls.append(f'<i>{tool_name}</i> selected.')
-                        txt_ls.append('No restriction on the variables.')
+                msg_ls = ['<b>You are in <i>update mode</i>.</b> ']
+                if info_type == 'new':
+                    msg_ls.extend(['To create a new batch job: ',
+                                  '1. Choose at least one tool from the '
+                                  'list of <i>Available tools</i>, and add some '
+                                  'variables to it.',
+                                   '2. Choose a name for the batch job. '])
+                elif name_of_batch_job.value == 'Name of batch job':
+                    msg_ls.append('Remember to choose a name for the '
+                                  'batch job in the above area <b><i>Batch '
+                                  'name<b></i>.')
+                if info_type == 'update':
+                    msg_ls.extend(['<b><i>To edit</i></b> the content of a tool: '
+                                  'Select the tool to in the list above, '
+                                  'and use the variable buttons to add or '
+                                  'remove them from the tool.',
+                                  '<b><i>To delete</i></b> the batch job, just press '
+                                  '<b><i>Delete</i></b> without changing the '
+                                  'content.'])
+                elif info_type == 'multi_plot':
+                    msg_ls.extend(['<b><i>Multi-plot</i></b> selected. ',
+                                   'With a multi-plot you can plot several '
+                                   'variables in the same figure.',
+                                   'Please note that there are at most two '
+                                   '$y$-axes, and <i>each axis will only hold '
+                                   'variables of the same unit</i> (where '
+                                   '"unitless" is regarded as a unit). ',
+                                   'By default, variables are automatically '
+                                   'distributed among the axes depending on '
+                                   'their units. This behaviour can be '
+                                   'changed with '
+                                   f'<i>{multi_plot_auto_cb.description}</i>. ',
+                                   'If unchecked, the first click on a '
+                                   'variable will add it to the left $y$-axis, '
+                                   'the second click will move it to the right '
+                                   '$y$-axis provided both axis have the same '
+                                   'unit.'])
+                elif info_type == 'corr_plot':
+                    msg_ls.extend(['<b><i>Correlation plot</i></b> selected.',
+                                   'The correlation plot is used to plot two '
+                                   'and only two, variables against each other. ',
+                                   'The first selected variable is mapped to '
+                                   'the $x$-axis while the second variable is '
+                                   'mapped to the $y$-axis.'])
+                elif info_type == 'split_plot':
+                    msg_ls.extend(['<b><i>Split-plot</i></b> selected.',
+                                   'With the split-plot you plot several '
+                                   'variables in different but '
+                                   'interconnected figures, having a shared '
+                                   'zoom-tool.'])
+                elif info_type == 'upd':
+                    msg_ls.extend([f'Either select or add some tool to the '
+                                   f'batch job.'])
+                elif info_type in tool2name_dict.keys():
+                    msg_ls.extend([f'<b><i>{tool2name_dict[info_type]}</i></b> '
+                                   f'selected. <b>Please note that this tools is '
+                                   f'not implemented at this moment. </b>',
+                                   'No restriction on the variables.'])
 
-                        # if sel_var_row:
-                        #     axis = [x[0] for x in sel_var_row[1][1]]
-                        #     if len(axis) != len(set(axis)):
-                        #         auto_axis = False
-                        #     else:
-                        #         auto_axis = True
-                        # else:
-                        #     auto_axis = multi_plot_auto_value
-                if self.debug:
-                    debug_value(129, f'set_info_guide()',
-                                txt_title_ls, txt_ls)
-
-                txt_ls.insert(0, ' '.join(txt_title_ls))
-            info_guide.value = '<br>'.join(txt_ls)
+            info_guide.value = '<br>'.join(msg_ls)
 
         def set_user_guide():
             if user_guide_container.layout.display == 'block':
@@ -1393,43 +1386,26 @@ class AnalysisGui:
         def reset_multi_plot_auto(hide: bool,
                                   enable: bool = None,
                                   value: bool = None):
-            # New Multi-plot
-            # eset_multi_plot_auto(), tool_selections(), tool_click()       reset_multi_plot_auto() - before
-            # selection of tool
-            # changed_selected_tool(), _notify_observers(),
-            # reset_multi_plot_auto(), reset_var_buttons(), changed_selected_tool()       reset_multi_plot_auto() - before
-            # notify_change()     # changed_selected_tool()
+
             if self.debug:
                 debug_value(131, 'reset_multi_plot_auto() - before',
                             f'hide = {hide}',
                             f'enable = {enable}',
-                            f'value = {value}',
                             f'multi_plot_auto_cb.disabled = '
                             f'{multi_plot_auto_cb.disabled}',
                             f'multi_plot_auto_cb.layout.display'
                             f' = {multi_plot_auto_cb.layout.display}',
                             f'multi_plot_auto_cb.value = '
                             f'{multi_plot_auto_cb.value}')
-            if isinstance(hide, bool):
-                if hide:
-                    multi_plot_auto_cb.layout.display = 'none'
-                else:
-                    multi_plot_auto_cb.layout.display = 'block'
-            if isinstance(enable, bool):
-                multi_plot_auto_cb.disabled = not enable
-            if isinstance(value, bool):
-                multi_plot_auto_cb.value = value
-            if self.debug:
-                debug_value(131, 'reset_multi_plot_auto() - after',
-                            f'hide = {hide}',
-                            f'enable = {enable}',
-                            f'value = {value}',
-                            f'multi_plot_auto_cb.disabled = '
-                            f'{multi_plot_auto_cb.disabled}',
-                            f'multi_plot_auto_cb.layout.display'
-                            f' = {multi_plot_auto_cb.layout.display}',
-                            f'multi_plot_auto_cb.value = '
-                            f'{multi_plot_auto_cb.value}')
+            if hide:
+                multi_plot_auto_cb.layout.display = 'none'
+                multi_plot_auto_cb.disabled = True
+            else:
+                multi_plot_auto_cb.layout.display = 'block'
+                if isinstance(enable, bool):
+                    multi_plot_auto_cb.disabled = not enable
+                if isinstance(value, bool):
+                    multi_plot_auto_cb.value = value
 
         def reset_var_buttons():
             tool_index = selected_tools.value
@@ -1461,43 +1437,35 @@ class AnalysisGui:
                         # [['%', [['SWC_1', 'ETC NRT Meteo', 'SE-Htm'],
                         #         ['SWC_2', 'ETC NRT Meteo', 'SE-Htm']]],
                         #  ['mmol mol-1', [['H2O', 'ETC NRT Fluxes', 'SE-Htm']]]]
-                        var_ls = [v for axis in var_codes for v in axis[1]]
                         axis_ls = [axis[0] for axis in var_codes]
-                        if len(axis_ls) == len(set(axis_ls)):
-                            reset_multi_plot_auto(hide=False,
-                                                  enable=True,
-                                                  value=multi_plot_auto_value)
+                        if len(axis_ls) == 2:
+                            y1, y2 = var_codes
+                            _, y1_vars = y1
+                            _, y2_vars = y2
+                        elif len(axis_ls) == 1:
+                            _, y1_vars = var_codes[0]
+                            y2_vars = []
                         else:
-                            reset_multi_plot_auto(hide=False,
-                                                  enable=True,
-                                                  value=False)
+                            y1_vars = []
+                            y2_vars = []
 
                         for btn in var_buttons.children:
-                            if self.debug:
-                                debug_ls = [17, f'reset_var_buttons()  '
-                                                f'-- restore buttons -- ',
-                                            f' axis_ls = {axis_ls}',
-                                            f' btn.tooltip = {btn.tooltip}',
-                                            f' Button = "{btn.description}"']
-                            if var_trans_dict[btn.description] in var_ls:
-                                btn.icon = 'check'
+                            btn_var_code = var_trans_dict[btn.description]
+
+                            if btn_var_code in y1_vars:
+                                btn.icon = 'angle-double-left'
                                 btn.disabled = False
-                                if self.debug:
-                                    debug_ls.append(f'---- enabled and checked')
+                            elif btn_var_code in y2_vars:
+                                btn.icon = 'angle-double-right'
+                                btn.disabled = False
                             elif (len(axis_ls) == 2 and
                                   btn.tooltip not in axis_ls) or \
                                     btn.description == 'Select all':
                                 btn.icon = ''
                                 btn.disabled = True
-                                if self.debug:
-                                    debug_ls.append(f'---- disabled')
                             else:
                                 btn.icon = ''
                                 btn.disabled = False
-                                if self.debug:
-                                    debug_ls.append(f'---- enabled and unchecked')
-                            if self.debug:
-                                debug_value(*debug_ls)
 
                     elif tool_code == 'corr_plot':
                         if self.debug:
@@ -1573,15 +1541,15 @@ class AnalysisGui:
                 tool.style.button_color = "Green"
                 tool.icon = 'check'
                 tool_added = True
-            tool_selections(add_tool=tool_added,
-                            tool_name=tool.description)
+            update_tool_list(add_tool=tool_added,
+                             tool_name=tool.description)
 
-        def tool_selections(add_tool,
-                            tool_name):
+        def update_tool_list(add_tool,
+                             tool_name):
             # Similar to, but different from changed_selected_tool()
             # at this stage the tool is not in the upd_dict.
             if self.debug:
-                debug_value(115, f'tool_selections() -- input',
+                debug_value(115, f'update_tool_list() -- input',
                             f'add_tool = {add_tool}',
                             f'tool_name = {tool_name}')
 
@@ -1591,7 +1559,7 @@ class AnalysisGui:
             tools, _ = cleanup_tools(tools)
 
             if self.debug:
-                debug_value(115, f'tool_selections()',
+                debug_value(115, f'update_tool_list()',
                             f'tools (cleaned) ={tools}')
 
             if add_tool:
@@ -1615,14 +1583,13 @@ class AnalysisGui:
             if new_multi_plot:
                 reset_multi_plot_auto(hide=False,
                                       enable=True,
-                                      value=multi_plot_auto_value)
+                                      value=_get_multi_plot_auto())
             else:
-                reset_multi_plot_auto(hide=True,
-                                      enable=False)
+                reset_multi_plot_auto(hide=True)
 
             update_batch_dict(dict(_tools=tools,
                                    _selected_tool_index=key))
-            set_info_guide(info_type=tool_code)
+            set_info_guide(info_type=info_type)
 
         def var_button_click(btn):
 
@@ -1636,25 +1603,25 @@ class AnalysisGui:
                             f' - upd_dict[row_index] = {upd_dict[row_index]}']
                 debug_value(*debug_ls)
 
-            for tool_code, selected_var_codes in upd_dict[row_index].items():
+            for tool_code, upd_var_codes in upd_dict[row_index].items():
                 if self.debug:
                     debug_ls = [116, f'var_button_click() ***',
                                 f'tool_code = {tool_code}',
-                                f'selected_var_codes = {selected_var_codes}']
+                                f'upd_var_codes = {upd_var_codes}']
                     debug_value(*debug_ls)
                 var_trans_dict = get_var_translation_dict()
                 var_name = btn.description
                 var_code = var_trans_dict[var_name]
                 if var_code == 'All variables':
-                    if selected_var_codes != 'all':
-                        selected_var_codes = 'all'
+                    if upd_var_codes != 'all':
+                        upd_var_codes = 'all'
                     else:
-                        selected_var_codes = []
+                        upd_var_codes = []
                 elif tool_code != 'multi_plot':
-                    if var_code in selected_var_codes:
-                        selected_var_codes.remove(var_code)
+                    if var_code in upd_var_codes:
+                        upd_var_codes.remove(var_code)
                     else:
-                        selected_var_codes.append(var_code)
+                        upd_var_codes.append(var_code)
                 elif tool_code == 'multi_plot':
                     if self.debug:
                         debug_ls = [116, f'var_button_click()**** * * * ***',
@@ -1662,10 +1629,11 @@ class AnalysisGui:
                                     f'multi_plot_auto_cb.value = '
                                     f'{multi_plot_auto_cb.value}']
                         debug_value(*debug_ls)
+                    unit = var2unit(var_code)
                     if multi_plot_auto_cb.value:
-                        unit = var2unit(var_code)
                         axis_of_var = None
-                        for v in selected_var_codes:
+                        # unit must match
+                        for v in upd_var_codes:
                             if v[0] == unit:
                                 axis_of_var = v
                                 if var_code in v[1]:
@@ -1673,18 +1641,63 @@ class AnalysisGui:
                                 else:
                                     v[1].append(var_code)
                         if axis_of_var is None:
-                            selected_var_codes.append((unit, [var_code]))
-                        elif len(axis_of_var[1]) == 0:
-                            selected_var_codes.remove(axis_of_var)
+                            upd_var_codes.append((unit, [var_code]))
                     else:
-                        if self.debug:
-                            debug_ls = [116, f'var_button_click()',
-                                        f'tool_code = {tool_code}',
-                                        f'multi_plot_auto_cb.value = '
-                                        f'{multi_plot_auto_cb.value}']
-                            debug_value(*debug_ls)
+                        if len(upd_var_codes) == 0:
+                            upd_var_codes.append([unit, [var_code]])
+                        elif len(upd_var_codes) == 1:
+                            y_unit, y_vars = upd_var_codes[0]
+                            if y_unit == unit and var_code not in y_vars:
+                                # add var to the axis
+                                y_vars.append(var_code)
+                            elif y_unit == unit:
+                                y_vars.remove(var_code)
+                                if y_vars:
+                                    # add var to new axis only when the
+                                    # first axis has variables.
+                                    upd_var_codes.append([unit, [var_code]])
+                            else:
+                                # add the var to a new axis
+                                upd_var_codes.append([unit, [var_code]])
+                        elif len(upd_var_codes) == 2:
+                            y1, y2 = upd_var_codes
+                            y1_unit, y1_vars = y1
+                            y2_unit, y2_vars = y2
+                            if y1_unit == unit and var_code in y1_vars:
+                                # remove var from y1
+                                y1_vars.remove(var_code)
+                                if y2_unit == unit:
+                                    # add var to y2
+                                    y2_vars.append(var_code)
+                            elif y1_unit == unit:
+                                # the var is not in y1 and should
+                                # be added to y1 provided it is not in y2
+                                if y2_unit == unit:
+                                    if var_code in y2_vars:
+                                        # the var is in y2 and should be removed
+                                        y2_vars.remove(var_code)
+                                    else:
+                                        # the var is added to y1
+                                        y1_vars.append(var_code)
+                                else:
+                                    # the var is added to y1
+                                    y1_vars.append(var_code)
+                            elif y2_unit == unit:
+                                if var_code in y2_vars:
+                                    y2_vars.remove(var_code)
+                                else:
+                                    y2_vars.append(var_code)
+                    # finally we only keep non-empty
+                    upd_var_codes = [y for y in upd_var_codes if y[1]]
+                    multi_plot_auto_cb.disabled = (len(upd_var_codes) == 2)
+                    if self.debug:
+                        debug_ls = [116, f'var_button_click()',
+                                    f'tool_code = {tool_code}',
+                                    f'multi_plot_auto_cb.value = '
+                                    f'{multi_plot_auto_cb.value}']
+                        debug_value(*debug_ls)
 
-                upd_dict[row_index] = {tool_code: selected_var_codes}
+                upd_dict[row_index] = {tool_code: upd_var_codes}
                 if self.debug:
                     debug_ls = [116, f'var_button_click()',
                                 f'after:',
@@ -1844,7 +1857,8 @@ class AnalysisGui:
 
         def html_msg(text_ls: list = None,
                      title: str = None,
-                     error: bool = None):
+                     error: bool = None,
+                     show_user_guide: bool =None):
             if self.debug:
                 debug_ls = [118, f'html_msg()']
                 debug_value(*debug_ls)
@@ -1870,9 +1884,10 @@ class AnalysisGui:
                 msg += f'<h3>{margin}'
                 msg += f'<br>{margin}'.join(text_ls)
                 msg += '</h3></span>'
+            if show_user_guide:
+                user_guide.value = msg
             with out:
                 clear_output()
-                user_guide.value = msg
                 display(wd.HTML(msg))
 
         def html_error_msg(error_ls: list = None):
@@ -2164,6 +2179,9 @@ class AnalysisGui:
 
         def new_batch(c):
 
+            with out:
+                clear_output()
+
             upd_dict = {'_upd_mode': 'new',
                         '_version': 0,
                         '_orig_name': '',
@@ -2320,10 +2338,10 @@ class AnalysisGui:
                 user_guide_container.layout.display = 'none'
 
         # activate/deactivate upd-widgets
-        def activate_gui(upd_active: str):
+        def activate_gui(action_id: str):
             if self.debug:
                 debug_value(10, 'activate_gui()',
-                            f'upd_active = {upd_active}')
+                            f'action_id = {action_id}')
 
             def set_widget_state(wd_input, disable: bool = None,
                                  tooltip: str = None, show_widget: bool = None):
@@ -2349,7 +2367,7 @@ class AnalysisGui:
                     for w in wd_input:
                         set_widget_state(w, disable, tooltip, show_widget)
 
-            set_info_guide(info_type=upd_active)
+            set_info_guide(info_type=action_id)
 
             set_widget_state(multi_plot_auto_cb, show_widget=False)
 
@@ -2364,7 +2382,7 @@ class AnalysisGui:
             else:
                 init_tool_buttons()
 
-            if upd_active in ['new', 'update']:
+            if action_id in ['new', 'update']:
                 # update mode
                 init_group_var_buttons(mode='create')
                 # reset_batch_gui update widgets..
@@ -2385,9 +2403,9 @@ class AnalysisGui:
                                  tooltip='Cancel...')
 
                 if self.debug:
-                    debug_value(9999, 999, upd_active, save_btn.disabled,
+                    debug_value(9999, 999, action_id, save_btn.disabled,
                                 delete_btn.disabled, delete_btn)
-                if upd_active == 'update':
+                if action_id == 'update':
                     delete_btn.disabled = False
                     delete_btn.tooltip = 'Click to delete...'
                 else:
@@ -2398,10 +2416,10 @@ class AnalysisGui:
                     selected_vars.value = None
                     selected_vars.options = []
                 if self.debug:
-                    debug_value(99999,9999, upd_active, save_btn.disabled,
+                    debug_value(99999, 9999, action_id, save_btn.disabled,
                                 delete_btn.disabled, delete_btn)
 
-            elif upd_active == 'reset_gui':
+            elif action_id == 'reset_gui':
                 # read mode
                 init_group_var_buttons(mode='reset')
 
@@ -2610,10 +2628,10 @@ class AnalysisGui:
         # 8:rd row. info, special settings
         # Info regarding selected tool
         info_guide = wd.HTMLMath(layout=info_guide_layout)
-        multi_plot_auto_value = _get_multi_plot_auto()
+
         multi_plot_auto_cb = wd.Checkbox(description='Choose axis according to '
                                                      'unit',
-                                         value=multi_plot_auto_value,
+                                         value=_get_multi_plot_auto(),
                                          layout=multi_auto_select_label_layout)
 
         # special_settings = wd.VBox([multi_plot_auto_cb, multi_plot_axis])
@@ -2641,8 +2659,7 @@ class AnalysisGui:
         def init_general_settings():
             # set general values
             settings = self._load_user_settings()
-
-            time_configs = settings.get('time_configs', {})
+            run_configs = settings.get('run_configs', {})
             latex_kwargs = settings.get('latex_kwargs', {})
             split_p_kwargs = settings.get('split_plot_kwargs', {})
             multi_p_kwargs = settings.get('multi_plot_kwargs', {})
@@ -2650,9 +2667,10 @@ class AnalysisGui:
             corr_t_kwargs = settings.get('corr_table_kwargs', {})
             statistics_kwargs = settings.get('statistics_kwargs', {})
 
-            time_end_date.value = time_configs.get('end_date', 0)
-            time_start_date.value = time_configs.get('start_date', 10)
-            time_fetch_date.value = time_configs.get('fetch_date', 6)
+            auto_run_cb.value = run_configs.get('auto_run', True)
+            time_end_date.value = run_configs.get('end_date', 0)
+            time_start_date.value = run_configs.get('start_date', 10)
+            time_fetch_date.value = run_configs.get('fetch_date', 6)
 
             latex_font_style.value = latex_kwargs.get('font_style', 'rm')
             latex_font_size.value = latex_kwargs.get('font_size', 8)
@@ -2753,9 +2771,10 @@ class AnalysisGui:
 
         def save_general_settings(c):
 
-            upd_dict = {'time_configs': {'start_date': time_start_date.value,
-                                         'end_date': time_end_date.value,
-                                         'fetch_date': time_fetch_date.value},
+            upd_dict = {'run_configs': {'auto_run': auto_run_cb.value,
+                                        'start_date': time_start_date.value,
+                                        'end_date': time_end_date.value,
+                                        'fetch_date': time_fetch_date.value},
                         'latex_kwargs':
                             {'font_style': latex_font_style.value,
                              'font_size': latex_font_size.value,
@@ -2874,9 +2893,12 @@ class AnalysisGui:
 
         # widgets
         cb_layout = wd.Layout(width='20px')
-        int_drop_layout = wd.Layout(width='55px')
-        font_drop_layout = wd.Layout(min_width='100px', max_width='145px')
-        templ_drop_layout = wd.Layout(min_width='70px', max_width='110px')
+        int_drop_layout = wd.Layout(width='60px')
+        size_drop_layout = wd.Layout(width='125px')
+        font_drop_layout = size_drop_layout
+        # wd.Layout(min_width='100px', max_width='145px')
+        templ_drop_layout = size_drop_layout
+        # wd.Layout(min_width='70px', max_width='110px')
         save_btn = wd.Button(description='Save',
                              icon='save',
                              button_style='danger',
@@ -2895,65 +2917,90 @@ class AnalysisGui:
         def_settings_guide = wd.HTML(value='<span>Here you can modify certain '
                                            'settings such as: what data to use, '
                                            'visualizations of different plots '
-                                           'and texts. <i>Please note</i> that '
+                                           'and texts. <br><i>Please note</i> '
+                                           'that '
                                            'the <b>Save</b>-button below is '
                                            'enabled when a value is '
                                            'changed and the user press &lttab&gt '
                                            'or clicks outside the widget holding '
                                            'the value.</span')
 
-        time_start_end_date_guide = wd.HTML(value='<span><b>Guide:</b><br>'
-                                                  'Plots and statistics are '
-                                                  'based on values measured '
-                                                  'between the <b>start</b> '
-                                                  'and <b>end dates</b>, '
-                                                  'displayed in the <b>Start</b> '
-                                                  'menu. '
-                                                  'Here, you can modify the '
-                                                  'default method on how to '
-                                                  'calculate these dates. '
-                                                  '</span> <br>'
-                                                  'The displayed dates can be '
-                                                  'changed for each run. ')
-        time_fetch_date_guide = wd.HTML(value='<span>The <b>fetch date</b> '
-                                              'is used to <i>speed up '
-                                              'computations</i>.</span> '
-                                              'In case of a re-calculation based '
-                                              'on a longer time series, '
-                                              'the data between the fetch and '
-                                              'the end date is already in RAM.')
-        time_end_date_label = wd.HTML(value='<b>End date =</b> The number '
-                                            'of days <i>before</i> today:')
+        run_settings_guide = wd.HTML(value='<span><b>Guide:</b><br>'
+                                           'When the user start the '
+                                           'application, the default behaviour '
+                                           'is to execute all batch jobs of '
+                                           'the last edited group of variables, '
+                                           'to change this switch of '
+                                           '<b><i>Auto-run</i></b> below.<br> '
+                                           'Plots and statistics outputs are '
+                                           'based on values measured '
+                                           'between the <i>start</i> '
+                                           'and the <i>end dates</i>, '
+                                           'displayed in the <b>Start</b> '
+                                           'menu. '
+                                           'Of course, the dates displayed in '
+                                           'the start menu can be changed '
+                                           'for each run. '
+                                           'Here, you can modify the '
+                                           '<i>default method on how to '
+                                           'calculate these dates.</i> '
+                                           '</span><br> '
+                                           'The number at <b><i>End date</b></i> '
+                                           'is the number of days '
+                                           '<i>before today</i>, '
+                                           'while <b><i>Start date</i></b> is '
+                                           'the number of days <i>before the '
+                                           'end date</i>. '
+                                           '<span>The <b><i>Fetch date</i></b> '
+                                           'denotes the number of days '
+                                           '<i>before the start date</i>, it '
+                                           'is a feature used to <i>speed up '
+                                           're-calculations</i>. In case the '
+                                           'user chose to change the report '
+                                           'dates in a second run, the data '
+                                           'between the fetch date and the end '
+                                           'date of the first run will already '
+                                           'be in RAM.'
+                                           )
+        auto_run_label = wd.HTML(value='<b>Auto-run</b>')
+        auto_run_cb = wd.Checkbox(value=True,
+                                  disabled=False,
+                                  indent=False,
+                                  layout=cb_layout)
+        auto_sub_box = wd.HBox([auto_run_cb,
+                                auto_run_label])
+
+        time_end_date_label = wd.HTML(value='<b>End date: </b> ',
+                                      layout=label_layout)
         time_end_date = wd.IntText(layout=int_drop_layout)
         time_end_date_box = wd.HBox([time_end_date_label,
                                      time_end_date])
 
-        time_start_date_label = wd.HTML(value='<b>Start date =</b> The number '
-                                              'of days <i>before</i> the '
-                                              'end date:')
+        time_start_date_label = wd.HTML(value='<b>Start date: </b> ',
+                                        layout=label_layout)
         time_start_date = wd.IntText(layout=int_drop_layout)
         time_start_date_box = wd.HBox([time_start_date_label,
                                        time_start_date])
 
-        time_fetch_date_label = wd.HTML(value='<b>Fetch date =</b> '
-                                              'The number of days '
-                                              '<i>before</i> the start date:')
+        time_fetch_date_label = wd.HTML(value='<b>Fetch date: </b> ',
+                                        layout=label_layout)
         time_fetch_date = wd.Dropdown(options=range(0, 15),
                                       layout=int_drop_layout)
         time_fetch_date_box = wd.HBox([time_fetch_date_label,
                                        time_fetch_date])
-        time_date_box = wd.HBox([wd.VBox([time_start_end_date_guide,
-                                          time_end_date_box,
-                                          time_start_date_box,
-                                          time_fetch_date_guide,
-                                          time_fetch_date_box])
-                                 ])
+        run_box = wd.HBox([wd.VBox([run_settings_guide,
+                                    auto_sub_box,
+                                    time_end_date_box,
+                                    time_start_date_box,
+                                    time_fetch_date_box])
+                           ])
+        observe_pos_ls.append(auto_run_cb)
         observe_pos_ls.append(time_end_date)
         observe_pos_ls.append(time_start_date)
         observe_ordinary_ls.append(time_fetch_date)
 
-        time_length_settings = wd.Accordion(children=[time_date_box],
-                                            titles=('Length of time series',))
+        run_settings = wd.Accordion(children=[run_box],
+                                    titles=('Run configurations',))
 
         latex_text1 = wd.HTML('<span><b>Guide:<br> <i>LaTeX settings</i></b> '
                               'applies to axis labels of plots.<br>For example, '
@@ -3058,12 +3105,12 @@ class AnalysisGui:
                                           split_p_title_font])
 
         split_p_title_size = wd.Dropdown(options=plotly_sizes,
-                                         layout=int_drop_layout)
+                                         layout=size_drop_layout)
         split_p_title_size_box = wd.HBox([title_size_label,
                                           split_p_title_size])
 
         split_p_subtitle_size = wd.Dropdown(options=plotly_sizes,
-                                            layout=int_drop_layout)
+                                            layout=size_drop_layout)
         split_p_subtitle_size_box = wd.HBox([subtitle_size_label,
                                              split_p_subtitle_size])
 
@@ -3147,12 +3194,12 @@ class AnalysisGui:
                                           multi_p_title_font])
 
         multi_p_title_size = wd.Dropdown(options=plotly_sizes,
-                                         layout=int_drop_layout)
+                                         layout=size_drop_layout)
         multi_p_title_size_box = wd.HBox([title_size_label,
                                           multi_p_title_size])
 
         multi_p_subtitle_size = wd.Dropdown(options=plotly_sizes,
-                                            layout=int_drop_layout)
+                                            layout=size_drop_layout)
         multi_p_subtitle_size_box = wd.HBox([subtitle_size_label,
                                              multi_p_subtitle_size])
         multi_box = wd.VBox([multi_plot_guide,
@@ -3214,12 +3261,12 @@ class AnalysisGui:
                                          corr_p_title_font])
 
         corr_p_title_size = wd.Dropdown(options=plotly_sizes,
-                                        layout=int_drop_layout)
+                                        layout=size_drop_layout)
         corr_p_title_size_box = wd.HBox([title_size_label,
                                          corr_p_title_size])
 
         corr_p_subtitle_size = wd.Dropdown(options=plotly_sizes,
-                                           layout=int_drop_layout)
+                                           layout=size_drop_layout)
         corr_p_subtitle_size_box = wd.HBox([subtitle_size_label,
                                             corr_p_subtitle_size])
 
@@ -3277,12 +3324,12 @@ class AnalysisGui:
                                          corr_t_title_font])
 
         corr_t_title_size = wd.Dropdown(options=plotly_sizes,
-                                        layout=int_drop_layout)
+                                        layout=size_drop_layout)
         corr_t_title_size_box = wd.HBox([title_size_label,
                                          corr_t_title_size])
 
         corr_t_subtitle_size = wd.Dropdown(options=plotly_sizes,
-                                           layout=int_drop_layout)
+                                           layout=size_drop_layout)
         corr_t_subtitle_size_box = wd.HBox([subtitle_size_label,
                                             corr_t_subtitle_size])
 
@@ -3306,7 +3353,7 @@ class AnalysisGui:
                                            titles=('Numerical statistics '
                                                    'settings',))
         return_widget = wd.VBox([def_settings_guide,
-                                 time_length_settings,
+                                 run_settings,
                                  latex_settings,
                                  split_plot_settings,
                                  multi_plot_settings,

@@ -132,8 +132,8 @@ class ReportWriter:
 
         settings = self._load_user_settings()
         days = 6
-        if 'time_configs' in settings.keys():
-            days = settings['time_configs'].get('fetch_date', 6)
+        if 'run_configs' in settings.keys():
+            days = settings['run_configs'].get('fetch_date', 6)
         cache = self._load_cache()
         var_tuple_ls = cache['_groups'][group]['_group_vars']
         st_df = self.stations_df
