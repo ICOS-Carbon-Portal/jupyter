@@ -54,37 +54,39 @@ __maintainer__ = "ICOS Carbon Portal, Elaborated products team"
 __email__ = ['info@icos-cp.eu', 'anders.dahlner@nateko.lu.se']
 
 
-class Translator():
+class Translator:
     # We use some class members in order to improve
     # the performance reasons. These are all private.
-    __layout = {'font_size':
-                    {6: r'\tiny ',          # ~6pt
-                     8: r'\scriptsize ',    # ~8pt, *default
-                     9: r'\footnotesize ',  # ~9pt
-                     10: r'\small ',        # ~10pt
-                     11: r'\normalsize ',   # ...
-                     12: r'\large ',
-                     14: r'\Large ',
-                     17: r'\LARGE ',
-                     21: r'\huge ',
-                     25: r'\Huge ',
-                     0: None},  # default latex style
-                # see (***) above
-                'font_style':
-                    {'rm': r'\mathrm ',  # serif, ~times roman, *default
-                     'sf': r'\mathsf ',  # sans-serif, no serifs, web-text
-                     'tt': r'\mathtt ',  # serif, typewriter text
-                     'it': r'\mathit ',  # serif, italic, ~ like default latex
-                     'bf': r'\mathbf ',  # serif, bold
-                     'bb': r'\mathbb ',  # black-board bold, for capitals
-                     'cal': r'\mathcal ',  # calligraphy, for capitals
-                     'frak': r'\mathfrak ',  # fraktur, for capitals
-                     'normal': r'\mathnormal ',  # "Normal font"
-                     'none': None},  # default latex style
-                'use_exp': False,  # Applies to units, if True output
-                # use negative exponents instead of
-                # div-signs. e.g 'm/s' or m s^{-1}
-                }
+    __layout = {
+        'font_size': {
+            'Default': None,
+            'None': None,            # default latex style
+            '6': r'\tiny ',          # ~6pt
+            '8': r'\scriptsize ',    # ~8pt, *default
+            '9': r'\footnotesize ',  # ~9pt
+            '10': r'\small ',        # ~10pt
+            '11': r'\normalsize ',   # ...
+            '12': r'\large ',
+            '14': r'\Large ',
+            '17': r'\LARGE ',
+            '21': r'\huge ',
+            '25': r'\Huge '},
+        # see (***) above
+        'font_style': {
+            'Default': None,    # *default
+            'None': None,
+            'rm': r'\mathrm ',  # serif, ~times roman,
+            'sf': r'\mathsf ',  # sans-serif, no serifs, web-text
+            'tt': r'\mathtt ',  # serif, typewriter text
+            'it': r'\mathit ',  # serif, italic, ~ like default latex
+            'bf': r'\mathbf ',  # serif, bold
+            'bb': r'\mathbb ',  # black-board bold, for capitals
+            'cal': r'\mathcal ',  # calligraphy, for capitals
+            'frak': r'\mathfrak '  # fraktur, for capitals
+            },  # default latex style
+        'use_exp': False}   # Applies to units, if True output
+    # will use negative exponents instead of
+    # div-signs. e.g 'm/s' or m s^{-1}
 
     @classmethod
     def __var_to_latex(cls, var: str = None):
@@ -320,77 +322,48 @@ class Translator():
 
     def __process_configs(self, **configs):
 
-        all_known_keys = set(Translator.__layout.keys()).union(['debug',
-                                                                'compiler'])
+        layout_keys = list(Translator.__layout.keys())
 
         debug = configs.pop('debug', False)
         self['debug'] = debug if isinstance(debug, bool) else False
-
         self['compiler'] = configs.pop('compiler', None)
 
-        known_keys = all_known_keys.difference(['debug', 'compiler'])
         # Only set known keys:
-        for k in known_keys:
+        for k in layout_keys:
             if k in configs.keys():
-                self[k] = configs[k]
+                self[k] = configs.pop(k, None)
             else:
                 self[k] = None
 
-        unknown_keys = set(configs.keys()).difference(all_known_keys)
-        if unknown_keys and self.debug:
+        if configs and self.debug:
+            known_keys = layout_keys.extend(['debug', 'compiler'])
+            unknown_keys = [str(x) for x in configs.keys()]
             msg = f'''\tUnknown key(s) sent to `icos2latex`: \
-            \n\t\t{", ".join(list(unknown_keys))}.\
+            \n\t\t{", ".join(unknown_keys)}.\
             \n\tKnown keys are:  \
             \n\t\t{", ".join(known_keys)}.'''
             print(msg)
 
     def __setitem__(self, key, value):
-        value_error = False
         if key in ['debug', 'use_exp']:
             if isinstance(value, bool):
                 self._config[key] = value
             else:
                 self._config[key] = False
-                value_error = True
-        elif key == 'font_size':
-            if value is None:
-                self._config[key] = None
-            else:
-                try:
-                    val_int = int(value)
-                except Exception:
-                    value_error = True
-                    val_int = 8
-                if val_int in Translator.__layout[key].keys():
-                    self._config[key] = Translator.__layout[key][value]
-                else:
-                    self._config[key] = Translator.__layout[key][8]
-                    value_error = True
+        elif key in Translator.__layout.keys():
+            self._config[key] = Translator.__layout[key].get(str(value), None)
         elif key == 'font_style':
-            if value is None:
-                self._config[key] = None
-            elif value in Translator.__layout[key].keys():
-                self._config[key] = Translator.__layout[key][value]
-            else:
-                self._config[key] = Translator.__layout[key]['rm']
-                value_error = True
+            self._config[key] = Translator.__layout[key].get(str(value), None)
         elif key == 'compiler':
             if value is None:
                 self._config[key] = 'mathjax'
             else:
-                self._config[key] = value
+                self._config[key] = str(value)
         else:
             if self.debug:
                 msg = f"""\tError in the call to `icos2latex`: """ \
                       f"""\n\t\tUnknown parameter `{key}`. """ \
                       f"""\n\t{self.__init__.__doc__}"""
-                print(msg)
-
-        if self.debug:
-            if value_error:
-                msg = f"""\tError in the call to `icos2latex`: """ \
-                      f"""\n\t\tThe parameter `{key}` got the unknown value: """ \
-                      f"""`{value}`\n\t{self.__init__.__doc__}"""
                 print(msg)
 
     def __getitem__(self, key):
@@ -433,8 +406,10 @@ class Translator():
         # See the "Warning" paragraph in the file documentation
         if self.font_size is not None:
             if self.compiler == 'mathjax' and not no_dollars:
+                # in case the output should be compiled with mathjax
                 latex_final = fr'${{{self.font_size} {txt}}}$'
             elif not no_dollars:
+                # in case the output should go into an ordinary tex-file
                 latex_final = fr'{self.font_size} {{${txt}$}}'
             else:
                 latex_final = fr'{self.font_size} {{{txt}}}'
@@ -529,7 +504,5 @@ class Translator():
         latex_var = Translator.__var_to_latex(var)
         latex_unit = Translator.__unit_to_latex(unit, self.use_exp)
         latex_unit = f'({latex_unit})'
-
-        latex_var_unit = f'{latex_var}\ {latex_unit}'
-
+        latex_var_unit = rf'{latex_var}\ {latex_unit}'
         return self.__set_style(latex_var_unit)

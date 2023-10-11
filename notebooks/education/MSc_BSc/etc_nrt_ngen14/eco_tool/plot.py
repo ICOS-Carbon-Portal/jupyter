@@ -38,25 +38,57 @@ from eco_tool import icos2latex
 
 class Plot:
 
+    __plotly_color_scales = ['aggrnyl', 'agsunset', 'blackbody', 'bluered',
+                             'blues', 'blugrn', 'bluyl', 'brwnyl', 'bugn',
+                             'bupu', 'burg', 'burgyl', 'cividis',
+                             'darkmint', 'electric', 'emrld', 'gnbu',
+                             'greens', 'greys', 'hot', 'inferno', 'jet',
+                             'magenta', 'magma', 'mint', 'orrd', 'oranges',
+                             'oryel', 'peach', 'pinkyl', 'plasma',
+                             'plotly3', 'pubu', 'pubugn', 'purd',
+                             'purp', 'purples', 'purpor', 'rainbow',
+                             'rdbu', 'rdpu', 'redor', 'reds', 'sunset',
+                             'sunsetdark', 'teal', 'tealgrn', 'turbo',
+                             'viridis', 'ylgn', 'ylgnbu', 'ylorbr',
+                             'ylorrd', 'algae', 'amp', 'deep', 'dense',
+                             'gray', 'haline', 'ice', 'matter', 'solar',
+                             'speed', 'tempo', 'thermal', 'turbid',
+                             'armyrose', 'brbg', 'earth', 'fall', 'geyser',
+                             'prgn', 'piyg', 'picnic', 'portland',
+                             'puor', 'rdgy', 'rdylbu', 'rdylgn',
+                             'spectral', 'tealrose', 'temps', 'tropic',
+                             'balance', 'curl', 'delta', 'oxy', 'edge',
+                             'hsv', 'icefire', 'phase', 'twilight',
+                             'mrybm', 'mygbm']
+    __plotly_templates = ['plotly', 'plotly_white', 'plotly_dark',
+                          'ggplot2', 'seaborn', 'simple_white', 'none']
+
+
+    __plotly_text_fonts = ["Arial", "Balto", "Courier New", "Droid Sans",
+                           "Droid Serif", "Droid Sans Mono", "Gravitas One",
+                           "Old Standard TT", "Open Sans", "Overpass",
+                           "PT Sans Narrow", "Raleway", "Times New Roman"]
+    __plotly_text_sizes = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+
+
     def __init__(self, **kwargs):
         """
-        Keys of settings:
-        -----------------
-        - debug: bool
-                    If true, messages will be printed.
-        - latex_kwargs: dict
-                    Settings for LaTeX, see eco_tool.icos2latex for details.
-        - corr_plot: dict
-                    Plotly settings for corr_plot
-        - corr_table: dict
-                    Plotly settings for corr_table
-        - multi_plot: dict
-                    Plotly settings for multi_plot
-        - split_plot: dict
-                    Plotly settings for split_plot
+            Keys of settings:
+            -----------------
+            - debug: bool
+                        If true, messages will be printed.
+            - latex_kwargs: dict
+                        Settings for LaTeX, see eco_tool.icos2latex for details.
+            - corr_plot: dict
+                        Plotly settings for corr_plot
+            - corr_table: dict
+                        Plotly settings for corr_table
+            - multi_plot: dict
+                        Plotly settings for multi_plot
+            - split_plot: dict
+                        Plotly settings for split_plot
         """
         debug = kwargs.pop('debug', False)
-
         if isinstance(debug, bool):
             self.debug = debug
         else:
@@ -73,36 +105,89 @@ class Plot:
         self.corr_table_settings = kwargs.pop('corr_table_kwargs', dict())
         self.multi_plot_settings = kwargs.pop('multi_plot_kwargs', dict())
         self.split_plot_settings = kwargs.pop('split_plot_kwargs', dict())
-        if self.debug:
-            print('corr_plot_settings: ', self.corr_plot_settings)
-            print('corr_table_settings: ', self.corr_table_settings)
-            print('multi_plot_settings: ', self.multi_plot_settings)
-            print('split_plot_settings: ', self.split_plot_settings)
+        self.corr_plot_layout = None
 
-        self.plotly_color_scales = ['aggrnyl', 'agsunset', 'blackbody', 'bluered',
-                                    'blues', 'blugrn', 'bluyl', 'brwnyl', 'bugn',
-                                    'bupu', 'burg', 'burgyl', 'cividis',
-                                    'darkmint', 'electric', 'emrld', 'gnbu',
-                                    'greens', 'greys', 'hot', 'inferno', 'jet',
-                                    'magenta', 'magma', 'mint', 'orrd', 'oranges',
-                                    'oryel', 'peach', 'pinkyl', 'plasma',
-                                    'plotly3', 'pubu', 'pubugn', 'purd',
-                                    'purp', 'purples', 'purpor', 'rainbow',
-                                    'rdbu', 'rdpu', 'redor', 'reds', 'sunset',
-                                    'sunsetdark', 'teal', 'tealgrn', 'turbo',
-                                    'viridis', 'ylgn', 'ylgnbu', 'ylorbr',
-                                    'ylorrd', 'algae', 'amp', 'deep', 'dense',
-                                    'gray', 'haline', 'ice', 'matter', 'solar',
-                                    'speed', 'tempo', 'thermal', 'turbid',
-                                    'armyrose', 'brbg', 'earth', 'fall', 'geyser',
-                                    'prgn', 'piyg', 'picnic', 'portland',
-                                    'puor', 'rdgy', 'rdylbu', 'rdylgn',
-                                    'spectral', 'tealrose', 'temps', 'tropic',
-                                    'balance', 'curl', 'delta', 'oxy', 'edge',
-                                    'hsv', 'icefire', 'phase', 'twilight',
-                                    'mrybm', 'mygbm']
-        self.plotly_templates = ['plotly', 'plotly_white', 'plotly_dark',
-                                 'ggplot2', 'seaborn', 'simple_white', 'none']
+        if self.debug:
+            print(f'corr_plot_settings: {self.corr_plot_settings}\n',
+                  f'corr_table_settings: {self.corr_table_settings}\n',
+                  f'multi_plot_settings: {self.multi_plot_settings}\n',
+                  f'split_plot_settings:  {self.split_plot_settings}\n')
+
+    def get_corr_plot_layout(self, use_latex):
+        if not self.corr_plot_layout:
+            width = self.corr_plot_settings.get('width', None)
+            if not isinstance(width, int) or width < 200:
+                width = None
+            height = self.corr_plot_settings.get('height', None)
+            if not isinstance(height, int) or height < 200:
+                height = None
+            template = self.corr_plot_settings.get('template', None)
+            if template not in Plot.__plotly_templates:
+                template = 'plotly'
+            color_scale = self.corr_plot_settings.get('color_scale', None)
+            if color_scale not in Plot.__plotly_color_scales:
+                color_scale = "blues"
+            title_font = self.corr_plot_settings.get('title_font', None)
+            if title_font not in Plot.__plotly_text_fonts:
+                title_font = None
+            title_size = self.corr_plot_settings.get('title_size', None)
+            if title_size not in Plot.__plotly_text_sizes:
+                title_size = None
+            subtitle_size = self.corr_plot_settings.get('subtitle_size', None)
+            if subtitle_size not in Plot.__plotly_text_sizes:
+                subtitle_size = None
+            colorbar_height = 0.8 * height if height else None
+            self.corr_plot_layout = dict(
+                title=dict(
+                    text='main title of corr-plot template',
+                    font=dict(
+                        family=title_font,
+                        size=title_size),
+                    yref='paper'),
+                width=width,
+                height=height,
+                template=template,
+                annotations=[dict(
+                    font=dict(
+                        family=title_font,
+                        size=subtitle_size),
+                    text='subtitle of corr-plot template',
+                    showarrow=False,
+                    x=0.5,
+                    xref='paper',
+                    y=1.1,
+                    yref='paper')],
+                coloraxis=dict(
+                    colorbar=dict(
+                        title=dict(
+                            text='Color mapping<br><br>',
+                            font=dict(
+                                family=title_font,
+                                size=subtitle_size)),
+                        lenmode="pixels",
+                        len=colorbar_height)),
+                xaxis=dict(
+                    anchor='y',
+                    domain=[0.0, 1.0],
+                    title=dict(
+                        text='title of x-axis',
+                        font=dict(
+                            family=title_font,
+                            size=subtitle_size)),
+                    zeroline=True,
+                    zerolinecolor='black'),
+                yaxis=dict(
+                    anchor='x',
+                    domain=[0.0, 1.0],
+                    title=dict(
+                        text='title of y-axis',
+                        font=dict(
+                            family=title_font,
+                            size=subtitle_size)),
+                    zeroline=True,
+                    zerolinecolor='black'))
+
+        return self.corr_plot_layout
 
     def corr_plot(self, df,
                   x_col: str,
@@ -139,45 +224,39 @@ class Plot:
 
         if self.debug:
             print(df.head, x_col, y_col, units, title, subtitle)
-        if title is None:
-            title = f'Correlation plot of {x_col} and {y_col}.'
-        if subtitle is None:
-            subtitle = f'{x_col} (on the <i>x</i>-axis) vs  ' \
-                       f'{y_col} (on the <i>y</i>-axis) ' \
+
+
+        color_scale = self.corr_plot_settings.get('color_scale', None)
+        if color_scale not in Plot.__plotly_color_scales:
+            color_scale = "blues"
 
         if not isinstance(units, list):
             units = [x_col, y_col]
 
         # load general settings for corr-plot
         use_latex = self.corr_plot_settings.get('use_latex', True)
-        width = self.corr_plot_settings.get('width', None)
-        if not isinstance(width, int):
-            width = None
-        elif width < 200:
-            width = None
-        height = self.corr_plot_settings.get('height', None)
-        if not isinstance(height, int):
-            height = None
-        elif height < 200:
-            height = None
-        template = self.corr_plot_settings.get('template', None)
-        if template not in self.plotly_templates:
-            template = 'plotly'
-        color_scale = self.corr_plot_settings.get('color_scale', None)
-        if color_scale not in self.plotly_color_scales:
-            color_scale = "blues"
+        corr_layout = self.get_corr_plot_layout(use_latex)
+
+        if title is None:
+            title = f'Correlation plot of {x_col} and {y_col}.'
+        corr_layout['title']['text'] = title
+        if subtitle is None:
+            subtitle = f'{x_col} (on the <i>x</i>-axis) vs  ' \
+                       f'{y_col} (on the <i>y</i>-axis) '
+        corr_layout['annotations'][0]['text'] = subtitle
 
         df = df.copy()
         if 'TIMESTAMP' not in [c.upper() for c in df.columns]:
             df.reset_index(inplace=True)
+        df = df[['TIMESTAMP', x_col, y_col]]
 
         if all(isinstance(x, tuple) for x in units):
             if use_latex and self.latex is not None:
                 x_label = self.latex.var_unit_to_latex(var_unit=units[0])
                 y_label = self.latex.var_unit_to_latex(var_unit=units[1])
             else:
-                x_label = units[0][0] + ' ' + units[0][1]
-                y_label = units[1][0] + ' ' + units[1][1]
+                x_label = f'{units[0][0]} ({units[0][1]})'
+                y_label = f'{units[1][0]} ({units[1][1]})'
         elif all(isinstance(x, str) for x in units):
             if use_latex and self.latex is not None:
                 x_label = self.latex.var_to_latex(var=units[0])
@@ -185,59 +264,40 @@ class Plot:
             else:
                 x_label = units[0]
                 y_label = units[1]
+        if use_latex:
+            corr_layout['xaxis']['title'] = x_label
+            corr_layout['yaxis']['title'] = y_label
+        else:
+            corr_layout['xaxis']['title']['text'] = x_label
+            corr_layout['yaxis']['title']['text'] = y_label
 
-        fig = go.Figure(px.scatter(df, x=x_col, y=y_col,
-                                   trendline="ols",
-                                   color=df.index,
-                                   color_continuous_scale=color_scale,
-                                   title=title),
-                        layout={'title': {'text': title+'aaaaa',
-                                          'y': 0.9,
-                                          'x': 0.1,
-                                          #'xanchor': 'left',
-                                          'yanchor': 'top'},
-                                'template': template})
-
-        fig.update_layout(title=title,
-                          height=height,
-                          width=width,
-                          annotations=[dict(xref='paper',
-                                            yref='paper',
-                                            x=0.5, y=1.05,
-                                            showarrow=False,
-                                            text=subtitle)],
-                          xaxis=dict(title=x_label,
-                                     zeroline=True,
-                                     zerolinecolor='black'),
-                          yaxis=dict(title=y_label,
-                                     zeroline=True,
-                                     zerolinecolor='black')
-                          )
-
-        if len(df) > 14:
+        ticks = len(df)
+        if ticks > 18:
             last_date = str(df['TIMESTAMP'].values.max())[:16]
             first_date = str(df['TIMESTAMP'].values.min())[:16]
             tick_ind = [0, 1, 2,
                         3, 4, 5,
-                        len(df) - 9, len(df) - 8, len(df) - 7,
-                        len(df) - 6, len(df) - 5, len(df) - 4,
-                        len(df) - 3, len(df) - 2, len(df) - 1]
+                        6, 7, 8,
+                        ticks - 9, ticks - 8, ticks - 7,
+                        ticks - 6, ticks - 5, ticks - 4,
+                        ticks - 3, ticks - 2, ticks - 1]
             tick_text = ['', '', '',
+                         '', '', '',
                          '', '', f"<sub>Sampled on <br>{first_date}</sub>",
-                         f"<sub>Sampled on <br>{last_date}</sub>", '', '',
+                         f"<br><sub>Sampled on <br>{last_date}</sub>", '', '',
                          '', '', '',
                          '', '', '']
         else:
             tick_ind = [0, 1]
             tick_text = ['', '']
+        corr_layout['coloraxis']['colorbar']['tickvals'] = tick_ind
+        corr_layout['coloraxis']['colorbar']['ticktext'] = tick_text
 
-        colorbar_height = 0.8 * height if height else None
+        fig = go.Figure(px.scatter(df, x=x_col, y=y_col,
+                                   trendline="ols",
+                                   color=df.index))
+        fig.update(layout=corr_layout)
 
-        fig.update_layout(coloraxis_colorbar=dict(title="Color mapping<br>",
-                                                  tickvals=tick_ind,
-                                                  ticktext=tick_text,
-                                                  lenmode="pixels",
-                                                  len=colorbar_height))
         return fig
 
     def multi_plot(self, df,
@@ -294,7 +354,7 @@ class Plot:
         elif height < 200:
             height = None
         template = self.multi_plot_settings.get('template', None)
-        if template not in self.plotly_templates:
+        if template not in Plot.__plotly_templates:
             template = 'plotly'
 
         # Create figure with secondary y-axis
@@ -433,7 +493,7 @@ class Plot:
         if not isinstance(subtitle_size, int):
             subtitle_size = None
         template = self.split_plot_settings.get('template', None)
-        if template not in self.plotly_templates:
+        if template not in Plot.__plotly_templates:
             template = 'plotly'
         n = self.split_plot_settings.get('zoom_sliders', None)
         if not (isinstance(n, int) and n >= 0):
@@ -458,13 +518,12 @@ class Plot:
 
         for c in range(ncols):
             col = cols[c]
-
             # formatting y-axis labels
             if isinstance(unit_ls[c], tuple):
                 if lat:
                     y_label = lat.var_unit_to_latex(var_unit=unit_ls[c])
                 else:
-                    y_label = unit_ls[c][0] + ' ' + unit_ls[c][1]
+                    y_label = f'{unit_ls[c][0]} ({unit_ls[c][1]})'
             elif isinstance(unit_ls[c], str):
                 if lat:
                     y_label = lat.var_to_latex(unit_ls[c])

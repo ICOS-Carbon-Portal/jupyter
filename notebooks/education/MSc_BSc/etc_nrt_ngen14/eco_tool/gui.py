@@ -2672,10 +2672,11 @@ class AnalysisGui:
             time_start_date.value = run_configs.get('start_date', 10)
             time_fetch_date.value = run_configs.get('fetch_date', 6)
 
-            latex_font_style.value = latex_kwargs.get('font_style', 'rm')
-            latex_font_size.value = latex_kwargs.get('font_size', 8)
+            latex_font_style.value = latex_kwargs.get('font_style', 'Default')
+            f_size = latex_kwargs.get('font_size', 'Default')
+            latex_font_size.value = str(f_size)
             latex_use_exp_cb.value = latex_kwargs.get('use_exp', False)
-            latex_changed(0)
+            latex_changed()
 
             split_p_zoom_sliders.value = split_p_kwargs.get('zoom_sliders', 2)
             split_p_use_latex_cb.value = split_p_kwargs.get('use_latex', True)
@@ -2684,7 +2685,7 @@ class AnalysisGui:
             split_p_height.value = split_p_kwargs.get('height', 0)
             split_p_width.value = split_p_kwargs.get('width', 0)
             split_p_title_font.value = split_p_kwargs.get('title_font',
-                                                          plotly_fonts[0])
+                                                          plotly_text_fonts[0])
             split_p_title_size.value = split_p_kwargs.get('title_size',
                                                           'Default')
             split_p_subtitle_size.value = split_p_kwargs.get('subtitle_size',
@@ -2697,7 +2698,7 @@ class AnalysisGui:
             multi_p_height.value = multi_p_kwargs.get('height', 0)
             multi_p_width.value = multi_p_kwargs.get('width', 0)
             multi_p_title_font.value = multi_p_kwargs.get('title_font',
-                                                          plotly_fonts[0])
+                                                          plotly_text_fonts[0])
             multi_p_title_size.value = multi_p_kwargs.get('title_size',
                                                           'Default')
             multi_p_subtitle_size.value = multi_p_kwargs.get('subtitle_size',
@@ -2709,7 +2710,7 @@ class AnalysisGui:
             corr_p_height.value = corr_p_kwargs.get('height', 0)
             corr_p_width.value = corr_p_kwargs.get('width', 0)
             corr_p_title_font.value = corr_p_kwargs.get('title_font',
-                                                        plotly_fonts[0])
+                                                        plotly_text_fonts[0])
             corr_p_title_size.value = corr_p_kwargs.get('title_size',
                                                         'Default')
             corr_p_subtitle_size.value = corr_p_kwargs.get('subtitle_size',
@@ -2718,7 +2719,7 @@ class AnalysisGui:
                                                               'blues')
 
             corr_t_title_font.value = corr_t_kwargs.get('title_font',
-                                                        plotly_fonts[0])
+                                                        plotly_text_fonts[0])
             corr_t_title_size.value = corr_t_kwargs.get('title_size',
                                                         'Default')
             corr_t_subtitle_size.value = corr_t_kwargs.get('subtitle_size',
@@ -2740,7 +2741,7 @@ class AnalysisGui:
             cancel_btn.disabled = True
             save_btn.disabled = True
 
-        def latex_changed(c):
+        def latex_changed(c = None):
             latex = icos2latex.Translator(use_exp=latex_use_exp_cb.value,
                                           font_size=latex_font_size.value,
                                           font_style=latex_font_style.value)
@@ -2852,11 +2853,11 @@ class AnalysisGui:
                                'mrybm', 'mygbm']
         plotly_templates = ['plotly', 'plotly_white', 'plotly_dark',
                             'ggplot2', 'seaborn', 'simple_white', 'none']
-        plotly_fonts = ["Arial", "Balto", "Courier New", "Droid Sans",
-                        "Droid Serif", "Droid Sans Mono", "Gravitas One",
-                        "Old Standard TT", "Open Sans", "Overpass",
-                        "PT Sans Narrow", "Raleway", "Times New Roman"]
-        plotly_sizes = ['Default', 6, 8, 10, 11, 12, 14, 17]
+        plotly_text_fonts = ["Arial", "Balto", "Courier New", "Droid Sans",
+                             "Droid Serif", "Droid Sans Mono", "Gravitas One",
+                             "Old Standard TT", "Open Sans", "Overpass",
+                             "PT Sans Narrow", "Raleway", "Times New Roman"]
+        plotly_text_sizes = ['Default', 6, 7, 8, 9, 10, 11, 12, 13, 14, 17]
 
         # common texts
         col_href = link("https://www.aao.org/eye-health/"
@@ -2873,7 +2874,7 @@ class AnalysisGui:
                               'value. '
 
         # common label widgets
-        label_layout = wd.Layout(min_width='80px', max_width='155px')
+        label_layout = wd.Layout(min_width='90px', max_width='220px')
         plotly_templ_label = wd.HTML(value='<b>Plotly template:</b>',
                                      layout=label_layout)
         use_latex_label = wd.HTML(value='<b> Use LaTeX</b>',
@@ -3021,22 +3022,20 @@ class AnalysisGui:
         latex_use_exp_box = wd.HBox([latex_use_exp_cb, latex_use_exp_label])
         latex_font_size_label = wd.HTML('<b>Font size: </b>',
                                         layout=label_layout)
-        latex_font_size = wd.Dropdown(options=[6, 8, 10, 11,
-                                               12, 14, 17],
-                                      value=8,
+        latex_font_size = wd.Dropdown(options=['Default', '6', '8', '10', '11',
+                                               '12', '14', '17'],
                                       disabled=False,
-                                      layout=int_drop_layout)
+                                      layout=wd.Layout(width='75px'))
         latex_font_size_box = wd.HBox([latex_font_size_label, latex_font_size])
         latex_font_style_label = wd.HTML('<b>Font style: </b>',
                                          layout=label_layout)
-        latex_font_style = wd.Dropdown(options=[('Roman (serifs, default)', 'rm'),
+        latex_font_style = wd.Dropdown(options=[('Default', 'Default'),
+                                                 ('Roman (serifs)', 'rm'),
                                                 ('Sans Serif (no serifs)', 'sf'),
                                                 ('Italic (serifs)', 'it'),
                                                 ('Typewriter (serifs)', 'tt'),
-                                                ('Bold (serifs)', 'bf'),
-                                                ('Normal', 'normal')],
-                                       value='rm', disabled=False,
-                                       layout=font_drop_layout)
+                                                ('Bold (serifs)', 'bf')],
+                                       layout=wd.Layout(width='150px'))
         latex_font_style_box = wd.HBox([latex_font_style_label,
                                         latex_font_style])
 
@@ -3099,17 +3098,17 @@ class AnalysisGui:
         split_p_width_box = wd.HBox([width_label,
                                      split_p_width])
 
-        split_p_title_font = wd.Dropdown(options=plotly_fonts,
+        split_p_title_font = wd.Dropdown(options=plotly_text_fonts,
                                          layout=font_drop_layout)
         split_p_title_font_box = wd.HBox([title_font_label,
                                           split_p_title_font])
 
-        split_p_title_size = wd.Dropdown(options=plotly_sizes,
+        split_p_title_size = wd.Dropdown(options=plotly_text_sizes,
                                          layout=size_drop_layout)
         split_p_title_size_box = wd.HBox([title_size_label,
                                           split_p_title_size])
 
-        split_p_subtitle_size = wd.Dropdown(options=plotly_sizes,
+        split_p_subtitle_size = wd.Dropdown(options=plotly_text_sizes,
                                             layout=size_drop_layout)
         split_p_subtitle_size_box = wd.HBox([subtitle_size_label,
                                              split_p_subtitle_size])
@@ -3188,17 +3187,17 @@ class AnalysisGui:
         multi_p_plotly_template_box = wd.HBox([plotly_templ_label,
                                                multi_p_plotly_templates])
 
-        multi_p_title_font = wd.Dropdown(options=plotly_fonts,
+        multi_p_title_font = wd.Dropdown(options=plotly_text_fonts,
                                          layout=font_drop_layout)
         multi_p_title_font_box = wd.HBox([title_font_label,
                                           multi_p_title_font])
 
-        multi_p_title_size = wd.Dropdown(options=plotly_sizes,
+        multi_p_title_size = wd.Dropdown(options=plotly_text_sizes,
                                          layout=size_drop_layout)
         multi_p_title_size_box = wd.HBox([title_size_label,
                                           multi_p_title_size])
 
-        multi_p_subtitle_size = wd.Dropdown(options=plotly_sizes,
+        multi_p_subtitle_size = wd.Dropdown(options=plotly_text_sizes,
                                             layout=size_drop_layout)
         multi_p_subtitle_size_box = wd.HBox([subtitle_size_label,
                                              multi_p_subtitle_size])
@@ -3255,17 +3254,17 @@ class AnalysisGui:
         corr_p_width_box = wd.HBox([width_label,
                                     corr_p_width])
 
-        corr_p_title_font = wd.Dropdown(options=plotly_fonts,
+        corr_p_title_font = wd.Dropdown(options=plotly_text_fonts,
                                         layout=font_drop_layout)
         corr_p_title_font_box = wd.HBox([title_font_label,
                                          corr_p_title_font])
 
-        corr_p_title_size = wd.Dropdown(options=plotly_sizes,
+        corr_p_title_size = wd.Dropdown(options=plotly_text_sizes,
                                         layout=size_drop_layout)
         corr_p_title_size_box = wd.HBox([title_size_label,
                                          corr_p_title_size])
 
-        corr_p_subtitle_size = wd.Dropdown(options=plotly_sizes,
+        corr_p_subtitle_size = wd.Dropdown(options=plotly_text_sizes,
                                            layout=size_drop_layout)
         corr_p_subtitle_size_box = wd.HBox([subtitle_size_label,
                                             corr_p_subtitle_size])
@@ -3318,17 +3317,17 @@ class AnalysisGui:
                                               layout=font_drop_layout)
         corr_t_color_scale_box = wd.HBox([color_scale_label,
                                           corr_t_color_scale_drop])
-        corr_t_title_font = wd.Dropdown(options=plotly_fonts,
+        corr_t_title_font = wd.Dropdown(options=plotly_text_fonts,
                                         layout=font_drop_layout)
         corr_t_title_font_box = wd.HBox([title_font_label,
                                          corr_t_title_font])
 
-        corr_t_title_size = wd.Dropdown(options=plotly_sizes,
+        corr_t_title_size = wd.Dropdown(options=plotly_text_sizes,
                                         layout=size_drop_layout)
         corr_t_title_size_box = wd.HBox([title_size_label,
                                          corr_t_title_size])
 
-        corr_t_subtitle_size = wd.Dropdown(options=plotly_sizes,
+        corr_t_subtitle_size = wd.Dropdown(options=plotly_text_sizes,
                                            layout=size_drop_layout)
         corr_t_subtitle_size_box = wd.HBox([subtitle_size_label,
                                             corr_t_subtitle_size])
