@@ -28,6 +28,7 @@ from IPython.display import display, Math, clear_output
 import datetime as dt
 import copy
 import os
+
 warnings.simplefilter("ignore", FutureWarning)
 
 if os.getcwd()[-8:] == 'eco_tool':
@@ -37,7 +38,7 @@ if os.getcwd()[-8:] == 'eco_tool':
     from icos_timeseries import IcosFrame
     import json_handler
     import icos2latex
-    import idebug
+    import trace_debug
 else:
     from eco_tool import icos_data
     from eco_tool import plot_old
@@ -45,7 +46,7 @@ else:
     from eco_tool.icos_timeseries import IcosFrame
     from eco_tool import json_handler
     from eco_tool import icos2latex
-    from eco_tool import idebug
+    from eco_tool import trace_debug
 
 
 class _AppDataRetriever:
@@ -114,15 +115,57 @@ class AnalysisGui:
                            'warning': '#FF9800', 'warning:active': '#F57C00',
                            'danger': '#F44336', 'danger:active': '#D32F2F'}
 
+    help_dict = {'brief': {'group': {'update': '',
+                                     'new': '',
+                                     'read-mode': ''
+                                     },
+                           'batch': {'update': '',
+                                     'new': '',
+                                     'read-mode': '',
+                                     'split_plot': '',
+                                     'multi_plot': '',
+                                     'corr_plot': '',
+                                     'corr_table': '',
+                                     'statistics': ''},
+                           'configs': {'run_configs': '',
+                                       'latex': '',
+                                       'split_plot': '',
+                                       'multi_plot': '',
+                                       'corr_plot': '',
+                                       'corr_table': '',
+                                       'statistics': ''},
+                           'main': ''},
+                 'detail': {'group': {'update': '',
+                                      'new': '',
+                                      'read_mode': ''
+                                      },
+                            'batch': {'update': '',
+                                      'new': '',
+                                      'read-mode': '',
+                                      'split_plot': '',
+                                      'multi_plot': '',
+                                      'corr_plot': '',
+                                      'corr_table': '',
+                                      'statistics': ''},
+                            'configs': {'run_configs': {},
+                                        'latex': {},
+                                        'split_plot': {},
+                                        'multi_plot': {},
+                                        'corr_plot': {},
+                                        'corr_table': {},
+                                        'statistics': {}},
+                            'main': ''}
+                 }
+
     @staticmethod
     def _var_tup2station_dict(var_tuples: list = None):
         """
-        var_tuple: list of tuples
-            Each tuple is of the form
-                (variable, file, station)
+            var_tuple: list of tuples
+                Each tuple is of the form
+                    (variable, file, station)
 
-         Returns
-         a dictionary of the form
+             Returns
+             a dictionary of the form
 
         """
         station_dict = {}
@@ -165,7 +208,7 @@ class AnalysisGui:
         valid_levels = ['1']
         if not level:
             level = '1'
-        elif not(isinstance(level, str) and level in valid_levels):
+        elif not (isinstance(level, str) and level in valid_levels):
             warnings.warn(f"At this moment the choice level = {level} "
                           f"is not implemented. "
                           f"\nThe app will continue with level = '1'.",
@@ -176,14 +219,16 @@ class AnalysisGui:
         self.level = level
         if bool(debug):
             self.debug = True
-            self.debugger = idebug.IDebug(output='html')
+            self.debugger = trace_debug.IDebug(output='html')
+            self.debug_out = wd.Output()
         else:
             self.debug = False
             self.debugger = None
+            self.debug_out = None
 
         # directories for appdata and user outputs
-        appdata_dir = os.path.join(os.path.expanduser('~'), '.eco_tool_appdata')
         self.code_dir = os.path.join('.', 'eco_tool')
+        appdata_dir = os.path.join(self.code_dir, 'appdata')
         output_dir = os.path.join(os.path.expanduser('~'), 'output')
         tex_files_dir = os.path.join(output_dir, 'eco_tool_tex_files')
         png_files_dir = os.path.join(output_dir, 'eco_tool_png_files')
@@ -211,7 +256,25 @@ class AnalysisGui:
         self.report_writer = None
 
         self._reset_gui_data()
+
+        # starts the app
         self.go()
+
+    def debug_value(self, *text_list):
+        caller_id = None
+        if text_list:
+            if isinstance(text_list[0], int):
+                caller_id, *text_list = text_list
+        msg = self.debugger.debug_value(*text_list,
+                                        external_id=caller_id,
+                                        stack_start=2,
+                                        stack_depth=5)
+        with self.debug_out:
+            display(wd.HTML(msg))
+
+    def _clear_debug_list(self, c):
+        with self.debug_out:
+            clear_output()
 
     def _reset_gui_data(self):
         # reset non-persistent data
@@ -287,27 +350,34 @@ class AnalysisGui:
             choice = change['new']
             with out:
                 clear_output()
-                if choice == 'Start ':
+                if choice == 'Plot ':
                     self._start()
                 elif choice == 'Group menu ':
-                    self._edit_group_variables()
-                elif choice == 'Configurations ':
-                    self._user_configurations()
-                else:
+                    self._group_menu()
+                elif choice == 'Batch jobs ':
+                    self._edit_batch_jobs(_menu_call=True)
+                elif choice == 'Settings ':
+                    self._configurations_menu()
+                elif choice == 'Help ':
                     self._help()
+                else:
+                    self._extract_data()
 
-        option_ls = ['Start ', 'Group menu ', 'Configurations ', 'Help ']
-        icon_ls = ['area-chart', 'list', 'cog', 'info-circle']
+        option_ls = ['Plot ', 'Group menu ', 'Batch jobs ', 'Settings ',
+                     'Help ', '*Extract data ']
+        icon_ls = ['area-chart', 'list', 'table', 'cog', 'info-circle', 'wrench']
 
+        main_widgets = []
         main = wd.ToggleButtons(options=option_ls,
                                 button_style="success",
-                                style={'button_width': "120px"},
+                                style={'button_width': "100px"},
                                 tooltip=None,
                                 icons=icon_ls)
+        main_widgets.append(main)
 
         group_cache = self._load_cache()
         if group_cache['_groups'].keys():
-            start_value = 'Start '
+            start_value = 'Plot '
         else:
             # In the first run, there are no
             # group of variables.
@@ -315,31 +385,38 @@ class AnalysisGui:
         main.value = start_value
 
         out = wd.Output()
+        main_widgets.append(out)
+        if self.debug:
+            debug_btn = wd.Button(description='Clear debug list')
+            debug_btn.on_click(self._clear_debug_list)
+            main_widgets.append(debug_btn)
+            main_widgets.append(self.debug_out)
+
         main.observe(main_change, "value")
         with out:
-            if start_value == 'Start ':
+            if start_value == 'Plot ':
                 self._start()
             else:
-                self._edit_group_variables()
+                self._group_menu()
 
-        display(wd.VBox([main, out]))
+        display(wd.VBox(main_widgets))
 
     def get_data(self, grp: str = None) -> IcosFrame or None:
-        d = self.get_data_dict
-        if d:
-            if grp and grp in d.keys():
-                df = d[grp]['df']
+        reports = self._get_data_dict
+        if reports:
+            if grp and grp in reports.keys():
+                icos_df = reports[grp]['df']
             elif grp:
-                df = None
+                icos_df = None
             else:
-                grp = list(d.keys())[-1]
-                df = d[grp]['df']
+                grp = list(reports.keys())[-1]
+                icos_df = reports[grp]['df']
         else:
-            df = None
-        return df
+            icos_df = None
+        return icos_df
 
     @property
-    def get_data_dict(self) -> dict:
+    def _get_data_dict(self) -> dict:
 
         if self.report_writer is None:
             d = {}
@@ -350,7 +427,7 @@ class AnalysisGui:
     def _start(self):
 
         if self.debug:
-            print('*** _start()\n')
+            self.debug_value(-33, '_start()    *** Start ***')
 
         def set_gui():
             cache = self._load_cache()
@@ -449,27 +526,28 @@ class AnalysisGui:
             stored_start = start + dt.timedelta(days=-days.value)
             stored_end = end + dt.timedelta(days=2)
             if self.debug:
-                with out:
-                    print(var_pid_ls)
+                self.debug_value(-34, 'get_data()',
+                                 f'var_pid_ls = {var_pid_ls}')
 
             df = None
             try:
                 df = icos_data.StationData.group_ts(var_tuple_ls=var_pid_ls,
                                                     start_date=stored_start,
                                                     end_date=stored_end)
-            except Exception:
+            except Exception as e:
                 if self.debug:
                     import traceback
-                    with out:
-                        print('-- Error in call: \n',
-                              f'icos_data.StationData.group_ts'
-                              f'(var_tuple_ls={var_pid_ls},'
-                              + f'\nstart_date= {stored_start}, '
-                                f'\nend_date= {stored_end})',
-                              type(stored_start), type(stored_end))
-                        print('Traceback: ', traceback.format_exc())
+                    self.debug_value(-34, 'get_data()',
+                                     f'Exception: {e})',
+                                     '-- Error in call to '
+                                     'icos_data.StationData.group_ts',
+                                     f'var_tuple_ls={var_pid_ls}',
+                                     f'start_date= {stored_start}',
+                                     f'end_date= {stored_end})',
+                                     f'type(stored_start) = {type(stored_start)}',
+                                     f'type(stored_end) = {type(stored_end)}',
+                                     f'Traceback: {traceback.format_exc()}')
 
-            # Store the timeseries
             self.stored_timeseries[grp] = {'start': stored_start,
                                            'end': stored_end,
                                            'df': df}
@@ -496,15 +574,16 @@ class AnalysisGui:
             grp = group_drop.value
             error_msg = f'<b>The group <i>{grp}</i> and it\'s ' \
                         f'batch jobs do not match.</b><br> '
-            with out:
-                print(er_ls)
+            if self.debug:
+                self.debug_value(-35, 'set_error_message()',
+                                 f'er_ls: {er_ls})')
             for e in er_ls:
                 error_msg += f'The batch job <b><i>{e[0]}</i></b> include <br>'
                 for index, tool_dict in e[1].items():
                     var_ls = []
                     for tool, var_ls in tool_dict.items():
                         error_msg += f'a <b><i>{tool2name_dict[tool]}</i></b> ' \
-                                     f'(tool number {int(index)+1}) with ' \
+                                     f'(tool number {int(index) + 1}) with ' \
                                      f'the variable(s): <br>'
 
                     for v in var_ls:
@@ -527,10 +606,9 @@ class AnalysisGui:
                 jobs = 'all'
 
             if self.debug:
-                with out:
-                    print('run_batch()',
-                          jobs,
-                          group_drop.value)
+                self.debug_value(-38, 'run_batch() ',
+                                 f'jobs = {jobs}',
+                                 f'group_drop.value = {group_drop.value}')
             errors = batch_validation_errors(jobs)
 
             if errors:
@@ -570,12 +648,21 @@ class AnalysisGui:
                                               'corr_plot']:
                             try:
                                 tool_result[1].show()
-                            except Exception:
-                                print('ERROR in run_batch ---- ', tool_result[0])
-                                print('ERROR in run_batch ---- ', tool_result[1])
+                            except Exception as e:
+                                if self.debug:
+                                    self.debug_value(-38, 'run_batch()  -- '
+                                                          'exception',
+                                                     f'---Exception: {e}',
+                                                     f'Errors run_batch: ',
+                                                     f'--- tool_result[0] = '
+                                                     f'{tool_result[0]}',
+                                                     f'--- tool_result[1] = '
+                                                     f'{tool_result[1]}')
                         else:
                             if self.debug:
-                                print(f'Not implemented: {tool_result[0]} ')
+                                self.debug_value(-38, 'run_batch() ',
+                                                 f'Not implemented: '
+                                                 f'{tool_result[0]} ')
                             pass
 
         def run(c=None):
@@ -587,9 +674,8 @@ class AnalysisGui:
                 clear_output()
             df = get_data()
             if self.debug:
-                print(df)
-                with out:
-                    print(type(df))
+                self.debug_value(-39, 'run() ',
+                                 f'df: {df} ')
 
             # Generating report title
             grp = group_drop.value
@@ -601,7 +687,7 @@ class AnalysisGui:
             rep_title2 = 'Data from '
             rep_title3 = ''
             if all((isinstance(x, str) for x in [stations, products, urls])):
-                rep_title2 += f'{link(urls,products)} of {stations}.'
+                rep_title2 += f'{link(urls, products)} of {stations}.'
             elif all(
                     (isinstance(x, list) for x in [stations, products, urls])) and \
                     len(stations) == len(products) and len(products) == len(urls):
@@ -621,7 +707,7 @@ class AnalysisGui:
                 for s, v in d.items():
                     rep_title2 += last_char
                     for tup in v:
-                        rep_title2 += f'{link(tup[1],tup[0])}, '
+                        rep_title2 += f'{link(tup[1], tup[0])}, '
                     rep_title2 += f' of {s}'
                     last_char = ';<br>'
                 rep_title2 += '.'
@@ -640,11 +726,11 @@ class AnalysisGui:
                 rep_title2 = f'<h2>{rep_title2}</h2><br>'
 
                 if isinstance(urls, str):
-                    rep_title3 += f'Link to data:  {link(urls,urls)}.'
+                    rep_title3 += f'Link to data:  {link(urls, urls)}.'
                 else:
                     rep_title3 += 'Links to data:  '
                     for u in urls:
-                        rep_title3 += f'{link(u,u)}.'
+                        rep_title3 += f'{link(u, u)}.'
 
             rep_title2 = f'<h3>{rep_title2}</h3>'
             report_title = rep_title1 + rep_title2 + rep_title3
@@ -714,23 +800,8 @@ class AnalysisGui:
                                  layout=common_layout,
                                  tooltip='Default is yesterday')
 
-        # tool_buttons = wd.ToggleButtons(button_style="success",
-        #                                 tooltip='settings')
-        # add_btn = wd.Button(description='Add setting',
-        #                     icon='plus',
-        #                     button_style='primary')
-        # save_btn = wd.Button(description='Save setting',
-        #                      icon='save',
-        #                      button_style='success')
-        # info_btn = wd.Button(description='Info',
-        #                      icon='fa-info-circle',
-        #                      button_style='info')
-
-        # toolbox = wd.VBox([wd.HBox([tool_buttons]), wd.VBox([save_btn, add_btn])])
-
         run_btn = wd.Button(description="Run", icon='area-chart',
                             button_style='success')  #####, layout=center_layout)
-
         out = wd.Output()
 
         if set_gui():
@@ -777,7 +848,9 @@ class AnalysisGui:
             json_handler.write(data=app_dict,
                                path_to_json_file=self.app_config_file)
         except Exception as e:
-            print(e)
+            self.debug_value(-40, '_set_app_configs **** _set_app_configs *** ',
+                             f'exception: {e} ')
+
         self.retriever.app_config_dict = app_dict
 
     def _set_cache(self,
@@ -794,43 +867,66 @@ class AnalysisGui:
                    f'<font color="DarkBlue">{url_txt}</font></a>'
 
         images_dir = os.path.join(self.code_dir, 'images')
-        start_menu_png = os.path.join(images_dir, 'start_menu.png')
+        plot_menu_png = os.path.join(images_dir, 'plot_menu.png')
         group_menu_png = os.path.join(images_dir, 'group_menu.png')
-        config_menu_png = os.path.join(images_dir, 'config_menu.png')
-        with open(start_menu_png, 'rb') as f:
-            start_img = wd.Image(value=f.read())
-            start_img.layout.height = '28px'
+        batch_menu_png = os.path.join(images_dir, 'batch_menu.png')
+        settings_menu_png = os.path.join(images_dir, 'settings_menu.png')
+        extract_menu_png = os.path.join(images_dir, 'extract_menu.png')
+        with open(plot_menu_png, 'rb') as f:
+            plot_img = wd.Image(value=f.read())
+            plot_img.layout.height = '28px'
 
         with open(group_menu_png, 'rb') as f:
             group_img = wd.Image(value=f.read())
             group_img.layout.height = '28px'
 
-        with open(config_menu_png, 'rb') as f:
-            config_img = wd.Image(value=f.read())
-            config_img.layout.height = '28px'
+        with open(batch_menu_png, 'rb') as f:
+            batch_img = wd.Image(value=f.read())
+            batch_img.layout.height = '28px'
+
+        with open(settings_menu_png, 'rb') as f:
+            settings_img = wd.Image(value=f.read())
+            settings_img.layout.height = '28px'
+
+        with open(extract_menu_png, 'rb') as f:
+            extract_img = wd.Image(value=f.read())
+            extract_img.layout.height = '28px'
 
         wide_layout = wd.Layout(width='auto', height='auto', max_width='80%')
         column_layout = wd.Layout(width='auto', height='auto', max_width='60%')
-        p_class_txt = wd.HTML()
-        p_class_txt.value = '<style> ' \
-                            '    p.line_height {line-height: 1.3; } ' \
-                            '</style>'
-        p_class = '<p class="line_height">'
-        main_txt1 = wd.HTML(disabled=True,
-                            layout=wide_layout)
-        main_txt2 = wd.HTML(disabled=True,
-                            layout=wide_layout)
-        start_txt = wd.HTML(disabled=True,
+
+        # we use a css paragraph in order to set a nice style for the rows
+        p_css = wd.HTML(value='<head>'
+                              '    <style>'
+                              '        p.line_height {line-height: 1.3; '
+                              '                       margin-left: 10px} '
+                              '    </style>'
+                              '</head>')
+        replace_str = '_replace_me_'
+        p_line = f'<p class="line_height">{replace_str}</p>'
+        top_html = wd.HTML(disabled=True,
+                           layout=wide_layout)
+        plot_html = wd.HTML(disabled=True,
                             layout=column_layout)
-        group_txt1 = wd.HTML(disabled=True,
-                             layout=column_layout)
-        group_txt2 = wd.HTML(disabled=True,
-                             layout=column_layout)
-        definition_txt = wd.HTML(disabled=True,
-                                 layout=wd.Layout(width='auto', height='auto',
-                                                  max_width='50%'))
-        config_txt = wd.HTML(disabled=True,
-                             layout=column_layout)
+        group_html1 = wd.HTML(disabled=True,
+                              layout=column_layout)
+        group_html2 = wd.HTML(disabled=True,
+                              layout=column_layout)
+        grp_defn_html = wd.HTML(disabled=True,
+                                layout=column_layout)
+        batch_html1 = wd.HTML(disabled=True,
+                              layout=column_layout)
+        batch_html2 = wd.HTML(disabled=True,
+                              layout=column_layout)
+        bat_defn_html = wd.HTML(disabled=True,
+                                layout=column_layout)
+        settings_html = wd.HTML(disabled=True,
+                                layout=column_layout)
+        extract_html = wd.HTML(disabled=True,
+                               layout=column_layout)
+        end_html = wd.HTML(disabled=True,
+                           layout=wide_layout)
+
         margin_str = '&nbsp' * 6
         margin = wd.HTML(value=margin_str)
         link_cp = link("https://data.icos-cp.eu/portal/", "ICOS Carbon Portal")
@@ -838,104 +934,260 @@ class AnalysisGui:
         mail_ad = link("mailto:anders.dahlner@nateko.lu.se",
                        "anders.dahlner@nateko.lu.se")
 
-        widgets = wd.VBox([p_class_txt,
-                           main_txt1,
-                           wd.HBox([start_img, start_txt]),
-                           wd.HBox([group_img, wd.VBox([group_txt1,
+        widgets = wd.VBox([p_css,
+                           top_html,
+                           wd.HBox([plot_img, plot_html]),
+                           wd.HBox([group_img, wd.VBox([group_html1,
                                                         wd.HBox([margin,
-                                                                 definition_txt]),
-                                                        group_txt2])
+                                                                 grp_defn_html]),
+                                                        group_html2])
                                     ]),
-                           wd.HBox([config_img, config_txt]),
-                           main_txt2])
+                           wd.HBox([batch_img, wd.VBox([batch_html1,
+                                                        wd.HBox([margin,
+                                                                 bat_defn_html]),
+                                                        batch_html2])
+                                    ]),
+                                    wd.HBox([settings_img, settings_html]),
+                           wd.HBox([extract_img, extract_html]),
+                           end_html])
 
-        main_txt1.value = f'{p_class}<br>' \
-                          'This application is aimed to ' \
-                          'assist ' \
-                          'principal investigators of ICOS Ecosystem stations ' \
-                          'to quality check and analyse NRT data. ' \
-                          'from stations.<br><br>' \
-                          '</p>'
-        start_txt.value = f'{p_class}The <i>Start</i>-menu is the ' \
-                          f'standard view of the application, basically ' \
-                          f'it is a report writer. Here the user can run ' \
-                          f'reports to produce plots and statistics on ICOS ' \
-                          f'data.<br></p>'
-        group_txt1.value = f'{p_class}In the <i>Group</i>-menu the user can ' \
-                           'create <i>groups of variables</i>.<br> '
-        definition_txt.value = f'{p_class}<i><b>Definition: </b>' \
-                               'A group of variables is a list of variables ' \
-                               'where each variable is an ingested ' \
-                               'variable<sup>1</sup> from one of the files ' \
-                               '<b>ETC NRT Fluxes</b>, <b>ETC NRT Meteo</b>,' \
-                               '<b>ETC NRT Meteosens</b>, of some ICOS ' \
-                               'station.</i><br>'
-        group_txt2.value = f'{p_class}In particular a group of variables may ' \
-                           'contain variables from different station and ' \
-                           'files.<br>' \
-                           f'<u>{margin_str}{margin_str}{margin_str}</u><br>' \
-                           '<sup>1</sup> <i>That a variable is ingested means ' \
-                           'that it is previewable at the ' \
-                           f'{link_cp}.'
+        top_text = 'This application is aimed to assist principal ' \
+                   'investigators of ICOS Ecosystem stations in the quality ' \
+                   'control and analyse NRT data. <br><br>'
+        top_html.value = p_line.replace(replace_str, top_text)
+        plot_text = 'The <b><i>Plot</i></b>-menu is the standard view of the ' \
+                    'application. This is were the user run reports in order ' \
+                    'to produce plots and statistics from the ICOS data.<br><br>'
+        plot_html.value = p_line.replace(replace_str, plot_text)
+        group_text1 = 'In the <b><i>Group</i></b>-menu the user can create ' \
+                      '<i>groups of variables</i>.<br>'
+        group_html1.value = p_line.replace(replace_str, group_text1)
+        grp_defn_text = '<i><b>Definition:</b> A group of variables is a ' \
+                        'list of variables where each variable is an ' \
+                        'ingested variable<sup>1</sup> from one of the ' \
+                        'files <b>ETC NRT Fluxes</b>, <b>ETC NRT Meteo</b>, ' \
+                        'or <b>ETC NRT Meteosens</b>, of some ICOS ' \
+                        'station.</i><br>'
+        grp_defn_html.value = p_line.replace(replace_str, grp_defn_text)
+        group_text2 = 'In particular a group of variables may ' \
+                      'contain variables from different station and ' \
+                      'files.<br>' \
+                      '<i>How</i> to set ut a group of variables are described ' \
+                      'in the <b><i>User guide</i></b> of the ' \
+                      '<b><i>Group</i></b>-menu.<br>' \
+                      f'<u>{margin_str}{margin_str}{margin_str}</u><br>' \
+                      '<sup>1</sup> <i>That a variable is ingested means ' \
+                      'that it is previewable at the ' \
+                      f'{link_cp}.<br><br>'
+        group_html2.value = p_line.replace(replace_str, group_text2)
+        batch_text1 = 'In the <b><i>Batch jobs</i></b>-menu the user create ' \
+                      '<i>batch jobs</i>. <br>'
+        batch_html1.value = p_line.replace(replace_str, batch_text1)
+        batch_defn_text = '<i><b>Definition:</b> A batch job for a group of ' \
+                          'variables, is a list of tools where each tool ' \
+                          'consist of a selection of variables from the ' \
+                          'group.<br>' \
+                          'By a tool we mean a plot-tool or a statistical ' \
+                          'tool, which is to be applied to a set of ' \
+                          'variables in order to create an output.'
+        bat_defn_html.value = p_line.replace(replace_str, batch_defn_text)
+        batch_text2 = '<i>How</i> to set ut a batch job is explained in the ' \
+                      '<b><i>User guide</i></b> of the <b><i>Batch jobs' \
+                      '</i></b>-menu.'
+        batch_html2.value = p_line.replace(replace_str, batch_text2)
+        config_text = 'In the <b><i>Configurations</i></b>-menu the user ' \
+                      'can:<br> ' \
+                      f'{margin_str} - change the <i>Default settings</i> ' \
+                      'on what data to fetch and manipulate ' \
+                      'layouts of plots.<br>' \
+                      f'{margin_str} - use the <i>Batch jobs</i> to set ' \
+                      'up sequences of outputs, i.e. plots of statistics, ' \
+                      'to produce. Here variables for the outputs are ' \
+                      'selected from a group of variables.<br><br>'
+        settings_html.value = p_line.replace(replace_str, config_text)
 
-        config_txt.value = f'{p_class}In the <i>Configurations</i>-menu the ' \
-                           'user can:<br> ' \
-                           f'{margin_str} - change the <i>Default settings</i> ' \
-                           'on what data to fetch and manipulate ' \
-                           'layouts of plots.<br>' \
-                           f'{margin_str} - use the <i>Batch jobs</i> to set ' \
-                           'up sequences of outputs, i.e. plots of statistics, ' \
-                           'to produce. Here variables for the outputs are ' \
-                           'selected from a group of variables.'
+        extract_text = 'The menu <b><i>Extract data</i></b> is a guidance ' \
+                       'on how to extract data from the tool in case a user ' \
+                       'wish to look more into details of a dataset or run ' \
+                       'tests not available in this application.<br><br>'
+        extract_html.value = p_line.replace(replace_str, extract_text)
 
-        main_txt2.value = f'<br>{p_class}For comments, questions, bug reports ' \
-                          f'or ' \
-                          'any other kind of feedback, ' \
-                          f'please feel free to contact: {mail_cp} or ' \
-                          f'{mail_ad}.</p>'
+        end_text = f'For comments, questions, suggestions, bug reports ' \
+                   f'or any other kind of feedback, please feel free to ' \
+                   f'contact: {mail_cp} or {mail_ad}.'
+        end_html.value = p_line.replace(replace_str, end_text)
+
+        display(widgets)
+
+    def _extract_data(self):
+        def link(url, url_txt) -> str:
+            return f'<a href="{url}" target="_blank">' \
+                   f'<font color="DarkBlue">{url_txt}</font></a>'
+        # we use a paragraph in order to set a nice style for the rows
+        wide_layout = wd.Layout(width='auto', height='auto', max_width='80%')
+
+        # we use a paragraph in order to set a nice style for the rows
+        replace_str = '_replace_me_'
+        p_css = wd.HTML(value='<head>'
+                              '    <style>'
+                              '        p.line_height {'
+                              '            line-height: 1.3; '
+                              '            margin-left: 10px} '
+                              '        p.tight_line_height {'
+                              '            line-height: 1.15; '
+                              '            margin-left: 30px} '
+                              '    </style>'
+                              '</head>')
+        p_line = f'<p class="line_height">{replace_str}</p>'
+        p_tight_line = f'<p class="tight_line_height">{replace_str}</p>'
+        top_html = wd.HTML(disabled=True,
+                           layout=wide_layout)
+        example_html = wd.HTML(disabled=True,
+                               layout=wide_layout)
+        end_html = wd.HTML(disabled=True,
+                           layout=wide_layout)
+
+        margin_str = '&nbsp' * 6
+        margin = wd.HTML(value=margin_str)
+        link_cp = link("https://data.icos-cp.eu/portal/", "ICOS Carbon Portal")
+        mail_cp = link("mailto:info@icos-cp.eu", "info@icos-cp.eu")
+        mail_ad = link("mailto:anders.dahlner@nateko.lu.se",
+                       "anders.dahlner@nateko.lu.se")
+
+        widgets = wd.VBox([p_css,
+                           top_html,
+                           example_html,
+                           end_html])
+
+        top_text = 'Besides from running reports as described in *<i>direction ' \
+                   'to text to come</i>*, the user can also use the app in ' \
+                   'order to extract data from the ICOS Carbon Portal. <br><br>'
+        top_html.value = p_line.replace(replace_str, top_text)
+        ex_txt1 = '<b><i>Example.</i></b><br> Suppose a user has created a ' \
+                 'group of variables called ' \
+                 '<i>fluxes</i> and a batch job called <i>my plots</i> for ' \
+                 'some variables of the group (the names themself are ' \
+                 'insignificant, but we refer to them ' \
+                 'below).<br><br>' \
+                 '<b><i>Step 1. Run.</i></b><br>' \
+                 'The user execute the code: <br>'
+        out_txt = p_tight_line.replace(replace_str, ex_txt1)
+
+        out_txt += '''<pre><code>
+        import warnings
+        warnings.simplefilter('ignore', FutureWarning)
+        from eco_tool import gui
+        g = gui.AnalysisGui(theme='ES');</code></pre>'''
+
+        ex_txt2 = '<br><b><i>Step 2. Gathering data.</i></b><br> ' \
+                  'The user select the group <i>fluxes</i> and hits the button ' \
+                  '<i>my plots</i>.<br>' \
+                  'This will display whatever output is related to the batch ' \
+                  'job <i>my plots</i>, between the ' \
+                  '<b><i>Start date</i></b> and <b><i>End date</i></b>.<br> ' \
+                  '<i><u>However</u>, in the background <b>all</b> variables of the ' \
+                  'group <b>fluxes</b> are gathered (actually they are ' \
+                  'gathered between the <b>"Fetch date"</b> and ' \
+                  '<b>End date</b>, the Fetch date is explained in ' \
+                  'the <b>Run configurations</b> under the ' \
+                  '<b>Configurations</b>-menu).</i><br><br>'
+        out_txt += p_tight_line.replace(replace_str, ex_txt2)
+
+        ex_txt3 = '<b><i>Step 3. Extracting data. </i></b><br>The user opens a ' \
+                  'new cell of the notebook and run the code: <br>'
+        out_txt += p_tight_line.replace(replace_str, ex_txt3)
+
+        out_txt += """<pre><code>
+        df = g.get_data() # or df = g.get_data('fluxes'), in case the user
+                          # have executed reports from other groups
+                          </code></pre>"""
+
+        ex_txt4 = '<br>Here <i><code>df</code></i> is an ' \
+                  '<i><code>IcosFrame</code></i>, ' \
+                  'which is a <i><code>pandas.DataFrame</code></i> together ' \
+                  'with some ICOS-metadata that can be reached using the ' \
+                  'properties: <br>'
+        out_txt += p_tight_line.replace(replace_str, ex_txt4)
+
+        out_txt += '''<pre><code>
+        icos_meta -&gt; dict
+        icos_accessUrl -&gt; str
+        icos_pid -&gt; str
+        icos_previousVersion -&gt; str
+        icos_station_name -&gt; str
+        icos_station_id -&gt; str
+        icos_station_uri -&gt; str
+        icos_product -&gt; str
+        icos_citationBibTex -&gt; str
+        icos_citationRis -&gt; str
+        icos_citationString -&gt; str
+        icos_title -&gt; str
+        icos_columns -&gt; dict
+        icos_var_unit_ls -&gt; list 
+        </pre></code>'''
+        ex_txt5 = 'Here, the user can run: <br>'
+        out_txt += p_tight_line.replace(replace_str, ex_txt5)
+        out_txt += '''<pre><code>
+                import pandas as pd
+                df = pd.Dataframe(df)
+                </pre></code>'''
+        ex_txt6 = 'in order to convert the data into an standard dataframe.<br><br>'
+        out_txt += p_tight_line.replace(replace_str, ex_txt6)
+
+        example_html.value = out_txt
+
+        end_text = f'For comments, questions, suggestions, bug reports ' \
+                   f'or any other kind of feedback, please feel free to ' \
+                   f'contact: {mail_cp} or {mail_ad}.</p>'
+        end_html.value = p_line.replace(replace_str, end_text)
 
         display(widgets)
 
     def _tool_settings(self):
         pass
 
-    def _flush_store(self, grp):
+    def _flush_store(self, group: str = None):
         """
-        When the user change a group of variables the local
-        storage of timeseries should be removed. When the
-        user change run settings the local storage should be
-        cleared.
+            Removes stored timeseries dataframe.
+            Used when the user change:
+             - a group of variables the local storage of that group.
+             - run settings the local storage should be
+            cleared.
 
-        grp: str
-            the group name
-
+            group: str
+                The group name.
+                If group is not None, all timeseries of the group are removed,
+                otherwise all timeseries are removed
         """
         if self.debug:
-            print('*** _flush_store()\n')
+            self.debug_value(-36, '_flush_store()   **** flush ****',
+                             f' -- grp = {group}')
 
-        if grp:
-            self.stored_timeseries.pop(grp, None)
+        if group:
+            self.stored_timeseries.pop(group, None)
         else:
             self.stored_timeseries.clear()
 
     def _edit_batch_jobs(self,
+                         _menu_call: bool = None,
                          _group_name: str = None,
-                         _batch_name: str = None) -> wd.VBox:
+                         _batch_name: str = None,
+                         ) -> wd.VBox:
         if self.debug:
-            print('*** _edit_batch_jobs()\n')
+            self.debug_value(-12, '_edit_batch_jobs()  *** start ***')
 
         def _get_multi_plot_auto() -> bool:
             settings = self._load_user_settings()
             multi_p_kwargs = settings.get('multi_plot_kwargs', {})
             return multi_p_kwargs.get('auto_axis', True)
 
-        def reset_batch_gui(batch_name: str = None):
+        def reset_batch_gui(reason: str, batch_name: str = None):
 
             if self.debug:
                 debug_value(1, 'reset_batch_gui()', 'step 1',
                             f'batch_name = {batch_name}')
             init_batch_drop(batch_name)
-            activate_gui('reset_gui')
+            activate_gui(action_id='reset_gui', reason=reason)
 
             if self.debug:
                 debug_value(1, 'reset_batch_gui()', '--- end ---')
@@ -983,8 +1235,7 @@ class AnalysisGui:
                 debug_value(2, f'changed_group_drop()')
             set_group_var_info()
             set_var_translation_dict()
-            init_group_var_buttons(mode='delete')
-            reset_batch_gui()
+            reset_batch_gui(reason='changed_group_drop')
 
         def set_var_translation_dict():
             """
@@ -996,8 +1247,8 @@ class AnalysisGui:
                 is not displayed.
             """
             if self.debug:
-                debug_ls = [3, f'set_var_translation_dict()']
-                debug_value(*debug_ls)
+                debug_value(3, f'set_var_translation_dict() - start -',
+                            f'group_drop.value = {group_drop.value}')
             grp = group_drop.value
             cache = self._load_cache()
             var_ls = cache['_groups'][grp]['_group_vars']
@@ -1017,12 +1268,16 @@ class AnalysisGui:
                 translation_dict[var_name] = v_ls
 
             translation_dict['Select all'] = 'All variables'
+            if self.debug:
+                debug_value(3, f'set_var_translation_dict() - end -',
+                            f'translation_dict = {translation_dict}')
             var_translation_dict.value = str(translation_dict)
 
         def init_group_var_buttons(mode: str):
             if self.debug:
-                debug_ls = [6, f'init_group_var_buttons()']
-                debug_value(*debug_ls)
+                debug_value(6, f'init_group_var_buttons() ',
+                            f' -- input mode = {mode}',
+                            f' -- var_buttons.children = {var_buttons.children}')
 
             if mode == 'create' and not var_buttons.children:
                 var_list = list(get_var_translation_dict().items())
@@ -1050,10 +1305,11 @@ class AnalysisGui:
                 for b in var_buttons.children:
                     b.icon = ''
             elif mode == 'delete':
-                for b in var_buttons.children:
-                    b.unobserve_all()
-                    b.close()
-                    del b
+                var_buttons.children = []
+            if self.debug:
+                debug_value(6, f'init_group_var_buttons() -- end --',
+                            f' -- input mode = {mode}',
+                            f' -- var_buttons.children = {var_buttons.children}')
 
         def init_batch_drop(batch_name: str = None):
             cache = self._load_cache()
@@ -1065,22 +1321,22 @@ class AnalysisGui:
                             f"cache['_groups']['{group}'] = "
                             f"{cache['_groups'][group]}")
 
-            batch_dict = cache['_groups'][group].get('_batches',{})
+            batch_dict = cache['_groups'][group].get('_batches', {})
             if self.debug:
                 debug_value(9, 'init_batch_drop()', 'step 2',
                             f'batches = {batch_dict}')
             if batch_dict:
                 batch_labels = sorted(list(batch_dict.keys()))
                 batch_drop.options = [(k, batch_dict[k]) for k in batch_labels]
-                if batch_name and batch_name in batch_dict.keys():
-                    batch_drop.value = batch_dict[batch_name]
+                if batch_name and batch_name in batch_labels:
+                    batch_drop.label = batch_name
                     changed_batch_drop('reset_batch_gui')
                 else:
-                    batch_drop.value = list(batch_dict.values())[0]
+                    batch_drop.label = batch_drop.options[0][0]
             else:
                 batch_drop.options = [('Press new...', 0)]
-                #batch_drop.value = 0
-                html_msg(text_ls=[f'Press "New", in order to create a batch '
+                batch_drop.value = 0
+                html_msg(text_ls=[f'Press <i>New</i>, in order to create a batch '
                                   f'job for the group <i>{group}</i>.'])
             if self.debug:
                 debug_value(9, 'init_batch_drop()', 'step 3',
@@ -1094,14 +1350,12 @@ class AnalysisGui:
             else:
                 batch = 0
             if self.debug:
-                debug_ls = [11, 'changed_batch_drop()', '- step 1 - batch '
-                                                        'value changed, '
-                                                        'reset displayed '
-                                                        'selections',
+                debug_value(11, 'changed_batch_drop()',
+                            '- step 1 - batch value changed, reset displayed '
+                            'selections',
                             f'c = {c}',
                             f'batch_drop.label = {batch_drop.label}',
-                            f'batch_drop.value = {batch}']
-                debug_value(*debug_ls)
+                            f'batch_drop.value = {batch}')
 
             if batch != 0:
                 batch_version = batch.pop('_version', '0')
@@ -1115,9 +1369,8 @@ class AnalysisGui:
             set_user_guide()
 
             if self.debug:
-                debug_ls = [11, 'changed_batch_drop()', '- step 2 - ',
-                            f'upd_dict_log.value = {upd_dict_log.value}']
-                debug_value(*debug_ls)
+                debug_value(11, 'changed_batch_drop()', '- step 2 - ',
+                            f'upd_dict_log.value = {upd_dict_log.value}')
 
         def reset_selection(c):
             # TODO: check what has changed and divide the update accordingly
@@ -1125,11 +1378,10 @@ class AnalysisGui:
             batch_dict = get_batch_upd_dict()
 
             if self.debug:
-                debug_ls = [13, f'reset_selection()',
+                debug_value(13, f'reset_selection()',
                             f'c = {c}',
                             f'batch_dict = {batch_dict}',
-                            f'batch_drop.value = {batch_drop.value}']
-                debug_value(*debug_ls)
+                            f'batch_drop.value = {batch_drop.value}')
 
             sel_tool_index = batch_dict.pop('_selected_tool_index', None)
             tools = batch_dict.get('_tools', {})
@@ -1147,10 +1399,9 @@ class AnalysisGui:
         def format_tool_vars(tools):
             # formatting var list to selected_var widget
             if self.debug:
-                debug_ls = [15, f'label_of_selected_var_row()',
+                debug_value(15, f'label_of_selected_var_row()',
                             f'tool_code = {tools}',
-                            f'batch_drop.value = {batch_drop.value}']
-                debug_value(*debug_ls)
+                            f'batch_drop.value = {batch_drop.value}')
 
             sel_vars = []
             if tools:
@@ -1184,12 +1435,11 @@ class AnalysisGui:
             # Sometimes we want to set the index to None,
             # this is why we have default value -1.
             if self.debug:
-                debug_ls = [16, f'set_selections()',
+                debug_value(16, f'set_selections()',
                             'step 1',
                             f'sel_tool_ls = {sel_tool_ls}',
                             f'sel_tool_index = {sel_tool_index}',
-                            f'sel_var_ls = {sel_var_ls}']
-                debug_value(*debug_ls)
+                            f'sel_var_ls = {sel_var_ls}')
 
             rows = 3 + (len(sel_tool_ls) // 2) * 2
             selected_tools.rows = rows
@@ -1209,24 +1459,23 @@ class AnalysisGui:
                 try:
                     ind = selected_tools.value
                     selected_vars.tooltip = selected_vars.options[ind][0]
-                except:
+                except Exception as e:
                     if self.debug:
-                        debug_ls = [16, f'set_selections()', 'exception',
+                        debug_value(16, f'set_selections() ---- exception',
+                                    f'--- Exception: {e}',
                                     f'selected_vars.options = '
                                     f'{selected_vars.options}',
-                                    f'ind = {selected_tools.value}']
-                        debug_value(*debug_ls)
+                                    f'ind = {selected_tools.value}')
                     selected_vars.tooltip = ''
             else:
                 selected_vars.tooltip = ''
 
             if self.debug:
-                debug_ls = [16, f'set_selections()', 'end ',
+                debug_value(16, f'set_selections()', 'end ',
                             f'selected_tools.value = {selected_tools.value}',
                             f'selected_tools.options = {selected_tools.options}',
                             f'selected_vars.options = {selected_vars.options}',
-                            f'selected_vars.tooltip = {selected_vars.tooltip}']
-                debug_value(*debug_ls)
+                            f'selected_vars.tooltip = {selected_vars.tooltip}')
 
         def changed_selected_tool(c):
             # Triggered when a tool is selected,
@@ -1292,32 +1541,34 @@ class AnalysisGui:
 
             if self.debug:
                 debug_value(129, f'set_info_guide()',
-                            f'info_type = {info_type}')
+                            f' -- info_type = {info_type}')
 
             if info_type == 'reset_gui':
                 msg_ls = ['<b>You are in <i>read mode</i>.</b> '
-                          'Either select a group of variables or a ' 
-                          'batch job, and choose <i>New</i>, or <i>Update</i>.']
+                          'Either select a group of variables or a '
+                          'batch job, and choose <b><i>New</i></b>, '
+                          'or <b><i>Update</i></b>. For more guidance, '
+                          'please check the <b><i>User guide</i></b>.']
             else:
                 msg_ls = ['<b>You are in <i>update mode</i>.</b> ']
                 if info_type == 'new':
                     msg_ls.extend(['To create a new batch job: ',
-                                  '1. Choose at least one tool from the '
-                                  'list of <i>Available tools</i>, and add some '
-                                  'variables to it.',
+                                   '1. Choose at least one tool from the '
+                                   'list of <i>Available tools</i>, and '
+                                   'add some variables to it.',
                                    '2. Choose a name for the batch job. '])
                 elif name_of_batch_job.value == 'Name of batch job':
                     msg_ls.append('Remember to choose a name for the '
                                   'batch job in the above area <b><i>Batch '
-                                  'name<b></i>.')
+                                  'name</i></b>.')
                 if info_type == 'update':
                     msg_ls.extend(['<b><i>To edit</i></b> the content of a tool: '
-                                  'Select the tool to in the list above, '
-                                  'and use the variable buttons to add or '
-                                  'remove them from the tool.',
-                                  '<b><i>To delete</i></b> the batch job, just press '
-                                  '<b><i>Delete</i></b> without changing the '
-                                  'content.'])
+                                   'Select the tool to in the list above, '
+                                   'and use the variable buttons to add or '
+                                   'remove them from the tool.',
+                                   '<b><i>To delete</i></b> the batch job, just press '
+                                   '<b><i>Delete</i></b> without changing the '
+                                   'content.'])
                 elif info_type == 'multi_plot':
                     msg_ls.extend(['<b><i>Multi-plot</i></b> selected. ',
                                    'With a multi-plot you can plot several '
@@ -1357,6 +1608,9 @@ class AnalysisGui:
                                    f'selected. <b>Please note that this tools is '
                                    f'not implemented at this moment. </b>',
                                    'No restriction on the variables.'])
+                if self.debug:
+                    self.debug_value(129, f'set_info_guide()  --- end ---',
+                                     f' msg_lse = {msg_ls}')
 
             info_guide.value = '<br>'.join(msg_ls)
 
@@ -1364,12 +1618,14 @@ class AnalysisGui:
             if user_guide_container.layout.display == 'block':
                 d = get_batch_upd_dict().get('_upd_mode', {'_upd_mode': ''})
                 if d['_upd_mode'] == 'read_mode_no_batch':
-                    user_guide.value = '<b>To create a batch job:</b><br>' \
+                    user_guide.value = '<H3><b>To create a batch ' \
+                                       'job:</b></H3><br>' \
                                        '1. Choose a group of variables. ' \
                                        '2. Press <i>New</i> and follow the ' \
                                        'directions.'
                 elif d['_upd_mode'] == 'read_mode_with_batch':
-                    user_guide.value = '<b>To create a batch job:</b><br>' \
+                    user_guide.value = '<H3><b>To create a batch job:</b></H3>' \
+                                       '<br>' \
                                        '1. Choose a group of variables.<br>' \
                                        '2. Press <i>New</i> and follow the ' \
                                        'directions.<br>' \
@@ -1503,9 +1759,8 @@ class AnalysisGui:
         def move_selected(move_click):
             index = selected_tools.value
             if self.debug:
-                debug_ls = [113, f'move_selected() click',
-                            f'tool index = {index}']
-                debug_value(*debug_ls)
+                debug_value(113, f'move_selected() click',
+                            f'tool index = {index}')
 
             if index is not None:
                 upd_dict = get_batch_upd_dict()['_tools']
@@ -1596,19 +1851,17 @@ class AnalysisGui:
             upd_dict = get_batch_upd_dict()['_tools']
             row_index = selected_tools.value
             if self.debug:
-                debug_ls = [116, f'var_button_click()',
+                debug_value(116, f'var_button_click()',
                             f'btn.description = {btn.description}',
                             f'selected_tools.value = {row_index}',
                             f'before:'
-                            f' - upd_dict[row_index] = {upd_dict[row_index]}']
-                debug_value(*debug_ls)
+                            f' - upd_dict[row_index] = {upd_dict[row_index]}')
 
             for tool_code, upd_var_codes in upd_dict[row_index].items():
                 if self.debug:
-                    debug_ls = [116, f'var_button_click() ***',
+                    debug_value(116, f'var_button_click() ***',
                                 f'tool_code = {tool_code}',
-                                f'upd_var_codes = {upd_var_codes}']
-                    debug_value(*debug_ls)
+                                f'upd_var_codes = {upd_var_codes}')
                 var_trans_dict = get_var_translation_dict()
                 var_name = btn.description
                 var_code = var_trans_dict[var_name]
@@ -1624,11 +1877,10 @@ class AnalysisGui:
                         upd_var_codes.append(var_code)
                 elif tool_code == 'multi_plot':
                     if self.debug:
-                        debug_ls = [116, f'var_button_click()**** * * * ***',
+                        debug_value(116, f'var_button_click() ****',
                                     f'tool_code = {tool_code}',
                                     f'multi_plot_auto_cb.value = '
-                                    f'{multi_plot_auto_cb.value}']
-                        debug_value(*debug_ls)
+                                    f'{multi_plot_auto_cb.value}')
                     unit = var2unit(var_code)
                     if multi_plot_auto_cb.value:
                         axis_of_var = None
@@ -1691,41 +1943,26 @@ class AnalysisGui:
                     upd_var_codes = [y for y in upd_var_codes if y[1]]
                     multi_plot_auto_cb.disabled = (len(upd_var_codes) == 2)
                     if self.debug:
-                        debug_ls = [116, f'var_button_click()',
+                        debug_value(116, f'var_button_click()',
                                     f'tool_code = {tool_code}',
                                     f'multi_plot_auto_cb.value = '
-                                    f'{multi_plot_auto_cb.value}']
-                        debug_value(*debug_ls)
+                                    f'{multi_plot_auto_cb.value}')
 
                 upd_dict[row_index] = {tool_code: upd_var_codes}
                 if self.debug:
-                    debug_ls = [116, f'var_button_click()',
+                    debug_value(116, f'var_button_click()',
                                 f'after:',
-                                f' - upd_dict[row_index] = {upd_dict[row_index]}']
-                    debug_value(*debug_ls)
+                                f' - upd_dict[row_index] = '
+                                f'{upd_dict[row_index]}')
 
                 update_batch_dict(dict(_tools=upd_dict,
                                        _selected_tool_index=row_index))
-
-        # def selections2batch_dict() -> dict:
-        #     if self.debug:
-        #         debug_ls = [117, f'selections2batch_dict()']
-        #         debug_value(*debug_ls)
-        #
-        #     d = dict()
-        #     t_ls = selected_tools.options
-        #     v_ls = [v[1][1] for v in selected_vars.options]
-        #     ind = range(len(t_ls))
-        #     d['_tools'] = {k: {name2tool_dict[t_ls[k][0]]: v_ls[k]} for k in
-        #     ind}
-        #     d['_selected_tool_index'] = selected_tools.index
-        #     return d
 
         def get_var2unit_dict():
             if self.debug:
                 debug_value(32, f'get_var2unit_dict()')
             d = eval(var_to_unit_dict.value)
-            if not(d and isinstance(d, dict)):
+            if not (d and isinstance(d, dict)):
                 d = self._load_app_configs().get('_var2unit_map', {})
                 var_to_unit_dict.value = str(d)
             return d
@@ -1752,8 +1989,7 @@ class AnalysisGui:
         def set_group_var_info():
             cache = self._load_cache()
             if self.debug:
-                debug_ls = [4, f'set_group_var_info()']
-                debug_value(*debug_ls)
+                debug_value(4, f'set_group_var_info()')
 
             if isinstance(cache, dict):
                 grp = group_drop.value
@@ -1780,8 +2016,7 @@ class AnalysisGui:
         def get_group_var_info_text(upd_mode):
             cache = self._load_cache()
             if self.debug:
-                debug_ls = [5, f'get_group_var_info_text()']
-                debug_value(*debug_ls)
+                debug_value(5, f'get_group_var_info_text()')
 
             grp = group_drop.value
             if grp not in cache['_groups'].keys():
@@ -1841,27 +2076,14 @@ class AnalysisGui:
             return return_val
 
         def debug_value(*text_list):
-
-            caller_id = None
-            if text_list:
-                if isinstance(text_list[0], int):
-                    caller_id, *text_list = text_list
-
-            msg = self.debugger.debug_value(*text_list,
-                                            external_id=caller_id,
-                                            stack_start=2,
-                                            stack_depth=5)
-            if self.debug:
-                with debug_out:
-                    display(wd.HTML(msg))
+            self.debug_value(*text_list)
 
         def html_msg(text_ls: list = None,
                      title: str = None,
                      error: bool = None,
-                     show_user_guide: bool =None):
+                     show_user_guide: bool = None):
             if self.debug:
-                debug_ls = [118, f'html_msg()']
-                debug_value(*debug_ls)
+                debug_value(118, f'html_msg()')
 
             margin = '&nbsp' * 6  # html space
 
@@ -1883,23 +2105,25 @@ class AnalysisGui:
             if isinstance(text_ls, list):
                 msg += f'<h3>{margin}'
                 msg += f'<br>{margin}'.join(text_ls)
-                msg += '</h3></span>'
-            if show_user_guide:
+                msg += '</h3>'
+            msg += '</span>'
+            if user_guide.value:
+                user_guide.value += f'<br>{msg}'
+            else:
                 user_guide.value = msg
+            if show_user_guide:
+                user_guide.layout.display = 'block'
             with out:
                 clear_output()
                 display(wd.HTML(msg))
-
-        def html_error_msg(error_ls: list = None):
-            if self.debug:
-                debug_value(119, f'html_error_msg()')
-            html_msg(text_ls=error_ls, error=True)
 
         def set_info_msg(error_ls=None):
             upd_dict = get_batch_upd_dict()
             upd_mode = upd_dict.get('_upd_mode', None)
             grp = group_drop.value
-
+            if self.debug:
+                debug_value(130, 'set_info_msg()', f'upd_mode = {upd_mode}',
+                            f'grp = {grp}')
             if upd_mode == 'new':
                 index = upd_dict['_selected_tool_index']
                 index = str(index)
@@ -1967,7 +2191,8 @@ class AnalysisGui:
             if info_ls:
                 info_color = self.widget_style_colors['primary:active']
                 msg = f'<span style="color:{info_color}">{margin}{margin}<h4>' \
-                      f'{info_ls[0]}</h4><b>'
+                      f'{info_ls[0]}</h4>' \
+                      f'<b>'
 
                 for row in info_ls[1:]:
                     msg += f'{margin}{row}<br>'
@@ -1978,8 +2203,11 @@ class AnalysisGui:
             if error_ls:
                 warning_emoji = '\u26a0\ufe0f'
                 error_color = self.widget_style_colors['danger:active']
-                msg += f'<br><span style="color:{error_color}">{margin}{margin}'
-                msg += f'<h3>To do: {warning_emoji}</h3><b>'
+                if msg:
+                    msg += '<br>'
+                msg += f'<span style="color:{error_color}">{margin}{margin}'
+                msg += f'<h3>To do: {warning_emoji}</h3>'
+                msg += f'<b>'
                 for error in error_ls:
                     msg += f'{margin}{error}<br>'
                 msg += '</b></span>'
@@ -2052,7 +2280,8 @@ class AnalysisGui:
         def batch_name_changed(change):
             if self.debug:
                 debug_value(122, f'batch_name_changed()',
-                            f'change = {change}')
+                            f'change = {change}',
+                            f'name = {change.owner.value}')
 
             if change.type == 'change':
                 new_name = change.owner.value
@@ -2139,11 +2368,10 @@ class AnalysisGui:
                 if b in cache['_groups'][grp]['_var_mismatch'].keys():
                     er_dict = cache["_groups"][grp]["_var_mismatch"][b]
                     if self.debug:
-                        debug_ls = [128, f'validate_batch()',
+                        debug_value(128, f'validate_batch()',
                                     f'batch_drop.label = {batch_drop.label}',
                                     f'batch_drop.value = {batch2validate}',
-                                    f'er_dict = {er_dict}']
-                        debug_value(*debug_ls)
+                                    f'er_dict = {er_dict}')
 
                     reindex = False
                     for index, tool_vars in er_dict.items():
@@ -2160,7 +2388,7 @@ class AnalysisGui:
                                         if v in val:
                                             val.remove(v)
                                             if tool == 'corr_plot':
-                                                val=[]
+                                                val = []
                                     if not val:
                                         batch2validate.pop(index)
                                         reindex = True
@@ -2190,8 +2418,7 @@ class AnalysisGui:
                         '_selected_tool_index': None}
 
             if self.debug:
-                debug_ls = [124, 'new_batch()', f'upd_dict = {upd_dict}']
-                debug_value(*debug_ls)
+                debug_value(124, 'new_batch()', f'upd_dict = {upd_dict}')
 
             set_batch_upd_dict(upd_dict)
             name_of_batch_job.value = "Name of batch job"
@@ -2199,10 +2426,9 @@ class AnalysisGui:
 
         def update_batch(c):
             if self.debug:
-                debug_ls = [125, f'update_batch()',
+                debug_value(125, f'update_batch()',
                             f'batch_drop.label = {batch_drop.label}',
-                            f'batch_drop.value = {batch_drop.value}']
-                debug_value(*debug_ls)
+                            f'batch_drop.value = {batch_drop.value}')
 
             stored_batch = get_valid_batch()
             batch_version = int(stored_batch.pop('_version', 1))
@@ -2210,7 +2436,7 @@ class AnalysisGui:
                              _version=batch_version,
                              _tools=stored_batch,
                              _orig_name=batch_drop.label,
-                             _new_name= batch_drop.label,
+                             _new_name=batch_drop.label,
                              _selected_tool_index=None)
             name_of_batch_job.value = batch_drop.label
             set_batch_upd_dict(batch_upd)
@@ -2227,7 +2453,8 @@ class AnalysisGui:
             batches = cache['_groups'][grp].get('_batches', {})
 
             if self.debug:
-                debug_value(125, 'save_batch()', f'upd_dict = {upd_dict}')
+                debug_value(125, 'save_batch()',
+                            f'upd_dict = {upd_dict}')
 
             error_ls = validate_name(b_name)
             tool_dict, _ = cleanup_tools(upd_dict.get('_tools', {}))
@@ -2236,7 +2463,7 @@ class AnalysisGui:
                 error_ls.append('Please choose some tool and variables.')
 
             if error_ls:
-                html_error_msg(error_ls)
+                html_msg(text_ls=error_ls, error=True)
             else:
                 with out:
                     clear_output()
@@ -2248,8 +2475,7 @@ class AnalysisGui:
                 batches.pop(old_batch, None)
                 batches[b_name] = config
                 if self.debug:
-                    debug_ls = [20, 'save_batch()', f'batches = {batches}']
-                    debug_value(*debug_ls)
+                    debug_value(20, 'save_batch()', f'batches = {batches}')
 
                 cache['_groups'][grp]['_batches'] = batches
                 d = cache['_groups'][grp]
@@ -2260,13 +2486,12 @@ class AnalysisGui:
                 else:
                     cache['_groups'][grp].pop('_var_mismatch', None)
                 self._set_cache(cache_dict=cache)
-                reset_batch_gui(batch_name=b_name)
+                reset_batch_gui(reason='saved_batch', batch_name=b_name)
 
         def cancel_batch(c):
             if self.debug:
                 debug_value(126, 'cancel_batch()')
-
-            reset_batch_gui()
+            reset_batch_gui(reason='cancel_batch_upd')
 
         def delete_batch(c):
 
@@ -2276,31 +2501,28 @@ class AnalysisGui:
 
             b_name = upd_dict['_new_name']
             if self.debug:
-                debug_ls = [127, 'delete_batch()',
+                debug_value(127, 'delete_batch()',
                             f'b_name = {b_name}',
-                            f'batch_drop.label = {batch_drop.label}']
-                debug_value(*debug_ls)
+                            f'batch_drop.label = {batch_drop.label}')
 
-            error_ls = []
+            validation_error_ls = []
             if upd_dict['_orig_name'] != b_name:
-                error_ls.append('  - Name changed')
+                validation_error_ls.append('  - Name changed.')
             if upd_dict['_tools'] != orig_tools:
-                error_ls.append('  - Change of tools or variables')
-            if error_ls:
-                error_ls.insert(0, 'Deletion error:')
-                error_ls.insert(1, 'To delete a batch job, just choose '
-                                   'update and then delete - without '
-                                   'changing it\'s content.')
-                error_ls.insert(-1, 'Suggestion to delete: Press Cancel, '
-                                    'Update and '
-                                    'Delete')
+                validation_error_ls.append('  - Change of tools or variables.')
+            if validation_error_ls:
+                error_ls = ['Deletion error:',
+                            'To delete a batch job, just choose update '
+                            "and then delete - without changing it\'s content."]
+                error_ls.extend(validation_error_ls)
+                error_ls.append('Suggestion to delete: Press Cancel, '
+                                'Update and Delete')
                 html_msg(text_ls=error_ls, error=True)
                 if self.debug:
                     debug_value(127, f'delete_batch()  --error-- ',
                                 f'error_ls = {error_ls}',
                                 f'orig_tools:  {orig_tools}',
                                 f"upd_dict['_tools']: {upd_dict['_tools']}")
-
                 return
             else:
                 grp = group_drop.value
@@ -2320,17 +2542,16 @@ class AnalysisGui:
                 if self.debug:
                     debug_value(127, f'delete_batch() ',
                                 f'deleted: {b_name}')
-                reset_batch_gui()
+                reset_batch_gui(reason='delete_batch')
 
-        def clear_debug_list(c):
-            with debug_out:
-                clear_output()
+        #        def clear_debug_list(c):
+        #            with debug_out:
+        #                clear_output()
 
         def display_user_guide(c):
             if c == 'display_guide':
                 user_guide_container.selected_index = 0
                 user_guide_container.layout.display = 'block'
-                set_info_msg()
             elif user_guide_container.layout.display == 'none':
                 user_guide_container.layout.display = 'block'
                 set_info_msg()
@@ -2338,10 +2559,11 @@ class AnalysisGui:
                 user_guide_container.layout.display = 'none'
 
         # activate/deactivate upd-widgets
-        def activate_gui(action_id: str):
+        def activate_gui(action_id: str, reason: str = None):
             if self.debug:
                 debug_value(10, 'activate_gui()',
-                            f'action_id = {action_id}')
+                            f'action_id = {action_id}',
+                            f'reason = {reason}')
 
             def set_widget_state(wd_input, disable: bool = None,
                                  tooltip: str = None, show_widget: bool = None):
@@ -2402,9 +2624,11 @@ class AnalysisGui:
                                  disable=False,
                                  tooltip='Cancel...')
 
-                if self.debug:
-                    debug_value(9999, 999, action_id, save_btn.disabled,
-                                delete_btn.disabled, delete_btn)
+                debug_value(10, 'activate_gui() - upd 1',
+                            f'action_id = {action_id}',
+                            f'save_btn.disabled = {save_btn.disabled}',
+                            f'delete_btn.disabled = '
+                            f'{delete_btn.disabled}')
                 if action_id == 'update':
                     delete_btn.disabled = False
                     delete_btn.tooltip = 'Click to delete...'
@@ -2416,12 +2640,18 @@ class AnalysisGui:
                     selected_vars.value = None
                     selected_vars.options = []
                 if self.debug:
-                    debug_value(99999, 9999, action_id, save_btn.disabled,
-                                delete_btn.disabled, delete_btn)
+                    debug_value(10, 'activate_gui() - upd 2',
+                                f'action_id = {action_id}',
+                                f'save_btn.disabled = {save_btn.disabled}',
+                                f'delete_btn.disabled = '
+                                f'{delete_btn.disabled}')
 
             elif action_id == 'reset_gui':
                 # read mode
-                init_group_var_buttons(mode='reset')
+                if reason == 'changed_group_drop':
+                    init_group_var_buttons(mode='delete')
+                else:
+                    init_group_var_buttons(mode='reset')
 
                 try:
                     name_of_batch_job.unobserve(batch_name_changed, 'value')
@@ -2438,7 +2668,6 @@ class AnalysisGui:
                     upd_btn.disabled = True
                     upd_btn.tooltip = 'No batch job to update...'
                 else:
-                    # changed_batch_drop('reset_batch_gui')
                     upd_btn.disabled = False
                     upd_btn.tooltip = 'Update batch job...'
 
@@ -2457,7 +2686,6 @@ class AnalysisGui:
 
         # Widgets
         out = wd.Output()
-        debug_out = wd.Output()
 
         # layouts
         drop_layout = wd.Layout(width='auto',
@@ -2498,8 +2726,8 @@ class AnalysisGui:
         if not group_drop.options:
             display(out)
             if self.debug:
-                display(debug_out)
-                debug_value(999, '--- There are no groups. ---')
+                self.debug_value(-12, '_edit_batch_jobs()  *** init ***',
+                                 '--- There are no groups. ---')
             html_msg(text_ls=['First you need to create a group of ',
                               'variables using the "Group menu".'])
             return wd.VBox([out])
@@ -2522,35 +2750,40 @@ class AnalysisGui:
         # 2:nd row update-buttons
         new_btn = wd.Button(description='New',
                             icon='plus',
-                            button_style='primary')
+                            button_style='primary',
+                            layout=wd.Layout(width='100px'))
         new_btn.on_click(new_batch)
 
         upd_btn = wd.Button(description='Update',
                             icon='pen',
-                            button_style='info')
+                            button_style='info',
+                            layout=wd.Layout(width='100px'))
         upd_btn.on_click(update_batch)
         save_btn = wd.Button(description='Save',
                              icon='save',
-                             button_style='success')
+                             button_style='success',
+                             layout=wd.Layout(width='100px'))
         save_btn.on_click(save_batch)
         cancel_btn = wd.Button(description='Cancel',
                                icon='ban',
-                               button_style='info')
+                               button_style='info',
+                               layout=wd.Layout(width='100px'))
         cancel_btn.on_click(cancel_batch)
         delete_btn = wd.Button(description='Delete',
                                icon='trash',
-                               button_style='danger')
+                               button_style='danger',
+                               layout=wd.Layout(width='100px'))
         delete_btn.on_click(delete_batch)
         user_guide_btn = wd.Button(description='User guide',
                                    disabled=False,
                                    icon='fa-info-circle',
                                    button_style='info',
-                                   tooltip='Show user guide...')
+                                   tooltip='Show user guide...',
+                                   layout=wd.Layout(width='100px'))
         user_guide_btn.on_click(display_user_guide)
 
-        create_buttons = wd.HBox([new_btn, upd_btn], layout=flex_layout)
-        save_buttons = wd.HBox([save_btn, cancel_btn, delete_btn],
-                               layout=flex_layout)
+        create_buttons = wd.HBox([new_btn, upd_btn])
+        save_buttons = wd.HBox([save_btn, cancel_btn, delete_btn])
         row_list.append(wd.HBox([create_buttons, save_buttons, user_guide_btn],
                                 layout=flex_layout))
 
@@ -2642,19 +2875,16 @@ class AnalysisGui:
         set_group_value(group=_group_name)
 
         row_list.append(out)
-        if self.debug:
-            debug_btn = wd.Button(description='Clear debug list')
-            debug_btn.on_click(clear_debug_list)
-            row_list.append(debug_btn)
-            row_list.append(debug_out)
-
         return_widget = wd.VBox(row_list)
 
-        return return_widget
+        if _menu_call:
+            display(return_widget)
+        else:
+            return return_widget
 
     def _default_settings(self):
         if self.debug:
-            print('*** _user_configurations()\n')
+            self.debug_value(-10, '_default_settings   *** start ***')
 
         def init_general_settings():
             # set general values
@@ -2741,14 +2971,15 @@ class AnalysisGui:
             cancel_btn.disabled = True
             save_btn.disabled = True
 
-        def latex_changed(c = None):
+        def latex_changed(c=None):
             latex = icos2latex.Translator(use_exp=latex_use_exp_cb.value,
                                           font_size=latex_font_size.value,
                                           font_style=latex_font_style.value)
-            tex_str = '$\\qquad $ '*3 + \
+            tex_str = '$\\qquad $ ' * 3 + \
                       latex.var_unit_to_latex(var_unit=("CO2", "\u00b5mol mol-1"))
             if self.debug:
-                print('latex_changed()', f'tex_str = {tex_str}')
+                self.debug_value(-11, 'latex_changed()',
+                                 f'tex_str = {tex_str}')
 
             with latex_output_area:
                 clear_output()
@@ -2828,7 +3059,7 @@ class AnalysisGui:
             return f'<a href="{url}" target="_blank">' \
                    f'<font color="DarkBlue">{url_txt}</font></a>'
 
-        # plotly color-scales
+        # lists of plotly: color-scales, templates, text-fonts, and text-sizes
         plotly_color_scales = ['aggrnyl', 'agsunset', 'blackbody', 'bluered',
                                'blues', 'blugrn', 'bluyl', 'brwnyl', 'bugn',
                                'bupu', 'burg', 'burgyl', 'cividis',
@@ -2868,9 +3099,9 @@ class AnalysisGui:
                                  "Plotly template")
         plotly_templ_ref = f'The background color can be changed by switching ' \
                            f'the <b><i>{plotly_templ_href}</i></b>.<br>'
-        height_or_width_min = 'Setting <b><i>Height</i></b> or '\
-                              '<b><i>Width</i></b> to a value below '\
-                              '200 will lead to plotly default '\
+        height_or_width_min = 'Setting <b><i>Height</i></b> or ' \
+                              '<b><i>Width</i></b> to a value below ' \
+                              '200 will lead to plotly default ' \
                               'value. '
 
         # common label widgets
@@ -2903,10 +3134,11 @@ class AnalysisGui:
         save_btn = wd.Button(description='Save',
                              icon='save',
                              button_style='danger',
-                             )
+                             layout=wd.Layout(width='100px'))
         cancel_btn = wd.Button(description='cancel',
                                icon='cancel',
-                               button_style='info')
+                               button_style='info',
+                               layout=wd.Layout(width='100px'))
         save_btn.on_click(save_general_settings)
         cancel_btn.on_click(cancel_general_settings)
         save_cancel_box = wd.HBox([save_btn,
@@ -2918,13 +3150,19 @@ class AnalysisGui:
         def_settings_guide = wd.HTML(value='<span>Here you can modify certain '
                                            'settings such as: what data to use, '
                                            'visualizations of different plots '
-                                           'and texts. <br><i>Please note</i> '
-                                           'that '
+                                           'and texts. <br>'
+                                           '<b><i>Please note</i></b> that '
                                            'the <b>Save</b>-button below is '
                                            'enabled when a value is '
-                                           'changed and the user press &lttab&gt '
-                                           'or clicks outside the widget holding '
-                                           'the value.</span')
+                                           'changed and the user press '
+                                           '<it><b>&lttab&gt</b> or <b>clicks '
+                                           'outside</b> the widget holding '
+                                           'the value</it>.<br>'
+                                           'Also, if you find problems '
+                                           'related to any of these settings, '
+                                           'do not hesitate to report this '
+                                           'according to the description in the '
+                                           '<it>Help</it> menu.</span>')
 
         run_settings_guide = wd.HTML(value='<span><b>Guide:</b><br>'
                                            'When the user start the '
@@ -2937,10 +3175,10 @@ class AnalysisGui:
                                            'based on values measured '
                                            'between the <i>start</i> '
                                            'and the <i>end dates</i>, '
-                                           'displayed in the <b>Start</b> '
+                                           'displayed in the <b>Plot</b> '
                                            'menu. '
                                            'Of course, the dates displayed in '
-                                           'the start menu can be changed '
+                                           'the plot menu can be changed '
                                            'for each run. '
                                            'Here, you can modify the '
                                            '<i>default method on how to '
@@ -2961,8 +3199,8 @@ class AnalysisGui:
                                            'dates in a second run, the data '
                                            'between the fetch date and the end '
                                            'date of the first run will already '
-                                           'be in RAM.'
-                                           )
+                                           'be in RAM. </span>'
+                                     )
         auto_run_label = wd.HTML(value='<b>Auto-run</b>')
         auto_run_cb = wd.Checkbox(value=True,
                                   disabled=False,
@@ -3030,7 +3268,7 @@ class AnalysisGui:
         latex_font_style_label = wd.HTML('<b>Font style: </b>',
                                          layout=label_layout)
         latex_font_style = wd.Dropdown(options=[('Default', 'Default'),
-                                                 ('Roman (serifs)', 'rm'),
+                                                ('Roman (serifs)', 'rm'),
                                                 ('Sans Serif (no serifs)', 'sf'),
                                                 ('Italic (serifs)', 'it'),
                                                 ('Typewriter (serifs)', 'tt'),
@@ -3346,8 +3584,8 @@ class AnalysisGui:
         observe_ordinary_ls.append(corr_t_title_size)
         observe_ordinary_ls.append(corr_t_subtitle_size)
 
-        statistics_guide = wd.HTML(value='<span><b>Guide:</b><br>...............'
-                                         '.............')
+        statistics_guide = wd.HTML(value='<span><b>Guide:</b><br>'
+                                         '<it>To be implemented</it>.</span>')
         statistics_settings = wd.Accordion(children=[statistics_guide],
                                            titles=('Numerical statistics '
                                                    'settings',))
@@ -3365,7 +3603,7 @@ class AnalysisGui:
 
         return return_widget
 
-    def _user_configurations(self):
+    def _configurations_menu(self):
         general_accordion = wd.Accordion(children=[self._default_settings()],
                                          titles=('Default settings',))
         batch_accordion = wd.Accordion(children=[self._edit_batch_jobs()],
@@ -3373,13 +3611,14 @@ class AnalysisGui:
         out = wd.Output()
         display(general_accordion, batch_accordion, out)
 
-    def _edit_group_variables(self):
+    def _group_menu(self):
         if self.debug:
-            print('*** _edit_group_variables()\n')
+            self.debug_value(-12, '_group_menu()   *** start ***')
 
         def update_cache(group_dict):
             if self.debug:
-                print('update_cache()', group_dict)
+                self.debug_value(-13, 'update_cache()',
+                                 f'group_dict = {group_dict}')
 
             # Structure of group_dict
             # group_dict = {'_upd_mode': 'new'| 'update'| 'delete',
@@ -3510,7 +3749,7 @@ class AnalysisGui:
 
         def set_station_drop():
             if self.debug:
-                print('set_station_drop()')
+                self.debug_value(-14, 'set_station_drop()')
 
             station_ls = get_station_list()
 
@@ -3551,55 +3790,52 @@ class AnalysisGui:
 
             spec_drop_ls = list(zip(spec_ls, dobj_ls))
             spec_drop_ls.sort(key=lambda v: v[0].lower())
-            spec_drop.options = spec_drop_ls
+            product_drop.options = spec_drop_ls
 
             if change == 'new':
-                spec_drop.value = spec_drop.options[0][1]
+                product_drop.value = product_drop.options[0][1]
             elif change == 'update':
                 grp = group_drop.value
                 last_spec_in_var_list = cache['_groups'][grp]['_group_vars'][
                     -1][1]
-                spec_drop.value = [y[1] for y in spec_drop_ls if
+                product_drop.value = [y[1] for y in spec_drop_ls if
                                    y[0] == last_spec_in_var_list].pop()
             elif isinstance(change, dict) and change['new']:
                 grp = change['new']
                 try:
                     last_spec_in_var_list = cache['_groups'][grp][
                         '_group_vars'][-1][1]
-                    spec_drop.value = [y[1] for y in spec_drop_ls if
+                    product_drop.value = [y[1] for y in spec_drop_ls if
                                        y[0] == last_spec_in_var_list].pop()
                 except:
                     pass
             else:
-                spec_drop.value = spec_drop.options[0][1]
+                product_drop.value = product_drop.options[0][1]
 
-            if not spec_drop.value:
-                spec_drop.value = spec_drop.options[0][1]
+            if not product_drop.value:
+                product_drop.value = product_drop.options[0][1]
 
         def set_var_drop(change):
-
             if self.debug:
-                print('set_var_drop()')
+                self.debug_value(-15, 'set_var_drop()')
 
             # Menu of variables to show some info of a variable
-            if spec_drop.value == 'dummy':
+            if product_drop.value == 'dummy':
                 var_drop.options = [('Variables...', 'dummy')]
                 var_drop.value = var_drop.options[0][1]
             else:
-                pid = spec_drop.value
+                pid = product_drop.value
                 var_dict = icos_data.StationData.icos_pid2meta(pid)['columns']
                 var_ls = sorted([key for key in var_dict.keys() if key not in
                                  ['TIMESTAMP', 'TIMESTAMP_END']])
                 var_info = [var_dict[key] for key in var_ls]
-                if self.debug:
-                    print(' - list(zip(var_ls, var_info)) = ',
-                          list(zip(var_ls, var_info)))
                 var_drop.options = list(zip(var_ls, var_info))
                 var_drop.value = var_drop.options[0][1]
 
         def set_var_info_text(change):
             if self.debug:
-                print('\nset_var_info_text()\nchange: ', change)
+                self.debug_value(-16, 'set_var_info_text()',
+                                 f'change: {change}')
 
             # Show info of a variable
             if isinstance(change, dict):
@@ -3617,10 +3853,12 @@ class AnalysisGui:
                     #             if x[0] == var_name].pop()
                     var_drop.label = var_name
                     if self.debug:
-                        print(f' - var_drop.options = {var_drop.options},'
-                              f'\n- var_dict = {var_dict} ',
-                              f'\n- change["owner"].description = '
-                              f'{change["owner"].description} ')
+                        self.debug_value(-16, 'set_var_info_text()',
+                                         f' - var_drop.options = '
+                                         f'{var_drop.options}',
+                                         f' - var_dict = {var_dict} ',
+                                         f' - change["owner"].description = '
+                                         f'{change["owner"].description}')
                 else:
                     return
 
@@ -3661,7 +3899,9 @@ class AnalysisGui:
         def set_group_drop(change):
             cache = self._load_cache()
             if self.debug:
-                print('set_group_drop()', cache.keys())
+                self.debug_value(-17, 'set_group_drop() ',
+                                 f' - cache.keys()  = '
+                                 f'{cache.keys()}')
 
             # load from cache
             group_ls = list(cache['_groups'].keys())
@@ -3682,22 +3922,20 @@ class AnalysisGui:
 
         def get_group_var_text(upd_mode):
             if self.debug:
-                print('get_group_var_text()\tmode: ', upd_mode)
+                self.debug_value(-18, 'get_group_var_text() ',
+                                 f' - upd_mode  = {upd_mode}')
 
             if upd_mode:
                 upd_dict = get_temp_dict()
                 var_tuples = copy.deepcopy(upd_dict['_var_list'])
                 text_tag = 'i'
-                separator = ' || '
-                margin = '&nbsp' * 42
-                t1 = f'<{text_tag}>Variables in update mode: </{text_tag}>'
+                margin = ''
+                t1 = ''
             else:
                 grp = group_drop.value
                 cache = self._load_cache()
                 var_tuples = copy.deepcopy(cache['_groups'][grp]['_group_vars'])
                 text_tag = 'b'
-                separator = '<br>'
-
                 t1 = f'<{text_tag}>Variables: </{text_tag}>'
                 margin = '&nbsp' * 18
 
@@ -3724,17 +3962,18 @@ class AnalysisGui:
 
             station_dict = AnalysisGui._var_tup2station_dict(var_tuples)
             if self.debug:
-                print(f'get_group_var_text()\tvar_tuples = {var_tuples} ')
-                print(f'get_group_var_text()\tstation_dict = {station_dict} ')
+                self.debug_value(-18, f'get_group_var_text()',
+                                 f'var_tuples = {var_tuples}',
+                                 f'station_dict = {station_dict} ')
 
-            t2 = f',<br>{margin}'.join([', '.join(var_ls[i:i + 12])
-                                        for i in range(0, len(var_ls),
-                                                       12)]) + '<br>'
+            t2 = ', '.join(var_ls) + '<br><hr>'
+            #t2 = f',<br>{margin}'.join([', '.join(var_ls[i:i + 12])
+            #                            for i in range(0, len(var_ls),
+            #                                           12)]) + '<br>'
 
             # Next we loop over stations and products to concatenate
             # a proper html text
             t3 = ''
-
             stn_ls = get_station_list()
             one_stn = (len(station_dict.keys()) == 1)
             rows = []
@@ -3744,67 +3983,58 @@ class AnalysisGui:
                     one_prod = (len(station_dict[stn].keys()) == 1)
                     if one_prod:
                         for prod in station_dict[stn].keys():
-                            t3 = f'Here, all variables are from ' \
-                                 f'<{text_tag}>{prod}</{text_tag}> '
+                            t3 += f'<i>Here</i>, all variables are from ' \
+                                  f'<{text_tag}>{prod}</{text_tag}> '
                     else:
                         for prod in station_dict[stn].keys():
                             if not t3:
-                                t3 += 'Where the variables '
+                                t3 += '<hr><i>Where the variables </i>'
                             else:
-                                t3 += ', while '
+                                t3 += ',<br>while '
 
                             prod_vars = station_dict[stn][prod]
                             last_var = prod_vars.pop()
-                            var_row = ',<br>'.join(['</b>, <b>'.join(prod_vars[
-                                                                     i:i + 12])
-                                                    for i in range(0,
-                                                                   len(prod_vars),
-                                                                   12)])
+                            var_row = '</b>, <b>'.join(prod_vars)
                             if prod_vars:
                                 t3 += f'<b>{var_row}</b> and ' \
                                       f'<b>{last_var}</b> are '
                             else:
                                 t3 += f'<b>{last_var}</b> is '
 
-                            t3 += f' from <{text_tag}>{prod}</{text_tag}> '
-                        t3 += f'of the station ' \
-                              f'<{text_tag}>{stn_name}</{text_tag}> ' \
-                              f'(<{text_tag}>{stn}</{text_tag}>)'
-                    t3 += '.'
+                            t3 += f'from <{text_tag}>{prod}</{text_tag}>'
+                        t3 += f' of the station ' \
+                              f'<{text_tag}>{stn_name}</{text_tag}>'
                 else:
                     t4 = ''
-                    prods = []
                     for prod in station_dict[stn].keys():
                         if not t4:
-                            t4 += f'Where the variables '
+                            t4 += f'<hr><i>Where the variables</i> '
                         else:
                             t4 += f',<br>while '
 
                         prod_vars = station_dict[stn][prod]
                         last_var = prod_vars.pop()
-                        var_row = ',<br>'.join(['</b>, <b>'.join(prod_vars[
-                                                                   i:i + 12])
-                                                for i in range(0, len(prod_vars),
-                                                               12)])
+                        var_row = '</b>, <b>'.join(prod_vars)
                         if prod_vars:
-                            t4 += f'<b>{var_row}</b> and <b>{last_var}</b> are '
+                            t4 += f'<b>{var_row}</b> and <b>{last_var}</b> ' \
+                                  f'are '
                         else:
                             t4 += f'<b>{last_var}</b> is '
 
-                        t4 += f' from <{text_tag}>{prod}</{text_tag}>'
-                    t4 += f'of the station ' \
-                          f'<{text_tag}>{stn_name}</{text_tag}> ' \
-                          f'(<{text_tag}>{stn}</{text_tag}>)'
+                        t4 += f'from <{text_tag}>{prod}</{text_tag}>'
+                    t4 += f' of the station ' \
+                          f'<{text_tag}>{stn_name}</{text_tag}>'
                     rows.append(t4)
             if rows:
-                t3 = ';<br> '.join(rows) + '.'
+                t3 = '<hr>'.join(rows)
 
             return t1 + t2 + t3
 
         def set_group_vars(c):
             cache = self._load_cache()
             if self.debug:
-                print('set_group_vars()\tcache.keys(): ', cache.keys())
+                self.debug_value(-20, f'set_group_vars()',
+                                 f'cache.keys() = {cache.keys()}')
             if isinstance(cache, dict):
                 grp = group_drop.value
                 if grp not in cache['_groups'].keys():
@@ -3831,13 +4061,13 @@ class AnalysisGui:
             # Checkboxes for variables
 
             if self.debug:
-                print('set_var_checkboxes()')
+                self.debug_value(-21, f'set_var_checkboxes()')
 
-            if station_drop.value == 'dummy' or spec_drop.value == 'dummy':
+            if station_drop.value == 'dummy' or product_drop.value == 'dummy':
                 return
 
             station = station_drop.value
-            spec = spec_drop.label
+            spec = product_drop.label
 
             var_label.value = f'<b><font color="darkgreen">Variables of {str(spec)} at {str(station)}</b>'
 
@@ -3873,7 +4103,9 @@ class AnalysisGui:
         def get_temp_dict():
 
             if self.debug:
-                print('get_temp_dict()\t', group_dict_log.value)
+                self.debug_value(-22, f'get_temp_dict()',
+                                 f'group_dict_log.value = '
+                                 f'{group_dict_log.value}')
 
             temp_log = group_dict_log.value
             if temp_log:
@@ -3886,7 +4118,8 @@ class AnalysisGui:
         def set_temp_dict(upd_dict):
 
             if self.debug:
-                print('\nset_temp_dict()\t', upd_dict)
+                self.debug_value(-23, f'set_temp_dict()',
+                                 f'upd_dict = {upd_dict}')
 
             upd_group_dict = get_temp_dict()
 
@@ -3910,7 +4143,7 @@ class AnalysisGui:
 
                 var_name = str(cb.owner.description)
 
-                upd_ls = [var_name, spec_drop.label, station_drop.value]
+                upd_ls = [var_name, product_drop.label, station_drop.value]
 
                 # Load group dict 
                 upd_group_dict = get_temp_dict()
@@ -3921,9 +4154,9 @@ class AnalysisGui:
 
                 else:
                     if self.debug:
-                        print('cb_changed()\t',
-                              '\nupd_ls: ', upd_ls,
-                              '\nupd_group_dict: ', upd_group_dict)
+                        self.debug_value(-24, f'cb_changed()',
+                                         f'upd_ls = {upd_ls}',
+                                         f'upd_group_dict = {upd_group_dict}')
                     # Remove var from var group
                     upd_group_dict['_var_list'].remove(upd_ls)
 
@@ -3936,7 +4169,7 @@ class AnalysisGui:
         def group_name_changed(change):
 
             if self.debug:
-                print('group_name_changed()')
+                self.debug_value(-25, 'group_name_changed() *** start ***')
 
             if change.name == 'value':
                 new_name = change.owner.value
@@ -3964,7 +4197,7 @@ class AnalysisGui:
 
         def new_group(click):
             if self.debug:
-                print('new_group()')
+                self.debug_value(-26, 'new_group() ')
 
             upd_group_dict = {'_upd_mode': 'new',
                               '_group_name': 'Group name',
@@ -3978,7 +4211,7 @@ class AnalysisGui:
 
         def update_group(click):
             if self.debug:
-                print('update_group()')
+                self.debug_value(-27, 'update_group() ')
 
             grp = group_drop.value
             cache = self._load_cache()
@@ -3998,8 +4231,9 @@ class AnalysisGui:
 
             upd_group_dict = get_temp_dict()
             if self.debug:
-                print(f'save_group()\t cache.keys(): {cache.keys()}')
-                print(f'save_group()\t upd_group_dict: {upd_group_dict}')
+                self.debug_value(-28, 'save_group() ',
+                                 f'cache.keys(): {cache.keys()}',
+                                 f'upd_group_dict: {upd_group_dict}')
 
             if not upd_group_dict['_upd_mode'] in ['new', 'update']:
                 return
@@ -4028,7 +4262,7 @@ class AnalysisGui:
 
             cache = self._load_cache()
             if self.debug:
-                print('save_group()')
+                self.debug_value(-29, 'delete_group() ')
 
             upd_group_dict = get_temp_dict()
 
@@ -4071,8 +4305,7 @@ class AnalysisGui:
 
         def cancel_group(click):
             if self.debug:
-                print('cancel_group()')
-
+                self.debug_value(-30, 'cancel_group() ')
             activate_gui('cancel')
 
         # Validations     
@@ -4138,20 +4371,26 @@ class AnalysisGui:
 
             if upd_mode == 'new':
                 info_ls = ['How to create a group of variables:',
-                           '1. Select your station.',
-                           '2. Select a file/product.',
+                           '1. Select a station, or several stations, but one '
+                           'at a time.',
+                           '2. Select a file/product, or several, but one at a '
+                           'time.',
                            '3. Select variables.',
-                           'Chosen variables are displayed beside the text '
+                           'Chosen variables are displayed below the label <br>'
                            '<span style="color:black">"Variables in update '
-                           'mode:"</span> below. ',
+                           'mode:"</span>. ',
                            '4. Choose a name for your group of variables in '
                            'the area <span style="color:black">"Group '
                            'name"</span>.',
                            '5. Save.',
                            '',
-                           '</b>The order of the variables is the order of presentation in plots, etc.<b>',
-                           '</b>You can combine variables from different files or stations.<b>',
-                           '</b>Last entered station, and file/product, will be preselected next time.<b>']
+                           '<b>The order of the variables is the order of '
+                           'presentation in outputs, unless specified '
+                           'otherwise in batch jobs.</b>',
+                           '<b>You can combine variables from different files '
+                           'or stations.</b>', '',
+                           '<b>Last entered station, and file/product, will be '
+                           'preselected next time.</b>']
             elif upd_mode == 'update':
                 info_ls = ['In update mode you can:',
                            '1. Add or remove variables of a group.',
@@ -4169,7 +4408,6 @@ class AnalysisGui:
                 info_color = self.widget_style_colors['primary:active']
                 msg = f'<span style="color:{info_color}">{margin}{margin}<h4>' \
                       f'{info_ls[0]}</h4><b>'
-
                 for row in info_ls[1:]:
                     msg += f'{margin}{row}<br>'
                 msg += '</b></span>'
@@ -4179,7 +4417,7 @@ class AnalysisGui:
             if error_ls:
                 warning_emoji = '\u26a0\ufe0f'
                 error_color = self.widget_style_colors['danger:active']
-                msg += f'<br><span style="color:{error_color}">{margin}{margin}'
+                msg += f'<span style="color:{error_color}">{margin}{margin}'
                 msg += f'<h3>To do: {warning_emoji}</h3><b>'
                 for error in error_ls:
                     msg += f'{margin}{error}<br>'
@@ -4208,7 +4446,8 @@ class AnalysisGui:
         # activate/deactivate upd-widgets
         def activate_gui(upd_active):
             if self.debug:
-                print('activate_gui()\t', get_temp_dict())
+                self.debug_value(-31, 'activate_gui() ',
+                                 f'upd_active = {upd_active}')
 
             if upd_active in ['new', 'update']:
                 # update mode
@@ -4230,8 +4469,8 @@ class AnalysisGui:
 
                 var_drop.observe(set_var_info_text, names='value')
                 station_drop.observe(set_spec_drop, names='value')
-                spec_drop.observe(set_var_drop, names='value')
-                spec_drop.observe(set_var_checkboxes, names='value')
+                product_drop.observe(set_var_drop, names='value')
+                product_drop.observe(set_var_checkboxes, names='value')
                 group_name.observe(group_name_changed, 'value')
 
                 upd_box.layout.display = 'flex'
@@ -4266,8 +4505,8 @@ class AnalysisGui:
                 user_guide_btn.on_click(display_user_guide, remove=True)
 
                 station_drop.unobserve(set_spec_drop)
-                spec_drop.unobserve(set_var_drop)
-                spec_drop.unobserve(set_var_checkboxes)
+                product_drop.unobserve(set_var_drop)
+                product_drop.unobserve(set_var_checkboxes)
                 group_name.unobserve(group_name_changed)
                 var_drop.unobserve(set_var_info_text)
 
@@ -4294,94 +4533,88 @@ class AnalysisGui:
 
         # Layouts
         drop_layout = wd.Layout(width='auto', height='40px')
-        var_txt_layout = wd.Layout(width='99%', height='100%')
-        grp_txt_layout = wd.Layout(width='148pt', height='28px')
-        label_layout = wd.Layout(min_width='125px')
+        grp_txt_layout = wd.Layout(width='20%', height='28px')
+        label_layout = wd.Layout(width='auto', min_width='125px')
 
         # row 1
         group_label = wd.HTML('<b><i>Available groups: </i></b>',
-                              layout=label_layout)
-        group_drop = wd.Dropdown(layout=wd.Layout(width='148pt',
+                              layout=wd.Layout(width='auto'))
+        group_drop = wd.Dropdown(layout=wd.Layout(width='auto',
                                                   height='40px'),
                                  description_tooltip='Group name')
-        group_box = wd.VBox([group_label, group_drop])
+        group_box = wd.HBox([group_label, group_drop])
 
-        station_label = wd.HTML('<b><i>ICOS Stations: </i></b>',
-                                layout=label_layout)
-        station_drop = wd.Dropdown(layout=drop_layout,
-                                   description_tooltip='ICOS Station')
-        station_box = wd.HBox([group_label, group_drop])
-        product_label = wd.HTML('<b><i>Files: </i></b>',
-                                layout=label_layout)
-        spec_drop = wd.Dropdown(layout=drop_layout,
-                                description_tooltip='File name')
-        var_drop = wd.Dropdown(layout=wd.Layout(width='148pt',
-                                                flex='inline-flex',
-                                                align="flex-end"))
-
-
-        # Group stuff  n(children=[page1, page2], width=400)
-        group_vars = wd.HTML(layout=var_txt_layout,
+        group_vars = wd.HTML(layout=wd.Layout(width='auto',
+                                              max_width='90%',
+                                              height='100%'),
                              value='Variables: ',
                              disabled=True)
         g_vars = wd.Accordion([group_vars],
                               titles=(group_vars.value, '0'),
                               selected_index=None,
-                              layout=wd.Layout(width='100%', height='100%'))
-        group_vars_upd = wd.HTML(layout=var_txt_layout,
-                                 value='Variables in update mode: ',
-                                 disabled=True,
-                                 style={'text_color': 'darkgreen'})
-        group_name = wd.Text(layout=grp_txt_layout)
-        group_dict_log = wd.Textarea(disabled=True)
-        # to hide... layout = wd.Layout(display = 'none'))
+                              layout=wd.Layout(width='50%',
+                                               height='100%'))
+        rows = [wd.HBox([group_box, g_vars])]
 
-        # Container for checkboxes
-        var_label = wd.HTML()
-        var_cbs_box = wd.HBox(layout=wd.Layout(border='dashed 0.5px',
-                                               width='100%',
-                                               display='inline-flex',
-                                               flex_flow='row wrap',
-                                               align_content='flex-start'))
-        var_box = wd.VBox([var_label, var_cbs_box])
-
+        # row 2
         # Create group buttons
         new_group_btn = wd.Button(description='New', icon='plus',
-                                  button_style='primary')
+                                  button_style='primary',
+                                  layout=wd.Layout(width='100px'))
         update_group_btn = wd.Button(description='Update', icon='pen',
-                                     button_style='info')
+                                     button_style='info',
+                                     layout=wd.Layout(width='100px'))
         save_group_btn = wd.Button(description='Save', icon='save',
-                                   button_style='success')
+                                   button_style='success',
+                                   layout=wd.Layout(width='100px'))
         cancel_group_btn = wd.Button(description='Cancel', icon='ban',
-                                     button_style='info')
+                                     button_style='info',
+                                     layout=wd.Layout(width='100px'))
         delete_group_btn = wd.Button(description='Delete', icon='trash',
-                                     button_style='danger')
+                                     button_style='danger',
+                                     layout=wd.Layout(width='100px'))
         create_btns = wd.HBox([new_group_btn, update_group_btn])
 
         user_guide_btn = wd.Button(description='User guide',
                                    icon='fa-info-circle',
-                                   button_style='info')
-        var_info_btn = wd.Button(description='Variable info',
+                                   button_style='info',
+                                   layout=wd.Layout(width='100px'))
+        var_info_btn = wd.Button(description='Var. info',
                                  icon='fa-info-circle',
-                                 button_style='info')
+                                 button_style='info',
+                                 layout=wd.Layout(width='100px'))
 
         non_create_btns = wd.HBox([save_group_btn,
                                    cancel_group_btn,
                                    delete_group_btn])
-        all_btns = wd.HBox([create_btns,
-                            non_create_btns,
-                            user_guide_btn,
-                            var_info_btn])
+        rows.append(wd.HBox([create_btns, non_create_btns,
+                             user_guide_btn, var_info_btn]))
 
+        # row 3 - guides
+        # Help text for user
+        user_guide = wd.HTMLMath(disabled=True,
+                                 layout=wd.Layout(width='90%',
+                                                  height='auto'))
+        user_guide_container = wd.Accordion(selected_index=None,
+                                            layout=wd.Layout(width='auto',
+                                                             min_width='45%',
+                                                             height='auto',
+                                                             display='none'))
+        group_dict_log = wd.Textarea(disabled=True)
+
+        if self.debug:
+            user_guide_container.children = [wd.VBox([user_guide,
+                                                      group_dict_log])]
+        else:
+            user_guide_container.children = [wd.VBox([user_guide])]
+            user_guide_container.set_title(0, 'User guide')
         # Variable info-text
+        var_drop = wd.Dropdown(layout=wd.Layout(width='148pt',
+                                                flex='inline-flex',
+                                                align="flex-end"))
         var_info_text = wd.HTML(layout=wd.Layout(width='100%',
                                                  max_width='90%',
                                                  height='auto'))
-        # Help text to user
-        user_guide = wd.HTMLMath(disabled=True,
-                                 layout=wd.Layout(width='90%',
-                                                  max_width='90%',
-                                                  height='auto'))
 
         var_info_container = wd.Accordion(children=[wd.VBox([var_drop,
                                                              var_info_text])],
@@ -4392,24 +4625,55 @@ class AnalysisGui:
                                                            display='none'))
         var_info_container.set_title(0, 'Variable info')
 
-        user_guide_container = wd.Accordion(selected_index=None,
-                                            layout=wd.Layout(width='auto',
-                                                             min_width='45%',
-                                                             height='auto',
-                                                             display='none'))
+        rows.append(wd.HBox([user_guide_container, var_info_container]))
 
-        if self.debug:
-            user_guide_container.children = [wd.VBox([user_guide,
-                                                      group_dict_log])]
-        else:
-            user_guide_container.children = [wd.VBox([user_guide])]
-        user_guide_container.set_title(0, 'User guide')
+        # upd row 1
+        station_label = wd.HTML('<b><i>ICOS Stations: </i></b>',
+                                layout=label_layout)
+        station_drop = wd.Dropdown(layout=drop_layout,
+                                   description_tooltip='ICOS Station')
+        station_box = wd.VBox([station_label, station_drop])
+        product_label = wd.HTML('<b><i>Files of station: </i></b>',
+                                layout=label_layout)
+        product_drop = wd.Dropdown(layout=drop_layout,
+                                   description_tooltip='File name')
+        product_box = wd.VBox([product_label, product_drop])
+        upd_rows = [wd.HBox([station_box, product_box])]
 
-        upd_box = wd.VBox([wd.HBox([user_guide_container,
-                                    var_info_container]),
-                           wd.HBox([station_drop, spec_drop]),
-                           wd.HBox([group_name, group_vars_upd]),
-                           var_box])
+        # upd row 2
+        # Group stuff  n(children=[page1, page2], width=400)
+        group_name_label = wd.HTML('<b><i>Name of group: </i></b>',
+                                   layout=label_layout)
+        group_name = wd.Text(layout=wd.Layout(width='auto'))
+        group_name_box = wd.VBox([group_name_label, group_name],
+                                 layout=wd.Layout(width='25%'))
+        html_margin = wd.HTML(layout=wd.Layout(width='5%'))
+        group_var_label = wd.HTML('<b><i>Variables in update mode: </i></b>',
+                                  layout=wd.Layout(width='auto',
+                                                   min_width='150px'))
+        group_vars_upd = wd.HTML(layout=wd.Layout(width='auto',
+                                                  min_width='70%',
+                                                  max_width='90%',
+                                                  height='100%'),
+                                 disabled=True,
+                                 style={'text_color': 'darkgreen'})
+        group_vars_upd_box = wd.VBox([group_var_label, group_vars_upd],
+                                     layout=wd.Layout(width='67%'))
+        upd_rows.append(wd.HBox([group_name_box, html_margin,
+                                 group_vars_upd_box]))
+        # to hide... layout = wd.Layout(display = 'none'))
+
+        # upd row 3
+        # Container for checkboxes
+        var_label = wd.HTML()
+        var_cbs_box = wd.HBox(layout=wd.Layout(border='dashed 0.5px',
+                                               width='100%',
+                                               display='inline-flex',
+                                               flex_flow='row wrap',
+                                               align_content='flex-start'))
+        var_box = wd.VBox([var_label, var_cbs_box])
+        upd_rows.append(var_box)
+        upd_box = wd.VBox(upd_rows)
 
         # observe choices
         group_drop.observe(set_group_vars, names='value')
@@ -4420,4 +4684,4 @@ class AnalysisGui:
         if not self.debug:
             group_dict_log.layout.display = 'None'
 
-        display(wd.VBox([wd.HBox([group_drop, g_vars]), all_btns, upd_box]))
+        display(wd.VBox([wd.VBox(rows), upd_box]))

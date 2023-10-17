@@ -115,7 +115,7 @@ class ReportWriter:
                   start_date,
                   end_date):
 
-        # Reuse timeseries if possible
+        # Reuse timeseries if possible, but remove old reports
         now = datetime.datetime.today().strftime('YYYY-MM-DD')
         if now != self.timestamp:
             # user did not restart the app, remove stored data
@@ -129,52 +129,53 @@ class ReportWriter:
                 # reuse df
                 df = stored_df['df']
                 return df
+        else:
+            # we need to gather the data
+            settings = self._load_user_settings()
+            days = 6
+            if 'run_configs' in settings.keys():
+                days = settings['run_configs'].get('fetch_date', 6)
+            cache = self._load_cache()
+            var_tuple_ls = cache['_groups'][group]['_group_vars']
+            st_df = self.stations_df
+            start = start_date
+            end = end_date
 
-        settings = self._load_user_settings()
-        days = 6
-        if 'run_configs' in settings.keys():
-            days = settings['run_configs'].get('fetch_date', 6)
-        cache = self._load_cache()
-        var_tuple_ls = cache['_groups'][group]['_group_vars']
-        st_df = self.stations_df
-        start = start_date
-        end = end_date
+            var_pid_ls = []
+            for var, prod, stn in var_tuple_ls:
+                # sampleheight needed for 'AS'
+                pid = st_df.loc[(st_df.id == stn) & (st_df.specLabel ==
+                                                     prod)].dobj.values[0]
+                var_pid_ls.append((var, pid))
 
-        var_pid_ls = []
-        for var, prod, stn in var_tuple_ls:
-            # sampleheight needed for 'AS'
-            pid = st_df.loc[(st_df.id == stn) & (st_df.specLabel ==
-                                                 prod)].dobj.values[0]
-            var_pid_ls.append((var, pid))
+            stored_start = start + datetime.timedelta(days=-days)
+            stored_end = end
 
-        stored_start = start + datetime.timedelta(days=-days)
-        stored_end = end
-
-        if self.debug:
-            print('_get_data(), var_pid_ls =', var_pid_ls)
-
-        df = None
-        try:
-            df = icos_data.StationData.group_ts(var_tuple_ls=var_pid_ls,
-                                                start_date=stored_start,
-                                                end_date=stored_end)
-        except Exception:
             if self.debug:
-                import traceback
+                print('_get_data(), var_pid_ls =', var_pid_ls)
 
-                print('-- Error in call: \n',
-                      f'icos_data.StationData.group_ts()'
-                      f'\nvar_tuple_ls = {var_pid_ls}, '
-                      f'\nstart_date = {stored_start}, '
-                      f'\nend_date = {stored_end})',
-                      f'\ntype(stored_start) = {type(stored_start)},'
-                      f'\ntype(stored_end) = {type(stored_end)}')
-                print('Traceback: ', traceback.format_exc())
+            df = None
+            try:
+                df = icos_data.StationData.group_ts(var_tuple_ls=var_pid_ls,
+                                                    start_date=stored_start,
+                                                    end_date=stored_end)
+            except Exception:
+                if self.debug:
+                    import traceback
 
-        # Store the timeseries, we only store one timeseries per group
-        self.stored_timeseries[group] = {'start': stored_start,
-                                         'end': stored_end,
-                                         'df': df}
+                    print('-- Error in call: \n',
+                          f'icos_data.StationData.group_ts()'
+                          f'\nvar_tuple_ls = {var_pid_ls}, '
+                          f'\nstart_date = {stored_start}, '
+                          f'\nend_date = {stored_end})',
+                          f'\ntype(stored_start) = {type(stored_start)},'
+                          f'\ntype(stored_end) = {type(stored_end)}')
+                    print('Traceback: ', traceback.format_exc())
+
+            # Store the timeseries, we only store one timeseries per group
+            self.stored_timeseries[group] = {'start': stored_start,
+                                             'end': stored_end,
+                                             'df': df}
         return df
 
     def get_group_report(self, grp: str,

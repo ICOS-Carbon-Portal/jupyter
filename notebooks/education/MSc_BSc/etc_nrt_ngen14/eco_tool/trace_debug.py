@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-    A simple debugger.
+    A simple debugger/tracer, where the
+    developer can set outputs of stack and variables.
     Use output = 'html' for colorful HTML returns.
 """
 
