@@ -10,13 +10,13 @@
     >>> # dataframe df with an interconnected zoom slider
     >>> # below every second graph, use:
     >>> ### 1. On jupyter:
-    >>> fig = multi_plot(df, n=2, units=unit_ls)
+    >>> fig = split_plot(df, n=2, units=unit_ls)
     >>> fig.show()
     ...
     >>> ### 2. On local computer:
     >>> from plotly.offline import plot
     >>>
-    >>> fig = multi_plot(df,n=2,units=unit_ls)
+    >>> fig = split_plot(df,n=2,units=unit_ls)
     >>> plot(fig, include_mathjax='cdn')
 """
 
@@ -29,10 +29,13 @@ __email__ = ['info@icos-cp.eu', 'anders.dahlner@nateko.lu.se']
 __status__ = "rc1"
 __date__ = "2023-06-14"
 
+from typing import List, Any
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import copy
 from eco_tool import icos2latex
 
 
@@ -63,20 +66,19 @@ class Plot:
     __plotly_templates = ['plotly', 'plotly_white', 'plotly_dark',
                           'ggplot2', 'seaborn', 'simple_white', 'none']
 
-
     __plotly_text_fonts = ["Arial", "Balto", "Courier New", "Droid Sans",
                            "Droid Serif", "Droid Sans Mono", "Gravitas One",
                            "Old Standard TT", "Open Sans", "Overpass",
                            "PT Sans Narrow", "Raleway", "Times New Roman"]
-    __plotly_text_sizes = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
-
+    __plotly_text_sizes = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 
     def __init__(self, **kwargs):
         """
             Keys of settings:
             -----------------
-            - debug: bool
-                        If true, messages will be printed.
+            - debug_function
+                        If not None, messages will be
+                        sent to this function.
             - latex_kwargs: dict
                         Settings for LaTeX, see eco_tool.icos2latex for details.
             - corr_plot: dict
@@ -88,32 +90,31 @@ class Plot:
             - split_plot: dict
                         Plotly settings for split_plot
         """
-        debug = kwargs.pop('debug', False)
-        if isinstance(debug, bool):
-            self.debug = debug
-        else:
-            self.debug = False
+        debug_function = kwargs.pop('debug_function', None)
+        self.debug = True if debug_function else False
+        if self.debug:
+            self.debug_value = debug_function
+            self.debug_value(0, 'Plot init',
+                             f'kwargs = {kwargs}')
 
         latex_settings = kwargs.pop('latex_kwargs', {})
         self.latex = icos2latex.Translator(**latex_settings)
-        if self.debug:
-            print(f'plot, latex_settings = {latex_settings}')
 
-        if self.debug:
-            print(f'plot2, self.latex = {self.latex}')
         self.corr_plot_settings = kwargs.pop('corr_plot_kwargs', dict())
         self.corr_table_settings = kwargs.pop('corr_table_kwargs', dict())
         self.multi_plot_settings = kwargs.pop('multi_plot_kwargs', dict())
         self.split_plot_settings = kwargs.pop('split_plot_kwargs', dict())
         self.corr_plot_layout = None
+        self.multi_plot_layout = None
+        self.split_plot_layout = None
 
+    def _corr_plot_layout_dict(self, use_latex: bool) -> dict:
         if self.debug:
-            print(f'corr_plot_settings: {self.corr_plot_settings}\n',
-                  f'corr_table_settings: {self.corr_table_settings}\n',
-                  f'multi_plot_settings: {self.multi_plot_settings}\n',
-                  f'split_plot_settings:  {self.split_plot_settings}\n')
+            self.debug_value(1, '_corr_plot_layout()',
+                             f'self.corr_plot_settings = '
+                             f'{self.corr_plot_settings}',
+                             f'self.corr_plot_layout = {self.corr_plot_layout}')
 
-    def get_corr_plot_layout(self, use_latex):
         if not self.corr_plot_layout:
             width = self.corr_plot_settings.get('width', None)
             if not isinstance(width, int) or width < 200:
@@ -121,29 +122,43 @@ class Plot:
             height = self.corr_plot_settings.get('height', None)
             if not isinstance(height, int) or height < 200:
                 height = None
-            template = self.corr_plot_settings.get('template', None)
+            template = self.corr_plot_settings.get('template', 'plotly')
             if template not in Plot.__plotly_templates:
                 template = 'plotly'
-            color_scale = self.corr_plot_settings.get('color_scale', None)
+            color_scale = self.corr_plot_settings.get('color_scale', "blues")
             if color_scale not in Plot.__plotly_color_scales:
                 color_scale = "blues"
-            title_font = self.corr_plot_settings.get('title_font', None)
+            title_font = self.corr_plot_settings.get('title_font', 'Arial')
             if title_font not in Plot.__plotly_text_fonts:
-                title_font = None
-            title_size = self.corr_plot_settings.get('title_size', None)
+                title_font = 'Arial'
+            title_size = self.corr_plot_settings.get('title_size', 14)
             if title_size not in Plot.__plotly_text_sizes:
-                title_size = None
-            subtitle_size = self.corr_plot_settings.get('subtitle_size', None)
+                title_size = 14
+            subtitle_size = self.corr_plot_settings.get('subtitle_size', 10)
             if subtitle_size not in Plot.__plotly_text_sizes:
-                subtitle_size = None
-            colorbar_height = 0.8 * height if height else None
+                subtitle_size = 10
+            colorbar_height = int(0.8 * height) if height else 200
+
+            if use_latex:
+                x_title = 'title of x-axis'
+                y_title = 'title of y-axis'
+            else:
+                x_title = {'text': 'title of x-axis',
+                           'font': {'family': title_font,
+                                    'size': subtitle_size}}
+                y_title = {'text': 'title of y-axis',
+                           'font': {'family': title_font,
+                                    'size': subtitle_size}}
             self.corr_plot_layout = dict(
                 title=dict(
                     text='main title of corr-plot template',
                     font=dict(
                         family=title_font,
                         size=title_size),
-                    yref='paper'),
+                    x=0.05,
+                    xref='container',
+                    yref='paper',
+                ),
                 width=width,
                 height=height,
                 template=template,
@@ -153,11 +168,12 @@ class Plot:
                         size=subtitle_size),
                     text='subtitle of corr-plot template',
                     showarrow=False,
-                    x=0.5,
+                    x=0.47,
                     xref='paper',
                     y=1.1,
                     yref='paper')],
                 coloraxis=dict(
+                    colorscale=color_scale,
                     colorbar=dict(
                         title=dict(
                             text='Color mapping<br><br>',
@@ -168,9 +184,105 @@ class Plot:
                         len=colorbar_height)),
                 xaxis=dict(
                     anchor='y',
+                    domain=[0.0, 0.94],
+                    title=x_title,
+                    zeroline=True,
+                    zerolinecolor='black'),
+                yaxis=dict(
+                    anchor='x',
                     domain=[0.0, 1.0],
+                    title=y_title,
+                    zeroline=True,
+                    zerolinecolor='black'))
+        if self.debug:
+            self.debug_value(1, '_corr_plot_layout ',
+                             f'self.corr_plot_layout = {self.corr_plot_layout}')
+        return copy.deepcopy(self.corr_plot_layout)
+
+    def _multi_plot_layout_dict(self, use_latex: bool) -> dict:
+        if self.debug:
+            self.debug_value(2, '_multi_plot_layout_dict()',
+                             f'self.multi_plot_settings = '
+                             f'{self.multi_plot_settings}',
+                             f'self.multi_plot_layout = {self.multi_plot_layout}')
+
+        if not self.multi_plot_layout:
+            width = self.multi_plot_settings.get('width', None)
+            if not isinstance(width, int) or width < 200:
+                width = None
+            height = self.multi_plot_settings.get('height', None)
+            if not isinstance(height, int) or height < 200:
+                height = None
+            template = self.multi_plot_settings.get('template', 'plotly')
+            if template not in Plot.__plotly_templates:
+                template = 'plotly'
+            title_font = self.multi_plot_settings.get('title_font', 'Arial')
+            if title_font not in Plot.__plotly_text_fonts:
+                title_font = 'Arial'
+            title_size = self.multi_plot_settings.get('title_size', 14)
+            if title_size not in Plot.__plotly_text_sizes:
+                title_size = 14
+            subtitle_size = self.multi_plot_settings.get('subtitle_size', 10)
+            if subtitle_size not in Plot.__plotly_text_sizes:
+                subtitle_size = 10
+
+            second_title_size = min(subtitle_size + 1, title_size)
+            legend_title_size = min(subtitle_size + 1, title_size)
+
+            if use_latex:
+                y1_title = 'title of y1-axis'
+                y2_title = 'title of y2-axis'
+            else:
+                y1_title = {'text': 'title of y1-axis',
+                            'font': {'family': title_font,
+                                     'size': subtitle_size}}
+                y2_title = {'text': 'title of y-axis',
+                            'font': {'family': title_font,
+                                     'size': subtitle_size}}
+            self.multi_plot_layout = dict(
+                title=dict(
+                    text='main title of multi-plot template',
+                    font=dict(
+                        family=title_font,
+                        size=title_size),
+                    x=0.05,
+                    xref='container',
+                    yref='paper',
+                ),
+                width=width,
+                height=height,
+                template=template,
+                annotations=[
+                    dict(
+                        font=dict(
+                            family=title_font,
+                            size=subtitle_size),
+                        text=' ',       # subtitle of multi-plot template',
+                        showarrow=False,
+                        x=0.47,
+                        xanchor='center',
+                        xref='paper',
+                        y=1.1,
+                        yanchor='bottom',
+                        yref='paper'),
+                    dict(
+                        font=dict(
+                            family=title_font,
+                            size=second_title_size),
+                        text=' ',       # second_title of multi-plot template',
+                        showarrow=False,
+                        x=0.01,
+                        xref='paper',
+                        y=1.05,
+                        yanchor='bottom',
+                        yref='paper',
+                        align='left')
+                ],
+                xaxis=dict(
+                    anchor='y',
+                    domain=[0.0, 0.94],
                     title=dict(
-                        text='title of x-axis',
+                        text='Time',
                         font=dict(
                             family=title_font,
                             size=subtitle_size)),
@@ -179,22 +291,153 @@ class Plot:
                 yaxis=dict(
                     anchor='x',
                     domain=[0.0, 1.0],
+                    title=y1_title,
+                    zeroline=True,
+                    zerolinecolor='black'),
+                yaxis2=dict(
+                    anchor='x',
+                    overlaying='y',
+                    side='right',
+                    title=y2_title,
+                    zeroline=True,
+                    zerolinecolor='darkgray'),
+                legend=dict(
+                    x=1.08,
+                    xanchor='right',
+                    yanchor='top',
                     title=dict(
-                        text='title of y-axis',
+                        text='Variables',
+                        font=dict(
+                            family=title_font,
+                            size=legend_title_size)),
+                    font=dict(              # used for the variables
+                        family=title_font,
+                        size=subtitle_size)) #, color="black"))
+                )
+
+        if self.debug:
+            self.debug_value(2, '_multi_plot_layout_dict ',
+                             f'self.multi_plot_layout = {self.multi_plot_layout}')
+        return copy.deepcopy(self.multi_plot_layout)
+
+    def _split_plot_layout_dict(self, use_latex: bool ) -> dict:
+        if self.debug:
+            self.debug_value(3, '_split_plot_layout_dict()',
+                             f'self.split_plot_settings = '
+                             f'{self.split_plot_settings}',
+                             f'self.split_plot_layout = {self.split_plot_layout}')
+
+        if not self.split_plot_layout:
+            width = self.split_plot_settings.get('width', None)
+            if not isinstance(width, int) or width < 200:
+                width = None
+            height = self.split_plot_settings.get('height', None)
+            if not isinstance(height, int) or height < 200:
+                height = None
+            template = self.split_plot_settings.get('template', 'plotly')
+            if template not in Plot.__plotly_templates:
+                template = 'plotly'
+            title_font = self.split_plot_settings.get('title_font', 'Arial')
+            if title_font not in Plot.__plotly_text_fonts:
+                title_font = 'Arial'
+            title_size = self.split_plot_settings.get('title_size', 14)
+            if title_size not in Plot.__plotly_text_sizes:
+                title_size = 14
+            subtitle_size = self.split_plot_settings.get('subtitle_size', 10)
+            if subtitle_size not in Plot.__plotly_text_sizes:
+                subtitle_size = 10
+
+            second_title_size = min(subtitle_size + 1, title_size)
+            legend_title_size = min(subtitle_size + 1, title_size)
+
+            if use_latex:
+                y_title = 'title of y-axis'
+            else:
+                y_title = {'text': 'title of y-axis',
+                           'font': {'family': title_font,
+                                    'size': subtitle_size}}
+            temp_split_plot_layout = dict(
+                title=dict(
+                    text=' ', # main title of split-plot template',
+                    font=dict(
+                        family=title_font,
+                        size=title_size),
+                    x=0.05,
+                    xref='container',
+                    yref='paper',
+                ),
+                annotations=[
+                    dict(
+                        font=dict(
+                            family=title_font,
+                            size=subtitle_size),
+                        text=' ',   # subtitle of split-plot template',
+                        showarrow=False,
+                        x=0.47,
+                        xanchor='center',
+                        xref='paper',
+                        y=1.1,
+                        yanchor='bottom',
+                        yref='paper'),
+                    dict(
+                        font=dict(
+                            family=title_font,
+                            size=second_title_size),
+                        text=' ',  # second_title of split-plot template',
+                        showarrow=False,
+                        x=0.01,
+                        xref='paper',
+                        y=1.05,
+                        yanchor='bottom',
+                        yref='paper',
+                        align='left')
+                ],
+                template=template,
+                xaxis=dict(
+                    anchor='y',
+                    domain=[0.0, 0.94],
+                    title=dict(
+                        text='',
                         font=dict(
                             family=title_font,
                             size=subtitle_size)),
                     zeroline=True,
-                    zerolinecolor='black'))
-
-        return self.corr_plot_layout
+                    zerolinecolor='black'),
+                yaxis=dict(
+                    anchor='x',
+                    domain=[0.0, 1.0],
+                    title=y_title,
+                    zeroline=True,
+                    zerolinecolor='black'),
+                legend=dict(
+                    x=1.08,
+                    xanchor='right',
+                    yanchor='top',
+                    title=dict(
+                        text='Variables',
+                        font=dict(
+                            family=title_font,
+                            size=legend_title_size)),
+                    font=dict(              # used for the variables
+                        family=title_font,
+                        size=subtitle_size)) #, color="black"))
+                )
+            if height:
+                temp_split_plot_layout['height'] = height
+            if width:
+                temp_split_plot_layout['width'] = width
+            self.split_plot_layout = temp_split_plot_layout
+        if self.debug:
+            self.debug_value(3, '_split_plot_layout() ',
+                             f'self.split_plot_layout = {self.split_plot_layout}')
+        return copy.deepcopy(self.split_plot_layout)
 
     def corr_plot(self, df,
                   x_col: str,
                   y_col: str,
                   units: list = None,
                   title: str = None,
-                  subtitle: str = None):
+                  subtitle: str = None) -> go.Figure:
         """
             For a pandas dataframe df, this function
             returns a plotly figure with a scatter plot of
@@ -222,34 +465,36 @@ class Plot:
 
         """
 
-        if self.debug:
-            print(df.head, x_col, y_col, units, title, subtitle)
-
-
-        color_scale = self.corr_plot_settings.get('color_scale', None)
-        if color_scale not in Plot.__plotly_color_scales:
-            color_scale = "blues"
-
-        if not isinstance(units, list):
-            units = [x_col, y_col]
-
-        # load general settings for corr-plot
-        use_latex = self.corr_plot_settings.get('use_latex', True)
-        corr_layout = self.get_corr_plot_layout(use_latex)
-
-        if title is None:
-            title = f'Correlation plot of {x_col} and {y_col}.'
-        corr_layout['title']['text'] = title
-        if subtitle is None:
-            subtitle = f'{x_col} (on the <i>x</i>-axis) vs  ' \
-                       f'{y_col} (on the <i>y</i>-axis) '
-        corr_layout['annotations'][0]['text'] = subtitle
-
         df = df.copy()
         if 'TIMESTAMP' not in [c.upper() for c in df.columns]:
             df.reset_index(inplace=True)
         df = df[['TIMESTAMP', x_col, y_col]]
 
+        if self.debug:
+            self.debug_value(11, 'corr_plot ',
+                             f'df.head = {df.head}',
+                             f'x_col = {x_col}',
+                             f'y_col = {y_col}',
+                             f'units = {units}',
+                             f'title = {title}'
+                             f'subtitle = {subtitle}')
+
+        # load general settings for corr-plot
+        use_latex = self.corr_plot_settings.get('use_latex', True)
+        if not isinstance(use_latex, bool):
+            use_latex = True
+
+        layout_dict = self._corr_plot_layout_dict(use_latex)
+
+        if title is None:
+            title = f'Correlation plot of {x_col} and {y_col}.'
+
+        if subtitle is None:
+            subtitle = f'{x_col} (on the <i>x</i>-axis) vs  ' \
+                       f'{y_col} (on the <i>y</i>-axis) '
+
+        if not isinstance(units, list):
+            units = [x_col, y_col]
         if all(isinstance(x, tuple) for x in units):
             if use_latex and self.latex is not None:
                 x_label = self.latex.var_unit_to_latex(var_unit=units[0])
@@ -264,13 +509,14 @@ class Plot:
             else:
                 x_label = units[0]
                 y_label = units[1]
-        if use_latex:
-            corr_layout['xaxis']['title'] = x_label
-            corr_layout['yaxis']['title'] = y_label
-        else:
-            corr_layout['xaxis']['title']['text'] = x_label
-            corr_layout['yaxis']['title']['text'] = y_label
 
+        if self.debug:
+            self.debug_value(11, 'corr_plot ',
+                             f'use_latex = {use_latex}',
+                             f'x_label ={x_label}',
+                             f'y_label ={y_label}')
+
+        # ticks for color legend
         ticks = len(df)
         if ticks > 18:
             last_date = str(df['TIMESTAMP'].values.max())[:16]
@@ -290,24 +536,86 @@ class Plot:
         else:
             tick_ind = [0, 1]
             tick_text = ['', '']
-        corr_layout['coloraxis']['colorbar']['tickvals'] = tick_ind
-        corr_layout['coloraxis']['colorbar']['ticktext'] = tick_text
+
+        layout_dict['coloraxis']['colorbar']['tickvals'] = tick_ind
+        layout_dict['coloraxis']['colorbar']['ticktext'] = tick_text
+        layout_dict['title']['text'] = title
+        layout_dict['annotations'][0]['text'] = subtitle
+        if use_latex:
+            layout_dict['xaxis']['title'] = x_label
+            layout_dict['yaxis']['title'] = y_label
+        else:
+            layout_dict['xaxis']['title']['text'] = x_label
+            layout_dict['yaxis']['title']['text'] = y_label
 
         fig = go.Figure(px.scatter(df, x=x_col, y=y_col,
                                    trendline="ols",
                                    color=df.index))
-        fig.update(layout=corr_layout)
-
-        return fig
+        fig.update(layout=layout_dict)
+        if self.debug:
+            self.debug_value(11, 'corr_plot - end',
+                             f'fig.layout = {fig.layout}')
+        return fig.show()
 
     def multi_plot(self, df,
-                   yaxis1: list(),
-                   units1: list() = None,
-                   yaxis2: list() = None,
-                   units2: list() = None,
+                   yaxis1_vars: list,
+                   yaxis1: list = None,
+                   unit1: str = None,
+                   yaxis2_vars: list = None,
+                   yaxis2: list = None,
+                   unit2: str = None,
                    title: str = None,
-                   subtitle: str = None):
+                   second_title: str = None,
+                   subtitle: str = None,
+                   legend_titles: list = None) -> go.Figure:
+        """
+            Plot several variables in one plotly Figure,
+            with one or two y axes.
+
+            Inputs:
+            -------
+            - df: a pandas dataframe
+
+            - yaxis1_vars: list
+                column names for left axis
+
+            - yaxis1: list
+                labels for left axis variables
+
+            - unit1: str
+                 unit for left axis variables
+
+            - yaxis2_vars: list
+                column names for right axis
+
+             - yaxis2: list
+                labels for right axis variables
+
+            - unit2: str
+                unit for right axis variables
+
+            - title: str
+                main title of plot
+
+           - second_title: str
+                title text below main title using subtitle-size
+
+            - subtitle: str
+                subtitle of plot, placed below main
+
+            - legend_titles: list
+                titles for renaming legend variables
+
+        """
         df = df.copy()
+        if self.debug:
+            self.debug_value(12, 'multi_plot() -- start ',
+                             f'yaxis1 = {yaxis1}', f'yaxis2 = {yaxis2}',
+                             f'unit1 = {unit1}', f'unit2 = {unit2}',
+                             f'title = {title}',
+                             f'second_title = {second_title}'
+                             f'subtitle = {subtitle}'
+                             f'legend_titles = {legend_titles}')
 
         if 'TIMESTAMP' not in df.columns:
             if 'TIMESTAMP' in [c.upper() for c in df.columns]:
@@ -318,112 +626,108 @@ class Plot:
                 df.reset_index(inplace=True)
                 df.rename(columns={'index': 'TIMESTAMP'},
                           inplace=True)
+        use_latex = self.multi_plot_settings.get('use_latex', True)
+        if not isinstance(use_latex, bool):
+            use_latex = True
+        layout_dict = self._multi_plot_layout_dict(use_latex=use_latex)
 
-        if not(isinstance(units1, list) and len(units1) == len(yaxis1)):
-            units1 = yaxis1
-        if yaxis2 is None:
-            yaxis2 = []
-        if not (isinstance(units2, list) and len(units2) == len(yaxis2)):
-            units2 = yaxis2
-        if title is None:
-            title = f'Multiplot plot of {", ".join(yaxis1.extend(yaxis2))}.'
-        if subtitle is None:
-            subtitle = f'Multiplot plot of {", ".join(yaxis1.extend(yaxis2))}.'
+        if not(isinstance(yaxis1_vars, list)):
+            raise TypeError(f'The input parameter yaxis1_vars is supposed to be '
+                            f'a list.')
+        if not(isinstance(yaxis1, list)):
+            yaxis1 = yaxis1_vars
+        if not isinstance(unit1, str):
+            unit1 = None
+        if yaxis2_vars is None:
+            yaxis2_vars = []
+        if not(isinstance(yaxis2, list)):
+            yaxis2 = yaxis2_vars
+        if not isinstance(unit2, str):
+            unit2 = None
+        plot_vars = yaxis1_vars.copy()
+        plot_vars.extend(yaxis2_vars)
+
+        if not isinstance(title, str):
+            title = f'Multiplot plot of {", ".join(plot_vars)}.'
+        if not isinstance(second_title, str):
+            second_title = ''
+        if not isinstance(subtitle, str):
+            subtitle = f'Multiplot plot of {", ".join(plot_vars)}.'
         if title == subtitle:
             subtitle = ''
 
-        # load general settings for corr-plot
-        use_latex = self.multi_plot_settings.get('use_latex', True)
-        if use_latex:
-            lat = self.latex
+        if not isinstance(legend_titles, list):
+            legend_titles = None
+            y1_legend_names = yaxis1_vars
+            y2_legend_names = yaxis2_vars
         else:
-            lat = False
+            y1_legend_names = legend_titles[:len(yaxis1_vars)]
+            y2_legend_names = legend_titles[len(yaxis1_vars):]
+
         if self.debug:
-            print('in multi-plot')
-            print(use_latex)
-            print(lat)
-
-        width = self.multi_plot_settings.get('width', None)
-        if not isinstance(width, int):
-            width = None
-        elif width < 200:
-            width = None
-        height = self.multi_plot_settings.get('height', None)
-        if not isinstance(height, int):
-            height = None
-        elif height < 200:
-            height = None
-        template = self.multi_plot_settings.get('template', None)
-        if template not in Plot.__plotly_templates:
-            template = 'plotly'
-
-        # Create figure with secondary y-axis
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
-        fig.update_layout(title_text=title,
-                          width=width,
-                          height=height,
-                          template=template)
+            self.debug_value(12, 'multi_plot()', f'use_latex={use_latex}',
+                             f'y1_legend_names = {y1_legend_names}',
+                             f'y2_legend_names = {y2_legend_names}',
+                             f'layout={layout_dict}')
 
         # Fix labels for y-axes
-        y_labels = []
-        unit_ls = [units1]
-        if units2:
-            unit_ls.append(units2)
-        for u in unit_ls:
-            if all(isinstance(x, tuple) for x in u):
-                y_unit = u[0][1]
-                y_vars = [u[i][0] for i in range(len(u))
-                          if all(u[i][0] != u[j][0] for j in range(i))]
-                if lat:
-                    y_unit = lat.unit_to_latex(unit=y_unit,
-                                               no_dollar=True)
-                    y_vars = [lat.var_to_latex(var=y,
-                                               no_dollar=True) for y in y_vars]
-                    y_label = f'${", ".join(y_vars)}\\ \\left({y_unit}\\right)$'
-                else:
-                    y_label = f'{", ".join(y_vars)}\\ ({y_unit})'
-            elif all(isinstance(x, str) for x in u):
-                if lat:
-                    y_vars = [lat.var_to_latex(var=y,
-                                               no_dollar=True) for y in u]
-                    y_label = f'${", ".join(y_vars)}$'
-                else:
-                    y_label = f'{", ".join(u)}'
+        if use_latex:
+            y1_label = self.latex.var_unit_to_latex(var_ls=yaxis1, unit=unit1)
+            if yaxis2:
+                y2_label = self.latex.var_unit_to_latex(var_ls=yaxis2, unit=unit2)
             else:
-                y_label = ''
-            y_labels.append(y_label)
+                y2_label = ''
+        else:
+            y1_label = ', '.join(yaxis1)
+            if unit1:
+                y1_label = f'{y1_label} ({unit1})'
+            y2_label = ', '.join(yaxis2)
+            if unit2:
+                y2_label = f'{y2_label} ({unit2})'
 
-        for i in range(len(yaxis1)):
-            c = yaxis1[i]
+        # Create figure with secondary y-axis
+        fig = make_subplots(specs=[[{"secondary_y": True}]],
+                            subplot_titles=['', ''])
+        # add plots to figure
+        for i in range(len(yaxis1_vars)):
+            df_col = yaxis1_vars[i]
+            legend_col = y1_legend_names[i]
             # plotting y1-axis
             fig.add_trace(go.Scatter(x=df.TIMESTAMP,
-                                     y=df[c],
-                                     name=f"{c}"),
+                                     y=df[df_col],
+                                     name=f"{legend_col}"),
                           secondary_y=False)
 
-        for i in range(len(yaxis2)):
-            c = yaxis2[i]
+        for i in range(len(yaxis2_vars)):
+            df_col = yaxis2_vars[i]
+            legend_col = y2_legend_names[i]
             # plotting y2-axis
             fig.add_trace(go.Scatter(x=df.TIMESTAMP,
-                                     y=df[c],
-                                     name=f"{c}"),
+                                     y=df[df_col],
+                                     name=f"{legend_col}"),
                           secondary_y=True)
+        layout_dict['title']['text'] = title
+        layout_dict['annotations'][0]['text'] = subtitle
+        layout_dict['annotations'][1]['text'] = second_title
+        if use_latex:
+            layout_dict['yaxis']['title'] = y1_label
+            layout_dict['yaxis2']['title'] = y2_label
+        else:
+            layout_dict['yaxis']['title']['text'] = y1_label
+            layout_dict['yaxis2']['title']['text'] = y2_label
+        fig.update(layout=layout_dict)
 
-        # Set x-axis title
-        fig.update_xaxes(title_text="Time")
-
-        # Set y-axes titles
-        fig.update_yaxes(title_text=f"{y_labels[0]}", secondary_y=False)
-        if yaxis2:
-            fig.update_yaxes(title_text=f"{y_labels[1]}", secondary_y=True)
-
+        if self.debug:
+            self.debug_value(12, 'multi_plot',
+                             f'fig.layout = {fig.layout}')
         return fig
 
     def split_plot(self, df,
                    units: list = None,
                    title: str = None,
-                   n: int = None,
-                   **setting):
+                   second_title: list[str] = None,
+                   subtitles: list[str] = None,
+                   legend_titles: list[str] = None) -> go.Figure:
         """
 
             For a pandas dataframe df, with a datetime index, this function
@@ -445,6 +749,7 @@ class Plot:
                 In the case of a tuple (a,b) a is the variable and b is the
                 unit.
             - title: str
+            - subtitles: list of strings
 
             Notes:
             - It is assumed that df.index is a datetime-index that will
@@ -470,31 +775,23 @@ class Plot:
         else:
             unit_ls = cols
 
-        title = title if isinstance(title, str) else ''
+        if not isinstance(title, str):
+            title = ''
+
+        if not isinstance(second_title, str):
+            second_title = ''
+
+        if isinstance(subtitles, list) and len(subtitles) == ncols and \
+                all(isinstance(s, str) for s in subtitles):
+            subtitles = subtitles
+        else:
+            subtitles = cols
 
         # load general settings for corr-plot
-        use_latex = self.split_plot_settings.get('use_latex', True)
-        if use_latex:
-            lat = self.latex
-        else:
-            lat = False
+        use_latex = self.split_plot_settings.get('use_latex', None)
 
-        width = self.split_plot_settings.get('width', None)
-        if not isinstance(width, int):
-            width = None
-        elif width < 200:
-            width = None
-        height = self.split_plot_settings.get('height', None)
-        if not isinstance(height, int):
-            height = None
-        elif height < 200:
-            height = None
-        subtitle_size = self.split_plot_settings.get('subtitle_size', None)
-        if not isinstance(subtitle_size, int):
-            subtitle_size = None
-        template = self.split_plot_settings.get('template', None)
-        if template not in Plot.__plotly_templates:
-            template = 'plotly'
+        layout = self._split_plot_layout_dict(use_latex=use_latex)
+
         n = self.split_plot_settings.get('zoom_sliders', None)
         if not (isinstance(n, int) and n >= 0):
             n = 2
@@ -518,27 +815,26 @@ class Plot:
 
         for c in range(ncols):
             col = cols[c]
+            legend_name = legend_titles[c]
             # formatting y-axis labels
             if isinstance(unit_ls[c], tuple):
-                if lat:
-                    y_label = lat.var_unit_to_latex(var_unit=unit_ls[c])
+                if use_latex:
+                    y_label = self.latex.var_unit_to_latex(var_unit=unit_ls[c])
                 else:
                     y_label = f'{unit_ls[c][0]} ({unit_ls[c][1]})'
             elif isinstance(unit_ls[c], str):
-                if lat:
-                    y_label = lat.var_to_latex(unit_ls[c])
+                if use_latex:
+                    y_label = self.latex.var_to_latex(unit_ls[c])
                 else:
                     y_label = unit_ls[c]
             else:
                 y_label = ''
 
-            if self.debug:
-                print('split-plot, y-labels: ', unit_ls[c], y_label)
             y_ax_labels.append(y_label)
 
             g_real = go.Scatter(x=df.index,
                                 y=df[col],
-                                name=col)
+                                name=legend_name)
 
             graphs.append(g_real)
 
@@ -558,33 +854,44 @@ class Plot:
         # Step 2.
         # Next, we create a figure for the graphs.
         number_of_subplots = len(graphs)
-        if height is None:
-            fig_height = number_of_subplots * 175 + slider_no * 5
+        height = layout.get('height', None)
+        if isinstance(height, int):
+            mult = height
         else:
-            fig_height = max(number_of_subplots * 175 + slider_no * 5, height)
+            mult = 350
 
-        vert_space = 0.15 * (1 / (number_of_subplots - 1))
+        layout['height'] = number_of_subplots * mult + slider_no * 5
+
+        vert_space = min(0.15 * (1 / (number_of_subplots - 1)), 0.06)
 
         # Labels and heights for each graph
         row_heights = [0.45 / ncols] * ncols
-        labels = cols
         for x in empty_positions:
             row_heights.insert(x, 0.12 / ncols)
-            labels.insert(x, '')
+            subtitles.insert(x, '')
             y_ax_labels.insert(x, '')
+
+        layout['title']['text'] = title
 
         fig = make_subplots(rows=number_of_subplots, cols=1,
                             shared_xaxes=True,
                             vertical_spacing=vert_space,
-                            subplot_titles=labels,
-                            row_heights=row_heights)
-        for i in fig['layout']['annotations']:
-            i['font']['size'] = 10
+                            subplot_titles=subtitles,
+                            row_heights=row_heights,
+                            figure=go.Figure(layout=layout))
+        fig_layout = fig.to_dict()['layout']
 
-        fig.update_layout(template=template,
-                          height=fig_height,
-                          width=width,
-                          title=title)
+        for anno in fig_layout['annotations']:
+            anno['x'] = layout['annotations'][0]['x']
+            anno['font']['size'] = layout['annotations'][0]['font']['size']
+        layout['annotations'][1]['text'] = second_title
+        fig_layout['annotations'].append(layout['annotations'][1])
+        fig.update(layout=fig_layout, overwrite=True)
+
+        if self.debug:
+            self.debug_value(99, 'split_plot()  -- ',
+                             f'layout = {layout}',
+                             f'fig.layout = {fig.layout}')
 
         # Step 3.
         # Add the graphs to the figure, and some styling
@@ -594,27 +901,32 @@ class Plot:
 
         # Remove all dates of each x-axis
         for x in range(1, number_of_subplots + 1):
-            fig.update_xaxes(row=x, col=1, showticklabels=False)
-            fig.update_yaxes(row=x, col=1, title_text=y_ax_labels[x - 1])
+            fig.update_xaxes(row=x, col=1,
+                             showticklabels=False,
+                             domain=layout['xaxis']['domain'])
+            fig.update_yaxes(row=x, col=1, title_text=y_ax_labels[x - 1],
+                             fixedrange=False)
 
         # Set font size
-        fig.update_annotations(font_size=18)
+        # fig.update_annotations(font_size=subtitle_size)
 
         # Step 4 (WA-2)
         # We will now create rangesliders from the empty graphs,
         # adjust thickness compared to number of plots,
         # make sure the xaxis has type 'date' and show
         # the dates on this x-axis
-
+        slider_thickness = min(vert_space, 0.045)
         for pos in empty_positions:
-            fig.update_xaxes(rangeslider={'visible': True, 'thickness': vert_space},
+            fig.update_xaxes(rangeslider={'visible': True,
+                                          'thickness': slider_thickness},
                              type='date',
                              showticklabels=True,
                              row=pos, col=1)
 
         # Step 5 (WA-3)
         # We will now place the first graph G after each empty graph E
-        # over the graph E. That is: [G1,G2,E1,G3,G4,G5,E2,G6] -> [G1,G2,G3,G4,G5,G6]
+        # over the graph E. That is:
+        #   [G1,G2,E1,G3,G4,G5,E2,G6] -> [G1,G2,G3,G4,G5,G6]
         hidden_y_ax = ''
 
         for _, t in enumerate(fig.data):
