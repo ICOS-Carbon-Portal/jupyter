@@ -155,7 +155,9 @@ class Translator:
         if not isinstance(var, str):
             return ''
 
-        trans_dict = {'CO2': r'CO_2',
+        trans_dict = {'IN': r'{\mathit{IN}}',
+                      'OUT': r'{\mathit{OUT}}',
+                      'CO2': r'CO_2',
                       'co2': r'CO_2',
                       'fCO2': r'fCO_2',
                       'pCO2': r'pCO_2',
@@ -163,7 +165,9 @@ class Translator:
                       'ch4': r'CH_4',
                       'H2O': r'H_2O',
                       'n2o': r'N_2O',
+                      'SIGMA': r'{\sigma}',
                       'rn': r'RN',
+                      'UNCLEANED': r'{\mathit{UNCLEANED}}',
                       '[degC]': r'[^{\circ}C]',
                       '[uatm]': r'[\mu {atm}]'}
 
@@ -471,38 +475,52 @@ class Translator:
 
         return self.__set_style(latex_txt=latex_unit, no_dollars=no_dollar)
 
-    def var_unit_to_latex(self, var_unit: (str, str) = None, var: str = None,
+    def var_unit_to_latex(self, var_unit: (str, str) = None,
+                          var_ls: [str] = None,
                           unit: str = None):
-        """ 
-        Converts ICOS-var and ICOS-unit into latex-strings.
+        """
+            Converts ICOS-var and ICOS-unit into latex-strings
 
-        Parameters
-        ----------
-        var_unit: tuple of str
-            A tuple in the form (var, unit) where var and
-            unit are like below.
-        var  : str
-            Expects a string having the format of an ICOS-variable
-            see doc of __var_to_latex()
-        unit : str
-            Expects a string having the format of an ICOS-unit
-            see doc of __unit_to_latex()
-            
+            Parameters
+            ----------
+            var_unit: (str, str))
+                A tuple in the form (var, unit) where var and
+                unit are like below.
+            var_ls  : list of strings
+                Expects a list of strings where each string has
+                the format of an ICOS-variable, it will then return a comma
+                separated list of latex-strings.
+            unit : str
+                Expects a string having the format of an ICOS-unit
+                see doc of __unit_to_latex()
 
-        Returns
-        -------
-        string
+            Example:
+
+            >>> var_unit_to_latex(var_ls = ['SWC1', 'SWC2', 'SWC3'],
+            >>>                   unit = '%')
+            '${SWC_1},\ {SWC_2},\ {SWC_3},\ (\%)$'
+
+            Returns
+            -------
+            string
         """
 
         if var_unit:
-            var = var_unit[0]
-            unit = var_unit[1]
-
-        if not isinstance(var, str) or not isinstance(unit, str):
+            latex_var = Translator.__var_to_latex(var_unit[0])
+            latex_unit = Translator.__unit_to_latex(var_unit[1], self.use_exp)
+        elif isinstance(var_ls, list):
+            latex_vars = [Translator.__var_to_latex(v) for v in var_ls]
+            latex_var = r',\ '.join(latex_vars)
+            if unit:
+                latex_unit = Translator.__unit_to_latex(unit, self.use_exp)
+            else:
+                latex_unit = None
+        else:
             return '$ $'
 
-        latex_var = Translator.__var_to_latex(var)
-        latex_unit = Translator.__unit_to_latex(unit, self.use_exp)
-        latex_unit = f'({latex_unit})'
-        latex_var_unit = rf'{latex_var}\ {latex_unit}'
+        if latex_unit:
+            latex_unit = f'({latex_unit})'
+            latex_var_unit = rf'{latex_var}\ {latex_unit}'
+        else:
+            latex_var_unit = latex_var
         return self.__set_style(latex_var_unit)

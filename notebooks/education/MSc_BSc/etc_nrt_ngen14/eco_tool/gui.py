@@ -21,13 +21,13 @@ __date__ = "2023-06-11"
 __maintainer__ = "ICOS Carbon Portal, Elaborated products team"
 __email__ = ['info@icos-cp.eu', 'anders.dahlner@nateko.lu.se']
 
-import warnings
-
 from ipywidgets import widgets as wd
 from IPython.display import display, Math, clear_output
 import datetime as dt
 import copy
 import os
+
+import warnings
 
 warnings.simplefilter("ignore", FutureWarning)
 
@@ -56,8 +56,12 @@ class _AppDataRetriever:
     """
 
     def __init__(self, app_config_file: str, user_cache_file: str,
-                 user_config_file: str, debug: bool):
-        self.debug = bool(debug)
+                 user_config_file: str, debug_function=None):
+
+        self.debug = True if debug_function else False
+        if self.debug:
+            self.debug_value = debug_function
+            self.debug_value(0, '_AppDataRetriever init with debugger')
         self.app_config_file = app_config_file
         self.user_cache_file = user_cache_file
         self.user_config_file = user_config_file
@@ -65,6 +69,9 @@ class _AppDataRetriever:
         self.app_config_dict = None
 
     def load_app_configs(self):
+        if self.debug:
+            self.debug_value(1, 'load_app_configs')
+
         if not self.app_config_dict:
             default_dict = {'_var2unit_map': {}}
             self.app_config_dict = self._load_json(default_dict=default_dict,
@@ -72,6 +79,9 @@ class _AppDataRetriever:
         return self.app_config_dict
 
     def load_cache(self, refresh: bool = None):
+        if self.debug:
+            self.debug_value(2, 'load_cache', f'refresh = {refresh}')
+
         if refresh or not self.cache:
             default_dict = {'_last_station_id': '',
                             '_last_group': '',
@@ -115,72 +125,419 @@ class AnalysisGui:
                            'warning': '#FF9800', 'warning:active': '#F57C00',
                            'danger': '#F44336', 'danger:active': '#D32F2F'}
 
-    help_dict = {'brief': {'group': {'update': '',
-                                     'new': '',
-                                     'read-mode': ''
-                                     },
-                           'batch': {'update': '',
-                                     'new': '',
-                                     'read-mode': '',
-                                     'split_plot': '',
-                                     'multi_plot': '',
-                                     'corr_plot': '',
-                                     'corr_table': '',
-                                     'statistics': ''},
-                           'configs': {'run_configs': '',
-                                       'latex': '',
-                                       'split_plot': '',
-                                       'multi_plot': '',
-                                       'corr_plot': '',
-                                       'corr_table': '',
-                                       'statistics': ''},
-                           'main': ''},
-                 'detail': {'group': {'update': '',
-                                      'new': '',
-                                      'read_mode': ''
-                                      },
-                            'batch': {'update': '',
-                                      'new': '',
-                                      'read-mode': '',
-                                      'split_plot': '',
-                                      'multi_plot': '',
-                                      'corr_plot': '',
-                                      'corr_table': '',
-                                      'statistics': ''},
-                            'configs': {'run_configs': {},
-                                        'latex': {},
-                                        'split_plot': {},
-                                        'multi_plot': {},
-                                        'corr_plot': {},
-                                        'corr_table': {},
-                                        'statistics': {}},
-                            'main': ''}
+    help_dict = {'group': {'read_header1': '<h3>To create a group of '
+                                           'variables: </h3>',
+                           'read_body1': '<ol>'
+                                         '<li> Press <b><i>New</i></b></li>'
+                                         '<ul>'
+                                         '<li> Select a station/stations. </li>'
+                                         '<li> Select a product/products. </li>'
+                                         '<li> Choose variables. </li>'
+                                         '</ul>'
+                                         '<li> Choose a name for the group </li>'
+                                         '<li> Press <b><i>Save</i></b></li>'
+                                         '</ol>',
+                           'read_header2': '<h3>To edit a group of variables: '
+                                           '</h3>',
+                           'read_body2': '<ol>'
+                                         '<li> Select the group and press '
+                                         '<b><i>Update</i></b></li>'
+                                         '<ul>'
+                                         '<li> Select or deselect variables.'
+                                         '</li>'
+                                         '<li> Rename the group. </li>'
+                                         '</ul>'
+                                         '<li> Press <b><i>Save</i></b></li>'
+                                         '</ol>',
+                           'read_header3': '<h3>To delete a group of variables: '
+                                           '</h3>',
+                           'read_body3': '<ol>'
+                                         '<li> Select the group and press '
+                                         '<b><i>Update</i></b></li>'
+                                         '<li> Click on the '
+                                         '<b><i>Delete</i></b> button</li>'
+                                         '</ol>',
+                           'update_header': '<h3>Update</h3>',
+                           'update_body': 'Now you can'
+                                          '<ol>'
+                                          '<li> Choose station and product '
+                                          'in order to add or remove variables '
+                                          'from the group.'
+                                          '</li>'
+                                          '<li> Rename the group. </li>'
+                                          '<li> Delete the group.'
+                                          '</ol>',
+                           'new_header': '<h3>New</h3>',
+                           'new_body': 'Steps to create a group of variables:'
+                                       '<ol>'
+                                       '<li> Select a station, or several '
+                                       'stations, but one at a time.</li>'
+                                       '<li> Select a file/product, or '
+                                       'several, but one at a time.</li>'
+                                       '<li> Select variables. Chosen '
+                                       'variables are displayed at '
+                                       '<span style="color:black"><i>'
+                                       '"Variables in update mode"</i>'
+                                       '</span>. </li>'
+                                       '<li> Choose a name for your group of '
+                                       'variables and press '
+                                       '<b><i>Save</i></b>.</li>'
+                                       '</ol>'
+                                       '<br>'
+                                       '<b><i>New user?</i></b> By adding '
+                                       '<b><i>"+b"</i></b> to the end of '
+                                       'the group name, you will '
+                                       'get an example batch job so you can see '
+                                       'how some of the plots look like. '
+                                       'It will appear as a button <b><i>Batch '
+                                       'example</i></b> in the '
+                                       '<b><i>Plot-menu</i></b>.',
+                           'new_user': '<b><i>New user?</i></b> By adding '
+                                       '<b><i>"+b"</i></b> to the end of '
+                                       'the group name, you will '
+                                       'get an example batch job so you can see '
+                                       'how some of the plots look like. '
+                                       'It will appear as a button <b><i>Batch '
+                                       'example</i></b> in the '
+                                       '<b><i>Plot-menu</i></b>.',
+                           'general': '<h4><i>General info on group '
+                                      'variables</i></h4>'
+                                      '<ul>'
+                                      '<li> The order of the variables is the '
+                                      'order of presentation in outputs, unless '
+                                      'specified otherwise in batch jobs.'
+                                      '</li>'
+                                      '<li> You can combine variables from '
+                                      'different files or stations.'
+                                      '</li>'
+                                      '</ul>'},
+                 'batch': {'update': '',
+                           'new': '',
+                           'read-mode': '',
+                           'split_plot': '',
+                           'multi_plot': '',
+                           'corr_plot': '',
+                           'corr_table': '',
+                           'statistics': ''},
+                 'configs': {'run_configs': {},
+                             'latex': {},
+                             'split_plot': {},
+                             'multi_plot': {},
+                             'corr_plot': {},
+                             'corr_table': {},
+                             'statistics': {}},
+                 'technical': '<h4><i>Stored data - technical info'
+                              '</i></h4>'
+                              '<ul>'
+                              '<li> Group and batch jobs are stored '
+                              'in the file: '
+                              '"/appdata/_user_var_config_ES_1.json".'
+                              '<br>'
+                              'Changes are logged here: '
+                              '"/appdata/_user_var_config_ES_1_bak.'
+                              'json"'
+                              '</li>'
+                              '<li> Settings are stored in the file '
+                              '"/appdata/_default_settings_ES_1.json".'
+                              '<br>'
+                              'Changes are logged here: '
+                              '"/appdata/_default_settings_ES_1_bak.'
+                              'json".'
+                              '</li>'
+                              '</ul>'
+                              'If you like you can e-mail these to a '
+                              'colleague, in order to share your '
+                              'findings etc.'
                  }
 
     @staticmethod
-    def _var_tup2station_dict(var_tuples: list = None):
+    def var_tuple_ls_converter(var_ls: [] or (str, str, str) or [(str, str, str)],
+                               output: str,
+                               var_plot_tool: str = None,
+                               stn_name_id_ls: [(str, str)] = None,
+                               debug_fun: callable = None) -> dict or list or str:
         """
-            var_tuple: list of tuples
-                Each tuple is of the form
+            Converts var_ls into output as below.
+
+            Inputs
+            ------
+            var_ls: list of tuples
+                Either an empty list or a list of variables as in the
+                list of variables of a groups, that is each element
+                should be a tuple of the form
                     (variable, file, station)
 
-             Returns
-             a dictionary of the form
+            output: str
+                output choices:         output of function:
+                'var_list':         ->  []
+                                        HTML-styled list of variables,
+                                        these are of the form
+                                            '<b>CO2</b>','<b>H</b>' etc
+                                        or if a variable is repeated
+                                            '<b>H<sub>1</sub></b>',
+                                            '<b>H<sub>2</sub></b>' etc
+                'station_dict':     ->  dict(dict(list()))
+                                            outer key stations,
+                                                inner key products
+                                                    inner HTML-styled
+                                                    list of variables,
+                                                    as in 'var_list'
+                'var_btns'          ->  (list(str),str)
+                                        - The list contain strings of labels
+                                        (Not HTML) for the var buttons of
+                                        batch jobs, of the format
+                                            'H','CO2 (#1)', 'CO2 (#2)'
+                                        - The string (in HTML) is a description
+                                        on the belonging of each variable.
+                'var_cont_upd':     ->  Formatted html text for group content
+                                        in mode update.
+                'var_cont_read':    ->  Formatted html text for group content
+                                        in mode read.
+                'var_plot_texts':     ->  (str, str, list)
+                                        str1 = details of variables of the output
+                                        of a tool.
+                                                (row below title)
+                                        str2 = subtitle of the output of a tool.
+                                                (row above plot)
+                                        list of legend titles
+
+            var_plot_tool: str
+                Used with output=='var_plot_texts', that will have slight different
+                outputs depending on tool.
+                Choices for var_plot_tool:
+                 'multi_plot', 'corr_plot', 'split_plot'
+                 'corr_table', 'statistics'
+
+
+            stn_name_id_ls: list(str, str)
+                List of (station_name, station_id), needed for
+                    output in  ['var_btns', 'var_cont_upd, 'var_cont_read']
+
+            Returns
+            dict list or str (depending on output)
 
         """
-        station_dict = {}
+
+        def format_var_index(v, ind, out):
+            if out in ['var_btns', 'var_plot_texts']:
+                if ind is not None:
+                    return f'{v} (#{ind})'
+                return v
+            else:
+                if ind is not None:
+                    return f'<b>{v}<sub>{ind}</sub></b>'
+                return f'<b>{v}</b>'
+
+        plot_axis = 0
+        if var_ls:
+            if isinstance(var_ls, list) or isinstance(var_ls, tuple):
+                if all(isinstance(x, str) for x in var_ls):
+                    var_tuples = [list(var_ls)]
+                elif all(isinstance(y, str) for x in var_ls for y in x):
+                    var_tuples = copy.deepcopy(var_ls)
+                elif len(var_ls) == 2 and all(isinstance(y[1], list) for y in
+                                              var_ls):
+                    var_tuples = []
+                    for y in var_ls:
+                        if not plot_axis:
+                            plot_axis = len(y[1])
+                        var_tuples.extend(copy.deepcopy(y[1]))
+                elif len(var_ls) == 1 and all(isinstance(y[1], list) for y in
+                                              var_ls):
+                    var_tuples = copy.deepcopy(var_ls[0][1])
+                else:
+                    return
+            else:
+                return
+        else:
+            return
+
+        v_ls = [v[0] for v in var_tuples]
+        count_ls = [1] * len(v_ls)
+        if debug_fun:
+            debug_fun(999, 'var_tuple_ls_converter() --- output ',
+                      f'output = {output}',
+                      f'var_tuples = {var_tuples}',
+                      f'v_ls = {v_ls}',
+                      f'count_ls = {count_ls}')
+        i = 0
+        while v_ls:
+            var = v_ls.pop(0)
+            var_format_index = count_ls.pop(0)
+            if debug_fun:
+                debug_fun(999, 'var_tuple_ls_converter() --- 1111 ',
+                          f'i = {i}',
+                          f'var = {var}',
+                          f'var_tuples = {var_tuples}',
+                          f'v_ls = {v_ls}',
+                          f'count_ls = {count_ls}',
+                          f'var_format_index = {var_format_index}')
+            try:
+                next_index_of_var = v_ls.index(var)
+            except ValueError:
+                next_index_of_var = None
+            if isinstance(next_index_of_var, int):
+                fm_var = format_var_index(var, var_format_index, output)
+                count_ls[next_index_of_var] += 1
+            elif var_format_index > 1:
+                fm_var = format_var_index(var, var_format_index, output)
+            else:
+                fm_var = format_var_index(var, None, output)
+
+            var_tuples[i][0] = fm_var
+            i += 1
+        fm_var_ls = [v[0] for v in var_tuples]
+
+        if output == 'var_list':
+            return fm_var_ls
+
+        station_dict1 = {}
+        station_dict2 = {}
+
         for v_tuple in var_tuples:
             st = v_tuple[-1]
             prod = v_tuple[-2]
             var = v_tuple[0]
-            if st in station_dict.keys():
-                if prod in station_dict[st].keys():
-                    station_dict[st][prod].append(var)
+            if var in fm_var_ls[: plot_axis]:
+                if st not in station_dict1:
+                    station_dict1[st] = {prod: [var]}
+                elif prod not in station_dict1[st]:
+                    station_dict1[st][prod] = [var]
                 else:
-                    station_dict[st][prod] = [var]
+                    station_dict1[st][prod].append(var)
             else:
-                station_dict[st] = {prod: [var]}
-        return station_dict
+                if st not in station_dict2:
+                    station_dict2[st] = {prod: [var]}
+                elif prod not in station_dict2[st]:
+                    station_dict2[st][prod] = [var]
+                else:
+                    station_dict2[st][prod].append(var)
+
+        if output == 'var_plot_texts':
+
+            title_part_ls1 = []
+            for stn in station_dict1.keys():
+                txt = f'{stn}, '
+                prod_var_ls = []
+                for prod in station_dict1[stn].keys():
+                    p_ls = prod.split(' ')
+                    p_short = f'{p_ls[-1]}'
+                    p_vars = station_dict1[stn][prod]
+                    prod_var_ls.append(f'{p_short}: ' + ', '.join(p_vars))
+                title_part_ls1.append(txt + ', '.join(prod_var_ls))
+
+            title_part_ls2 = []
+            for stn in station_dict2.keys():
+                txt = f'{stn}, '
+                prod_var_ls = []
+                for prod in station_dict2[stn].keys():
+                    p_ls = prod.split(' ')
+                    p_short = f'{p_ls[-1]}'
+                    p_vars = station_dict2[stn][prod]
+                    prod_var_ls.append(f'{p_short}: ' + ', '.join(p_vars))
+                title_part_ls2.append(txt + ', '.join(prod_var_ls))
+
+            legend_titles = fm_var_ls
+            match var_plot_tool:
+                case 'multi_plot':
+                    if title_part_ls1 and title_part_ls2:
+                        title_part = f'Left axis - ' \
+                                     f'{"; ".join(title_part_ls1)} <br>' \
+                                     f'Right axis - ' \
+                                     f'{"; ".join(title_part_ls2)} <br>'
+                    else:
+                        title_part = f'{"; ".join(title_part_ls2)} <br>'
+                    if plot_axis:
+                        subtitle = ', '.join(fm_var_ls[: plot_axis])
+                        subtitle += " || " + ', '.join(fm_var_ls[plot_axis:])
+                    else:
+                        subtitle = ', '.join(fm_var_ls)
+                case 'corr_plot':
+                    title_part = f'{title_part_ls2[0]} on the <i>x</i>-axis, ' \
+                                 f'and {title_part_ls2[1]} on the ' \
+                                 f'<i>y</i>-axis. <br>Please note that ' \
+                                 f'timescale of the measurements is ' \
+                                 f'converted to the colorgrade starting from ' \
+                                 f'the bottom.'
+                    subtitle = f'{fm_var_ls[0]} vs {fm_var_ls[1]}'
+                case 'split_plot':
+                    subtitle = ''
+                    title_part = f'{"; ".join(title_part_ls2)} <br>'
+                case _:
+                    subtitle = ''
+                    title_part = f'{"; ".join(title_part_ls2)} <br>'
+
+            return title_part, subtitle, legend_titles
+        else:
+            station_dict = station_dict2
+
+        match output:
+            case 'station_dict':
+                return station_dict
+            case 'var_btns':
+                var_txt = ''
+                separator = '<br>'
+            case 'var_cont_upd':
+                var_txt = ', '.join(fm_var_ls)
+                var_txt += '<br><hr>'
+                separator = '<hr>'
+            case 'var_cont_read':
+                var_txt = f'<b><i>Variables: </i></b>'
+                var_txt += ', '.join(fm_var_ls)
+                var_txt += '<br><hr>'
+                separator = '<hr>'
+
+        one_stn = (len(station_dict) == 1)
+        stn_ls = stn_name_id_ls
+        rows = []
+        for stn in station_dict.keys():
+            stn_name = [s[0] for s in stn_ls if s[1] == stn].pop()
+
+            one_prod = (len(station_dict[stn].keys()) == 1)
+            if debug_fun:
+                debug_fun(999, 'var_tuple_ls_converter() --- station, prod ',
+                          f'stn_name = {stn_name}',
+                          f'one_stn = {one_stn}',
+                          f'one_prod = {one_prod}')
+            if one_stn and one_prod:
+                for prod in station_dict[stn].keys():
+                    title_txt = f'<i>All variables are from ' \
+                                f'<b>{prod}</b> of the station ' \
+                                f'<b>{stn_name}</b></i>'
+                    if output != 'var_btns':
+                        title_txt = '<hr>' + title_txt
+            else:
+                main_title_txt = f'<i>Variables from the station ' \
+                                 f'<b>{stn_name}</b></i>'
+                if output != 'var_btns':
+                    main_title_txt = '<hr>' + main_title_txt
+                prod_var_ls = []
+                for prod in station_dict[stn].keys():
+                    p_vars = station_dict[stn][prod]
+                    prod_title_txt = f'<br><b><i>{prod}: </i></b> &nbsp &nbsp'
+                    last_var = p_vars.pop()
+                    if p_vars:
+                        var_row = ', '.join(p_vars)
+                        prod_title_txt += f'{var_row} <i>and</i>' \
+                                          f' {last_var}'
+                    else:
+                        prod_title_txt += f'{last_var}'
+                    prod_var_ls.append(prod_title_txt)
+                if debug_fun:
+                    debug_fun(999, 'var_tuple_ls_converter() --- main_title_txt ',
+                              f'main_title_txt = {main_title_txt}',
+                              f'prod_var_ls = {prod_var_ls}')
+                rows.append(main_title_txt + ''.join(prod_var_ls))
+
+        if rows:
+            title_txt = f'{separator}'.join(rows)
+        if debug_fun:
+            debug_fun(999, 'var_tuple_ls_converter() --- 4',
+                      f'title_txt = {title_txt}')
+        if output == 'var_btns':
+            return fm_var_ls, title_txt
+        else:
+            return var_txt + title_txt
 
     @staticmethod
     def _get_width_layout(text: str = None):
@@ -189,6 +546,17 @@ class AnalysisGui:
         this_layout = wd.Layout(min_width=f'{min_width}px',
                                 max_width=max_width)
         return this_layout
+
+    @staticmethod
+    def _set_css(text: str, css_type: str = None):
+        # we use a paragraph in order to set a nice style for the rows
+        match css_type:
+            case 'tight':
+                return f'<p class="tight_line_height">{text}</p>'
+            case 'line':
+                return f'<p class="line_height">{text}</p>'
+            case _:
+                return f'<p class="line_height">{text}</p>'
 
     def __init__(self, theme: str = None, level: str = None, debug: bool = None):
 
@@ -225,6 +593,7 @@ class AnalysisGui:
             self.debug = False
             self.debugger = None
             self.debug_out = None
+            self.debug_value = None
 
         # directories for appdata and user outputs
         self.code_dir = os.path.join('.', 'eco_tool')
@@ -247,7 +616,7 @@ class AnalysisGui:
         self.retriever = _AppDataRetriever(app_config_file=self.app_config_file,
                                            user_cache_file=self.user_cache_file,
                                            user_config_file=self.user_config_file,
-                                           debug=self.debug)
+                                           debug_function=self.debug_value)
 
         self.cache = None
         self.stored_timeseries = None
@@ -272,6 +641,106 @@ class AnalysisGui:
         with self.debug_out:
             display(wd.HTML(msg))
 
+    def _batch_validation_errors(self, grp, jobs: list or str, mode: str):
+        def html_error_txt(er_dict: dict):
+            tool2name_dict = {'split_plot': 'Split-plot',
+                              'multi_plot': 'Multi-plot',
+                              'corr_plot': 'Correlation plot (2 vars)',
+                              'corr_table': 'Correlation table',
+                              'statistics': 'Numerical Statistics'}
+            er_batches = sorted(list(er_dict.keys()), key=(lambda x: x.lower()))
+            batches = [f'<b><i>{bat}</i></b>' for bat in er_batches]
+            good_batches = [bat for bat in jobs if bat not in er_batches]
+            good_bats = [f'<b><i>{bat}</i></b>' for bat in good_batches]
+
+            error_msg = f'<h4><b>Validation error:</b></h4> The group <b><i' \
+                        f'>"{grp}"</i></b> and it\'s batch jobs do not match.<br>'
+            txt = AnalysisGui._set_css(text=error_msg,
+                                       css_type='line')
+            if mode == 'run':
+                if len(jobs) == len(batches):
+                    error_msg = f'Can not generate output. '
+                elif len(batches) > 1:
+                    error_msg = f'Skipping batch jobs: {", ".join(batches)}. ' \
+                                f'Proceeding with batch jobs: ' \
+                                f'{", ".join(good_bats)}. '
+                else:
+                    error_msg = f'Skipping batch job: {batches[0]}.'
+                error_msg += 'See the <b>suggestion</b> below on how to fix this.'
+                txt += AnalysisGui._set_css(text=error_msg,
+                                            css_type='line')
+            elif mode == 'save_group':
+                error_msg = f'The batch job(s): {", ".join(batches)}, will ' \
+                            f'not run. To fix this, please consider the ' \
+                            f'suggestion below. '
+                txt += AnalysisGui._set_css(text=error_msg,
+                                            css_type='line')
+            if self.debug:
+                self.debug_value(-151, '_batch_validation_errors() '
+                                       'html_error_txt()',
+                                 f'er_dict = {er_dict}')
+            for bat, tool_rows in er_dict.items():
+                error_msg = f'<br>Missmatch in batch job <b><i>' \
+                            f'"{bat}"</i></b>:<br>'
+                txt += AnalysisGui._set_css(text=error_msg,
+                                            css_type='line')
+                for row in tool_rows:
+                    for index, tool_dict in row.items():
+                        tool_txt_ls = []
+                        for tool, var_ls in tool_dict.items():
+                            tool_txt = f'Tool number {int(index) + 1}, a ' \
+                                       f'<b><i>{tool2name_dict[tool]}</i></b> ' \
+                                       f'with contain the variable(s): '
+                            var_texts = []
+                            for var in var_ls:
+                                var_texts.append(f'<b><i>{var[0]}</i></b> '
+                                                 f'from <b>{var[1]}</b> of '
+                                                 f'station the <b>{var[2]}</b>')
+                            tool_txt += f'<ul><li>{"</li><li>".join(var_texts)}' \
+                                        f'</li></ul>'
+                            tool_txt = AnalysisGui._set_css(text=tool_txt,
+                                                            css_type='line')
+                            tool_txt_ls.append(tool_txt)
+                        txt += f'<ul><li>{"</li><li>".join(tool_txt_ls)}' \
+                               f'</li></ul>'
+            error_msg = '<br><i>Probably the above variable(s) has been ' \
+                        'removed from the group, but not from the batch ' \
+                        'jobs</i><br>'
+            txt += AnalysisGui._set_css(text=error_msg,
+                                        css_type='line')
+            error_msg = '<b><i>Suggestion</i></b>, either:' \
+                        '<ol><li> ' \
+                        '<ul>' \
+                        '<li>Go to the <b><i>Group</i></b>-menu</li>' \
+                        f'<li>Select group <b><i>{grp}</i></b> and ' \
+                        f'choose <i>Update</i>.</li>' \
+                        '<li>Add the missing variable(s) and ' \
+                        'press <i>Save</i>.</li>' \
+                        '</ul></li>' \
+                        '<li><ul>' \
+                        '<li>Go to the <b><i>Batch jobs</i></b>-menu</li>' \
+                        f'<li>Select each of the falsy batch jobs: ' \
+                        f'<b><i>{", ".join(batches)}</i></b> and ' \
+                        f'choose <i>Update</i></li>' \
+                        '<li>When <i>Save</i> is chosen old group ' \
+                        'variables will be removed.</li>' \
+                        '</ul></li></ol><br>'
+            txt += AnalysisGui._set_css(text=error_msg,
+                                        css_type='line')
+            return txt, good_batches
+
+        cache = self._load_cache()
+        error_dict = {}
+        if '_var_mismatch' in cache['_groups'][grp]:
+            for b, v in cache["_groups"][grp]["_var_mismatch"].items():
+                if b in jobs:
+                    if b not in error_dict:
+                        error_dict[b] = [v]
+                    else:
+                        error_dict[b].append(v)
+
+        return '' if not error_dict else html_error_txt(error_dict)
+
     def _clear_debug_list(self, c):
         with self.debug_out:
             clear_output()
@@ -288,19 +757,27 @@ class AnalysisGui:
 
     def _get_report_writer(self):
 
-        if self.report_writer is None:
-            self.report_writer = report_writer.ReportWriter(self.retriever,
-                                                            self.icos_info,
-                                                            self.debug)
-        else:
-            today = dt.datetime.today().strftime('YYYY-MM-DD')
-            if self.report_writer.timestamp == today:
-                return self.report_writer
-            else:
-                self._reset_gui_data()
-                self._get_report_writer()
+        rw = self.report_writer
+        if rw is None:
+            rw = report_writer.ReportWriter(retriever=self.retriever,
+                                            icos_info=self.icos_info,
+                                            debug_function=self.debug_value)
+            self.report_writer = rw
+
+        today = dt.datetime.today().strftime('YYYY-MM-DD')
+        if rw.timestamp != today:
+            self._reset_gui_data()
+            self._get_report_writer()
 
         return self.report_writer
+
+    def _station_name_id_ls(self) -> list:
+        st_df = self.stations_df
+        id_ls = list(st_df.id)
+        name_ls = list(st_df.name)
+        name_id_ls = list(set(zip(name_ls, id_ls)))
+        name_id_ls.sort(key=lambda v: v[0].lower())
+        return name_id_ls
 
     def _validate_batch_of_grp(self, cache_dict: dict = None) -> dict:
         # expects a dict like cache['_groups'][grp] see the 'save_group'
@@ -355,9 +832,9 @@ class AnalysisGui:
                 elif choice == 'Group menu ':
                     self._group_menu()
                 elif choice == 'Batch jobs ':
-                    self._edit_batch_jobs(_menu_call=True)
+                    self._edit_batch_jobs()
                 elif choice == 'Settings ':
-                    self._configurations_menu()
+                    self._default_settings()
                 elif choice == 'Help ':
                     self._help()
                 else:
@@ -374,6 +851,18 @@ class AnalysisGui:
                                 tooltip=None,
                                 icons=icon_ls)
         main_widgets.append(main)
+        # we use a css paragraph in order to set a nice style for the rows
+        p_css = wd.HTML(value='<head>'
+                              '    <style>'
+                              '        p.line_height {'
+                              '            line-height: 1.3; '
+                              '            margin-left: 10px} '
+                              '        p.tight_line_height {'
+                              '            line-height: 1.15; '
+                              '            margin-left: 30px} '
+                              '    </style>'
+                              '</head>')
+        main_widgets.append(p_css)
 
         group_cache = self._load_cache()
         if group_cache['_groups'].keys():
@@ -440,7 +929,8 @@ class AnalysisGui:
                     display(wd.HTML(msg))
                     return False
 
-            group_drop.options = list(cache['_groups'].keys())
+            group_ls = list(cache['_groups'].keys())
+            group_drop.options = sorted(group_ls, key=(lambda x: x.lower()))
             group_drop.observe(init_batch_jobs,
                                names='value')
             if cache['_last_group']:
@@ -448,23 +938,25 @@ class AnalysisGui:
             else:
                 group_drop.value = group_drop.options[0]
             group_drop.disabled = False
+            error_widget.layout.display = 'none'
 
             # tool settings
-            settings = self._load_user_settings()
-            end_shift = 0
-            start_shift = -8
-            fetch_shift = 6
-            if 'run_configs' in settings.keys():
-                end_shift = - settings['run_configs'].get('end_date', 0)
-                start_shift = - settings['run_configs'].get('start_date', 8)
-                fetch_shift = settings['run_configs'].get('fetch_date', 6)
-
+            user_settings = self._load_user_settings()
+            if 'run_configs' in user_settings.keys():
+                end_shift = - user_settings['run_configs'].get('end_date', 0)
+                start_shift = - user_settings['run_configs'].get('start_date', 8)
+            else:
+                end_shift = 0
+                start_shift = -8
             end_date.value = dt.date.today() + dt.timedelta(days=end_shift)
             start_date.value = end_date.value + dt.timedelta(days=start_shift)
-            days.value = fetch_shift
+
             return True
 
         def init_batch_jobs(c):
+            error_txt_widget.value = ''
+            error_widget.layout.display = 'none'
+
             cache = self._load_cache()
             grp = group_drop.value
             if grp in cache['_groups'].keys() and \
@@ -472,22 +964,24 @@ class AnalysisGui:
                 batches = cache['_groups'][grp].get('_batches', {})
                 if batches:
                     b_ls = [wd.Button(description=name,
-                                      style={'button_color': 'LightSeaGreen'},
+                                      style=dict(button_color='LightSeaGreen'),
                                       layout=AnalysisGui._get_width_layout(name))
                             for name in batches.keys()]
                     if b_ls:
                         all_title = 'Run all batch jobs'
                         all_layout = AnalysisGui._get_width_layout(all_title)
                         b_ls.append(wd.Button(description=all_title,
-                                              style={'button_color':
-                                                         'MediumSeaGreen'},
+                                              icon='area-chart',
+                                              button_style='success',
                                               layout=all_layout))
                     for bt in b_ls:
                         bt.on_click(batch_click)
                     batch_jobs.children = b_ls
-
-        def days_changed(change):
-            start_date.value = end_date.value + dt.timedelta(days=-days.value)
+                else:
+                    batch_jobs.children = []
+            else:
+                # Should never be the case
+                batch_jobs.children = []
 
         def date_changed(change):
             if change['owner'].description == 'End date':
@@ -497,142 +991,50 @@ class AnalysisGui:
                 if change['new'] >= end_date.value:
                     start_date.value = change['old']
 
-        def get_data():
-            with out:
-                display(wd.HTML(value='<h1>Generating report...</h1>'))
-            grp = group_drop.value
-            cache = self._load_cache()
-            var_tuple_ls = cache['_groups'][grp]['_group_vars']
-
-            start = start_date.value
-            end = end_date.value
-
-            # Reuse timeseries if possible
-            store = self.stored_timeseries.get(grp, None)
-            if isinstance(store, dict):
-                if store['start'] <= start and store['end'] >= end:
-                    df = store['df']
-                    return df
-
-            var_pid_ls = []
-            st_df = self.stations_df
-            for var, prod, stn in var_tuple_ls:
-                # sampleheight needed for 'AS'
-
-                pid = st_df.loc[(st_df.id == stn) & (st_df.specLabel ==
-                                                     prod)].dobj.values[0]
-                var_pid_ls.append((var, pid))
-
-            stored_start = start + dt.timedelta(days=-days.value)
-            stored_end = end + dt.timedelta(days=2)
-            if self.debug:
-                self.debug_value(-34, 'get_data()',
-                                 f'var_pid_ls = {var_pid_ls}')
-
-            df = None
-            try:
-                df = icos_data.StationData.group_ts(var_tuple_ls=var_pid_ls,
-                                                    start_date=stored_start,
-                                                    end_date=stored_end)
-            except Exception as e:
-                if self.debug:
-                    import traceback
-                    self.debug_value(-34, 'get_data()',
-                                     f'Exception: {e})',
-                                     '-- Error in call to '
-                                     'icos_data.StationData.group_ts',
-                                     f'var_tuple_ls={var_pid_ls}',
-                                     f'start_date= {stored_start}',
-                                     f'end_date= {stored_end})',
-                                     f'type(stored_start) = {type(stored_start)}',
-                                     f'type(stored_end) = {type(stored_end)}',
-                                     f'Traceback: {traceback.format_exc()}')
-
-            self.stored_timeseries[grp] = {'start': stored_start,
-                                           'end': stored_end,
-                                           'df': df}
-
-            return df
-
-        def batch_validation_errors(jobs):
-            cache = self._load_cache()
-            grp = group_drop.value
-            error_ls = []
-            if '_var_mismatch' in cache['_groups'][grp]:
-                for b, v in cache["_groups"][grp]["_var_mismatch"].items():
-                    if b in jobs or jobs == 'all':
-                        error_ls.append((b, v))
-
-            return error_ls
-
-        def set_error_message(er_ls):
-            tool2name_dict = {'split_plot': 'Split-plot',
-                              'multi_plot': 'Multi-plot',
-                              'corr_plot': 'Correlation plot (2 vars)',
-                              'corr_table': 'Correlation table',
-                              'statistics': 'Numerical Statistics'}
-            grp = group_drop.value
-            error_msg = f'<b>The group <i>{grp}</i> and it\'s ' \
-                        f'batch jobs do not match.</b><br> '
-            if self.debug:
-                self.debug_value(-35, 'set_error_message()',
-                                 f'er_ls: {er_ls})')
-            for e in er_ls:
-                error_msg += f'The batch job <b><i>{e[0]}</i></b> include <br>'
-                for index, tool_dict in e[1].items():
-                    var_ls = []
-                    for tool, var_ls in tool_dict.items():
-                        error_msg += f'a <b><i>{tool2name_dict[tool]}</i></b> ' \
-                                     f'(tool number {int(index) + 1}) with ' \
-                                     f'the variable(s): <br>'
-
-                    for v in var_ls:
-                        error_msg += f'<b><i>{v[0]}</i></b> (from {v[1]} of' \
-                                     f' {v[2]}) <br>'
-            error_msg += '<br><i> Probably the above variable has been removed ' \
-                         'from the group, but not from the batch jobs</i><br>' \
-                         'Suggestion: Either update the group and add the ' \
-                         'variables, or update the batch jobs.'
-
-            with out:
-                clear_output()
-                display(wd.HTML(error_msg))
-
         def batch_click(c):
             run_batch(jobs=c.description)
 
         def run_batch(jobs):
+
+            grp = group_drop.value
             if jobs == 'Run all batch jobs':
-                jobs = 'all'
+                cache = self._load_cache()
+                batch_ls = list(cache['_groups'][grp]['_batches'].keys())
+            else:
+                batch_ls = [jobs]
 
             if self.debug:
                 self.debug_value(-38, 'run_batch() ',
                                  f'jobs = {jobs}',
-                                 f'group_drop.value = {group_drop.value}')
-            errors = batch_validation_errors(jobs)
+                                 f'group = {grp}')
 
-            if errors:
-                set_error_message(errors)
-                return
+            validation_error = self._batch_validation_errors(grp=grp,
+                                                             jobs=batch_ls,
+                                                             mode='run')
 
             with out:
                 clear_output()
-                if jobs == 'all':
-                    temp_title = f'Generating report to all batch jobs ' \
-                                 f'of variable group {group_drop.value}...'
+                if jobs == 'Run all batch jobs':
+                    temp_title = f'<i>Generating report to all batch jobs ' \
+                                 f'of variable group ' \
+                                 f'<b>{group_drop.value}</b>...</i>'
                 else:
-                    temp_title = f'Generating report of batch(es) {jobs} ' \
-                                 f'of variable group {group_drop.value}...'
+                    temp_title = f'<i>Generating report of batch job ' \
+                                 f'<b>{jobs}</b> of variable group ' \
+                                 f'<b>{group_drop.value}</b>...</i>'
+                if validation_error:
+                    error_txt_widget.value = validation_error[0]
+                    error_widget.layout.display = 'block'
+                    temp_title += f'<hr>{validation_error[0]}<hr>'
+                    good_batches = validation_error[1]
+                    if good_batches:
+                        batch_ls = good_batches
+                    else:
+                        display(wd.HTML(temp_title))
+                        return
                 display(wd.HTML(temp_title))
 
             rw = self._get_report_writer()
-
-            if jobs == 'all':
-                cache = self._load_cache()
-                grp = group_drop.value
-                batch_ls = list(cache['_groups'][grp]['_batches'].keys())
-            else:
-                batch_ls = [jobs]
 
             report_dict = rw.get_batch_report(group=group_drop.value,
                                               batch_ls=batch_ls,
@@ -663,159 +1065,48 @@ class AnalysisGui:
                                 self.debug_value(-38, 'run_batch() ',
                                                  f'Not implemented: '
                                                  f'{tool_result[0]} ')
-                            pass
-
-        def run(c=None):
-            def link(url, url_txt) -> str:
-                return f'<a href="{url}" target="_blank">' \
-                       f'<font color="DarkBlue">{url_txt}</font></a>'
-
-            with out:
-                clear_output()
-            df = get_data()
-            if self.debug:
-                self.debug_value(-39, 'run() ',
-                                 f'df: {df} ')
-
-            # Generating report title
-            grp = group_drop.value
-            stations = df.icos_station_name
-            products = df.icos_product
-            urls = df.icos_accessUrl
-            today = dt.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
-            rep_title1 = f'<h1>Report for the variable group: <font color="DodgerBlue">{grp}</font>, {today}.</h1><br>'
-            rep_title2 = 'Data from '
-            rep_title3 = ''
-            if all((isinstance(x, str) for x in [stations, products, urls])):
-                rep_title2 += f'{link(urls, products)} of {stations}.'
-            elif all(
-                    (isinstance(x, list) for x in [stations, products, urls])) and \
-                    len(stations) == len(products) and len(products) == len(urls):
-                n = len(stations)
-                d = {}
-                for i in range(n):
-                    s = stations[i]
-                    p = products[i]
-                    u = urls[i]
-                    v = (p, u)
-                    if s in d.keys():
-                        if v not in d[s]:
-                            d[s].append(v)
-                    else:
-                        d[s] = [v]
-                last_char = ''
-                for s, v in d.items():
-                    rep_title2 += last_char
-                    for tup in v:
-                        rep_title2 += f'{link(tup[1], tup[0])}, '
-                    rep_title2 += f' of {s}'
-                    last_char = ';<br>'
-                rep_title2 += '.'
-            else:
-                if isinstance(products, str):
-                    rep_title2 += f'Data from {products}'
-                else:
-                    rep_title2 += f'Data from {", ".join(products)}'
-
-                if isinstance(stations, str):
-                    rep_title2 += f' collected at {stations}.'
-                elif len(set(stations)) == 1:
-                    rep_title2 += f' collected at {stations[0]}.'
-                else:
-                    rep_title2 += f' collected at {", ".join(stations)}.'
-                rep_title2 = f'<h2>{rep_title2}</h2><br>'
-
-                if isinstance(urls, str):
-                    rep_title3 += f'Link to data:  {link(urls, urls)}.'
-                else:
-                    rep_title3 += 'Links to data:  '
-                    for u in urls:
-                        rep_title3 += f'{link(u, u)}.'
-
-            rep_title2 = f'<h3>{rep_title2}</h3>'
-            report_title = rep_title1 + rep_title2 + rep_title3
-
-            with out:
-                clear_output()
-                report = wd.HTML(value=report_title)
-                display(report)
-
-            if tool_drop.value == 'Split-plot':
-                sliders = int(plot_sliders.value)
-                var_units = df.icos_var_unit_ls
-                data = df[start_date.value:end_date.value]
-                title = f'Split-plot of variable group {grp}  (Timestamp: {today})'
-
-                with out:
-                    plot_old.split_plot(data,
-                                        n=sliders,
-                                        units=var_units,
-                                        title=title).show()
-
-        def save():
-            # clear local storage
-            self._flush_store('')
-            cache = self._load_cache()
-            json_handler.write(data=cache,
-                               path_to_json_file=self.user_cache_file)
 
         # Main of configurations
         # ======================
-
         # Layouts
-
-        right_aligned_column = wd.Layout(display='flex',
-                                         # Possible values of display:flex, grid
-                                         flex_flow='column',
-                                         # Pos. values of flex_flow:row,column
-                                         align_items='flex-end')
-        # Pos values of  align_items: center, flex-start, flex-end, stretch
-
-        common_layout = wd.Layout(width='148pt', height='30px')
+        common_layout = wd.Layout(width='155pt', height='40px')
 
         # Dropdowns
-
-        group_drop = wd.Dropdown(description='Groups',
-                                 layout=common_layout)
-        batch_jobs = wd.HBox()
-        tool_drop = wd.Dropdown(description='Tools',
-                                options=['Split-plot',
-                                         'Multi-plot'
-                                         'Correlation plot',
-                                         'Correlation table'],
-                                layout=common_layout)
-
-        plot_sliders = wd.Dropdown(description="Plot sliders",
-                                   options=range(1, 10),
-                                   layout=common_layout)
-
-        days = wd.Dropdown(description="Max days",
-                           options=range(1, 100),
-                           layout=common_layout)
+        group_label = wd.HTML('<b><i>Available groups: </i></b>',
+                              layout=wd.Layout(width='auto'))
+        group_drop = wd.Dropdown(layout=wd.Layout(width='auto',
+                                                  height='40px'),
+                                 description_tooltip='Group name')
+        group_box = wd.HBox([group_label, group_drop])
 
         start_date = wd.DatePicker(description='Start date',
                                    layout=common_layout)
 
         end_date = wd.DatePicker(description='End date',
-                                 layout=common_layout,
-                                 tooltip='Default is yesterday')
+                                 layout=common_layout)
 
-        run_btn = wd.Button(description="Run", icon='area-chart',
-                            button_style='success')  #####, layout=center_layout)
+        rows = [wd.HBox([group_box, start_date, end_date])]
+        batch_jobs = wd.HBox()
+        rows.append(batch_jobs)
+        error_txt_widget = wd.HTML(layout=wd.Layout(width='auto',
+                                                    max_width='90%',
+                                                    height='100%'),
+                                   value='Variables: ',
+                                   disabled=True)
+        error_widget = wd.Accordion([error_txt_widget],
+                                    titles=('Errors', '0'),
+                                    selected_index=None,
+                                    layout=wd.Layout(width='50%',
+                                                     height='100%'))
+        rows.append(error_widget)
         out = wd.Output()
-
+        rows.append(out)
         if set_gui():
             # observe changes
-            run_btn.on_click(run)
-            days.observe(days_changed, "value")
             start_date.observe(date_changed, "value")
             end_date.observe(date_changed, "value")
 
-            display(wd.VBox([wd.HBox([group_drop, tool_drop, run_btn]),
-                             wd.HBox([start_date, end_date]),
-                             # layout=right_aligned_column),
-                             batch_jobs,
-                             out]))  # layout=right_aligned_column))
+            display(wd.VBox(rows))
 
             # By default we run all batch jobs of latest group.
             # this can be changed in configurations
@@ -829,9 +1120,7 @@ class AnalysisGui:
                 pass
             elif auto_run:
                 if batch_jobs.children:
-                    run_batch('all')
-                else:
-                    run()
+                    run_batch('Run all batch jobs')
 
     def _load_app_configs(self):
         return self.retriever.load_app_configs()
@@ -894,108 +1183,139 @@ class AnalysisGui:
 
         wide_layout = wd.Layout(width='auto', height='auto', max_width='80%')
         column_layout = wd.Layout(width='auto', height='auto', max_width='60%')
+        half_col_layout = wd.Layout(width='auto', height='auto', max_width='40%')
+        three_col_layout = wd.Layout(width='auto', height='auto', max_width='33%')
 
-        # we use a css paragraph in order to set a nice style for the rows
-        p_css = wd.HTML(value='<head>'
-                              '    <style>'
-                              '        p.line_height {line-height: 1.3; '
-                              '                       margin-left: 10px} '
-                              '    </style>'
-                              '</head>')
-        replace_str = '_replace_me_'
-        p_line = f'<p class="line_height">{replace_str}</p>'
-        top_html = wd.HTML(disabled=True,
-                           layout=wide_layout)
-        plot_html = wd.HTML(disabled=True,
-                            layout=column_layout)
-        group_html1 = wd.HTML(disabled=True,
-                              layout=column_layout)
-        group_html2 = wd.HTML(disabled=True,
-                              layout=column_layout)
-        grp_defn_html = wd.HTML(disabled=True,
-                                layout=column_layout)
-        batch_html1 = wd.HTML(disabled=True,
-                              layout=column_layout)
-        batch_html2 = wd.HTML(disabled=True,
-                              layout=column_layout)
-        bat_defn_html = wd.HTML(disabled=True,
-                                layout=column_layout)
-        settings_html = wd.HTML(disabled=True,
-                                layout=column_layout)
-        extract_html = wd.HTML(disabled=True,
-                               layout=column_layout)
-        end_html = wd.HTML(disabled=True,
-                           layout=wide_layout)
+        top_html = wd.HTML(disabled=True, layout=wide_layout)
+
+        plot_html = wd.HTML(disabled=True, layout=column_layout)
+
+        group_html1 = wd.HTML(disabled=True, layout=column_layout)
+        group_html2 = wd.HTML(disabled=True, layout=column_layout)
+        grp_defn_html = wd.HTML(disabled=True, layout=column_layout)
+
+        batch_html1 = wd.HTML(disabled=True, layout=column_layout)
+        batch_html2 = wd.HTML(disabled=True, layout=column_layout)
+        bat_defn_html = wd.HTML(disabled=True, layout=column_layout)
+
+        settings_html = wd.HTML(disabled=True, layout=column_layout)
+
+        extract_html = wd.HTML(disabled=True, layout=column_layout)
+
+        new_grp_html = wd.HTML(disabled=True, layout=three_col_layout)
+        upd_grp_html = wd.HTML(disabled=True, layout=three_col_layout)
+        del_grp_html = wd.HTML(disabled=True, layout=three_col_layout)
+
+        general_html = wd.HTML(disabled=True, layout=half_col_layout)
+        technical_html = wd.HTML(disabled=True, layout=half_col_layout)
+
+        end_html = wd.HTML(disabled=True, layout=wide_layout)
 
         margin_str = '&nbsp' * 6
         margin = wd.HTML(value=margin_str)
+
+        link_product_fluxes = link('https://data.icos-cp.eu/objects/'
+                                   '_Vb_c34v0nfTA_fG0kiIAmXM',
+                                   'NRT ETC Fluxes')
+        link_product_meteo = link('https://data.icos-cp.eu/objects/'
+                                  'AOceWQsLL6wjS2fKUylSKsrY',
+                                  'NRT ETC Meteo')
+        link_product_meteosens = link('https://data.icos-cp.eu/objects/'
+                                      'H51Y34JoWmUffyKoNIpDVg2I',
+                                      'NRT ETC MeteoSens')
+        link_etc_stations = link('https://www.icos-cp.eu/observations/'
+                                 'ecosystem/stations', 'ICOS ETC Station')
         link_cp = link("https://data.icos-cp.eu/portal/", "ICOS Carbon Portal")
         mail_cp = link("mailto:info@icos-cp.eu", "info@icos-cp.eu")
         mail_ad = link("mailto:anders.dahlner@nateko.lu.se",
                        "anders.dahlner@nateko.lu.se")
 
-        widgets = wd.VBox([p_css,
-                           top_html,
-                           wd.HBox([plot_img, plot_html]),
+        widgets = wd.VBox([top_html,
+                           wd.HBox([plot_img, plot_html], layout=wide_layout),
                            wd.HBox([group_img, wd.VBox([group_html1,
                                                         wd.HBox([margin,
                                                                  grp_defn_html]),
                                                         group_html2])
-                                    ]),
+                                    ], layout=wide_layout),
                            wd.HBox([batch_img, wd.VBox([batch_html1,
                                                         wd.HBox([margin,
                                                                  bat_defn_html]),
                                                         batch_html2])
-                                    ]),
-                                    wd.HBox([settings_img, settings_html]),
-                           wd.HBox([extract_img, extract_html]),
+                                    ], layout=wide_layout),
+                           wd.HBox([settings_img, settings_html],
+                                   layout=wide_layout),
+                           wd.HBox([extract_img, extract_html],
+                                   layout=wide_layout),
+                           wd.HBox([new_grp_html, upd_grp_html, del_grp_html],
+                                   layout=wide_layout),
+                           wd.HBox([general_html, technical_html],
+                                   layout=wide_layout),
                            end_html])
 
         top_text = 'This application is aimed to assist principal ' \
                    'investigators of ICOS Ecosystem stations in the quality ' \
                    'control and analyse NRT data. <br><br>'
-        top_html.value = p_line.replace(replace_str, top_text)
+        top_html.value = AnalysisGui._set_css(text=top_text,
+                                              css_type='line')
+
         plot_text = 'The <b><i>Plot</i></b>-menu is the standard view of the ' \
                     'application. This is were the user run reports in order ' \
                     'to produce plots and statistics from the ICOS data.<br><br>'
-        plot_html.value = p_line.replace(replace_str, plot_text)
+        plot_html.value = AnalysisGui._set_css(text=plot_text,
+                                               css_type='line')
+
         group_text1 = 'In the <b><i>Group</i></b>-menu the user can create ' \
                       '<i>groups of variables</i>.<br>'
-        group_html1.value = p_line.replace(replace_str, group_text1)
-        grp_defn_text = '<i><b>Definition:</b> A group of variables is a ' \
-                        'list of variables where each variable is an ' \
-                        'ingested variable<sup>1</sup> from one of the ' \
-                        'files <b>ETC NRT Fluxes</b>, <b>ETC NRT Meteo</b>, ' \
-                        'or <b>ETC NRT Meteosens</b>, of some ICOS ' \
-                        'station.</i><br>'
-        grp_defn_html.value = p_line.replace(replace_str, grp_defn_text)
+        group_html1.value = AnalysisGui._set_css(text=group_text1,
+                                                 css_type='line')
+
+        grp_defn_text = '<i><b>Definition:</b> A <b>group of variables</b> ' \
+                        'is a non-empty list of variables where each ' \
+                        'variable is an ingested variable<sup>1</sup> from ' \
+                        'one of the ' \
+                        f'products <b>{link_product_fluxes}</b>, ' \
+                        f'<b>{link_product_meteo}</b>, ' \
+                        f'or <b>{link_product_meteosens}</b>, of some ' \
+                        f'<b>{link_etc_stations}</b>.</i><br>'
+        grp_defn_html.value = AnalysisGui._set_css(text=grp_defn_text,
+                                                   css_type='line')
         group_text2 = 'In particular a group of variables may ' \
                       'contain variables from different station and ' \
                       'files.<br>' \
-                      '<i>How</i> to set ut a group of variables are described ' \
-                      'in the <b><i>User guide</i></b> of the ' \
-                      '<b><i>Group</i></b>-menu.<br>' \
+                      '<b><i>How to set up or edit a group ' \
+                      'of variables</i></b> are described below. Moreover, ' \
+                      'when the user is in <i>update mode</i>, more ' \
+                      'detailed information is found in the ' \
+                      '<b><i>User guide</i></b> of the <b><i>Group</i></b>-menu.' \
+                      '<br>' \
                       f'<u>{margin_str}{margin_str}{margin_str}</u><br>' \
                       '<sup>1</sup> <i>That a variable is ingested means ' \
                       'that it is previewable at the ' \
                       f'{link_cp}.<br><br>'
-        group_html2.value = p_line.replace(replace_str, group_text2)
+        group_html2.value = AnalysisGui._set_css(text=group_text2,
+                                                 css_type='line')
         batch_text1 = 'In the <b><i>Batch jobs</i></b>-menu the user create ' \
                       '<i>batch jobs</i>. <br>'
-        batch_html1.value = p_line.replace(replace_str, batch_text1)
-        batch_defn_text = '<i><b>Definition:</b> A batch job for a group of ' \
-                          'variables, is a list of tools where each tool ' \
-                          'consist of a selection of variables from the ' \
-                          'group.<br>' \
-                          'By a tool we mean a plot-tool or a statistical ' \
-                          'tool, which is to be applied to a set of ' \
-                          'variables in order to create an output.'
-        bat_defn_html.value = p_line.replace(replace_str, batch_defn_text)
-        batch_text2 = '<i>How</i> to set ut a batch job is explained in the ' \
+        batch_html1.value = AnalysisGui._set_css(text=batch_text1,
+                                                 css_type='line')
+
+        batch_defn_text = '<i><b>Definition:</b> A <b>batch job</b> for ' \
+                          'a group of variables, is a list of tools where ' \
+                          'each tool consist of a selection of group ' \
+                          'variables.<br>' \
+                          'By a <b>tool</b> we mean a plot-tool or a ' \
+                          'statistical tool, together with some variables from ' \
+                          'the group of variables in order to create an output.'
+        bat_defn_html.value = AnalysisGui._set_css(text=batch_defn_text,
+                                                   css_type='line')
+
+        batch_text2 = '<i>How</i> to set up a batch job is explained in the ' \
                       '<b><i>User guide</i></b> of the <b><i>Batch jobs' \
                       '</i></b>-menu.'
-        batch_html2.value = p_line.replace(replace_str, batch_text2)
-        config_text = 'In the <b><i>Configurations</i></b>-menu the user ' \
+        batch_html2.value = AnalysisGui._set_css(text=batch_text2,
+                                                 css_type='line')
+
+        config_text = 'In the <b><i>Settings</i></b>-menu the user ' \
                       'can:<br> ' \
                       f'{margin_str} - change the <i>Default settings</i> ' \
                       'on what data to fetch and manipulate ' \
@@ -1004,18 +1324,46 @@ class AnalysisGui:
                       'up sequences of outputs, i.e. plots of statistics, ' \
                       'to produce. Here variables for the outputs are ' \
                       'selected from a group of variables.<br><br>'
-        settings_html.value = p_line.replace(replace_str, config_text)
+        settings_html.value = AnalysisGui._set_css(text=config_text,
+                                                   css_type='line')
 
         extract_text = 'The menu <b><i>Extract data</i></b> is a guidance ' \
                        'on how to extract data from the tool in case a user ' \
                        'wish to look more into details of a dataset or run ' \
                        'tests not available in this application.<br><br>'
-        extract_html.value = p_line.replace(replace_str, extract_text)
+        extract_html.value = AnalysisGui._set_css(text=extract_text,
+                                                  css_type='line')
 
-        end_text = f'For comments, questions, suggestions, bug reports ' \
+        new_grp_text = AnalysisGui.help_dict['group']['read_header1']
+        new_grp_text += AnalysisGui.help_dict['group']['read_body1'] + '<br>'
+        new_grp_html.value = AnalysisGui._set_css(text=new_grp_text,
+                                                  css_type='line')
+
+        upd_grp_text = AnalysisGui.help_dict['group']['read_header2']
+        upd_grp_text += AnalysisGui.help_dict['group']['read_body2'] + '<br>'
+        upd_grp_html.value = AnalysisGui._set_css(text=upd_grp_text,
+                                                  css_type='line')
+
+        del_grp_text = AnalysisGui.help_dict['group']['read_header3']
+        del_grp_text += AnalysisGui.help_dict['group']['read_body3'] + '<br>'
+        del_grp_html.value = AnalysisGui._set_css(text=del_grp_text,
+                                                  css_type='line')
+
+        general_text = AnalysisGui.help_dict['group']['general'] + '<br>'
+        general_html.value = AnalysisGui._set_css(text=general_text,
+                                                  css_type='line')
+
+        technical_text = AnalysisGui.help_dict['technical'] + '<br>'
+        technical_html.value = AnalysisGui._set_css(text=technical_text,
+                                                    css_type='line')
+
+        end_text = f'<br><hr><br>' \
+                   f'<b><i>Contact</i></b> For comments, questions, ' \
+                   f'suggestions, bug reports ' \
                    f'or any other kind of feedback, please feel free to ' \
                    f'contact: {mail_cp} or {mail_ad}.'
-        end_html.value = p_line.replace(replace_str, end_text)
+        end_html.value = AnalysisGui._set_css(text=end_text,
+                                              css_type='line')
 
         display(widgets)
 
@@ -1023,23 +1371,10 @@ class AnalysisGui:
         def link(url, url_txt) -> str:
             return f'<a href="{url}" target="_blank">' \
                    f'<font color="DarkBlue">{url_txt}</font></a>'
+
         # we use a paragraph in order to set a nice style for the rows
         wide_layout = wd.Layout(width='auto', height='auto', max_width='80%')
 
-        # we use a paragraph in order to set a nice style for the rows
-        replace_str = '_replace_me_'
-        p_css = wd.HTML(value='<head>'
-                              '    <style>'
-                              '        p.line_height {'
-                              '            line-height: 1.3; '
-                              '            margin-left: 10px} '
-                              '        p.tight_line_height {'
-                              '            line-height: 1.15; '
-                              '            margin-left: 30px} '
-                              '    </style>'
-                              '</head>')
-        p_line = f'<p class="line_height">{replace_str}</p>'
-        p_tight_line = f'<p class="tight_line_height">{replace_str}</p>'
         top_html = wd.HTML(disabled=True,
                            layout=wide_layout)
         example_html = wd.HTML(disabled=True,
@@ -1047,31 +1382,30 @@ class AnalysisGui:
         end_html = wd.HTML(disabled=True,
                            layout=wide_layout)
 
-        margin_str = '&nbsp' * 6
-        margin = wd.HTML(value=margin_str)
         link_cp = link("https://data.icos-cp.eu/portal/", "ICOS Carbon Portal")
         mail_cp = link("mailto:info@icos-cp.eu", "info@icos-cp.eu")
         mail_ad = link("mailto:anders.dahlner@nateko.lu.se",
                        "anders.dahlner@nateko.lu.se")
 
-        widgets = wd.VBox([p_css,
-                           top_html,
+        widgets = wd.VBox([top_html,
                            example_html,
                            end_html])
 
         top_text = 'Besides from running reports as described in *<i>direction ' \
                    'to text to come</i>*, the user can also use the app in ' \
                    'order to extract data from the ICOS Carbon Portal. <br><br>'
-        top_html.value = p_line.replace(replace_str, top_text)
+        top_html.value = AnalysisGui._set_css(text=top_text,
+                                              css_type='line')
         ex_txt1 = '<b><i>Example.</i></b><br> Suppose a user has created a ' \
-                 'group of variables called ' \
-                 '<i>fluxes</i> and a batch job called <i>my plots</i> for ' \
-                 'some variables of the group (the names themself are ' \
-                 'insignificant, but we refer to them ' \
-                 'below).<br><br>' \
-                 '<b><i>Step 1. Run.</i></b><br>' \
-                 'The user execute the code: <br>'
-        out_txt = p_tight_line.replace(replace_str, ex_txt1)
+                  'group of variables called ' \
+                  '<i>fluxes</i> and a batch job called <i>my plots</i> for ' \
+                  'some variables of the group (the names themself are ' \
+                  'insignificant, but we refer to them ' \
+                  'below).<br><br>' \
+                  '<b><i>Step 1. Run.</i></b><br>' \
+                  'The user execute the code: <br>'
+        out_txt = AnalysisGui._set_css(text=ex_txt1,
+                                       css_type='tight')
 
         out_txt += '''<pre><code>
         import warnings
@@ -1085,17 +1419,20 @@ class AnalysisGui:
                   'This will display whatever output is related to the batch ' \
                   'job <i>my plots</i>, between the ' \
                   '<b><i>Start date</i></b> and <b><i>End date</i></b>.<br> ' \
-                  '<i><u>However</u>, in the background <b>all</b> variables of the ' \
+                  '<i><u>However</u>, in the background <b>all</b> ' \
+                  'variables of the ' \
                   'group <b>fluxes</b> are gathered (actually they are ' \
                   'gathered between the <b>"Fetch date"</b> and ' \
                   '<b>End date</b>, the Fetch date is explained in ' \
                   'the <b>Run configurations</b> under the ' \
-                  '<b>Configurations</b>-menu).</i><br><br>'
-        out_txt += p_tight_line.replace(replace_str, ex_txt2)
+                  '<b>Settings</b>-menu).</i><br><br>'
+        out_txt += AnalysisGui._set_css(text=ex_txt2,
+                                        css_type='tight')
 
         ex_txt3 = '<b><i>Step 3. Extracting data. </i></b><br>The user opens a ' \
                   'new cell of the notebook and run the code: <br>'
-        out_txt += p_tight_line.replace(replace_str, ex_txt3)
+        out_txt += AnalysisGui._set_css(text=ex_txt3,
+                                        css_type='tight')
 
         out_txt += """<pre><code>
         df = g.get_data() # or df = g.get_data('fluxes'), in case the user
@@ -1107,7 +1444,8 @@ class AnalysisGui:
                   'which is a <i><code>pandas.DataFrame</code></i> together ' \
                   'with some ICOS-metadata that can be reached using the ' \
                   'properties: <br>'
-        out_txt += p_tight_line.replace(replace_str, ex_txt4)
+        out_txt += AnalysisGui._set_css(text=ex_txt4,
+                                        css_type='tight')
 
         out_txt += '''<pre><code>
         icos_meta -&gt; dict
@@ -1126,20 +1464,24 @@ class AnalysisGui:
         icos_var_unit_ls -&gt; list 
         </pre></code>'''
         ex_txt5 = 'Here, the user can run: <br>'
-        out_txt += p_tight_line.replace(replace_str, ex_txt5)
+        out_txt += AnalysisGui._set_css(text=ex_txt5,
+                                        css_type='tight')
         out_txt += '''<pre><code>
                 import pandas as pd
                 df = pd.Dataframe(df)
                 </pre></code>'''
-        ex_txt6 = 'in order to convert the data into an standard dataframe.<br><br>'
-        out_txt += p_tight_line.replace(replace_str, ex_txt6)
+        ex_txt6 = 'in order to convert the data into an standard dataframe.' \
+                  '<br><br>'
+        out_txt += AnalysisGui._set_css(text=ex_txt6,
+                                        css_type='tight')
 
         example_html.value = out_txt
 
         end_text = f'For comments, questions, suggestions, bug reports ' \
                    f'or any other kind of feedback, please feel free to ' \
                    f'contact: {mail_cp} or {mail_ad}.</p>'
-        end_html.value = p_line.replace(replace_str, end_text)
+        end_html.value = AnalysisGui._set_css(text=end_text,
+                                              css_type='line')
 
         display(widgets)
 
@@ -1169,10 +1511,8 @@ class AnalysisGui:
             self.stored_timeseries.clear()
 
     def _edit_batch_jobs(self,
-                         _menu_call: bool = None,
                          _group_name: str = None,
-                         _batch_name: str = None,
-                         ) -> wd.VBox:
+                         _batch_name: str = None):
         if self.debug:
             self.debug_value(-12, '_edit_batch_jobs()  *** start ***')
 
@@ -1210,7 +1550,7 @@ class AnalysisGui:
                 debug_value(0, f'init_group_drop()', '--- start ---',
                             f'group list = {group_ls}')
             if group_ls:
-                group_ls = sorted(group_ls)
+                group_ls = sorted(group_ls, key=(lambda x: x.lower()))
                 group_drop.options = group_ls
 
         def set_group_value(group: str = None):
@@ -1314,35 +1654,36 @@ class AnalysisGui:
         def init_batch_drop(batch_name: str = None):
             cache = self._load_cache()
             group = group_drop.value
-            if self.debug:
-                debug_value(9, 'init_batch_drop()', 'step 1',
-                            f'(input) batch_name = {batch_name}',
-                            f'group = {group}',
-                            f"cache['_groups']['{group}'] = "
-                            f"{cache['_groups'][group]}")
-
             batch_dict = cache['_groups'][group].get('_batches', {})
             if self.debug:
-                debug_value(9, 'init_batch_drop()', 'step 2',
-                            f'batches = {batch_dict}')
+                debug_value(9, 'init_batch_drop() -- step 1',
+                            f'(input) batch_name = {batch_name}',
+                            f'group = {group}',
+                            f'batch_dict = {batch_dict}')
             if batch_dict:
-                batch_labels = sorted(list(batch_dict.keys()))
+                batch_labels = sorted(list(batch_dict.keys()),
+                                      key=(lambda x: x.lower()))
                 batch_drop.options = [(k, batch_dict[k]) for k in batch_labels]
                 if batch_name and batch_name in batch_labels:
-                    batch_drop.label = batch_name
-                    changed_batch_drop('reset_batch_gui')
+                    batch_label = batch_name
                 else:
-                    batch_drop.label = batch_drop.options[0][0]
+                    batch_label = batch_labels[0]
+                if self.debug:
+                    debug_value(9, 'init_batch_drop() -- step 2 - '
+                                   f'batch_label = {batch_label}',
+                                f'batch_drop.options = {batch_drop.options}')
+                batch_drop.label = batch_label
             else:
                 batch_drop.options = [('Press new...', 0)]
                 batch_drop.value = 0
                 html_msg(text_ls=[f'Press <i>New</i>, in order to create a batch '
                                   f'job for the group <i>{group}</i>.'])
             if self.debug:
-                debug_value(9, 'init_batch_drop()', 'step 3',
+                debug_value(9, 'init_batch_drop() -- step 3',
                             f'batch_drop.label = {batch_drop.label}',
                             f'batch_drop.value = {batch_drop.value}',
                             f'-- end--')
+            changed_batch_drop('reset_batch_gui')
 
         def changed_batch_drop(c):
             if batch_drop.value:
@@ -1617,6 +1958,9 @@ class AnalysisGui:
         def set_user_guide():
             if user_guide_container.layout.display == 'block':
                 d = get_batch_upd_dict().get('_upd_mode', {'_upd_mode': ''})
+                if self.debug:
+                    debug_value(1311, 'set_user_guide() ',
+                                f'd = {d}')
                 if d['_upd_mode'] == 'read_mode_no_batch':
                     user_guide.value = '<H3><b>To create a batch ' \
                                        'job:</b></H3><br>' \
@@ -1991,89 +2335,34 @@ class AnalysisGui:
             if self.debug:
                 debug_value(4, f'set_group_var_info()')
 
-            if isinstance(cache, dict):
+            if isinstance(cache, dict) and '_groups' in cache.keys():
                 grp = group_drop.value
-                if grp not in cache['_groups'].keys():
-                    # Container title...
-                    cont_title = f'Content of a group goes here'
-                    g_vars.set_title(0, cont_title)
-                    group_vars.value = '<b>Variables: </b>'
-                    return
-
-                # Generate HTML-text for the variables
-                var_text = get_group_var_info_text(upd_mode=False)
-
-                # Container title...
-                cont_title = f'Content of group {grp}'
-                g_vars.set_title(0, cont_title)
-                group_vars.value = var_text
+                if grp in cache['_groups'].keys():
+                    content_title = f'Content of group {grp}'
+                    content_text = get_var_info_text(group=grp)
+                else:
+                    content_title = f'Content of a group goes here'
+                    content_text = '<b>Variables of the group goes here.</b>'
             else:
                 # No cache,
-                cont_title = f'Content of a group goes here'
-                g_vars.set_title(0, cont_title)
-                group_vars.value = 'Variables: '
+                content_title = f'Content of a group goes here'
+                content_text = '<b>Variables of the group goes here.</b>'
 
-        def get_group_var_info_text(upd_mode):
-            cache = self._load_cache()
+            g_vars.set_title(0, content_title)
+            group_vars.value = content_text
+
+        def get_var_info_text(group: str = None):
             if self.debug:
-                debug_value(5, f'get_group_var_info_text()')
-
-            grp = group_drop.value
-            if grp not in cache['_groups'].keys():
-                return_val = ''
-            else:
-                var_tuples = cache['_groups'][grp]['_group_vars']
-                var_ls = [v[0] for v in var_tuples]
-                text_tag = 'b'
-                separator = '<br>'
-                margin = '&nbsp' * 10
-                station_dict = AnalysisGui._var_tup2station_dict(var_tuples)
-
-                # We loop over stations and products to concatenate
-                # a proper text in html
-                t1 = f'<{text_tag}>Variables: </{text_tag}>'
-                t2 = ', '.join(var_ls)
-                t3 = ''
-                if upd_mode and len(t1 + t2) > 100:
-                    t2 += '<br>'
-                    first_break = 0
-                else:
-                    first_break = 1
-
-                one_stn = (len(station_dict.keys()) == 1)
-                for stn in station_dict.keys():
-                    if one_stn:
-                        t1 = f'<{text_tag}>Variables (of {stn}): </{text_tag}>'
-                        one_prod = (len(station_dict[stn].keys()) == 1)
-                        for prod in station_dict[stn].keys():
-                            if one_prod:
-                                t1 = f'<{text_tag}>Variables (of ' \
-                                     f'{prod} at {stn}): </{text_tag}>'
-                            else:
-                                t3 += f'{separator}{margin}<{text_tag}>{prod}: ' \
-                                      f'</{text_tag}>' + \
-                                      ", ".join(station_dict[stn][prod])
-                                if not upd_mode:
-                                    t3 += f'{separator}'
-                            if upd_mode and len(t3) + len(
-                                    t1 + t2) * first_break > 100:
-                                first_break = 0
-                                t3 += '<br>'
-                    else:
-                        t3 += f'{separator}{margin}<{text_tag}>Station {stn}</{text_tag}> '
-                        for prod in station_dict[stn].keys():
-                            t3 += f'{separator}{margin}<{text_tag}>{prod}: </{text_tag}>'
-                            t3 += ", ".join(station_dict[stn][prod])
-                        if upd_mode:
-                            if len(t3) + len(t1 + t2) * first_break > 100:
-                                t3 += '<br>'
-                        else:
-                            t3 += '<br>'
-
-                if t3:
-                    t3 += f'{margin}<i>(In order of appearance)</i>'
-                return_val = t1 + t2 + t3
-            return return_val
+                debug_value(5, f'get_var_info_text()')
+            if group:
+                cache = self._load_cache()
+                var_tuples = copy.deepcopy(cache['_groups'][group]['_group_vars'])
+                output_code = 'var_cont_read'
+                stn_ls = self._station_name_id_ls()
+                return AnalysisGui.var_tuple_ls_converter(var_ls=var_tuples,
+                                                          output=output_code,
+                                                          stn_name_id_ls=stn_ls,
+                                                          debug_fun=self.debug_value)
 
         def debug_value(*text_list):
             self.debug_value(*text_list)
@@ -2115,6 +2404,8 @@ class AnalysisGui:
                 user_guide.layout.display = 'block'
             with out:
                 clear_output()
+                msg = AnalysisGui._set_css(text=msg,
+                                           css_type='line')
                 display(wd.HTML(msg))
 
         def set_info_msg(error_ls=None):
@@ -2214,11 +2505,12 @@ class AnalysisGui:
 
             if error_ls and user_guide_container.layout.display == 'none':
                 display_user_guide('display_guide')
-
+            msg = AnalysisGui._set_css(text=msg,
+                                       css_type='line')
             user_guide.value = msg
 
         def cleanup_tools(d: dict) -> (dict, bool):
-            # returns "a clean tool-dict" and "dict has changed"
+            # returns "a clean tool-dict" and boolean for "dict has changed"
             if self.debug:
                 debug_value(120, f'cleanup_tools() -- (before)',
                             f"upd_dict['_tools'] = {d}")
@@ -2231,10 +2523,9 @@ class AnalysisGui:
                             d.pop(tool_number)
                         elif t_name == 'corr_plot' and len(tool_var[t_name]) != 2:
                             d.pop(tool_number)
-                dict_has_changed = d != d_copy
-                if dict_has_changed:
-                    # reset the tool number
-                    d = dict(zip(range(len(d.keys())), d.values()))
+                # allways reset the tool number
+                d = dict(zip(range(len(d.keys())), d.values()))
+                dict_has_changed = (d != d_copy)
             else:
                 dict_has_changed = False
 
@@ -2875,12 +3166,9 @@ class AnalysisGui:
         set_group_value(group=_group_name)
 
         row_list.append(out)
-        return_widget = wd.VBox(row_list)
+        batch_widget = wd.VBox(row_list)
 
-        if _menu_call:
-            display(return_widget)
-        else:
-            return return_widget
+        display(batch_widget)
 
     def _default_settings(self):
         if self.debug:
@@ -2916,10 +3204,8 @@ class AnalysisGui:
             split_p_width.value = split_p_kwargs.get('width', 0)
             split_p_title_font.value = split_p_kwargs.get('title_font',
                                                           plotly_text_fonts[0])
-            split_p_title_size.value = split_p_kwargs.get('title_size',
-                                                          'Default')
-            split_p_subtitle_size.value = split_p_kwargs.get('subtitle_size',
-                                                             'Default')
+            split_p_title_size.value = split_p_kwargs.get('title_size', 16)
+            split_p_subtitle_size.value = split_p_kwargs.get('subtitle_size', 12)
 
             multi_p_auto_axis_cb.value = multi_p_kwargs.get('auto_axis', True)
             multi_p_use_latex_cb.value = multi_p_kwargs.get('use_latex', True)
@@ -2929,10 +3215,8 @@ class AnalysisGui:
             multi_p_width.value = multi_p_kwargs.get('width', 0)
             multi_p_title_font.value = multi_p_kwargs.get('title_font',
                                                           plotly_text_fonts[0])
-            multi_p_title_size.value = multi_p_kwargs.get('title_size',
-                                                          'Default')
-            multi_p_subtitle_size.value = multi_p_kwargs.get('subtitle_size',
-                                                             'Default')
+            multi_p_title_size.value = multi_p_kwargs.get('title_size', 16)
+            multi_p_subtitle_size.value = multi_p_kwargs.get('subtitle_size', 12)
 
             corr_p_use_latex_cb.value = corr_p_kwargs.get('use_latex', True)
             corr_p_plotly_templates.value = corr_p_kwargs.get('template',
@@ -2941,19 +3225,15 @@ class AnalysisGui:
             corr_p_width.value = corr_p_kwargs.get('width', 0)
             corr_p_title_font.value = corr_p_kwargs.get('title_font',
                                                         plotly_text_fonts[0])
-            corr_p_title_size.value = corr_p_kwargs.get('title_size',
-                                                        'Default')
-            corr_p_subtitle_size.value = corr_p_kwargs.get('subtitle_size',
-                                                           'Default')
+            corr_p_title_size.value = corr_p_kwargs.get('title_size', 16)
+            corr_p_subtitle_size.value = corr_p_kwargs.get('subtitle_size', 12)
             corr_p_color_scale_drop.value = corr_p_kwargs.get('color_scale',
                                                               'blues')
 
             corr_t_title_font.value = corr_t_kwargs.get('title_font',
                                                         plotly_text_fonts[0])
-            corr_t_title_size.value = corr_t_kwargs.get('title_size',
-                                                        'Default')
-            corr_t_subtitle_size.value = corr_t_kwargs.get('subtitle_size',
-                                                           'Default')
+            corr_t_title_size.value = corr_t_kwargs.get('title_size', 16)
+            corr_t_subtitle_size.value = corr_t_kwargs.get('subtitle_size', 12)
             corr_t_color_scale_drop.value = corr_t_kwargs.get('color_scale',
                                                               'blues')
 
@@ -3088,7 +3368,8 @@ class AnalysisGui:
                              "Droid Serif", "Droid Sans Mono", "Gravitas One",
                              "Old Standard TT", "Open Sans", "Overpass",
                              "PT Sans Narrow", "Raleway", "Times New Roman"]
-        plotly_text_sizes = ['Default', 6, 7, 8, 9, 10, 11, 12, 13, 14, 17]
+        plotly_text_sizes = [6, 7, 8, 9, 10, 11, 12, 13,
+                             14, 15, 16, 17, 18, 19, 20]
 
         # common texts
         col_href = link("https://www.aao.org/eye-health/"
@@ -3147,22 +3428,20 @@ class AnalysisGui:
         observe_pos_ls = []
         observe_height_width_ls = []
 
-        def_settings_guide = wd.HTML(value='<span>Here you can modify certain '
-                                           'settings such as: what data to use, '
-                                           'visualizations of different plots '
-                                           'and texts. <br>'
-                                           '<b><i>Please note</i></b> that '
-                                           'the <b>Save</b>-button below is '
-                                           'enabled when a value is '
-                                           'changed and the user press '
-                                           '<it><b>&lttab&gt</b> or <b>clicks '
-                                           'outside</b> the widget holding '
-                                           'the value</it>.<br>'
-                                           'Also, if you find problems '
-                                           'related to any of these settings, '
-                                           'do not hesitate to report this '
-                                           'according to the description in the '
-                                           '<it>Help</it> menu.</span>')
+        txt = '<h3>Default settings</h3>' \
+              '<span>Here you can modify certain settings such as: ' \
+              'what data to use, visualizations of different plots ' \
+              'and texts. <br>' \
+              '<b><i>Please note</i></b> that the <b>Save</b>-button below is ' \
+              'enabled when a value is changed and the user press ' \
+              '<it><b>&lttab&gt</b> or <b>clicks outside</b> the widget ' \
+              'holding the value</it>.<br>' \
+              'Also, if you find problems related to any of these settings, ' \
+              'do not hesitate to report this according to the description in ' \
+              'the <it>Help</it> menu.</span>'
+        txt = AnalysisGui._set_css(text=txt,
+                                   css_type='line')
+        def_settings_guide = wd.HTML(value=txt)
 
         run_settings_guide = wd.HTML(value='<span><b>Guide:</b><br>'
                                            'When the user start the '
@@ -3328,11 +3607,11 @@ class AnalysisGui:
         split_p_plotly_template_box = wd.HBox([plotly_templ_label,
                                                split_p_plotly_templates])
 
-        split_p_height = wd.FloatText(layout=int_drop_layout)
+        split_p_height = wd.IntText(layout=int_drop_layout)
         split_p_height_box = wd.HBox([height_label,
                                       split_p_height])
 
-        split_p_width = wd.FloatText(layout=int_drop_layout)
+        split_p_width = wd.IntText(layout=int_drop_layout)
         split_p_width_box = wd.HBox([width_label,
                                      split_p_width])
 
@@ -3413,11 +3692,11 @@ class AnalysisGui:
         multi_p_latex_box = wd.HBox([multi_p_use_latex_cb,
                                      use_latex_label])
 
-        multi_p_height = wd.FloatText(layout=int_drop_layout)
+        multi_p_height = wd.IntText(layout=int_drop_layout)
         multi_p_height_box = wd.HBox([height_label,
                                       multi_p_height])
 
-        multi_p_width = wd.FloatText(layout=int_drop_layout)
+        multi_p_width = wd.IntText(layout=int_drop_layout)
         multi_p_width_box = wd.HBox([width_label,
                                      multi_p_width])
         multi_p_plotly_templates = wd.Dropdown(options=plotly_templates,
@@ -3484,11 +3763,11 @@ class AnalysisGui:
         corr_p_latex_box = wd.HBox([corr_p_use_latex_cb,
                                     use_latex_label])
 
-        corr_p_height = wd.FloatText(layout=int_drop_layout)
+        corr_p_height = wd.IntText(layout=int_drop_layout)
         corr_p_height_box = wd.HBox([height_label,
                                      corr_p_height])
 
-        corr_p_width = wd.FloatText(layout=int_drop_layout)
+        corr_p_width = wd.IntText(layout=int_drop_layout)
         corr_p_width_box = wd.HBox([width_label,
                                     corr_p_width])
 
@@ -3589,27 +3868,21 @@ class AnalysisGui:
         statistics_settings = wd.Accordion(children=[statistics_guide],
                                            titles=('Numerical statistics '
                                                    'settings',))
-        return_widget = wd.VBox([def_settings_guide,
-                                 run_settings,
-                                 latex_settings,
-                                 split_plot_settings,
-                                 multi_plot_settings,
-                                 corr_plot_settings,
-                                 corr_table_settings,
-                                 statistics_settings,
-                                 save_cancel_box])
+        plot_area = wd.Output()
+        settings_widget = wd.VBox([def_settings_guide,
+                                   save_cancel_box,
+                                   run_settings,
+                                   latex_settings,
+                                   split_plot_settings,
+                                   multi_plot_settings,
+                                   corr_plot_settings,
+                                   corr_table_settings,
+                                   statistics_settings,
+                                   plot_area])
 
         init_general_settings()
 
-        return return_widget
-
-    def _configurations_menu(self):
-        general_accordion = wd.Accordion(children=[self._default_settings()],
-                                         titles=('Default settings',))
-        batch_accordion = wd.Accordion(children=[self._edit_batch_jobs()],
-                                       titles=('Batch jobs',))
-        out = wd.Output()
-        display(general_accordion, batch_accordion, out)
+        display(settings_widget)
 
     def _group_menu(self):
         if self.debug:
@@ -3670,20 +3943,27 @@ class AnalysisGui:
                     '_group_name' not in group_dict.keys():
                 return
 
+            upd_mode = group_dict['_upd_mode']
             grp = group_dict['_group_name']
             var_ls = group_dict['_var_list']
             old_grp = ''
             cache = self._load_cache()
+            add_batch = False
 
-            if group_dict['_upd_mode'] == 'new':
+            if upd_mode == 'new':
                 cache['_groups'][grp] = {'_group_vars': var_ls}
+                if self.debug:
+                    self.debug_value(-13, 'update_cache()',
+                                     f'group_dict = {grp}', len(grp) > 2,
+                                     grp[-2:] == '+b')
+                if len(grp) > 2 and grp[-2:] == '+b':
+                    cache['_groups'][grp]['_batches'] = demo_batch(var_ls)
 
                 # update "last"-flags
                 last_var_tuple = var_ls[-1]
                 cache['_last_group'] = grp
                 cache['_last_station_id'] = last_var_tuple[-1]
-
-            elif group_dict['_upd_mode'] == 'update':
+            elif upd_mode == 'update':
                 if '_saved_group_name' in group_dict.keys():
                     old_grp = group_dict['_saved_group_name']
                     if grp != old_grp:
@@ -3696,8 +3976,7 @@ class AnalysisGui:
                 last_var_tuple = var_ls[-1]
                 cache['_last_group'] = grp
                 cache['_last_station_id'] = last_var_tuple[-1]
-
-            elif group_dict['_upd_mode'] == 'delete':
+            elif upd_mode == 'delete':
                 if grp in cache['_groups'].keys():
                     cache['_groups'].pop(grp)
                     if cache['_last_group'] == grp:
@@ -3714,7 +3993,7 @@ class AnalysisGui:
                             cache['_last_station_id'] = ''
 
             # validate_batches
-            if grp in cache['_groups'].keys() and '_batches' in \
+            if upd_mode == 'update' and '_batches' in \
                     cache['_groups'][grp].keys():
                 d = cache['_groups'][grp]
                 var_mismatch_dict = self._validate_batch_of_grp(d)
@@ -3729,6 +4008,55 @@ class AnalysisGui:
                 self._flush_store(old_grp)
             self._set_cache(cache_dict=cache)
 
+        def demo_batch(var_ls) -> dict:
+            def var2unit(var):
+                var2unit_dict = self._load_app_configs().get('_var2unit_map', {})
+                if var[0] not in var2unit_dict.keys():
+                    pid = st_df.loc[(st_df.id == var[-1]) & (
+                            st_df.specLabel == var[1])].dobj.values[0]
+                    meta = icos_data.StationData.icos_pid2meta(pid)
+                    var_unit_list = meta['varUnitList']
+                    var2unit_dict.update({vu[0]: vu[1] for vu in var_unit_list})
+                    app_configs = self._load_app_configs()
+                    app_configs['_var2unit_map'].update(var2unit_dict)
+                    self._set_app_configs(app_dict=app_configs)
+                return var2unit_dict[var[0]]
+
+            b_name = 'Batch example'
+            split_ls = var_ls[:min(5, len(var_ls))]
+            tool = 0
+            batch_dict = {b_name: {str(tool): {"split_plot": split_ls}}}
+            if len(var_ls) >= 2:
+                corr_ls = var_ls[:2]
+                tool += 1
+                batch_dict[b_name][str(tool)] = {'corr_plot': corr_ls}
+                if len(var_ls) >= 4:
+                    corr_ls = var_ls[2:4]
+                    tool += 1
+                    batch_dict[b_name][str(tool)] = {'corr_plot': corr_ls}
+            multi_dict = {}
+            good_units = set()
+            for i in range(len(var_ls)):
+                v = var_ls[i]
+                u = var2unit(v)
+                if u in multi_dict.keys():
+                    multi_dict[u].append(v)
+                    good_units.add(u)
+                else:
+                    multi_dict[u] = [v]
+                if len(good_units) == 2:
+                    break
+            multi_list = [[k, v] for k, v in multi_dict.items()
+                          if k in good_units]
+            if len(multi_list) < 2 and len(multi_dict) > 1:
+                for k, v in multi_dict.items():
+                    if k not in good_units:
+                        multi_list.append([k, v])
+            tool += 1
+            batch_dict[b_name][str(tool)] = {'multi_plot': multi_list}
+            batch_dict[b_name]['_version'] = '1'
+            return batch_dict
+
         def init():
 
             val = set_group_drop('')
@@ -3739,19 +4067,12 @@ class AnalysisGui:
             else:
                 activate_gui('init_read_mode')
 
-        def get_station_list():
-            id_ls = list(st_df.id)
-            name_ls = list(st_df.name)
-            station_ls = list(set(zip(name_ls, id_ls)))
-            station_ls = [(f'{v[0]} ({v[1]})', v[1]) for v in station_ls]
-            station_ls.sort(key=lambda v: v[0].lower())
-            return station_ls
-
         def set_station_drop():
             if self.debug:
                 self.debug_value(-14, 'set_station_drop()')
 
-            station_ls = get_station_list()
+            station_ls = self._station_name_id_ls()
+            station_ls = [(f'{v[0]} ({v[1]})', v[1]) for v in station_ls]
 
             # Try to use station from last added variable
             upd_dict = get_temp_dict()
@@ -3799,14 +4120,14 @@ class AnalysisGui:
                 last_spec_in_var_list = cache['_groups'][grp]['_group_vars'][
                     -1][1]
                 product_drop.value = [y[1] for y in spec_drop_ls if
-                                   y[0] == last_spec_in_var_list].pop()
+                                      y[0] == last_spec_in_var_list].pop()
             elif isinstance(change, dict) and change['new']:
                 grp = change['new']
                 try:
                     last_spec_in_var_list = cache['_groups'][grp][
                         '_group_vars'][-1][1]
                     product_drop.value = [y[1] for y in spec_drop_ls if
-                                       y[0] == last_spec_in_var_list].pop()
+                                          y[0] == last_spec_in_var_list].pop()
                 except:
                     pass
             else:
@@ -3908,7 +4229,8 @@ class AnalysisGui:
             last_grp = cache['_last_group']
 
             if group_ls:
-                group_drop.options = group_ls
+                group_ls = list(cache['_groups'].keys())
+                group_drop.options = sorted(group_ls, key=(lambda x: x.lower()))
                 if last_grp:
                     group_drop.value = last_grp
                 else:
@@ -3924,111 +4246,23 @@ class AnalysisGui:
             if self.debug:
                 self.debug_value(-18, 'get_group_var_text() ',
                                  f' - upd_mode  = {upd_mode}')
-
             if upd_mode:
                 upd_dict = get_temp_dict()
                 var_tuples = copy.deepcopy(upd_dict['_var_list'])
-                text_tag = 'i'
-                margin = ''
-                t1 = ''
+                output_code = 'var_cont_upd'
             else:
                 grp = group_drop.value
                 cache = self._load_cache()
                 var_tuples = copy.deepcopy(cache['_groups'][grp]['_group_vars'])
-                text_tag = 'b'
-                t1 = f'<{text_tag}>Variables: </{text_tag}>'
-                margin = '&nbsp' * 18
+                output_code = 'var_cont_read'
+            if not var_tuples:
+                return ''
 
-            # Next we rename possible duplicate variable names
-            var_ls = [v[0] for v in var_tuples]
-            n = len(var_ls)
-            var_duplicates = {}
-            for i, v in enumerate(var_ls):
-                if i != n - 1 and v in var_ls[i + 1:]:
-                    if v not in var_duplicates.keys():
-                        var_duplicates[v] = [(i, 1)]
-                    else:
-                        count = var_duplicates[v][-1][1] + 1
-                        var_duplicates[v].append((i, count))
-
-                elif v in var_duplicates.keys():
-                    count = var_duplicates[v][-1][1] + 1
-                    var_duplicates[v].append((i, count))
-
-            for v, i_ls in var_duplicates.items():
-                for x in i_ls:
-                    var_ls[x[0]] = f'{v}<sub>{x[1]}</sub>'
-                    var_tuples[x[0]][0] = f'{v}<sub>{x[1]}</sub>'
-
-            station_dict = AnalysisGui._var_tup2station_dict(var_tuples)
-            if self.debug:
-                self.debug_value(-18, f'get_group_var_text()',
-                                 f'var_tuples = {var_tuples}',
-                                 f'station_dict = {station_dict} ')
-
-            t2 = ', '.join(var_ls) + '<br><hr>'
-            #t2 = f',<br>{margin}'.join([', '.join(var_ls[i:i + 12])
-            #                            for i in range(0, len(var_ls),
-            #                                           12)]) + '<br>'
-
-            # Next we loop over stations and products to concatenate
-            # a proper html text
-            t3 = ''
-            stn_ls = get_station_list()
-            one_stn = (len(station_dict.keys()) == 1)
-            rows = []
-            for stn in station_dict.keys():
-                stn_name = [s[0] for s in stn_ls if s[1] == stn].pop()
-                if one_stn:
-                    one_prod = (len(station_dict[stn].keys()) == 1)
-                    if one_prod:
-                        for prod in station_dict[stn].keys():
-                            t3 += f'<i>Here</i>, all variables are from ' \
-                                  f'<{text_tag}>{prod}</{text_tag}> '
-                    else:
-                        for prod in station_dict[stn].keys():
-                            if not t3:
-                                t3 += '<hr><i>Where the variables </i>'
-                            else:
-                                t3 += ',<br>while '
-
-                            prod_vars = station_dict[stn][prod]
-                            last_var = prod_vars.pop()
-                            var_row = '</b>, <b>'.join(prod_vars)
-                            if prod_vars:
-                                t3 += f'<b>{var_row}</b> and ' \
-                                      f'<b>{last_var}</b> are '
-                            else:
-                                t3 += f'<b>{last_var}</b> is '
-
-                            t3 += f'from <{text_tag}>{prod}</{text_tag}>'
-                        t3 += f' of the station ' \
-                              f'<{text_tag}>{stn_name}</{text_tag}>'
-                else:
-                    t4 = ''
-                    for prod in station_dict[stn].keys():
-                        if not t4:
-                            t4 += f'<hr><i>Where the variables</i> '
-                        else:
-                            t4 += f',<br>while '
-
-                        prod_vars = station_dict[stn][prod]
-                        last_var = prod_vars.pop()
-                        var_row = '</b>, <b>'.join(prod_vars)
-                        if prod_vars:
-                            t4 += f'<b>{var_row}</b> and <b>{last_var}</b> ' \
-                                  f'are '
-                        else:
-                            t4 += f'<b>{last_var}</b> is '
-
-                        t4 += f'from <{text_tag}>{prod}</{text_tag}>'
-                    t4 += f' of the station ' \
-                          f'<{text_tag}>{stn_name}</{text_tag}>'
-                    rows.append(t4)
-            if rows:
-                t3 = '<hr>'.join(rows)
-
-            return t1 + t2 + t3
+            stn_ls = self._station_name_id_ls()
+            return AnalysisGui.var_tuple_ls_converter(var_ls=var_tuples,
+                                                      output=output_code,
+                                                      stn_name_id_ls=stn_ls,
+                                                      debug_fun=self.debug_value)
 
         def set_group_vars(c):
             cache = self._load_cache()
@@ -4038,24 +4272,16 @@ class AnalysisGui:
             if isinstance(cache, dict):
                 grp = group_drop.value
                 if grp not in cache['_groups'].keys():
-                    # Container title...
-                    cont_title = f'Content of a group goes here'
-                    g_vars.set_title(0, cont_title)
-                    group_vars.value = '<b>Variables: </b>'
-                    return
-
-                # Generate HTML-text for the variables
-                var_text = get_group_var_text(upd_mode=False)
-
-                # Container title...
-                cont_title = f'Content of group {grp}'
-                g_vars.set_title(0, cont_title)
-                group_vars.value = var_text
+                    content_title = f'Content of a group goes here'
+                    content_text = '<b>Variables of the group goes here.</b>'
+                else:
+                    content_title = f'Content of group {grp}'
+                    content_text = get_group_var_text(upd_mode=False)
             else:
-                # No cache,
-                cont_title = f'Content of a group goes here'
-                g_vars.set_title(0, cont_title)
-                group_vars.value = 'Variables: '
+                content_title = f'Content of a group goes here'
+                content_text = '<b>Variables of the group goes here.</b>'
+            g_vars.set_title(0, content_title)
+            group_vars.value = content_text
 
         def set_var_checkboxes(c):
             # Checkboxes for variables
@@ -4069,7 +4295,7 @@ class AnalysisGui:
             station = station_drop.value
             spec = product_drop.label
 
-            var_label.value = f'<b><font color="darkgreen">Variables of {str(spec)} at {str(station)}</b>'
+            var_label.value = f'<b>Variables of {str(spec)} at {str(station)}</b>'
 
             # We need to find vars that are part of the group
             upd_group_dict = get_temp_dict()
@@ -4250,6 +4476,7 @@ class AnalysisGui:
             if name_error_ls or var_error_ls:
                 # Don't save the data
                 set_temp_dict(upd_group_dict)
+                display_user_guide('display_guide')
             else:
                 # save group data
                 update_cache(upd_group_dict)
@@ -4282,10 +4509,10 @@ class AnalysisGui:
                     stored variables'''
 
             if name_error:
-                error_ls.append(f'<b>Name error</b> {name_error}')
+                error_ls.append(f'<b>Name error</b><br> {name_error}')
 
             if var_error:
-                error_ls.append(f'<b>Variable error</b> {var_error}')
+                error_ls.append(f'<b>Variable error</b><br> {var_error}')
 
             if error_ls:
                 error_ls.append('<br>To delete a group of variables:')
@@ -4295,7 +4522,7 @@ class AnalysisGui:
                 error_ls.append('Don\'t change the content.')
                 upd_group_dict['_delete_errors'] = error_ls
                 set_temp_dict(upd_group_dict)
-                set_reset_error_msg()
+                display_user_guide('display_guide')
             else:
                 upd_group_dict['_upd_mode'] = 'delete'
                 update_cache(upd_group_dict)
@@ -4365,82 +4592,57 @@ class AnalysisGui:
                 user_guide_container.layout.display = 'none'
 
         # Messages on what to do and errors
-        def set_info_msg(error_ls=None):
-            upd_group_dict = get_temp_dict()
-            upd_mode = upd_group_dict['_upd_mode']
+        def set_info_msg(upd_mode: str = None,
+                         error_ls: list = None):
+
+            if not upd_mode:
+                upd_group_dict = get_temp_dict()
+                upd_mode = upd_group_dict.get('_upd_mode', None)
 
             if upd_mode == 'new':
-                info_ls = ['How to create a group of variables:',
-                           '1. Select a station, or several stations, but one '
-                           'at a time.',
-                           '2. Select a file/product, or several, but one at a '
-                           'time.',
-                           '3. Select variables.',
-                           'Chosen variables are displayed below the label <br>'
-                           '<span style="color:black">"Variables in update '
-                           'mode:"</span>. ',
-                           '4. Choose a name for your group of variables in '
-                           'the area <span style="color:black">"Group '
-                           'name"</span>.',
-                           '5. Save.',
-                           '',
-                           '<b>The order of the variables is the order of '
-                           'presentation in outputs, unless specified '
-                           'otherwise in batch jobs.</b>',
-                           '<b>You can combine variables from different files '
-                           'or stations.</b>', '',
-                           '<b>Last entered station, and file/product, will be '
-                           'preselected next time.</b>']
+                msg = AnalysisGui.help_dict['group']['new_header']
+                msg += AnalysisGui.help_dict['group']['new_body']
             elif upd_mode == 'update':
-                info_ls = ['In update mode you can:',
-                           '1. Add or remove variables of a group.',
-                           '2. Change the group name.',
-                           '3. Delete the group.',
-                           '',
-                           '</b>The order of the variables is the order of presentation in plots, etc.<b>',
-                           '</b>Changes are logged in the file "/appdata/cache_bak.json".<b>']
+                msg = AnalysisGui.help_dict['group']['update_header']
+                msg += AnalysisGui.help_dict['group']['update_body']
             else:
-                info_ls = []
+                msg = AnalysisGui.help_dict['group']['read_header1']
+                msg += AnalysisGui.help_dict['group']['read_body1']
+                msg += AnalysisGui.help_dict['group']['read_header2']
+                msg += AnalysisGui.help_dict['group']['read_body2']
+                msg += AnalysisGui.help_dict['group']['read_header3']
+                msg += AnalysisGui.help_dict['group']['read_body3']
+            msg += AnalysisGui.help_dict['group']['general']
 
-            margin = '&nbsp' * 3
-
-            if info_ls:
-                info_color = self.widget_style_colors['primary:active']
-                msg = f'<span style="color:{info_color}">{margin}{margin}<h4>' \
-                      f'{info_ls[0]}</h4><b>'
-                for row in info_ls[1:]:
-                    msg += f'{margin}{row}<br>'
-                msg += '</b></span>'
-            else:
-                msg = ''
+            info_color = self.widget_style_colors['primary:active']
+            msg = f'<span style="color:{info_color}">' \
+                  f'{msg}</span>'
 
             if error_ls:
+                margin = '&nbsp' * 3
                 warning_emoji = '\u26a0\ufe0f'
                 error_color = self.widget_style_colors['danger:active']
-                msg += f'<span style="color:{error_color}">{margin}{margin}'
-                msg += f'<h3>To do: {warning_emoji}</h3><b>'
+
+                err_msg = f'<span style="color:{error_color}">{margin}{margin}'
+                err_msg += f'<h3>To do: {warning_emoji}</h3><b>'
                 for error in error_ls:
-                    msg += f'{margin}{error}<br>'
-                msg += '</b></span>'
+                    err_msg += f'{margin}{error}<br>'
+                err_msg += '</b></span>'
+                msg = err_msg + msg
+
+            user_guide.value = msg
 
             if error_ls and user_guide_container.layout.display == 'none':
                 display_user_guide('display_guide')
 
-            user_guide.value = msg
-
         def set_reset_error_msg():
             upd_group_dict = get_temp_dict()
-            error_keys = ['_name_error', '_var_error', '_delete_errors']
-
             error_ls = []
-            for k in upd_group_dict.keys():
-                if k in error_keys:
-                    error_ls += upd_group_dict[k]
+            for k in ['_name_error', '_var_error', '_delete_errors']:
+                error_ls += upd_group_dict.get(k, [])
 
-            if error_ls:
-                set_info_msg(error_ls)
-            else:
-                set_info_msg()
+            set_info_msg(upd_mode=upd_group_dict.get('_upd_mode', None),
+                         error_ls=error_ls)
 
         # ********************************
         # activate/deactivate upd-widgets
@@ -4448,18 +4650,17 @@ class AnalysisGui:
             if self.debug:
                 self.debug_value(-31, 'activate_gui() ',
                                  f'upd_active = {upd_active}')
+            set_info_msg(upd_mode=upd_active)
 
             if upd_active in ['new', 'update']:
                 # update mode
                 # init update widgets..
-                set_info_msg()
                 update_group_btn.on_click(update_group, remove=True)
                 new_group_btn.on_click(new_group, remove=True)
                 save_group_btn.on_click(save_group, remove=False)
                 delete_group_btn.on_click(delete_group, remove=False)
                 cancel_group_btn.on_click(cancel_group, remove=False)
                 var_info_btn.on_click(display_var_info, remove=False)
-                user_guide_btn.on_click(display_user_guide, remove=False)
 
                 set_station_drop()
                 set_spec_drop(upd_active)
@@ -4471,6 +4672,7 @@ class AnalysisGui:
                 station_drop.observe(set_spec_drop, names='value')
                 product_drop.observe(set_var_drop, names='value')
                 product_drop.observe(set_var_checkboxes, names='value')
+                group_name.style.text_color = 'darkgreen'
                 group_name.observe(group_name_changed, 'value')
 
                 upd_box.layout.display = 'flex'
@@ -4482,7 +4684,6 @@ class AnalysisGui:
                 save_group_btn.disabled = False
                 cancel_group_btn.disabled = False
                 var_info_btn.disabled = False
-                user_guide_btn.disabled = False
                 save_group_btn.tooltip = 'Save settings...'
                 cancel_group_btn.tooltip = 'Cancel...'
                 if upd_active == 'update':
@@ -4502,7 +4703,6 @@ class AnalysisGui:
                 delete_group_btn.on_click(delete_group, remove=True)
                 cancel_group_btn.on_click(cancel_group, remove=True)
                 var_info_btn.on_click(display_var_info, remove=True)
-                user_guide_btn.on_click(display_user_guide, remove=True)
 
                 station_drop.unobserve(set_spec_drop)
                 product_drop.unobserve(set_var_drop)
@@ -4518,7 +4718,6 @@ class AnalysisGui:
                 new_group_btn.tooltip = 'New group...'
                 update_group_btn.tooltip = 'Update group...'
                 var_info_btn.disabled = True
-                user_guide_btn.disabled = True
 
                 for b in non_create_btns.children:
                     b.tooltip = 'Enabled in update mode...'
@@ -4532,8 +4731,7 @@ class AnalysisGui:
         st_df = self.stations_df
 
         # Layouts
-        drop_layout = wd.Layout(width='auto', height='40px')
-        grp_txt_layout = wd.Layout(width='20%', height='28px')
+
         label_layout = wd.Layout(width='auto', min_width='125px')
 
         # row 1
@@ -4576,9 +4774,13 @@ class AnalysisGui:
         create_btns = wd.HBox([new_group_btn, update_group_btn])
 
         user_guide_btn = wd.Button(description='User guide',
+                                   disabled=False,
                                    icon='fa-info-circle',
                                    button_style='info',
+                                   tooltip='Display or hide User guide',
                                    layout=wd.Layout(width='100px'))
+        user_guide_btn.on_click(display_user_guide)
+
         var_info_btn = wd.Button(description='Var. info',
                                  icon='fa-info-circle',
                                  button_style='info',
@@ -4607,11 +4809,10 @@ class AnalysisGui:
                                                       group_dict_log])]
         else:
             user_guide_container.children = [wd.VBox([user_guide])]
-            user_guide_container.set_title(0, 'User guide')
+        user_guide_container.set_title(0, 'User guide')
         # Variable info-text
-        var_drop = wd.Dropdown(layout=wd.Layout(width='148pt',
-                                                flex='inline-flex',
-                                                align="flex-end"))
+        var_drop = wd.Dropdown(layout=wd.Layout(width='auto',
+                                                max_width='148px'))
         var_info_text = wd.HTML(layout=wd.Layout(width='100%',
                                                  max_width='90%',
                                                  height='auto'))
@@ -4627,45 +4828,57 @@ class AnalysisGui:
 
         rows.append(wd.HBox([user_guide_container, var_info_container]))
 
-        # upd row 1
+        # upd row 1-2
         station_label = wd.HTML('<b><i>ICOS Stations: </i></b>',
                                 layout=label_layout)
-        station_drop = wd.Dropdown(layout=drop_layout,
+        station_drop = wd.Dropdown(layout=wd.Layout(width='auto',
+                                                    min_width='148px',
+                                                    height='40px'),
                                    description_tooltip='ICOS Station')
         station_box = wd.VBox([station_label, station_drop])
         product_label = wd.HTML('<b><i>Files of station: </i></b>',
                                 layout=label_layout)
-        product_drop = wd.Dropdown(layout=drop_layout,
+        product_drop = wd.Dropdown(layout=wd.Layout(width='auto',
+                                                    min_width='148px',
+                                                    height='40px'),
                                    description_tooltip='File name')
         product_box = wd.VBox([product_label, product_drop])
-        upd_rows = [wd.HBox([station_box, product_box])]
 
-        # upd row 2
+        drop_box = wd.HBox([station_box, product_box],
+                           layout=wd.Layout(width='auto',
+                                            max_width='100%',
+                                            display='inline-flex',
+                                            flex_flow='row wrap',
+                                            align_content='flex-start'))
+
         # Group stuff  n(children=[page1, page2], width=400)
         group_name_label = wd.HTML('<b><i>Name of group: </i></b>',
                                    layout=label_layout)
         group_name = wd.Text(layout=wd.Layout(width='auto'))
-        group_name_box = wd.VBox([group_name_label, group_name],
-                                 layout=wd.Layout(width='25%'))
-        html_margin = wd.HTML(layout=wd.Layout(width='5%'))
+        left_upd_box = wd.VBox([drop_box,
+                                group_name_label,
+                                group_name],
+                               layout=wd.Layout(width='auto',
+                                                min_width='25%'))
+        html_margin = wd.HTML(layout=wd.Layout(width='2%',
+                                               min_width='10px'))
         group_var_label = wd.HTML('<b><i>Variables in update mode: </i></b>',
                                   layout=wd.Layout(width='auto',
                                                    min_width='150px'))
         group_vars_upd = wd.HTML(layout=wd.Layout(width='auto',
-                                                  min_width='70%',
+                                                  min_width='50%',
                                                   max_width='90%',
                                                   height='100%'),
-                                 disabled=True,
-                                 style={'text_color': 'darkgreen'})
-        group_vars_upd_box = wd.VBox([group_var_label, group_vars_upd],
-                                     layout=wd.Layout(width='67%'))
-        upd_rows.append(wd.HBox([group_name_box, html_margin,
-                                 group_vars_upd_box]))
-        # to hide... layout = wd.Layout(display = 'none'))
+                                 disabled=True)
+        right_upd_box = wd.VBox([group_var_label, group_vars_upd],
+                                layout=wd.Layout(width='67%'))
+        upd_rows = [wd.HBox([left_upd_box,
+                             html_margin,
+                             right_upd_box])]
 
         # upd row 3
         # Container for checkboxes
-        var_label = wd.HTML()
+        var_label = wd.HTML(style=dict(text_color='darkgreen'))
         var_cbs_box = wd.HBox(layout=wd.Layout(border='dashed 0.5px',
                                                width='100%',
                                                display='inline-flex',
