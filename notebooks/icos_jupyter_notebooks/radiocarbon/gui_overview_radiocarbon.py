@@ -68,11 +68,11 @@ with header_year_data:
 header_static_map = Output()
 with header_static_map:
     
-    display(HTML('<p style="font-size:16px;"><br><b>Static map showing nuclear facilities\' emissions and ICOS atmospheric stations</b><br><br>2021 data is priliminary (2022-11-08 download from RADD)</p>'))
+    display(HTML('<p style="font-size:16px;"><br><b>Static map showing nuclear facilities\' emissions and ICOS atmospheric stations</b><br><br>2022 data is priliminary (2022-10-27)</p>'))
 
 year_data=RadioButtons(
-    options=['2006','2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021'],
-    value='2020',
+    options=['2006','2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022'],
+    value='2021',
     description=' ',
     disabled=False)
 
