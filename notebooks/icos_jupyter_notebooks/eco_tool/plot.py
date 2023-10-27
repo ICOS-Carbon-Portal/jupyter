@@ -555,7 +555,7 @@ class Plot:
         if self.debug:
             self.debug_value(11, 'corr_plot - end',
                              f'fig.layout = {fig.layout}')
-        return fig.show()
+        return fig
 
     def multi_plot(self, df,
                    yaxis1_vars: list,
@@ -858,7 +858,7 @@ class Plot:
         if isinstance(height, int):
             mult = height
         else:
-            mult = 350
+            mult = 250
 
         layout['height'] = number_of_subplots * mult + slider_no * 5
 

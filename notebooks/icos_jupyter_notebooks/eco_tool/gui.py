@@ -33,7 +33,6 @@ warnings.simplefilter("ignore", FutureWarning)
 
 if os.getcwd()[-8:] == 'eco_tool':
     import icos_data
-    import plot_old
     import report_writer
     from icos_timeseries import IcosFrame
     import json_handler
@@ -41,7 +40,6 @@ if os.getcwd()[-8:] == 'eco_tool':
     import trace_debug
 else:
     from eco_tool import icos_data
-    from eco_tool import plot_old
     from eco_tool import report_writer
     from eco_tool.icos_timeseries import IcosFrame
     from eco_tool import json_handler
@@ -364,14 +362,6 @@ class AnalysisGui:
         while v_ls:
             var = v_ls.pop(0)
             var_format_index = count_ls.pop(0)
-            if debug_fun:
-                debug_fun(999, 'var_tuple_ls_converter() --- 1111 ',
-                          f'i = {i}',
-                          f'var = {var}',
-                          f'var_tuples = {var_tuples}',
-                          f'v_ls = {v_ls}',
-                          f'count_ls = {count_ls}',
-                          f'var_format_index = {var_format_index}')
             try:
                 next_index_of_var = v_ls.index(var)
             except ValueError:
@@ -1524,13 +1514,13 @@ class AnalysisGui:
         def reset_batch_gui(reason: str, batch_name: str = None):
 
             if self.debug:
-                debug_value(1, 'reset_batch_gui()', 'step 1',
-                            f'batch_name = {batch_name}')
+                self.debug_value(1, 'reset_batch_gui()', 'step 1',
+                                 f'batch_name = {batch_name}')
             init_batch_drop(batch_name)
             activate_gui(action_id='reset_gui', reason=reason)
 
             if self.debug:
-                debug_value(1, 'reset_batch_gui()', '--- end ---')
+                self.debug_value(1, 'reset_batch_gui()', '--- end ---')
 
         def init_tool_buttons():
             tool_ls = []
@@ -1547,8 +1537,8 @@ class AnalysisGui:
             group_ls = list(cache['_groups'].keys())
 
             if self.debug:
-                debug_value(0, f'init_group_drop()', '--- start ---',
-                            f'group list = {group_ls}')
+                self.debug_value(0, f'init_group_drop()', '--- start ---',
+                                 f'group list = {group_ls}')
             if group_ls:
                 group_ls = sorted(group_ls, key=(lambda x: x.lower()))
                 group_drop.options = group_ls
@@ -1558,8 +1548,8 @@ class AnalysisGui:
             cache = self._load_cache()
             group_ls = group_drop.options
             if self.debug:
-                debug_value(0, f'set_group_value()   --- Here we go ----',
-                            f'group = {group}')
+                self.debug_value(0, f'set_group_value()   --- Here we go ----',
+                                 f'group = {group}')
 
             if group and group in group_ls:
                 group_drop.value = group
@@ -1572,7 +1562,7 @@ class AnalysisGui:
 
         def changed_group_drop(c):
             if self.debug:
-                debug_value(2, f'changed_group_drop()')
+                self.debug_value(2, f'changed_group_drop()')
             set_group_var_info()
             set_var_translation_dict()
             reset_batch_gui(reason='changed_group_drop')
@@ -1587,8 +1577,8 @@ class AnalysisGui:
                 is not displayed.
             """
             if self.debug:
-                debug_value(3, f'set_var_translation_dict() - start -',
-                            f'group_drop.value = {group_drop.value}')
+                self.debug_value(3, f'set_var_translation_dict() - start -',
+                                 f'group_drop.value = {group_drop.value}')
             grp = group_drop.value
             cache = self._load_cache()
             var_ls = cache['_groups'][grp]['_group_vars']
@@ -1609,15 +1599,16 @@ class AnalysisGui:
 
             translation_dict['Select all'] = 'All variables'
             if self.debug:
-                debug_value(3, f'set_var_translation_dict() - end -',
-                            f'translation_dict = {translation_dict}')
+                self.debug_value(3, f'set_var_translation_dict() - end -',
+                                 f'translation_dict = {translation_dict}')
             var_translation_dict.value = str(translation_dict)
 
         def init_group_var_buttons(mode: str):
             if self.debug:
-                debug_value(6, f'init_group_var_buttons() ',
-                            f' -- input mode = {mode}',
-                            f' -- var_buttons.children = {var_buttons.children}')
+                self.debug_value(6, f'init_group_var_buttons() ',
+                                 f' -- input mode = {mode}',
+                                 f' -- var_buttons.children = '
+                                 f'{var_buttons.children}')
 
             if mode == 'create' and not var_buttons.children:
                 var_list = list(get_var_translation_dict().items())
@@ -1647,19 +1638,20 @@ class AnalysisGui:
             elif mode == 'delete':
                 var_buttons.children = []
             if self.debug:
-                debug_value(6, f'init_group_var_buttons() -- end --',
-                            f' -- input mode = {mode}',
-                            f' -- var_buttons.children = {var_buttons.children}')
+                self.debug_value(6, f'init_group_var_buttons() -- end --',
+                                 f' -- input mode = {mode}',
+                                 f' -- var_buttons.children = '
+                                 f'{var_buttons.children}')
 
         def init_batch_drop(batch_name: str = None):
             cache = self._load_cache()
             group = group_drop.value
             batch_dict = cache['_groups'][group].get('_batches', {})
             if self.debug:
-                debug_value(9, 'init_batch_drop() -- step 1',
-                            f'(input) batch_name = {batch_name}',
-                            f'group = {group}',
-                            f'batch_dict = {batch_dict}')
+                self.debug_value(9, 'init_batch_drop() -- step 1',
+                                 f'(input) batch_name = {batch_name}',
+                                 f'group = {group}',
+                                 f'batch_dict = {batch_dict}')
             if batch_dict:
                 batch_labels = sorted(list(batch_dict.keys()),
                                       key=(lambda x: x.lower()))
@@ -1669,9 +1661,9 @@ class AnalysisGui:
                 else:
                     batch_label = batch_labels[0]
                 if self.debug:
-                    debug_value(9, 'init_batch_drop() -- step 2 - '
-                                   f'batch_label = {batch_label}',
-                                f'batch_drop.options = {batch_drop.options}')
+                    self.debug_value(9, 'init_batch_drop() -- step 2 - '
+                                        f'batch_label = {batch_label}',
+                                     f'batch_drop.options = {batch_drop.options}')
                 batch_drop.label = batch_label
             else:
                 batch_drop.options = [('Press new...', 0)]
@@ -1679,10 +1671,10 @@ class AnalysisGui:
                 html_msg(text_ls=[f'Press <i>New</i>, in order to create a batch '
                                   f'job for the group <i>{group}</i>.'])
             if self.debug:
-                debug_value(9, 'init_batch_drop() -- step 3',
-                            f'batch_drop.label = {batch_drop.label}',
-                            f'batch_drop.value = {batch_drop.value}',
-                            f'-- end--')
+                self.debug_value(9, 'init_batch_drop() -- step 3',
+                                 f'batch_drop.label = {batch_drop.label}',
+                                 f'batch_drop.value = {batch_drop.value}',
+                                 f'-- end--')
             changed_batch_drop('reset_batch_gui')
 
         def changed_batch_drop(c):
@@ -1691,12 +1683,12 @@ class AnalysisGui:
             else:
                 batch = 0
             if self.debug:
-                debug_value(11, 'changed_batch_drop()',
-                            '- step 1 - batch value changed, reset displayed '
-                            'selections',
-                            f'c = {c}',
-                            f'batch_drop.label = {batch_drop.label}',
-                            f'batch_drop.value = {batch}')
+                self.debug_value(11, 'changed_batch_drop()',
+                                 '- step 1 - batch value changed, '
+                                 'reset displayed selections',
+                                 f'c = {c}',
+                                 f'batch_drop.label = {batch_drop.label}',
+                                 f'batch_drop.value = {batch}')
 
             if batch != 0:
                 batch_version = batch.pop('_version', '0')
@@ -1710,8 +1702,9 @@ class AnalysisGui:
             set_user_guide()
 
             if self.debug:
-                debug_value(11, 'changed_batch_drop()', '- step 2 - ',
-                            f'upd_dict_log.value = {upd_dict_log.value}')
+                self.debug_value(11, 'changed_batch_drop()',
+                                 '- step 2 - ',
+                                 f'upd_dict_log.value = {upd_dict_log.value}')
 
         def reset_selection(c):
             # TODO: check what has changed and divide the update accordingly
@@ -1719,10 +1712,10 @@ class AnalysisGui:
             batch_dict = get_batch_upd_dict()
 
             if self.debug:
-                debug_value(13, f'reset_selection()',
-                            f'c = {c}',
-                            f'batch_dict = {batch_dict}',
-                            f'batch_drop.value = {batch_drop.value}')
+                self.debug_value(13, f'reset_selection()',
+                                 f'c = {c}',
+                                 f'batch_dict = {batch_dict}',
+                                 f'batch_drop.value = {batch_drop.value}')
 
             sel_tool_index = batch_dict.pop('_selected_tool_index', None)
             tools = batch_dict.get('_tools', {})
@@ -1740,9 +1733,9 @@ class AnalysisGui:
         def format_tool_vars(tools):
             # formatting var list to selected_var widget
             if self.debug:
-                debug_value(15, f'label_of_selected_var_row()',
-                            f'tool_code = {tools}',
-                            f'batch_drop.value = {batch_drop.value}')
+                self.debug_value(15, f'label_of_selected_var_row()',
+                                 f'tool_code = {tools}',
+                                 f'batch_drop.value = {batch_drop.value}')
 
             sel_vars = []
             if tools:
@@ -1776,11 +1769,11 @@ class AnalysisGui:
             # Sometimes we want to set the index to None,
             # this is why we have default value -1.
             if self.debug:
-                debug_value(16, f'set_selections()',
-                            'step 1',
-                            f'sel_tool_ls = {sel_tool_ls}',
-                            f'sel_tool_index = {sel_tool_index}',
-                            f'sel_var_ls = {sel_var_ls}')
+                self.debug_value(16, f'set_selections()',
+                                 'step 1',
+                                 f'sel_tool_ls = {sel_tool_ls}',
+                                 f'sel_tool_index = {sel_tool_index}',
+                                 f'sel_var_ls = {sel_var_ls}')
 
             rows = 3 + (len(sel_tool_ls) // 2) * 2
             selected_tools.rows = rows
@@ -1802,28 +1795,32 @@ class AnalysisGui:
                     selected_vars.tooltip = selected_vars.options[ind][0]
                 except Exception as e:
                     if self.debug:
-                        debug_value(16, f'set_selections() ---- exception',
-                                    f'--- Exception: {e}',
-                                    f'selected_vars.options = '
-                                    f'{selected_vars.options}',
-                                    f'ind = {selected_tools.value}')
+                        self.debug_value(16, f'set_selections() ---- exception',
+                                         f'--- Exception: {e}',
+                                         f'selected_vars.options = '
+                                         f'{selected_vars.options}',
+                                         f'ind = {selected_tools.value}')
                     selected_vars.tooltip = ''
             else:
                 selected_vars.tooltip = ''
 
             if self.debug:
-                debug_value(16, f'set_selections()', 'end ',
-                            f'selected_tools.value = {selected_tools.value}',
-                            f'selected_tools.options = {selected_tools.options}',
-                            f'selected_vars.options = {selected_vars.options}',
-                            f'selected_vars.tooltip = {selected_vars.tooltip}')
+                self.debug_value(16, f'set_selections()', 'end ',
+                                 f'selected_tools.value = {selected_tools.value}',
+                                 f'selected_tools.options = '
+                                 f'{selected_tools.options}',
+                                 f'selected_vars.options = '
+                                 f'{selected_vars.options}',
+                                 f'selected_vars.tooltip = '
+                                 f'{selected_vars.tooltip}')
 
         def changed_selected_tool(c):
             # Triggered when a tool is selected,
             # not triggered by tool buttons
             if self.debug:
-                debug_value(112, f'changed_selected_tool() -- triggered tool',
-                            f'c = {c}')
+                self.debug_value(112,
+                                 f'changed_selected_tool() -- triggered tool',
+                                 f'c = {c}')
 
             # Depending on c.old we might have to modify the selection index
             selected_index = c.new
@@ -1881,8 +1878,8 @@ class AnalysisGui:
             # 'split_plot', 'corr_table', 'statistics'
 
             if self.debug:
-                debug_value(129, f'set_info_guide()',
-                            f' -- info_type = {info_type}')
+                self.debug_value(129, f'set_info_guide()',
+                                 f' -- info_type = {info_type}')
 
             if info_type == 'reset_gui':
                 msg_ls = ['<b>You are in <i>read mode</i>.</b> '
@@ -1907,7 +1904,8 @@ class AnalysisGui:
                                    'Select the tool to in the list above, '
                                    'and use the variable buttons to add or '
                                    'remove them from the tool.',
-                                   '<b><i>To delete</i></b> the batch job, just press '
+                                   '<b><i>To delete</i></b> the batch job, '
+                                   'just press '
                                    '<b><i>Delete</i></b> without changing the '
                                    'content.'])
                 elif info_type == 'multi_plot':
@@ -1959,8 +1957,8 @@ class AnalysisGui:
             if user_guide_container.layout.display == 'block':
                 d = get_batch_upd_dict().get('_upd_mode', {'_upd_mode': ''})
                 if self.debug:
-                    debug_value(1311, 'set_user_guide() ',
-                                f'd = {d}')
+                    self.debug_value(1311, 'set_user_guide() ',
+                                     f'd = {d}')
                 if d['_upd_mode'] == 'read_mode_no_batch':
                     user_guide.value = '<H3><b>To create a batch ' \
                                        'job:</b></H3><br>' \
@@ -1982,21 +1980,50 @@ class AnalysisGui:
                                        '3. In case the batch job should be ' \
                                        'deleted, just press <i>Delete</i> ' \
                                        'without changing the content.'
+                elif d['_upd_mode'] == 'new':
+                    user_guide.value = '<H3><b><i>New batch job</i></b> ' \
+                                       '</H3><br>'\
+                                       'To create a new batch job: ' \
+                                       '<ol>' \
+                                       '<li> Use a tool buttons in the ' \
+                                       'list of <i>Available tools</i> to add ' \
+                                       'a tool to the batch job, ' \
+                                       'and add variables to the tool.</li>' \
+                                       '<li>Choose a name for the batch job. ' \
+                                       '</li> ' \
+                                       '</ol> ' \
+                                       'A batch job can have several tools.'
+                elif d['_upd_mode'] == 'update':
+                    user_guide.value = '<H3><b><i>Update batch job</i></b>' \
+                                       '</H3><br>' \
+                                       'To edit the content of a tool: ' \
+                                       '<ol><li> Use a tool buttons in the ' \
+                                       'list of <i>Available tools</i> to add ' \
+                                       'a tool to the batch job, ' \
+                                       'and add variables to the tool.</li>' \
+                                       '<li>To change variables of a tool, ' \
+                                       'select the tool in the list ' \
+                                       '<b><i>Current setup</i></b>, ' \
+                                       'and use the variable buttons to ' \
+                                       'add or remove them from the tool.' \
+                                       '</li></ol>' \
+                                       '<br><b><i>To delete</i></b> the batch ' \
+                                       'job, just press <b><i>Delete</i></b> ' \
+                                       'without changing the content.'
 
         def reset_multi_plot_auto(hide: bool,
                                   enable: bool = None,
                                   value: bool = None):
 
             if self.debug:
-                debug_value(131, 'reset_multi_plot_auto() - before',
-                            f'hide = {hide}',
-                            f'enable = {enable}',
-                            f'multi_plot_auto_cb.disabled = '
-                            f'{multi_plot_auto_cb.disabled}',
-                            f'multi_plot_auto_cb.layout.display'
-                            f' = {multi_plot_auto_cb.layout.display}',
-                            f'multi_plot_auto_cb.value = '
-                            f'{multi_plot_auto_cb.value}')
+                self.debug_value(131, 'reset_multi_plot_auto() - before',
+                                 f'hide = {hide}', f'enable = {enable}',
+                                 f'multi_plot_auto_cb.disabled = '
+                                 f'{multi_plot_auto_cb.disabled}',
+                                 f'multi_plot_auto_cb.layout.display'
+                                 f' = {multi_plot_auto_cb.layout.display}',
+                                 f'multi_plot_auto_cb.value = '
+                                 f'{multi_plot_auto_cb.value}')
             if hide:
                 multi_plot_auto_cb.layout.display = 'none'
                 multi_plot_auto_cb.disabled = True
@@ -2010,13 +2037,13 @@ class AnalysisGui:
         def reset_var_buttons():
             tool_index = selected_tools.value
             if self.debug:
-                debug_value(17, 'reset_var_buttons()   --- start ---',
-                            f'  - index of selected_tools = {tool_index}')
+                self.debug_value(17, 'reset_var_buttons()   --- start ---',
+                                 f'  - index of selected_tools = {tool_index}')
             if tool_index is None:
                 if self.debug:
-                    debug_value(17, 'reset_var_buttons()   -- index = None',
-                                '  -- deselecting and disabling all ',
-                                'var-buttons and the "Up"-btn')
+                    self.debug_value(17, 'reset_var_buttons()   -- index = None',
+                                     '  -- deselecting and disabling all ',
+                                     'var-buttons and the "Up"-btn')
                 move_up.disabled = True
                 for btn in var_buttons.children:
                     btn.disabled = True
@@ -2028,10 +2055,10 @@ class AnalysisGui:
                 var_trans_dict = get_var_translation_dict()
                 for tool_code, var_codes in row_dict.items():
                     if self.debug:
-                        debug_value(17, f'reset_var_buttons()  -- index '
-                                        f'= {tool_index}',
-                                    f'  --- tool_code = {tool_code}',
-                                    f'  --- var_codes = {var_codes}')
+                        self.debug_value(17, f'reset_var_buttons()  -- index '
+                                             f'= {tool_index}',
+                                         f'  --- tool_code = {tool_code}',
+                                         f'  --- var_codes = {var_codes}')
                     if tool_code == 'multi_plot':
                         # for multi_plot var_codes look like this:
                         # [['%', [['SWC_1', 'ETC NRT Meteo', 'SE-Htm'],
@@ -2069,8 +2096,9 @@ class AnalysisGui:
 
                     elif tool_code == 'corr_plot':
                         if self.debug:
-                            debug_value(17, f'reset_var_buttons() --- restore '
-                                            f'buttons ---')
+                            self.debug_value(17,
+                                             f'reset_var_buttons() --- restore '
+                                             f'buttons ---')
                         for btn in var_buttons.children:
                             if var_trans_dict[btn.description] in var_codes:
                                 btn.icon = 'check'
@@ -2103,8 +2131,8 @@ class AnalysisGui:
         def move_selected(move_click):
             index = selected_tools.value
             if self.debug:
-                debug_value(113, f'move_selected() click',
-                            f'tool index = {index}')
+                self.debug_value(113, f'move_selected() click',
+                                 f'tool index = {index}')
 
             if index is not None:
                 upd_dict = get_batch_upd_dict()['_tools']
@@ -2125,9 +2153,9 @@ class AnalysisGui:
 
         def tool_click(tool):
             if self.debug:
-                debug_value(114, f'tool_click()',
-                            f'tool.description = {tool.description}',
-                            f'tool.icon = {tool.icon}')
+                self.debug_value(114, f'tool_click()',
+                                 f'tool.description = {tool.description}',
+                                 f'tool.icon = {tool.icon}')
             if tool.icon:
                 tool.style.button_color = "LightGreen"
                 tool.icon = ''
@@ -2148,9 +2176,9 @@ class AnalysisGui:
             # Similar to, but different from changed_selected_tool()
             # at this stage the tool is not in the upd_dict.
             if self.debug:
-                debug_value(115, f'update_tool_list() -- input',
-                            f'add_tool = {add_tool}',
-                            f'tool_name = {tool_name}')
+                self.debug_value(115, f'update_tool_list() -- input',
+                                 f'add_tool = {add_tool}',
+                                 f'tool_name = {tool_name}')
 
             # We must remove empty rows, in case this or another tool was
             # deselected without variables.
@@ -2158,8 +2186,8 @@ class AnalysisGui:
             tools, _ = cleanup_tools(tools)
 
             if self.debug:
-                debug_value(115, f'update_tool_list()',
-                            f'tools (cleaned) ={tools}')
+                self.debug_value(115, f'update_tool_list()',
+                                 f'tools (cleaned) ={tools}')
 
             if add_tool:
                 tool_code = name2tool_dict[tool_name]
@@ -2195,17 +2223,17 @@ class AnalysisGui:
             upd_dict = get_batch_upd_dict()['_tools']
             row_index = selected_tools.value
             if self.debug:
-                debug_value(116, f'var_button_click()',
-                            f'btn.description = {btn.description}',
-                            f'selected_tools.value = {row_index}',
-                            f'before:'
-                            f' - upd_dict[row_index] = {upd_dict[row_index]}')
+                self.debug_value(116, f'var_button_click()',
+                                 f'btn.description = {btn.description}',
+                                 f'selected_tools.value = {row_index}',
+                                 f'before:  - upd_dict[row_index] ='
+                                 f' {upd_dict[row_index]}')
 
             for tool_code, upd_var_codes in upd_dict[row_index].items():
                 if self.debug:
-                    debug_value(116, f'var_button_click() ***',
-                                f'tool_code = {tool_code}',
-                                f'upd_var_codes = {upd_var_codes}')
+                    self.debug_value(116, f'var_button_click() ***',
+                                     f'tool_code = {tool_code}',
+                                     f'upd_var_codes = {upd_var_codes}')
                 var_trans_dict = get_var_translation_dict()
                 var_name = btn.description
                 var_code = var_trans_dict[var_name]
@@ -2221,10 +2249,10 @@ class AnalysisGui:
                         upd_var_codes.append(var_code)
                 elif tool_code == 'multi_plot':
                     if self.debug:
-                        debug_value(116, f'var_button_click() ****',
-                                    f'tool_code = {tool_code}',
-                                    f'multi_plot_auto_cb.value = '
-                                    f'{multi_plot_auto_cb.value}')
+                        self.debug_value(116, f'var_button_click() ****',
+                                         f'tool_code = {tool_code}',
+                                         f'multi_plot_auto_cb.value = '
+                                         f'{multi_plot_auto_cb.value}')
                     unit = var2unit(var_code)
                     if multi_plot_auto_cb.value:
                         axis_of_var = None
@@ -2287,24 +2315,24 @@ class AnalysisGui:
                     upd_var_codes = [y for y in upd_var_codes if y[1]]
                     multi_plot_auto_cb.disabled = (len(upd_var_codes) == 2)
                     if self.debug:
-                        debug_value(116, f'var_button_click()',
-                                    f'tool_code = {tool_code}',
-                                    f'multi_plot_auto_cb.value = '
-                                    f'{multi_plot_auto_cb.value}')
+                        self.debug_value(116, f'var_button_click()',
+                                         f'tool_code = {tool_code}',
+                                         f'multi_plot_auto_cb.value = '
+                                         f'{multi_plot_auto_cb.value}')
 
                 upd_dict[row_index] = {tool_code: upd_var_codes}
                 if self.debug:
-                    debug_value(116, f'var_button_click()',
-                                f'after:',
-                                f' - upd_dict[row_index] = '
-                                f'{upd_dict[row_index]}')
+                    self.debug_value(116, f'var_button_click()',
+                                     f'after:',
+                                     f' - upd_dict[row_index] = '
+                                     f'{upd_dict[row_index]}')
 
                 update_batch_dict(dict(_tools=upd_dict,
                                        _selected_tool_index=row_index))
 
         def get_var2unit_dict():
             if self.debug:
-                debug_value(32, f'get_var2unit_dict()')
+                self.debug_value(32, f'get_var2unit_dict()')
             d = eval(var_to_unit_dict.value)
             if not (d and isinstance(d, dict)):
                 d = self._load_app_configs().get('_var2unit_map', {})
@@ -2326,14 +2354,14 @@ class AnalysisGui:
 
             unit = var2unit_dict[var[0]]
             if self.debug:
-                debug_value(8, f'var2unit()', f'var = {var}',
-                            f'return unit = {unit}')
+                self.debug_value(8, f'var2unit()', f'var = {var}',
+                                 f'return unit = {unit}')
             return unit
 
         def set_group_var_info():
             cache = self._load_cache()
             if self.debug:
-                debug_value(4, f'set_group_var_info()')
+                self.debug_value(4, f'set_group_var_info()')
 
             if isinstance(cache, dict) and '_groups' in cache.keys():
                 grp = group_drop.value
@@ -2353,7 +2381,7 @@ class AnalysisGui:
 
         def get_var_info_text(group: str = None):
             if self.debug:
-                debug_value(5, f'get_var_info_text()')
+                self.debug_value(5, f'get_var_info_text()')
             if group:
                 cache = self._load_cache()
                 var_tuples = copy.deepcopy(cache['_groups'][group]['_group_vars'])
@@ -2362,17 +2390,15 @@ class AnalysisGui:
                 return AnalysisGui.var_tuple_ls_converter(var_ls=var_tuples,
                                                           output=output_code,
                                                           stn_name_id_ls=stn_ls,
-                                                          debug_fun=self.debug_value)
-
-        def debug_value(*text_list):
-            self.debug_value(*text_list)
+                                                          debug_fun=
+                                                          self.debug_value)
 
         def html_msg(text_ls: list = None,
                      title: str = None,
                      error: bool = None,
                      show_user_guide: bool = None):
             if self.debug:
-                debug_value(118, f'html_msg()')
+                self.debug_value(118, f'html_msg()')
 
             margin = '&nbsp' * 6  # html space
 
@@ -2413,8 +2439,8 @@ class AnalysisGui:
             upd_mode = upd_dict.get('_upd_mode', None)
             grp = group_drop.value
             if self.debug:
-                debug_value(130, 'set_info_msg()', f'upd_mode = {upd_mode}',
-                            f'grp = {grp}')
+                self.debug_value(130, 'set_info_msg()', f'upd_mode = {upd_mode}',
+                                 f'grp = {grp}')
             if upd_mode == 'new':
                 index = upd_dict['_selected_tool_index']
                 index = str(index)
@@ -2512,8 +2538,8 @@ class AnalysisGui:
         def cleanup_tools(d: dict) -> (dict, bool):
             # returns "a clean tool-dict" and boolean for "dict has changed"
             if self.debug:
-                debug_value(120, f'cleanup_tools() -- (before)',
-                            f"upd_dict['_tools'] = {d}")
+                self.debug_value(120, f'cleanup_tools() -- (before)',
+                                 f"upd_dict['_tools'] = {d}")
 
             if isinstance(d, dict) and d:
                 d_copy = d.copy()
@@ -2530,9 +2556,9 @@ class AnalysisGui:
                 dict_has_changed = False
 
             if self.debug:
-                debug_value(120, f'cleanup_tools() -- (after)',
-                            f'd = {d}',
-                            f'dict_has_changed = {dict_has_changed}')
+                self.debug_value(120, f'cleanup_tools() -- (after)',
+                                 f'd = {d}',
+                                 f'dict_has_changed = {dict_has_changed}')
 
             return d, dict_has_changed
 
@@ -2562,17 +2588,17 @@ class AnalysisGui:
                 name_of_batch_job.layout = AnalysisGui._get_width_layout(name)
 
             if self.debug:
-                debug_value(121, f'validate_name()',
-                            f'name = {name}',
-                            f'error_ls = {error_ls}')
+                self.debug_value(121, f'validate_name()',
+                                 f'name = {name}',
+                                 f'error_ls = {error_ls}')
 
             return error_ls
 
         def batch_name_changed(change):
             if self.debug:
-                debug_value(122, f'batch_name_changed()',
-                            f'change = {change}',
-                            f'name = {change.owner.value}')
+                self.debug_value(122, f'batch_name_changed()',
+                                 f'change = {change}',
+                                 f'name = {change.owner.value}')
 
             if change.type == 'change':
                 new_name = change.owner.value
@@ -2581,24 +2607,24 @@ class AnalysisGui:
 
                 if error_ls:
                     if self.debug:
-                        debug_value(122, f'batch_name_changed()',
-                                    f'\t error_ls = {error_ls}')
+                        self.debug_value(122, f'batch_name_changed()',
+                                         f'\t error_ls = {error_ls}')
                     upd_dict['_name_error'] = error_ls
                 else:
                     if self.debug:
-                        debug_value(122, f'batch_name_changed()',
-                                    f'\t new_name={new_name}')
+                        self.debug_value(122, f'batch_name_changed()',
+                                         f'\t new_name={new_name}')
                     upd_dict['_new_name'] = new_name
                 if self.debug:
-                    debug_value(122, f'batch_name_changed()',
-                                f'\t batch_drop.value={batch_drop.value}')
+                    self.debug_value(122, f'batch_name_changed()',
+                                     f'\t batch_drop.value={batch_drop.value}')
                 update_batch_dict(upd_dict)
 
         def get_var_translation_dict() -> dict:
             if self.debug:
-                debug_value(7, f'get_var_translation_dict()',
-                            f'var_translation_dict.value = '
-                            f'{var_translation_dict.value}')
+                self.debug_value(7, f'get_var_translation_dict()',
+                                 f'var_translation_dict.value = '
+                                 f'{var_translation_dict.value}')
 
             d = eval(var_translation_dict.value)
             return d
@@ -2612,26 +2638,26 @@ class AnalysisGui:
                 d = dict()
 
             if self.debug:
-                debug_value(14, 'get_batch_upd_dict()', f'd ={d}')
+                self.debug_value(14, 'get_batch_upd_dict()', f'd ={d}')
 
             return d
 
         def set_batch_upd_dict(d: dict):
             if self.debug:
-                debug_value(12, 'set_batch_upd_dict()', 'step 1', f'd ={d}')
+                self.debug_value(12, 'set_batch_upd_dict()', 'step 1', f'd ={d}')
 
             json_safe_dict = {k: v for k, v in d.items() if k != '_tools'}
             json_safe_dict['_tools'] = {str(k): v for k, v in d['_tools'].items()}
 
             upd_dict_log.value = str(json_safe_dict)
             if self.debug:
-                debug_value(12, 'set_batch_upd_dict()', 'step 2',
-                            f'upd_dict_log.value ={upd_dict_log.value}')
+                self.debug_value(12, 'set_batch_upd_dict()', 'step 2',
+                                 f'upd_dict_log.value ={upd_dict_log.value}')
 
         def update_batch_dict(d: dict):
             if self.debug:
-                debug_value(123, f'update_batch_dict()',
-                            f'd = {d}')
+                self.debug_value(123, f'update_batch_dict()',
+                                 f'd = {d}')
             upd_dict = get_batch_upd_dict()
             for k, v in d.items():
                 upd_dict[k] = v
@@ -2659,10 +2685,10 @@ class AnalysisGui:
                 if b in cache['_groups'][grp]['_var_mismatch'].keys():
                     er_dict = cache["_groups"][grp]["_var_mismatch"][b]
                     if self.debug:
-                        debug_value(128, f'validate_batch()',
-                                    f'batch_drop.label = {batch_drop.label}',
-                                    f'batch_drop.value = {batch2validate}',
-                                    f'er_dict = {er_dict}')
+                        self.debug_value(128, f'validate_batch()',
+                                         f'batch_drop.label = {batch_drop.label}',
+                                         f'batch_drop.value = {batch2validate}',
+                                         f'er_dict = {er_dict}')
 
                     reindex = False
                     for index, tool_vars in er_dict.items():
@@ -2709,7 +2735,7 @@ class AnalysisGui:
                         '_selected_tool_index': None}
 
             if self.debug:
-                debug_value(124, 'new_batch()', f'upd_dict = {upd_dict}')
+                self.debug_value(124, 'new_batch()', f'upd_dict = {upd_dict}')
 
             set_batch_upd_dict(upd_dict)
             name_of_batch_job.value = "Name of batch job"
@@ -2717,9 +2743,9 @@ class AnalysisGui:
 
         def update_batch(c):
             if self.debug:
-                debug_value(125, f'update_batch()',
-                            f'batch_drop.label = {batch_drop.label}',
-                            f'batch_drop.value = {batch_drop.value}')
+                self.debug_value(125, f'update_batch()',
+                                 f'batch_drop.label = {batch_drop.label}',
+                                 f'batch_drop.value = {batch_drop.value}')
 
             stored_batch = get_valid_batch()
             batch_version = int(stored_batch.pop('_version', 1))
@@ -2744,8 +2770,8 @@ class AnalysisGui:
             batches = cache['_groups'][grp].get('_batches', {})
 
             if self.debug:
-                debug_value(125, 'save_batch()',
-                            f'upd_dict = {upd_dict}')
+                self.debug_value(125, 'save_batch()',
+                                 f'upd_dict = {upd_dict}')
 
             error_ls = validate_name(b_name)
             tool_dict, _ = cleanup_tools(upd_dict.get('_tools', {}))
@@ -2766,7 +2792,7 @@ class AnalysisGui:
                 batches.pop(old_batch, None)
                 batches[b_name] = config
                 if self.debug:
-                    debug_value(20, 'save_batch()', f'batches = {batches}')
+                    self.debug_value(20, 'save_batch()', f'batches = {batches}')
 
                 cache['_groups'][grp]['_batches'] = batches
                 d = cache['_groups'][grp]
@@ -2781,7 +2807,7 @@ class AnalysisGui:
 
         def cancel_batch(c):
             if self.debug:
-                debug_value(126, 'cancel_batch()')
+                self.debug_value(126, 'cancel_batch()')
             reset_batch_gui(reason='cancel_batch_upd')
 
         def delete_batch(c):
@@ -2792,9 +2818,9 @@ class AnalysisGui:
 
             b_name = upd_dict['_new_name']
             if self.debug:
-                debug_value(127, 'delete_batch()',
-                            f'b_name = {b_name}',
-                            f'batch_drop.label = {batch_drop.label}')
+                self.debug_value(127, 'delete_batch()',
+                                 f'b_name = {b_name}',
+                                 f'batch_drop.label = {batch_drop.label}')
 
             validation_error_ls = []
             if upd_dict['_orig_name'] != b_name:
@@ -2810,10 +2836,10 @@ class AnalysisGui:
                                 'Update and Delete')
                 html_msg(text_ls=error_ls, error=True)
                 if self.debug:
-                    debug_value(127, f'delete_batch()  --error-- ',
-                                f'error_ls = {error_ls}',
-                                f'orig_tools:  {orig_tools}',
-                                f"upd_dict['_tools']: {upd_dict['_tools']}")
+                    self.debug_value(127, f'delete_batch()  --error-- ',
+                                     f'error_ls = {error_ls}',
+                                     f'orig_tools:  {orig_tools}',
+                                     f"upd_dict['_tools']: {upd_dict['_tools']}")
                 return
             else:
                 grp = group_drop.value
@@ -2831,8 +2857,8 @@ class AnalysisGui:
                 self._set_cache(cache_dict=cache)
 
                 if self.debug:
-                    debug_value(127, f'delete_batch() ',
-                                f'deleted: {b_name}')
+                    self.debug_value(127, f'delete_batch() ',
+                                     f'deleted: {b_name}')
                 reset_batch_gui(reason='delete_batch')
 
         #        def clear_debug_list(c):
@@ -2852,9 +2878,9 @@ class AnalysisGui:
         # activate/deactivate upd-widgets
         def activate_gui(action_id: str, reason: str = None):
             if self.debug:
-                debug_value(10, 'activate_gui()',
-                            f'action_id = {action_id}',
-                            f'reason = {reason}')
+                self.debug_value(10, 'activate_gui()',
+                                 f'action_id = {action_id}',
+                                 f'reason = {reason}')
 
             def set_widget_state(wd_input, disable: bool = None,
                                  tooltip: str = None, show_widget: bool = None):
@@ -2915,11 +2941,12 @@ class AnalysisGui:
                                  disable=False,
                                  tooltip='Cancel...')
 
-                debug_value(10, 'activate_gui() - upd 1',
-                            f'action_id = {action_id}',
-                            f'save_btn.disabled = {save_btn.disabled}',
-                            f'delete_btn.disabled = '
-                            f'{delete_btn.disabled}')
+                if self.debug:
+                    self.debug_value(10, 'activate_gui() - upd 1',
+                                     f'action_id = {action_id}',
+                                     f'save_btn.disabled = {save_btn.disabled}',
+                                     f'delete_btn.disabled = '
+                                     f'{delete_btn.disabled}')
                 if action_id == 'update':
                     delete_btn.disabled = False
                     delete_btn.tooltip = 'Click to delete...'
@@ -2931,11 +2958,11 @@ class AnalysisGui:
                     selected_vars.value = None
                     selected_vars.options = []
                 if self.debug:
-                    debug_value(10, 'activate_gui() - upd 2',
-                                f'action_id = {action_id}',
-                                f'save_btn.disabled = {save_btn.disabled}',
-                                f'delete_btn.disabled = '
-                                f'{delete_btn.disabled}')
+                    self.debug_value(10, 'activate_gui() - upd 2',
+                                     f'action_id = {action_id}',
+                                     f'save_btn.disabled = {save_btn.disabled}',
+                                     f'delete_btn.disabled = '
+                                     f'{delete_btn.disabled}')
 
             elif action_id == 'reset_gui':
                 # read mode
@@ -4035,23 +4062,29 @@ class AnalysisGui:
                     tool += 1
                     batch_dict[b_name][str(tool)] = {'corr_plot': corr_ls}
             multi_dict = {}
-            good_units = set()
+            multi_dict = {}
             for i in range(len(var_ls)):
                 v = var_ls[i]
                 u = var2unit(v)
                 if u in multi_dict.keys():
                     multi_dict[u].append(v)
-                    good_units.add(u)
                 else:
                     multi_dict[u] = [v]
-                if len(good_units) == 2:
+
+            multi_list = []
+            for k, v_ls in multi_dict.items():
+                if len(v_ls) > 1:
+                    multi_list.append([k, v_ls])
+                if len(multi_list) == 2:
                     break
-            multi_list = [[k, v] for k, v in multi_dict.items()
-                          if k in good_units]
-            if len(multi_list) < 2 and len(multi_dict) > 1:
-                for k, v in multi_dict.items():
-                    if k not in good_units:
-                        multi_list.append([k, v])
+
+            if len(multi_list) < 2 <= len(multi_dict):
+                for k, v_ls in multi_dict.items():
+                    if [k, v_ls] not in multi_list:
+                        multi_list.append([k, v_ls])
+                    if len(multi_list) == 2:
+                        break
+
             tool += 1
             batch_dict[b_name][str(tool)] = {'multi_plot': multi_list}
             batch_dict[b_name]['_version'] = '1'
