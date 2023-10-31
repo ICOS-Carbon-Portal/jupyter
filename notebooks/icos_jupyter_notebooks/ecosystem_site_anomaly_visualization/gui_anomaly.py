@@ -697,7 +697,7 @@ def update_func(button_c):
     # show the citation strings associated with the output figures
     with output_citation:
         
-        display(HTML('<p style="font-size:16px"><b>Citation:</b><br></p>'))
+        display(HTML('<p style="font-size:16px"><b>Data citation:</b><br></p>'))
         if year_a > 2020:        
             display(HTML('<p style="font-size:16px">' + citation_string_site_a_icos + '<br></p>'))
         
