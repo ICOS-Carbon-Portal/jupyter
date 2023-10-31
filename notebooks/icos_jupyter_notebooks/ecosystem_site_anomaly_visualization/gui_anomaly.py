@@ -448,10 +448,14 @@ def update_func(button_c):
     
     # use the url to the site landing page to access its metadata. 
     json_url = landingpage_site_a + '/json_file.json'
-    json_url_response = urllib.request.urlopen(json_url)
-    json_data = json.loads(json_url_response.read())
-    citation_string_site_a = json_data['references']['citationString']
-
+    # 2023-10-31: glitch in ecosystem data upload. Everything gone.
+    try:
+        json_url_response = urllib.request.urlopen(json_url)
+        json_data = json.loads(json_url_response.read())
+        citation_string_site_a = json_data['references']['citationString']
+    except:
+        citation_string_site_a = 'We have a temporary problem with our ecosystem data: currently, there is no citation string to show for ' + selected_site_a_name + '.'
+        
     try: 
         ecosystem_type_site_a = json_data['specificInfo']['acquisition']['station']['specificInfo']['ecosystemType']['label']
     except:
@@ -468,11 +472,14 @@ def update_func(button_c):
     
     if  year_a > 2020:
         landingpage_site_a_icos = return_link_es_data(selected_site_a, icos = True)
-        # use the url to the product landing page to the selected site to access its metadata. 
+        # use the url to the product landing page to the selected site to access its metadata.
         json_url = landingpage_site_a_icos + '/json_file.json'
-        json_url_response = urllib.request.urlopen(json_url)
-        json_data = json.loads(json_url_response.read())
-        citation_string_site_a_icos = json_data['references']['citationString']
+        try:
+            json_url_response = urllib.request.urlopen(json_url)
+            json_data = json.loads(json_url_response.read())
+            citation_string_site_a_icos = json_data['references']['citationString']
+        except:
+            citation_string_site_a_icos = 'We have a temporary problem with our ecosystem data: currently, there is no citation string to show for ' + selected_site_a_name + '.'
         values_site_a = return_year_data(path_icos, selected_site_a, year_a, variable_a_value)
         correlation_site_a = str(round(list(comparison_table.loc[comparison_table['site'] == selected_site_a]['correlation'])[0], 2))
         rmse_site_a = str(round(list(comparison_table.loc[comparison_table['site'] == selected_site_a]['RMSE'])[0], 2))
@@ -522,9 +529,12 @@ def update_func(button_c):
         selected_site_b_name = list(sites_dataframe.loc[sites_dataframe['id'] == selected_site_b]['name'])[0]             
         landingpage_site_b = return_link_es_data(selected_site_b)
         json_url = landingpage_site_b + '/json_file.json'
-        json_url_response = urllib.request.urlopen(json_url)
-        json_data = json.loads(json_url_response.read())
-        citation_string_site_b = json_data['references']['citationString']
+        try:
+            json_url_response = urllib.request.urlopen(json_url)
+            json_data = json.loads(json_url_response.read())
+            citation_string_site_b = json_data['references']['citationString']
+        except:
+            citation_string_site_b = 'We have a temporary problem with our ecosystem data: currently, there is no citation string to show for ' + selected_site_b_name + '.'
         try: 
             ecosystem_type_site_b = json_data['specificInfo']['acquisition']['station']['specificInfo']['ecosystemType']['label']
         except:
@@ -542,9 +552,12 @@ def update_func(button_c):
         if year_b > 2020:
             landingpage_site_b_icos = return_link_es_data(selected_site_b, icos = True)
             json_url = landingpage_site_b_icos + '/json_file.json'
-            json_url_response = urllib.request.urlopen(json_url)
-            json_data = json.loads(json_url_response.read())
-            citation_string_site_b_icos = json_data['references']['citationString']
+            try:
+                json_url_response = urllib.request.urlopen(json_url)
+                json_data = json.loads(json_url_response.read())
+                citation_string_site_b_icos = json_data['references']['citationString']
+            except:
+                citation_string_site_b_icos = 'We have a temporary problem with our ecosystem data: currently, there is no citation string to show for ' + selected_site_b_name + '.'
             correlation_site_b = str(round(list(comparison_table.loc[comparison_table['site'] == selected_site_b]['correlation'])[0], 2))
             rmse_site_b = str(round(list(comparison_table.loc[comparison_table['site'] == selected_site_b]['RMSE'])[0], 2))
             bias_site_b = str(round(list(comparison_table.loc[comparison_table['site'] == selected_site_b]['bias (warm winter - new release)'])[0], 2))
@@ -697,19 +710,19 @@ def update_func(button_c):
     # show the citation strings associated with the output figures
     with output_citation:
         
-        display(HTML('<p style="font-size:16px"><b>Citation:</b><br></p>'))
+        display(HTML('<p style="font-size:16px"><b>Data citation:</b><br></p>'))
         if year_a > 2020:        
             display(HTML('<p style="font-size:16px">' + citation_string_site_a_icos + '<br></p>'))
-        
-        display(HTML('<p style="font-size:16px">' + citation_string_site_a + '<br></p>'))
+        else:
+            display(HTML('<p style="font-size:16px">' + citation_string_site_a + '<br></p>'))
         
         if site_b is not None and citation_string_site_a!=citation_string_site_b:
             
             if year_b > 2020:
                 
                 display(HTML('<p style="font-size:16px">' + citation_string_site_b_icos + '<br></p>'))
-                
-            display(HTML('<p style="font-size:16px">' + citation_string_site_b + '<br></p>'))
+            else:   
+                display(HTML('<p style="font-size:16px">' + citation_string_site_b + '<br></p>'))
     
     with output_plot_anomalies:
         plot_interface_anomaly.plot_anomalies(df_final, data_filename, selection_dict, colors_positive_anomalies_dict, colors_negative_anomalies_dict)
