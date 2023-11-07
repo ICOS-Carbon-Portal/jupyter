@@ -922,31 +922,34 @@ class AnalysisGui:
 
         if error_ls:
             margin = '&nbsp' * 3
-            warning_emoji = '\u26a0\ufe0f'
             error_color = self.widget_style_colors['danger:active']
 
             span_start = f'<span style="color:{error_color}">'
             span_end = '</span>'
 
             if not self.error_texts.value:
-                err_msg = f'{span_start}<h2>{warning_emoji}{margin}' \
-                          f'Errors!{margin}{warning_emoji}</h2>{span_end}'
+                warning_emoji = '\u26a0\ufe0f'
+                err_msg = f'{span_start}<h3>' \
+                          f'List of data errors:{margin}{margin}' \
+                          f'{warning_emoji}</h3>' \
+                          f'{span_end}'
             else:
                 err_msg = '<hr>'
 
-            err_msg += span_start
+            err_msg += f'<hr>{span_start}'
             if error_ls[0] == 'ACTION':
-                err_msg += f'<h3>{warning_emoji}{margin}' \
+                err_msg += f'<h4>{margin}' \
                            f'{error_ls[1]}' \
-                           f'{margin}{warning_emoji}</h3><b>'
+                           f'</h4>'
                 error_ls = error_ls[2:]
             else:
-                err_msg += f'<h4>{warning_emoji}{margin}{error_ls[0]}</h4><b>'
+                err_msg += f'<h4>{margin}' \
+                           f'{error_ls[0]}</h4>'
                 error_ls = error_ls[1:]
             for error in error_ls:
-                error = f'{margin}{error}'
+                error = f'<b>{margin}{error}</b>'
                 err_msg += AnalysisGui._set_css(error, 'tight')
-            err_msg += f'</b>{span_end}'
+            err_msg += f'{span_end}'
             self.error_texts.value += err_msg
 
     def start_tool_app(self):
@@ -1978,6 +1981,18 @@ class AnalysisGui:
             sel_plot_type_index = plot_setup_dict.pop('_selected_plot_type_index',
                                                       None)
             plot_types = plot_setup_dict.get('_plot_types', {})
+
+            # we need to clean up deprecated plots
+            temp_pt = {}
+            i = 0
+            for idx, pt_row in plot_types.items():
+                for pt_code, v_ls in pt_row.items():
+                    if pt_code in plot_type2name_dict.keys():
+                        temp_pt[i] = {pt_code: v_ls}
+                        i += 1
+                    elif sel_plot_type_index == idx:
+                        sel_plot_type_index = None
+            plot_types = temp_pt
             sel_plot_types = [(plot_type2name_dict[k2], k1) for k1, v1 in
                               plot_types.items() for
                               k2 in v1.keys()]
@@ -3653,7 +3668,7 @@ class AnalysisGui:
             save_btn.disabled = False
 
         def height_or_width_changed(c):
-            if c.new < 200:
+            if c.new < 210:
                 c.owner.value = 0
             else:
                 settings_changed(c)
@@ -3788,7 +3803,7 @@ class AnalysisGui:
                            f'the <b><i>{plotly_templ_href}</i></b>.<br>'
         height_or_width_min = 'Setting <b><i>Height</i></b> or ' \
                               '<b><i>Width</i></b> to a value below ' \
-                              '200 will lead to plotly default ' \
+                              '210 will lead to plotly default ' \
                               'value. '
 
         # common label widgets
@@ -4536,13 +4551,13 @@ class AnalysisGui:
                 prod_ls = []
                 dobj_ls = []
                 err_obj_ls = []
+                # these are ordered with respect to date
                 for i in range(len(p_ls)):
                     if p_ls[i] not in prod_ls:
                         prod_ls.append(p_ls[i])
                         dobj_ls.append(d_ls[i])
                     else:
                         err_obj_ls.append((p_ls[i], d_ls[i]))
-
                 if err_obj_ls:
                     emph_1 = '<font color="DarkBlue"><i>'
                     emph_2 = '</i></font>'
@@ -4569,39 +4584,43 @@ class AnalysisGui:
                                           f'{emph_1}{station_drop.label}{emph_2}',
                                 'There should only be one data object per file.',
                                 txt1, txt2]
-                    self.set_persistent_error(error_ls=error_ls)
+                    if self.debug:
+                        self.set_persistent_error(error_ls=error_ls)
 
             if self.debug:
                 self.debug_value(-1114, 'set_prod_drop()',
+                                 f'change = {change}',
+                                 f'station = {station_drop.label}',
                                  f'prod_ls = {prod_ls}',
                                  f'dobj_ls = {dobj_ls}')
 
             prod_drop_ls = list(zip(prod_ls, dobj_ls))
             prod_drop_ls.sort(key=lambda v: v[0].lower())
-            product_drop.options = prod_drop_ls
-
-            if change == 'new':
-                product_drop.value = product_drop.options[0][1]
-            elif change == 'update':
-                grp = group_drop.value
-                last_var = cache['_groups'][grp]['_group_vars'][-1]
-                last_prod = last_var[1]
-                product_drop.value = [y[1] for y in prod_drop_ls if
-                                      y[0] == last_prod].pop()
-            elif isinstance(change, dict) and change['new']:
-                grp = change['new']
-                try:
-                    last_var = cache['_groups'][grp]['_group_vars'][-1]
-                    last_prod = last_var[1]
-                    product_drop.value = [y[1] for y in prod_drop_ls if
-                                          y[0] == last_prod].pop()
-                except:
-                    pass
+            if product_drop.label and product_drop.label in prod_ls:
+                prod_label = product_drop.label
             else:
-                product_drop.value = product_drop.options[0][1]
+                upd_dict = get_temp_dict()
+                prod_label = ''
+                if isinstance(upd_dict, dict):
+                    var_tuples = upd_dict.get('_var_list', [])
+                    if var_tuples:
+                        last_var = var_tuples[-1]
+                        prod_label = last_var[1] if last_var[1] in prod_ls else ''
+                if not prod_label:
+                    grp = group_drop.value
+                    if grp in cache['_groups'].keys():
+                        last_prod = cache['_groups'][grp]['_group_vars'][-1][1]
+                        prod_label = last_prod if last_prod in prod_ls else ''
+                if not prod_label:
+                    grp = cache['_last_group']
+                    last_prod = cache['_groups'][grp]['_group_vars'][-1][1]
+                    prod_label = last_prod if last_prod in prod_ls else ''
+                else:
+                    prod_label = prod_ls[0]
 
-            if not product_drop.value:
-                product_drop.value = product_drop.options[0][1]
+            product_drop.options = prod_drop_ls
+            product_drop.value = [y[1] for y in prod_drop_ls if y[0] ==
+                                  prod_label].pop()
 
         def set_var_drop(change):
             if self.debug:
@@ -4626,12 +4645,10 @@ class AnalysisGui:
                         ind = prod_ls.index(error_prod)
                         prod_ls[ind] = f'Error: {error_prod}'
                         prod_drop_ls = list(zip(prod_ls, dobj_ls))
-                        product_drop.unobserve(set_var_drop)
                         product_drop.options = prod_drop_ls
                         product_drop.value = prod_drop_ls[ind][1]
-                        product_drop.observe(set_var_drop, names='value')
                         set_pid_error()
-                    var_drop.options = [('Error in data object!', 'dummy')]
+                    var_drop.options = [('Error in data object!', 'error')]
                     var_drop.value = var_drop.options[0][1]
                     return
 
@@ -4644,23 +4661,23 @@ class AnalysisGui:
         def set_pid_error(pid: str = None, var: tuple = None):
 
             if self.debug:
-                self.debug_value(-88, 'set_pid_error() '
-                                      f'pid = {pid}',
+                self.debug_value(-88, 'set_pid_error() ', f'pid = {pid}',
                                  f'var = {var}',
                                  f'product_drop.options = '
                                  f'{product_drop.options}')
-            if not isinstance(pid, tuple):
-
+            if not (isinstance(pid, str) and isinstance(var, tuple)):
                 prod_drop_ls = list(product_drop.options)
                 er_prod_ls = []
                 er_pid_ls = []
+                selected_prod = ''
+                selected_url = ''
                 for p in prod_drop_ls:
                     if 'Error' in p[0]:
                         p0 = p[0][7:]
                         p1 = f'<a href="{p[1]}" target="_blank">{p[1]}</a>'
                         if p[0] == product_drop.label:
-                            persistent_prod = p0
-                            persistent_url = p1
+                            selected_prod = p0
+                            selected_url = p1
                         er_prod_ls.append(p0)
                         er_pid_ls.append(p1)
                 prod = ', '.join(er_prod_ls)
@@ -4670,14 +4687,15 @@ class AnalysisGui:
                     pid += '</li></ol>'
                     s = 's'
                 else:
+                    pid = er_pid_ls[0]
                     s = ''
                 st = station_drop.label
-            elif isinstance(var, tuple):
+            elif isinstance(pid, str) and isinstance(var, tuple):
                 prod = var[1]
-                persistent_prod = prod
+                selected_prod = prod
                 st = var[2]
                 pid = f'<a href="{pid}" target="_blank">{pid}</a>'
-                persistent_url = pid
+                selected_url = pid
                 s = ''
             else:
                 return
@@ -4685,20 +4703,21 @@ class AnalysisGui:
                          f'Severe Data Error at the station <font '
                          f'color="DarkBlue">{st}</font>',
                          f'Could not access the data object of: '
-                         f'<font color="DarkBlue"><i>{persistent_prod}'
+                         f'<font color="DarkBlue"><i>{selected_prod}'
                          f'</i></font>',
                          f'Landing page of the data object: '
-                         f'<font color="DarkBlue">{persistent_url}</font>']
+                         f'<font color="DarkBlue">{selected_url}</font>']
             error_ls2 = ['ACTION',
                          f'Severe Data Error at the station <font '
                          f'color="DarkBlue">{st}</font>',
                          f'Could not access the data object{s} of: '
                          f'<font color="DarkBlue"><i>{prod}.</i></font>',
                          f'Landing page{s} of the data object{s}: '
-                         f'<font color="DarkBlue">{pid}</font>',
-                         f'The error will be stored in the error widget, '
-                         f'below the main menu.']
-            self.set_persistent_error(error_ls=error_ls1)
+                         f'<font color="DarkBlue">{pid}</font>']
+            if self.debug:
+                error_ls2.append(f'The error will be stored in the error '
+                                 f'widget, below the main menu.')
+                self.set_persistent_error(error_ls=error_ls1)
             set_info_msg(error_ls=error_ls2)
 
         def set_var_info_text(change):
@@ -4710,7 +4729,23 @@ class AnalysisGui:
             if isinstance(change, dict):
                 if isinstance(change['owner'], wd.Dropdown):
                     if var_drop.value == 'dummy':
-                        var_info_text.value = ''
+                        var_info_text.value = 'Here basic ' \
+                                              'information on variables are ' \
+                                              'given. Make sure you are in ' \
+                                              'update mode, and then:' \
+                                              '<ol>' \
+                                              '<li><i>Select a ' \
+                                              'station</i></li>' \
+                                              '<li><i>Select a ' \
+                                              'product' \
+                                              '</i> ' \
+                                              'Then the menu here will display ' \
+                                              'variables of that product.'
+                        return
+                    elif var_drop.value == 'error':
+                        var_info_text.value = 'Error in data object. See the ' \
+                                              '<b><i>User guide</i></b> for ' \
+                                              'details.'
                         return
                     else:
                         var_name = change['owner'].label
@@ -4848,13 +4883,11 @@ class AnalysisGui:
                 var_cbs_box.children = []
                 return
             elif 'Error' in product_drop.label:
-                warning_emoji = '\u26a0\ufe0f'
                 error_color = self.widget_style_colors['danger:active']
-
                 err_msg = f'<span style="color:{error_color}">' \
-                          f'<h4>{warning_emoji}{warning_emoji}' \
-                          f'<b><i>Data error in product!! </i></b> ' \
-                          f' See the User guide for details.  </h4></span>'
+                          f'Error in data object. See the ' \
+                          '<b><i>User guide</i></b> for ' \
+                          'details.</span>'
                 var_label.value = err_msg
                 var_cbs_box.children = []
                 return
@@ -5191,18 +5224,19 @@ class AnalysisGui:
                 warning_emoji = '\u26a0\ufe0f'
                 error_color = self.widget_style_colors['danger:active']
 
-                err_msg = f'<span style="color:{error_color}">{margin}{margin}'
+                err_msg = f'<span style="color:{error_color}">' \
+                          f'<hr>{margin}{margin}'
                 if error_ls[0] == 'ACTION':
-                    err_msg += f'<h2>{warning_emoji} {error_ls[1]}' \
-                               f' {warning_emoji} </h2><b>'
+                    err_msg += f'<h3>{warning_emoji} {error_ls[1]}' \
+                               f' {warning_emoji} </h3><b>'
                     error_ls = error_ls[2:]
                 else:
                     err_msg += f'<h3>To do: {warning_emoji}</h3><b>'
 
                 for error in error_ls:
                     err_msg += f'{margin}{error}<br>'
-                err_msg += '</b></span>'
-                msg = err_msg + msg
+                err_msg += '</b></span><hr>'
+                msg = msg + err_msg
 
             user_guide.value = msg
 
@@ -5242,9 +5276,9 @@ class AnalysisGui:
                 set_var_info_text('')
                 set_var_checkboxes('')
 
-                var_drop.observe(set_var_info_text, names='value')
                 station_drop.observe(set_prod_drop, names='value')
                 product_drop.observe(set_var_drop, names='value')
+                var_drop.observe(set_var_info_text, names='value')
                 var_drop.observe(set_var_checkboxes, names='options')
                 # product_drop.observe(set_var_checkboxes, names='value')
                 group_name.style.text_color = 'darkgreen'
@@ -5281,9 +5315,9 @@ class AnalysisGui:
 
                 station_drop.unobserve(set_prod_drop)
                 product_drop.unobserve(set_var_drop)
+                var_drop.unobserve(set_var_info_text)
                 var_drop.unobserve(set_var_checkboxes)
                 group_name.unobserve(group_name_changed)
-                var_drop.unobserve(set_var_info_text)
                 var_info_container.layout.display = 'none'
 
                 upd_box.layout.display = 'none'
