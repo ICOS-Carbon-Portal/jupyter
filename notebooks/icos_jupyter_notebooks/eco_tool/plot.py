@@ -104,7 +104,9 @@ class Plot:
         self.corr_table_settings = kwargs.pop('corr_table_kwargs', dict())
         self.multi_plot_settings = kwargs.pop('multi_plot_kwargs', dict())
         self.split_plot_settings = kwargs.pop('split_plot_kwargs', dict())
+
         self.corr_plot_layout = None
+        self.corr_table_layout = None
         self.multi_plot_layout = None
         self.split_plot_layout = None
 
@@ -139,6 +141,8 @@ class Plot:
                 subtitle_size = 10
             colorbar_height = int(0.8 * height) if height else 200
 
+            #second_title_size = min(subtitle_size + 1, title_size)
+            legend_title_size = min(subtitle_size + 1, title_size)
             if use_latex:
                 x_title = 'title of x-axis'
                 y_title = 'title of y-axis'
@@ -161,6 +165,9 @@ class Plot:
                 ),
                 width=width,
                 height=height,
+                margin=dict(
+                    b=50,
+                    t=150),
                 template=template,
                 annotations=[dict(
                     font=dict(
@@ -171,7 +178,20 @@ class Plot:
                     x=0.47,
                     xref='paper',
                     y=1.1,
-                    yref='paper')],
+                    yref='paper'),
+                    # dict(
+                    #     font=dict(
+                    #         family=title_font,
+                    #         size=second_title_size),
+                    #     text=' ',  # second_title of corr-table template',
+                    #     showarrow=False,
+                    #     x=0.01,
+                    #     xref='paper',
+                    #     y=1.12,
+                    #     yanchor='bottom',
+                    #     yref='y domain',
+                    #     align='left')
+                ],
                 coloraxis=dict(
                     colorscale=color_scale,
                     colorbar=dict(
@@ -179,7 +199,7 @@ class Plot:
                             text='Color mapping<br><br>',
                             font=dict(
                                 family=title_font,
-                                size=subtitle_size)),
+                                size=legend_title_size)),
                         lenmode="pixels",
                         len=colorbar_height)),
                 xaxis=dict(
@@ -198,6 +218,104 @@ class Plot:
             self.debug_value(1, '_corr_plot_layout ',
                              f'self.corr_plot_layout = {self.corr_plot_layout}')
         return copy.deepcopy(self.corr_plot_layout)
+
+    def _corr_table_layout_dict(self) -> dict:
+        if self.debug:
+            self.debug_value(5, '_corr_table_layout_dict()',
+                             f'self.corr_table_settings = '
+                             f'{self.corr_table_settings}',
+                             f'self.corr_table_layout = {self.corr_table_layout}')
+
+        if not self.corr_table_layout:
+            width = self.corr_table_settings.get('width', None)
+            if not isinstance(width, int) or width < 200:
+                width = None
+            height = self.corr_table_settings.get('height', None)
+            if not isinstance(height, int) or height < 200:
+                height = None
+            template = self.corr_table_settings.get('template', 'plotly')
+            if template not in Plot.__plotly_templates:
+                template = 'plotly'
+            color_scale = self.corr_table_settings.get('color_scale', "blues")
+            if color_scale not in Plot.__plotly_color_scales:
+                color_scale = "blues"
+            title_font = self.corr_table_settings.get('title_font', 'Arial')
+            if title_font not in Plot.__plotly_text_fonts:
+                title_font = 'Arial'
+            title_size = self.corr_table_settings.get('title_size', 14)
+            if title_size not in Plot.__plotly_text_sizes:
+                title_size = 14
+            subtitle_size = self.corr_table_settings.get('subtitle_size', 10)
+            if subtitle_size not in Plot.__plotly_text_sizes:
+                subtitle_size = 10
+            colorbar_height = int(0.8 * height) if height else 200
+
+            second_title_size = min(subtitle_size + 1, title_size)
+            legend_title_size = min(subtitle_size + 1, title_size)
+            self.corr_table_layout = dict(
+                title=dict(
+                    text='main title of corr-table template',
+                    font=dict(
+                        family=title_font,
+                        size=title_size),
+                    x=0.05,
+                    xref='container',
+                    yref='paper',
+                ),
+                width=width,
+                height=height,
+                margin=dict(
+                    b=50,
+                    t=150),
+                template=template,
+                annotations=[dict(
+                    font=dict(
+                        family=title_font,
+                        size=subtitle_size),
+                    text='',
+                    showarrow=False,
+                    x=0.47,
+                    xref='paper',
+                    y=1.1,
+                    yref='paper'),
+                    dict(
+                         font=dict(
+                             family=title_font,
+                             size=second_title_size),
+                         text=' ',  # second_title of corr-table template',
+                         showarrow=False,
+                         x=0.01,
+                         xref='paper',
+                         y=1.12,
+                         yanchor='bottom',
+                         yref='y domain',
+                         align='left')
+                ],
+                xaxis=dict(side='top',
+                           title=dict(text='',
+                                      font=dict(family=title_font,
+                                                size=subtitle_size))
+                           ),
+                yaxis=dict(side='left',
+                           title=dict(text='',
+                                      font=dict(family=title_font,
+                                                size=subtitle_size))
+                           ),
+                coloraxis=dict(
+                    colorscale=color_scale,
+                    colorbar=dict(
+                        title=dict(
+                            text='Color mapping<br><br>',
+                            font=dict(
+                                family=title_font,
+                                size=legend_title_size)),
+                        lenmode="pixels",
+                        len=colorbar_height))
+            )
+        if self.debug:
+            self.debug_value(5, '_corr_table_layout() ',
+                             f'self.corr_table_layout = {self.corr_table_layout}')
+        return copy.deepcopy(self.corr_table_layout)
 
     def _multi_plot_layout_dict(self, use_latex: bool) -> dict:
         if self.debug:
@@ -251,6 +369,9 @@ class Plot:
                 ),
                 width=width,
                 height=height,
+                margin=dict(
+                    b=50,
+                    t=150),
                 template=template,
                 annotations=[
                     dict(
@@ -262,7 +383,7 @@ class Plot:
                         x=0.47,
                         xanchor='center',
                         xref='paper',
-                        y=1.1,
+                        y=1.06,
                         yanchor='bottom',
                         yref='paper'),
                     dict(
@@ -273,16 +394,16 @@ class Plot:
                         showarrow=False,
                         x=0.01,
                         xref='paper',
-                        y=1.05,
+                        y=1.12,
                         yanchor='bottom',
-                        yref='paper',
+                        yref='y domain',
                         align='left')
                 ],
                 xaxis=dict(
                     anchor='y',
                     domain=[0.0, 0.94],
                     title=dict(
-                        text='Time',
+                        text='Timestamp UTC',
                         font=dict(
                             family=title_font,
                             size=subtitle_size)),
@@ -302,7 +423,7 @@ class Plot:
                     zeroline=True,
                     zerolinecolor='darkgray'),
                 legend=dict(
-                    x=1.08,
+                    x=1.1,
                     xanchor='right',
                     yanchor='top',
                     title=dict(
@@ -320,7 +441,7 @@ class Plot:
                              f'self.multi_plot_layout = {self.multi_plot_layout}')
         return copy.deepcopy(self.multi_plot_layout)
 
-    def _split_plot_layout_dict(self, use_latex: bool ) -> dict:
+    def _split_plot_layout_dict(self, use_latex: bool) -> dict:
         if self.debug:
             self.debug_value(3, '_split_plot_layout_dict()',
                              f'self.split_plot_settings = '
@@ -366,6 +487,9 @@ class Plot:
                     xref='container',
                     yref='paper',
                 ),
+                margin=dict(
+                    b=50,
+                    t=150),
                 annotations=[
                     dict(
                         font=dict(
@@ -376,7 +500,7 @@ class Plot:
                         x=0.47,
                         xanchor='center',
                         xref='paper',
-                        y=1.1,
+                        y=1.06,
                         yanchor='bottom',
                         yref='paper'),
                     dict(
@@ -387,9 +511,9 @@ class Plot:
                         showarrow=False,
                         x=0.01,
                         xref='paper',
-                        y=1.05,
+                        y=1.12,
                         yanchor='bottom',
-                        yref='paper',
+                        yref='y domain',
                         align='left')
                 ],
                 template=template,
@@ -397,7 +521,7 @@ class Plot:
                     anchor='y',
                     domain=[0.0, 0.94],
                     title=dict(
-                        text='',
+                        text='Timestamp UTC',
                         font=dict(
                             family=title_font,
                             size=subtitle_size)),
@@ -548,12 +672,91 @@ class Plot:
             layout_dict['xaxis']['title']['text'] = x_label
             layout_dict['yaxis']['title']['text'] = y_label
 
+        height = layout_dict.get('height', None)
+        if isinstance(height, int):
+            height = max(210, min(height, 800))
+        else:
+            height = 210
+
+        if 'margin' in layout_dict.keys():
+            margins = layout_dict['margin'].get('t', 150) + \
+                      layout_dict['margin'].get('b', 50)
+        else:
+            margins = 200
+        plot_height = height
+        tot_height = margins + plot_height
+        layout_dict['height'] = max(tot_height, 360)
+
         fig = go.Figure(px.scatter(df, x=x_col, y=y_col,
                                    trendline="ols",
                                    color=df.index))
         fig.update(layout=layout_dict)
         if self.debug:
             self.debug_value(11, 'corr_plot - end',
+                             f'fig.layout = {fig.layout}')
+        return fig
+
+    def corr_table(self, df,
+                   title: str = None,
+                   second_title: str = None,
+                   legend_titles: list = None) -> go.Figure:
+        """
+            For a pandas dataframe df, this function
+            returns a plotly figure with a correlation table.
+
+            Inputs:
+            -------
+            - df: a pandas dataframe.
+                    Mandatory.
+            - title: str
+                    Main title of the plot.
+            - subtitle: str
+                    Subtitle of the plot.
+
+        """
+        cols = list(df.columns)
+        df_corr = df.corr()
+
+        if self.debug:
+            self.debug_value(12, 'corr_table ',
+                             f'df.head = {df.head}',
+                             f'title = {title}'
+                             f'subtitle = {second_title}',
+                             f'legend_titles = {legend_titles}')
+        if title is None:
+            cols = list(df.columns)
+            title = f'Correlation table {", ".join(cols)}'
+
+        layout_dict = self._corr_table_layout_dict()
+        layout_dict['title']['text'] = title
+        if isinstance(second_title, str):
+            layout_dict['annotations'][1]['text'] = second_title
+        height = layout_dict.get('height', None)
+        if isinstance(height, int):
+            height = max(210, min(height, 800))
+        else:
+            height = 210
+
+        if 'margin' in layout_dict.keys():
+            margins = layout_dict['margin'].get('t', 150) + \
+                      layout_dict['margin'].get('b', 50)
+        else:
+            margins = 200
+        plot_height = height
+        tot_height = margins + plot_height
+        layout_dict['height'] = max(tot_height, 360)
+
+        colorscale = layout_dict['coloraxis']['colorscale']
+
+        fig = px.imshow(df_corr,
+                        color_continuous_scale=colorscale,
+                        text_auto='.3f',
+                        x=legend_titles, y=legend_titles,
+                        aspect="auto")
+        fig.update(layout=layout_dict)
+
+        if self.debug:
+            self.debug_value(12, 'corr_table - end',
                              f'fig.layout = {fig.layout}')
         return fig
 
@@ -609,7 +812,7 @@ class Plot:
         """
         df = df.copy()
         if self.debug:
-            self.debug_value(12, 'multi_plot() -- start ',
+            self.debug_value(15, 'multi_plot() -- start ',
                              f'yaxis1 = {yaxis1}', f'yaxis2 = {yaxis2}',
                              f'unit1 = {unit1}', f'unit2 = {unit2}',
                              f'title = {title}',
@@ -665,7 +868,7 @@ class Plot:
             y2_legend_names = legend_titles[len(yaxis1_vars):]
 
         if self.debug:
-            self.debug_value(12, 'multi_plot()', f'use_latex={use_latex}',
+            self.debug_value(15, 'multi_plot()', f'use_latex={use_latex}',
                              f'y1_legend_names = {y1_legend_names}',
                              f'y2_legend_names = {y2_legend_names}',
                              f'layout={layout_dict}')
@@ -715,10 +918,26 @@ class Plot:
         else:
             layout_dict['yaxis']['title']['text'] = y1_label
             layout_dict['yaxis2']['title']['text'] = y2_label
+
+        height = layout_dict.get('height', None)
+        if isinstance(height, int):
+            height = max(210, min(height, 800))
+        else:
+            height = 210
+
+        if 'margin' in layout_dict.keys():
+            margins = layout_dict['margin'].get('t', 150) + \
+                      layout_dict['margin'].get('b', 50)
+        else:
+            margins = 200
+        plot_height = height
+        tot_height = margins + plot_height
+        layout_dict['height'] = max(tot_height, 360)
+
         fig.update(layout=layout_dict)
 
         if self.debug:
-            self.debug_value(12, 'multi_plot',
+            self.debug_value(15, 'multi_plot',
                              f'fig.layout = {fig.layout}')
         return fig
 
@@ -733,7 +952,7 @@ class Plot:
             For a pandas dataframe df, with a datetime index, this function
             returns a plotly figure containing separate graphs of each
             column of df. The plots are interconnected through common
-            (empty) rangesliders (a zoom tool).
+            a zoom tool on the x-axis.   
 
             Inputs:
             -------
@@ -768,9 +987,9 @@ class Plot:
 
         df = df.copy()
         cols = list(df.columns)
-        ncols = len(cols)
+        no_cols = len(cols)
 
-        if isinstance(units, list) and len(units) == ncols:
+        if isinstance(units, list) and len(units) == no_cols:
             unit_ls = units
         else:
             unit_ls = cols
@@ -781,27 +1000,33 @@ class Plot:
         if not isinstance(second_title, str):
             second_title = ''
 
-        if isinstance(subtitles, list) and len(subtitles) == ncols and \
+        if isinstance(subtitles, list) and len(subtitles) == no_cols and \
                 all(isinstance(s, str) for s in subtitles):
             subtitles = subtitles
         else:
             subtitles = cols
 
-        # load general settings for corr-plot
-        use_latex = self.split_plot_settings.get('use_latex', None)
+        # load general settings for split-plot
+
+        use_latex = self.split_plot_settings.get('use_latex', True)
+        if not isinstance(use_latex, bool):
+            use_latex = True
 
         layout = self._split_plot_layout_dict(use_latex=use_latex)
 
         n = self.split_plot_settings.get('zoom_sliders', None)
+
         if not (isinstance(n, int) and n >= 0):
             n = 2
         elif n == 0:
-            n = ncols
-        n = min(n, ncols)
+            n = no_cols
+        n = min(n, no_cols)
 
         if n == 0:
-            n = ncols
-        # for n!=0 nsliders = max(int(ncols/n),1)
+            n = no_cols
+        n = min(n, no_cols)
+
+        # for n!=0 nsliders = max(int(no_cols/n),1)
 
         # Step 1.
         # We create a list of graphs where
@@ -813,7 +1038,7 @@ class Plot:
         pos = 0
         empty_positions = []
 
-        for c in range(ncols):
+        for c in range(no_cols):
             col = cols[c]
             legend_name = legend_titles[c]
             # formatting y-axis labels
@@ -839,7 +1064,7 @@ class Plot:
             graphs.append(g_real)
 
             pos += 1
-            if pos % n == 0 and ncols - c > n:
+            if pos % n == 0 and no_cols - c > n:
                 # (WA-1)
                 # We place the empty graph right before the last real graph.
                 graphs.insert(-1, g_empty)
@@ -847,31 +1072,84 @@ class Plot:
                 slider_no += 1
 
         # (WA-1)
-        # Finally we put an empty graph right beefore the last real graph
+        # Finally we put an empty graph right before the last real graph
         graphs.insert(-1, g_empty)
         empty_positions.append(len(graphs) - 1)
 
         # Step 2.
         # Next, we create a figure for the graphs.
         number_of_subplots = len(graphs)
+        # We need to calculate the height of the figure, in this
+        # case the 'height' of the figures layout refer to the height
+        # of the Figure object, other heights (such as the height of the
+        # individual traces) are calculated using the Figure height.
+        ### a ) We want the individual trace height to be like in the
+        ### settings - between 250 and 800
         height = layout.get('height', None)
         if isinstance(height, int):
-            mult = height
+            height = max(210, min(height, 800))
         else:
-            mult = 250
+            height = 210
 
-        layout['height'] = number_of_subplots * mult + slider_no * 5
+        # The total height is given by:
+        #   tot_height = margins + plot_height
+        # where,
+        #   margins = margin_top + margin_bottom
+        # and
+        #   plot_height = no_cols * trace_h
+        #   plot_height += slider_no * ranger_h
+        #   plot_height += (no_cols - 1) * vert_space
+        # here:
+        # 1. trace_h is the height of an individual
+        #    trace (that is we want it to be `height`),
+        # 2. ranger_h is the height of the rangesliders,
+        #    we set:  ranger_h = 0.05 * trace_h
+        # 3. vert_space is the space between traces, we set
+        #    vert_space = 0.2 * trace_h
+        # set
+        if 'margin' in layout.keys():
+            margins = layout['margin'].get('t', 150) + \
+                      layout['margin'].get('b', 50)
+        else:
+            margins = 200
+        plot_height = (no_cols + 0.055 * (slider_no + no_cols) +
+                       0.2 * (slider_no + no_cols - 2)) * height
+        tot_height = margins + plot_height
+        layout['height'] = max(tot_height, 360)
 
-        vert_space = min(0.15 * (1 / (number_of_subplots - 1)), 0.06)
+        # Now, the portion of the plot area that is occupied by one trace
+        # can be simplified to
+        # 1 / (no_cols +
+        #      0.055 * (slider_no + no_cols) +
+        #      0.2 * (slider_no + no_cols - 2))  =
+        # 200/(200 * no_cols +
+        #     11 * (slider_no + no_cols) +
+        #     40 * (slider_no + no_cols - 2)) =
+        # 200/(251 * no_cols + 51 * slider_no - 80)
+        # However, plotly use a list for the height of traces,
+        row_heights = [200/(251 * no_cols + 51 * slider_no - 80)] * no_cols
+        # slider 5%:  [20 /(25 *no_cols + 5 * slider_no - 8)] * no_cols
+
+        # Plotly use a number instead of a list for the vertical
+        # space between the traces:
+        if no_cols > 1:
+            vert_space = 0.2 / (no_cols + slider_no - 2)
+            # there are `no_cols - 1` spaces between the traces
+            # and `slider_no`of empty traces
+        else:
+            vert_space = 0
+        ranger_height = 0.055 / (slider_no + no_cols)
 
         # Labels and heights for each graph
-        row_heights = [0.45 / ncols] * ncols
+
         for x in empty_positions:
-            row_heights.insert(x, 0.12 / ncols)
+            row_heights.insert(x, 0.0 / no_cols)
             subtitles.insert(x, '')
             y_ax_labels.insert(x, '')
 
         layout['title']['text'] = title
+        xaxis_layout = layout.pop('xaxis', {})
+        annotation_layout = layout.pop('annotations', {})
 
         fig = make_subplots(rows=number_of_subplots, cols=1,
                             shared_xaxes=True,
@@ -880,12 +1158,14 @@ class Plot:
                             row_heights=row_heights,
                             figure=go.Figure(layout=layout))
         fig_layout = fig.to_dict()['layout']
+        fig_annotations = fig_layout['annotations']
+        for anno in fig_annotations:
+            anno['x'] = annotation_layout[0]['x']
+            anno['font']['size'] = annotation_layout[0]['font']['size']
 
-        for anno in fig_layout['annotations']:
-            anno['x'] = layout['annotations'][0]['x']
-            anno['font']['size'] = layout['annotations'][0]['font']['size']
-        layout['annotations'][1]['text'] = second_title
-        fig_layout['annotations'].append(layout['annotations'][1])
+        annotation_layout[1]['text'] = second_title
+        fig_annotations.append(annotation_layout[1])
+        fig_layout['annotations'] = fig_annotations
         fig.update(layout=fig_layout, overwrite=True)
 
         if self.debug:
@@ -899,29 +1179,31 @@ class Plot:
                        rows=list(range(1, number_of_subplots + 1)),
                        cols=[1] * number_of_subplots)
 
-        # Remove all dates of each x-axis
-        for x in range(1, number_of_subplots + 1):
-            fig.update_xaxes(row=x, col=1,
-                             showticklabels=False,
-                             domain=layout['xaxis']['domain'])
-            fig.update_yaxes(row=x, col=1, title_text=y_ax_labels[x - 1],
-                             fixedrange=False)
-
-        # Set font size
-        # fig.update_annotations(font_size=subtitle_size)
-
         # Step 4 (WA-2)
-        # We will now create rangesliders from the empty graphs,
+        # We will update each x- and y-axes and
+        # now create rangesliders from the empty graphs,
         # adjust thickness compared to number of plots,
         # make sure the xaxis has type 'date' and show
         # the dates on this x-axis
-        slider_thickness = min(vert_space, 0.045)
-        for pos in empty_positions:
-            fig.update_xaxes(rangeslider={'visible': True,
-                                          'thickness': slider_thickness},
-                             type='date',
-                             showticklabels=True,
-                             row=pos, col=1)
+
+        for row in range(1, number_of_subplots + 1):
+            fig.update_yaxes(row=row, col=1,
+                             title_text=y_ax_labels[row - 1],
+                             fixedrange=False)
+            if row not in empty_positions:
+                fig.update_xaxes(row=row, col=1,
+                                 showticklabels=False,
+                                 domain=[0.0, 0.94])
+            else:
+                fig.update_xaxes(rangeslider={'visible': True,
+                                              'thickness': ranger_height},
+                                 domain=xaxis_layout['domain'],
+                                 title=xaxis_layout['title'],
+                                 zeroline=xaxis_layout['zeroline'],
+                                 zerolinecolor=xaxis_layout['zerolinecolor'],
+                                 type='date',
+                                 showticklabels=True,
+                                 row=row, col=1)
 
         # Step 5 (WA-3)
         # We will now place the first graph G after each empty graph E

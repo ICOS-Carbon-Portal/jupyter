@@ -1,6 +1,7 @@
 # Read, update and save settings (as dictionary)
-# from/to the file 'eco_tool/appdata/name.json'
+# from/to the file '.output/eco_nrt_tool/appdata/<name>.json'
 # When saving, previous name.json is backed up into name_bak.json
+# with a timestamp key.
 
 from datetime import datetime
 import json
@@ -36,26 +37,31 @@ def _write_backup(path_to_json_file: str = None):
         # backup previous settings before update
         timestamp = str(datetime.today())
         backup_dict = read(bak_file)
-
-        if isinstance(backup_dict, dict) and 'timestamps' in backup_dict.keys():
-            backup_dict['timestamps'].append(timestamp)
-        else:
-            backup_dict['timestamps'] = [timestamp]
         backup_dict[timestamp] = latest_dict
 
         with open(bak_file, 'w') as new_bak_file:
             json.dump(backup_dict, new_bak_file)
 
 
-def get_restore_point(timestamps: list = None,
+def get_restore_point(timestamp: str = None,
+                      timestamps: list = None,
+                      last: bool = None,
+                      all: bool = None,
                       path_to_json_file: str = None) -> dict:
-
-    if isinstance(timestamps, str):
-        timestamps = [timestamps]
 
     bak_dict = _get_backup(path_to_json_file)
 
-    return {k: bak_dict.get(k, {}) for k in timestamps}
+    if isinstance(timestamp, str):
+        d = bak_dict[timestamp]
+    elif isinstance(timestamps, list):
+        d = {k: bak_dict.get(k, {}) for k in timestamps}
+    elif isinstance(last, bool) and last:
+        d = list(bak_dict.values())[-1]
+    elif isinstance(all, bool) and last:
+        d = bak_dict
+    else:
+        d = dict()
+    return d
 
 
 def get_restore_point_timestamps(path_to_json_file: str = None) -> list:
