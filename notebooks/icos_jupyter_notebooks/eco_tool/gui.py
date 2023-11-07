@@ -4,7 +4,7 @@
     This is the main entry to run the
     Ecosystem notebook for PIs.
     In the gui the user can create
-    groups of variables and batch jobs to run
+    groups of variables and plot setups to run
 
     The purpose is to run the program from
     a notebook on https://jupyter.icos-cp.eu/
@@ -110,7 +110,6 @@ class _AppDataRetriever:
         return return_dict
 
     def load_user_settings(self):
-
         return self._load_json(default_dict={},
                                json_file=self.user_config_file)
 
@@ -123,135 +122,202 @@ class AnalysisGui:
                            'warning': '#FF9800', 'warning:active': '#F57C00',
                            'danger': '#F44336', 'danger:active': '#D32F2F'}
 
-    help_dict = {'group': {'read_header1': '<h3>To create a group of '
-                                           'variables: </h3>',
-                           'read_body1': '<ol>'
-                                         '<li> Press <b><i>New</i></b></li>'
-                                         '<ul>'
-                                         '<li> Select a station/stations. </li>'
-                                         '<li> Select a product/products. </li>'
-                                         '<li> Choose variables. </li>'
-                                         '</ul>'
-                                         '<li> Choose a name for the group </li>'
-                                         '<li> Press <b><i>Save</i></b></li>'
-                                         '</ol>',
-                           'read_header2': '<h3>To edit a group of variables: '
-                                           '</h3>',
-                           'read_body2': '<ol>'
-                                         '<li> Select the group and press '
-                                         '<b><i>Update</i></b></li>'
-                                         '<ul>'
-                                         '<li> Select or deselect variables.'
+    @property
+    def help_dict(self):
+        return {'group': {'read_header1': '<h3>To create a group of '
+                                          'variables: </h3>',
+                          'read_body1': '<ol>'
+                                        '<li> Press <b><i>New</i></b></li>'
+                                        '<ul>'
+                                        '<li> Select a station/stations. </li>'
+                                        '<li> Select a product/products. </li>'
+                                        '<li> Choose variables. </li>'
+                                        '</ul>'
+                                        '<li> Choose a name for the group </li>'
+                                        '<li> Press <b><i>Save</i></b></li>'
+                                        '</ol>',
+                          'read_header2': '<h3>To edit a group of variables: '
+                                          '</h3>',
+                          'read_body2': '<ol>'
+                                        '<li> Select the group and press '
+                                        '<b><i>Update</i></b></li>'
+                                        '<ul>'
+                                        '<li> Select or deselect variables.'
+                                        '</li>'
+                                        '<li> Rename the group. </li>'
+                                        '</ul>'
+                                        '<li> Press <b><i>Save</i></b></li>'
+                                        '</ol>',
+                          'read_header3': '<h3>To delete a group of variables: '
+                                          '</h3>',
+                          'read_body3': '<ol>'
+                                        '<li> Select the group and press '
+                                        '<b><i>Update</i></b></li>'
+                                        '<li> Click on the '
+                                        '<b><i>Delete</i></b> button</li>'
+                                        '</ol>',
+                          'update_header': '<h3>Update</h3>',
+                          'update_body': 'Now you can'
+                                         '<ol>'
+                                         '<li> Choose station and product '
+                                         'in order to add or remove variables '
+                                         'from the group.'
                                          '</li>'
                                          '<li> Rename the group. </li>'
-                                         '</ul>'
-                                         '<li> Press <b><i>Save</i></b></li>'
+                                         '<li> Delete the group.'
                                          '</ol>',
-                           'read_header3': '<h3>To delete a group of variables: '
-                                           '</h3>',
-                           'read_body3': '<ol>'
-                                         '<li> Select the group and press '
-                                         '<b><i>Update</i></b></li>'
-                                         '<li> Click on the '
-                                         '<b><i>Delete</i></b> button</li>'
-                                         '</ol>',
-                           'update_header': '<h3>Update</h3>',
-                           'update_body': 'Now you can'
-                                          '<ol>'
-                                          '<li> Choose station and product '
-                                          'in order to add or remove variables '
-                                          'from the group.'
-                                          '</li>'
-                                          '<li> Rename the group. </li>'
-                                          '<li> Delete the group.'
-                                          '</ol>',
-                           'new_header': '<h3>New</h3>',
-                           'new_body': 'Steps to create a group of variables:'
-                                       '<ol>'
-                                       '<li> Select a station, or several '
-                                       'stations, but one at a time.</li>'
-                                       '<li> Select a file/product, or '
-                                       'several, but one at a time.</li>'
-                                       '<li> Select variables. Chosen '
-                                       'variables are displayed at '
-                                       '<span style="color:black"><i>'
-                                       '"Variables in update mode"</i>'
-                                       '</span>. </li>'
-                                       '<li> Choose a name for your group of '
-                                       'variables and press '
-                                       '<b><i>Save</i></b>.</li>'
-                                       '</ol>'
-                                       '<br>'
-                                       '<b><i>New user?</i></b> By adding '
-                                       '<b><i>"+b"</i></b> to the end of '
-                                       'the group name, you will '
-                                       'get an example batch job so you can see '
-                                       'how some of the plots look like. '
-                                       'It will appear as a button <b><i>Batch '
-                                       'example</i></b> in the '
-                                       '<b><i>Plot-menu</i></b>.',
-                           'new_user': '<b><i>New user?</i></b> By adding '
-                                       '<b><i>"+b"</i></b> to the end of '
-                                       'the group name, you will '
-                                       'get an example batch job so you can see '
-                                       'how some of the plots look like. '
-                                       'It will appear as a button <b><i>Batch '
-                                       'example</i></b> in the '
-                                       '<b><i>Plot-menu</i></b>.',
-                           'general': '<h4><i>General info on group '
-                                      'variables</i></h4>'
-                                      '<ul>'
-                                      '<li> The order of the variables is the '
-                                      'order of presentation in outputs, unless '
-                                      'specified otherwise in batch jobs.'
-                                      '</li>'
-                                      '<li> You can combine variables from '
-                                      'different files or stations.'
-                                      '</li>'
-                                      '</ul>'},
-                 'batch': {'update': '',
-                           'new': '',
-                           'read-mode': '',
-                           'split_plot': '',
-                           'multi_plot': '',
-                           'corr_plot': '',
-                           'corr_table': '',
-                           'statistics': ''},
-                 'configs': {'run_configs': {},
-                             'latex': {},
-                             'split_plot': {},
-                             'multi_plot': {},
-                             'corr_plot': {},
-                             'corr_table': {},
-                             'statistics': {}},
-                 'technical': '<h4><i>Stored data - technical info'
-                              '</i></h4>'
-                              '<ul>'
-                              '<li> Group and batch jobs are stored '
-                              'in the file: '
-                              '"/appdata/_user_var_config_ES_1.json".'
-                              '<br>'
-                              'Changes are logged here: '
-                              '"/appdata/_user_var_config_ES_1_bak.'
-                              'json"'
-                              '</li>'
-                              '<li> Settings are stored in the file '
-                              '"/appdata/_default_settings_ES_1.json".'
-                              '<br>'
-                              'Changes are logged here: '
-                              '"/appdata/_default_settings_ES_1_bak.'
-                              'json".'
-                              '</li>'
-                              '</ul>'
-                              'If you like you can e-mail these to a '
-                              'colleague, in order to share your '
-                              'findings etc.'
-                 }
+                          'new_header': '<h3>New</h3>',
+                          'new_body': 'Steps to create a group of variables:'
+                                      '<ol>'
+                                      '<li> Select a station, or several '
+                                      'stations, but one at a time.</li>'
+                                      '<li> Select a file/product, or '
+                                      'several, but one at a time.</li>'
+                                      '<li> Select variables. Chosen '
+                                      'variables are displayed at '
+                                      '<span style="color:black"><i>'
+                                      '"Variables in update mode"</i>'
+                                      '</span>. </li>'
+                                      '<li> Choose a name for your group of '
+                                      'variables and press '
+                                      '<b><i>Save</i></b>.</li>'
+                                      '</ol>'
+                                      '<br>'
+                                      '<b><i>New user?</i></b> By adding '
+                                      '<b><i>"+p"</i></b> to the end of '
+                                      'the group name, you will '
+                                      'get an example plot setup so you can see '
+                                      'how some of the plots look like. '
+                                      'It will appear as a button <b><i>Batch '
+                                      'example</i></b> in the '
+                                      '<b><i>Plot-menu</i></b>.',
+                          'new_user': '<b><i>New user?</i></b> By adding '
+                                      '<b><i>"+p"</i></b> to the end of '
+                                      'the group name, you will '
+                                      'get an example plot setup so you can see '
+                                      'how some of the plots look like. '
+                                      'It will appear as a button <b><i>Batch '
+                                      'example</i></b> in the '
+                                      '<b><i>Plot-menu</i></b>.',
+                          'general': '<h4><i>General info on group '
+                                     'variables</i></h4>'
+                                     '<ul>'
+                                     '<li> The order of the variables is the '
+                                     'order of presentation in outputs, unless '
+                                     'specified otherwise in plot setups.'
+                                     '</li>'
+                                     '<li> You can combine variables from '
+                                     'different files or stations.'
+                                     '</li>'
+                                     '</ul>'},
+                'plot_setup': {'multi_plot':
+                                   'Please note that <i>Multi-plot</i> '
+                                   'will use at most <i>two $y$-axes</i> '
+                                   ', and by default the variables are '
+                                   'divided according to their unit.',
+                               'update': '',
+                               'corr_plot':
+                                   'Please note that <i>Correlation-plot</i> '
+                                   'is a plot for <i>exactly two '
+                                   'variables</i>.<br>'
+                                   'The first variable belongs to the '
+                                   'horizontal axis (the $x$-axis), while the '
+                                   'second variable belongs to the vertical '
+                                   'axis (the $y$-axis).',
+                               'new_header':
+                                   '<h3>New</h3>',
+                               'new_body':
+                                   'A plot setup is a collection av '
+                                   '<b><i>plot types</i></b> together with '
+                                   'a set of variables from the group. '
+                                   'Steps to create a plot setup:'
+                                   '<ol>'
+                                   '<li>'
+                                   'Select a <b><i>plot type</i></b> from the '
+                                   'list below <span style="color:black">'
+                                   '<b><i>Available plot types</i></b></span>. '
+                                   'The plot type will be displayed in '
+                                   'the 1:st area to the right of '
+                                   '<span style="color:black">'
+                                   '<b><i>Current setup</i></b></span>. Note '
+                                   'that this area is locked as long as the '
+                                   'plot type is selected.'
+                                   '</li>'
+                                   '<li>Select/deselect variables displayed '
+                                   'below <span style="color:black">'
+                                   '<b><i>Available variables</i></b></span> in '
+                                   'order to add or remove them from the '
+                                   'plot type. These will be displayed in '
+                                   'the 2:nd area to the right of '
+                                   '<span style="color:black">'
+                                   '<b><i>Current setup</i></b></span>.'
+                                   '</li>'
+                                   '<li>'
+                                   'To add another plot type, just select it and '
+                                   'choose variables for that plot type.'
+                                   '</li>'
+                                   '<li>'
+                                   'Before saving the plot setup it will need '
+                                   'a name, entered in the area <span '
+                                   'style="color:black"><b><i>Name of plot '
+                                   'setup</i></b>></span>.'
+                                   '</li>'
+                                   '</ol>',
+                               'order':
+                                   '<br> Please note:</b> '
+                                   '<ul>'
+                                   '<li>'
+                                   'The list of the plot types '
+                                   'also represent the order of execution of '
+                                   'the plot setup. <br>'
+                                   'To rearrange this order '
+                                   'select a plot type of the setup, '
+                                   'and click on '
+                                   'the button <b><i>Up</i></b>.'
+                                   '</li>'
+                                   '<li>'
+                                   'The order of the variables of a '
+                                   'plot type will be the order of '
+                                   'presentation in plots, etc.'
+                                   '</li>',
+                               'new': '',
+                               'read-mode': '',
+                               'split_plot': '',
+                               'corr_table': '',
+                               'statistics': ''},
+                'configs': {'run_configs': {},
+                            'latex': {},
+                            'split_plot': {},
+                            'multi_plot': {},
+                            'corr_plot': {},
+                            'corr_table': {},
+                            'statistics': {}},
+                'technical': '<h4><i>Stored data - technical info'
+                             '</i></h4>'
+                             '<ul>'
+                             '<li> Groups and plot setups are stored '
+                             'in the file: '
+                             f'"{self.user_cache_file}".'
+                             '<br>'
+                             'Changes are logged here: '
+                             f'"{self.user_cache_bak_file}"'
+                             '</li>'
+                             '<li> Settings are stored in the file: '
+                             f'"{self.user_config_file}".'
+                             '<br>'
+                             'Changes are logged here: '
+                             f'"{self.user_config_bak_file}".'
+                             '</li>'
+                             '</ul>'
+                             'If you like you can share these with a '
+                             'colleague, in order to discuss findings or '
+                             'setups etc.'
+                }
 
     @staticmethod
     def var_tuple_ls_converter(var_ls: [] or (str, str, str) or [(str, str, str)],
                                output: str,
-                               var_plot_tool: str = None,
+                               var_plot_type: str = None,
                                stn_name_id_ls: [(str, str)] = None,
                                debug_fun: callable = None) -> dict or list or str:
         """
@@ -283,7 +349,7 @@ class AnalysisGui:
                 'var_btns'          ->  (list(str),str)
                                         - The list contain strings of labels
                                         (Not HTML) for the var buttons of
-                                        batch jobs, of the format
+                                        plot setups, of the format
                                             'H','CO2 (#1)', 'CO2 (#2)'
                                         - The string (in HTML) is a description
                                         on the belonging of each variable.
@@ -293,19 +359,19 @@ class AnalysisGui:
                                         in mode read.
                 'var_plot_texts':     ->  (str, str, list)
                                         str1 = details of variables of the output
-                                        of a tool.
+                                        of a plot type.
                                                 (row below title)
-                                        str2 = subtitle of the output of a tool.
+                                        str2 = subtitle of the output
+                                        of a plot type.
                                                 (row above plot)
                                         list of legend titles
 
-            var_plot_tool: str
-                Used with output=='var_plot_texts', that will have slight different
-                outputs depending on tool.
-                Choices for var_plot_tool:
+            var_plot_type: str
+                Used with output=='var_plot_texts', that will have
+                slight different outputs depending on plot type.
+                Choices for var_plot_type:
                  'multi_plot', 'corr_plot', 'split_plot'
                  'corr_table', 'statistics'
-
 
             stn_name_id_ls: list(str, str)
                 List of (station_name, station_id), needed for
@@ -368,7 +434,7 @@ class AnalysisGui:
                 next_index_of_var = None
             if isinstance(next_index_of_var, int):
                 fm_var = format_var_index(var, var_format_index, output)
-                count_ls[next_index_of_var] += 1
+                count_ls[next_index_of_var] += var_format_index
             elif var_format_index > 1:
                 fm_var = format_var_index(var, var_format_index, output)
             else:
@@ -428,7 +494,7 @@ class AnalysisGui:
                 title_part_ls2.append(txt + ', '.join(prod_var_ls))
 
             legend_titles = fm_var_ls
-            match var_plot_tool:
+            match var_plot_type:
                 case 'multi_plot':
                     if title_part_ls1 and title_part_ls2:
                         title_part = f'Left axis - ' \
@@ -476,6 +542,9 @@ class AnalysisGui:
                 var_txt += ', '.join(fm_var_ls)
                 var_txt += '<br><hr>'
                 separator = '<hr>'
+            case _:
+                var_txt = ''
+                separator = ''
 
         one_stn = (len(station_dict) == 1)
         stn_ls = stn_name_id_ls
@@ -491,11 +560,13 @@ class AnalysisGui:
                           f'one_prod = {one_prod}')
             if one_stn and one_prod:
                 for prod in station_dict[stn].keys():
-                    title_txt = f'<i>All variables are from ' \
-                                f'<b>{prod}</b> of the station ' \
-                                f'<b>{stn_name}</b></i>'
+
+                    main_title_txt = f'<i>All variables are from ' \
+                                     f'<b>{prod}</b> of the station ' \
+                                     f'<b>{stn_name}</b></i>'
                     if output != 'var_btns':
-                        title_txt = '<hr>' + title_txt
+                        main_title_txt = '<hr>' + main_title_txt
+                    rows.append(main_title_txt)
             else:
                 main_title_txt = f'<i>Variables from the station ' \
                                  f'<b>{stn_name}</b></i>'
@@ -508,8 +579,7 @@ class AnalysisGui:
                     last_var = p_vars.pop()
                     if p_vars:
                         var_row = ', '.join(p_vars)
-                        prod_title_txt += f'{var_row} <i>and</i>' \
-                                          f' {last_var}'
+                        prod_title_txt += f'{var_row} <i>and</i> {last_var}'
                     else:
                         prod_title_txt += f'{last_var}'
                     prod_var_ls.append(prod_title_txt)
@@ -519,8 +589,8 @@ class AnalysisGui:
                               f'prod_var_ls = {prod_var_ls}')
                 rows.append(main_title_txt + ''.join(prod_var_ls))
 
-        if rows:
-            title_txt = f'{separator}'.join(rows)
+        title_txt = f'{separator}'.join(rows)
+
         if debug_fun:
             debug_fun(999, 'var_tuple_ls_converter() --- 4',
                       f'title_txt = {title_txt}')
@@ -556,29 +626,33 @@ class AnalysisGui:
         elif isinstance(theme, str) and theme.upper() in valid_themes:
             theme = theme.upper()
         else:
-            warnings.warn(f"At this moment the choice theme = {theme}"
-                          f"is not implemented. "
-                          f"\nThe app will continue "
-                          f"with theme = 'ES'.",
-                          category=UserWarning)
+            msg = f"The choice: theme = {theme}, is not implemented. " \
+                  f"Switching to theme = 'ES'."
+            warnings.warn(message=msg, category=UserWarning)
             theme = 'ES'
 
         valid_levels = ['1']
         if not level:
             level = '1'
         elif not (isinstance(level, str) and level in valid_levels):
-            warnings.warn(f"At this moment the choice level = {level} "
-                          f"is not implemented. "
-                          f"\nThe app will continue with level = '1'.",
-                          category=UserWarning)
+            msg = f"The choice: level = {level} is not implemented. " \
+                  f"Switching over to: level = '1'."
+            warnings.warn(message=msg, category=UserWarning)
             level = '1'
 
         self.theme = theme
         self.level = level
+        self.startup_output = wd.Output()
+        self.error_texts = wd.HTML(layout=wd.Layout(width='100%',
+                                                    max_width='90%',
+                                                    height='auto'))
+        display(self.startup_output)
+        self.startup_feed(txt='<i>Building up graphical interface...<i>')
         if bool(debug):
             self.debug = True
             self.debugger = trace_debug.IDebug(output='html')
             self.debug_out = wd.Output()
+            self.startup_feed(obj=self.debug_out)
         else:
             self.debug = False
             self.debugger = None
@@ -587,37 +661,58 @@ class AnalysisGui:
 
         # directories for appdata and user outputs
         self.code_dir = os.path.join('.', 'eco_tool')
-        appdata_dir = os.path.join(self.code_dir, 'appdata')
+
         output_dir = os.path.join(os.path.expanduser('~'), 'output')
-        tex_files_dir = os.path.join(output_dir, 'eco_tool_tex_files')
-        png_files_dir = os.path.join(output_dir, 'eco_tool_png_files')
-        pdf_files_dir = os.path.join(output_dir, 'eco_tool_pdf_files')
-        self.output_directories = {'tex_files': tex_files_dir,
+        tool_output_dir = os.path.join(output_dir, 'eco_nrt_tool')
+        appdata_dir = os.path.join(tool_output_dir, 'appdata')
+
+        tex_files_dir = os.path.join(tool_output_dir, 'eco_plot_type_tex_files')
+        png_files_dir = os.path.join(tool_output_dir, 'eco_plot_type_png_files')
+        pdf_files_dir = os.path.join(tool_output_dir, 'eco_plot_type_pdf_files')
+        self.output_directories = {'appdata': appdata_dir,
+                                   'tex_files': tex_files_dir,
                                    'png_files': png_files_dir,
                                    'pdf_files': pdf_files_dir}
         # app_files
-        json_file = f'_unit_map_{theme}_{level}.json'
+        json_file = f'_unit_map_{theme}_L{level}.json'
         self.app_config_file = os.path.join(appdata_dir, json_file)
-        json_file = f'_user_var_config_{theme}_{level}.json'
+        json_file = f'user_group_plot_setup_{theme}_L{level}.json'
         self.user_cache_file = os.path.join(appdata_dir, json_file)
-        json_file = f'_default_settings_{theme}_{level}.json'
+        json_file = f'user_group_plot_setup_{theme}_L{level}_bak.json'
+        self.user_cache_bak_file = os.path.join(appdata_dir, json_file)
+        json_file = f'tool_settings_{theme}_L{level}.json'
         self.user_config_file = os.path.join(appdata_dir, json_file)
+        json_file = f'tool_settings_{theme}_L{level}_bak.json'
+        self.user_config_bak_file = os.path.join(appdata_dir, json_file)
 
+        self.startup_feed(txt='<i>Connecting to stored data</i>...')
         self.retriever = _AppDataRetriever(app_config_file=self.app_config_file,
                                            user_cache_file=self.user_cache_file,
                                            user_config_file=self.user_config_file,
                                            debug_function=self.debug_value)
-
         self.cache = None
-        self.stored_timeseries = None
         self.icos_info = None
         self.stations_df = None
         self.report_writer = None
-
         self._reset_gui_data()
 
         # starts the app
-        self.go()
+        self.start_tool_app()
+
+    def startup_feed(self, txt: str = None, obj: object = None):
+
+        if self.startup_output:
+            if txt:
+                with self.startup_output:
+                    txt = AnalysisGui._set_css(txt, 'tight')
+                    display(wd.HTML(f'<i>{txt}</i>'))
+            elif obj:
+                with self.startup_output:
+                    display(obj)
+            else:
+                with self.startup_output:
+                    clear_output()
+                self.startup_output = None
 
     def debug_value(self, *text_list):
         caller_id = None
@@ -631,71 +726,84 @@ class AnalysisGui:
         with self.debug_out:
             display(wd.HTML(msg))
 
-    def _batch_validation_errors(self, grp, jobs: list or str, mode: str):
+    def _plot_setup_validation(self, grp, jobs: list or str, mode: str):
         def html_error_txt(er_dict: dict):
-            tool2name_dict = {'split_plot': 'Split-plot',
-                              'multi_plot': 'Multi-plot',
-                              'corr_plot': 'Correlation plot (2 vars)',
-                              'corr_table': 'Correlation table',
-                              'statistics': 'Numerical Statistics'}
-            er_batches = sorted(list(er_dict.keys()), key=(lambda x: x.lower()))
-            batches = [f'<b><i>{bat}</i></b>' for bat in er_batches]
-            good_batches = [bat for bat in jobs if bat not in er_batches]
-            good_bats = [f'<b><i>{bat}</i></b>' for bat in good_batches]
+            if self.debug:
+                plot_type2name_dict = {'split_plot': 'Split-plot',
+                                       'multi_plot': 'Multi-plot',
+                                       'corr_plot': 'Correlation plot (2 vars)',
+                                       'corr_table': 'Correlation table',
+                                       'statistics': 'Numerical Statistics'}
+            else:
+                plot_type2name_dict = {'split_plot': 'Split-plot',
+                                       'multi_plot': 'Multi-plot',
+                                       'corr_plot': 'Correlation plot'}
+
+            er_plot_setups = sorted(list(er_dict.keys()),
+                                    key=(lambda x: x.lower()))
+            plot_setups = [f'<b><i>{ps}</i></b>' for ps in er_plot_setups]
+            good_plot_setups = [ps for ps in jobs if ps not in er_plot_setups]
+            good_bats = [f'<b><i>{ps}</i></b>' for ps in good_plot_setups]
 
             error_msg = f'<h4><b>Validation error:</b></h4> The group <b><i' \
-                        f'>"{grp}"</i></b> and it\'s batch jobs do not match.<br>'
+                        f'>"{grp}"</i></b> and it\'s plot setups do not ' \
+                        f'match.<br>'
             txt = AnalysisGui._set_css(text=error_msg,
                                        css_type='line')
             if mode == 'run':
-                if len(jobs) == len(batches):
+                if len(jobs) == len(plot_setups):
                     error_msg = f'Can not generate output. '
-                elif len(batches) > 1:
-                    error_msg = f'Skipping batch jobs: {", ".join(batches)}. ' \
-                                f'Proceeding with batch jobs: ' \
+                elif len(plot_setups) > 1:
+                    error_msg = f'Skipping plot setups: ' \
+                                f'{", ".join(plot_setups)}. ' \
+                                f'Proceeding with plot setups: ' \
                                 f'{", ".join(good_bats)}. '
                 else:
-                    error_msg = f'Skipping batch job: {batches[0]}.'
+                    error_msg = f'Skipping plot setup: {plot_setups[0]}.'
                 error_msg += 'See the <b>suggestion</b> below on how to fix this.'
                 txt += AnalysisGui._set_css(text=error_msg,
                                             css_type='line')
             elif mode == 'save_group':
-                error_msg = f'The batch job(s): {", ".join(batches)}, will ' \
-                            f'not run. To fix this, please consider the ' \
+                error_msg = f'The plot setup(s): {", ".join(plot_setups)}, ' \
+                            f'will not run. To fix this, please consider the ' \
                             f'suggestion below. '
                 txt += AnalysisGui._set_css(text=error_msg,
                                             css_type='line')
             if self.debug:
-                self.debug_value(-151, '_batch_validation_errors() '
+                self.debug_value(-151, '_plot_setup_validation() '
                                        'html_error_txt()',
                                  f'er_dict = {er_dict}')
-            for bat, tool_rows in er_dict.items():
-                error_msg = f'<br>Missmatch in batch job <b><i>' \
+            for bat, plot_type_rows in er_dict.items():
+                error_msg = f'<br>Missmatch in plot setup <b><i>' \
                             f'"{bat}"</i></b>:<br>'
                 txt += AnalysisGui._set_css(text=error_msg,
                                             css_type='line')
-                for row in tool_rows:
-                    for index, tool_dict in row.items():
-                        tool_txt_ls = []
-                        for tool, var_ls in tool_dict.items():
-                            tool_txt = f'Tool number {int(index) + 1}, a ' \
-                                       f'<b><i>{tool2name_dict[tool]}</i></b> ' \
-                                       f'with contain the variable(s): '
+                for row in plot_type_rows:
+                    for index, plot_type_dict in row.items():
+                        plot_type_txt_ls = []
+                        for plot_type, var_ls in plot_type_dict.items():
+                            plot_type_txt = f'Tool number {int(index) + 1}, ' \
+                                            f'a <b><i>' \
+                                            f'{plot_type2name_dict[plot_type]}' \
+                                            f'</i></b> ' \
+                                            f'with contain the variable(s): '
                             var_texts = []
                             for var in var_ls:
                                 var_texts.append(f'<b><i>{var[0]}</i></b> '
                                                  f'from <b>{var[1]}</b> of '
                                                  f'station the <b>{var[2]}</b>')
-                            tool_txt += f'<ul><li>{"</li><li>".join(var_texts)}' \
-                                        f'</li></ul>'
-                            tool_txt = AnalysisGui._set_css(text=tool_txt,
-                                                            css_type='line')
-                            tool_txt_ls.append(tool_txt)
-                        txt += f'<ul><li>{"</li><li>".join(tool_txt_ls)}' \
+                            plot_type_txt += f'<ul><li>' \
+                                             f'{"</li><li>".join(var_texts)}' \
+                                             f'</li></ul>'
+                            plot_type_txt = AnalysisGui._set_css(text=
+                                                                 plot_type_txt,
+                                                                 css_type='line')
+                            plot_type_txt_ls.append(plot_type_txt)
+                        txt += f'<ul><li>{"</li><li>".join(plot_type_txt_ls)}' \
                                f'</li></ul>'
             error_msg = '<br><i>Probably the above variable(s) has been ' \
-                        'removed from the group, but not from the batch ' \
-                        'jobs</i><br>'
+                        'removed from the group, but not from the plot ' \
+                        'setups of the group</i><br>'
             txt += AnalysisGui._set_css(text=error_msg,
                                         css_type='line')
             error_msg = '<b><i>Suggestion</i></b>, either:' \
@@ -708,16 +816,16 @@ class AnalysisGui:
                         'press <i>Save</i>.</li>' \
                         '</ul></li>' \
                         '<li><ul>' \
-                        '<li>Go to the <b><i>Batch jobs</i></b>-menu</li>' \
-                        f'<li>Select each of the falsy batch jobs: ' \
-                        f'<b><i>{", ".join(batches)}</i></b> and ' \
+                        '<li>Go to the <b><i>Plot setups</i></b>-menu</li>' \
+                        f'<li>Select each of the falsy plot setups: ' \
+                        f'<b><i>{", ".join(plot_setups)}</i></b> and ' \
                         f'choose <i>Update</i></li>' \
                         '<li>When <i>Save</i> is chosen old group ' \
                         'variables will be removed.</li>' \
                         '</ul></li></ol><br>'
             txt += AnalysisGui._set_css(text=error_msg,
                                         css_type='line')
-            return txt, good_batches
+            return txt, good_plot_setups
 
         cache = self._load_cache()
         error_dict = {}
@@ -738,7 +846,6 @@ class AnalysisGui:
     def _reset_gui_data(self):
         # reset non-persistent data
         self._load_cache(refresh=True)
-        self.stored_timeseries = {}
 
         self.icos_info = icos_data.StationData(theme=self.theme,
                                                level=self.level)
@@ -769,78 +876,141 @@ class AnalysisGui:
         name_id_ls.sort(key=lambda v: v[0].lower())
         return name_id_ls
 
-    def _validate_batch_of_grp(self, cache_dict: dict = None) -> dict:
+    def _validate_plot_setup_of_grp(self, cache_dict: dict = None) -> dict:
         # expects a dict like cache['_groups'][grp] see the 'save_group'
-        # when variables are removed from a group with batches
+        # when variables are removed from a group with plot_setups
         # we might get crashes
         var_ls = cache_dict['_group_vars']
 
-        d = cache_dict['_batches']
+        d = cache_dict['_plot_setups']
         er_dict = {}
-        for b_name in d.keys():
-            for index, k in d[b_name].items():
+        for ps_name in d.keys():
+            for index, k in d[ps_name].items():
                 if isinstance(k, str):
                     continue
-                for tool, v_ls in k.items():
-                    if tool in ['split_plot', 'corr_plot', 'corr_table',
-                                'statistics']:
+                for p_type, v_ls in k.items():
+                    if p_type in ['split_plot', 'corr_plot', 'corr_table',
+                                  'statistics']:
                         if isinstance(v_ls, list) and not all(v in
                                                               var_ls for
                                                               v in v_ls):
-                            if b_name not in er_dict.keys():
-                                er_dict[b_name] = {}
-                            if index not in er_dict[b_name].keys():
-                                er_dict[b_name][index] = {}
-                            er_dict[b_name][index][tool] = [x for x in v_ls if
-                                                            x not in var_ls]
+                            if ps_name not in er_dict.keys():
+                                er_dict[ps_name] = {}
+                            if index not in er_dict[ps_name].keys():
+                                er_dict[ps_name][index] = {}
+                            er_dict[ps_name][index][p_type] = [x for x in v_ls if
+                                                             x not in var_ls]
                     else:
-                        # multi-plot
+                        # p_type multi-plot
                         for x in v_ls:
                             if not all(v in var_ls for v in x[1]):
-                                if b_name not in er_dict.keys():
-                                    er_dict[b_name] = {}
-                                if index not in er_dict[b_name].keys():
-                                    er_dict[b_name][index] = {}
-                                if tool in er_dict[b_name][index].keys():
-                                    er_dict[b_name][index][tool].extend(
+                                if ps_name not in er_dict.keys():
+                                    er_dict[ps_name] = {}
+                                if index not in er_dict[ps_name].keys():
+                                    er_dict[ps_name][index] = {}
+                                if p_type in er_dict[ps_name][index].keys():
+                                    er_dict[ps_name][index][p_type].extend(
                                         [y for y in x[1] if y not in var_ls])
                                 else:
-                                    er_dict[b_name][index][tool] = [y for y in
-                                                                    x[1] if y
-                                                                    not in
-                                                                    var_ls]
+                                    er_dict[ps_name][index][p_type] = [y for y in
+                                                                       x[1] if y
+                                                                       not in
+                                                                       var_ls]
         return er_dict
 
-    def go(self):
+    def set_persistent_error(self, error_ls):
+
+        if error_ls:
+            margin = '&nbsp' * 3
+            warning_emoji = '\u26a0\ufe0f'
+            error_color = self.widget_style_colors['danger:active']
+
+            span_start = f'<span style="color:{error_color}">'
+            span_end = '</span>'
+
+            if not self.error_texts.value:
+                err_msg = f'{span_start}<h2>{warning_emoji}{margin}' \
+                          f'Errors!{margin}{warning_emoji}</h2>{span_end}'
+            else:
+                err_msg = '<hr>'
+
+            err_msg += span_start
+            if error_ls[0] == 'ACTION':
+                err_msg += f'<h3>{warning_emoji}{margin}' \
+                           f'{error_ls[1]}' \
+                           f'{margin}{warning_emoji}</h3><b>'
+                error_ls = error_ls[2:]
+            else:
+                err_msg += f'<h4>{warning_emoji}{margin}{error_ls[0]}</h4><b>'
+                error_ls = error_ls[1:]
+            for error in error_ls:
+                error = f'{margin}{error}'
+                err_msg += AnalysisGui._set_css(error, 'tight')
+            err_msg += f'</b>{span_end}'
+            self.error_texts.value += err_msg
+
+    def start_tool_app(self):
+
+        self.startup_feed(txt='<i>Setting up main menu<i>...')
+
+        def display_errors(c):
+            if self.debug:
+                self.debug_value(200, 'display_errors()   ',
+                                 f'c = {c}',
+                                 f'error_container.get_title(0) = '
+                                 f'{error_container.get_title(0)}')
+
+            title = error_container.get_title(0)
+            title_ls = title.split(' ')
+            number_of_err = title_ls[-1]
+            if number_of_err:
+                title_ls[-1] = str((1 + int(number_of_err)))
+            else:
+                title_ls[-1] = '1'
+            title = ' '.join(title_ls)
+            error_container.set_title(0, title=title)
+
+            if error_container.layout.display == 'none':
+                error_container.layout.display = 'block'
+                error_container.selected_index = 0
 
         def main_change(change):
             choice = change['new']
             with out:
                 clear_output()
-                if choice == 'Plot ':
-                    self._start()
+                if choice == 'Visualise ':
+                    self._menu_visualise()
                 elif choice == 'Group menu ':
-                    self._group_menu()
-                elif choice == 'Batch jobs ':
-                    self._edit_batch_jobs()
+                    self._menu_group()
+                elif choice == 'Plot setups ':
+                    self._menu_plot_setups()
                 elif choice == 'Settings ':
-                    self._default_settings()
+                    self._menu_settings()
                 elif choice == 'Help ':
-                    self._help()
+                    self._menu_help()
                 else:
-                    self._extract_data()
+                    self._menu_extract_data()
 
-        option_ls = ['Plot ', 'Group menu ', 'Batch jobs ', 'Settings ',
+        option_ls = ['Visualise ', 'Group menu ', 'Plot setups ', 'Settings ',
                      'Help ', '*Extract data ']
         icon_ls = ['area-chart', 'list', 'table', 'cog', 'info-circle', 'wrench']
 
         main_widgets = []
-        main = wd.ToggleButtons(options=option_ls,
-                                button_style="success",
-                                style={'button_width': "100px"},
-                                tooltip=None,
-                                icons=icon_ls)
-        main_widgets.append(main)
+        main_menu = wd.ToggleButtons(options=option_ls,
+                                     button_style="success",
+                                     style={'button_width': "100px"},
+                                     tooltip=None,
+                                     icons=icon_ls)
+        error_container = wd.Accordion(children=[wd.VBox([self.error_texts])],
+                                       selected_index=None,
+                                       layout=wd.Layout(width='auto',
+                                                        height='auto',
+                                                        display='none'))
+        error_container.set_title(0, 'Errors -- Number of errors: ')
+        if self.debug:
+            self.error_texts.observe(display_errors, names='value')
+
+        main_widgets.append(wd.VBox([main_menu, error_container]))
         # we use a css paragraph in order to set a nice style for the rows
         p_css = wd.HTML(value='<head>'
                               '    <style>'
@@ -851,17 +1021,21 @@ class AnalysisGui:
                               '            line-height: 1.15; '
                               '            margin-left: 30px} '
                               '    </style>'
+
                               '</head>')
         main_widgets.append(p_css)
 
         group_cache = self._load_cache()
         if group_cache['_groups'].keys():
-            start_value = 'Plot '
+            start_value = 'Visualise '
+            self.startup_feed(txt='<i>Generating visualisation<i>...')
         else:
-            # In the first run, there are no
+            # In the first run, there is no
             # group of variables.
+            self.startup_feed(txt='<i>No data to visualise, '
+                                  'entering new group of variables<i>...')
             start_value = 'Group menu '
-        main.value = start_value
+        main_menu.value = start_value
 
         out = wd.Output()
         main_widgets.append(out)
@@ -871,13 +1045,14 @@ class AnalysisGui:
             main_widgets.append(debug_btn)
             main_widgets.append(self.debug_out)
 
-        main.observe(main_change, "value")
+        main_menu.observe(main_change, "value")
         with out:
-            if start_value == 'Plot ':
-                self._start()
+            if start_value == 'Visualise ':
+                self._menu_visualise()
             else:
-                self._group_menu()
+                self._menu_group()
 
+        self.startup_feed(txt=None)
         display(wd.VBox(main_widgets))
 
     def get_data(self, grp: str = None) -> IcosFrame or None:
@@ -903,25 +1078,56 @@ class AnalysisGui:
             d = self.report_writer.stored_timeseries
         return d
 
-    def _start(self):
+    def _menu_visualise(self):
 
         if self.debug:
-            self.debug_value(-33, '_start()    *** Start ***')
+            self.debug_value(-33, '_menu_visualise()    *** Start ***')
+
+        def set_info_msg(reason: str):
+            color = self.widget_style_colors['info:active']
+            msg = f'<span style="color:{color}">'
+            msg_ls = ['<h3><i>To do:</i></h3>']
+            if reason == 'no_group':
+                msg_ls.append('<br>'
+                              '<ol><li>'
+                              'First create a <i>group of variables</i> '
+                              'using the <b><i>Group menu</i></b>. <br>'
+                              '<i>In other words:</i> specify <b><i>what '
+                              'data</i></b> to analyse. '
+                              '</li><li>'
+                              'Next, create some <i>plot setup</i> using the '
+                              '<b><i>Plot setup menu/i></b>. <br> '
+                              '<i>In other words</i>: specify <b><i>how</i></b> '
+                              'to analyse the data. '
+                              '</li></ol>')
+            else:
+                # reason == 'no_plot_setup':
+                msg_ls.append('<br>'
+                              '<i>The group of variables '
+                              f'<b>{group_drop.value}</b> '
+                              'has no <b>plot setup</b></i>. Use the '
+                              '<b><i>Plot setup menu</i></b> in order '
+                              'to create a plot setup, in order to specify '
+                              '<b><i>how</i></b> to analyse the data. ')
+
+            for txt in msg_ls:
+                msg += self._set_css(text=txt, css_type='line')
+            msg += '</span>'
+
+            with out:
+                clear_output()
+                display(wd.HTML(msg))
 
         def set_gui():
             cache = self._load_cache()
             # set group drop
             if not cache['_groups'].keys():
-                with out:
-                    clear_output()
-                    msg = 'First you need to create a group of variables ' \
-                          'using the "Group menu"'
-                    display(wd.HTML(msg))
-                    return False
+                set_info_msg('no_group')
+                return False
 
             group_ls = list(cache['_groups'].keys())
             group_drop.options = sorted(group_ls, key=(lambda x: x.lower()))
-            group_drop.observe(init_batch_jobs,
+            group_drop.observe(init_plot_setups,
                                names='value')
             if cache['_last_group']:
                 group_drop.value = cache['_last_group']
@@ -930,7 +1136,6 @@ class AnalysisGui:
             group_drop.disabled = False
             error_widget.layout.display = 'none'
 
-            # tool settings
             user_settings = self._load_user_settings()
             if 'run_configs' in user_settings.keys():
                 end_shift = - user_settings['run_configs'].get('end_date', 0)
@@ -943,35 +1148,36 @@ class AnalysisGui:
 
             return True
 
-        def init_batch_jobs(c):
+        def init_plot_setups(c):
             error_txt_widget.value = ''
             error_widget.layout.display = 'none'
 
             cache = self._load_cache()
             grp = group_drop.value
             if grp in cache['_groups'].keys() and \
-                    '_batches' in cache['_groups'][grp].keys():
-                batches = cache['_groups'][grp].get('_batches', {})
-                if batches:
+                    '_plot_setups' in cache['_groups'][grp].keys():
+                p_setups = cache['_groups'][grp].get('_plot_setups', {})
+                if p_setups:
                     b_ls = [wd.Button(description=name,
                                       style=dict(button_color='LightSeaGreen'),
                                       layout=AnalysisGui._get_width_layout(name))
-                            for name in batches.keys()]
+                            for name in p_setups.keys()]
                     if b_ls:
-                        all_title = 'Run all batch jobs'
+                        all_title = 'Run all'
                         all_layout = AnalysisGui._get_width_layout(all_title)
                         b_ls.append(wd.Button(description=all_title,
                                               icon='area-chart',
                                               button_style='success',
                                               layout=all_layout))
                     for bt in b_ls:
-                        bt.on_click(batch_click)
-                    batch_jobs.children = b_ls
+                        bt.on_click(plot_setup_click)
+                    plot_setups.children = b_ls
                 else:
-                    batch_jobs.children = []
+                    set_info_msg('no_plot_setup')
+                    plot_setups.children = []
             else:
-                # Should never be the case
-                batch_jobs.children = []
+                set_info_msg('no_plot_setup')
+                plot_setups.children = []
 
         def date_changed(change):
             if change['owner'].description == 'End date':
@@ -981,85 +1187,94 @@ class AnalysisGui:
                 if change['new'] >= end_date.value:
                     start_date.value = change['old']
 
-        def batch_click(c):
-            run_batch(jobs=c.description)
+        def plot_setup_click(c):
+            run_plot_setup(jobs=c.description)
 
-        def run_batch(jobs):
+        def run_plot_setup(jobs):
 
             grp = group_drop.value
-            if jobs == 'Run all batch jobs':
+            if jobs == 'Run all':
                 cache = self._load_cache()
-                batch_ls = list(cache['_groups'][grp]['_batches'].keys())
+                plot_setup_ls = list(cache['_groups'][grp]['_plot_setups'].keys())
             else:
-                batch_ls = [jobs]
+                plot_setup_ls = [jobs]
 
             if self.debug:
-                self.debug_value(-38, 'run_batch() ',
+                self.debug_value(-38, 'run_plot_setup() ',
                                  f'jobs = {jobs}',
                                  f'group = {grp}')
 
-            validation_error = self._batch_validation_errors(grp=grp,
-                                                             jobs=batch_ls,
-                                                             mode='run')
+            validation_error = self._plot_setup_validation(grp=grp,
+                                                           jobs=plot_setup_ls,
+                                                           mode='run')
 
             with out:
                 clear_output()
-                if jobs == 'Run all batch jobs':
-                    temp_title = f'<i>Generating report to all batch jobs ' \
+                if jobs == 'Run all':
+                    temp_title = f'<i>Generating report to all plot setups ' \
                                  f'of variable group ' \
                                  f'<b>{group_drop.value}</b>...</i>'
                 else:
-                    temp_title = f'<i>Generating report of batch job ' \
+                    temp_title = f'<i>Generating report of plot setup ' \
                                  f'<b>{jobs}</b> of variable group ' \
                                  f'<b>{group_drop.value}</b>...</i>'
                 if validation_error:
                     error_txt_widget.value = validation_error[0]
                     error_widget.layout.display = 'block'
                     temp_title += f'<hr>{validation_error[0]}<hr>'
-                    good_batches = validation_error[1]
-                    if good_batches:
-                        batch_ls = good_batches
+                    good_plot_setups = validation_error[1]
+                    if good_plot_setups:
+                        plot_setup_ls = good_plot_setups
                     else:
+                        self.startup_feed(txt=temp_title)
                         display(wd.HTML(temp_title))
                         return
+                self.startup_feed(txt=temp_title)
                 display(wd.HTML(temp_title))
 
             rw = self._get_report_writer()
-
-            report_dict = rw.get_batch_report(group=group_drop.value,
-                                              batch_ls=batch_ls,
-                                              start_date=start_date.value,
-                                              end_date=end_date.value)
+            self.startup_feed(txt='...')
+            report_dict = rw.get_plot_setup_report(group=group_drop.value,
+                                                   plot_setup_ls=plot_setup_ls,
+                                                   start_date=start_date.value,
+                                                   end_date=end_date.value)
+            self.startup_feed(txt='......')
             with out:
                 clear_output()
                 display(report_dict['main_title'])
-                for b in batch_ls:
-                    display(report_dict[b]['batch_title'])
-                    for tool_result in report_dict[b]['result']:
-                        if tool_result[0] in ['split_plot', 'multi_plot',
-                                              'corr_plot']:
+                for b in plot_setup_ls:
+                    self.startup_feed(txt=f"<i>Assembling:</i> "
+                                          f"{report_dict[b]['plot_setup_title']}"
+                                          f"...")
+                    display(report_dict[b]['plot_setup_title'])
+                    ii = 1
+                    for plot_type_result in report_dict[b]['result']:
+                        if plot_type_result[0] in ['split_plot', 'multi_plot',
+                                                   'corr_plot', 'corr_table']:
                             try:
-                                tool_result[1].show()
+                                self.startup_feed(txt=f'Building plot #{ii}...')
+                                ii += 1
+                                plot_type_result[1].show()
                             except Exception as e:
                                 if self.debug:
-                                    self.debug_value(-38, 'run_batch()  -- '
+                                    self.debug_value(-38, 'run_plot_setup()  -- '
                                                           'exception',
                                                      f'---Exception: {e}',
-                                                     f'Errors run_batch: ',
-                                                     f'--- tool_result[0] = '
-                                                     f'{tool_result[0]}',
-                                                     f'--- tool_result[1] = '
-                                                     f'{tool_result[1]}')
+                                                     f'Errors run_plot_setup: ',
+                                                     f'--- plot_type_result[0] = '
+                                                     f'{plot_type_result[0]}',
+                                                     f'--- plot_type_result[1] = '
+                                                     f'{plot_type_result[1]}')
                         else:
                             if self.debug:
-                                self.debug_value(-38, 'run_batch() ',
+                                self.debug_value(-38, 'run_plot_setup() ',
                                                  f'Not implemented: '
-                                                 f'{tool_result[0]} ')
+                                                 f'{plot_type_result[0]} ')
 
         # Main of configurations
         # ======================
         # Layouts
-        common_layout = wd.Layout(width='155pt', height='40px')
+        common_layout = wd.Layout(width='165pt', height='40px')
 
         # Dropdowns
         group_label = wd.HTML('<b><i>Available groups: </i></b>',
@@ -1076,8 +1291,8 @@ class AnalysisGui:
                                  layout=common_layout)
 
         rows = [wd.HBox([group_box, start_date, end_date])]
-        batch_jobs = wd.HBox()
-        rows.append(batch_jobs)
+        plot_setups = wd.HBox()
+        rows.append(plot_setups)
         error_txt_widget = wd.HTML(layout=wd.Layout(width='auto',
                                                     max_width='90%',
                                                     height='100%'),
@@ -1098,7 +1313,7 @@ class AnalysisGui:
 
             display(wd.VBox(rows))
 
-            # By default we run all batch jobs of latest group.
+            # By default we run all plot setups of latest group.
             # this can be changed in configurations
             settings = self._load_user_settings()
             if 'run_configs' in settings.keys():
@@ -1109,8 +1324,10 @@ class AnalysisGui:
             if self.debug:
                 pass
             elif auto_run:
-                if batch_jobs.children:
-                    run_batch('Run all batch jobs')
+                if plot_setups.children:
+                    run_plot_setup('Run all')
+        else:
+            display(out)
 
     def _load_app_configs(self):
         return self.retriever.load_app_configs()
@@ -1136,32 +1353,32 @@ class AnalysisGui:
                    cache_dict: dict = None):
         json_handler.write(data=cache_dict,
                            path_to_json_file=self.user_cache_file)
-        self.report_writer = None
+        # self.report_writer = None
         self.retriever.cache = cache_dict
 
-    def _help(self):
+    def _menu_help(self):
         # static help text
         def link(url, url_txt) -> str:
             return f'<a href="{url}" target="_blank">' \
                    f'<font color="DarkBlue">{url_txt}</font></a>'
 
         images_dir = os.path.join(self.code_dir, 'images')
-        plot_menu_png = os.path.join(images_dir, 'plot_menu.png')
+        visualise_png = os.path.join(images_dir, 'visualise.png')
         group_menu_png = os.path.join(images_dir, 'group_menu.png')
-        batch_menu_png = os.path.join(images_dir, 'batch_menu.png')
+        plot_setup_png = os.path.join(images_dir, 'plot_setups.png')
         settings_menu_png = os.path.join(images_dir, 'settings_menu.png')
         extract_menu_png = os.path.join(images_dir, 'extract_menu.png')
-        with open(plot_menu_png, 'rb') as f:
-            plot_img = wd.Image(value=f.read())
-            plot_img.layout.height = '28px'
+        with open(visualise_png, 'rb') as f:
+            visualise_img = wd.Image(value=f.read())
+            visualise_img.layout.height = '28px'
 
         with open(group_menu_png, 'rb') as f:
             group_img = wd.Image(value=f.read())
             group_img.layout.height = '28px'
 
-        with open(batch_menu_png, 'rb') as f:
-            batch_img = wd.Image(value=f.read())
-            batch_img.layout.height = '28px'
+        with open(plot_setup_png, 'rb') as f:
+            plot_setup_img = wd.Image(value=f.read())
+            plot_setup_img.layout.height = '28px'
 
         with open(settings_menu_png, 'rb') as f:
             settings_img = wd.Image(value=f.read())
@@ -1178,14 +1395,14 @@ class AnalysisGui:
 
         top_html = wd.HTML(disabled=True, layout=wide_layout)
 
-        plot_html = wd.HTML(disabled=True, layout=column_layout)
+        visualise_html = wd.HTML(disabled=True, layout=column_layout)
 
         group_html1 = wd.HTML(disabled=True, layout=column_layout)
         group_html2 = wd.HTML(disabled=True, layout=column_layout)
         grp_defn_html = wd.HTML(disabled=True, layout=column_layout)
 
-        batch_html1 = wd.HTML(disabled=True, layout=column_layout)
-        batch_html2 = wd.HTML(disabled=True, layout=column_layout)
+        plot_setup_html1 = wd.HTML(disabled=True, layout=column_layout)
+        plot_setup_html2 = wd.HTML(disabled=True, layout=column_layout)
         bat_defn_html = wd.HTML(disabled=True, layout=column_layout)
 
         settings_html = wd.HTML(disabled=True, layout=column_layout)
@@ -1221,24 +1438,32 @@ class AnalysisGui:
                        "anders.dahlner@nateko.lu.se")
 
         widgets = wd.VBox([top_html,
-                           wd.HBox([plot_img, plot_html], layout=wide_layout),
-                           wd.HBox([group_img, wd.VBox([group_html1,
-                                                        wd.HBox([margin,
-                                                                 grp_defn_html]),
-                                                        group_html2])
+                           wd.HBox([visualise_img,
+                                    visualise_html], layout=wide_layout),
+                           wd.HBox([group_img,
+                                    wd.VBox([group_html1,
+                                             wd.HBox([margin,
+                                                      grp_defn_html]),
+                                             group_html2])
                                     ], layout=wide_layout),
-                           wd.HBox([batch_img, wd.VBox([batch_html1,
-                                                        wd.HBox([margin,
-                                                                 bat_defn_html]),
-                                                        batch_html2])
+                           wd.HBox([plot_setup_img,
+                                    wd.VBox([plot_setup_html1,
+                                             wd.HBox([margin,
+                                                      bat_defn_html]),
+                                             plot_setup_html2])
                                     ], layout=wide_layout),
-                           wd.HBox([settings_img, settings_html],
+                           wd.HBox([settings_img,
+                                    settings_html],
                                    layout=wide_layout),
-                           wd.HBox([extract_img, extract_html],
+                           wd.HBox([extract_img,
+                                    extract_html],
                                    layout=wide_layout),
-                           wd.HBox([new_grp_html, upd_grp_html, del_grp_html],
+                           wd.HBox([new_grp_html,
+                                    upd_grp_html,
+                                    del_grp_html],
                                    layout=wide_layout),
-                           wd.HBox([general_html, technical_html],
+                           wd.HBox([general_html,
+                                    technical_html],
                                    layout=wide_layout),
                            end_html])
 
@@ -1248,11 +1473,12 @@ class AnalysisGui:
         top_html.value = AnalysisGui._set_css(text=top_text,
                                               css_type='line')
 
-        plot_text = 'The <b><i>Plot</i></b>-menu is the standard view of the ' \
-                    'application. This is were the user run reports in order ' \
-                    'to produce plots and statistics from the ICOS data.<br><br>'
-        plot_html.value = AnalysisGui._set_css(text=plot_text,
-                                               css_type='line')
+        visualise_text = 'The <b><i>Visualise</i></b>-menu is the standard ' \
+                         'view of the application. This is were the user run ' \
+                         'reports in order to produce plots and statistics ' \
+                         'from the ICOS data.<br><br>'
+        visualise_html.value = AnalysisGui._set_css(text=visualise_text,
+                                                    css_type='line')
 
         group_text1 = 'In the <b><i>Group</i></b>-menu the user can create ' \
                       '<i>groups of variables</i>.<br>'
@@ -1284,33 +1510,36 @@ class AnalysisGui:
                       f'{link_cp}.<br><br>'
         group_html2.value = AnalysisGui._set_css(text=group_text2,
                                                  css_type='line')
-        batch_text1 = 'In the <b><i>Batch jobs</i></b>-menu the user create ' \
-                      '<i>batch jobs</i>. <br>'
-        batch_html1.value = AnalysisGui._set_css(text=batch_text1,
-                                                 css_type='line')
+        plot_setup_text1 = 'In the <b><i>Plot setups</i></b>-menu the user ' \
+                           'create <i>plot setups</i>. <br>'
+        plot_setup_html1.value = AnalysisGui._set_css(text=plot_setup_text1,
+                                                      css_type='line')
 
-        batch_defn_text = '<i><b>Definition:</b> A <b>batch job</b> for ' \
-                          'a group of variables, is a list of tools where ' \
-                          'each tool consist of a selection of group ' \
-                          'variables.<br>' \
-                          'By a <b>tool</b> we mean a plot-tool or a ' \
-                          'statistical tool, together with some variables from ' \
-                          'the group of variables in order to create an output.'
-        bat_defn_html.value = AnalysisGui._set_css(text=batch_defn_text,
+        plot_setup_defn_text = '<i><b>Definition:</b> A <b>plot setup</b> ' \
+                               'for a group of variables, is a list of ' \
+                               '<i>plot types</i> where each plot type ' \
+                               'consist of a selection of group ' \
+                               'variables.<br>' \
+                               'By a <b>plot type</b> we mean a ' \
+                               'visualisation plot or a some statistical ' \
+                               'tool, together with some variables ' \
+                               'from the group of variables in order to ' \
+                               'create an output.'
+        bat_defn_html.value = AnalysisGui._set_css(text=plot_setup_defn_text,
                                                    css_type='line')
 
-        batch_text2 = '<i>How</i> to set up a batch job is explained in the ' \
-                      '<b><i>User guide</i></b> of the <b><i>Batch jobs' \
-                      '</i></b>-menu.'
-        batch_html2.value = AnalysisGui._set_css(text=batch_text2,
-                                                 css_type='line')
+        plot_setup_text2 = '<i>How</i> to set up a plot setup is explained ' \
+                           'in the <b><i>User guide</i></b> of the ' \
+                           '<b><i>Plot setups</i></b>-menu.'
+        plot_setup_html2.value = AnalysisGui._set_css(text=plot_setup_text2,
+                                                      css_type='line')
 
         config_text = 'In the <b><i>Settings</i></b>-menu the user ' \
                       'can:<br> ' \
                       f'{margin_str} - change the <i>Default settings</i> ' \
                       'on what data to fetch and manipulate ' \
                       'layouts of plots.<br>' \
-                      f'{margin_str} - use the <i>Batch jobs</i> to set ' \
+                      f'{margin_str} - use the <i>Plot setups</i> to set ' \
                       'up sequences of outputs, i.e. plots of statistics, ' \
                       'to produce. Here variables for the outputs are ' \
                       'selected from a group of variables.<br><br>'
@@ -1318,32 +1547,32 @@ class AnalysisGui:
                                                    css_type='line')
 
         extract_text = 'The menu <b><i>Extract data</i></b> is a guidance ' \
-                       'on how to extract data from the tool in case a user ' \
+                       'on how to extract data from the notebook in case a user ' \
                        'wish to look more into details of a dataset or run ' \
                        'tests not available in this application.<br><br>'
         extract_html.value = AnalysisGui._set_css(text=extract_text,
                                                   css_type='line')
 
-        new_grp_text = AnalysisGui.help_dict['group']['read_header1']
-        new_grp_text += AnalysisGui.help_dict['group']['read_body1'] + '<br>'
+        new_grp_text = self.help_dict['group']['read_header1']
+        new_grp_text += self.help_dict['group']['read_body1'] + '<br>'
         new_grp_html.value = AnalysisGui._set_css(text=new_grp_text,
                                                   css_type='line')
 
-        upd_grp_text = AnalysisGui.help_dict['group']['read_header2']
-        upd_grp_text += AnalysisGui.help_dict['group']['read_body2'] + '<br>'
+        upd_grp_text = self.help_dict['group']['read_header2']
+        upd_grp_text += self.help_dict['group']['read_body2'] + '<br>'
         upd_grp_html.value = AnalysisGui._set_css(text=upd_grp_text,
                                                   css_type='line')
 
-        del_grp_text = AnalysisGui.help_dict['group']['read_header3']
-        del_grp_text += AnalysisGui.help_dict['group']['read_body3'] + '<br>'
+        del_grp_text = self.help_dict['group']['read_header3']
+        del_grp_text += self.help_dict['group']['read_body3'] + '<br>'
         del_grp_html.value = AnalysisGui._set_css(text=del_grp_text,
                                                   css_type='line')
 
-        general_text = AnalysisGui.help_dict['group']['general'] + '<br>'
+        general_text = self.help_dict['group']['general'] + '<br>'
         general_html.value = AnalysisGui._set_css(text=general_text,
                                                   css_type='line')
 
-        technical_text = AnalysisGui.help_dict['technical'] + '<br>'
+        technical_text = self.help_dict['technical'] + '<br>'
         technical_html.value = AnalysisGui._set_css(text=technical_text,
                                                     css_type='line')
 
@@ -1357,7 +1586,8 @@ class AnalysisGui:
 
         display(widgets)
 
-    def _extract_data(self):
+    def _menu_extract_data(self):
+
         def link(url, url_txt) -> str:
             return f'<a href="{url}" target="_blank">' \
                    f'<font color="DarkBlue">{url_txt}</font></a>'
@@ -1382,13 +1612,13 @@ class AnalysisGui:
                            end_html])
 
         top_text = 'Besides from running reports as described in *<i>direction ' \
-                   'to text to come</i>*, the user can also use the app in ' \
-                   'order to extract data from the ICOS Carbon Portal. <br><br>'
+                   'to text to come</i>*, the user can also use this notebook ' \
+                   'in order to extract data from the ICOS Carbon Portal. <br><br>'
         top_html.value = AnalysisGui._set_css(text=top_text,
                                               css_type='line')
         ex_txt1 = '<b><i>Example.</i></b><br> Suppose a user has created a ' \
                   'group of variables called ' \
-                  '<i>fluxes</i> and a batch job called <i>my plots</i> for ' \
+                  '<i>fluxes</i> and a plot setup called <i>my plots</i> for ' \
                   'some variables of the group (the names themself are ' \
                   'insignificant, but we refer to them ' \
                   'below).<br><br>' \
@@ -1404,10 +1634,10 @@ class AnalysisGui:
         g = gui.AnalysisGui(theme='ES');</code></pre>'''
 
         ex_txt2 = '<br><b><i>Step 2. Gathering data.</i></b><br> ' \
-                  'The user select the group <i>fluxes</i> and hits the button ' \
-                  '<i>my plots</i>.<br>' \
-                  'This will display whatever output is related to the batch ' \
-                  'job <i>my plots</i>, between the ' \
+                  'The user select the group <i>fluxes</i> and hits the ' \
+                  'button <i>my plots</i>.<br>' \
+                  'This will display whatever output is related to the plot ' \
+                  'setup <i>my plots</i>, between the ' \
                   '<b><i>Start date</i></b> and <b><i>End date</i></b>.<br> ' \
                   '<i><u>However</u>, in the background <b>all</b> ' \
                   'variables of the ' \
@@ -1475,62 +1705,83 @@ class AnalysisGui:
 
         display(widgets)
 
-    def _tool_settings(self):
+    def _plot_type_settings(self):
         pass
 
-    def _flush_store(self, group: str = None):
+    def _flush_memory(self, group: str = None,
+                      plot_setup: str = None,
+                      timeseries: bool = None,
+                      reports: bool = None):
         """
-            Removes stored timeseries dataframe.
-            Used when the user change:
-             - a group of variables the local storage of that group.
-             - run settings the local storage should be
-            cleared.
+            Clear memory of stored timeseries dataframe or stored reports.
 
             group: str
                 The group name.
-                If group is not None, all timeseries of the group are removed,
-                otherwise all timeseries are removed
+                If not None, all timeseries of the group are removed,
+                If None, all timeseries are removed.
+
+            plot_setup: str
+                When used the param group is needed
+                - Use when a plot setup of the group is changed
+                It will remove results from the plot_setup of the
+                reports of the group
+
+            timeseries: bool
+                When True timeseries dataframe from previous run
+                - Use when the user change anything of a group of variables
+                - Run settings (all timeseries should be removed)
+                This will also remove reports of the group(s).
+
+            reports: bool
+                When True timeseries dataframe from previous run
+                - Use when the user change anything of a plot setup of a
+                group
+                - Plot settings (all reports should be removed)
+
         """
         if self.debug:
-            self.debug_value(-36, '_flush_store()   **** flush ****',
+            self.debug_value(-36, '_flush_memory()   **** flush ****',
                              f' -- grp = {group}')
 
-        if group:
-            self.stored_timeseries.pop(group, None)
-        else:
-            self.stored_timeseries.clear()
+        if isinstance(self.report_writer, report_writer.ReportWriter):
+            if timeseries:
+                self.report_writer.remove_timeseries(group=group)
+            elif reports or plot_setup:
+                self.report_writer.remove_reports(group=group,
+                                                  plot_setup=plot_setup)
 
-    def _edit_batch_jobs(self,
-                         _group_name: str = None,
-                         _batch_name: str = None):
+    def _menu_plot_setups(self,
+                          _group_name: str = None,
+                          _plot_setup_name: str = None):
         if self.debug:
-            self.debug_value(-12, '_edit_batch_jobs()  *** start ***')
+            self.debug_value(-12, '_menu_plot_setups()  *** start ***')
 
         def _get_multi_plot_auto() -> bool:
             settings = self._load_user_settings()
             multi_p_kwargs = settings.get('multi_plot_kwargs', {})
             return multi_p_kwargs.get('auto_axis', True)
 
-        def reset_batch_gui(reason: str, batch_name: str = None):
+        def reset_plot_setup_gui(reason: str, plot_setup_name: str = None):
 
             if self.debug:
-                self.debug_value(1, 'reset_batch_gui()', 'step 1',
-                                 f'batch_name = {batch_name}')
-            init_batch_drop(batch_name)
+                self.debug_value(1, 'reset_plot_setup_gui()', 'step 1',
+                                 f'plot_setup_name = {plot_setup_name}')
+            init_plot_setup_drop(plot_setup_name)
             activate_gui(action_id='reset_gui', reason=reason)
 
             if self.debug:
-                self.debug_value(1, 'reset_batch_gui()', '--- end ---')
+                self.debug_value(1, 'reset_plot_setup_gui()', '--- end ---')
 
-        def init_tool_buttons():
-            tool_ls = []
-            for tool_name in tool_names:
-                bt = wd.Button(description=tool_name,
+        def init_plot_type_buttons():
+            plot_type_ls = []
+            for plot_type_name in plot_type_names:
+                bt = wd.Button(description=plot_type_name,
                                style={'button_color': 'LightGreen'},
-                               layout=AnalysisGui._get_width_layout(tool_name))
-                bt.on_click(tool_click)
-                tool_ls.append(bt)
-            tool_buttons.children = tool_ls
+                               layout=AnalysisGui._get_width_layout(
+                                   plot_type_name))
+                bt.on_click(plot_type_click)
+                plot_type_ls.append(bt)
+            plot_type_buttons.children = plot_type_ls
 
         def init_group_drop():
             cache = self._load_cache()
@@ -1548,7 +1799,7 @@ class AnalysisGui:
             cache = self._load_cache()
             group_ls = group_drop.options
             if self.debug:
-                self.debug_value(0, f'set_group_value()   --- Here we go ----',
+                self.debug_value(0, f'set_group_value() - Here we go --',
                                  f'group = {group}')
 
             if group and group in group_ls:
@@ -1565,7 +1816,7 @@ class AnalysisGui:
                 self.debug_value(2, f'changed_group_drop()')
             set_group_var_info()
             set_var_translation_dict()
-            reset_batch_gui(reason='changed_group_drop')
+            reset_plot_setup_gui(reason='changed_group_drop')
 
         def set_var_translation_dict():
             """
@@ -1643,155 +1894,167 @@ class AnalysisGui:
                                  f' -- var_buttons.children = '
                                  f'{var_buttons.children}')
 
-        def init_batch_drop(batch_name: str = None):
+        def init_plot_setup_drop(plot_setup_name: str = None):
             cache = self._load_cache()
             group = group_drop.value
-            batch_dict = cache['_groups'][group].get('_batches', {})
+            plot_setup_dict = cache['_groups'][group].get('_plot_setups', {})
             if self.debug:
-                self.debug_value(9, 'init_batch_drop() -- step 1',
-                                 f'(input) batch_name = {batch_name}',
+                self.debug_value(9, 'init_plot_setup_drop() -- step 1',
+                                 f'(input) plot_setup_name = {plot_setup_name}',
                                  f'group = {group}',
-                                 f'batch_dict = {batch_dict}')
-            if batch_dict:
-                batch_labels = sorted(list(batch_dict.keys()),
-                                      key=(lambda x: x.lower()))
-                batch_drop.options = [(k, batch_dict[k]) for k in batch_labels]
-                if batch_name and batch_name in batch_labels:
-                    batch_label = batch_name
+                                 f'plot_setup_dict = {plot_setup_dict}')
+            if plot_setup_dict:
+                plot_setup_labels = sorted(list(plot_setup_dict.keys()),
+                                           key=(lambda x: x.lower()))
+                plot_setup_drop.options = [(k, plot_setup_dict[k]) for k in
+                                           plot_setup_labels]
+                if plot_setup_name and plot_setup_name in plot_setup_labels:
+                    plot_setup_label = plot_setup_name
                 else:
-                    batch_label = batch_labels[0]
+                    plot_setup_label = plot_setup_labels[0]
                 if self.debug:
-                    self.debug_value(9, 'init_batch_drop() -- step 2 - '
-                                        f'batch_label = {batch_label}',
-                                     f'batch_drop.options = {batch_drop.options}')
-                batch_drop.label = batch_label
+                    self.debug_value(9, 'init_plot_setup_drop() -- step 2 - '
+                                        f'plot_setup_label = {plot_setup_label}',
+                                     f'plot_setup_drop.options = '
+                                     f'{plot_setup_drop.options}')
+                plot_setup_drop.label = plot_setup_label
             else:
-                batch_drop.options = [('Press new...', 0)]
-                batch_drop.value = 0
-                html_msg(text_ls=[f'Press <i>New</i>, in order to create a batch '
-                                  f'job for the group <i>{group}</i>.'])
+                plot_setup_drop.options = [('Press new...', 0)]
+                plot_setup_drop.value = 0
+                html_msg(text_ls=[f'Press <i>New</i>, in order to create a plot '
+                                  f'setup for the group <i>{group}</i>.'])
             if self.debug:
-                self.debug_value(9, 'init_batch_drop() -- step 3',
-                                 f'batch_drop.label = {batch_drop.label}',
-                                 f'batch_drop.value = {batch_drop.value}',
+                self.debug_value(9, 'init_plot_setup_drop() -- step 3',
+                                 f'plot_setup_drop.label = '
+                                 f'{plot_setup_drop.label}',
+                                 f'plot_setup_drop.value = '
+                                 f'{plot_setup_drop.value}',
                                  f'-- end--')
-            changed_batch_drop('reset_batch_gui')
+            changed_plot_setup_drop('reset_plot_setup_gui')
 
-        def changed_batch_drop(c):
-            if batch_drop.value:
-                batch = batch_drop.value.copy()
+        def changed_plot_setup_drop(c):
+            if plot_setup_drop.value:
+                plot_setup = plot_setup_drop.value.copy()
             else:
-                batch = 0
+                plot_setup = 0
             if self.debug:
-                self.debug_value(11, 'changed_batch_drop()',
-                                 '- step 1 - batch value changed, '
+                self.debug_value(11, 'changed_plot_setup_drop()',
+                                 '- step 1 - plot_setup value changed, '
                                  'reset displayed selections',
                                  f'c = {c}',
-                                 f'batch_drop.label = {batch_drop.label}',
-                                 f'batch_drop.value = {batch}')
+                                 f'plot_setup_drop.label = '
+                                 f'{plot_setup_drop.label}',
+                                 f'plot_setup_drop.value = {plot_setup}')
 
-            if batch != 0:
-                batch_version = batch.pop('_version', '0')
-                set_batch_upd_dict(dict(_upd_mode='read_mode_with_batch',
-                                        _tools=batch,
-                                        _selected_tool_index=None,
-                                        _version=batch_version))
+            if plot_setup != 0:
+                plot_setup_version = plot_setup.pop('_version', '0')
+                set_plot_setup_upd_dict(dict(_upd_mode=
+                                             'read_mode_with_plot_setup',
+                                             _plot_types=plot_setup,
+                                             _selected_plot_type_index=None,
+                                             _version=plot_setup_version))
             else:
-                set_batch_upd_dict(dict(_upd_mode='read_mode_no_batch',
-                                        _tools={}))
+                set_plot_setup_upd_dict(dict(_upd_mode='read_mode_no_plot_setup',
+                                             _plot_types={}))
             set_user_guide()
 
             if self.debug:
-                self.debug_value(11, 'changed_batch_drop()',
+                self.debug_value(11, 'changed_plot_setup_drop()',
                                  '- step 2 - ',
                                  f'upd_dict_log.value = {upd_dict_log.value}')
 
         def reset_selection(c):
             # TODO: check what has changed and divide the update accordingly
 
-            batch_dict = get_batch_upd_dict()
+            plot_setup_dict = get_plot_setup_upd_dict()
 
             if self.debug:
                 self.debug_value(13, f'reset_selection()',
                                  f'c = {c}',
-                                 f'batch_dict = {batch_dict}',
-                                 f'batch_drop.value = {batch_drop.value}')
+                                 f'plot_setup_dict = {plot_setup_dict}',
+                                 f'plot_setup_drop.value = '
+                                 f'{plot_setup_drop.value}')
 
-            sel_tool_index = batch_dict.pop('_selected_tool_index', None)
-            tools = batch_dict.get('_tools', {})
-            sel_tools = [(tool2name_dict[k2], k1) for k1, v1 in tools.items() for
-                         k2 in v1.keys()]
-            sel_vars = format_tool_vars(tools)
+            sel_plot_type_index = plot_setup_dict.pop('_selected_plot_type_index',
+                                                      None)
+            plot_types = plot_setup_dict.get('_plot_types', {})
+            sel_plot_types = [(plot_type2name_dict[k2], k1) for k1, v1 in
+                              plot_types.items() for
+                              k2 in v1.keys()]
+            sel_vars = format_plot_type_vars(plot_types)
 
-            set_selections(sel_tool_ls=sel_tools,
-                           sel_tool_index=sel_tool_index,
+            set_selections(sel_plot_type_ls=sel_plot_types,
+                           sel_plot_type_index=sel_plot_type_index,
                            sel_var_ls=sel_vars)
 
-            if batch_dict['_upd_mode'] in ['new', 'update']:
+            if plot_setup_dict['_upd_mode'] in ['new', 'update']:
                 reset_var_buttons()
 
-        def format_tool_vars(tools):
+        def format_plot_type_vars(plot_types):
             # formatting var list to selected_var widget
             if self.debug:
                 self.debug_value(15, f'label_of_selected_var_row()',
-                                 f'tool_code = {tools}',
-                                 f'batch_drop.value = {batch_drop.value}')
+                                 f'plot_type_code = {plot_types}',
+                                 f'plot_setup_drop.value = '
+                                 f'{plot_setup_drop.value}')
 
             sel_vars = []
-            if tools:
+            if plot_types:
                 var_trans_dict = get_var_translation_dict()
-                for index, tool_dict in tools.items():
-                    for tool_code, tool_vars in tool_dict.items():
-                        if isinstance(tool_vars, str):
+                for index, plot_type_dict in plot_types.items():
+                    for plot_type_code, plot_type_vars in plot_type_dict.items():
+                        if isinstance(plot_type_vars, str):
                             # the case 'all'
                             label_ls = ['All variables']
-                        elif tool_code != 'multi_plot':
+                        elif plot_type_code != 'multi_plot':
                             # the case of list of var-lists
-                            label_ls = [var_name for x in tool_vars for var_name
+                            label_ls = [var_name for x in plot_type_vars for var_name
                                         in
                                         var_trans_dict.keys() if
                                         var_trans_dict[var_name] == x]
                         else:
                             # the case of list of axes and var-lists
-                            label_ls = [var_name for x in tool_vars for y in x[1]
+                            label_ls = [var_name for x in plot_type_vars for y in x[1]
                                         for
                                         var_name in
                                         var_trans_dict.keys() if
                                         var_trans_dict[var_name] == y]
-                        label_for_tool_vars = ', '.join(label_ls)
-                        sel_vars.append((label_for_tool_vars, (index, tool_vars)))
+                        label_for_plot_type_vars = ', '.join(label_ls)
+                        sel_vars.append(
+                            (label_for_plot_type_vars, (index, plot_type_vars)))
 
             return sel_vars
 
-        def set_selections(sel_tool_ls: list,
-                           sel_tool_index: int = -1,
+        def set_selections(sel_plot_type_ls: list,
+                           sel_plot_type_index: int = -1,
                            sel_var_ls: list = None):
             # Sometimes we want to set the index to None,
             # this is why we have default value -1.
             if self.debug:
                 self.debug_value(16, f'set_selections()',
                                  'step 1',
-                                 f'sel_tool_ls = {sel_tool_ls}',
-                                 f'sel_tool_index = {sel_tool_index}',
+                                 f'sel_plot_type_ls = {sel_plot_type_ls}',
+                                 f'sel_plot_type_index = {sel_plot_type_index}',
                                  f'sel_var_ls = {sel_var_ls}')
 
-            rows = 3 + (len(sel_tool_ls) // 2) * 2
-            selected_tools.rows = rows
+            rows = 3 + (len(sel_plot_type_ls) // 2) * 2
+            selected_plot_types.rows = rows
             selected_vars.rows = rows
 
-            selected_tools.unobserve(changed_selected_tool, names='value')
-            selected_tools.options = sel_tool_ls
-            if isinstance(sel_tool_index, int) and sel_tool_index >= 0:
-                selected_tools.value = sel_tool_index
-            elif sel_tool_index is None:
-                selected_tools.value = sel_tool_index
-            selected_tools.observe(changed_selected_tool, names='value')
+            selected_plot_types.unobserve(changed_selected_plot_type,
+                                          names='value')
+            selected_plot_types.options = sel_plot_type_ls
+            if isinstance(sel_plot_type_index, int) and sel_plot_type_index >= 0:
+                selected_plot_types.value = sel_plot_type_index
+            elif sel_plot_type_index is None:
+                selected_plot_types.value = sel_plot_type_index
+            selected_plot_types.observe(changed_selected_plot_type, names='value')
 
             if isinstance(sel_var_ls, list):
                 selected_vars.options = sel_var_ls
-            if selected_tools.value is not None:
+            if selected_plot_types.value is not None:
                 try:
-                    ind = selected_tools.value
+                    ind = selected_plot_types.value
                     selected_vars.tooltip = selected_vars.options[ind][0]
                 except Exception as e:
                     if self.debug:
@@ -1799,27 +2062,28 @@ class AnalysisGui:
                                          f'--- Exception: {e}',
                                          f'selected_vars.options = '
                                          f'{selected_vars.options}',
-                                         f'ind = {selected_tools.value}')
+                                         f'ind = {selected_plot_types.value}')
                     selected_vars.tooltip = ''
             else:
                 selected_vars.tooltip = ''
 
             if self.debug:
                 self.debug_value(16, f'set_selections()', 'end ',
-                                 f'selected_tools.value = {selected_tools.value}',
-                                 f'selected_tools.options = '
-                                 f'{selected_tools.options}',
+                                 f'selected_plot_types.value = '
+                                 f'{selected_plot_types.value}',
+                                 f'selected_plot_types.options = '
+                                 f'{selected_plot_types.options}',
                                  f'selected_vars.options = '
                                  f'{selected_vars.options}',
                                  f'selected_vars.tooltip = '
                                  f'{selected_vars.tooltip}')
 
-        def changed_selected_tool(c):
-            # Triggered when a tool is selected,
-            # not triggered by tool buttons
+        def changed_selected_plot_type(c):
+            # Triggered when a plot_type is selected,
+            # not triggered by plot_type buttons
             if self.debug:
                 self.debug_value(112,
-                                 f'changed_selected_tool() -- triggered tool',
+                                 f'changed_selected_plot_type() triggered p_type',
                                  f'c = {c}')
 
             # Depending on c.old we might have to modify the selection index
@@ -1828,36 +2092,38 @@ class AnalysisGui:
             # Also, in order to avoid more work than necessary we set
             upd_changed = False
 
-            # In case of a deselected tool with no variables we must
+            # In case of a deselected plot_type with no variables we must
             # clean up the selected_vars widget
             if isinstance(c.old, int):
-                upd_dict = get_batch_upd_dict()
-                tools = upd_dict.get('_tools', {})
-                upd_dict['_tools'], upd_changed = cleanup_tools(tools)
+                upd_dict = get_plot_setup_upd_dict()
+                plot_types = upd_dict.get('_plot_types', {})
+                upd_dict['_plot_types'], upd_changed = cleanup_plot_types(
+                    plot_types)
 
                 if upd_changed:
                     if isinstance(selected_index, int) and selected_index > c.old:
                         selected_index = selected_index - 1
-                if upd_dict['_selected_tool_index'] != selected_index:
-                    upd_dict['_selected_tool_index'] = selected_index
+                if upd_dict['_selected_plot_type_index'] != selected_index:
+                    upd_dict['_selected_plot_type_index'] = selected_index
                     upd_changed = True
 
                 if upd_changed:
                     # this will trigger reset_var_buttons()
-                    set_batch_upd_dict(upd_dict)
+                    set_plot_setup_upd_dict(upd_dict)
 
             if selected_index is None:
                 info_type = 'upd'
             else:
-                sel_tools = list(selected_tools.options)
-                tool_name = sel_tools[selected_index][0]
-                info_type = name2tool_dict[tool_name]
+                sel_plot_types = list(selected_plot_types.options)
+                plot_type_name = sel_plot_types[selected_index][0]
+                info_type = name2plot_type_dict[plot_type_name]
 
             if info_type != 'multi_plot':
                 reset_multi_plot_auto(hide=True)
             else:
-                upd_dict = get_batch_upd_dict()
-                var_codes = list(upd_dict['_tools'][selected_index].values())[0]
+                upd_dict = get_plot_setup_upd_dict()
+                var_codes = \
+                list(upd_dict['_plot_types'][selected_index].values())[0]
                 axis_ls = [axis[0] for axis in var_codes]
                 mp_auto_enable = not len(axis_ls) == 2
                 mp_auto_value = not len(axis_ls) != len(set(axis_ls))
@@ -1871,7 +2137,7 @@ class AnalysisGui:
                 reset_var_buttons()
 
         def set_info_guide(info_type: str = None):
-            # set info text depending on update mode and tool
+            # set info text depending on update mode and plot_type
             # show/hide buttons etc
             # cases of info_type:
             # 'upd', 'new', 'update', multi_plot, 'corr_plot',
@@ -1884,27 +2150,28 @@ class AnalysisGui:
             if info_type == 'reset_gui':
                 msg_ls = ['<b>You are in <i>read mode</i>.</b> '
                           'Either select a group of variables or a '
-                          'batch job, and choose <b><i>New</i></b>, '
+                          'plot setup, and choose <b><i>New</i></b>, '
                           'or <b><i>Update</i></b>. For more guidance, '
                           'please check the <b><i>User guide</i></b>.']
             else:
                 msg_ls = ['<b>You are in <i>update mode</i>.</b> ']
                 if info_type == 'new':
-                    msg_ls.extend(['To create a new batch job: ',
-                                   '1. Choose at least one tool from the '
-                                   'list of <i>Available tools</i>, and '
+                    msg_ls.extend(['To create a new plot setup: ',
+                                   '1. Choose at least one plot type from the '
+                                   'list of <i>Available plot types</i>, and '
                                    'add some variables to it.',
-                                   '2. Choose a name for the batch job. '])
-                elif name_of_batch_job.value == 'Name of batch job':
+                                   '2. Choose a name for the plot setup. '])
+                elif name_of_plot_setup.value == 'Name of plot setup':
                     msg_ls.append('Remember to choose a name for the '
-                                  'batch job in the above area <b><i>Batch '
+                                  'plot setup in the above area <b><i>Batch '
                                   'name</i></b>.')
                 if info_type == 'update':
-                    msg_ls.extend(['<b><i>To edit</i></b> the content of a tool: '
-                                   'Select the tool to in the list above, '
+                    msg_ls.extend(['<b><i>To edit</i></b> the content of a '
+                                   'plot type: Select the plot type to in the '
+                                   'list above, '
                                    'and use the variable buttons to add or '
-                                   'remove them from the tool.',
-                                   '<b><i>To delete</i></b> the batch job, '
+                                   'remove them from the plot type.',
+                                   '<b><i>To delete</i></b> the plot setup, '
                                    'just press '
                                    '<b><i>Delete</i></b> without changing the '
                                    'content.'])
@@ -1940,12 +2207,14 @@ class AnalysisGui:
                                    'interconnected figures, having a shared '
                                    'zoom-tool.'])
                 elif info_type == 'upd':
-                    msg_ls.extend([f'Either select or add some tool to the '
-                                   f'batch job.'])
-                elif info_type in tool2name_dict.keys():
-                    msg_ls.extend([f'<b><i>{tool2name_dict[info_type]}</i></b> '
-                                   f'selected. <b>Please note that this tools is '
-                                   f'not implemented at this moment. </b>',
+                    msg_ls.extend([f'Either select or add some plot type to the '
+                                   f'plot setup.'])
+                elif info_type in plot_type2name_dict.keys():
+                    msg_ls.extend([f'<b><i>{plot_type2name_dict[info_type]}'
+                                   f'</i></b> '
+                                   f'selected. <b>Please note that '
+                                   f'this plot types is not implemented at '
+                                   f'this moment. </b>',
                                    'No restriction on the variables.'])
                 if self.debug:
                     self.debug_value(129, f'set_info_guide()  --- end ---',
@@ -1955,60 +2224,64 @@ class AnalysisGui:
 
         def set_user_guide():
             if user_guide_container.layout.display == 'block':
-                d = get_batch_upd_dict().get('_upd_mode', {'_upd_mode': ''})
+                d = get_plot_setup_upd_dict().get('_upd_mode', {'_upd_mode': ''})
                 if self.debug:
                     self.debug_value(1311, 'set_user_guide() ',
                                      f'd = {d}')
-                if d['_upd_mode'] == 'read_mode_no_batch':
-                    user_guide.value = '<H3><b>To create a batch ' \
-                                       'job:</b></H3><br>' \
+                if d['_upd_mode'] == 'read_mode_no_plot_setup':
+                    user_guide.value = '<H3><b>To create a plot ' \
+                                       'setup:</b></H3><br>' \
                                        '1. Choose a group of variables. ' \
                                        '2. Press <i>New</i> and follow the ' \
                                        'directions.'
-                elif d['_upd_mode'] == 'read_mode_with_batch':
-                    user_guide.value = '<H3><b>To create a batch job:</b></H3>' \
+                elif d['_upd_mode'] == 'read_mode_with_plot_setup':
+                    user_guide.value = '<H3><b>To create a plot setup:</b></H3>' \
                                        '<br>' \
                                        '1. Choose a group of variables.<br>' \
                                        '2. Press <i>New</i> and follow the ' \
                                        'directions.<br>' \
-                                       '<b>To change or delete a batch ' \
-                                       'job:</b><br>' \
+                                       '<b>To change or delete a plot ' \
+                                       'setup:</b><br>' \
                                        '1. Select the group of variables and ' \
-                                       'the batch job.<br>' \
+                                       'the plot setup.<br>' \
                                        '2. Press <i>Update</i>. and follow the ' \
                                        'directions.<br>' \
-                                       '3. In case the batch job should be ' \
+                                       '3. In case the plot setup should be ' \
                                        'deleted, just press <i>Delete</i> ' \
                                        'without changing the content.'
                 elif d['_upd_mode'] == 'new':
-                    user_guide.value = '<H3><b><i>New batch job</i></b> ' \
-                                       '</H3><br>'\
-                                       'To create a new batch job: ' \
+                    user_guide.value = '<H3><b><i>New plot setup</i></b> ' \
+                                       '</H3><br>' \
+                                       'To create a new plot setup: ' \
                                        '<ol>' \
-                                       '<li> Use a tool buttons in the ' \
-                                       'list of <i>Available tools</i> to add ' \
-                                       'a tool to the batch job, ' \
-                                       'and add variables to the tool.</li>' \
-                                       '<li>Choose a name for the batch job. ' \
+                                       '<li> Use a plot type buttons in the ' \
+                                       'list of <i>Available plot types</i> ' \
+                                       'to add a plot type to the plot setup, ' \
+                                       'and add variables to the plot ' \
+                                       'type.</li>' \
+                                       '<li>Choose a name for the plot setup. ' \
                                        '</li> ' \
                                        '</ol> ' \
-                                       'A batch job can have several tools.'
+                                       'A plot setup can have several plot types.'
                 elif d['_upd_mode'] == 'update':
-                    user_guide.value = '<H3><b><i>Update batch job</i></b>' \
+                    user_guide.value = '<H3><b><i>Update plot setup</i></b>' \
                                        '</H3><br>' \
-                                       'To edit the content of a tool: ' \
-                                       '<ol><li> Use a tool buttons in the ' \
-                                       'list of <i>Available tools</i> to add ' \
-                                       'a tool to the batch job, ' \
-                                       'and add variables to the tool.</li>' \
-                                       '<li>To change variables of a tool, ' \
-                                       'select the tool in the list ' \
+                                       'To edit the content of a plot type: ' \
+                                       '<ol><li> Use a plot type buttons in the ' \
+                                       'list of <i>Available plot types</i> ' \
+                                       'to add a plot type to the plot setup, ' \
+                                       'and add variables to the plot ' \
+                                       'type.</li>' \
+                                       '<li>To change variables of a plot ' \
+                                       'type, ' \
+                                       'select the plot type in the list ' \
                                        '<b><i>Current setup</i></b>, ' \
                                        'and use the variable buttons to ' \
-                                       'add or remove them from the tool.' \
+                                       'add or remove them from the plot ' \
+                                       'type.' \
                                        '</li></ol>' \
-                                       '<br><b><i>To delete</i></b> the batch ' \
-                                       'job, just press <b><i>Delete</i></b> ' \
+                                       '<br><b><i>To delete</i></b> the plot ' \
+                                       'setup, just press <b><i>Delete</i></b> ' \
                                        'without changing the content.'
 
         def reset_multi_plot_auto(hide: bool,
@@ -2035,11 +2308,12 @@ class AnalysisGui:
                     multi_plot_auto_cb.value = value
 
         def reset_var_buttons():
-            tool_index = selected_tools.value
+            plot_type_index = selected_plot_types.value
             if self.debug:
                 self.debug_value(17, 'reset_var_buttons()   --- start ---',
-                                 f'  - index of selected_tools = {tool_index}')
-            if tool_index is None:
+                                 f'  - index of selected_plot_types = '
+                                 f'{plot_type_index}')
+            if plot_type_index is None:
                 if self.debug:
                     self.debug_value(17, 'reset_var_buttons()   -- index = None',
                                      '  -- deselecting and disabling all ',
@@ -2048,18 +2322,19 @@ class AnalysisGui:
                 for btn in var_buttons.children:
                     btn.disabled = True
                     btn.icon = ''
-            elif isinstance(tool_index, int):
+            elif isinstance(plot_type_index, int):
                 move_up.disabled = False
-                upd_dict = get_batch_upd_dict()
-                row_dict = upd_dict['_tools'][tool_index]
+                upd_dict = get_plot_setup_upd_dict()
+                row_dict = upd_dict['_plot_types'][plot_type_index]
                 var_trans_dict = get_var_translation_dict()
-                for tool_code, var_codes in row_dict.items():
+                for plot_type_code, var_codes in row_dict.items():
                     if self.debug:
                         self.debug_value(17, f'reset_var_buttons()  -- index '
-                                             f'= {tool_index}',
-                                         f'  --- tool_code = {tool_code}',
+                                             f'= {plot_type_index}',
+                                         f'  --- plot_type_code = '
+                                         f'{plot_type_code}',
                                          f'  --- var_codes = {var_codes}')
-                    if tool_code == 'multi_plot':
+                    if plot_type_code == 'multi_plot':
                         # for multi_plot var_codes look like this:
                         # [['%', [['SWC_1', 'ETC NRT Meteo', 'SE-Htm'],
                         #         ['SWC_2', 'ETC NRT Meteo', 'SE-Htm']]],
@@ -2094,7 +2369,7 @@ class AnalysisGui:
                                 btn.icon = ''
                                 btn.disabled = False
 
-                    elif tool_code == 'corr_plot':
+                    elif plot_type_code == 'corr_plot':
                         if self.debug:
                             self.debug_value(17,
                                              f'reset_var_buttons() --- restore '
@@ -2129,13 +2404,13 @@ class AnalysisGui:
                                     btn.disabled = False
 
         def move_selected(move_click):
-            index = selected_tools.value
+            index = selected_plot_types.value
             if self.debug:
                 self.debug_value(113, f'move_selected() click',
-                                 f'tool index = {index}')
+                                 f'plot_type index = {index}')
 
             if index is not None:
-                upd_dict = get_batch_upd_dict()['_tools']
+                upd_dict = get_plot_setup_upd_dict()['_plot_types']
                 keys = len(upd_dict.keys())
                 if index > 0:
                     new_index = index - 1
@@ -2148,54 +2423,54 @@ class AnalysisGui:
                     upd_dict = {k - 1: v for k, v in upd_dict.items()}
                     upd_dict[new_index] = down_val
 
-                update_batch_dict(dict(_tools=upd_dict,
-                                       _selected_tool_index=new_index))
+                update_plot_setup_dict(dict(_plot_types=upd_dict,
+                                            _selected_plot_type_index=new_index))
 
-        def tool_click(tool):
+        def plot_type_click(plot_type):
             if self.debug:
-                self.debug_value(114, f'tool_click()',
-                                 f'tool.description = {tool.description}',
-                                 f'tool.icon = {tool.icon}')
-            if tool.icon:
-                tool.style.button_color = "LightGreen"
-                tool.icon = ''
-                tool_added = False
+                self.debug_value(114, f'plot_type_click()',
+                                 f'plot_type.description = {plot_type.description}',
+                                 f'tool.icon = {plot_type.icon}')
+            if plot_type.icon:
+                plot_type.style.button_color = "LightGreen"
+                plot_type.icon = ''
+                plot_type_added = False
             else:
-                for btn in tool_buttons.children:
-                    if btn != tool:
+                for btn in plot_type_buttons.children:
+                    if btn != plot_type:
                         btn.style.button_color = "LightGreen"
                         btn.icon = ''
-                tool.style.button_color = "Green"
-                tool.icon = 'check'
-                tool_added = True
-            update_tool_list(add_tool=tool_added,
-                             tool_name=tool.description)
+                plot_type.style.button_color = "Green"
+                plot_type.icon = 'check'
+                plot_type_added = True
+            update_plot_type_list(add_plot_type=plot_type_added,
+                                  plot_type_name=plot_type.description)
 
-        def update_tool_list(add_tool,
-                             tool_name):
-            # Similar to, but different from changed_selected_tool()
-            # at this stage the tool is not in the upd_dict.
+        def update_plot_type_list(add_plot_type,
+                                  plot_type_name):
+            # Similar to, but different from changed_selected_plot_type()
+            # at this stage the plot_type is not in the upd_dict.
             if self.debug:
-                self.debug_value(115, f'update_tool_list() -- input',
-                                 f'add_tool = {add_tool}',
-                                 f'tool_name = {tool_name}')
+                self.debug_value(115, f'update_plot_type_list() -- input',
+                                 f'add_plot_type = {add_plot_type}',
+                                 f'plot_type_name = {plot_type_name}')
 
-            # We must remove empty rows, in case this or another tool was
+            # We must remove empty rows, in case this or another plot_type was
             # deselected without variables.
-            tools = get_batch_upd_dict().get('_tools', {})
-            tools, _ = cleanup_tools(tools)
+            plot_types = get_plot_setup_upd_dict().get('_plot_types', {})
+            plot_types, _ = cleanup_plot_types(plot_types)
 
             if self.debug:
-                self.debug_value(115, f'update_tool_list()',
-                                 f'tools (cleaned) ={tools}')
+                self.debug_value(115, f'update_plot_type_list()',
+                                 f'plot_types (cleaned) ={plot_types}')
 
-            if add_tool:
-                tool_code = name2tool_dict[tool_name]
-                info_type = tool_code
-                key = len(tools.keys())
-                tools[key] = {tool_code: []}
-                selected_tools.disabled = True
-                if tool_code == 'multi_plot':
+            if add_plot_type:
+                plot_type_code = name2plot_type_dict[plot_type_name]
+                info_type = plot_type_code
+                key = len(plot_types.keys())
+                plot_types[key] = {plot_type_code: []}
+                selected_plot_types.disabled = True
+                if plot_type_code == 'multi_plot':
                     # A new multi-plot is added
                     new_multi_plot = True
                 else:
@@ -2205,7 +2480,7 @@ class AnalysisGui:
                 info_type = 'upd'
                 new_multi_plot = False
                 key = None
-                selected_tools.disabled = False
+                selected_plot_types.disabled = False
 
             if new_multi_plot:
                 reset_multi_plot_auto(hide=False,
@@ -2214,25 +2489,25 @@ class AnalysisGui:
             else:
                 reset_multi_plot_auto(hide=True)
 
-            update_batch_dict(dict(_tools=tools,
-                                   _selected_tool_index=key))
+            update_plot_setup_dict(dict(_plot_types=plot_types,
+                                        _selected_plot_type_index=key))
             set_info_guide(info_type=info_type)
 
         def var_button_click(btn):
 
-            upd_dict = get_batch_upd_dict()['_tools']
-            row_index = selected_tools.value
+            upd_dict = get_plot_setup_upd_dict()['_plot_types']
+            row_index = selected_plot_types.value
             if self.debug:
                 self.debug_value(116, f'var_button_click()',
                                  f'btn.description = {btn.description}',
-                                 f'selected_tools.value = {row_index}',
+                                 f'selected_plot_types.value = {row_index}',
                                  f'before:  - upd_dict[row_index] ='
                                  f' {upd_dict[row_index]}')
 
-            for tool_code, upd_var_codes in upd_dict[row_index].items():
+            for plot_type_code, upd_var_codes in upd_dict[row_index].items():
                 if self.debug:
                     self.debug_value(116, f'var_button_click() ***',
-                                     f'tool_code = {tool_code}',
+                                     f'plot_type_code = {plot_type_code}',
                                      f'upd_var_codes = {upd_var_codes}')
                 var_trans_dict = get_var_translation_dict()
                 var_name = btn.description
@@ -2242,15 +2517,15 @@ class AnalysisGui:
                         upd_var_codes = 'all'
                     else:
                         upd_var_codes = []
-                elif tool_code != 'multi_plot':
+                elif plot_type_code != 'multi_plot':
                     if var_code in upd_var_codes:
                         upd_var_codes.remove(var_code)
                     else:
                         upd_var_codes.append(var_code)
-                elif tool_code == 'multi_plot':
+                elif plot_type_code == 'multi_plot':
                     if self.debug:
                         self.debug_value(116, f'var_button_click() ****',
-                                         f'tool_code = {tool_code}',
+                                         f'plot_type_code = {plot_type_code}',
                                          f'multi_plot_auto_cb.value = '
                                          f'{multi_plot_auto_cb.value}')
                     unit = var2unit(var_code)
@@ -2316,19 +2591,19 @@ class AnalysisGui:
                     multi_plot_auto_cb.disabled = (len(upd_var_codes) == 2)
                     if self.debug:
                         self.debug_value(116, f'var_button_click()',
-                                         f'tool_code = {tool_code}',
+                                         f'plot_type_code = {plot_type_code}',
                                          f'multi_plot_auto_cb.value = '
                                          f'{multi_plot_auto_cb.value}')
 
-                upd_dict[row_index] = {tool_code: upd_var_codes}
+                upd_dict[row_index] = {plot_type_code: upd_var_codes}
                 if self.debug:
                     self.debug_value(116, f'var_button_click()',
                                      f'after:',
                                      f' - upd_dict[row_index] = '
                                      f'{upd_dict[row_index]}')
 
-                update_batch_dict(dict(_tools=upd_dict,
-                                       _selected_tool_index=row_index))
+                update_plot_setup_dict(dict(_plot_types=upd_dict,
+                                            _selected_plot_type_index=row_index))
 
         def get_var2unit_dict():
             if self.debug:
@@ -2344,7 +2619,11 @@ class AnalysisGui:
             if update or var[0] not in var2unit_dict.keys():
                 pid = st_df.loc[(st_df.id == var[-1]) & (
                         st_df.specLabel == var[1])].dobj.values[0]
-                meta = icos_data.StationData.icos_pid2meta(pid)
+                try:
+                    meta = icos_data.StationData.icos_pid2meta(pid)
+                except:
+                    set_pid_error(pid, var)
+                    return ''
                 var_unit_list = meta['varUnitList']
                 var2unit_dict.update({v[0]: v[1] for v in var_unit_list})
                 app_configs = self._load_app_configs()
@@ -2357,6 +2636,15 @@ class AnalysisGui:
                 self.debug_value(8, f'var2unit()', f'var = {var}',
                                  f'return unit = {unit}')
             return unit
+
+        def set_pid_error(pid, var):
+            error_ls = [f'Data error! ',
+                        f'Could not access the data object of: <i>{var[1]}</i>',
+                        f'from the station {var[2]}. ',
+                        f'Url to the landing page of the data object: '
+                        f'<a href="{pid}" target="_blank">'
+                        f'<font color="DarkBlue">{pid}</font></a>']
+            set_info_msg(error_ls=error_ls)
 
         def set_group_var_info():
             cache = self._load_cache()
@@ -2435,26 +2723,26 @@ class AnalysisGui:
                 display(wd.HTML(msg))
 
         def set_info_msg(error_ls=None):
-            upd_dict = get_batch_upd_dict()
+            upd_dict = get_plot_setup_upd_dict()
             upd_mode = upd_dict.get('_upd_mode', None)
             grp = group_drop.value
             if self.debug:
                 self.debug_value(130, 'set_info_msg()', f'upd_mode = {upd_mode}',
                                  f'grp = {grp}')
             if upd_mode == 'new':
-                index = upd_dict['_selected_tool_index']
+                index = upd_dict['_selected_plot_type_index']
                 index = str(index)
-                if index in upd_dict['_tools'].keys():
-                    tool = list(upd_dict['_tools'][index].keys())[0]
+                if index in upd_dict['_plot_types'].keys():
+                    plot_type = list(upd_dict['_plot_types'][index].keys())[0]
                 else:
-                    tool = None
+                    plot_type = None
 
-                if tool == 'multi_plot':
+                if plot_type == 'multi_plot':
                     info_ls = ['Please note that <i>Multi-plot</i> will '
                                'use at most <i>two $y$-axes</i> , and by '
                                'default the variables are divided according '
                                'to their unit.']
-                elif tool == 'corr_plot':
+                elif plot_type == 'corr_plot':
                     info_ls = ['Please note that <i>Correlation-plot</i> '
                                'is a plot for <i>exactly two '
                                'variables</i>.',
@@ -2463,100 +2751,129 @@ class AnalysisGui:
                                'second variable '
                                'belongs to the vertical axis (the $y$-axis).']
                 else:
-                    info_ls = [f'To create a batch job for the group {grp}:',
-                               '1. Select <i>tools</i> (one at a time) from '
-                               'the list in <i>Available tools</i> below. '
+                    info_ls = [f'To create a plot setup for the group {grp}:',
+                               '<ol>'
+                               '<li>'
+                               'Select <i>plot types</i> (one at a time) from '
+                               'the list in <i>Available plot types</i> below. '
                                'These will be displayed in the 1:st list to the '
-                               'right of the label <i>Current setup</i>.',
-                               '2. Select/deselect preferred variables for the '
-                               'chosen tool. These will be displayed in the 2:st '
+                               'right of the label <i>Current setup</i>.'
+                               '</li>'
+                               '<li> Select/deselect preferred variables for '
+                               'the chosen plot type. '
+                               'These will be displayed in the 2:st '
                                'list to the right of the label <i>Current'
-                               ' setup</i>.',
-                               '3. Choose a name for the batch job in '
+                               ' setup</i>.'
+                               '</li>'
+                               '<li> Choose a name for the plot setup in '
                                'the area <span style="color:black">"Name of '
-                               'batch job"</span>.',
-                               '4. Press save.',
-                               '',
-                               '<b> - A batch job may contain several '
-                               '<i>tools</i>.</b>',
-                               '<b> - The list of the tools also represents the '
-                               'order of execution of the batch job, and the '
+                               'plot setup"</span>.'
+                               '</li>'
+                               '<li> Press save.'
+                               '</li>'
+                               '</ol>',
+                               '<b> - A plot setup may contain several '
+                               '<i>plot types</i>.</b>',
+                               '<b> - The list of the plot types also '
+                               'represents the '
+                               'order of execution of the plot setup, and the '
                                'order of the variables will be the order of '
                                'presentation in plots, etc.</b>',
                                '<b> - To rearrange the order of execution '
-                               'select a tool to the right of the '
+                               'select a plot type to the right of the '
                                '<i>"Up"</i>-button and click "Up".</b>']
             elif upd_mode == 'update':
                 info_ls = ['In update mode you can:',
-                           '1. Add or remove variables of a group.',
-                           '2. Change the group name.',
-                           '3. Delete the group.',
+                           '<ol><li>'
+                           ' Add or remove plot types of a plot type.</li>'
+                           ' Add or remove variables of a plot type.</li>'
+                           '<li>'
+                           'Change the group name.',
+                           '</li>'
+                           '<li>Delete the group.',
                            '',
                            '<b>The order of the variables is the order of '
                            'presentation in plots, etc.</b>',
                            '<b>Changes are logged in the file '
-                           '"/appdata/cache_bak.json".</b>']
+                           f'"{self.user_cache_bak_file}"</b>']
             else:
                 info_ls = ['Steps',
                            'Start by choosing a group of variables. ',
-                           'Use <i>New</i> to create a new batch job.',
+                           'Use <i>New</i> to create a new plot setup.',
                            'Use <i>Update</i> in case you wish to change or '
-                           'delete a batch job.']
+                           'delete a plot setup.']
 
             margin = '&nbsp' * 3
 
+            # info_color = self.widget_style_colors['primary:active']
+            # msg = f'<span style="color:{info_color}">' \
+            #       f'{msg}</span>'
+            #
+            # if error_ls:
+            #     margin = '&nbsp' * 3
+            #     warning_emoji = '\u26a0\ufe0f'
+            #     error_color = self.widget_style_colors['danger:active']
+            #
+            #     err_msg = f'<span style="color:{error_color}">{margin}{margin}'
+            #     err_msg += f'<h3>To do: {warning_emoji}</h3><b>'
+            #     for error in error_ls:
+            #         err_msg += f'{margin}{error}<br>'
+            #     err_msg += '</b></span>'
+            #     msg = err_msg + msg
+            #
+            # user_guide.value = msg
+
             if info_ls:
                 info_color = self.widget_style_colors['primary:active']
-                msg = f'<span style="color:{info_color}">{margin}{margin}<h4>' \
-                      f'{info_ls[0]}</h4>' \
-                      f'<b>'
+                txt = f'<span style="color:{info_color}">{margin}{margin}' \
+                      f'<h4>{info_ls[0]}</h4><b>'
 
                 for row in info_ls[1:]:
-                    msg += f'{margin}{row}<br>'
-                msg += '</b></span>'
+                    txt += f'{margin}{row}<br>'
+                txt += '</b></span>'
             else:
-                msg = ''
+                txt = ''
 
             if error_ls:
                 warning_emoji = '\u26a0\ufe0f'
                 error_color = self.widget_style_colors['danger:active']
-                if msg:
-                    msg += '<br>'
-                msg += f'<span style="color:{error_color}">{margin}{margin}'
-                msg += f'<h3>To do: {warning_emoji}</h3>'
-                msg += f'<b>'
+                if txt:
+                    txt += '<br>'
+                txt += f'<span style="color:{error_color}">{margin}{margin}'
+                txt += f'<h3>To do: {warning_emoji}</h3>'
+                txt += f'<b>'
                 for error in error_ls:
-                    msg += f'{margin}{error}<br>'
-                msg += '</b></span>'
+                    txt += f'{margin}{error}<br>'
+                txt += '</b></span>'
 
             if error_ls and user_guide_container.layout.display == 'none':
                 display_user_guide('display_guide')
-            msg = AnalysisGui._set_css(text=msg,
+            txt = AnalysisGui._set_css(text=txt,
                                        css_type='line')
-            user_guide.value = msg
+            user_guide.value = txt
 
-        def cleanup_tools(d: dict) -> (dict, bool):
-            # returns "a clean tool-dict" and boolean for "dict has changed"
+        def cleanup_plot_types(d: dict) -> (dict, bool):
+            # returns "a clean plot type-dict" and boolean for "dict has changed"
             if self.debug:
-                self.debug_value(120, f'cleanup_tools() -- (before)',
-                                 f"upd_dict['_tools'] = {d}")
+                self.debug_value(120, f'cleanup_plot_types() -- (before)',
+                                 f"upd_dict['_plot_types'] = {d}")
 
             if isinstance(d, dict) and d:
                 d_copy = d.copy()
-                for tool_number, tool_var in d_copy.items():
-                    for t_name in tool_var.keys():
-                        if not tool_var[t_name]:
-                            d.pop(tool_number)
-                        elif t_name == 'corr_plot' and len(tool_var[t_name]) != 2:
-                            d.pop(tool_number)
-                # allways reset the tool number
+                for plot_type_number, plot_type_var in d_copy.items():
+                    for t_name in plot_type_var.keys():
+                        if not plot_type_var[t_name]:
+                            d.pop(plot_type_number)
+                        elif t_name == 'corr_plot' and len(plot_type_var[t_name]) != 2:
+                            d.pop(plot_type_number)
+                # allways reset the plot type number
                 d = dict(zip(range(len(d.keys())), d.values()))
                 dict_has_changed = (d != d_copy)
             else:
                 dict_has_changed = False
 
             if self.debug:
-                self.debug_value(120, f'cleanup_tools() -- (after)',
+                self.debug_value(120, f'cleanup_plot_types() -- (after)',
                                  f'd = {d}',
                                  f'dict_has_changed = {dict_has_changed}')
 
@@ -2566,26 +2883,26 @@ class AnalysisGui:
             cache = self._load_cache()
             grp = group_drop.value
             error_ls = []
-            if not name or name == 'Name of batch job':
-                error_ls.append('Please choose a name for batch job')
+            if not name or name == 'Name of plot setup':
+                error_ls.append('Please choose a name for plot setup')
             elif not name[0].isalnum():
                 error_ls.append('At least the first letter of the name')
                 error_ls.append('must be an alfa numeric character.')
             elif grp in cache['_groups'].keys():
-                batches = cache['_groups'][grp].get('_batches', {})
-                if name in batches.keys():
-                    upd_dict = get_batch_upd_dict()
+                plot_setups = cache['_groups'][grp].get('_plot_setups', {})
+                if name in plot_setups.keys():
+                    upd_dict = get_plot_setup_upd_dict()
                     if name != upd_dict['_orig_name']:
                         error_ls.append(
-                            f'There is already a batch job called '
+                            f'There is already a plot setup called '
                             f'<i>{name}</i>,')
                         error_ls.append('please pick another name.')
 
             if error_ls:
-                name_of_batch_job.style.text_color = 'red'
+                name_of_plot_setup.style.text_color = 'red'
             else:
-                name_of_batch_job.style.text_color = 'darkgreen'
-                name_of_batch_job.layout = AnalysisGui._get_width_layout(name)
+                name_of_plot_setup.style.text_color = 'darkgreen'
+                name_of_plot_setup.layout = AnalysisGui._get_width_layout(name)
 
             if self.debug:
                 self.debug_value(121, f'validate_name()',
@@ -2594,9 +2911,9 @@ class AnalysisGui:
 
             return error_ls
 
-        def batch_name_changed(change):
+        def plot_setup_name_changed(change):
             if self.debug:
-                self.debug_value(122, f'batch_name_changed()',
+                self.debug_value(122, f'plot_setup_name_changed()',
                                  f'change = {change}',
                                  f'name = {change.owner.value}')
 
@@ -2607,18 +2924,19 @@ class AnalysisGui:
 
                 if error_ls:
                     if self.debug:
-                        self.debug_value(122, f'batch_name_changed()',
+                        self.debug_value(122, f'plot_setup_name_changed()',
                                          f'\t error_ls = {error_ls}')
                     upd_dict['_name_error'] = error_ls
                 else:
                     if self.debug:
-                        self.debug_value(122, f'batch_name_changed()',
+                        self.debug_value(122, f'plot_setup_name_changed()',
                                          f'\t new_name={new_name}')
                     upd_dict['_new_name'] = new_name
                 if self.debug:
-                    self.debug_value(122, f'batch_name_changed()',
-                                     f'\t batch_drop.value={batch_drop.value}')
-                update_batch_dict(upd_dict)
+                    self.debug_value(122, f'plot_setup_name_changed()',
+                                     f'\t plot_setup_drop.value='
+                                     f'{plot_setup_drop.value}')
+                update_plot_setup_dict(upd_dict)
 
         def get_var_translation_dict() -> dict:
             if self.debug:
@@ -2629,73 +2947,80 @@ class AnalysisGui:
             d = eval(var_translation_dict.value)
             return d
 
-        def get_batch_upd_dict() -> dict:
+        def get_plot_setup_upd_dict() -> dict:
             d = eval(upd_dict_log.value)
             if isinstance(d, dict):
-                if '_tools' in d.keys():
-                    d['_tools'] = {int(k): v for k, v in d['_tools'].items()}
+                if '_plot_types' in d.keys():
+                    d['_plot_types'] = {int(k): v for k, v in
+                                        d['_plot_types'].items()}
             else:
                 d = dict()
 
             if self.debug:
-                self.debug_value(14, 'get_batch_upd_dict()', f'd ={d}')
+                self.debug_value(14, 'get_plot_setup_upd_dict()', f'd ={d}')
 
             return d
 
-        def set_batch_upd_dict(d: dict):
+        def set_plot_setup_upd_dict(d: dict):
             if self.debug:
-                self.debug_value(12, 'set_batch_upd_dict()', 'step 1', f'd ={d}')
+                self.debug_value(12, 'set_plot_setup_upd_dict()', 'step 1',
+                                 f'd ={d}')
 
-            json_safe_dict = {k: v for k, v in d.items() if k != '_tools'}
-            json_safe_dict['_tools'] = {str(k): v for k, v in d['_tools'].items()}
+            json_safe_dict = {k: v for k, v in d.items() if k != '_plot_types'}
+            json_safe_dict['_plot_types'] = {str(k): v for k, v in
+                                             d['_plot_types'].items()}
 
             upd_dict_log.value = str(json_safe_dict)
             if self.debug:
-                self.debug_value(12, 'set_batch_upd_dict()', 'step 2',
+                self.debug_value(12, 'set_plot_setup_upd_dict()', 'step 2',
                                  f'upd_dict_log.value ={upd_dict_log.value}')
 
-        def update_batch_dict(d: dict):
+        def update_plot_setup_dict(d: dict):
             if self.debug:
-                self.debug_value(123, f'update_batch_dict()',
+                self.debug_value(123, f'update_plot_setup_dict()',
                                  f'd = {d}')
-            upd_dict = get_batch_upd_dict()
+            upd_dict = get_plot_setup_upd_dict()
             for k, v in d.items():
                 upd_dict[k] = v
-            set_batch_upd_dict(upd_dict)
+            set_plot_setup_upd_dict(upd_dict)
 
-        # def set_batch_upd_selections(d: dict = None):
+        # def set_plot_setup_upd_selections(d: dict = None):
         #
         #
         #     if d is None:
-        #         d = selections2batch_dict()
+        #         d = selections2plot_setup_dict()
         #
-        #     upd_dict = get_batch_upd_dict()
+        #     upd_dict = get_plot_setup_upd_dict()
         #
-        #     upd_dict['_tools'] = {str(k): v for k, v in d['_tools'].items()}
-        #     upd_dict['_selected_tool_index'] = d.get('_selected_tool_index', -1)
-        #     set_batch_upd_dict(upd_dict)
+        #     upd_dict['_plot_types'] = {str(k): v for k, v in
+        #     d['_plot_types'].items()}
+        #     upd_dict['_selected_plot_type_index'] =
+        #     d.get('_selected_plot_type_index', -1)
+        #     set_plot_setup_upd_dict(upd_dict)
 
-        def get_valid_batch():
+        def get_valid_plot_setup():
             cache = self._load_cache()
             grp = group_drop.value
-            b = batch_drop.label
-            batch2validate = batch_drop.value.copy()
+            b = plot_setup_drop.label
+            ps2validate = plot_setup_drop.value.copy()
 
             if '_var_mismatch' in cache['_groups'][grp].keys():
                 if b in cache['_groups'][grp]['_var_mismatch'].keys():
                     er_dict = cache["_groups"][grp]["_var_mismatch"][b]
                     if self.debug:
-                        self.debug_value(128, f'validate_batch()',
-                                         f'batch_drop.label = {batch_drop.label}',
-                                         f'batch_drop.value = {batch2validate}',
+                        self.debug_value(128, f'validate_plot_setup()',
+                                         f'plot_setup_drop.label = '
+                                         f'{plot_setup_drop.label}',
+                                         f'plot_setup_drop.value = '
+                                         f'{ps2validate}',
                                          f'er_dict = {er_dict}')
 
                     reindex = False
-                    for index, tool_vars in er_dict.items():
-                        for v_ls in tool_vars.values():
+                    for index, plot_type_vars in er_dict.items():
+                        for v_ls in plot_type_vars.values():
                             for v in v_ls:
-                                for tool, val in batch2validate[index].items():
-                                    if tool == 'multi_plot':
+                                for p_type, val in ps2validate[index].items():
+                                    if p_type == 'multi_plot':
                                         for y in val:
                                             if v in y[1]:
                                                 y[1].remove(v)
@@ -2704,25 +3029,25 @@ class AnalysisGui:
                                     else:
                                         if v in val:
                                             val.remove(v)
-                                            if tool == 'corr_plot':
+                                            if p_type == 'corr_plot':
                                                 val = []
                                     if not val:
-                                        batch2validate.pop(index)
+                                        ps2validate.pop(index)
                                         reindex = True
 
                     if reindex:
                         j = 0
                         d = {}
-                        for i in batch2validate.keys():
+                        for i in ps2validate.keys():
                             if i != '_version':
-                                d[str(j)] = batch2validate[i]
+                                d[str(j)] = ps2validate[i]
                                 j += 1
                             else:
-                                d[i] = batch2validate[i]
+                                d[i] = ps2validate[i]
 
-            return batch2validate
+            return ps2validate
 
-        def new_batch(c):
+        def new_plot_setup(c):
 
             with out:
                 clear_output()
@@ -2731,53 +3056,58 @@ class AnalysisGui:
                         '_version': 0,
                         '_orig_name': '',
                         '_new_name': '',
-                        '_tools': {},
-                        '_selected_tool_index': None}
+                        '_plot_types': {},
+                        '_selected_plot_type_index': None}
 
             if self.debug:
-                self.debug_value(124, 'new_batch()', f'upd_dict = {upd_dict}')
+                self.debug_value(124, 'new_plot_setup()',
+                                 f'upd_dict = {upd_dict}')
 
-            set_batch_upd_dict(upd_dict)
-            name_of_batch_job.value = "Name of batch job"
+            set_plot_setup_upd_dict(upd_dict)
+            name_of_plot_setup.value = "Name of plot setup"
             activate_gui('new')
 
-        def update_batch(c):
+        def update_plot_setup(c):
             if self.debug:
-                self.debug_value(125, f'update_batch()',
-                                 f'batch_drop.label = {batch_drop.label}',
-                                 f'batch_drop.value = {batch_drop.value}')
+                self.debug_value(125, f'update_plot_setup()',
+                                 f'plot_setup_drop.label = '
+                                 f'{plot_setup_drop.label}',
+                                 f'plot_setup_drop.value = '
+                                 f'{plot_setup_drop.value}')
 
-            stored_batch = get_valid_batch()
-            batch_version = int(stored_batch.pop('_version', 1))
-            batch_upd = dict(_upd_mode='update',
-                             _version=batch_version,
-                             _tools=stored_batch,
-                             _orig_name=batch_drop.label,
-                             _new_name=batch_drop.label,
-                             _selected_tool_index=None)
-            name_of_batch_job.value = batch_drop.label
-            set_batch_upd_dict(batch_upd)
+            stored_plot_setup = get_valid_plot_setup()
+            plot_setup_version = int(stored_plot_setup.pop('_version', 1))
+            plot_setup_upd = dict(_upd_mode='update',
+                                  _version=plot_setup_version,
+                                  _plot_types=stored_plot_setup,
+                                  _orig_name=plot_setup_drop.label,
+                                  _new_name=plot_setup_drop.label,
+                                  _selected_plot_type_index=None)
+            name_of_plot_setup.value = plot_setup_drop.label
+            set_plot_setup_upd_dict(plot_setup_upd)
             activate_gui('update')
 
-        def save_batch(c):
+        def save_plot_setup(c):
             # Note: Avoid using `get_upd_dict()` here, some keys are
             # integers which is not "json-safe" of some reason.
             # The keys stored in  `upd_dict_log.value` are strings.
             upd_dict = eval(upd_dict_log.value)
-            b_name = upd_dict['_new_name']
+            ps_name = upd_dict['_new_name']
+            old_ps_name = upd_dict['_orig_name']
             grp = group_drop.value
             cache = self._load_cache()
-            batches = cache['_groups'][grp].get('_batches', {})
+            plot_setups = cache['_groups'][grp].get('_plot_setups', {})
 
             if self.debug:
-                self.debug_value(125, 'save_batch()',
+                self.debug_value(125, 'save_plot_setup()',
                                  f'upd_dict = {upd_dict}')
 
-            error_ls = validate_name(b_name)
-            tool_dict, _ = cleanup_tools(upd_dict.get('_tools', {}))
+            error_ls = validate_name(ps_name)
+            plot_type_dict, _ = cleanup_plot_types(
+                upd_dict.get('_plot_types', {}))
 
-            if not tool_dict:
-                error_ls.append('Please choose some tool and variables.')
+            if not plot_type_dict:
+                error_ls.append('Please choose some plot type and variables.')
 
             if error_ls:
                 html_msg(text_ls=error_ls, error=True)
@@ -2785,70 +3115,85 @@ class AnalysisGui:
                 with out:
                     clear_output()
 
-                config = tool_dict
+                config = plot_type_dict
                 config['_version'] = str(int(upd_dict['_version']) + 1)
 
-                old_batch = upd_dict['_orig_name']
-                batches.pop(old_batch, None)
-                batches[b_name] = config
+                plot_setups.pop(old_ps_name, None)
+                plot_setups[ps_name] = config
                 if self.debug:
-                    self.debug_value(20, 'save_batch()', f'batches = {batches}')
+                    self.debug_value(20, 'save_plot_setup()',
+                                     f'plot_setups = {plot_setups}')
 
-                cache['_groups'][grp]['_batches'] = batches
+                cache['_groups'][grp]['_plot_setups'] = plot_setups
                 d = cache['_groups'][grp]
 
-                var_mismatch_dict = self._validate_batch_of_grp(d)
+                var_mismatch_dict = self._validate_plot_setup_of_grp(d)
                 if var_mismatch_dict:
                     cache['_groups'][grp]['_var_mismatch'] = var_mismatch_dict
                 else:
                     cache['_groups'][grp].pop('_var_mismatch', None)
+                    cache['_last_group'] = grp
+                    vars_of_last_group = cache['_groups'][grp]['_group_vars']
+                    cache['_last_station_id'] = vars_of_last_group[-1][-1]
+
+                # cleaning up memory
+                # we only have to fix the case:
+                if old_ps_name:
+                    self._flush_memory(group=grp,
+                                       plot_setup=old_ps_name,
+                                       reports=True)
+
                 self._set_cache(cache_dict=cache)
-                reset_batch_gui(reason='saved_batch', batch_name=b_name)
+                reset_plot_setup_gui(reason='saved_plot_setup',
+                                     plot_setup_name=ps_name)
 
-        def cancel_batch(c):
+        def cancel_plot_setup(c):
             if self.debug:
-                self.debug_value(126, 'cancel_batch()')
-            reset_batch_gui(reason='cancel_batch_upd')
+                self.debug_value(126, 'cancel_plot_setup()')
+            reset_plot_setup_gui(reason='cancel_plot_setup_upd')
 
-        def delete_batch(c):
+        def delete_plot_setup(c):
 
             upd_dict = eval(upd_dict_log.value)
-            orig_tools = batch_drop.value.copy()
-            orig_tools.pop('_version', None)
+            orig_plot_types = plot_setup_drop.value.copy()
+            orig_plot_types.pop('_version', None)
 
-            b_name = upd_dict['_new_name']
+            ps_name = upd_dict['_new_name']
             if self.debug:
-                self.debug_value(127, 'delete_batch()',
-                                 f'b_name = {b_name}',
-                                 f'batch_drop.label = {batch_drop.label}')
+                self.debug_value(127, 'delete_plot_setup()',
+                                 f'ps_name = {ps_name}',
+                                 f'plot_setup_drop.label = '
+                                 f'{plot_setup_drop.label}')
 
             validation_error_ls = []
-            if upd_dict['_orig_name'] != b_name:
+            if upd_dict['_orig_name'] != ps_name:
                 validation_error_ls.append('  - Name changed.')
-            if upd_dict['_tools'] != orig_tools:
-                validation_error_ls.append('  - Change of tools or variables.')
+            if upd_dict['_plot_types'] != orig_plot_types:
+                validation_error_ls.append(
+                    '  - Change of plot types or variables.')
             if validation_error_ls:
                 error_ls = ['Deletion error:',
-                            'To delete a batch job, just choose update '
+                            'To delete a plot setup, just choose update '
                             "and then delete - without changing it\'s content."]
                 error_ls.extend(validation_error_ls)
                 error_ls.append('Suggestion to delete: Press Cancel, '
                                 'Update and Delete')
                 html_msg(text_ls=error_ls, error=True)
                 if self.debug:
-                    self.debug_value(127, f'delete_batch()  --error-- ',
+                    self.debug_value(127, f'delete_plot_setup()  --error-- ',
                                      f'error_ls = {error_ls}',
-                                     f'orig_tools:  {orig_tools}',
-                                     f"upd_dict['_tools']: {upd_dict['_tools']}")
+                                     f'orig_plot_types:  {orig_plot_types}',
+                                     f"upd_dict['_plot_types']: "
+                                     f"{upd_dict['_plot_types']}")
                 return
             else:
                 grp = group_drop.value
                 cache = self._load_cache()
-                batches = cache['_groups'][grp].get('_batches', {})
-                batches.pop(b_name, None)
-                cache['_groups'][grp]['_batches'] = batches
+                plot_setups = cache['_groups'][grp].get('_plot_setups', {})
+                plot_setups.pop(ps_name, None)
+                cache['_groups'][grp]['_plot_setups'] = plot_setups
                 d = cache['_groups'][grp]
-                var_mismatch_dict = self._validate_batch_of_grp(d)
+                var_mismatch_dict = self._validate_plot_setup_of_grp(d)
                 if var_mismatch_dict:
                     cache['_groups'][grp]['_var_mismatch'] = var_mismatch_dict
                 else:
@@ -2857,9 +3202,9 @@ class AnalysisGui:
                 self._set_cache(cache_dict=cache)
 
                 if self.debug:
-                    self.debug_value(127, f'delete_batch() ',
-                                     f'deleted: {b_name}')
-                reset_batch_gui(reason='delete_batch')
+                    self.debug_value(127, f'delete_plot_setup() ',
+                                     f'deleted: {ps_name}')
+                reset_plot_setup_gui(reason='delete_plot_setup')
 
         #        def clear_debug_list(c):
         #            with debug_out:
@@ -2898,8 +3243,9 @@ class AnalysisGui:
                             for w in wd_input.children:
                                 set_widget_state(w, disable, tooltip, show_widget)
                         else:
-                            if disable is not None and 'disabled' in wd_input.keys:
-                                wd_input.disabled = disable
+                            if disable is not None:
+                                if 'disabled' in wd_input.keys:
+                                    wd_input.disabled = disable
                             if tooltip is not None and 'tooltip' in wd_input.keys:
                                 wd_input.tooltip = tooltip
                 elif isinstance(wd_input, list):
@@ -2910,24 +3256,24 @@ class AnalysisGui:
 
             set_widget_state(multi_plot_auto_cb, show_widget=False)
 
-            update_enable_list = [selected_tools]
-            update_disable_list = [group_drop, batch_drop]
-            update_display_list = [name_row, tool_row, var_row, move_up]
+            update_enable_list = [selected_plot_types]
+            update_disable_list = [group_drop, plot_setup_drop]
+            update_display_list = [name_row, plot_type_row, var_row, move_up]
 
-            if any(tool_buttons.children):
-                for tool in tool_buttons.children:
-                    tool.icon = ''
-                    tool.style.button_color = 'LightGreen'
+            if any(plot_type_buttons.children):
+                for p_type in plot_type_buttons.children:
+                    p_type.icon = ''
+                    p_type.style.button_color = 'LightGreen'
             else:
-                init_tool_buttons()
+                init_plot_type_buttons()
 
             if action_id in ['new', 'update']:
                 # update mode
                 init_group_var_buttons(mode='create')
-                # reset_batch_gui update widgets..
+                # reset_plot_setup_gui update widgets..
                 #        set_info_msg()
 
-                name_of_batch_job.observe(batch_name_changed, 'value')
+                name_of_plot_setup.observe(plot_setup_name_changed, 'value')
                 set_widget_state(update_enable_list, disable=False)
                 set_widget_state(update_disable_list, disable=True)
                 set_widget_state(update_display_list, show_widget=True)
@@ -2953,8 +3299,8 @@ class AnalysisGui:
                 else:
                     delete_btn.disabled = True
                     delete_btn.tooltip = 'Delete...'
-                    selected_tools.value = None
-                    selected_tools.options = []
+                    selected_plot_types.value = None
+                    selected_plot_types.options = []
                     selected_vars.value = None
                     selected_vars.options = []
                 if self.debug:
@@ -2972,7 +3318,7 @@ class AnalysisGui:
                     init_group_var_buttons(mode='reset')
 
                 try:
-                    name_of_batch_job.unobserve(batch_name_changed, 'value')
+                    name_of_plot_setup.unobserve(plot_setup_name_changed, 'value')
                 except ValueError:
                     pass
                 set_widget_state(update_enable_list, disable=True)
@@ -2980,27 +3326,34 @@ class AnalysisGui:
                 set_widget_state(update_display_list, show_widget=False)
 
                 new_btn.disabled = False
-                new_btn.tooltip = 'New batch job...'
-                if not batch_drop.value or isinstance(batch_drop.value,
-                                                      int):
+                new_btn.tooltip = 'New plot setup...'
+                if not plot_setup_drop.value or isinstance(plot_setup_drop.value,
+                                                           int):
                     upd_btn.disabled = True
-                    upd_btn.tooltip = 'No batch job to update...'
+                    upd_btn.tooltip = 'No plot setup to update...'
                 else:
                     upd_btn.disabled = False
-                    upd_btn.tooltip = 'Update batch job...'
+                    upd_btn.tooltip = 'Update plot setup...'
 
                 set_widget_state(save_buttons, disable=True,
                                  tooltip='Enabled in update mode...')
 
         st_df = self.stations_df
 
-        # Static lookup dictionary for tools
-        tool_codes = ['split_plot', 'multi_plot', 'corr_plot',
-                      'corr_table', 'statistics']
-        tool_names = ['Split-plot', 'Multi-plot', 'Correlation plot (2 vars)',
-                      'Correlation table', 'Numerical Statistics']
-        tool2name_dict = dict(zip(tool_codes, tool_names))
-        name2tool_dict = {v: k for k, v in tool2name_dict.items()}
+        # Static lookup dictionary for plot types
+        if self.debug:
+            plot_type_codes = ['split_plot', 'multi_plot', 'corr_plot',
+                               'corr_table', 'statistics']
+            plot_type_names = ['Split-plot', 'Multi-plot',
+                               'Correlation plot (2 vars)',
+                               'Correlation table', 'Numerical Statistics']
+        else:
+            plot_type_codes = ['split_plot', 'multi_plot', 'corr_plot']
+            plot_type_names = ['Split-plot', 'Multi-plot',
+                               'Correlation plot']
+
+        plot_type2name_dict = dict(zip(plot_type_codes, plot_type_names))
+        name2plot_type_dict = {v: k for k, v in plot_type2name_dict.items()}
 
         # Widgets
         out = wd.Output()
@@ -3029,7 +3382,7 @@ class AnalysisGui:
         # - var_translation_dict
         #   maps button names to a variable of the group
         # - upd_dict_log (if debug-mode this is displayed in the user guide)
-        #   keeps track on updates of the batch job
+        #   keeps track on updates of the plot setup
         var_to_unit_dict = wd.Textarea(value='{}', disabled=True)
         var_translation_dict = wd.Textarea(value='{}', disabled=True)
         upd_dict_log = wd.Textarea(value='{}',
@@ -3044,16 +3397,16 @@ class AnalysisGui:
         if not group_drop.options:
             display(out)
             if self.debug:
-                self.debug_value(-12, '_edit_batch_jobs()  *** init ***',
+                self.debug_value(-12, '_menu_plot_setups()  *** init ***',
                                  '--- There are no groups. ---')
-            html_msg(text_ls=['First you need to create a group of ',
-                              'variables using the "Group menu".'])
-            return wd.VBox([out])
+            msg = wd.HTML('<h3>First you need to create a group of '
+                          'variables using the <b><i>Group menu</i></b></h3')
+            return display(msg)
 
         group_drop.observe(changed_group_drop, names='value')
-        batch_drop = wd.Dropdown(layout=drop_layout,
-                                 description_tooltip='Name of batch job')
-        batch_drop.observe(changed_batch_drop, names='value')
+        plot_setup_drop = wd.Dropdown(layout=drop_layout,
+                                      description_tooltip='Name of plot setup')
+        plot_setup_drop.observe(changed_plot_setup_drop, names='value')
 
         group_vars = wd.HTML(layout=var_txt_layout,
                              value='Variables: ',
@@ -3062,7 +3415,7 @@ class AnalysisGui:
                               titles=(group_vars.value, '0'),
                               selected_index=None,
                               layout=full_layout)
-        row_list = [wd.HBox([group_drop, batch_drop, g_vars],
+        row_list = [wd.HBox([group_drop, plot_setup_drop, g_vars],
                             layout=full_layout)]
 
         # 2:nd row update-buttons
@@ -3070,28 +3423,28 @@ class AnalysisGui:
                             icon='plus',
                             button_style='primary',
                             layout=wd.Layout(width='100px'))
-        new_btn.on_click(new_batch)
+        new_btn.on_click(new_plot_setup)
 
         upd_btn = wd.Button(description='Update',
                             icon='pen',
                             button_style='info',
                             layout=wd.Layout(width='100px'))
-        upd_btn.on_click(update_batch)
+        upd_btn.on_click(update_plot_setup)
         save_btn = wd.Button(description='Save',
                              icon='save',
                              button_style='success',
                              layout=wd.Layout(width='100px'))
-        save_btn.on_click(save_batch)
+        save_btn.on_click(save_plot_setup)
         cancel_btn = wd.Button(description='Cancel',
                                icon='ban',
                                button_style='info',
                                layout=wd.Layout(width='100px'))
-        cancel_btn.on_click(cancel_batch)
+        cancel_btn.on_click(cancel_plot_setup)
         delete_btn = wd.Button(description='Delete',
                                icon='trash',
                                button_style='danger',
                                layout=wd.Layout(width='100px'))
-        delete_btn.on_click(delete_batch)
+        delete_btn.on_click(delete_plot_setup)
         user_guide_btn = wd.Button(description='User guide',
                                    disabled=False,
                                    icon='fa-info-circle',
@@ -3125,21 +3478,21 @@ class AnalysisGui:
 
         row_list.append(user_guide_container)
 
-        # 4:th row. update section: Batch name
-        name_label = wd.HTML(value='<b><i>Batch name: </i></b>',
+        # 4:th row. update section: plot setup
+        name_label = wd.HTML(value='<b><i>Name of plot setup: </i></b>',
                              layout=wd.Layout(min_width='125px'))
-        name_of_batch_job = wd.Text(value='Name of batch job',
-                                    layout=wd.Layout(min_width='200px'))
+        name_of_plot_setup = wd.Text(value='Name of plot setup',
+                                     layout=wd.Layout(min_width='200px'))
 
-        name_row = wd.HBox([name_label, name_of_batch_job])
+        name_row = wd.HBox([name_label, name_of_plot_setup])
         row_list.append(name_row)
 
         # 5:th row. update section: Tools
-        tool_label = wd.HTML('<b><i>Available tools: </i></b>',
-                             layout=label_layout)
-        tool_buttons = wd.HBox(layout=flex_layout)
-        tool_row = wd.HBox([tool_label, tool_buttons])
-        row_list.append(tool_row)
+        plot_type_label = wd.HTML('<b><i>Available plot types: </i></b>',
+                                  layout=label_layout)
+        plot_type_buttons = wd.HBox(layout=flex_layout)
+        plot_type_row = wd.HBox([plot_type_label, plot_type_buttons])
+        row_list.append(plot_type_row)
 
         # 6:th row. update section: Vars
         avail_variables_label = wd.HTML('<b><i>Available variables: </i></b>',
@@ -3151,20 +3504,21 @@ class AnalysisGui:
         # 7:rd row. update section: Selections
         selection_label = wd.HTML('<b><i>Current setup: </i></b>',
                                   layout=label_layout)
-        selected_tools_tooltip = "The tools are listed in order of execution." \
-                                 "\nUse the Up-button (displayed in " \
-                                 "update-mode)" \
-                                 "\nto change the order of " \
-                                 "\nexecution."
-        selected_tools = wd.Select(disabled=False,
-                                   layout=wd.Layout(max_width='150px'),
-                                   tooltip=selected_tools_tooltip)
-        selected_tools.observe(changed_selected_tool, names='value')
+        selected_plot_types_tooltip = "The plot types are listed in order " \
+                                      "of execution." \
+                                      "\nUse the Up-button (displayed in " \
+                                      "update-mode)" \
+                                      "\nto change the order of " \
+                                      "\nexecution."
+        selected_plot_types = wd.Select(disabled=False,
+                                        layout=wd.Layout(max_width='150px'),
+                                        tooltip=selected_plot_types_tooltip)
+        selected_plot_types.observe(changed_selected_plot_type, names='value')
 
         move_up = wd.Button(description='Up',
                             disabled=False,
                             icon='arrow-up',
-                            tooltip='Move selected tool...',
+                            tooltip='Move selected plot type...',
                             layout=wd.Layout(width='60px'))
         move_up.on_click(move_selected)
         selected_vars = wd.Select(disabled=True,
@@ -3173,11 +3527,11 @@ class AnalysisGui:
         left_selection_box = wd.VBox([selection_label, move_up],
                                      layout=label_layout)
         row_list.append(wd.HBox([left_selection_box,
-                                 selected_tools,
+                                 selected_plot_types,
                                  selected_vars]))
 
         # 8:rd row. info, special settings
-        # Info regarding selected tool
+        # Info regarding selected plot type
         info_guide = wd.HTMLMath(layout=info_guide_layout)
 
         multi_plot_auto_cb = wd.Checkbox(description='Choose axis according to '
@@ -3193,17 +3547,19 @@ class AnalysisGui:
         set_group_value(group=_group_name)
 
         row_list.append(out)
-        batch_widget = wd.VBox(row_list)
+        plot_setup_widget = wd.VBox(row_list)
 
-        display(batch_widget)
+        display(plot_setup_widget)
 
-    def _default_settings(self):
+    def _menu_settings(self):
         if self.debug:
-            self.debug_value(-10, '_default_settings   *** start ***')
+            self.debug_value(-10, '_menu_settings   *** start ***')
 
         def init_general_settings():
             # set general values
             settings = self._load_user_settings()
+            stored_settings.value = str(settings)
+
             run_configs = settings.get('run_configs', {})
             latex_kwargs = settings.get('latex_kwargs', {})
             split_p_kwargs = settings.get('split_plot_kwargs', {})
@@ -3309,7 +3665,6 @@ class AnalysisGui:
                 settings_changed(c)
 
         def save_general_settings(c):
-
             upd_dict = {'run_configs': {'auto_run': auto_run_cb.value,
                                         'start_date': time_start_date.value,
                                         'end_date': time_end_date.value,
@@ -3353,8 +3708,31 @@ class AnalysisGui:
                              'subtitle_size': corr_t_subtitle_size.value},
                         'statistics_kwargs': {}
                         }
+            new_run_setting = upd_dict.get('run_configs', {})
+            new_report_settings = [upd_dict.get('latex_kwargs', {}),
+                                   upd_dict.get('split_plot_kwargs', {}),
+                                   upd_dict.get('multi_plot_kwargs', {}),
+                                   upd_dict.get('corr_plot_kwargs', {}),
+                                   upd_dict.get('corr_table_kwargs', {}),
+                                   upd_dict.get('statistics_kwargs', {})]
 
-            self.report_writer = None
+            settings = eval(stored_settings.value)
+            if not isinstance(settings, dict):
+                settings = dict()
+            stored_run_setting = settings.get('run_configs', {})
+            stored_report_settings = [settings.get('latex_kwargs', {}),
+                                      settings.get('split_plot_kwargs', {}),
+                                      settings.get('multi_plot_kwargs', {}),
+                                      settings.get('corr_plot_kwargs', {}),
+                                      settings.get('corr_table_kwargs', {}),
+                                      settings.get('statistics_kwargs', {})]
+
+            # cleaning up memory
+            if new_run_setting != stored_run_setting:
+                self._flush_memory(group=None, timeseries=True)
+            if new_report_settings != stored_report_settings:
+                self._flush_memory(group=None, reports=True)
+
             json_handler.update(data_piece=upd_dict,
                                 path_to_json_file=self.user_config_file)
             init_general_settings()
@@ -3403,6 +3781,7 @@ class AnalysisGui:
                         "diseases/what-is-color-blindness", "color deficiencies")
         color_ref = f'the color scale can be changed in order to ' \
                     f'ease variants of <b><i>{col_href}</i></b>.'
+        plotly_link_href = link("https://plotly.com/python/", "Plotly")
         plotly_templ_href = link("https://plotly.com/python/templates/",
                                  "Plotly template")
         plotly_templ_ref = f'The background color can be changed by switching ' \
@@ -3432,6 +3811,7 @@ class AnalysisGui:
                                     layout=label_layout)
 
         # widgets
+        stored_settings = wd.Textarea(value='{}')
         cb_layout = wd.Layout(width='20px')
         int_drop_layout = wd.Layout(width='60px')
         size_drop_layout = wd.Layout(width='125px')
@@ -3455,58 +3835,51 @@ class AnalysisGui:
         observe_pos_ls = []
         observe_height_width_ls = []
 
-        txt = '<h3>Default settings</h3>' \
-              '<span>Here you can modify certain settings such as: ' \
-              'what data to use, visualizations of different plots ' \
-              'and texts. <br>' \
-              '<b><i>Please note</i></b> that the <b>Save</b>-button below is ' \
-              'enabled when a value is changed and the user press ' \
-              '<it><b>&lttab&gt</b> or <b>clicks outside</b> the widget ' \
-              'holding the value</it>.<br>' \
-              'Also, if you find problems related to any of these settings, ' \
-              'do not hesitate to report this according to the description in ' \
-              'the <it>Help</it> menu.</span>'
-        txt = AnalysisGui._set_css(text=txt,
-                                   css_type='line')
+        txt = '<h3>Default settings</h3>'
+        txt2 = '<span>Here you can modify certain ' \
+               'settings such as: ' \
+               '<i>what data to use, visualizations of different ' \
+               'plots ' \
+               'and texts</i>. All plots available are based on the ' \
+               f'python package <b><i>{plotly_link_href}</i></b>.' \
+               '<br>' \
+               '<b><i>Please note</i></b> that the <b>Save</b>-button below is ' \
+               'enabled when a value is changed and the user press ' \
+               '<it><b>&lttab&gt</b> or <b>clicks outside</b> the widget ' \
+               'holding the value</it>.<br>' \
+               'Also, if you find problems related to any of these settings, ' \
+               'do not hesitate to report this according to the description in ' \
+               'the <it>Help</it> menu.</span>'
+        txt += AnalysisGui._set_css(text=txt2, css_type='tight')
         def_settings_guide = wd.HTML(value=txt)
 
-        run_settings_guide = wd.HTML(value='<span><b>Guide:</b><br>'
-                                           'When the user start the '
-                                           'application, the default behaviour '
-                                           'is to execute all batch jobs of '
-                                           'the last edited group of variables, '
-                                           'to change this switch of '
-                                           '<b><i>Auto-run</i></b> below.<br> '
-                                           'Plots and statistics outputs are '
-                                           'based on values measured '
-                                           'between the <i>start</i> '
-                                           'and the <i>end dates</i>, '
-                                           'displayed in the <b>Plot</b> '
-                                           'menu. '
-                                           'Of course, the dates displayed in '
-                                           'the plot menu can be changed '
-                                           'for each run. '
-                                           'Here, you can modify the '
-                                           '<i>default method on how to '
-                                           'calculate these dates.</i> '
-                                           '</span><br> '
-                                           'The number at <b><i>End date</b></i> '
-                                           'is the number of days '
-                                           '<i>before today</i>, '
-                                           'while <b><i>Start date</i></b> is '
-                                           'the number of days <i>before the '
-                                           'end date</i>. '
-                                           '<span>The <b><i>Fetch date</i></b> '
-                                           'denotes the number of days '
-                                           '<i>before the start date</i>, it '
-                                           'is a feature used to <i>speed up '
-                                           're-calculations</i>. In case the '
-                                           'user chose to change the report '
-                                           'dates in a second run, the data '
-                                           'between the fetch date and the end '
-                                           'date of the first run will already '
-                                           'be in RAM. </span>'
-                                     )
+        txt_guide = '<h4>Guide:</h4>'
+        txt2 = '<span>When the user start the application, the default ' \
+               'behaviour is to execute all plot setups of the last edited ' \
+               'group of variables, to change this switch of ' \
+               '<b><i>Auto-run</i></b> below.<br> '
+        txt3 = 'Plots and statistics outputs are based on values measured ' \
+               'between the <i>start</i> and the <i>end dates</i>, displayed ' \
+               'in the <b>Plot</b> menu. Of course, the dates displayed in ' \
+               'the plot menu can be changed for each run. ' \
+               'Here, you can modify the ' \
+               '<i>default method on how to calculate these dates.</i> ' \
+               '</span><br> '
+        txt4 = 'The number at <b><i>End date</b></i> ' \
+               'is the number of days <i>before today</i>, ' \
+               'while <b><i>Start date</i></b> is the number of days ' \
+               '<i>before the end date</i>. '
+        txt5 = '<span>The <b><i>Fetch date</i></b> ' \
+               'denotes the number of days <i>before the start date</i>, it ' \
+               'is a feature used to <i>speed up re-calculations</i>. ' \
+               'In case the user chose to change the report dates in a ' \
+               'second run, then data between the fetch date and the end date ' \
+               'of the first run will already be in memory.</span>'
+        txt_guide += AnalysisGui._set_css(text=txt2, css_type='tight')
+        txt_guide += AnalysisGui._set_css(text=txt3, css_type='tight')
+        txt_guide += AnalysisGui._set_css(text=txt4, css_type='tight')
+        txt_guide += AnalysisGui._set_css(text=txt5, css_type='tight')
+        run_settings_guide = wd.HTML(value=txt_guide)
         auto_run_label = wd.HTML(value='<b>Auto-run</b>')
         auto_run_cb = wd.Checkbox(value=True,
                                   disabled=False,
@@ -3601,13 +3974,16 @@ class AnalysisGui:
         split_plot_guide = wd.HTML(value='<span><b>Guide:</b><br>'
                                          'In a <b><i>Split-plot</i></b> you can '
                                          'visualize several variables '
-                                         'in interconnected individual plots. '
-                                         'The plots are connected using a '
-                                         '<i>zoom-slider</i>. The value of '
+                                         'in individual plots. '
+                                         'These plots are interconnected using a '
+                                         '<i>zoom-slider</i> for the '
+                                         '<i>time</i>-axis. '
                                          '<b><i>Split-plot grouping</i></b> is '
-                                         'the number of graphs '
+                                         'the number of plots '
                                          'displayed before the '
-                                         'first zoom-slider.<br>'
+                                         'first zoom-slider, or more '
+                                         'accurately the minimal number of '
+                                         'plots before a zoom-slider.<br>'
                                          f'{plotly_templ_ref}'
                                          f'{height_or_width_min}'
                                          'These values will be applied for each '
@@ -3911,9 +4287,9 @@ class AnalysisGui:
 
         display(settings_widget)
 
-    def _group_menu(self):
+    def _menu_group(self):
         if self.debug:
-            self.debug_value(-12, '_group_menu()   *** start ***')
+            self.debug_value(-12, '_menu_group()   *** start ***')
 
         def update_cache(group_dict):
             if self.debug:
@@ -3938,7 +4314,7 @@ class AnalysisGui:
             #          '_group_vars': [['SWC_1', 'ETC NRT Meteo', 'Hyltemossa'],
             #                          ['SWC_2', 'ETC NRT Meteo', 'Hyltemossa'],
             #                          ['SWC_3', 'ETC NRT Meteo', 'Hyltemossa']],
-            #          '_batches': {
+            #          '_plot_setups': {
             #              'flux stat': {
             #                  '0': {
             #                      'split_plot': [['SWC_1', 'ETC NRT Meteo',
@@ -3955,14 +4331,15 @@ class AnalysisGui:
             #                          ['NEE','ETC NRT Fluxes', 'Hyltemossa'],
             #                          ['NEE_UNCLEANED','ETC NRT Fluxes',
             #                           'Hyltemossa']],
-            #          '_batches': {
-            #              'batch with error': {
+            #          '_plot_setups': {
+            #              'plot_setup with error': {
             #                  '0': {
-            #                      'split_plot': [['SWC_1', 'ETC NRT Meteo', 'Hyltemossa'],
+            #                      'split_plot': [['SWC_1', 'ETC NRT Meteo',
+            #                                      'Hyltemossa'],
             #                                     ['SWC_4', 'ETC NRT Meteo',
             #                                      'Hyltemossa']]}}},
             #          '_var_mismatch': {
-            #              'batch with error': {
+            #              'plot_setup with error': {
             #                  'split_plot': [['SWC_4', 'ETC NRT Meteo',
             #                                  'Hyltemossa']]}}}}}
 
@@ -3975,16 +4352,17 @@ class AnalysisGui:
             var_ls = group_dict['_var_list']
             old_grp = ''
             cache = self._load_cache()
-            add_batch = False
+            add_plot_setup = False
 
             if upd_mode == 'new':
                 cache['_groups'][grp] = {'_group_vars': var_ls}
                 if self.debug:
                     self.debug_value(-13, 'update_cache()',
                                      f'group_dict = {grp}', len(grp) > 2,
-                                     grp[-2:] == '+b')
-                if len(grp) > 2 and grp[-2:] == '+b':
-                    cache['_groups'][grp]['_batches'] = demo_batch(var_ls)
+                                     grp[-2:] == '+p')
+                if len(grp) > 2 and grp[-2:] == '+p':
+                    cache['_groups'][grp]['_plot_setups'] = demo_plot_setup(
+                        var_ls)
 
                 # update "last"-flags
                 last_var_tuple = var_ls[-1]
@@ -3994,9 +4372,10 @@ class AnalysisGui:
                 if '_saved_group_name' in group_dict.keys():
                     old_grp = group_dict['_saved_group_name']
                     if grp != old_grp:
-                        batches = cache['_groups'][old_grp].get('_batches', {})
+                        plot_setups = cache['_groups'][old_grp].get(
+                            '_plot_setups', {})
                         cache['_groups'].pop(old_grp)
-                        cache['_groups'][grp] = {'_batches': batches}
+                        cache['_groups'][grp] = {'_plot_setups': plot_setups}
 
                 cache['_groups'][grp]['_group_vars'] = var_ls
                 # update "last"-flags
@@ -4019,29 +4398,35 @@ class AnalysisGui:
                             cache['_last_group'] = ''
                             cache['_last_station_id'] = ''
 
-            # validate_batches
-            if upd_mode == 'update' and '_batches' in \
+            # validate_plot_setups
+            if upd_mode == 'update' and '_plot_setups' in \
                     cache['_groups'][grp].keys():
                 d = cache['_groups'][grp]
-                var_mismatch_dict = self._validate_batch_of_grp(d)
+                var_mismatch_dict = self._validate_plot_setup_of_grp(d)
                 if var_mismatch_dict:
                     cache['_groups'][grp]['_var_mismatch'] = var_mismatch_dict
                 else:
                     cache['_groups'][grp].pop('_var_mismatch', None)
 
-            # Remove timeseries from local storage
-            self._flush_store(grp)
+            # Remove timeseries and reports from local memory
+            self._flush_memory(group=grp,
+                               timeseries=True)
             if old_grp:
-                self._flush_store(old_grp)
+                self._flush_memory(group=old_grp,
+                                   timeseries=True)
             self._set_cache(cache_dict=cache)
 
-        def demo_batch(var_ls) -> dict:
+        def demo_plot_setup(var_ls) -> dict:
             def var2unit(var):
                 var2unit_dict = self._load_app_configs().get('_var2unit_map', {})
                 if var[0] not in var2unit_dict.keys():
                     pid = st_df.loc[(st_df.id == var[-1]) & (
                             st_df.specLabel == var[1])].dobj.values[0]
-                    meta = icos_data.StationData.icos_pid2meta(pid)
+                    try:
+                        meta = icos_data.StationData.icos_pid2meta(pid)
+                    except:
+                        set_pid_error(pid, var)
+                        return 'error'
                     var_unit_list = meta['varUnitList']
                     var2unit_dict.update({vu[0]: vu[1] for vu in var_unit_list})
                     app_configs = self._load_app_configs()
@@ -4049,46 +4434,54 @@ class AnalysisGui:
                     self._set_app_configs(app_dict=app_configs)
                 return var2unit_dict[var[0]]
 
-            b_name = 'Batch example'
-            split_ls = var_ls[:min(5, len(var_ls))]
-            tool = 0
-            batch_dict = {b_name: {str(tool): {"split_plot": split_ls}}}
-            if len(var_ls) >= 2:
-                corr_ls = var_ls[:2]
-                tool += 1
-                batch_dict[b_name][str(tool)] = {'corr_plot': corr_ls}
-                if len(var_ls) >= 4:
-                    corr_ls = var_ls[2:4]
-                    tool += 1
-                    batch_dict[b_name][str(tool)] = {'corr_plot': corr_ls}
-            multi_dict = {}
+            ps_name = 'Plot example'
+            v_ls = copy.deepcopy(var_ls)
             multi_dict = {}
             for i in range(len(var_ls)):
                 v = var_ls[i]
                 u = var2unit(v)
+                if u == 'error':
+                    v_ls.pop(i)
+                    continue
                 if u in multi_dict.keys():
                     multi_dict[u].append(v)
                 else:
                     multi_dict[u] = [v]
 
             multi_list = []
+            if self.debug:
+                self.debug_value(888, 'demo_plot_setup()',
+                                 f'var_ls = {var_ls}',
+                                 f'multi_dict = {multi_dict}')
             for k, v_ls in multi_dict.items():
                 if len(v_ls) > 1:
                     multi_list.append([k, v_ls])
                 if len(multi_list) == 2:
                     break
 
-            if len(multi_list) < 2 <= len(multi_dict):
+            if len(multi_list) < 2:
                 for k, v_ls in multi_dict.items():
                     if [k, v_ls] not in multi_list:
                         multi_list.append([k, v_ls])
                     if len(multi_list) == 2:
                         break
+            p_type = 0
+            plot_setup_dict = {ps_name: {str(p_type): {'multi_plot': multi_list}}}
 
-            tool += 1
-            batch_dict[b_name][str(tool)] = {'multi_plot': multi_list}
-            batch_dict[b_name]['_version'] = '1'
-            return batch_dict
+            split_ls = var_ls[:min(5, len(var_ls))]
+            p_type += 1
+            plot_setup_dict[ps_name][str(p_type)] = {"split_plot": split_ls}
+            if len(var_ls) >= 2:
+                corr_ls = var_ls[:2]
+                p_type += 1
+                plot_setup_dict[ps_name][str(p_type)] = {'corr_plot': corr_ls}
+                if len(var_ls) >= 4:
+                    corr_ls = var_ls[2:4]
+                    p_type += 1
+                    plot_setup_dict[ps_name][str(p_type)] = {'corr_plot': corr_ls}
+
+            plot_setup_dict[ps_name]['_version'] = '1'
+            return plot_setup_dict
 
         def init():
 
@@ -4131,36 +4524,77 @@ class AnalysisGui:
                 station_drop.options = station_ls
                 station_drop.value = stn
 
-        def set_spec_drop(change):
-
+        def set_prod_drop(change):
             cache = self._load_cache()
             if station_drop.value == 'dummy':
-                spec_ls = ['Files...']
+                prod_ls = ['Files...']
                 dobj_ls = ['dummy']
             else:
                 df = st_df.loc[st_df.id == station_drop.value]
-                spec_ls = list(df.specLabel)
-                dobj_ls = list(df.dobj)
+                p_ls = list(df.specLabel)
+                d_ls = list(df.dobj)
+                prod_ls = []
+                dobj_ls = []
+                err_obj_ls = []
+                for i in range(len(p_ls)):
+                    if p_ls[i] not in prod_ls:
+                        prod_ls.append(p_ls[i])
+                        dobj_ls.append(d_ls[i])
+                    else:
+                        err_obj_ls.append((p_ls[i], d_ls[i]))
 
-            spec_drop_ls = list(zip(spec_ls, dobj_ls))
-            spec_drop_ls.sort(key=lambda v: v[0].lower())
-            product_drop.options = spec_drop_ls
+                if err_obj_ls:
+                    emph_1 = '<font color="DarkBlue"><i>'
+                    emph_2 = '</i></font>'
+                    if len(err_obj_ls) > 1:
+                        err_ls = [f'{emph_1}{e[0]}{emph_2} with url: '
+                                  f'<a href="{e[1]}" target="_blank">'
+                                  f'{emph_1}{e[1]}{emph_2}</a>'
+                                  for e in err_obj_ls]
+                        er_str = "</li><li>".join(err_ls)
+                        txt1 = f'These data objects are old and should be ' \
+                               f'deprecated: '
+                        txt2 = f'<ol><li>{er_str}</li></ol>'
+
+                    else:
+                        file, pid = err_obj_ls[0]
+                        url = f'<a href="{pid}" target="_blank">{pid}</a>'
+                        txt1 = f'The data object ' \
+                               f'{emph_1}{file}{emph_2} ' \
+                               f'with url {emph_1}{url}{emph_2}'
+                        txt2 = f'is old and should be deprecated.'
+
+                    error_ls = ['ACTION', f'Data deprecation error at the '
+                                          f'station '
+                                          f'{emph_1}{station_drop.label}{emph_2}',
+                                'There should only be one data object per file.',
+                                txt1, txt2]
+                    self.set_persistent_error(error_ls=error_ls)
+
+            if self.debug:
+                self.debug_value(-1114, 'set_prod_drop()',
+                                 f'prod_ls = {prod_ls}',
+                                 f'dobj_ls = {dobj_ls}')
+
+            prod_drop_ls = list(zip(prod_ls, dobj_ls))
+            prod_drop_ls.sort(key=lambda v: v[0].lower())
+            product_drop.options = prod_drop_ls
 
             if change == 'new':
                 product_drop.value = product_drop.options[0][1]
             elif change == 'update':
                 grp = group_drop.value
-                last_spec_in_var_list = cache['_groups'][grp]['_group_vars'][
-                    -1][1]
-                product_drop.value = [y[1] for y in spec_drop_ls if
-                                      y[0] == last_spec_in_var_list].pop()
+                last_var = cache['_groups'][grp]['_group_vars'][-1]
+                last_prod = last_var[1]
+                product_drop.value = [y[1] for y in prod_drop_ls if
+                                      y[0] == last_prod].pop()
             elif isinstance(change, dict) and change['new']:
                 grp = change['new']
                 try:
-                    last_spec_in_var_list = cache['_groups'][grp][
-                        '_group_vars'][-1][1]
-                    product_drop.value = [y[1] for y in spec_drop_ls if
-                                          y[0] == last_spec_in_var_list].pop()
+                    last_var = cache['_groups'][grp]['_group_vars'][-1]
+                    last_prod = last_var[1]
+                    product_drop.value = [y[1] for y in prod_drop_ls if
+                                          y[0] == last_prod].pop()
                 except:
                     pass
             else:
@@ -4171,20 +4605,101 @@ class AnalysisGui:
 
         def set_var_drop(change):
             if self.debug:
-                self.debug_value(-15, 'set_var_drop()')
+                self.debug_value(-15, 'set_var_drop()',
+                                 f'product_drop.options = '
+                                 f'{product_drop.options}')
 
             # Menu of variables to show some info of a variable
             if product_drop.value == 'dummy':
-                var_drop.options = [('Variables...', 'dummy')]
+                var_drop.options = [('Select a station...', 'dummy')]
                 var_drop.value = var_drop.options[0][1]
             else:
                 pid = product_drop.value
-                var_dict = icos_data.StationData.icos_pid2meta(pid)['columns']
+                try:
+                    var_dict = icos_data.StationData.icos_pid2meta(pid)['columns']
+                except:
+                    error_prod = product_drop.label
+                    if 'Error: ' not in error_prod:
+                        drop_ls = list(product_drop.options)
+                        prod_ls = [p[0] for p in drop_ls]
+                        dobj_ls = [p[1] for p in drop_ls]
+                        ind = prod_ls.index(error_prod)
+                        prod_ls[ind] = f'Error: {error_prod}'
+                        prod_drop_ls = list(zip(prod_ls, dobj_ls))
+                        product_drop.unobserve(set_var_drop)
+                        product_drop.options = prod_drop_ls
+                        product_drop.value = prod_drop_ls[ind][1]
+                        product_drop.observe(set_var_drop, names='value')
+                        set_pid_error()
+                    var_drop.options = [('Error in data object!', 'dummy')]
+                    var_drop.value = var_drop.options[0][1]
+                    return
+
                 var_ls = sorted([key for key in var_dict.keys() if key not in
                                  ['TIMESTAMP', 'TIMESTAMP_END']])
                 var_info = [var_dict[key] for key in var_ls]
                 var_drop.options = list(zip(var_ls, var_info))
                 var_drop.value = var_drop.options[0][1]
+
+        def set_pid_error(pid: str = None, var: tuple = None):
+
+            if self.debug:
+                self.debug_value(-88, 'set_pid_error() '
+                                      f'pid = {pid}',
+                                 f'var = {var}',
+                                 f'product_drop.options = '
+                                 f'{product_drop.options}')
+            if not isinstance(pid, tuple):
+
+                prod_drop_ls = list(product_drop.options)
+                er_prod_ls = []
+                er_pid_ls = []
+                for p in prod_drop_ls:
+                    if 'Error' in p[0]:
+                        p0 = p[0][7:]
+                        p1 = f'<a href="{p[1]}" target="_blank">{p[1]}</a>'
+                        if p[0] == product_drop.label:
+                            persistent_prod = p0
+                            persistent_url = p1
+                        er_prod_ls.append(p0)
+                        er_pid_ls.append(p1)
+                prod = ', '.join(er_prod_ls)
+                if len(er_prod_ls) > 1:
+                    pid = '<ol><li>'
+                    pid += '</li><li>'.join(er_pid_ls)
+                    pid += '</li></ol>'
+                    s = 's'
+                else:
+                    s = ''
+                st = station_drop.label
+            elif isinstance(var, tuple):
+                prod = var[1]
+                persistent_prod = prod
+                st = var[2]
+                pid = f'<a href="{pid}" target="_blank">{pid}</a>'
+                persistent_url = pid
+                s = ''
+            else:
+                return
+            error_ls1 = ['ACTION',
+                         f'Severe Data Error at the station <font '
+                         f'color="DarkBlue">{st}</font>',
+                         f'Could not access the data object of: '
+                         f'<font color="DarkBlue"><i>{persistent_prod}'
+                         f'</i></font>',
+                         f'Landing page of the data object: '
+                         f'<font color="DarkBlue">{persistent_url}</font>']
+            error_ls2 = ['ACTION',
+                         f'Severe Data Error at the station <font '
+                         f'color="DarkBlue">{st}</font>',
+                         f'Could not access the data object{s} of: '
+                         f'<font color="DarkBlue"><i>{prod}.</i></font>',
+                         f'Landing page{s} of the data object{s}: '
+                         f'<font color="DarkBlue">{pid}</font>',
+                         f'The error will be stored in the error widget, '
+                         f'below the main menu.']
+            self.set_persistent_error(error_ls=error_ls1)
+            set_info_msg(error_ls=error_ls2)
 
         def set_var_info_text(change):
             if self.debug:
@@ -4195,6 +4710,7 @@ class AnalysisGui:
             if isinstance(change, dict):
                 if isinstance(change['owner'], wd.Dropdown):
                     if var_drop.value == 'dummy':
+                        var_info_text.value = ''
                         return
                     else:
                         var_name = change['owner'].label
@@ -4214,6 +4730,7 @@ class AnalysisGui:
                                          f' - change["owner"].description = '
                                          f'{change["owner"].description}')
                 else:
+                    var_info_text.value = ''
                     return
 
             else:
@@ -4275,13 +4792,17 @@ class AnalysisGui:
                 return 'first_run'
             return ''
 
-        def get_group_var_text(upd_mode):
+        def get_group_var_text(upd_mode: bool,
+                               var_list: list = None):
             if self.debug:
                 self.debug_value(-18, 'get_group_var_text() ',
                                  f' - upd_mode  = {upd_mode}')
             if upd_mode:
-                upd_dict = get_temp_dict()
-                var_tuples = copy.deepcopy(upd_dict['_var_list'])
+                if not var_list:
+                    upd_dict = get_temp_dict()
+                    var_tuples = copy.deepcopy(upd_dict['_var_list'])
+                else:
+                    var_tuples = copy.deepcopy(var_list)
                 output_code = 'var_cont_upd'
             else:
                 grp = group_drop.value
@@ -4323,6 +4844,19 @@ class AnalysisGui:
                 self.debug_value(-21, f'set_var_checkboxes()')
 
             if station_drop.value == 'dummy' or product_drop.value == 'dummy':
+                var_label.value = ''
+                var_cbs_box.children = []
+                return
+            elif 'Error' in product_drop.label:
+                warning_emoji = '\u26a0\ufe0f'
+                error_color = self.widget_style_colors['danger:active']
+
+                err_msg = f'<span style="color:{error_color}">' \
+                          f'<h4>{warning_emoji}{warning_emoji}' \
+                          f'<b><i>Data error in product!! </i></b> ' \
+                          f' See the User guide for details.  </h4></span>'
+                var_label.value = err_msg
+                var_cbs_box.children = []
                 return
 
             station = station_drop.value
@@ -4399,14 +4933,11 @@ class AnalysisGui:
             set_var_info_text(cb)
 
             if cb.name == 'value':
-
                 var_name = str(cb.owner.description)
-
                 upd_ls = [var_name, product_drop.label, station_drop.value]
 
-                # Load group dict 
+                # Load group dict
                 upd_group_dict = get_temp_dict()
-
                 if cb.owner.value:
                     # add var to group dict
                     upd_group_dict['_var_list'].append(upd_ls)
@@ -4420,10 +4951,14 @@ class AnalysisGui:
                     upd_group_dict['_var_list'].remove(upd_ls)
 
                 set_temp_dict(upd_group_dict)
-            set_upd_variables()
+                set_upd_variables()
 
-        def set_upd_variables():
-            group_vars_upd.value = get_group_var_text(upd_mode=True)
+        def set_upd_variables(mode=None, var_list=None):
+            if mode == 'new':
+                group_vars_upd.value = ''
+            else:
+                group_vars_upd.value = get_group_var_text(upd_mode=True,
+                                                          var_list=var_list)
 
         def group_name_changed(change):
 
@@ -4465,7 +5000,7 @@ class AnalysisGui:
             set_temp_dict(upd_group_dict)
 
             group_name.value = 'Group name'
-            set_upd_variables()
+            set_upd_variables('new')
             activate_gui('new')
 
         def update_group(click):
@@ -4474,15 +5009,14 @@ class AnalysisGui:
 
             grp = group_drop.value
             cache = self._load_cache()
+            var_ls = cache['_groups'][grp]['_group_vars']
             upd_group_dict = {'_upd_mode': 'update',
                               '_group_name': grp,
                               '_saved_group_name': grp,
-                              '_var_list': cache['_groups'][grp]['_group_vars']}
-
+                              '_var_list': var_ls}
             set_temp_dict(upd_group_dict)
-
             group_name.value = grp
-            set_upd_variables()
+            set_upd_variables('update', var_ls)
             activate_gui('update')
 
         def save_group(click):
@@ -4624,28 +5158,29 @@ class AnalysisGui:
             else:
                 user_guide_container.layout.display = 'none'
 
-        # Messages on what to do and errors
         def set_info_msg(upd_mode: str = None,
                          error_ls: list = None):
-
+            """
+                Messages on what to do and errors
+            """
             if not upd_mode:
                 upd_group_dict = get_temp_dict()
                 upd_mode = upd_group_dict.get('_upd_mode', None)
 
             if upd_mode == 'new':
-                msg = AnalysisGui.help_dict['group']['new_header']
-                msg += AnalysisGui.help_dict['group']['new_body']
+                msg = self.help_dict['group']['new_header']
+                msg += self.help_dict['group']['new_body']
             elif upd_mode == 'update':
-                msg = AnalysisGui.help_dict['group']['update_header']
-                msg += AnalysisGui.help_dict['group']['update_body']
+                msg = self.help_dict['group']['update_header']
+                msg += self.help_dict['group']['update_body']
             else:
-                msg = AnalysisGui.help_dict['group']['read_header1']
-                msg += AnalysisGui.help_dict['group']['read_body1']
-                msg += AnalysisGui.help_dict['group']['read_header2']
-                msg += AnalysisGui.help_dict['group']['read_body2']
-                msg += AnalysisGui.help_dict['group']['read_header3']
-                msg += AnalysisGui.help_dict['group']['read_body3']
-            msg += AnalysisGui.help_dict['group']['general']
+                msg = self.help_dict['group']['read_header1']
+                msg += self.help_dict['group']['read_body1']
+                msg += self.help_dict['group']['read_header2']
+                msg += self.help_dict['group']['read_body2']
+                msg += self.help_dict['group']['read_header3']
+                msg += self.help_dict['group']['read_body3']
+            msg += self.help_dict['group']['general']
 
             info_color = self.widget_style_colors['primary:active']
             msg = f'<span style="color:{info_color}">' \
@@ -4657,7 +5192,13 @@ class AnalysisGui:
                 error_color = self.widget_style_colors['danger:active']
 
                 err_msg = f'<span style="color:{error_color}">{margin}{margin}'
-                err_msg += f'<h3>To do: {warning_emoji}</h3><b>'
+                if error_ls[0] == 'ACTION':
+                    err_msg += f'<h2>{warning_emoji} {error_ls[1]}' \
+                               f' {warning_emoji} </h2><b>'
+                    error_ls = error_ls[2:]
+                else:
+                    err_msg += f'<h3>To do: {warning_emoji}</h3><b>'
+
                 for error in error_ls:
                     err_msg += f'{margin}{error}<br>'
                 err_msg += '</b></span>'
@@ -4696,15 +5237,16 @@ class AnalysisGui:
                 var_info_btn.on_click(display_var_info, remove=False)
 
                 set_station_drop()
-                set_spec_drop(upd_active)
+                set_prod_drop(upd_active)
                 set_var_drop('')
                 set_var_info_text('')
                 set_var_checkboxes('')
 
                 var_drop.observe(set_var_info_text, names='value')
-                station_drop.observe(set_spec_drop, names='value')
+                station_drop.observe(set_prod_drop, names='value')
                 product_drop.observe(set_var_drop, names='value')
-                product_drop.observe(set_var_checkboxes, names='value')
+                var_drop.observe(set_var_checkboxes, names='options')
+                # product_drop.observe(set_var_checkboxes, names='value')
                 group_name.style.text_color = 'darkgreen'
                 group_name.observe(group_name_changed, 'value')
 
@@ -4737,11 +5279,12 @@ class AnalysisGui:
                 cancel_group_btn.on_click(cancel_group, remove=True)
                 var_info_btn.on_click(display_var_info, remove=True)
 
-                station_drop.unobserve(set_spec_drop)
+                station_drop.unobserve(set_prod_drop)
                 product_drop.unobserve(set_var_drop)
-                product_drop.unobserve(set_var_checkboxes)
+                var_drop.unobserve(set_var_checkboxes)
                 group_name.unobserve(group_name_changed)
                 var_drop.unobserve(set_var_info_text)
+                var_info_container.layout.display = 'none'
 
                 upd_box.layout.display = 'none'
                 for b in create_btns.children:
@@ -4858,7 +5401,6 @@ class AnalysisGui:
                                                            height='auto',
                                                            display='none'))
         var_info_container.set_title(0, 'Variable info')
-
         rows.append(wd.HBox([user_guide_container, var_info_container]))
 
         # upd row 1-2
@@ -4869,6 +5411,7 @@ class AnalysisGui:
                                                     height='40px'),
                                    description_tooltip='ICOS Station')
         station_box = wd.VBox([station_label, station_drop])
+
         product_label = wd.HTML('<b><i>Files of station: </i></b>',
                                 layout=label_layout)
         product_drop = wd.Dropdown(layout=wd.Layout(width='auto',
@@ -4895,6 +5438,7 @@ class AnalysisGui:
                                                 min_width='25%'))
         html_margin = wd.HTML(layout=wd.Layout(width='2%',
                                                min_width='10px'))
+
         group_var_label = wd.HTML('<b><i>Variables in update mode: </i></b>',
                                   layout=wd.Layout(width='auto',
                                                    min_width='150px'))
@@ -4903,7 +5447,8 @@ class AnalysisGui:
                                                   max_width='90%',
                                                   height='100%'),
                                  disabled=True)
-        right_upd_box = wd.VBox([group_var_label, group_vars_upd],
+        right_upd_box = wd.VBox([group_var_label,
+                                 group_vars_upd],
                                 layout=wd.Layout(width='67%'))
         upd_rows = [wd.HBox([left_upd_box,
                              html_margin,
@@ -4921,6 +5466,8 @@ class AnalysisGui:
         upd_rows.append(var_box)
         upd_box = wd.VBox(upd_rows)
 
+        error_out = wd.Output()
+
         # observe choices
         group_drop.observe(set_group_vars, names='value')
 
@@ -4930,4 +5477,4 @@ class AnalysisGui:
         if not self.debug:
             group_dict_log.layout.display = 'None'
 
-        display(wd.VBox([wd.VBox(rows), upd_box]))
+        display(wd.VBox([wd.VBox(rows), upd_box, error_out]))

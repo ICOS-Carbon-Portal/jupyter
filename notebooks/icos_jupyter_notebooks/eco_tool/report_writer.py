@@ -20,8 +20,6 @@ if os.getcwd()[-8:] == 'eco_tool':
     import gui
     import icos_data
     import plot
-    import plot2
-    from icos_timeseries import IcosFrame
     import json_handler as json_manager
 else:
     from eco_tool import gui
@@ -101,20 +99,21 @@ class ReportWriter:
 
     def _get_stored_output(self,
                            group: str,
-                           batch: str,
+                           plot_setup: str,
                            start_date,
                            end_date):
         if self.debug:
             self.debug_value(2, '_get_stored_output()',
                              f'group: {group}',
-                             f'batch = {batch}'
+                             f'plot_setup = {plot_setup}'
                              f'start_date: {start_date}',
                              f'end_date = {end_date}')
-        key2output = str((group, batch, start_date, end_date))
-        if key2output in self.cached_reports.keys():
-            out_ls = self.cached_reports[key2output]
-        else:
-            out_ls = []
+        date_key = str((start_date, end_date))
+        out_ls = []
+        if group in self.cached_reports.keys():
+            if plot_setup in self.cached_reports[group].keys():
+                if date_key in self.cached_reports[group][plot_setup].keys():
+                    out_ls = self.cached_reports[group][plot_setup][date_key]
         return out_ls
 
     def _get_data(self,
@@ -185,7 +184,7 @@ class ReportWriter:
         pass
 
     def _title_of_report(self, grp: str,
-                         batch_ls: list,
+                         plot_setup_ls: list,
                          start_date,
                          end_date):
         df_of_group = self._get_data(grp,
@@ -195,13 +194,13 @@ class ReportWriter:
         products = df_of_group.icos_product
         urls = df_of_group.icos_accessUrl
         today = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
-        if len(batch_ls) == 1:
-            rep_title1 = f'<h2>Report of batch job: <i>{batch_ls[0]}</i>.<br>' \
+        if len(plot_setup_ls) == 1:
+            rep_title1 = f'<h2>Report of plot setup: <i>{plot_setup_ls[0]}</i>.<br>' \
                          f'Group of variables: <i>{grp}</i>.<br>' \
                          f'Data collected at <i>{today}</i>.</h2><br>'
         else:
-            batch_names = ', '.join(batch_ls)
-            rep_title1 = f'<h2>Report of batch jobs: <i>{batch_names}</i>.<br>' \
+            plot_setup_names = ', '.join(plot_setup_ls)
+            rep_title1 = f'<h2>Report of plot setups: <i>{plot_setup_names}</i>.<br>' \
                          f'Group of variables: <i>{grp}</i>.<br>' \
                          f'Data collected at <i>{today}</i>.</h2><br>'
         rep_title2 = 'Data from '
@@ -253,27 +252,29 @@ class ReportWriter:
 
         return wd.HTML(value=report_title)
 
-    def get_batch_report(self,
-                         group: str,
-                         batch_ls: list,
-                         start_date,
-                         end_date):
+    def get_plot_setup_report(self,
+                              group: str,
+                              plot_setup_ls: list,
+                              start_date,
+                              end_date):
 
         self._cleanup_stored_data()
 
-        if isinstance(batch_ls, str):
-            batch_ls = [batch_ls]
+        if isinstance(plot_setup_ls, str):
+            plot_setup_ls = [plot_setup_ls]
 
-        out_dict = {'main_title': self._title_of_report(group, batch_ls,
+        out_dict = {'main_title': self._title_of_report(group, plot_setup_ls,
                                                         start_date,
                                                         end_date)}
-        for b in batch_ls:
-            out_dict[b] = {'batch_title': wd.HTML(value=f'<h3>Result from '
-                                                        f'<i>{b}</i></h3>')}
-            out_dict[b]['result'] = self._get_single_batch_report(group,
-                                                                  b,
-                                                                  start_date,
-                                                                  end_date)
+        for ps in plot_setup_ls:
+            out_dict[ps] = {'plot_setup_title': wd.HTML(value=f'<h3>Result from '
+                                                              f'<i>{ps}</i>'
+                                                              f'</h3>')}
+            out_dict[ps]['result'] = \
+                self._get_single_plot_setup_report(group,
+                                                   ps,
+                                                   start_date,
+                                                   end_date)
         return out_dict
 
     def _cleanup_stored_data(self):
@@ -285,19 +286,19 @@ class ReportWriter:
             self.cached_reports = {}
             self.stored_timeseries = {}
 
-    def _var_list_to_output_texts(self, var_ls, tool) -> tuple:
+    def _var_list_to_output_texts(self, var_ls, plot_type) -> tuple:
         """
             Returns a tuple:
                 (second_title, plot_title, legend_list),
             where
                 second_title
                     is a string =   details of variables of the
-                                    output of a tool
+                                    output of a plot_type
                                     (row below main title)
                 plot_title
                     a string
-                        the subtitle of the output of a tool,
-                        exception --  tool = 'split_plot', where
+                        the subtitle of the output of a plot_type,
+                        exception --  plot_type = 'split_plot', where
                         the legend_list is used
                         (row in center above plot)
 
@@ -306,26 +307,26 @@ class ReportWriter:
 
         out = gui.AnalysisGui.var_tuple_ls_converter(var_ls=var_ls,
                                                      output='var_plot_texts',
-                                                     var_plot_tool=tool,
+                                                     var_plot_type=plot_type,
                                                      debug_fun=self.debug_value)
         if self.debug:
             self.debug_value(888, '_var_list_to_output_texts  --- ',
                              f'out = {out}')
         return out
 
-    def _get_single_batch_report(self,
-                                 group: str,
-                                 batch: str,
-                                 start_date,
-                                 end_date):
+    def _get_single_plot_setup_report(self,
+                                      group: str,
+                                      plot_setup: str,
+                                      start_date,
+                                      end_date):
         if self.debug:
-            self.debug_value(4, '_get_single_batch_report() ',
+            self.debug_value(4, '_get_single_plot_setup_report() ',
                              f'-- group = {group}',
-                             f'-- batch = {batch}',
+                             f'-- plot_setup = {plot_setup}',
                              f'-- start_date = {start_date}',
                              f'-- end_date = {end_date}')
 
-        result_ls = self._get_stored_output(group, batch, start_date, end_date)
+        result_ls = self._get_stored_output(group, plot_setup, start_date, end_date)
         if result_ls:
             return result_ls
 
@@ -337,50 +338,50 @@ class ReportWriter:
         df_grp_cols = list(df_of_group.columns)
         cache = self._load_cache()
         grp_vars = cache['_groups'][group]['_group_vars']
-        batch_dict = cache['_groups'][group]['_batches'][batch]
-        b = {k: v for k, v in batch_dict.items() if k != '_version'}
+        plot_setup_dict = cache['_groups'][group]['_plot_setups'][plot_setup]
+        b = {k: v for k, v in plot_setup_dict.items() if k != '_version'}
         for number, v in b.items():
             number = str(int(number)+1)
             if self.debug:
-                self.debug_value(4, '_get_single_batch_report() ',
+                self.debug_value(4, '_get_single_plot_setup_report() ',
                                  f'-- number = {number}',
                                  f'-- v = {v}')
-            for tool, tool_vars in v.items():
-                if tool == 'split_plot':
-                    if tool_vars == 'all':
-                        df_of_batch_tool = data
+            for p_type, p_type_vars in v.items():
+                if p_type == 'split_plot':
+                    if p_type_vars == 'all':
+                        df_of_plot_setup_p_type = data
                         unit_ls = group_unit_ls
                         var_ls = grp_vars
                     else:
                         # create filtered dataframe
-                        var_ls = tool_vars
-                        tool_cols = []
+                        var_ls = p_type_vars
+                        p_type_cols = []
                         unit_ls = []
-                        for tool_v in tool_vars:
-                            index_of_var = grp_vars.index(tool_v)
-                            tool_cols.append(df_grp_cols[index_of_var])
+                        for p_type_v in p_type_vars:
+                            index_of_var = grp_vars.index(p_type_v)
+                            p_type_cols.append(df_grp_cols[index_of_var])
                             unit_ls.append(group_unit_ls[index_of_var])
-                        df_of_batch_tool = data[tool_cols]
-                    var_texts = self._var_list_to_output_texts(var_ls, tool)
+                        df_of_plot_setup_p_type = data[p_type_cols]
+                    var_texts = self._var_list_to_output_texts(var_ls, p_type)
                     second_title, _, legend_titles = var_texts
 
-                    title = f'Output #{number} of {batch} - Split plot'
+                    title = f'Output #{number} of {plot_setup} - Split plot'
 
                     # with Pool(processes=2) as p:
                     #     kwargs = dict(zip(['df',
                     #                        'units', 'title'],
-                    #                       [df_of_batch_tool,
+                    #                       [df_of_plot_setup_p_type,
                     #                        unit_ls, title]))
                     #     fig = p.apply(func=self.plot.split_plot,
                     #                   kwds=kwargs)
-                    fig = self.plot.split_plot(df=df_of_batch_tool,
+                    fig = self.plot.split_plot(df=df_of_plot_setup_p_type,
                                                units=unit_ls,
                                                title=title,
                                                second_title=second_title,
                                                subtitles=legend_titles,
                                                legend_titles=legend_titles)
-                    result_ls.append((tool, fig))
-                elif tool == 'multi_plot':
+                    result_ls.append((p_type, fig))
+                elif p_type == 'multi_plot':
                     yaxis1_vars = []
                     yaxis1 = []
                     unit1 = None
@@ -388,9 +389,9 @@ class ReportWriter:
                     yaxis2 = []
                     unit2 = None
                     legend_titles = []
-                    var_texts = self._var_list_to_output_texts(tool_vars, tool)
+                    var_texts = self._var_list_to_output_texts(p_type_vars, p_type)
                     second_title, plot_title, legend_ls = var_texts
-                    for axis in tool_vars:
+                    for axis in p_type_vars:
                         columns_of_axis = []
                         legend_titles.extend(legend_ls)
                         y_ax_vars = []
@@ -407,21 +408,21 @@ class ReportWriter:
                             yaxis2_vars = columns_of_axis
                             unit2 = axis[0]
                             yaxis2 = y_ax_vars
-                    df_of_batch_tool = data[yaxis1_vars + yaxis2_vars]
-                    title = f'Output #{number} of {batch} - <b>Multi-plot</b>'
+                    df_of_plot_setup_p_type = data[yaxis1_vars + yaxis2_vars]
+                    title = f'Output #{number} of {plot_setup} - <b>Multi-plot</b>'
 
                     # with Pool(processes=2) as p:
                     #     kwargs = dict(zip(['df',
                     #                        'yaxis1', 'yaxis2',
                     #                        'unit1', 'unit2',
                     #                        'title', 'subtitle'],
-                    #                       [df_of_batch_tool,
+                    #                       [df_of_plot_setup_p_type,
                     #                        yaxis1, yaxis2,
                     #                        units1, units2,
                     #                        title, subtitle]))
                     #     fig = p.apply(func=self.plot.multi_plot,
                     #                   kwds=kwargs)
-                    fig = self.plot.multi_plot(df=df_of_batch_tool,
+                    fig = self.plot.multi_plot(df=df_of_plot_setup_p_type,
                                                yaxis1_vars=yaxis1_vars,
                                                yaxis2_vars=yaxis2_vars,
                                                yaxis1=yaxis1,
@@ -432,63 +433,102 @@ class ReportWriter:
                                                second_title=second_title,
                                                subtitle=plot_title,
                                                legend_titles=legend_titles)
-                    result_ls.append((tool, fig))
-                elif tool == 'corr_plot':
-                    tool_cols = []
+                    result_ls.append((p_type, fig))
+                elif p_type == 'corr_plot':
+                    p_type_cols = []
                     unit_ls = []
-                    for tool_v in tool_vars:
-                        i = grp_vars.index(tool_v)
-                        tool_cols.append(df_grp_cols[i])
+                    for p_type_v in p_type_vars:
+                        i = grp_vars.index(p_type_v)
+                        p_type_cols.append(df_grp_cols[i])
                         unit_ls.append(group_unit_ls[i])
-                    df_of_batch_tool = data[tool_cols]
-                    title = f'Output #{number} of {batch} - Correlation plot '
+                    df_of_plot_setup_p_type = data[p_type_cols]
+                    title = f'Output #{number} of {plot_setup} - Correlation plot '
                     if self.debug:
-                        self.debug_value(4, '_get_single_batch_report() --- ',
-                                         f'tool_vars == {tool_vars}')
-                    subtitle = f'{tool_vars[0][0]} vs {tool_vars[1][0]}'
-                    if tool_vars[0][1] != tool_vars[1][1] and \
-                            tool_vars[0][2] != tool_vars[1][2]:
-                        subtitle += f' (from <i>{tool_vars[0][1]}</i> of ' \
-                                    f'<i>{tool_vars[0][2]}</i>, and ' \
-                                    f'<i>{tool_vars[1][1]}</i> of ' \
-                                    f'<i>{tool_vars[1][2]}</i>, respectively)'
-                    elif tool_vars[0][1]!=tool_vars[1][1]:
-                        subtitle += f' (from <i>{tool_vars[0][1]}</i> and ' \
-                                    f'<i>{tool_vars[1][1]}</i> of ' \
-                                    f'<i>{tool_vars[0][2]}</i>, respectively)'
-                    elif tool_vars[0][2]!=tool_vars[1][2]:
-                        subtitle += f' (from <i>{tool_vars[0][1]}</i> ' \
-                                    f'of <i>{tool_vars[0][2]}</i> and ' \
-                                    f'<i>{tool_vars[1][2]}</i>, respectively)'
+                        self.debug_value(4, '_get_single_plot_setup_report() --- ',
+                                         f'p_type_vars == {p_type_vars}')
+                    subtitle = f'{p_type_vars[0][0]} vs {p_type_vars[1][0]}'
+                    if p_type_vars[0][1] != p_type_vars[1][1] and \
+                            p_type_vars[0][2] != p_type_vars[1][2]:
+                        subtitle += f' (from <i>{p_type_vars[0][1]}</i> of ' \
+                                    f'<i>{p_type_vars[0][2]}</i>, and ' \
+                                    f'<i>{p_type_vars[1][1]}</i> of ' \
+                                    f'<i>{p_type_vars[1][2]}</i>, respectively)'
+                    elif p_type_vars[0][1]!=p_type_vars[1][1]:
+                        subtitle += f' (from <i>{p_type_vars[0][1]}</i> and ' \
+                                    f'<i>{p_type_vars[1][1]}</i> of ' \
+                                    f'<i>{p_type_vars[0][2]}</i>, respectively)'
+                    elif p_type_vars[0][2]!=p_type_vars[1][2]:
+                        subtitle += f' (from <i>{p_type_vars[0][1]}</i> ' \
+                                    f'of <i>{p_type_vars[0][2]}</i> and ' \
+                                    f'<i>{p_type_vars[1][2]}</i>, respectively)'
                     else:
-                        subtitle += f' (from <i>{tool_vars[0][1]}</i> of ' \
-                                    f'<i>{tool_vars[0][2]}</i>)'
+                        subtitle += f' (from <i>{p_type_vars[0][1]}</i> of ' \
+                                    f'<i>{p_type_vars[0][2]}</i>)'
 
                     # with Pool(processes=2) as p:
                     #     kwargs = dict(zip(['df',
                     #                        'x_col', 'y_col',
                     #                        'units', 'title', 'subtitle'],
-                    #                       [df_of_batch_tool,
-                    #                        tool_cols[0], tool_cols[1],
+                    #                       [df_of_plot_setup_p_type,
+                    #                        p_type_cols[0], p_type_cols[1],
                     #                        unit_ls, title, subtitle]))
                     #     fig = p.apply(func=self.plot.corr_plot,
                     #                   kwds=kwargs)
 
-                    fig = self.plot.corr_plot(df=df_of_batch_tool,
-                                              x_col=tool_cols[0],
-                                              y_col=tool_cols[1],
+                    fig = self.plot.corr_plot(df=df_of_plot_setup_p_type,
+                                              x_col=p_type_cols[0],
+                                              y_col=p_type_cols[1],
                                               units=unit_ls,
                                               title=title,
                                               subtitle=subtitle)
-                    result_ls.append((tool, fig))
-                elif tool == 'corr_table':
-                    result_ls.append((tool, 'Not implemented'))
-                elif tool == 'statistics':
-                    result_ls.append((tool, 'Not implemented'))
+                    result_ls.append((p_type, fig))
+                elif p_type == 'corr_table':
+                    if p_type_vars == 'all':
+                        df_of_plot_setup_p_type = data
+                        var_ls = grp_vars
+                    else:
+                        # create filtered dataframe
+                        var_ls = p_type_vars
+                        p_type_cols = []
+                        for p_type_v in p_type_vars:
+                            index_of_var = grp_vars.index(p_type_v)
+                            p_type_cols.append(df_grp_cols[index_of_var])
+                        df_of_plot_setup_p_type = data[p_type_cols]
+                    var_texts = self._var_list_to_output_texts(var_ls, p_type)
+                    second_title, _, legend_titles = var_texts
+
+                    title = f'Output #{number} of {plot_setup} - Correlation ' \
+                            f'table'
+                    fig = self.plot.corr_table(df=df_of_plot_setup_p_type,
+                                               title=title,
+                                               second_title=second_title,
+                                               legend_titles=legend_titles)
+
+                    result_ls.append((p_type, fig)) #(p_type, 'Not implemented'))
+                elif p_type == 'statistics':
+                    result_ls.append((p_type, 'Not implemented'))
                 else:
-                    result_ls.append((tool, 'Not implemented'))
+                    result_ls.append((p_type, 'Not implemented'))
 
-        key2output = str((group, batch, start_date, end_date))
-        self.cached_reports[key2output] = result_ls
-
+        date_key = str((start_date, end_date))
+        upd_dict = {group: {plot_setup: {date_key: result_ls}}}
+        self.cached_reports.update(upd_dict)
         return result_ls
+
+    def remove_reports(self, group: str = None, plot_setup: str = None):
+        if group:
+            if plot_setup and group in self.cached_reports.keys():
+                self.cached_reports[group].pop(plot_setup, None)
+                if not self.cached_reports[group]:
+                    self.cached_reports.pop(group)
+            elif group in self.cached_reports.keys():
+                self.cached_reports.pop(group)
+        else:
+            self.cached_reports = {}
+
+    def remove_timeseries(self, group: str = None):
+        if group:
+            self.stored_timeseries.pop(group, None)
+        else:
+            self.stored_timeseries = {}
+        self.remove_reports(group=group)

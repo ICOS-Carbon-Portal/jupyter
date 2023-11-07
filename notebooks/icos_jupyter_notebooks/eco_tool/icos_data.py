@@ -23,7 +23,14 @@
     >>> # Ex 2. Get the timeseries and look up variables and units
     >>> ts_df = as_stations.get_ts(pid = '11676/gzsZmFSwlOyPtBmCPzQXU9QY')
     >>> ts_df.icos_var_unit_ls
-    [('AP', 'hPa'), ('AP-Flag', 'Unitless'), ('AP-NbPoints', 'Unitless'), ('AP-Stdev', 'hPa'), ('AT', '°C'), ('AT-Flag', 'Unitless'), ('AT-NbPoints', 'Unitless'), ('AT-Stdev', '°C'), ('RH', '%'), ('RH-Flag', 'Unitless'), ('RH-NbPoints', 'Unitless'), ('RH-Stdev', '%'), ('TIMESTAMP', 'Unitless'), ('WD', '°'), ('WD-Flag', 'Unitless'), ('WD-NbPoints', 'Unitless'), ('WD-Stdev', '°'), ('WS', 'm s-1'), ('WS-Flag', 'Unitless'), ('WS-NbPoints', 'Unitless'), ('WS-Stdev', 'm s-1')]
+    [('AP', 'hPa'), ('AP-Flag', 'Unitless'), ('AP-NbPoints', 'Unitless'),
+    ('AP-Stdev', 'hPa'), ('AT', '°C'), ('AT-Flag', 'Unitless'),
+    ('AT-NbPoints', 'Unitless'), ('AT-Stdev', '°C'), ('RH', '%'),
+    ('RH-Flag', 'Unitless'), ('RH-NbPoints', 'Unitless'),
+    ('RH-Stdev', '%'), ('TIMESTAMP', 'Unitless'), ('WD', '°'),
+    ('WD-Flag', 'Unitless'), ('WD-NbPoints', 'Unitless'),
+    ('WD-Stdev', '°'), ('WS', 'm s-1'), ('WS-Flag', 'Unitless'),
+    ('WS-NbPoints', 'Unitless'), ('WS-Stdev', 'm s-1')]
 """
 
 import warnings
