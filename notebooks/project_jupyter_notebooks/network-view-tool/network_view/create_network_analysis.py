@@ -17,7 +17,7 @@ data_folder = '/data/project/stc/footprints_2018_averaged'
 load_lat=loadtxt(os.path.join(data_folder, 'latitude.csv'), delimiter=',')
 load_lon=loadtxt(os.path.join(data_folder, 'longitude.csv'), delimiter=',')
 import xarray as xr
-path_network_footprints = '/data/project/obsnet/network_footprints'
+path_network_footprints = '/data/project/obsnet/network-footprints'
 # Create the output directory of the notebook:
 # "/home/user/output/network-footprints"
 output_path = os.path.join(os.path.expanduser('~'), 'output')

@@ -297,7 +297,7 @@ with header_stations:
     display(HTML(
         '<p style="font-size:15px;"><b>Select stations and date range for signals table:</b><br>Use the carbon portal <a href= "https://stilt.icos-cp.eu/worker/" target="_blank">on demand calculator</a> to produce new footprints. Create footprints for a full year to make the station appear in the list (the station list to choose from changes depending on what year is selected).</p>'))
 
-year_options = Dropdown(options=list(range(2007, 2022)),
+year_options = Dropdown(options=list(range(2007, 2023)),
                         description='Select year:',
                         value=None,
                         disabled=False,
