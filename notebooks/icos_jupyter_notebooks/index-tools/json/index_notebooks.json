@@ -210,6 +210,34 @@
     "ICOS Jupyter notebooks": [
       {
         "pid": "",
+        "description": "This notebook allows users to visualize anomalies in ecosystem variables. Daily averages for a selected year are compared to daily averages for a reference period of either 11 or 21 years. The results are aggregated to either months of the year, or kept as days of the year in which case all data for a selected month is plotted. The data can appear anomalous for different reasons, including anomalous weather, crop rotation, or other land use changes.",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/03_icos_JNBs/site_anomaly/anomaly.png",
+        "relative_path": "./icos_jupyter_notebooks/ecosystem_site_anomaly_visualization.ipynb",
+        "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/icos_jupyter_notebooks",
+        "contact": [
+          "jupyter-info@icos-cp.eu"
+        ],
+        "categories": [
+          "ICOS Jupyter notebooks"
+        ],
+        "title": "Ecosystem site anomaly visualization"
+      },
+	  {
+        "pid": "",
+        "description": "This notebook allows users to visualize and analyse predefined near real time variables from the ICOS EcoSystem network. A selection of variables from different source files, as well a comparison between different research sites is possible. Groups of different plots and stations can be saved for fast access to provide a daily quick overview and sanity check for the PI. ",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/03_icos_JNBs/eco_nrt/econrt.png",
+        "relative_path": "./icos_jupyter_notebooks/icos_eco_nrt_tool.ipynb",
+        "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/icos_jupyter_notebooks",
+        "contact": [
+          "jupyter-info@icos-cp.eu"
+        ],
+        "categories": [
+          "ICOS Jupyter notebooks"
+        ],
+        "title": "Near Real Time Ecosystem analysis toolbox"
+      },
+      {
+        "pid": "",
         "description": "This notebook includes examples of curve fitting methods for time series. For more detailed information regarding the implemented methods visit NOAA. The curve fitting methods are applied over CO2 measurements from ICOS stations as well as a selection of non-ICOS stations. Data from all stations are included in the Drought 2018 Atmospheric Product (part of the Drought 2018 Project) which is stored and can be downloaded from the ICOS Carbon Portal.",
         "thumbnail": "./icos_jupyter_notebooks/index-tools/img/03_icos_JNBs/ccgcrv/curve_fitting_method.PNG",
         "relative_path": "./icos_jupyter_notebooks/ccgcrv.ipynb",

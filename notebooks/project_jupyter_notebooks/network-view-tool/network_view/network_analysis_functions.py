@@ -2023,7 +2023,7 @@ def initiate_summer_winter_comparison():
     update_button.style.button_color=button_color_able
     
     
-    year_options = Dropdown(options = list(range(2007,2022)),
+    year_options = Dropdown(options = list(range(2007,2023)),
                    description = 'Select year:',
                    value=None,
                    disabled= False,
