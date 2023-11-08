@@ -217,7 +217,7 @@ class AnalysisGui:
                                    'divided according to their unit.',
                                'update': '',
                                'corr_plot':
-                                   'Please note that <i>Correlation-plot</i> '
+                                   'Please note that <i>Correlation plot</i> '
                                    'is a plot for <i>exactly two '
                                    'variables</i>.<br>'
                                    'The first variable belongs to the '
@@ -1985,14 +1985,21 @@ class AnalysisGui:
             # we need to clean up deprecated plots
             temp_pt = {}
             i = 0
+            deprecated_pt = False
             for idx, pt_row in plot_types.items():
                 for pt_code, v_ls in pt_row.items():
                     if pt_code in plot_type2name_dict.keys():
                         temp_pt[i] = {pt_code: v_ls}
                         i += 1
                     elif sel_plot_type_index == idx:
+                        deprecated_pt = True
                         sel_plot_type_index = None
             plot_types = temp_pt
+            if deprecated_pt:
+                plot_setup_dict['_plot_types'] = temp_pt
+                set_plot_setup_upd_dict(plot_setup_dict)
+                plot_types = temp_pt
+
             sel_plot_types = [(plot_type2name_dict[k2], k1) for k1, v1 in
                               plot_types.items() for
                               k2 in v1.keys()]
@@ -2758,7 +2765,7 @@ class AnalysisGui:
                                'default the variables are divided according '
                                'to their unit.']
                 elif plot_type == 'corr_plot':
-                    info_ls = ['Please note that <i>Correlation-plot</i> '
+                    info_ls = ['Please note that <i>Correlation plot</i> '
                                'is a plot for <i>exactly two '
                                'variables</i>.',
                                'The first variable belongs to the '
@@ -3364,8 +3371,7 @@ class AnalysisGui:
                                'Correlation table', 'Numerical Statistics']
         else:
             plot_type_codes = ['split_plot', 'multi_plot', 'corr_plot']
-            plot_type_names = ['Split-plot', 'Multi-plot',
-                               'Correlation plot']
+            plot_type_names = ['Split-plot', 'Multi-plot', 'Correlation plot']
 
         plot_type2name_dict = dict(zip(plot_type_codes, plot_type_names))
         name2plot_type_dict = {v: k for k, v in plot_type2name_dict.items()}
@@ -4226,7 +4232,7 @@ class AnalysisGui:
                                        ])
                               ])
         corr_plot_settings = wd.Accordion(children=[corr_p_box],
-                                          titles=('Correlation-plot settings',))
+                                          titles=('Correlation plot settings',))
         observe_ordinary_ls.append(corr_p_use_latex_cb)
         observe_ordinary_ls.append(corr_p_plotly_templates)
         observe_ordinary_ls.append(corr_p_color_scale_drop)
@@ -4540,7 +4546,7 @@ class AnalysisGui:
                 station_drop.value = stn
 
         def set_prod_drop(change):
-            cache = self._load_cache()
+
             if station_drop.value == 'dummy':
                 prod_ls = ['Files...']
                 dobj_ls = ['dummy']
@@ -4596,9 +4602,25 @@ class AnalysisGui:
 
             prod_drop_ls = list(zip(prod_ls, dobj_ls))
             prod_drop_ls.sort(key=lambda v: v[0].lower())
-            if product_drop.label and product_drop.label in prod_ls:
+            if change in ['new', 'update']:
+                grp = group_drop.value
+                cache = self._load_cache()
+                if not (grp and grp in cache['_groups'].keys()):
+                    grp = cache['_last_group']
+                try:
+                    last_prod = cache['_groups'][grp]['_group_vars'][-1][1]
+                    prod_label = last_prod if last_prod in prod_ls else ''
+                except:
+                    # case of first run, deleted groups or
+                    # manually changed json
+                    prod_label = ''
+                    pass
+            elif product_drop.label and product_drop.label in prod_ls:
+                # case when in upd-mode and station has changed
                 prod_label = product_drop.label
             else:
+                # case when in upd-mode and station has changed, but from a
+                # station with error in previous product
                 upd_dict = get_temp_dict()
                 prod_label = ''
                 if isinstance(upd_dict, dict):
@@ -4607,16 +4629,23 @@ class AnalysisGui:
                         last_var = var_tuples[-1]
                         prod_label = last_var[1] if last_var[1] in prod_ls else ''
                 if not prod_label:
+                    # case when in upd-mode and station has changed, but from a
+                    # station with error in previous product, and no var has
+                    # been added.
                     grp = group_drop.value
-                    if grp in cache['_groups'].keys():
+                    cache = self._load_cache()
+                    if not(grp and grp in cache['_groups'].keys()):
+                        grp = cache['_last_group']
+                    try:
                         last_prod = cache['_groups'][grp]['_group_vars'][-1][1]
                         prod_label = last_prod if last_prod in prod_ls else ''
-                if not prod_label:
-                    grp = cache['_last_group']
-                    last_prod = cache['_groups'][grp]['_group_vars'][-1][1]
-                    prod_label = last_prod if last_prod in prod_ls else ''
-                else:
-                    prod_label = prod_ls[0]
+                    except:
+                        pass
+
+            if not prod_label:
+                # certainly the case of first run, deleted groups or
+                # manually changed json
+                prod_label = prod_ls[0]
 
             product_drop.options = prod_drop_ls
             product_drop.value = [y[1] for y in prod_drop_ls if y[0] ==

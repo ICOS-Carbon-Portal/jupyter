@@ -25,6 +25,8 @@ class IDebug:
                  keep_outputs: bool = None):
         self.output = output if isinstance(output, str) else ''
         self.call_id = call_id if isinstance(call_id, int) else 0
+        self.first_call = True
+
         if bool(keep_outputs):
             self.trace = {self.call_id: '__init__'}
         else:
@@ -34,6 +36,29 @@ class IDebug:
                     external_id: int = None,
                     stack_start: int = None,
                     stack_depth: int = None):
+
+        def set_css(text: str, css_type: str = None):
+            if css_type == 'tight_1':
+                return f'<p class="tight_1">{text}</p>'
+            else:
+                return f'<p class="tight_2">{text}</p>'
+
+        if self.first_call:
+            top = '<head>' \
+                  '    <style>' \
+                  '        p.tight_1 {line-height: 1.2; ' \
+                  '            margin-left: 10px;' \
+                  '            "font-size:9.0pt"}' \
+                  '        p.tight_2 { line-height: 1.0;' \
+                  '            margin-left: 30px;' \
+                  '            "font-size:6.0pt"}' \
+                  '    </style>' \
+                  '</head>' \
+                  '<hr><h4>Traces start</h4><hr>'
+            self.first_call = False
+        else:
+            top = '<hr>'
+
         self.call_id += 1
 
         if isinstance(external_id, int):
@@ -65,23 +90,28 @@ class IDebug:
             # formatting html
             if not text_list:
                 text_list = deb_ls.extend([99, '-- start --'])
-            margin = '&nbsp' * 6  # html space
             color_num = external_id
 
             r_col = (41 * color_num) % 200
             g_col = (101 * color_num) % 177
             b_col = (137 * color_num) % 151
             header_span = f'<span style="color:rgb({r_col}, ' \
-                          f'{g_col}, {b_col})"; "font-size:10.0pt">'
+                          f'{g_col}, {b_col})" >'
             row_span = f'<span style="color:rgb({r_col}, ' \
-                       f'{g_col}, {b_col})"; "font-size:8.0pt">'
+                       f'{g_col}, {b_col})">'
             header_txt = f'<b>{deb_ls[0]} - {deb_ls[1]}</b>'
-            debug_line = f'<b>{deb_ls[0]} </b>'
-            msg = f'{header_span}{margin} {header_txt} {margin}</span>'
+            debug_line = f'<b>{deb_ls[0]}</b>'
+            msg = top
+            msg += set_css(f'{header_span}{header_txt}</span>', 'tight_1')
             msg += f'{row_span}'
-            row_label = f'<br>{margin} -- {debug_line} {margin} -- '
-            msg += f'{row_label}'.join(text_list)
-            msg += '</span>'
+            row_label = f'<br> -- {debug_line} --- '
+            msg_rows = ''
+            for text in text_list:
+                msg_rows += row_label + text
+
+            msg_rows += '</span>'
+
+            msg += set_css(msg_rows, 'tight_2')
         if self.trace:
             self.trace[self.call_id] = msg
         return msg

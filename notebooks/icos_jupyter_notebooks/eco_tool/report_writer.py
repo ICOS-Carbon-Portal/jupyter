@@ -326,7 +326,8 @@ class ReportWriter:
                              f'-- start_date = {start_date}',
                              f'-- end_date = {end_date}')
 
-        result_ls = self._get_stored_output(group, plot_setup, start_date, end_date)
+        result_ls = self._get_stored_output(group, plot_setup, start_date,
+                                            end_date)
         if result_ls:
             return result_ls
 
@@ -365,7 +366,7 @@ class ReportWriter:
                     var_texts = self._var_list_to_output_texts(var_ls, p_type)
                     second_title, _, legend_titles = var_texts
 
-                    title = f'Output #{number} of {plot_setup} - Split plot'
+                    title = f'Output #{number} of {plot_setup} - <b>Split-plot</b'
 
                     # with Pool(processes=2) as p:
                     #     kwargs = dict(zip(['df',
@@ -409,7 +410,8 @@ class ReportWriter:
                             unit2 = axis[0]
                             yaxis2 = y_ax_vars
                     df_of_plot_setup_p_type = data[yaxis1_vars + yaxis2_vars]
-                    title = f'Output #{number} of {plot_setup} - <b>Multi-plot</b>'
+                    title = f'Output #{number} of {plot_setup} - ' \
+                            f'<b>Multi-plot</b>'
 
                     # with Pool(processes=2) as p:
                     #     kwargs = dict(zip(['df',
@@ -442,7 +444,8 @@ class ReportWriter:
                         p_type_cols.append(df_grp_cols[i])
                         unit_ls.append(group_unit_ls[i])
                     df_of_plot_setup_p_type = data[p_type_cols]
-                    title = f'Output #{number} of {plot_setup} - Correlation plot '
+                    title = f'Output #{number} of {plot_setup} - ' \
+                            f'<b>Correlation plot</b>>'
                     if self.debug:
                         self.debug_value(4, '_get_single_plot_setup_report() --- ',
                                          f'p_type_vars == {p_type_vars}')
