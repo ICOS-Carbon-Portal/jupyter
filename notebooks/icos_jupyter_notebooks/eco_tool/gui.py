@@ -1246,10 +1246,11 @@ class AnalysisGui:
                 clear_output()
                 display(report_dict['main_title'])
                 for b in plot_setup_ls:
+                    title_key = 'plot_setup_title'
                     self.startup_feed(txt=f"<i>Assembling:</i> "
-                                          f"{report_dict[b]['plot_setup_title']}"
+                                          f"{report_dict[b][title_key].value}"
                                           f"...")
-                    display(report_dict[b]['plot_setup_title'])
+                    display(report_dict[b][title_key])
                     ii = 1
                     for plot_type_result in report_dict[b]['result']:
                         if plot_type_result[0] in ['split_plot', 'multi_plot',
@@ -4651,7 +4652,7 @@ class AnalysisGui:
             product_drop.value = [y[1] for y in prod_drop_ls if y[0] ==
                                   prod_label].pop()
 
-        def set_var_drop(change):
+        def set_var_drop():
             if self.debug:
                 self.debug_value(-15, 'set_var_drop()',
                                  f'product_drop.options = '
@@ -4686,6 +4687,7 @@ class AnalysisGui:
                 var_info = [var_dict[key] for key in var_ls]
                 var_drop.options = list(zip(var_ls, var_info))
                 var_drop.value = var_drop.options[0][1]
+                set_var_info_text('')
 
         def set_pid_error(pid: str = None, var: tuple = None):
 
@@ -4798,6 +4800,7 @@ class AnalysisGui:
                     return
 
             else:
+                # init call from set_var_drop
                 var_name = var_drop.label
                 var_dict = var_drop.value
 
@@ -4906,6 +4909,8 @@ class AnalysisGui:
 
             if self.debug:
                 self.debug_value(-21, f'set_var_checkboxes()')
+            # to make sure the drop has been updated, order matters...
+            set_var_drop()
 
             if station_drop.value == 'dummy' or product_drop.value == 'dummy':
                 var_label.value = ''
@@ -5301,17 +5306,14 @@ class AnalysisGui:
 
                 set_station_drop()
                 set_prod_drop(upd_active)
-                set_var_drop('')
-                set_var_info_text('')
                 set_var_checkboxes('')
 
                 station_drop.observe(set_prod_drop, names='value')
-                product_drop.observe(set_var_drop, names='value')
+                product_drop.observe(set_var_checkboxes, names='value')
                 var_drop.observe(set_var_info_text, names='value')
-                var_drop.observe(set_var_checkboxes, names='options')
-                # product_drop.observe(set_var_checkboxes, names='value')
-                group_name.style.text_color = 'darkgreen'
+
                 group_name.observe(group_name_changed, 'value')
+                group_name.style.text_color = 'darkgreen'
 
                 upd_box.layout.display = 'flex'
 
@@ -5343,9 +5345,8 @@ class AnalysisGui:
                 var_info_btn.on_click(display_var_info, remove=True)
 
                 station_drop.unobserve(set_prod_drop)
-                product_drop.unobserve(set_var_drop)
+                product_drop.unobserve(set_var_checkboxes)
                 var_drop.unobserve(set_var_info_text)
-                var_drop.unobserve(set_var_checkboxes)
                 group_name.unobserve(group_name_changed)
                 var_info_container.layout.display = 'none'
 

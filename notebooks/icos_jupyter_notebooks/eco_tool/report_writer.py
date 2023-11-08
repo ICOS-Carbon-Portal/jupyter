@@ -366,7 +366,8 @@ class ReportWriter:
                     var_texts = self._var_list_to_output_texts(var_ls, p_type)
                     second_title, _, legend_titles = var_texts
 
-                    title = f'Output #{number} of {plot_setup} - <b>Split-plot</b'
+                    title = f'Output #{number} of {plot_setup} - ' \
+                            f'<b>Split-plot</b>'
 
                     # with Pool(processes=2) as p:
                     #     kwargs = dict(zip(['df',
@@ -445,7 +446,7 @@ class ReportWriter:
                         unit_ls.append(group_unit_ls[i])
                     df_of_plot_setup_p_type = data[p_type_cols]
                     title = f'Output #{number} of {plot_setup} - ' \
-                            f'<b>Correlation plot</b>>'
+                            f'<b>Correlation plot</b>'
                     if self.debug:
                         self.debug_value(4, '_get_single_plot_setup_report() --- ',
                                          f'p_type_vars == {p_type_vars}')
