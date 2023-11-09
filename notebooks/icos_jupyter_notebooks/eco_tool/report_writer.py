@@ -39,18 +39,13 @@ class ReportWriter:
         self.debug = True if debug_function else False
         if self.debug:
             self.debug_value = debug_function
+            self.debug_value(0, 'ReportWriter init')
         else:
             self.debug_value = None
 
         self.retriever = retriever
 
-        user_plot_settings = self._load_user_settings()
-        if self.debug:
-            self.debug_value(0, 'ReportWriter init',
-                             f'user_plot_settings: {user_plot_settings}')
-        self.plot = plot.Plot(debug_function=debug_function,
-                              **user_plot_settings)
-
+        self.plot = None
         self.icos_info = icos_info
 
         self.stations_df = self.icos_info.stations_df
@@ -62,6 +57,7 @@ class ReportWriter:
         self.cached_reports = {}
         if self.debug:
             self.debug_out = wd.Output()
+        self.reset_plot()
 
     def __del__(self):
         del self.plot
@@ -536,3 +532,12 @@ class ReportWriter:
         else:
             self.stored_timeseries = {}
         self.remove_reports(group=group)
+
+    def reset_plot(self):
+        user_plot_settings = self._load_user_settings()
+        if self.debug:
+            self.debug_value(10, 'reset_plot()',
+                             f'user_plot_settings = {user_plot_settings}')
+        self.remove_reports()
+        self.plot = plot.Plot(debug_function=self.debug_value,
+                              **user_plot_settings)
