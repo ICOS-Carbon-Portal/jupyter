@@ -1715,6 +1715,7 @@ class AnalysisGui:
     def _flush_memory(self, group: str = None,
                       plot_setup: str = None,
                       timeseries: bool = None,
+                      plot_object: bool = None,
                       reports: bool = None):
         """
             Clear memory of stored timeseries dataframe or stored reports.
@@ -1725,22 +1726,29 @@ class AnalysisGui:
                 If None, all timeseries are removed.
 
             plot_setup: str
-                When used the param group is needed
+                When used the parameter group is needed
                 - Use when a plot setup of the group is changed
                 It will remove results from the plot_setup of the
                 reports of the group
 
             timeseries: bool
-                When True timeseries dataframe from previous run
-                - Use when the user change anything of a group of variables
-                - Run settings (all timeseries should be removed)
+                When True timeseries dataframe from previous run will
+                be removed.
+                Use when:
+                - The user change anything of a group of variables
+                - Run-settings (all timeseries should be removed)
                 This will also remove reports of the group(s).
 
+            plot_object: bool
+                If True then reinitialise the plot object
+                Use when:
+                - Plot-settings (all reports should be removed)
+                This will also reinitialise the reports.
+
             reports: bool
-                When True timeseries dataframe from previous run
-                - Use when the user change anything of a plot setup of a
-                group
-                - Plot settings (all reports should be removed)
+                If True stored reports from previous run will be removed
+                Use when:
+                - The user change anything of a plot setup of a group
 
         """
         if self.debug:
@@ -1753,6 +1761,8 @@ class AnalysisGui:
             elif reports or plot_setup:
                 self.report_writer.remove_reports(group=group,
                                                   plot_setup=plot_setup)
+            if plot_object:
+                self.report_writer.reset_plot()
 
     def _menu_plot_setups(self,
                           _group_name: str = None,
@@ -3161,12 +3171,12 @@ class AnalysisGui:
 
                 # cleaning up memory
                 # we only have to fix the case:
-                if old_ps_name:
-                    self._flush_memory(group=grp,
-                                       plot_setup=old_ps_name,
-                                       reports=True)
 
                 self._set_cache(cache_dict=cache)
+                if old_ps_name:
+                    self._flush_memory(group=grp, plot_setup=old_ps_name,
+                                       reports=True)
+
                 reset_plot_setup_gui(reason='saved_plot_setup',
                                      plot_setup_name=ps_name)
 
@@ -3749,14 +3759,14 @@ class AnalysisGui:
                                       settings.get('corr_table_kwargs', {}),
                                       settings.get('statistics_kwargs', {})]
 
+            json_handler.update(data_piece=upd_dict,
+                                path_to_json_file=self.user_config_file)
             # cleaning up memory
             if new_run_setting != stored_run_setting:
                 self._flush_memory(group=None, timeseries=True)
             if new_report_settings != stored_report_settings:
-                self._flush_memory(group=None, reports=True)
+                self._flush_memory(group=None, plot_object=True)
 
-            json_handler.update(data_piece=upd_dict,
-                                path_to_json_file=self.user_config_file)
             init_general_settings()
 
         def cancel_general_settings(c):
@@ -4430,13 +4440,12 @@ class AnalysisGui:
                 else:
                     cache['_groups'][grp].pop('_var_mismatch', None)
 
-            # Remove timeseries and reports from local memory
-            self._flush_memory(group=grp,
-                               timeseries=True)
-            if old_grp:
-                self._flush_memory(group=old_grp,
-                                   timeseries=True)
             self._set_cache(cache_dict=cache)
+
+            # Remove timeseries and reports from local memory
+            self._flush_memory(group=grp, timeseries=True)
+            if old_grp:
+                self._flush_memory(group=old_grp, timeseries=True)
 
         def demo_plot_setup(var_ls) -> dict:
             def var2unit(var):

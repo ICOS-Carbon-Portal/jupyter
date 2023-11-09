@@ -633,6 +633,9 @@ class Plot:
             else:
                 x_label = units[0]
                 y_label = units[1]
+        else:
+            x_label = x_col
+            y_label = y_col
 
         if self.debug:
             self.debug_value(11, 'corr_plot ',
