@@ -190,7 +190,7 @@
         ],
         "title": "ICOS Carbon Portal Python Library - STILT footprints and timeseries"
       },
-	  {
+      {
         "pid": "",
         "description": "This Jupyter notebook presents an examples on how to read the European Obspack compilation. Check out <a href='https://www.icos-cp.eu/data-products' target='_blank' style='text-decoration:underline;color:blue'>ICOS Data Products</a>, search for 'Historic Observational Time Series for ICOS and Non-ICOS Stations'. You could for example combine this, with our example for curve fitting, based on the ccgcrv method used by NOAA. Have a look at 'ICOS Jupyter Notebooks / Curve fitting methods for CO2 time series'",
         "thumbnail": "./icos_jupyter_notebooks/index-tools/img/02_pylib_ex/ex7.png",
@@ -208,6 +208,48 @@
 
     ],
     "ICOS Jupyter notebooks": [
+      {
+        "pid": "",
+        "description": "This notebook allows users to apply NOAA curve fitting method to ObsPack CO2 time series (daily, daily daytime, and daily nighttime). The notebook illustrates the filtering, fitting, and growth rate calculation steps, aiding users in understanding and repeating the curve fitting method.",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/03_icos_JNBs/curve-fitting-obspack/curve_fitting_daily.png",
+        "relative_path": "./icos_jupyter_notebooks/curve_fitting_obspack.ipynb",
+        "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/icos_jupyter_notebooks",
+        "contact": [
+          "jupyter-info@icos-cp.eu"
+        ],
+        "categories": [
+          "ICOS Jupyter notebooks"
+        ],
+        "title": "NOAA curve fitting method applied to ObsPack CO2 time series"
+      },
+      {
+        "pid": "",
+        "description": "This notebook allows users to visualize anomalies in ecosystem variables. Daily averages for a selected year are compared to daily averages for a reference period of either 11 or 21 years. The results are aggregated to either months of the year, or kept as days of the year in which case all data for a selected month is plotted. The data can appear anomalous for different reasons, including anomalous weather, crop rotation, or other land use changes.",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/03_icos_JNBs/site_anomaly/anomaly.png",
+        "relative_path": "./icos_jupyter_notebooks/ecosystem_site_anomaly_visualization.ipynb",
+        "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/icos_jupyter_notebooks",
+        "contact": [
+          "jupyter-info@icos-cp.eu"
+        ],
+        "categories": [
+          "ICOS Jupyter notebooks"
+        ],
+        "title": "Ecosystem site anomaly visualization"
+      },
+      {
+        "pid": "",
+        "description": "This notebook allows users to visualize and analyse predefined near real time variables from the ICOS EcoSystem network. A selection of variables from different source files, as well a comparison between different research sites is possible. Groups of different plots and stations can be saved for fast access to provide a daily quick overview and sanity check for the PI. ",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/03_icos_JNBs/eco_nrt/econrt.png",
+        "relative_path": "./icos_jupyter_notebooks/icos_eco_nrt_tool.ipynb",
+        "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/icos_jupyter_notebooks",
+        "contact": [
+          "jupyter-info@icos-cp.eu"
+        ],
+        "categories": [
+          "ICOS Jupyter notebooks"
+        ],
+        "title": "Near Real Time Ecosystem analysis toolbox"
+      },
       {
         "pid": "",
         "description": "This notebook includes examples of curve fitting methods for time series. For more detailed information regarding the implemented methods visit NOAA. The curve fitting methods are applied over CO2 measurements from ICOS stations as well as a selection of non-ICOS stations. Data from all stations are included in the Drought 2018 Atmospheric Product (part of the Drought 2018 Project) which is stored and can be downloaded from the ICOS Carbon Portal.",
