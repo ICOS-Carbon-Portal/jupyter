@@ -83,3 +83,4 @@ RUN pip install --quiet icoscp==0.1.19
 ENV PORTAL_DATA_PATH_ICOS="/data/dataAppStorage/"
 ENV PORTAL_DATA_PATH_SITES="/data/dataAppStorage/"
 ENV PORTAL_DATA_PATH_ICOSCITIES=""
+RUN pip install jupyterlab_mathjax2==4.0.0
