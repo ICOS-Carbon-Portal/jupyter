@@ -187,64 +187,109 @@ class ReportWriter:
                                      start_date,
                                      end_date)
         stns = df_of_group.icos_station_name
+        stn_ids = df_of_group.icos_station_id
         products = df_of_group.icos_product
         urls = df_of_group.icos_accessUrl
         today = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
         if len(plot_setup_ls) == 1:
-            rep_title1 = f'<h2>Report of plot setup: <i>{plot_setup_ls[0]}</i>.<br>' \
-                         f'Group of variables: <i>{grp}</i>.<br>' \
-                         f'Data collected at <i>{today}</i>.</h2><br>'
+            rep_header = f'<h2>Report of plot setup: <i>' \
+                         f'{plot_setup_ls[0]}</i></h2>'
         else:
             plot_setup_names = ', '.join(plot_setup_ls)
-            rep_title1 = f'<h2>Report of plot setups: <i>{plot_setup_names}</i>.<br>' \
-                         f'Group of variables: <i>{grp}</i>.<br>' \
-                         f'Data collected at <i>{today}</i>.</h2><br>'
-        rep_title2 = 'Data from '
-        rep_title3 = ''
-        if all((isinstance(x, str) for x in [stns, products, urls])):
-            rep_title2 += f'<a href="{urls}" target = "_blank">\
-                        <font color="DarkBlue">{products}</font></a> of {stns}.'
-        elif all((isinstance(x, list) for x in [stns, products, urls])) and \
-                len(stns) == len(products) and len(products) == len(urls):
-            n = len(stns)
+            rep_header = f'<h2>Report of plot setups: <i>' \
+                         f'{plot_setup_names}</i></h2>'
+        rep_title = f'<table style="text-align:left; line-height: 1.15; ' \
+                    f'            margin-left: 30px">' \
+                    f'     <tr>' \
+                    f'         <td style="padding-right: 30px">' \
+                    f'              <b>Group of variables:</b> </td>' \
+                    f'         <td><i>{grp}</i></td>' \
+                    f'     </tr>' \
+                    f'     <tr>' \
+                    f'         <td style="padding-right: 30px">' \
+                    f'              <b>Start date:</b></td>' \
+                    f'         <td><i>{start_date}</i></td>' \
+                    f'     </tr>' \
+                    f'     <tr>' \
+                    f'         <td style="padding-right: 30px">' \
+                    f'              <b>End date:</b></td>' \
+                    f'         <td><i>{end_date}</i></td>' \
+                    f'     </tr>' \
+                    f'     <tr>' \
+                    f'         <td style="padding-right: 30px">' \
+                    f'              <b>Execution timestamp:</b></td> ' \
+                    f'         <td><i>{today}</i></td>' \
+                    f'     </tr>' \
+                    f'</table>'
+
+        data_descr_ls = []
+        links_ls = []
+        if all((isinstance(x, str) for x in [stns, stn_ids, products, urls])):
+            data_descr_ls.append(f'<a href="{urls}" target = "_blank">'
+                                 f'<font color="DarkBlue">{products}'
+                                 f'</font></a> of {stns} ({stn_ids})')
+        elif all((isinstance(x, list) for x in [stns, stn_ids, products,
+                                                urls])) and \
+                len(stns) == len(stn_ids) == len(products) and \
+                len(products) == len(urls):
+            stns = [f'{s[0]} ({s[1]})' for s in zip(stns, stn_ids)]
             d = {}
-            for i in range(n):
-                s = stns[i]
-                p = products[i]
-                u = urls[i]
-                v = (p, u)
-                if s in d.keys():
-                    if v not in d[s]:
-                        d[s].append(v)
+            for k, v in list(zip(stns, list(zip(products, urls)))):
+                if k in d.keys():
+                    d[k].append(v)
                 else:
-                    d[s] = [v]
-            last_char = ''
-            for s, v in d.items():
-                rep_title2 += last_char
-                for tup in v:
-                    rep_title2 += f'<a href="{tup[1]}" target = "_blank">\
-                                <font color="DarkBlue">{tup[0]}</font></a>, '
-                rep_title2 += f' of {s}'
-                last_char = ';<br>'
-            rep_title2 += '.'
+                    d[k] = [v]
+
+            for s, v_ls in d.items():
+                data_of_station_ls = []
+
+                for tup in v_ls:
+                    data_of_station_ls.append(f'<a href="{tup[1]}" target = '
+                                              f'"_blank">'
+                                              f'<font color="DarkBlue">{tup[0]}'
+                                              f'</font></a>')
+
+                data_descr_ls.append(', '.join(data_of_station_ls) + f' of {s}')
         else:
             if isinstance(products, str):
-                products =[products]
-            rep_title2 += f'Data from {", ".join(products)}'
-
+                products = [products]
+            data_descript = f'Data from {", ".join(products)}'
             if isinstance(stns, str):
                 stns = [stns]
-            rep_title2 += f' collected at {", ".join(stns)}.'
-            rep_title2 = f'<h2>{rep_title2}</h2><br>'
+            data_descript += f', collected at {", ".join(stns)}'
+            data_descr_ls.append(data_descript)
 
             if isinstance(urls, str):
                 urls = [urls]
-            rep_title3 += 'Links to data:  '
-            for u in urls:
-                rep_title3 += f'<a href = "{u}" target = "_blank"> {u} </a>.'
 
-        rep_title2 = f'<h3>{rep_title2}</h3>'
-        report_title = rep_title1 + rep_title2 + rep_title3
+            for u in urls:
+                links_ls.append(f'<a href = "{u}" target = "_blank"> {u} </a>')
+
+        if not links_ls:
+            data_description = f'<h4>' \
+                               f'<table style="text-align:left; ' \
+                               f'              line-height: 1.15">' \
+                               f'     <tr>' \
+                               f'         <td>Data from  </td>' \
+                               f'         <td>{data_descr_ls.pop(0)}</td>' \
+                               f'     </tr>'
+            while data_descr_ls:
+                data_description += f'     <tr>' \
+                                    f'         <td></td>' \
+                                    f'         <td>{data_descr_ls.pop(0)}</td>' \
+                                    f'     </tr>'
+            data_description += '</table>'
+        else:
+            data_description = 'Data from ' + '; <br>'.join(data_descr_ls) + \
+                '<br>Links to data: ' + ', '.join(links_ls)
+        data_description = f'<h4>{data_description}</h4>'
+
+        report_title = f'<div style="text-align:left; ' \
+                       f'            line-height: 0.7;' \
+                       f'            padding-bottom: 0px">' \
+                       f'{rep_header}' \
+                       f'{rep_title}{data_description}' \
+                       f'</div>'
 
         return wd.HTML(value=report_title)
 
@@ -259,18 +304,14 @@ class ReportWriter:
         if isinstance(plot_setup_ls, str):
             plot_setup_ls = [plot_setup_ls]
 
-        out_dict = {'main_title': self._title_of_report(group, plot_setup_ls,
-                                                        start_date,
-                                                        end_date)}
+        out_dict = {'header': self._title_of_report(group, plot_setup_ls,
+                                                    start_date,
+                                                    end_date)}
         for ps in plot_setup_ls:
-            out_dict[ps] = {'plot_setup_title': wd.HTML(value=f'<h3>Result from '
-                                                              f'<i>{ps}</i>'
-                                                              f'</h3>')}
-            out_dict[ps]['result'] = \
-                self._get_single_plot_setup_report(group,
-                                                   ps,
-                                                   start_date,
-                                                   end_date)
+            out_dict[ps] = self._get_single_plot_setup_report(group,
+                                                              ps,
+                                                              start_date,
+                                                              end_date)
         return out_dict
 
     def _cleanup_stored_data(self):
@@ -301,10 +342,10 @@ class ReportWriter:
                 legend_list = of legend titles
         """
 
-        out = gui.AnalysisGui.var_tuple_ls_converter(var_ls=var_ls,
-                                                     output='var_plot_texts',
-                                                     var_plot_type=plot_type,
-                                                     debug_fun=self.debug_value)
+        out = gui.IcosVarGui.var_tuple_ls_converter(var_ls=var_ls,
+                                                    output='var_plot_texts',
+                                                    var_plot_type=plot_type,
+                                                    debug_fun=self.debug_value)
         if self.debug:
             self.debug_value(888, '_var_list_to_output_texts  --- ',
                              f'out = {out}')
@@ -360,7 +401,7 @@ class ReportWriter:
                             unit_ls.append(group_unit_ls[index_of_var])
                         df_of_plot_setup_p_type = data[p_type_cols]
                     var_texts = self._var_list_to_output_texts(var_ls, p_type)
-                    second_title, _, legend_titles = var_texts
+                    second_title, subtitles, legend_titles = var_texts
 
                     title = f'Output #{number} of {plot_setup} - ' \
                             f'<b>Split-plot</b>'
@@ -376,8 +417,7 @@ class ReportWriter:
                                                units=unit_ls,
                                                title=title,
                                                second_title=second_title,
-                                               subtitles=legend_titles,
-                                               legend_titles=legend_titles)
+                                               subtitles=subtitles)
                     result_ls.append((p_type, fig))
                 elif p_type == 'multi_plot':
                     yaxis1_vars = []
@@ -430,7 +470,7 @@ class ReportWriter:
                                                unit2=unit2,
                                                title=title,
                                                second_title=second_title,
-                                               subtitle=plot_title,
+                                               # subtitle=plot_title,
                                                legend_titles=legend_titles)
                     result_ls.append((p_type, fig))
                 elif p_type == 'corr_plot':

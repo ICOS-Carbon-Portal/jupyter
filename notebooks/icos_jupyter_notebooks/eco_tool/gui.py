@@ -10,7 +10,7 @@
     a notebook on https://jupyter.icos-cp.eu/
     using
     >>> from eco_tool import gui
-    >>> g = gui.AnalysisGui();
+    >>> g = gui.IcosVarGui();
 """
 
 __author__ = ["Anders Dahlner"]
@@ -114,7 +114,7 @@ class _AppDataRetriever:
                                json_file=self.user_config_file)
 
 
-class AnalysisGui:
+class IcosVarGui:
     # Colors of ipywidgets predefined styles
     widget_style_colors = {'text_color': '#FFFFFF', 'primary': '#2196F3',
                            'primary:active': '#1976D2', 'success': '#4CAF50',
@@ -124,31 +124,34 @@ class AnalysisGui:
 
     @property
     def help_dict(self):
-        return {'group': {'read_header1': '<h3>To create a group of '
-                                          'variables: </h3>',
+        return {'group': {'read_header1': '<h3><span style="color:black">'
+                                          'To create a group of '
+                                          'variables: </span></h3>',
                           'read_body1': '<ol>'
                                         '<li> Press <b><i>New</i></b></li>'
                                         '<ul>'
-                                        '<li> Select a station/stations. </li>'
-                                        '<li> Select a product/products. </li>'
-                                        '<li> Choose variables. </li>'
+                                        '<li> Select a station/stations </li>'
+                                        '<li> Select a product/products </li>'
+                                        '<li> Choose variables </li>'
                                         '</ul>'
                                         '<li> Choose a name for the group </li>'
                                         '<li> Press <b><i>Save</i></b></li>'
                                         '</ol>',
-                          'read_header2': '<h3>To edit a group of variables: '
+                          'read_header2': '<h3><span style="color:black">'
+                                          'To edit a group of variables: </span>'
                                           '</h3>',
                           'read_body2': '<ol>'
-                                        '<li> Select the group and press '
-                                        '<b><i>Update</i></b></li>'
-                                        '<ul>'
-                                        '<li> Select or deselect variables.'
+                                        '<li> Select the group to change and '
+                                        'press <b><i>Update</i></b></li>'
+                                        '<li> Select or deselect variables'
                                         '</li>'
-                                        '<li> Rename the group. </li>'
-                                        '</ul>'
+                                        '<li> Rename the group if needed'
+                                        '</li>'
                                         '<li> Press <b><i>Save</i></b></li>'
                                         '</ol>',
-                          'read_header3': '<h3>To delete a group of variables: '
+                          'read_header3': '<h3><span style="color:black">'
+                                          'To delete a group of variables: '
+                                          '</span>'
                                           '</h3>',
                           'read_body3': '<ol>'
                                         '<li> Select the group and press '
@@ -156,31 +159,35 @@ class AnalysisGui:
                                         '<li> Click on the '
                                         '<b><i>Delete</i></b> button</li>'
                                         '</ol>',
-                          'update_header': '<h3>Update</h3>',
+                          'update_header': '<h3><span '
+                                           'style="color:black">Update mode'
+                                           '</span></h3>',
                           'update_body': 'Now you can'
-                                         '<ol>'
+                                         '<ul>'
                                          '<li> Choose station and product '
                                          'in order to add or remove variables '
-                                         'from the group.'
+                                         'from the group'
                                          '</li>'
-                                         '<li> Rename the group. </li>'
-                                         '<li> Delete the group.'
-                                         '</ol>',
-                          'new_header': '<h3>New</h3>',
+                                         '<li> Rename the group</li>'
+                                         '<li> Delete the group'
+                                         '</ul>',
+                          'new_header': '<h3><span '
+                                        'style="color:black">New</span>'
+                                        '</h3>',
                           'new_body': 'Steps to create a group of variables:'
                                       '<ol>'
                                       '<li> Select a station, or several '
-                                      'stations, but one at a time.</li>'
+                                      'stations, but one at a time</li>'
                                       '<li> Select a file/product, or '
-                                      'several, but one at a time.</li>'
+                                      'several, but one at a time</li>'
                                       '<li> Select variables. Chosen '
                                       'variables are displayed at '
                                       '<span style="color:black"><i>'
                                       '"Variables in update mode"</i>'
-                                      '</span>. </li>'
+                                      '</span></li>'
                                       '<li> Choose a name for your group of '
                                       'variables and press '
-                                      '<b><i>Save</i></b>.</li>'
+                                      '<b><i>Save</i></b></li>'
                                       '</ol>'
                                       '<br>'
                                       '<b><i>New user?</i></b> By adding '
@@ -188,50 +195,118 @@ class AnalysisGui:
                                       'the group name, you will '
                                       'get an example plot setup so you can see '
                                       'how some of the plots look like. '
-                                      'It will appear as a button <b><i>Batch '
+                                      'It will appear as a button <b><i>Plot '
                                       'example</i></b> in the '
-                                      '<b><i>Plot-menu</i></b>.',
+                                      '<b><i>Visualise</i></b>-menu.',
                           'new_user': '<b><i>New user?</i></b> By adding '
                                       '<b><i>"+p"</i></b> to the end of '
                                       'the group name, you will '
                                       'get an example plot setup so you can see '
                                       'how some of the plots look like. '
-                                      'It will appear as a button <b><i>Batch '
+                                      'It will appear as a button <b><i>Plot '
                                       'example</i></b> in the '
-                                      '<b><i>Plot-menu</i></b>.',
+                                      '<b><i>Visualise</i></b>-menu. Later on '
+                                      'you can always remove or change it.',
                           'general': '<h4><i>General info on group '
                                      'variables</i></h4>'
                                      '<ul>'
                                      '<li> The order of the variables is the '
                                      'order of presentation in outputs, unless '
-                                     'specified otherwise in plot setups.'
+                                     'specified otherwise in plot setups'
                                      '</li>'
                                      '<li> You can combine variables from '
-                                     'different files or stations.'
+                                     'different files or stations'
                                      '</li>'
                                      '</ul>'},
                 'plot_setup': {'multi_plot':
-                                   'Please note that <i>Multi-plot</i> '
-                                   'will use at most <i>two $y$-axes</i> '
-                                   ', and by default the variables are '
-                                   'divided according to their unit.',
-                               'update': '',
+                                   'In a <b><i>Multi-plot</i></b> there is no '
+                                   'limit '
+                                   'on the number of variables to display '
+                                   'in one plot. However, it is only possible '
+                                   'to select variables of at most two '
+                                   'different units divided on <i>two horizontal '
+                                   'axes</i>. Moreover, by default the '
+                                   'variables are divided according to their '
+                                   'unit. <br>'
+                                   'In the case $x_1$ is a variable on '
+                                   'the left axis and $x_2$ is a variable '
+                                   'of the same unit, which should be mapped '
+                                   'to the right axis: '
+                                   '<ol><li>'
+                                   'First make sure the '
+                                   'checkbox <i>Choose axis according to '
+                                   'unit</i>, is unchecked</li>'
+                                   '<li>'
+                                   'Then click on the $x_2$-variable '
+                                   'button twice </li>'
+                                   '</ol>'
+                                   'A selected variable which the icon '
+                                   '$\\mathbb{<<}$ belongs to the left axis, '
+                                   'while $\\mathbb{>>}$ indicates that it '
+                                   'belongs to the right axis.',
                                'corr_plot':
-                                   'Please note that <i>Correlation plot</i> '
+                                   'Please note that <b><i>Correlation plot'
+                                   '</i></b> '
                                    'is a plot for <i>exactly two '
                                    'variables</i>.<br>'
-                                   'The first variable belongs to the '
-                                   'horizontal axis (the $x$-axis), while the '
-                                   'second variable belongs to the vertical '
-                                   'axis (the $y$-axis).',
-                               'new_header':
-                                   '<h3>New</h3>',
-                               'new_body':
-                                   'A plot setup is a collection av '
-                                   '<b><i>plot types</i></b> together with '
-                                   'a set of variables from the group. '
-                                   'Steps to create a plot setup:'
-                                   '<ol>'
+                                   'The first selected variable will be mapped  '
+                                   'to the '
+                                   'horizontal axis, the $x$-axis, while the '
+                                   'second variable will be mapped to the '
+                                   'vertical axis, the $y$-axis.',
+                               'split_plot':
+                                   'In a <b><i>Split-plot</i></b> you can '
+                                   'visualise several variables '
+                                   'in individual plots. The plots are '
+                                   'connected using a <i>zoom-slider</i>, '
+                                   'that zooms all plots. ',
+                               'corr_table': 'Use the <b><i>Correlation '
+                                             'table</i></b> in order to '
+                                             'calculate the Pearson\'s '
+                                             'correlation coefficient '
+                                             'between variables. The value is '
+                                             'visualised using a color scale '
+                                             'that can be set in the '
+                                             '<b><i>Settings</i></b>-menu.',
+                               'statistics': '',
+                               'read_header1': '<h3><span style="color:black">'
+                                               'To create or edit a plot '
+                                               'setup: </span></h3>',
+                               'read_body1':
+                                   '<ul>'
+                                   '<li> '
+                                   'Choose a group of variables in the upper '
+                                   'left dropdown menu and, if applicable, the '
+                                   'plot setup to change </li>'
+                                   '<li>'
+                                   'Press <b><i>New</i></b> or '
+                                   '<b><i>Update</i></b></li>'
+                                   '<li>'
+                                   'Follow the instructions herein'
+                                   '</li>'
+                                   '</ul>',
+                               'read_header2': '<h3><span style="color:black">' 
+                                               'To delete a plot setup: '
+                                               '</span></h3>',
+                               'read_body2': '<ul>'
+                                             '<li> Select the plot setup and '
+                                             'press '
+                                             '<b><i>Update</i></b></li>'
+                                             '<li> Click on the '
+                                             '<b><i>Delete</i></b> button</li>'
+                                             '</ul>',
+                               'new_header': '<h3><span style="color:black">' 
+                                             'New'
+                                             '</span></h3>',
+                               'new_edit_body1':
+                                   'A plot setup contains one, or several, '
+                                   '<b><i>plot types</i></b>, where each plot '
+                                   'type is applied to some variables of the '
+                                   'group of variables. Each plot setup should '
+                                   'have a name which is unique for the '
+                                   'group of variables.<br>'
+                                   '<i>To add a plot type</i> to the plot setup:'
+                                   '<ul>'
                                    '<li>'
                                    'Select a <b><i>plot type</i></b> from the '
                                    'list below <span style="color:black">'
@@ -239,12 +314,12 @@ class AnalysisGui:
                                    'The plot type will be displayed in '
                                    'the 1:st area to the right of '
                                    '<span style="color:black">'
-                                   '<b><i>Current setup</i></b></span>. Note '
-                                   'that this area is locked as long as the '
-                                   'plot type is selected.'
+                                   '<b><i>Current setup</i></b></span>. '
+                                   'Please note that this area is <i>locked '
+                                   'while a new plot type is checked</i>. '
                                    '</li>'
-                                   '<li>Select/deselect variables displayed '
-                                   'below <span style="color:black">'
+                                   '<li>Select/deselect variables '
+                                   'from <span style="color:black">'
                                    '<b><i>Available variables</i></b></span> in '
                                    'order to add or remove them from the '
                                    'plot type. These will be displayed in '
@@ -254,37 +329,47 @@ class AnalysisGui:
                                    '</li>'
                                    '<li>'
                                    'To add another plot type, just select it and '
-                                   'choose variables for that plot type.'
+                                   'choose variables for that plot type too.'
                                    '</li>'
-                                   '<li>'
-                                   'Before saving the plot setup it will need '
-                                   'a name, entered in the area <span '
-                                   'style="color:black"><b><i>Name of plot '
-                                   'setup</i></b>></span>.'
-                                   '</li>'
-                                   '</ol>',
-                               'order':
-                                   '<br> Please note:</b> '
+                                   '</ul>'
+                                   'To change variables of a plot type, '
+                                   'or remove a plot type:'
                                    '<ul>'
                                    '<li>'
-                                   'The list of the plot types '
-                                   'also represent the order of execution of '
-                                   'the plot setup. <br>'
-                                   'To rearrange this order '
-                                   'select a plot type of the setup, '
-                                   'and click on '
-                                   'the button <b><i>Up</i></b>.'
-                                   '</li>'
+                                   'Select the plot type from the '
+                                   'list to the right of <span '
+                                   'style="color:black">'
+                                   '<b><i>Available plot types</i></b></span>. '
+                                   '</li><li>'
+                                   'Add or remove variables using the variable '
+                                   'buttons. </li>'
                                    '<li>'
-                                   'The order of the variables of a '
-                                   'plot type will be the order of '
-                                   'presentation in plots, etc.'
-                                   '</li>',
-                               'new': '',
-                               'read-mode': '',
-                               'split_plot': '',
-                               'corr_table': '',
-                               'statistics': ''},
+                                   'A plot type without variables will be '
+                                   'removed. '
+                                   '</li>'
+                                   '</ul>'
+                                   'Before saving the plot setup it will need '
+                                   'a name, this is entered in the area '
+                                   '<span style="color:black"><b><i>Name of plot '
+                                   'setup</i></b></span>.<br>',
+                               'new_edit_body2':
+                                   'The list of the plot types, of a plot setup, '
+                                   'represents the order of execution, and '
+                                   'the order of the variables will be the order '
+                                   'of presentation in the outputs.<br>'
+                                   'To rearrange the order of execution: '
+                                   'Select a plot type in the setup and '
+                                   'click the button <b><i>"Up"</i></b>.',
+                               'edit_delete_header': '<h3><span style="color:'
+                                                     'black">' 
+                                                     'Update: </span></h3>',
+                               'delete_body': 'To delete the plot setup '
+                                              'just press delete without '
+                                              'changing the content. ',
+                               'new_edit_changes': '<b>Changes are logged in the '
+                                                   'file '
+                                                   f'"{self.user_cache_bak_file}"'
+                                                   f'</b>'},
                 'configs': {'run_configs': {},
                             'latex': {},
                             'split_plot': {},
@@ -346,13 +431,12 @@ class AnalysisGui:
                                                     inner HTML-styled
                                                     list of variables,
                                                     as in 'var_list'
-                'var_btns'          ->  (list(str),str)
+                'var_btns'          ->  (list(str), list(str, list)
                                         - The list contain strings of labels
                                         (Not HTML) for the var buttons of
                                         plot setups, of the format
                                             'H','CO2 (#1)', 'CO2 (#2)'
-                                        - The string (in HTML) is a description
-                                        on the belonging of each variable.
+                                        - A list of tuples [(stn, prods-list)]
                 'var_cont_upd':     ->  Formatted html text for group content
                                         in mode update.
                 'var_cont_read':    ->  Formatted html text for group content
@@ -382,12 +466,13 @@ class AnalysisGui:
 
         """
 
-        def format_var_index(v, ind, out):
-            if out in ['var_btns', 'var_plot_texts']:
+        if output in ['var_btns', 'var_plot_texts']:
+            def format_var_index(v, ind):
                 if ind is not None:
                     return f'{v} (#{ind})'
                 return v
-            else:
+        else:
+            def format_var_index(v, ind):
                 if ind is not None:
                     return f'<b>{v}<sub>{ind}</sub></b>'
                 return f'<b>{v}</b>'
@@ -433,12 +518,12 @@ class AnalysisGui:
             except ValueError:
                 next_index_of_var = None
             if isinstance(next_index_of_var, int):
-                fm_var = format_var_index(var, var_format_index, output)
+                fm_var = format_var_index(var, var_format_index)
                 count_ls[next_index_of_var] += var_format_index
             elif var_format_index > 1:
-                fm_var = format_var_index(var, var_format_index, output)
+                fm_var = format_var_index(var, var_format_index)
             else:
-                fm_var = format_var_index(var, None, output)
+                fm_var = format_var_index(var, None)
 
             var_tuples[i][0] = fm_var
             i += 1
@@ -483,6 +568,7 @@ class AnalysisGui:
                 title_part_ls1.append(txt + ', '.join(prod_var_ls))
 
             title_part_ls2 = []
+            split_plot_subtitles = []
             for stn in station_dict2.keys():
                 txt = f'{stn}, '
                 prod_var_ls = []
@@ -491,37 +577,50 @@ class AnalysisGui:
                     p_short = f'{p_ls[-1]}'
                     p_vars = station_dict2[stn][prod]
                     prod_var_ls.append(f'{p_short}: ' + ', '.join(p_vars))
+                    split_plot_subtitles.extend([f'{p} (from <i>'
+                                                   f'{p_short}</i> of '
+                                                  f'<i>{stn}</i>)' for p in
+                                                   p_vars])
                 title_part_ls2.append(txt + ', '.join(prod_var_ls))
 
             legend_titles = fm_var_ls
+            space = '&nbsp;' * 5
             match var_plot_type:
+
                 case 'multi_plot':
                     if title_part_ls1 and title_part_ls2:
-                        title_part = f'Left axis - ' \
-                                     f'{"; ".join(title_part_ls1)} <br>' \
-                                     f'Right axis - ' \
-                                     f'{"; ".join(title_part_ls2)} <br>'
+
+                        title_part = f'{space}<sub>Left axis - ' \
+                                     f'{"; ".join(title_part_ls1)} </sub><br>' \
+                                     f'{space}<sub>Right axis - ' \
+                                     f'{"; ".join(title_part_ls2)} </sub><br>'
                     else:
-                        title_part = f'{"; ".join(title_part_ls2)} <br>'
-                    if plot_axis:
-                        subtitle = ', '.join(fm_var_ls[: plot_axis])
-                        subtitle += " || " + ', '.join(fm_var_ls[plot_axis:])
-                    else:
-                        subtitle = ', '.join(fm_var_ls)
+                        title_part = f'{space}<sub>{"; ".join(title_part_ls2)} ' \
+                                     f'</sub><br>'
+                    subtitle = ''
+                    # if plot_axis:
+                    #     subtitle = ', '.join(fm_var_ls[: plot_axis])
+                    #     subtitle += " || " + ', '.join(fm_var_ls[plot_axis:])
+                    # else:
+                    #     subtitle = ', '.join(fm_var_ls)
                 case 'corr_plot':
-                    title_part = f'{title_part_ls2[0]} on the <i>x</i>-axis, ' \
+                    title_part = f'{space}<sub>{title_part_ls2[0]} on the ' \
+                                 f'<i>x</i>-axis, ' \
                                  f'and {title_part_ls2[1]} on the ' \
-                                 f'<i>y</i>-axis. <br>Please note that ' \
+                                 f'<i>y</i>-axis. </sub><br>' \
+                                 f'{space}<sub>Please note that ' \
                                  f'timescale of the measurements is ' \
                                  f'converted to the colorgrade starting from ' \
-                                 f'the bottom.'
+                                 f'the bottom.</sub>'
                     subtitle = f'{fm_var_ls[0]} vs {fm_var_ls[1]}'
                 case 'split_plot':
-                    subtitle = ''
-                    title_part = f'{"; ".join(title_part_ls2)} <br>'
+                    subtitle = split_plot_subtitles
+                    title_part = f'{space}<sub>{"; ".join(title_part_ls2)} ' \
+                                 f'</sub>'
                 case _:
                     subtitle = ''
-                    title_part = f'{"; ".join(title_part_ls2)} <br>'
+                    title_part = f'{space}<sub>{"; ".join(title_part_ls2)} ' \
+                                 f'</sub>'
 
             return title_part, subtitle, legend_titles
         else:
@@ -531,16 +630,17 @@ class AnalysisGui:
             case 'station_dict':
                 return station_dict
             case 'var_btns':
-                var_txt = ''
-                separator = '<br>'
+                separator = ''
             case 'var_cont_upd':
                 var_txt = ', '.join(fm_var_ls)
-                var_txt += '<br><hr>'
+                var_txt += '<hr>'
+                var_txt = IcosVarGui.set_css(text=var_txt, css_type='tight')
                 separator = '<hr>'
             case 'var_cont_read':
                 var_txt = f'<b><i>Variables: </i></b>'
                 var_txt += ', '.join(fm_var_ls)
-                var_txt += '<br><hr>'
+                var_txt += '<hr>'
+                var_txt = IcosVarGui.set_css(text=var_txt, css_type='tight')
                 separator = '<hr>'
             case _:
                 var_txt = ''
@@ -564,39 +664,42 @@ class AnalysisGui:
                     main_title_txt = f'<i>All variables are from ' \
                                      f'<b>{prod}</b> of the station ' \
                                      f'<b>{stn_name}</b></i>'
-                    if output != 'var_btns':
+                    if output == 'var_btns':
+                        rows.append((main_title_txt, []))
+                    else:
                         main_title_txt = '<hr>' + main_title_txt
-                    rows.append(main_title_txt)
+                        rows.append(main_title_txt)
             else:
-                main_title_txt = f'<i>Variables from the station ' \
-                                 f'<b>{stn_name}</b></i>'
                 if output != 'var_btns':
-                    main_title_txt = '<hr>' + main_title_txt
+                    txt = f'<i>Variables from the station <b>{stn_name}</b></i> '
+                    main_title_txt = '<hr>' + IcosVarGui.set_css(txt,
+                                                                  'tight_header')
+                else:
+                    main_title_txt = f'<i><b>{stn_name}</b></i> '
+
                 prod_var_ls = []
                 for prod in station_dict[stn].keys():
                     p_vars = station_dict[stn][prod]
-                    prod_title_txt = f'<br><b><i>{prod}: </i></b> &nbsp &nbsp'
+                    prod_title_txt = f'<b><i>{prod}: </i></b> &nbsp &nbsp'
                     last_var = p_vars.pop()
                     if p_vars:
                         var_row = ', '.join(p_vars)
                         prod_title_txt += f'{var_row} <i>and</i> {last_var}'
                     else:
                         prod_title_txt += f'{last_var}'
+                    if output != 'var_btns':
+                        prod_title_txt = IcosVarGui.set_css(prod_title_txt,
+                                                             'tight')
                     prod_var_ls.append(prod_title_txt)
-                if debug_fun:
-                    debug_fun(999, 'var_tuple_ls_converter() --- main_title_txt ',
-                              f'main_title_txt = {main_title_txt}',
-                              f'prod_var_ls = {prod_var_ls}')
-                rows.append(main_title_txt + ''.join(prod_var_ls))
+                if output == 'var_btns':
+                    rows.append((main_title_txt, prod_var_ls))
+                else:
+                    rows.append(main_title_txt + ''.join(prod_var_ls))
 
-        title_txt = f'{separator}'.join(rows)
-
-        if debug_fun:
-            debug_fun(999, 'var_tuple_ls_converter() --- 4',
-                      f'title_txt = {title_txt}')
         if output == 'var_btns':
-            return fm_var_ls, title_txt
+            return fm_var_ls, rows
         else:
+            title_txt = f'{separator}'.join(rows)
             return var_txt + title_txt
 
     @staticmethod
@@ -608,11 +711,24 @@ class AnalysisGui:
         return this_layout
 
     @staticmethod
-    def _set_css(text: str, css_type: str = None):
+    def _html_list(ls: list[str], numeric: bool = None) -> str:
+        tag = 'ol' if numeric else 'ul'
+        if not ls:
+            out = ''
+        elif len(ls) == 1:
+            out = ls[0]
+        else:
+            out = f"<{tag}><li>{'</li><li>'.join(ls)}</li></{tag}>"
+        return out
+
+    @staticmethod
+    def set_css(text: str, css_type: str = None):
         # we use a paragraph in order to set a nice style for the rows
         match css_type:
             case 'tight':
                 return f'<p class="tight_line_height">{text}</p>'
+            case 'tight_header':
+                return f'<p class="tight_header">{text}</p>'
             case 'line':
                 return f'<p class="line_height">{text}</p>'
             case _:
@@ -643,21 +759,31 @@ class AnalysisGui:
         self.theme = theme
         self.level = level
         self.startup_output = wd.Output()
-        self.error_texts = wd.HTML(layout=wd.Layout(width='100%',
-                                                    max_width='90%',
-                                                    height='auto'))
         display(self.startup_output)
-        self.startup_feed(txt='<i>Building up graphical interface...<i>')
+        self.main_widget_container = wd.VBox()
+        self.main_output = wd.Output()
+        self.startup_html = wd.HTML()
+        init_objects = [self.main_widget_container,
+                        self.main_output,
+                        self.startup_html]
         if bool(debug):
             self.debug = True
-            self.debugger = trace_debug.IDebug(output='html')
+            self.debugger = trace_debug.IDebug(output='html',
+                                               auto_refresh=False)
             self.debug_out = wd.Output()
-            self.startup_feed(obj=self.debug_out)
+            self.debug_html = wd.HTML()
+            init_objects.append(self.debug_out)
         else:
             self.debug = False
             self.debugger = None
             self.debug_out = None
             self.debug_value = None
+        self.startup_feed(txt='Building up graphical interface...')
+        with self.startup_output:
+            display(wd.VBox(init_objects))
+        self.error_texts = wd.HTML(layout=wd.Layout(width='100%',
+                                                    max_width='90%',
+                                                    height='auto'))
 
         # directories for appdata and user outputs
         self.code_dir = os.path.join('.', 'eco_tool')
@@ -685,7 +811,7 @@ class AnalysisGui:
         json_file = f'tool_settings_{theme}_L{level}_bak.json'
         self.user_config_bak_file = os.path.join(appdata_dir, json_file)
 
-        self.startup_feed(txt='<i>Connecting to stored data</i>...')
+        self.startup_feed(txt='Connecting to stored data...')
         self.retriever = _AppDataRetriever(app_config_file=self.app_config_file,
                                            user_cache_file=self.user_cache_file,
                                            user_config_file=self.user_config_file,
@@ -703,16 +829,25 @@ class AnalysisGui:
 
         if self.startup_output:
             if txt:
-                with self.startup_output:
-                    txt = AnalysisGui._set_css(txt, 'tight')
-                    display(wd.HTML(f'<i>{txt}</i>'))
-            elif obj:
-                with self.startup_output:
-                    display(obj)
+                previous_value = self.startup_html.value
+                if previous_value and previous_value[-4:] == '</p>':
+                    new_value = f'{previous_value[:-4]}<br><i>{txt}</i></p>'
+                else:
+                    new_value = IcosVarGui.set_css(f'<i>{txt}</i>', 'tight')
+
+                self.startup_html.value = new_value
+                # with self.startup_output:
+                #     previous_value += f'<br>{txt}'
+                #     txt = IcosVarGui.set_css(txt, 'tight')
+                #     display(wd.HTML(f'<i>{txt}</i>'))
+            # elif obj:
+            #     with self.startup_output:
+            #         display(obj)
             else:
                 with self.startup_output:
                     clear_output()
                 self.startup_output = None
+                self.startup_html = None
 
     def debug_value(self, *text_list):
         caller_id = None
@@ -720,13 +855,13 @@ class AnalysisGui:
             if isinstance(text_list[0], int):
                 caller_id, *text_list = text_list
         msg = self.debugger.debug_value(*text_list,
-                                        external_id=caller_id,
-                                        stack_start=2,
-                                        stack_depth=5)
-        with self.debug_out:
-            display(wd.HTML(msg))
+                                        timer_id=caller_id)
+        if msg:
+            self.debug_html.value = msg
+            with self.debug_out:
+                display(wd.HTML(msg))
 
-    def _plot_setup_validation(self, grp, jobs: list or str, mode: str):
+    def _plot_setup_validation(self, grp, jobs: list, mode: str):
         def html_error_txt(er_dict: dict):
             if self.debug:
                 plot_type2name_dict = {'split_plot': 'Split-plot',
@@ -748,8 +883,8 @@ class AnalysisGui:
             error_msg = f'<h4><b>Validation error:</b></h4> The group <b><i' \
                         f'>"{grp}"</i></b> and it\'s plot setups do not ' \
                         f'match.<br>'
-            txt = AnalysisGui._set_css(text=error_msg,
-                                       css_type='line')
+            txt = IcosVarGui.set_css(text=error_msg,
+                                     css_type='line')
             if mode == 'run':
                 if len(jobs) == len(plot_setups):
                     error_msg = f'Can not generate output. '
@@ -761,14 +896,14 @@ class AnalysisGui:
                 else:
                     error_msg = f'Skipping plot setup: {plot_setups[0]}.'
                 error_msg += 'See the <b>suggestion</b> below on how to fix this.'
-                txt += AnalysisGui._set_css(text=error_msg,
-                                            css_type='line')
+                txt += IcosVarGui.set_css(text=error_msg,
+                                          css_type='line')
             elif mode == 'save_group':
                 error_msg = f'The plot setup(s): {", ".join(plot_setups)}, ' \
                             f'will not run. To fix this, please consider the ' \
                             f'suggestion below. '
-                txt += AnalysisGui._set_css(text=error_msg,
-                                            css_type='line')
+                txt += IcosVarGui.set_css(text=error_msg,
+                                          css_type='line')
             if self.debug:
                 self.debug_value(-151, '_plot_setup_validation() '
                                        'html_error_txt()',
@@ -776,8 +911,8 @@ class AnalysisGui:
             for bat, plot_type_rows in er_dict.items():
                 error_msg = f'<br>Missmatch in plot setup <b><i>' \
                             f'"{bat}"</i></b>:<br>'
-                txt += AnalysisGui._set_css(text=error_msg,
-                                            css_type='line')
+                txt += IcosVarGui.set_css(text=error_msg,
+                                          css_type='line')
                 for row in plot_type_rows:
                     for index, plot_type_dict in row.items():
                         plot_type_txt_ls = []
@@ -795,17 +930,17 @@ class AnalysisGui:
                             plot_type_txt += f'<ul><li>' \
                                              f'{"</li><li>".join(var_texts)}' \
                                              f'</li></ul>'
-                            plot_type_txt = AnalysisGui._set_css(text=
+                            plot_type_txt = IcosVarGui.set_css(text=
                                                                  plot_type_txt,
-                                                                 css_type='line')
+                                                               css_type='line')
                             plot_type_txt_ls.append(plot_type_txt)
                         txt += f'<ul><li>{"</li><li>".join(plot_type_txt_ls)}' \
                                f'</li></ul>'
             error_msg = '<br><i>Probably the above variable(s) has been ' \
                         'removed from the group, but not from the plot ' \
                         'setups of the group</i><br>'
-            txt += AnalysisGui._set_css(text=error_msg,
-                                        css_type='line')
+            txt += IcosVarGui.set_css(text=error_msg,
+                                      css_type='line')
             error_msg = '<b><i>Suggestion</i></b>, either:' \
                         '<ol><li> ' \
                         '<ul>' \
@@ -823,25 +958,38 @@ class AnalysisGui:
                         '<li>When <i>Save</i> is chosen old group ' \
                         'variables will be removed.</li>' \
                         '</ul></li></ol><br>'
-            txt += AnalysisGui._set_css(text=error_msg,
-                                        css_type='line')
+            txt += IcosVarGui.set_css(text=error_msg,
+                                      css_type='line')
             return txt, good_plot_setups
 
         cache = self._load_cache()
         error_dict = {}
         if '_var_mismatch' in cache['_groups'][grp]:
-            for b, v in cache["_groups"][grp]["_var_mismatch"].items():
-                if b in jobs:
-                    if b not in error_dict:
-                        error_dict[b] = [v]
+            for ps, v in cache["_groups"][grp]["_var_mismatch"].items():
+                if ps in jobs:
+                    if ps not in error_dict:
+                        error_dict[ps] = [v]
                     else:
-                        error_dict[b].append(v)
+                        error_dict[ps].append(v)
 
         return '' if not error_dict else html_error_txt(error_dict)
 
     def _clear_debug_list(self, c):
         with self.debug_out:
             clear_output()
+
+    def _remove_debug_data(self, c):
+        self.debugger.reset_trace()
+
+    def _auto_refresh_debug_list(self, c):
+        self.debugger.auto_refresh = not self.debugger.auto_refresh
+
+    def _refresh_debug_list(self, c):
+        msg = self.debugger.fetch_traces()
+        if msg:
+            self.debug_html.value = msg
+            with self.debug_out:
+                display(wd.HTML(msg))
 
     def _reset_gui_data(self):
         # reset non-persistent data
@@ -878,44 +1026,45 @@ class AnalysisGui:
 
     def _validate_plot_setup_of_grp(self, cache_dict: dict = None) -> dict:
         # expects a dict like cache['_groups'][grp] see the 'save_group'
-        # when variables are removed from a group with plot_setups
-        # we might get crashes
-        var_ls = cache_dict['_group_vars']
+        # when variables are removed from a group and the group has
+        # plot_setups we might get crashes if the removed variables
+        # belongs to some plot.
+        g_vars = cache_dict.get('_group_vars', [])
 
-        d = cache_dict['_plot_setups']
+        d = cache_dict.get('_plot_setups', {})
         er_dict = {}
         for ps_name in d.keys():
             for index, k in d[ps_name].items():
-                if isinstance(k, str):
+                if not isinstance(k, dict):
                     continue
                 for p_type, v_ls in k.items():
                     if p_type in ['split_plot', 'corr_plot', 'corr_table',
                                   'statistics']:
                         if isinstance(v_ls, list) and not all(v in
-                                                              var_ls for
+                                                              g_vars for
                                                               v in v_ls):
                             if ps_name not in er_dict.keys():
                                 er_dict[ps_name] = {}
                             if index not in er_dict[ps_name].keys():
                                 er_dict[ps_name][index] = {}
                             er_dict[ps_name][index][p_type] = [x for x in v_ls if
-                                                             x not in var_ls]
+                                                             x not in g_vars]
                     else:
                         # p_type multi-plot
                         for x in v_ls:
-                            if not all(v in var_ls for v in x[1]):
+                            if not all(v in g_vars for v in x[1]):
                                 if ps_name not in er_dict.keys():
                                     er_dict[ps_name] = {}
                                 if index not in er_dict[ps_name].keys():
                                     er_dict[ps_name][index] = {}
                                 if p_type in er_dict[ps_name][index].keys():
                                     er_dict[ps_name][index][p_type].extend(
-                                        [y for y in x[1] if y not in var_ls])
+                                        [y for y in x[1] if y not in g_vars])
                                 else:
                                     er_dict[ps_name][index][p_type] = [y for y in
                                                                        x[1] if y
                                                                        not in
-                                                                       var_ls]
+                                                                       g_vars]
         return er_dict
 
     def set_persistent_error(self, error_ls):
@@ -948,13 +1097,13 @@ class AnalysisGui:
                 error_ls = error_ls[1:]
             for error in error_ls:
                 error = f'<b>{margin}{error}</b>'
-                err_msg += AnalysisGui._set_css(error, 'tight')
+                err_msg += IcosVarGui.set_css(error, 'tight')
             err_msg += f'{span_end}'
             self.error_texts.value += err_msg
 
     def start_tool_app(self):
 
-        self.startup_feed(txt='<i>Setting up main menu<i>...')
+        self.startup_feed(txt='Setting up main menu...')
 
         def display_errors(c):
             if self.debug:
@@ -1020,6 +1169,9 @@ class AnalysisGui:
                               '        p.line_height {'
                               '            line-height: 1.3; '
                               '            margin-left: 10px} '
+                              '        p.tight_header {'
+                              '            line-height: 1.5; '
+                              '            margin-left: 20px} '
                               '        p.tight_line_height {'
                               '            line-height: 1.15; '
                               '            margin-left: 30px} '
@@ -1031,23 +1183,67 @@ class AnalysisGui:
         group_cache = self._load_cache()
         if group_cache['_groups'].keys():
             start_value = 'Visualise '
-            self.startup_feed(txt='<i>Generating visualisation<i>...')
+            self.startup_feed(txt='Generating visualisation...')
         else:
             # In the first run, there is no
             # group of variables.
-            self.startup_feed(txt='<i>No data to visualise, '
-                                  'entering new group of variables<i>...')
+            self.startup_feed(txt='No data to visualise, entering new '
+                                  'group of variables...')
             start_value = 'Group menu '
         main_menu.value = start_value
 
         out = wd.Output()
         main_widgets.append(out)
-        if self.debug:
-            debug_btn = wd.Button(description='Clear debug list')
-            debug_btn.on_click(self._clear_debug_list)
-            main_widgets.append(debug_btn)
-            main_widgets.append(self.debug_out)
 
+        if self.debug:
+            show_debug_cb = wd.Checkbox(description='Show debug widgets',
+                                        value=False)
+            show_plots_cb = wd.Checkbox(description='Show plots',
+                                        value=True)
+            auto_refresh_cb = wd.Checkbox(description='Auto refresh',
+                                          value=self.debugger.auto_refresh)
+            refresh_btn = wd.Button(description='Refresh')
+            clear_debug_btn = wd.Button(description='Clear debug list')
+            remove_debug_data_btn = wd.Button(description='Remove debug data')
+
+            refresh_btn.on_click(self._refresh_debug_list)
+            clear_debug_btn.on_click(self._clear_debug_list)
+            remove_debug_data_btn.on_click(self._remove_debug_data)
+
+            auto_refresh_cb.observe(self._auto_refresh_debug_list,
+                                    names='value')
+            main_widgets.append(wd.VBox([wd.HBox([show_debug_cb,
+                                                  show_plots_cb,
+                                                  auto_refresh_cb,
+                                                  refresh_btn, clear_debug_btn,
+                                                  remove_debug_data_btn]),
+                                         self.debug_out]))
+
+            def __show_debug(c):
+                for y in [self.debug_out, show_plots_cb,
+                          auto_refresh_cb, refresh_btn,
+                          clear_debug_btn, remove_debug_data_btn]:
+                    if isinstance(c, dict):
+                        if c['new']:
+                            y.layout.display = 'block'
+                        else:
+                            y.layout.display = 'none'
+                    else:
+                        y.layout.display = 'none'
+
+            def __show_plots(c):
+                if c['new']:
+                    self.main_output.layout.display = 'block'
+                else:
+                    self.main_output.layout.display = 'none'
+
+            show_debug_cb.observe(__show_debug,
+                                  names='value')
+            show_plots_cb.observe(__show_plots,
+                                  names='value')
+            __show_debug('init')
+
+        main_widgets.append(self.main_output)
         main_menu.observe(main_change, "value")
         with out:
             if start_value == 'Visualise ':
@@ -1098,8 +1294,8 @@ class AnalysisGui:
                               '<i>In other words:</i> specify <b><i>what '
                               'data</i></b> to analyse. '
                               '</li><li>'
-                              'Next, create some <i>plot setup</i> using the '
-                              '<b><i>Plot setup menu/i></b>. <br> '
+                              'Next, create some <i>plot setup</i> using the menu'
+                              '<b><i>Plot setups/i></b>. <br> '
                               '<i>In other words</i>: specify <b><i>how</i></b> '
                               'to analyse the data. '
                               '</li></ol>')
@@ -1108,16 +1304,16 @@ class AnalysisGui:
                 msg_ls.append('<br>'
                               '<i>The group of variables '
                               f'<b>{group_drop.value}</b> '
-                              'has no <b>plot setup</b></i>. Use the '
-                              '<b><i>Plot setup menu</i></b> in order '
+                              'has no <b>plot setup</b></i>. Use the menu '
+                              '<b><i>Plot setups</i></b> in order '
                               'to create a plot setup, in order to specify '
                               '<b><i>how</i></b> to analyse the data. ')
 
             for txt in msg_ls:
-                msg += self._set_css(text=txt, css_type='line')
+                msg += self.set_css(text=txt, css_type='line')
             msg += '</span>'
 
-            with out:
+            with self.main_output:
                 clear_output()
                 display(wd.HTML(msg))
 
@@ -1163,11 +1359,11 @@ class AnalysisGui:
                 if p_setups:
                     b_ls = [wd.Button(description=name,
                                       style=dict(button_color='LightSeaGreen'),
-                                      layout=AnalysisGui._get_width_layout(name))
+                                      layout=IcosVarGui._get_width_layout(name))
                             for name in p_setups.keys()]
                     if b_ls:
                         all_title = 'Run all'
-                        all_layout = AnalysisGui._get_width_layout(all_title)
+                        all_layout = IcosVarGui._get_width_layout(all_title)
                         b_ls.append(wd.Button(description=all_title,
                                               icon='area-chart',
                                               button_style='success',
@@ -1203,6 +1399,8 @@ class AnalysisGui:
                 plot_setup_ls = [jobs]
 
             if self.debug:
+                import time
+                t1 = time.time()
                 self.debug_value(-38, 'run_plot_setup() ',
                                  f'jobs = {jobs}',
                                  f'group = {grp}')
@@ -1211,7 +1409,7 @@ class AnalysisGui:
                                                            jobs=plot_setup_ls,
                                                            mode='run')
 
-            with out:
+            with self.main_output:
                 clear_output()
                 if jobs == 'Run all':
                     temp_title = f'<i>Generating report to all plot setups ' \
@@ -1232,48 +1430,61 @@ class AnalysisGui:
                         self.startup_feed(txt=temp_title)
                         display(wd.HTML(temp_title))
                         return
-                self.startup_feed(txt=temp_title)
-                display(wd.HTML(temp_title))
+                if self.startup_output:
+                    self.startup_feed(txt=temp_title)
+                else:
+                    display(wd.HTML(temp_title))
 
             rw = self._get_report_writer()
             self.startup_feed(txt='...')
+            if self.debug:
+                t2 = time.time()
+                self.debug_value(-38, 'run_plot_setup() ',
+                                 f'time = {t2 - t1}')
             report_dict = rw.get_plot_setup_report(group=group_drop.value,
                                                    plot_setup_ls=plot_setup_ls,
                                                    start_date=start_date.value,
                                                    end_date=end_date.value)
+            if self.debug:
+                t3 = time.time()
+                self.debug_value(-38, 'run_plot_setup() ',
+                                 f'rw time = {t3 - t2}')
             self.startup_feed(txt='......')
-            with out:
+            with self.main_output:
                 clear_output()
-                display(report_dict['main_title'])
-                for b in plot_setup_ls:
-                    title_key = 'plot_setup_title'
-                    self.startup_feed(txt=f"<i>Assembling:</i> "
-                                          f"{report_dict[b][title_key].value}"
-                                          f"...")
-                    display(report_dict[b][title_key])
+                display(report_dict['header'])
+                for ps in plot_setup_ls:
+                    outputs = report_dict[ps]
+                    self.startup_feed(txt=f'Assembling plot setup {ps} ('
+                                          f'{len(outputs)} outputs)...')
                     ii = 1
-                    for plot_type_result in report_dict[b]['result']:
-                        if plot_type_result[0] in ['split_plot', 'multi_plot',
+                    for plot_output in outputs:
+                        if plot_output[0] in ['split_plot', 'multi_plot',
                                                    'corr_plot', 'corr_table']:
                             try:
                                 self.startup_feed(txt=f'Building plot #{ii}...')
                                 ii += 1
-                                plot_type_result[1].show()
+                                plot_output[1].show()
                             except Exception as e:
                                 if self.debug:
                                     self.debug_value(-38, 'run_plot_setup()  -- '
                                                           'exception',
                                                      f'---Exception: {e}',
                                                      f'Errors run_plot_setup: ',
-                                                     f'--- plot_type_result[0] = '
-                                                     f'{plot_type_result[0]}',
-                                                     f'--- plot_type_result[1] = '
-                                                     f'{plot_type_result[1]}')
+                                                     f'--- plot_output[0] = '
+                                                     f'{plot_output[0]}',
+                                                     f'--- plot_output[1] = '
+                                                     f'{plot_output[1]}')
                         else:
                             if self.debug:
                                 self.debug_value(-38, 'run_plot_setup() ',
                                                  f'Not implemented: '
-                                                 f'{plot_type_result[0]} ')
+                                                 f'{plot_output[0]} ')
+            if self.debug:
+                t4 = time.time()
+                self.debug_value(-38, 'run_plot_setup() ',
+                                 f'plot time = {t4 - t3}',
+                                 f'total time = {t4 - t1}')
 
         # Main of configurations
         # ======================
@@ -1308,8 +1519,6 @@ class AnalysisGui:
                                     layout=wd.Layout(width='50%',
                                                      height='100%'))
         rows.append(error_widget)
-        out = wd.Output()
-        rows.append(out)
         if set_gui():
             # observe changes
             start_date.observe(date_changed, "value")
@@ -1330,8 +1539,6 @@ class AnalysisGui:
             elif auto_run:
                 if plot_setups.children:
                     run_plot_setup('Run all')
-        else:
-            display(out)
 
     def _load_app_configs(self):
         return self.retriever.load_app_configs()
@@ -1474,20 +1681,20 @@ class AnalysisGui:
         top_text = 'This application is aimed to assist principal ' \
                    'investigators of ICOS Ecosystem stations in the quality ' \
                    'control and analyse NRT data. <br><br>'
-        top_html.value = AnalysisGui._set_css(text=top_text,
-                                              css_type='line')
+        top_html.value = IcosVarGui.set_css(text=top_text,
+                                            css_type='line')
 
         visualise_text = 'The <b><i>Visualise</i></b>-menu is the standard ' \
                          'view of the application. This is were the user run ' \
                          'reports in order to produce plots and statistics ' \
                          'from the ICOS data.<br><br>'
-        visualise_html.value = AnalysisGui._set_css(text=visualise_text,
-                                                    css_type='line')
+        visualise_html.value = IcosVarGui.set_css(text=visualise_text,
+                                                  css_type='line')
 
         group_text1 = 'In the <b><i>Group</i></b>-menu the user can create ' \
                       '<i>groups of variables</i>.<br>'
-        group_html1.value = AnalysisGui._set_css(text=group_text1,
-                                                 css_type='line')
+        group_html1.value = IcosVarGui.set_css(text=group_text1,
+                                               css_type='line')
 
         grp_defn_text = '<i><b>Definition:</b> A <b>group of variables</b> ' \
                         'is a non-empty list of variables where each ' \
@@ -1497,8 +1704,8 @@ class AnalysisGui:
                         f'<b>{link_product_meteo}</b>, ' \
                         f'or <b>{link_product_meteosens}</b>, of some ' \
                         f'<b>{link_etc_stations}</b>.</i><br>'
-        grp_defn_html.value = AnalysisGui._set_css(text=grp_defn_text,
-                                                   css_type='line')
+        grp_defn_html.value = IcosVarGui.set_css(text=grp_defn_text,
+                                                 css_type='line')
         group_text2 = 'In particular a group of variables may ' \
                       'contain variables from different station and ' \
                       'files.<br>' \
@@ -1512,12 +1719,12 @@ class AnalysisGui:
                       '<sup>1</sup> <i>That a variable is ingested means ' \
                       'that it is previewable at the ' \
                       f'{link_cp}.<br><br>'
-        group_html2.value = AnalysisGui._set_css(text=group_text2,
-                                                 css_type='line')
+        group_html2.value = IcosVarGui.set_css(text=group_text2,
+                                               css_type='line')
         plot_setup_text1 = 'In the <b><i>Plot setups</i></b>-menu the user ' \
                            'create <i>plot setups</i>. <br>'
-        plot_setup_html1.value = AnalysisGui._set_css(text=plot_setup_text1,
-                                                      css_type='line')
+        plot_setup_html1.value = IcosVarGui.set_css(text=plot_setup_text1,
+                                                    css_type='line')
 
         plot_setup_defn_text = '<i><b>Definition:</b> A <b>plot setup</b> ' \
                                'for a group of variables, is a list of ' \
@@ -1529,14 +1736,14 @@ class AnalysisGui:
                                'tool, together with some variables ' \
                                'from the group of variables in order to ' \
                                'create an output.'
-        bat_defn_html.value = AnalysisGui._set_css(text=plot_setup_defn_text,
-                                                   css_type='line')
+        bat_defn_html.value = IcosVarGui.set_css(text=plot_setup_defn_text,
+                                                 css_type='line')
 
         plot_setup_text2 = '<i>How</i> to set up a plot setup is explained ' \
                            'in the <b><i>User guide</i></b> of the ' \
                            '<b><i>Plot setups</i></b>-menu.'
-        plot_setup_html2.value = AnalysisGui._set_css(text=plot_setup_text2,
-                                                      css_type='line')
+        plot_setup_html2.value = IcosVarGui.set_css(text=plot_setup_text2,
+                                                    css_type='line')
 
         config_text = 'In the <b><i>Settings</i></b>-menu the user ' \
                       'can:<br> ' \
@@ -1547,46 +1754,46 @@ class AnalysisGui:
                       'up sequences of outputs, i.e. plots of statistics, ' \
                       'to produce. Here variables for the outputs are ' \
                       'selected from a group of variables.<br><br>'
-        settings_html.value = AnalysisGui._set_css(text=config_text,
-                                                   css_type='line')
+        settings_html.value = IcosVarGui.set_css(text=config_text,
+                                                 css_type='line')
 
         extract_text = 'The menu <b><i>Extract data</i></b> is a guidance ' \
                        'on how to extract data from the notebook in case a user ' \
                        'wish to look more into details of a dataset or run ' \
                        'tests not available in this application.<br><br>'
-        extract_html.value = AnalysisGui._set_css(text=extract_text,
-                                                  css_type='line')
+        extract_html.value = IcosVarGui.set_css(text=extract_text,
+                                                css_type='line')
 
         new_grp_text = self.help_dict['group']['read_header1']
         new_grp_text += self.help_dict['group']['read_body1'] + '<br>'
-        new_grp_html.value = AnalysisGui._set_css(text=new_grp_text,
-                                                  css_type='line')
+        new_grp_html.value = IcosVarGui.set_css(text=new_grp_text,
+                                                css_type='line')
 
         upd_grp_text = self.help_dict['group']['read_header2']
         upd_grp_text += self.help_dict['group']['read_body2'] + '<br>'
-        upd_grp_html.value = AnalysisGui._set_css(text=upd_grp_text,
-                                                  css_type='line')
+        upd_grp_html.value = IcosVarGui.set_css(text=upd_grp_text,
+                                                css_type='line')
 
         del_grp_text = self.help_dict['group']['read_header3']
         del_grp_text += self.help_dict['group']['read_body3'] + '<br>'
-        del_grp_html.value = AnalysisGui._set_css(text=del_grp_text,
-                                                  css_type='line')
+        del_grp_html.value = IcosVarGui.set_css(text=del_grp_text,
+                                                css_type='line')
 
         general_text = self.help_dict['group']['general'] + '<br>'
-        general_html.value = AnalysisGui._set_css(text=general_text,
-                                                  css_type='line')
+        general_html.value = IcosVarGui.set_css(text=general_text,
+                                                css_type='line')
 
         technical_text = self.help_dict['technical'] + '<br>'
-        technical_html.value = AnalysisGui._set_css(text=technical_text,
-                                                    css_type='line')
+        technical_html.value = IcosVarGui.set_css(text=technical_text,
+                                                  css_type='line')
 
         end_text = f'<br><hr><br>' \
                    f'<b><i>Contact</i></b> For comments, questions, ' \
                    f'suggestions, bug reports ' \
                    f'or any other kind of feedback, please feel free to ' \
                    f'contact: {mail_cp} or {mail_ad}.'
-        end_html.value = AnalysisGui._set_css(text=end_text,
-                                              css_type='line')
+        end_html.value = IcosVarGui.set_css(text=end_text,
+                                            css_type='line')
 
         display(widgets)
 
@@ -1618,8 +1825,8 @@ class AnalysisGui:
         top_text = 'Besides from running reports as described in *<i>direction ' \
                    'to text to come</i>*, the user can also use this notebook ' \
                    'in order to extract data from the ICOS Carbon Portal. <br><br>'
-        top_html.value = AnalysisGui._set_css(text=top_text,
-                                              css_type='line')
+        top_html.value = IcosVarGui.set_css(text=top_text,
+                                            css_type='line')
         ex_txt1 = '<b><i>Example.</i></b><br> Suppose a user has created a ' \
                   'group of variables called ' \
                   '<i>fluxes</i> and a plot setup called <i>my plots</i> for ' \
@@ -1628,14 +1835,14 @@ class AnalysisGui:
                   'below).<br><br>' \
                   '<b><i>Step 1. Run.</i></b><br>' \
                   'The user execute the code: <br>'
-        out_txt = AnalysisGui._set_css(text=ex_txt1,
-                                       css_type='tight')
+        out_txt = IcosVarGui.set_css(text=ex_txt1,
+                                     css_type='tight')
 
         out_txt += '''<pre><code>
         import warnings
         warnings.simplefilter('ignore', FutureWarning)
         from eco_tool import gui
-        g = gui.AnalysisGui(theme='ES');</code></pre>'''
+        g = gui.IcosVarGui(theme='ES');</code></pre>'''
 
         ex_txt2 = '<br><b><i>Step 2. Gathering data.</i></b><br> ' \
                   'The user select the group <i>fluxes</i> and hits the ' \
@@ -1650,13 +1857,13 @@ class AnalysisGui:
                   '<b>End date</b>, the Fetch date is explained in ' \
                   'the <b>Run configurations</b> under the ' \
                   '<b>Settings</b>-menu).</i><br><br>'
-        out_txt += AnalysisGui._set_css(text=ex_txt2,
-                                        css_type='tight')
+        out_txt += IcosVarGui.set_css(text=ex_txt2,
+                                      css_type='tight')
 
         ex_txt3 = '<b><i>Step 3. Extracting data. </i></b><br>The user opens a ' \
                   'new cell of the notebook and run the code: <br>'
-        out_txt += AnalysisGui._set_css(text=ex_txt3,
-                                        css_type='tight')
+        out_txt += IcosVarGui.set_css(text=ex_txt3,
+                                      css_type='tight')
 
         out_txt += """<pre><code>
         df = g.get_data() # or df = g.get_data('fluxes'), in case the user
@@ -1668,8 +1875,8 @@ class AnalysisGui:
                   'which is a <i><code>pandas.DataFrame</code></i> together ' \
                   'with some ICOS-metadata that can be reached using the ' \
                   'properties: <br>'
-        out_txt += AnalysisGui._set_css(text=ex_txt4,
-                                        css_type='tight')
+        out_txt += IcosVarGui.set_css(text=ex_txt4,
+                                      css_type='tight')
 
         out_txt += '''<pre><code>
         icos_meta -&gt; dict
@@ -1688,24 +1895,24 @@ class AnalysisGui:
         icos_var_unit_ls -&gt; list 
         </pre></code>'''
         ex_txt5 = 'Here, the user can run: <br>'
-        out_txt += AnalysisGui._set_css(text=ex_txt5,
-                                        css_type='tight')
+        out_txt += IcosVarGui.set_css(text=ex_txt5,
+                                      css_type='tight')
         out_txt += '''<pre><code>
                 import pandas as pd
                 df = pd.Dataframe(df)
                 </pre></code>'''
         ex_txt6 = 'in order to convert the data into an standard dataframe.' \
                   '<br><br>'
-        out_txt += AnalysisGui._set_css(text=ex_txt6,
-                                        css_type='tight')
+        out_txt += IcosVarGui.set_css(text=ex_txt6,
+                                      css_type='tight')
 
         example_html.value = out_txt
 
         end_text = f'For comments, questions, suggestions, bug reports ' \
                    f'or any other kind of feedback, please feel free to ' \
                    f'contact: {mail_cp} or {mail_ad}.</p>'
-        end_html.value = AnalysisGui._set_css(text=end_text,
-                                              css_type='line')
+        end_html.value = IcosVarGui.set_css(text=end_text,
+                                            css_type='line')
 
         display(widgets)
 
@@ -1791,7 +1998,7 @@ class AnalysisGui:
             for plot_type_name in plot_type_names:
                 bt = wd.Button(description=plot_type_name,
                                style={'button_color': 'LightGreen'},
-                               layout=AnalysisGui._get_width_layout(
+                               layout=IcosVarGui._get_width_layout(
                                    plot_type_name))
                 bt.on_click(plot_type_click)
                 plot_type_ls.append(bt)
@@ -1829,24 +2036,35 @@ class AnalysisGui:
             if self.debug:
                 self.debug_value(2, f'changed_group_drop()')
             set_group_var_info()
-            set_var_translation_dict()
+            init_var_translation()
             reset_plot_setup_gui(reason='changed_group_drop')
 
-        def set_var_translation_dict():
+        def init_var_translation():
             """
-                Dictionary of labels for buttons and selected variables.
+                Set dictionary of labels for buttons and selected
+                variables, also sets a description text of the variable
+                mapping in the User Guide.
                 The translation dict is of the form
-                {(var,product,station): "name of var button"}
+                {"name of var button": (var,product,station)}
                 in a one-to-one correspondence.
                 The dictionary is temporarily stored in a widget which
                 is not displayed.
             """
-            if self.debug:
-                self.debug_value(3, f'set_var_translation_dict() - start -',
-                                 f'group_drop.value = {group_drop.value}')
             grp = group_drop.value
             cache = self._load_cache()
             var_ls = cache['_groups'][grp]['_group_vars']
+            stn_ls = self._station_name_id_ls()
+            labels, descr_ls = IcosVarGui.var_tuple_ls_converter(
+                var_ls=var_ls,
+                output='var_btns',
+                stn_name_id_ls=stn_ls,
+                debug_fun=self.debug_value)
+            if self.debug:
+                self.debug_value(3, f'init_var_translation() - start -',
+                                 f'group_drop.value = {group_drop.value}',
+                                 f'var_ls = {var_ls}',
+                                 f'labels = {labels}',
+                                 f'descr_txt = {descr_ls}')
             one_stn = len(set(ls[2] for ls in var_ls)) == 1
             one_prod = len(set(ls[1] for ls in var_ls)) == 1
 
@@ -1861,12 +2079,34 @@ class AnalysisGui:
                 if var_name_description:
                     var_name += f' ({", ".join(var_name_description)})'
                 translation_dict[var_name] = v_ls
-
+            translation_dict = dict(zip(labels, var_ls))
             translation_dict['Select all'] = 'All variables'
+            translation_dict['description'] = descr_ls
+
             if self.debug:
-                self.debug_value(3, f'set_var_translation_dict() - end -',
+                self.debug_value(3, f'init_var_translation() - end -',
                                  f'translation_dict = {translation_dict}')
             var_translation_dict.value = str(translation_dict)
+
+        def var_translation_dict_changed(c):
+            description_ls = list(get_var_translation_dict().items())[-1][1]
+            if not description_ls or len(description_ls) == 1:
+                var_description.value = ''
+                return
+
+            header_txt = '<h3>Variable origins and abbreviation mapping</h3>'
+            st_txt = f'<i>Variables from station</i> '
+            txt = ''
+            for stn_prod_ls in description_ls:
+                stn = st_txt + stn_prod_ls[0]
+                prod_ls = stn_prod_ls[1]
+                txt += IcosVarGui.set_css(stn, 'tight_header')
+                for prod in prod_ls:
+                    txt += IcosVarGui.set_css(prod, 'tight')
+
+            info_color = self.widget_style_colors['primary:active']
+            txt = f'<span style="color:{info_color}">{txt}</span>'
+            var_description.value = header_txt + txt
 
         def init_group_var_buttons(mode: str):
             if self.debug:
@@ -1876,7 +2116,7 @@ class AnalysisGui:
                                  f'{var_buttons.children}')
 
             if mode == 'create' and not var_buttons.children:
-                var_list = list(get_var_translation_dict().items())
+                var_list = list(get_var_translation_dict().items())[:-1]
                 var2unit_dict = get_var2unit_dict()
                 btn_ls = []
                 for v_name, var_ls in var_list[:-1]:
@@ -1885,7 +2125,7 @@ class AnalysisGui:
                                     disabled=True,
                                     tooltip=unit,
                                     style={'button_color': 'LightSeaGreen'},
-                                    layout=AnalysisGui._get_width_layout(v_name))
+                                    layout=IcosVarGui._get_width_layout(v_name))
                     btn.on_click(var_button_click)
                     btn_ls.append(btn)
                 v_name = 'Select all'
@@ -1893,10 +2133,11 @@ class AnalysisGui:
                                 disabled=True,
                                 tooltip='',
                                 style={'button_color': 'MediumSeaGreen'},
-                                layout=AnalysisGui._get_width_layout(v_name))
+                                layout=IcosVarGui._get_width_layout(v_name))
                 btn.on_click(var_button_click)
                 btn_ls.append(btn)
                 var_buttons.children = btn_ls
+
             elif mode == 'reset':
                 for b in var_buttons.children:
                     b.icon = ''
@@ -1970,7 +2211,8 @@ class AnalysisGui:
             else:
                 set_plot_setup_upd_dict(dict(_upd_mode='read_mode_no_plot_setup',
                                              _plot_types={}))
-            set_user_guide()
+
+            set_user_guide_msg(info_type=plot_setup)
 
             if self.debug:
                 self.debug_value(11, 'changed_plot_setup_drop()',
@@ -2034,6 +2276,7 @@ class AnalysisGui:
             sel_vars = []
             if plot_types:
                 var_trans_dict = get_var_translation_dict()
+                var_trans_dict.pop('description')
                 for index, plot_type_dict in plot_types.items():
                     for plot_type_code, plot_type_vars in plot_type_dict.items():
                         if isinstance(plot_type_vars, str):
@@ -2041,9 +2284,8 @@ class AnalysisGui:
                             label_ls = ['All variables']
                         elif plot_type_code != 'multi_plot':
                             # the case of list of var-lists
-                            label_ls = [var_name for x in plot_type_vars for var_name
-                                        in
-                                        var_trans_dict.keys() if
+                            label_ls = [var_name for x in plot_type_vars for
+                                        var_name in var_trans_dict.keys() if
                                         var_trans_dict[var_name] == x]
                         else:
                             # the case of list of axes and var-lists
@@ -2088,17 +2330,33 @@ class AnalysisGui:
             if selected_plot_types.value is not None:
                 try:
                     ind = selected_plot_types.value
-                    selected_vars.tooltip = selected_vars.options[ind][0]
+                    sel_vars = selected_vars.options[ind][0]
                 except Exception as e:
+                    sel_vars = ''
                     if self.debug:
                         self.debug_value(16, f'set_selections() ---- exception',
                                          f'--- Exception: {e}',
                                          f'selected_vars.options = '
                                          f'{selected_vars.options}',
                                          f'ind = {selected_plot_types.value}')
-                    selected_vars.tooltip = ''
             else:
-                selected_vars.tooltip = ''
+                sel_vars = ''
+            description_ls = list(get_var_translation_dict().items())[-1][1]
+
+            txt = sel_vars + '\n' if sel_vars else ''
+            txt += 'Variable origins and abbreviation mapping\n'
+            for stn_prod_ls in description_ls:
+                stn = stn_prod_ls[0]
+                prod_ls = stn_prod_ls[1]
+                for x in ['&nbsp', '<b>', '<i>', '<u>', '</b>', '</i>', '</u>']:
+                    stn = stn.replace(x, '')
+                txt += f'\t{stn}  \n'
+                for prod in prod_ls:
+                    for x in ['&nbsp', '<b>', '<i>', '<u>', '</b>', '</i>',
+                              '</u>']:
+                        prod = prod.replace(x, '')
+                    txt += f'\t \t{prod}\n'
+            selected_vars.tooltip = txt
 
             if self.debug:
                 self.debug_value(16, f'set_selections()', 'end ',
@@ -2155,8 +2413,8 @@ class AnalysisGui:
                 reset_multi_plot_auto(hide=True)
             else:
                 upd_dict = get_plot_setup_upd_dict()
-                var_codes = \
-                list(upd_dict['_plot_types'][selected_index].values())[0]
+                var_codes = list(
+                    upd_dict['_plot_types'][selected_index].values())[0]
                 axis_ls = [axis[0] for axis in var_codes]
                 mp_auto_enable = not len(axis_ls) == 2
                 mp_auto_value = not len(axis_ls) != len(set(axis_ls))
@@ -2164,12 +2422,19 @@ class AnalysisGui:
                                       enable=mp_auto_enable,
                                       value=mp_auto_value)
 
-            set_info_guide(info_type=info_type)
+            if self.debug:
+                self.debug_value(112,
+                                 f'changed_selected_plot_type() triggered '
+                                 f'p_type 2',
+                                 f'selected_index = {selected_index}',
+                                 f'info_type = {info_type}',
+                                 f'plot_type_name = {plot_type_name}')
+            set_plot_type_info(info_type=info_type)
 
             if not upd_changed:
                 reset_var_buttons()
 
-        def set_info_guide(info_type: str = None):
+        def set_plot_type_info(info_type: str = None):
             # set info text depending on update mode and plot_type
             # show/hide buttons etc
             # cases of info_type:
@@ -2177,7 +2442,7 @@ class AnalysisGui:
             # 'split_plot', 'corr_table', 'statistics'
 
             if self.debug:
-                self.debug_value(129, f'set_info_guide()',
+                self.debug_value(129, f'set_plot_type_info()',
                                  f' -- info_type = {info_type}')
 
             if info_type == 'reset_gui':
@@ -2195,9 +2460,8 @@ class AnalysisGui:
                                    'add some variables to it.',
                                    '2. Choose a name for the plot setup. '])
                 elif name_of_plot_setup.value == 'Name of plot setup':
-                    msg_ls.append('Remember to choose a name for the '
-                                  'plot setup in the above area <b><i>Batch '
-                                  'name</i></b>.')
+                    msg_ls.append('Name the plot setup in the area <b><i>Name of '
+                                  'plot setup</i></b>.')
                 if info_type == 'update':
                     msg_ls.extend(['<b><i>To edit</i></b> the content of a '
                                    'plot type: Select the plot type to in the '
@@ -2250,26 +2514,27 @@ class AnalysisGui:
                                    f'this moment. </b>',
                                    'No restriction on the variables.'])
                 if self.debug:
-                    self.debug_value(129, f'set_info_guide()  --- end ---',
+                    self.debug_value(129, f'set_plot_type_info()  --- end ---',
                                      f' msg_lse = {msg_ls}')
 
-            info_guide.value = '<br>'.join(msg_ls)
+            plot_type_info.value = '<br>'.join(msg_ls)
+            set_user_guide_msg(info_type=info_type)
 
         def set_user_guide():
             if user_guide_container.layout.display == 'block':
-                d = get_plot_setup_upd_dict().get('_upd_mode', {'_upd_mode': ''})
+                upd_mode = get_plot_setup_upd_dict().get('_upd_mode', '')
                 if self.debug:
                     self.debug_value(1311, 'set_user_guide() ',
-                                     f'd = {d}')
-                if d['_upd_mode'] == 'read_mode_no_plot_setup':
+                                     f'upd_mode = {upd_mode}')
+                if upd_mode == 'read_mode_no_plot_setup':
                     user_guide.value = '<H3><b>To create a plot ' \
                                        'setup:</b></H3><br>' \
                                        '1. Choose a group of variables. ' \
                                        '2. Press <i>New</i> and follow the ' \
                                        'directions.'
-                elif d['_upd_mode'] == 'read_mode_with_plot_setup':
+                elif upd_mode == 'read_mode_with_plot_setup':
                     user_guide.value = '<H3><b>To create a plot setup:</b></H3>' \
-                                       '<br>' \
+                                       '<br>'\
                                        '1. Choose a group of variables.<br>' \
                                        '2. Press <i>New</i> and follow the ' \
                                        'directions.<br>' \
@@ -2282,7 +2547,7 @@ class AnalysisGui:
                                        '3. In case the plot setup should be ' \
                                        'deleted, just press <i>Delete</i> ' \
                                        'without changing the content.'
-                elif d['_upd_mode'] == 'new':
+                elif upd_mode == 'new':
                     user_guide.value = '<H3><b><i>New plot setup</i></b> ' \
                                        '</H3><br>' \
                                        'To create a new plot setup: ' \
@@ -2296,7 +2561,7 @@ class AnalysisGui:
                                        '</li> ' \
                                        '</ol> ' \
                                        'A plot setup can have several plot types.'
-                elif d['_upd_mode'] == 'update':
+                elif upd_mode == 'update':
                     user_guide.value = '<H3><b><i>Update plot setup</i></b>' \
                                        '</H3><br>' \
                                        'To edit the content of a plot type: ' \
@@ -2360,6 +2625,7 @@ class AnalysisGui:
                 upd_dict = get_plot_setup_upd_dict()
                 row_dict = upd_dict['_plot_types'][plot_type_index]
                 var_trans_dict = get_var_translation_dict()
+                var_trans_dict.pop('description')
                 for plot_type_code, var_codes in row_dict.items():
                     if self.debug:
                         self.debug_value(17, f'reset_var_buttons()  -- index '
@@ -2524,7 +2790,7 @@ class AnalysisGui:
 
             update_plot_setup_dict(dict(_plot_types=plot_types,
                                         _selected_plot_type_index=key))
-            set_info_guide(info_type=info_type)
+            set_plot_type_info(info_type=info_type)
 
         def var_button_click(btn):
 
@@ -2677,7 +2943,7 @@ class AnalysisGui:
                         f'Url to the landing page of the data object: '
                         f'<a href="{pid}" target="_blank">'
                         f'<font color="DarkBlue">{pid}</font></a>']
-            set_info_msg(error_ls=error_ls)
+            set_user_guide_msg(error_ls=error_ls)
 
         def set_group_var_info():
             cache = self._load_cache()
@@ -2708,10 +2974,10 @@ class AnalysisGui:
                 var_tuples = copy.deepcopy(cache['_groups'][group]['_group_vars'])
                 output_code = 'var_cont_read'
                 stn_ls = self._station_name_id_ls()
-                return AnalysisGui.var_tuple_ls_converter(var_ls=var_tuples,
-                                                          output=output_code,
-                                                          stn_name_id_ls=stn_ls,
-                                                          debug_fun=
+                return IcosVarGui.var_tuple_ls_converter(var_ls=var_tuples,
+                                                         output=output_code,
+                                                         stn_name_id_ls=stn_ls,
+                                                         debug_fun=
                                                           self.debug_value)
 
         def html_msg(text_ls: list = None,
@@ -2736,154 +3002,94 @@ class AnalysisGui:
                 color = self.widget_style_colors['info:active']
                 emoji = ''
 
-            msg = f'<span style="color:{color}">'
-            msg += f'{margin}<h3>{msg_title} {emoji}</h3>'
+            txt = f'<span style="color:{color}">'
+            txt += f'{margin}<h3>{msg_title} {emoji}</h3>'
             if isinstance(text_ls, list):
-                msg += f'<h3>{margin}'
-                msg += f'<br>{margin}'.join(text_ls)
-                msg += '</h3>'
-            msg += '</span>'
+                txt += f'<h3>{margin}'
+                txt += f'<br>{margin}'.join(text_ls)
+                txt += '</h3>'
+            txt += '</span>'
             if user_guide.value:
-                user_guide.value += f'<br>{msg}'
+                user_guide.value += f'<br>{txt}'
             else:
-                user_guide.value = msg
+                user_guide.value = txt
             if show_user_guide:
                 user_guide.layout.display = 'block'
             with out:
                 clear_output()
-                msg = AnalysisGui._set_css(text=msg,
-                                           css_type='line')
-                display(wd.HTML(msg))
+                txt = IcosVarGui.set_css(text=txt,
+                                         css_type='line')
+                display(wd.HTML(txt))
 
-        def set_info_msg(error_ls=None):
+        def set_user_guide_msg(info_type=None, error_ls=None):
+            if user_guide_container.layout.display == 'none':
+                return
             upd_dict = get_plot_setup_upd_dict()
             upd_mode = upd_dict.get('_upd_mode', None)
             grp = group_drop.value
             if self.debug:
-                self.debug_value(130, 'set_info_msg()', f'upd_mode = {upd_mode}',
+                self.debug_value(130, 'set_user_guide_msg()',
+                                 f'upd_dict = {upd_dict}',
+                                 f'upd_mode = {upd_mode}',
                                  f'grp = {grp}')
+            message = ''
             if upd_mode == 'new':
-                index = upd_dict['_selected_plot_type_index']
-                index = str(index)
-                if index in upd_dict['_plot_types'].keys():
+                txt = self.help_dict['plot_setup']['new_header']
+                txt += self.help_dict['plot_setup']['new_edit_body1'] + '<br>'
+                txt += self.help_dict['plot_setup']['new_edit_body2'] + '<br>'
+                txt += self.help_dict['plot_setup']['new_edit_changes'] + '<hr>'
+                message += IcosVarGui.set_css(text=txt, css_type='line')
+            elif upd_mode == 'update':
+                txt = self.help_dict['plot_setup']['edit_delete_header']
+                txt += self.help_dict['plot_setup']['new_edit_body1'] + '<br>'
+                txt += self.help_dict['plot_setup']['new_edit_body2'] + '<br>'
+                txt += self.help_dict['plot_setup']['delete_body'] + '<br>'
+                txt += self.help_dict['plot_setup']['new_edit_changes'] + '<hr>'
+                message += IcosVarGui.set_css(text=txt, css_type='line')
+            else:
+                txt = self.help_dict['plot_setup']['read_header1']
+                txt += self.help_dict['plot_setup']['read_body1'] + '<br>'
+                txt += self.help_dict['plot_setup']['read_header2'] + '<br>'
+                txt += self.help_dict['plot_setup']['read_body2'] + '<br>'
+                txt += self.help_dict['plot_setup']['new_edit_changes']
+                message += IcosVarGui.set_css(text=txt, css_type='line')
+
+            if info_type:
+                plot_type = info_type
+            else:
+                index = upd_dict.get('_selected_plot_type_index', None)
+                if index and index in upd_dict['_plot_types'].keys():
                     plot_type = list(upd_dict['_plot_types'][index].keys())[0]
                 else:
                     plot_type = None
 
-                if plot_type == 'multi_plot':
-                    info_ls = ['Please note that <i>Multi-plot</i> will '
-                               'use at most <i>two $y$-axes</i> , and by '
-                               'default the variables are divided according '
-                               'to their unit.']
-                elif plot_type == 'corr_plot':
-                    info_ls = ['Please note that <i>Correlation plot</i> '
-                               'is a plot for <i>exactly two '
-                               'variables</i>.',
-                               'The first variable belongs to the '
-                               'horizontal axis (the $x$-axis), while the '
-                               'second variable '
-                               'belongs to the vertical axis (the $y$-axis).']
-                else:
-                    info_ls = [f'To create a plot setup for the group {grp}:',
-                               '<ol>'
-                               '<li>'
-                               'Select <i>plot types</i> (one at a time) from '
-                               'the list in <i>Available plot types</i> below. '
-                               'These will be displayed in the 1:st list to the '
-                               'right of the label <i>Current setup</i>.'
-                               '</li>'
-                               '<li> Select/deselect preferred variables for '
-                               'the chosen plot type. '
-                               'These will be displayed in the 2:st '
-                               'list to the right of the label <i>Current'
-                               ' setup</i>.'
-                               '</li>'
-                               '<li> Choose a name for the plot setup in '
-                               'the area <span style="color:black">"Name of '
-                               'plot setup"</span>.'
-                               '</li>'
-                               '<li> Press save.'
-                               '</li>'
-                               '</ol>',
-                               '<b> - A plot setup may contain several '
-                               '<i>plot types</i>.</b>',
-                               '<b> - The list of the plot types also '
-                               'represents the '
-                               'order of execution of the plot setup, and the '
-                               'order of the variables will be the order of '
-                               'presentation in plots, etc.</b>',
-                               '<b> - To rearrange the order of execution '
-                               'select a plot type to the right of the '
-                               '<i>"Up"</i>-button and click "Up".</b>']
-            elif upd_mode == 'update':
-                info_ls = ['In update mode you can:',
-                           '<ol><li>'
-                           ' Add or remove plot types of a plot type.</li>'
-                           ' Add or remove variables of a plot type.</li>'
-                           '<li>'
-                           'Change the group name.',
-                           '</li>'
-                           '<li>Delete the group.',
-                           '',
-                           '<b>The order of the variables is the order of '
-                           'presentation in plots, etc.</b>',
-                           '<b>Changes are logged in the file '
-                           f'"{self.user_cache_bak_file}"</b>']
-            else:
-                info_ls = ['Steps',
-                           'Start by choosing a group of variables. ',
-                           'Use <i>New</i> to create a new plot setup.',
-                           'Use <i>Update</i> in case you wish to change or '
-                           'delete a plot setup.']
+            if plot_type in ['multi_plot', 'corr_plot', 'split_plot',
+                             'corr_table']:
+                txt = self.help_dict['plot_setup'][plot_type]
+                message += IcosVarGui.set_css(text=txt, css_type='line')
 
-            margin = '&nbsp' * 3
-
-            # info_color = self.widget_style_colors['primary:active']
-            # msg = f'<span style="color:{info_color}">' \
-            #       f'{msg}</span>'
-            #
-            # if error_ls:
-            #     margin = '&nbsp' * 3
-            #     warning_emoji = '\u26a0\ufe0f'
-            #     error_color = self.widget_style_colors['danger:active']
-            #
-            #     err_msg = f'<span style="color:{error_color}">{margin}{margin}'
-            #     err_msg += f'<h3>To do: {warning_emoji}</h3><b>'
-            #     for error in error_ls:
-            #         err_msg += f'{margin}{error}<br>'
-            #     err_msg += '</b></span>'
-            #     msg = err_msg + msg
-            #
-            # user_guide.value = msg
-
-            if info_ls:
+            if message:
                 info_color = self.widget_style_colors['primary:active']
-                txt = f'<span style="color:{info_color}">{margin}{margin}' \
-                      f'<h4>{info_ls[0]}</h4><b>'
-
-                for row in info_ls[1:]:
-                    txt += f'{margin}{row}<br>'
-                txt += '</b></span>'
-            else:
-                txt = ''
+                message = f'<span style="color:{info_color}">' \
+                      f'{message}</span>'
 
             if error_ls:
+                margin = '&nbsp' * 3
                 warning_emoji = '\u26a0\ufe0f'
                 error_color = self.widget_style_colors['danger:active']
-                if txt:
-                    txt += '<br>'
-                txt += f'<span style="color:{error_color}">{margin}{margin}'
+                txt = f'<span style="color:{error_color}">{margin}{margin}'
                 txt += f'<h3>To do: {warning_emoji}</h3>'
                 txt += f'<b>'
                 for error in error_ls:
                     txt += f'{margin}{error}<br>'
                 txt += '</b></span>'
+                message += '<hr>' + IcosVarGui.set_css(text=txt,
+                                                       css_type='line')
 
             if error_ls and user_guide_container.layout.display == 'none':
                 display_user_guide('display_guide')
-            txt = AnalysisGui._set_css(text=txt,
-                                       css_type='line')
-            user_guide.value = txt
+
+            user_guide.value = message
 
         def cleanup_plot_types(d: dict) -> (dict, bool):
             # returns "a clean plot type-dict" and boolean for "dict has changed"
@@ -2935,7 +3141,7 @@ class AnalysisGui:
                 name_of_plot_setup.style.text_color = 'red'
             else:
                 name_of_plot_setup.style.text_color = 'darkgreen'
-                name_of_plot_setup.layout = AnalysisGui._get_width_layout(name)
+                name_of_plot_setup.layout = IcosVarGui._get_width_layout(name)
 
             if self.debug:
                 self.debug_value(121, f'validate_name()',
@@ -3034,12 +3240,12 @@ class AnalysisGui:
         def get_valid_plot_setup():
             cache = self._load_cache()
             grp = group_drop.value
-            b = plot_setup_drop.label
+            ps = plot_setup_drop.label
             ps2validate = plot_setup_drop.value.copy()
 
             if '_var_mismatch' in cache['_groups'][grp].keys():
-                if b in cache['_groups'][grp]['_var_mismatch'].keys():
-                    er_dict = cache["_groups"][grp]["_var_mismatch"][b]
+                if ps in cache['_groups'][grp]['_var_mismatch'].keys():
+                    er_dict = cache["_groups"][grp]["_var_mismatch"][ps]
                     if self.debug:
                         self.debug_value(128, f'validate_plot_setup()',
                                          f'plot_setup_drop.label = '
@@ -3047,7 +3253,6 @@ class AnalysisGui:
                                          f'plot_setup_drop.value = '
                                          f'{ps2validate}',
                                          f'er_dict = {er_dict}')
-
                     reindex = False
                     for index, plot_type_vars in er_dict.items():
                         for v_ls in plot_type_vars.values():
@@ -3077,7 +3282,6 @@ class AnalysisGui:
                                 j += 1
                             else:
                                 d[i] = ps2validate[i]
-
             return ps2validate
 
         def new_plot_setup(c):
@@ -3190,13 +3394,16 @@ class AnalysisGui:
             upd_dict = eval(upd_dict_log.value)
             orig_plot_types = plot_setup_drop.value.copy()
             orig_plot_types.pop('_version', None)
-
+            orig_plot_types = {str(k): v for k, v in orig_plot_types.items()}
             ps_name = upd_dict['_new_name']
             if self.debug:
                 self.debug_value(127, 'delete_plot_setup()',
                                  f'ps_name = {ps_name}',
                                  f'plot_setup_drop.label = '
-                                 f'{plot_setup_drop.label}')
+                                 f'{plot_setup_drop.label}',
+                                 f'orig_plot_types = {orig_plot_types}',
+                                 f"upd_dict['_plot_types'] = "
+                                 f"{upd_dict['_plot_types']}")
 
             validation_error_ls = []
             if upd_dict['_orig_name'] != ps_name:
@@ -3249,7 +3456,7 @@ class AnalysisGui:
                 user_guide_container.layout.display = 'block'
             elif user_guide_container.layout.display == 'none':
                 user_guide_container.layout.display = 'block'
-                set_info_msg()
+                set_user_guide_msg()
             else:
                 user_guide_container.layout.display = 'none'
 
@@ -3285,7 +3492,7 @@ class AnalysisGui:
                     for w in wd_input:
                         set_widget_state(w, disable, tooltip, show_widget)
 
-            set_info_guide(info_type=action_id)
+            set_plot_type_info(info_type=action_id)
 
             set_widget_state(multi_plot_auto_cb, show_widget=False)
 
@@ -3304,7 +3511,7 @@ class AnalysisGui:
                 # update mode
                 init_group_var_buttons(mode='create')
                 # reset_plot_setup_gui update widgets..
-                #        set_info_msg()
+                #        set_user_guide_msg()
 
                 name_of_plot_setup.observe(plot_setup_name_changed, 'value')
                 set_widget_state(update_enable_list, disable=False)
@@ -3417,6 +3624,8 @@ class AnalysisGui:
         #   keeps track on updates of the plot setup
         var_to_unit_dict = wd.Textarea(value='{}', disabled=True)
         var_translation_dict = wd.Textarea(value='{}', disabled=True)
+        var_translation_dict.observe(var_translation_dict_changed,
+                                     names='value')
         upd_dict_log = wd.Textarea(value='{}',
                                    disabled=True,
                                    layout=flex_layout)
@@ -3437,7 +3646,7 @@ class AnalysisGui:
 
         group_drop.observe(changed_group_drop, names='value')
         plot_setup_drop = wd.Dropdown(layout=drop_layout,
-                                      description_tooltip='Name of plot setup')
+                                      description_tooltip='Plot setups')
         plot_setup_drop.observe(changed_plot_setup_drop, names='value')
 
         group_vars = wd.HTML(layout=var_txt_layout,
@@ -3498,14 +3707,18 @@ class AnalysisGui:
                                                              display='none'))
         # Help text to user
         user_guide = wd.HTMLMath(disabled=True,
-                                 layout=wd.Layout(width='90%',
-                                                  max_width='90%',
+                                 layout=wd.Layout(width='auto',
+                                                  max_width='59%',
                                                   height='auto'))
+        var_description = wd.HTML(layout=wd.Layout(width='auto',
+                                                   max_width='40%'))
         if self.debug:
-            user_guide_container.children = [wd.VBox([user_guide,
+            user_guide_container.children = [wd.VBox([wd.HBox([user_guide,
+                                                               var_description]),
                                                       upd_dict_log])]
         else:
-            user_guide_container.children = [wd.VBox([user_guide])]
+            user_guide_container.children = [wd.HBox([user_guide,
+                                                      var_description])]
         user_guide_container.set_title(0, 'User guide')
 
         row_list.append(user_guide_container)
@@ -3530,22 +3743,11 @@ class AnalysisGui:
         avail_variables_label = wd.HTML('<b><i>Available variables: </i></b>',
                                         layout=label_layout)
         var_buttons = wd.HBox(layout=flex_layout)
-        var_row = wd.HBox([avail_variables_label, var_buttons])
+        var_row = wd.VBox([avail_variables_label, var_buttons])
         row_list.append(var_row)
 
         # 7:rd row. update section: Selections
-        selection_label = wd.HTML('<b><i>Current setup: </i></b>',
-                                  layout=label_layout)
-        selected_plot_types_tooltip = "The plot types are listed in order " \
-                                      "of execution." \
-                                      "\nUse the Up-button (displayed in " \
-                                      "update-mode)" \
-                                      "\nto change the order of " \
-                                      "\nexecution."
-        selected_plot_types = wd.Select(disabled=False,
-                                        layout=wd.Layout(max_width='150px'),
-                                        tooltip=selected_plot_types_tooltip)
-        selected_plot_types.observe(changed_selected_plot_type, names='value')
+        selection_label = wd.HTML('<b><i>Current setup: </i></b>')
 
         move_up = wd.Button(description='Up',
                             disabled=False,
@@ -3553,18 +3755,33 @@ class AnalysisGui:
                             tooltip='Move selected plot type...',
                             layout=wd.Layout(width='60px'))
         move_up.on_click(move_selected)
-        selected_vars = wd.Select(disabled=True,
-                                  layout=wd.Layout(max_width='80%'))
 
         left_selection_box = wd.VBox([selection_label, move_up],
-                                     layout=label_layout)
+                                     layout=wd.Layout(width='auto',
+                                                      min_width='130px',
+                                                      max_width='20%'))
+        selected_plot_types = wd.Select(disabled=False,
+                                        layout=wd.Layout(max_width='150px'))
+        selected_plot_types.tooltip = "The plot types are listed in order " \
+                                      "of execution." \
+                                      "\nUse the Up-button (displayed in " \
+                                      "update-mode)" \
+                                      "\nto change the order of " \
+                                      "\nexecution."
+        selected_plot_types.observe(changed_selected_plot_type, names='value')
+
+        selected_vars = wd.Select(disabled=True,
+                                  layout=wd.Layout(width='auto',
+                                                   min_width='20%',
+                                                   max_width='80%'))
+
         row_list.append(wd.HBox([left_selection_box,
                                  selected_plot_types,
                                  selected_vars]))
 
         # 8:rd row. info, special settings
         # Info regarding selected plot type
-        info_guide = wd.HTMLMath(layout=info_guide_layout)
+        plot_type_info = wd.HTMLMath(layout=info_guide_layout)
 
         multi_plot_auto_cb = wd.Checkbox(description='Choose axis according to '
                                                      'unit',
@@ -3572,7 +3789,7 @@ class AnalysisGui:
                                          layout=multi_auto_select_label_layout)
 
         # special_settings = wd.VBox([multi_plot_auto_cb, multi_plot_axis])
-        info_box = wd.VBox([info_guide, multi_plot_auto_cb])
+        info_box = wd.VBox([plot_type_info, multi_plot_auto_cb])
         row_list.append(info_box)
 
         # Trigger changed_group_drop that populate other widgets.
@@ -3612,6 +3829,7 @@ class AnalysisGui:
             latex_changed()
 
             split_p_zoom_sliders.value = split_p_kwargs.get('zoom_sliders', 2)
+            split_p_border_cb.value = split_p_kwargs.get('border', True)
             split_p_use_latex_cb.value = split_p_kwargs.get('use_latex', True)
             split_p_plotly_templates.value = split_p_kwargs.get('template',
                                                                 'plotly')
@@ -3623,6 +3841,7 @@ class AnalysisGui:
             split_p_subtitle_size.value = split_p_kwargs.get('subtitle_size', 12)
 
             multi_p_auto_axis_cb.value = multi_p_kwargs.get('auto_axis', True)
+            multi_p_border_cb.value = multi_p_kwargs.get('border', True)
             multi_p_use_latex_cb.value = multi_p_kwargs.get('use_latex', True)
             multi_p_plotly_templates.value = multi_p_kwargs.get('template',
                                                                 'plotly')
@@ -3633,6 +3852,7 @@ class AnalysisGui:
             multi_p_title_size.value = multi_p_kwargs.get('title_size', 16)
             multi_p_subtitle_size.value = multi_p_kwargs.get('subtitle_size', 12)
 
+            corr_p_border_cb.value = corr_p_kwargs.get('border', True)
             corr_p_use_latex_cb.value = corr_p_kwargs.get('use_latex', True)
             corr_p_plotly_templates.value = corr_p_kwargs.get('template',
                                                               'plotly')
@@ -3649,6 +3869,7 @@ class AnalysisGui:
                                                         plotly_text_fonts[0])
             corr_t_title_size.value = corr_t_kwargs.get('title_size', 16)
             corr_t_subtitle_size.value = corr_t_kwargs.get('subtitle_size', 12)
+            corr_t_border_cb.value = corr_t_kwargs.get('border', True)
             corr_t_color_scale_drop.value = corr_t_kwargs.get('color_scale',
                                                               'blues')
 
@@ -3707,6 +3928,7 @@ class AnalysisGui:
                              'use_exp': latex_use_exp_cb.value},
                         'split_plot_kwargs':
                             {'zoom_sliders': split_p_zoom_sliders.value,
+                             'border': split_p_border_cb.value,
                              'use_latex': split_p_use_latex_cb.value,
                              'template': split_p_plotly_templates.value,
                              'title_font': split_p_title_font.value,
@@ -3716,6 +3938,7 @@ class AnalysisGui:
                              'height': split_p_height.value},
                         'multi_plot_kwargs':
                             {'auto_axis': multi_p_auto_axis_cb.value,
+                             'border': multi_p_border_cb.value,
                              'use_latex': multi_p_use_latex_cb.value,
                              'template': multi_p_plotly_templates.value,
                              'title_font': multi_p_title_font.value,
@@ -3725,6 +3948,7 @@ class AnalysisGui:
                              'height': multi_p_height.value},
                         'corr_plot_kwargs':
                             {'use_latex': corr_p_use_latex_cb.value,
+                             'border': corr_p_border_cb.value,
                              'template': corr_p_plotly_templates.value,
                              'color_scale': corr_p_color_scale_drop.value,
                              'title_font': corr_p_title_font.value,
@@ -3735,6 +3959,7 @@ class AnalysisGui:
                         'corr_table_kwargs':
 
                             {'color_scale': corr_t_color_scale_drop.value,
+                             'border': corr_t_border_cb.value,
                              'title_font': corr_t_title_font.value,
                              'title_size': corr_t_title_size.value,
                              'subtitle_size': corr_t_subtitle_size.value},
@@ -3827,8 +4052,10 @@ class AnalysisGui:
         label_layout = wd.Layout(min_width='90px', max_width='220px')
         plotly_templ_label = wd.HTML(value='<b>Plotly template:</b>',
                                      layout=label_layout)
-        use_latex_label = wd.HTML(value='<b> Use LaTeX</b>',
+        use_latex_label = wd.HTML(value='<b>Use LaTeX</b>',
                                   layout=label_layout)
+        use_border_label = wd.HTML(value='<b>Plotting area border</b>',
+                                   layout=label_layout)
         height_label = wd.HTML(value='<b>Height:</b>',
                                layout=label_layout)
         width_label = wd.HTML(value='<b>Width:</b> ',
@@ -3882,7 +4109,7 @@ class AnalysisGui:
                'Also, if you find problems related to any of these settings, ' \
                'do not hesitate to report this according to the description in ' \
                'the <it>Help</it> menu.</span>'
-        txt += AnalysisGui._set_css(text=txt2, css_type='tight')
+        txt += IcosVarGui.set_css(text=txt2, css_type='tight')
         def_settings_guide = wd.HTML(value=txt)
 
         txt_guide = '<h4>Guide:</h4>'
@@ -3907,10 +4134,10 @@ class AnalysisGui:
                'In case the user chose to change the report dates in a ' \
                'second run, then data between the fetch date and the end date ' \
                'of the first run will already be in memory.</span>'
-        txt_guide += AnalysisGui._set_css(text=txt2, css_type='tight')
-        txt_guide += AnalysisGui._set_css(text=txt3, css_type='tight')
-        txt_guide += AnalysisGui._set_css(text=txt4, css_type='tight')
-        txt_guide += AnalysisGui._set_css(text=txt5, css_type='tight')
+        txt_guide += IcosVarGui.set_css(text=txt2, css_type='tight')
+        txt_guide += IcosVarGui.set_css(text=txt3, css_type='tight')
+        txt_guide += IcosVarGui.set_css(text=txt4, css_type='tight')
+        txt_guide += IcosVarGui.set_css(text=txt5, css_type='tight')
         run_settings_guide = wd.HTML(value=txt_guide)
         auto_run_label = wd.HTML(value='<b>Auto-run</b>')
         auto_run_cb = wd.Checkbox(value=True,
@@ -4030,6 +4257,14 @@ class AnalysisGui:
         split_p_zoom_box = wd.HBox([split_p_zoom_sliders_label,
                                     split_p_zoom_sliders])
 
+        split_p_border_cb = wd.Checkbox(value=True,
+                                        disabled=False,
+                                        indent=False,
+                                        tooltip="Sets a border around "
+                                                "the plotting area",
+                                        layout=cb_layout)
+        split_p_border_box = wd.HBox([split_p_border_cb, use_border_label])
+
         split_p_use_latex_cb = wd.Checkbox(value=True,
                                            disabled=False,
                                            indent=False,
@@ -4066,7 +4301,8 @@ class AnalysisGui:
                                              split_p_subtitle_size])
 
         split_box = wd.VBox([split_plot_guide,
-                             wd.HBox([wd.VBox([split_p_latex_box,
+                             wd.HBox([wd.VBox([split_p_border_box,
+                                               split_p_latex_box,
                                                split_p_plotly_template_box,
                                                split_p_zoom_box]),
                                       wd.VBox([split_p_title_font_box,
@@ -4081,6 +4317,7 @@ class AnalysisGui:
         observe_ordinary_ls.append(split_p_zoom_sliders)
         observe_ordinary_ls.append(split_p_plotly_templates)
         observe_ordinary_ls.append(split_p_use_latex_cb)
+        observe_ordinary_ls.append(split_p_border_cb)
         observe_height_width_ls.append(split_p_width)
         observe_height_width_ls.append(split_p_height)
         observe_ordinary_ls.append(split_p_title_font)
@@ -4119,6 +4356,14 @@ class AnalysisGui:
                                            layout=cb_layout)
         multi_p_auto_axis_box = wd.HBox([multi_p_auto_axis_cb,
                                          multi_p_auto_axis_label])
+        multi_p_border_cb = wd.Checkbox(value=True,
+                                        disabled=False,
+                                        indent=False,
+                                        tooltip="Sets a border around "
+                                                "the plotting area",
+                                        layout=cb_layout)
+        multi_p_border_box = wd.HBox([multi_p_border_cb, use_border_label])
+
         multi_p_use_latex_cb = wd.Checkbox(value=True,
                                            disabled=False,
                                            indent=False,
@@ -4154,7 +4399,8 @@ class AnalysisGui:
         multi_p_subtitle_size_box = wd.HBox([subtitle_size_label,
                                              multi_p_subtitle_size])
         multi_box = wd.VBox([multi_plot_guide,
-                             wd.HBox([wd.VBox([multi_p_latex_box,
+                             wd.HBox([wd.VBox([multi_p_border_box,
+                                               multi_p_latex_box,
                                                multi_p_auto_axis_box,
                                                multi_p_plotly_template_box]),
                                       wd.VBox([multi_p_title_font_box,
@@ -4169,6 +4415,7 @@ class AnalysisGui:
         observe_ordinary_ls.append(multi_p_plotly_templates)
         observe_ordinary_ls.append(multi_p_auto_axis_cb)
         observe_ordinary_ls.append(multi_p_use_latex_cb)
+        observe_ordinary_ls.append(multi_p_border_cb)
         observe_ordinary_ls.append(multi_p_title_font)
         observe_ordinary_ls.append(multi_p_title_size)
         observe_ordinary_ls.append(multi_p_subtitle_size)
@@ -4187,6 +4434,14 @@ class AnalysisGui:
                                         'sampling timestamps </i> of '
                                         f'the data, {color_ref}'
                                         '</span>')
+
+        corr_p_border_cb = wd.Checkbox(value=True,
+                                       disabled=False,
+                                       indent=False,
+                                       tooltip="Sets a border around "
+                                               "the plotting area",
+                                       layout=cb_layout)
+        corr_p_border_box = wd.HBox([corr_p_border_cb, use_border_label])
 
         corr_p_use_latex_cb = wd.Checkbox(value=True,
                                           disabled=False,
@@ -4232,7 +4487,8 @@ class AnalysisGui:
         corr_p_plotly_template_box = wd.HBox([plotly_templ_label,
                                               corr_p_plotly_templates])
         corr_p_box = wd.VBox([corr_plot_guide,
-                              wd.HBox([wd.VBox([corr_p_latex_box,
+                              wd.HBox([wd.VBox([corr_p_border_box,
+                                                corr_p_latex_box,
                                                 corr_p_plotly_template_box,
                                                 corr_p_color_scale_box]),
                                        wd.VBox([corr_p_title_font_box,
@@ -4245,6 +4501,7 @@ class AnalysisGui:
         corr_plot_settings = wd.Accordion(children=[corr_p_box],
                                           titles=('Correlation plot settings',))
         observe_ordinary_ls.append(corr_p_use_latex_cb)
+        observe_ordinary_ls.append(corr_p_border_cb)
         observe_ordinary_ls.append(corr_p_plotly_templates)
         observe_ordinary_ls.append(corr_p_color_scale_drop)
         observe_ordinary_ls.append(corr_p_title_font)
@@ -4264,6 +4521,13 @@ class AnalysisGui:
                                          'the correlation coefficients, '
                                          f'{color_ref}.'
                                          '</span>')
+        corr_t_border_cb = wd.Checkbox(value=True,
+                                       disabled=False,
+                                       indent=False,
+                                       tooltip="Sets a border around "
+                                               "the plotting area",
+                                       layout=cb_layout)
+        corr_t_border_box = wd.HBox([corr_t_border_cb, use_border_label])
         corr_t_color_scale_drop = wd.Dropdown(options=plotly_color_scales,
                                               value='blues',
                                               layout=font_drop_layout)
@@ -4285,7 +4549,8 @@ class AnalysisGui:
                                             corr_t_subtitle_size])
 
         corr_t_box = wd.VBox([corr_table_guide,
-                              wd.HBox([wd.VBox([corr_t_color_scale_box]),
+                              wd.HBox([wd.VBox([corr_t_border_box,
+                                                corr_t_color_scale_box]),
                                        wd.VBox([corr_t_title_font_box,
                                                 corr_t_title_size_box,
                                                 corr_t_subtitle_size_box]),
@@ -4294,6 +4559,7 @@ class AnalysisGui:
         corr_table_settings = wd.Accordion(children=[corr_t_box],
                                            titles=('Correlation table settings',))
         observe_ordinary_ls.append(corr_t_color_scale_drop)
+        observe_ordinary_ls.append(corr_t_border_cb)
         observe_ordinary_ls.append(corr_t_title_font)
         observe_ordinary_ls.append(corr_t_title_size)
         observe_ordinary_ls.append(corr_t_subtitle_size)
@@ -4662,6 +4928,26 @@ class AnalysisGui:
                                   prod_label].pop()
 
         def set_var_drop():
+            def var_name_sort(var_name):
+                # sorting the variables in
+                # 1 alphabetic order where "_" is interpreted as space.
+                # 2 in case of meteosens variable, the second digit goes first,
+                # 3 'X_2_2_1' comes before 'X_10_2_1'
+                var_parts = var_name.split('_')
+
+                digit_ls = var_parts[-3:]
+                if len(digit_ls) == 3 and all(i.isdigit() for i in digit_ls):
+                    # we want to sort with respect to 2nd index,
+                    # and also that 10, 1, 2, 3 is sorted as 1, 2, 3, 10
+                    sorted_digits_ls = [format(f'{x:>3}') for x in
+                                        [digit_ls[1], digit_ls[0], digit_ls[2]]]
+                    # print(999, ' '.join(var_parts[:-3] + sorted_digits_ls))
+                    return ' '.join(var_parts[:-3] + sorted_digits_ls)
+                elif digit_ls[-1].isdigit():
+                    digit_ls[-1] = format(f'{digit_ls[-1]:>3}')
+                    return ' '.join(var_parts[:-3] + digit_ls)
+                return ' '.join(var_parts)
+
             if self.debug:
                 self.debug_value(-15, 'set_var_drop()',
                                  f'product_drop.options = '
@@ -4692,7 +4978,8 @@ class AnalysisGui:
                     return
 
                 var_ls = sorted([key for key in var_dict.keys() if key not in
-                                 ['TIMESTAMP', 'TIMESTAMP_END']])
+                                 ['TIMESTAMP', 'TIMESTAMP_END']],
+                                key=var_name_sort)
                 var_info = [var_dict[key] for key in var_ls]
                 var_drop.options = list(zip(var_ls, var_info))
                 var_drop.value = var_drop.options[0][1]
@@ -4889,10 +5176,10 @@ class AnalysisGui:
                 return ''
 
             stn_ls = self._station_name_id_ls()
-            return AnalysisGui.var_tuple_ls_converter(var_ls=var_tuples,
-                                                      output=output_code,
-                                                      stn_name_id_ls=stn_ls,
-                                                      debug_fun=self.debug_value)
+            return IcosVarGui.var_tuple_ls_converter(var_ls=var_tuples,
+                                                     output=output_code,
+                                                     stn_name_id_ls=stn_ls,
+                                                     debug_fun=self.debug_value)
 
         def set_group_vars(c):
             cache = self._load_cache()
