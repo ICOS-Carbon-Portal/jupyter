@@ -28,10 +28,10 @@ import copy
 import os
 
 import warnings
-
 warnings.simplefilter("ignore", FutureWarning)
 
-if os.getcwd()[-8:] == 'eco_tool':
+_, work_dir = os.path.split(os.getcwd())
+if work_dir == 'eco_tool':
     import icos_data
     import report_writer
     from icos_timeseries import IcosFrame

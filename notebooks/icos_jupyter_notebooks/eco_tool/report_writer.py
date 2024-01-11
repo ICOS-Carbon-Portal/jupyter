@@ -16,7 +16,9 @@ import datetime
 from icoscp.cpb.dobj import Dobj
 from ipywidgets import widgets as wd
 import os
-if os.getcwd()[-8:] == 'eco_tool':
+
+_, work_dir = os.path.split(os.getcwd())
+if work_dir == 'eco_tool':
     import gui
     import icos_data
     import plot
