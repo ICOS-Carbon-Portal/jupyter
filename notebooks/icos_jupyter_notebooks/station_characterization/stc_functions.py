@@ -409,14 +409,14 @@ def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='',
     lat=myStation.lat
     unit=myStation.settings['unit']
     if unit=='percent':
-        unit='%'
+        unit='(%)'
     else:
         if label=='point source contribution':
             unit='(ppm)'
         if label=='population sensitivity':
-            unit='(population * (ppm /(μmol / (m²s))))'
+            unit='(population * sensitivity)'
         if label=='sensitivity':
-            unit='(ppm /(μmol / (m²s)))'
+            unit='(ppm given a uniform flux of 1 μmol / (m²s))'
 
     fp_lon=myStation.fpLon
     fp_lat=myStation.fpLat
@@ -467,13 +467,13 @@ def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='',
         
         im = ax.imshow(field[:,:],interpolation=None,origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
         cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='neither')
-        cbar.set_label(label+'  '+unit)
+        cbar.set_label(label+' '+unit)
 
     else:
         
         im = ax.imshow(np.log10(field)[:,:],interpolation='none',origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
         cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='neither')
-        cbar.set_label(label+'  log$_{10}$ '+unit)
+        cbar.set_label(label+' log$_{10}$ '+unit)
     
     ax.text(0.01, -0.25, 'min: %.2f' % np.min(field[:,:]), horizontalalignment='left',transform=ax.transAxes)
     ax.text(0.99, -0.25, 'max: %.2f' % np.max(field[:,:]), horizontalalignment='right',transform=ax.transAxes)
@@ -507,20 +507,13 @@ def degrees_from_point_to_grid_cells(station_lat, station_lon, grid_lat, grid_lo
 
 
 def polar_graph(myStation, rose_type, colorbar='gist_heat_r', zoom=''):   
-    
-    """
-    function contained - can make shorter. not global. 
-    """
-    
+
     interval_bins=myStation.intervalBins
     interval_labels=myStation.intervalLabels
     dir_bins=myStation.dirBins
     dir_labels=myStation.dirLabels
     fp=myStation.fp
     unit=myStation.settings['unit']
-    
-    fp_pop= import_population_data()
-    fp_point= import_point_source_data()
     
     #same function used to all three types of map
     if rose_type=='sensitivity':
@@ -530,78 +523,62 @@ def polar_graph(myStation, rose_type, colorbar='gist_heat_r', zoom=''):
         
     elif rose_type=='point source contribution':
         
+        fp_point= import_point_source_data()
+        
         grid_to_display=fp*fp_point
         
     elif rose_type=='population sensitivity':
         
+        fp_pop= import_population_data()
         grid_to_display=fp*fp_pop
         
-    sens_value = []
-    for sublist in grid_to_display[0].tolist():
-        sens_value.extend(sublist)
-
-
-    #putting it into a dataframe - to perform groupby etc
+    # Initialize an empty DataFrame to hold sensitivity mapping data.
     df_sensitivity_map = pd.DataFrame()
-    df_sensitivity_map['distance'] = myStation.distances
-    df_sensitivity_map['sensitivity'] = sens_value
-    df_sensitivity_map['degrees'] = myStation.degrees
 
-    #for % later - sensitivity within certain bin (distance and direction)
-    total_sensitivity= df_sensitivity_map['sensitivity'].sum()
+    # Populate the DataFrame with sensitivity data and associated spatial metrics.
+    df_sensitivity_map['sensitivity'] = grid_to_display.flatten()  # Convert 2D grid data to a 1D array.
+    df_sensitivity_map['distance'] = myStation.distances  # Distance from the station for each grid cell.
+    df_sensitivity_map['degrees'] = myStation.degrees  # Degree direction for each grid cell.
+
+    # Binning data by distance and degree intervals to summarize information.
+    # Define bins for distance intervals.
+    rosedata = df_sensitivity_map.assign(
+        Interval_bins=lambda df: pd.cut(df['distance'], bins=interval_bins, labels=interval_labels, right=True)
+    )
+
+    # Define bins for directional degrees, treating the circular nature of direction (0 and 360 degrees are the same).
+    rosedata = rosedata.assign(
+        Degree_bins=lambda df: pd.cut(df['degrees'], bins=dir_bins, labels=dir_labels, right=False)
+    ).replace({'Degree_bins': {360: 0}})  # Correcting for circular direction representation.
+
+    # Create a unique identifier for each combination of distance and direction.
+    rosedata['key'] = rosedata['Interval_bins'].astype(str) + ' ' + rosedata['Degree_bins'].astype(str)
+
+    # Aggregate sensitivity data by the unique combination of distance and direction.
+    # This summarization helps in understanding the sensitivity distribution across different spatial bins.
+    rosedata_groupby = rosedata.groupby('key', as_index=False)['sensitivity'].sum().reset_index()
+
+    # Merge the aggregated sensitivity data back to the original DataFrame.
+    # This step assigns the summed sensitivity values to each cell based on their distance and direction bin.
+    # The merge operation is performed without sorting to maintain the original order.
+    rosedata = rosedata.reset_index().merge(rosedata_groupby[['key', 'sensitivity']], on='key', suffixes=('', '_summed'), sort=False)
+
+    # Sort the DataFrame by the original grid cell index to maintain spatial consistency.
+    # This sorting is crucial for visualizing the sensitivity data correctly on the map.
+    rosedata = rosedata.sort_values(by=['index'])
+
+    # Note: The final DataFrame 'rosedata' now contains both individual cell sensitivities
+    # and the aggregated sensitivity sums for each spatial bin, ready for visualization or further analysis.
     
-    #binning - by the distace intervals and degree intervals. Summarize these. 
-    rosedata=df_sensitivity_map.assign(Interval_bins=lambda df: pd.cut(df['distance'], bins=interval_bins, labels=interval_labels, right=True))
+    rosedata_list=rosedata['sensitivity_summed'].tolist()
 
-    rosedata=rosedata.assign(Degree_bins=lambda df: pd.cut(df['degrees'], bins=dir_bins, labels=dir_labels, right=False))
-   
-    #the 360 degree are the same as 0:
-    rosedata=rosedata.replace({'Degree_bins': {360: 0}})
-
-    #the combination of the distance and direction columns is used to create a unique column value for all cells
-    #with certain direction/distance combination.
-    #make it to string to be able to combine.
-    rosedata['key']=rosedata['Interval_bins'].astype(str) + ' ' + rosedata['Degree_bins'].astype(str) 
-
-    #group by the unique combination of direction and distance
-    rosedata_groupby=rosedata.groupby(by=['key'], as_index=False)['sensitivity'].sum().reset_index()
-
-    #merge between the 192000 cells and the "groupedby" values: each cell in a specific direction and distance will
-    #get the sum of the cells in that same specific bin. Same color on the map corresponing to % or absolute sensitivity.
-    #reset_index() creates a column with the original index of the dataframes that are joined. Needed to sort the dataframe
-    #in the next spted because default is to sort by the key used. 
-    rosedata=rosedata.reset_index().merge(rosedata_groupby, left_on='key', right_on='key', sort=False)
-
-    #sort by the original index of the 192000 cells: 
-    rosedata=rosedata.sort_values(by=['index_x'])
-
-    #x is the "fist" (rosedata.merge) dataframe that was merged (the 192000 individual cells) 
-    #y is the dataframe that is merged to the first. Both columns name "sensitivity". 
-    #sensitivity_y is the merged data - the summarized sensitivity value for the whole bin (direction and distance bin)
-    rosedata_list=rosedata['sensitivity_y'].tolist()
-
-    #now starts the process of "packing it back up" so that it can be displayed as a map (same format as the netCDF files with 480
-    #lists of lists - the first list is all tha values that has "the first" latitude value and all 400 different longitude values)
-    #calculate the % sensitivity - can be changed to absolute sensitivity
     if unit=='percent':
+
+        total_sensitivity= df_sensitivity_map['sensitivity'].sum() 
         rosedata_list=[(sensitivity_value/total_sensitivity)*100 for sensitivity_value in rosedata_list]
 
-    #the "netcdf simulation" (see text above)
-    rosedata_list_of_lists=[]
-
-    index=0
-    while index<192000:
-        index_to=index+400
-
-        #for each list: need to grab the 400 values that are the combination of the same latitude value
-        #but different longitude values
-        rosedata_list_of_lists.append(rosedata_list[index:index_to])
-
-        #start at the next 400 in the list in the next turn of the loop:
-        index=index+400
-
-    #numpy array works to display in map
-    rosedata_array=np.array(rosedata_list_of_lists) 
+    # footprint shape for display in map according to STILT grid
+    rosedata_array = np.array(np.array(rosedata_list).reshape(len(myStation.fpLat), len(myStation.fpLon)))
         
     caption=(unit.capitalize() + ' ' + rose_type + ' given direction and distance')
           
@@ -818,8 +795,8 @@ def seasonal_table(myStation):
     year=myStation.settings['startYear']
     available_STILT= myStation.settings['stilt']
     months= available_STILT[str(year)]['months']
-    
-    var_load=pd.read_csv(stcDataPath + 'seasonal_table_values_GPW_pop.csv') 
+    var_load=pd.read_csv(stcDataPath + 'seasonal_table_values_2024_02_07.csv')
+
     station_year= station +'_' + str(year)
 
     if station_year in set(var_load.station_year):
@@ -1260,8 +1237,8 @@ def multiple_variables_graph(myStation):
    
     else:
         full_year = False
-
-    var_load=pd.read_csv(stcDataPath + 'seasonal_table_values_GPW_pop.csv') 
+        
+    var_load=pd.read_csv(stcDataPath + 'seasonal_table_values_2024_02_07.csv')
 
     index = 0 
     stations_missing_footprints=[]
