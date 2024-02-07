@@ -126,9 +126,9 @@ class StationChar():
         start_date=dt.datetime(self.settings['startYear'],self.settings['startMonth'],self.settings['startDay'],min(hours))
         end_date=dt.datetime(self.settings['endYear'],self.settings['endMonth'],self.settings['endDay'],max(hours))
         date_range=pd.date_range(start_date,end_date,freq='3H')
-
-        self.dateRange = stc_functions.date_range_hour_filtered(date_range,hours)
-
+        
+        self.dateRange = [date for date in date_range if date.hour in hours]
+        
     def _setFootprint(self):
         """
         Generate an average footprint (fp) given the user date range.

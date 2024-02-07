@@ -89,7 +89,6 @@ def read_aggreg_footprints(station, date_range):
         return 0, None, None, None, None
 
 # function to read STILT concentration time series (new format of STILT results)
-# function to read STILT concentration time series (new format of STILT results)
 def read_stilt_timeseries(station,date_range,timeselect_list):
     url = 'https://stilt.icos-cp.eu/viewer/stiltresult'
     headers = {'Content-Type': 'application/json', 'Accept-Charset': 'UTF-8'}
@@ -134,93 +133,48 @@ def read_stilt_timeseries(station,date_range,timeselect_list):
 
     return df
 
-#given the input - create an updated pandas date range with only hours in timeselect_list
-def date_range_hour_filtered(date_range, timeselect_list):
-    
-    #depending on how many input (max 8 for 0 3 6 9 12 15 18 21), filter to include hours.
-    for time_value in timeselect_list:
-        if len(timeselect_list)==1:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)]
-            #df_nine = df.loc[(timeselect_list[count_timeselect] == df.index.hour)]
-        if len(timeselect_list)==2:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]
-        if len(timeselect_list)==3:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)]
-
-        if len(timeselect_list)==4:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]
-
-        if len(timeselect_list)==5:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
-            | date_range[(timeselect_list[4] == date_range.hour)]
-
-        if len(timeselect_list)==6:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
-            | date_range[(timeselect_list[4] == date_range.hour)] | date_range[(timeselect_list[5] == date_range.hour)]
-
-        if len(timeselect_list)==7:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
-            | date_range[(timeselect_list[4] == date_range.hour)] | date_range[(timeselect_list[5] == date_range.hour)]\
-            | date_range[(timeselect_list[6] == date_range.hour)]
-        
-        if len(timeselect_list)==8:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
-            | date_range[(timeselect_list[4] == date_range.hour)] | date_range[(timeselect_list[5] == date_range.hour)]\
-            | date_range[(timeselect_list[6] == date_range.hour)] | date_range[(timeselect_list[7] == date_range.hour)]
-          
-    return date_range
-
 def area_footprint_based_on_threshold(input_footprint, fp_lat, fp_lon, threshold):
+    """
+    Calculates the area of the footprint based on a given sensitivity threshold.
 
-    #total sensitivity - use this value to calculate what the sensitivity of the ex 50% footprint it (threshold)
-    sum_sensitivity_values=sum(input_footprint.flatten())
-
-    threshold_sensitivity=sum_sensitivity_values*threshold
-
-    #create a dataframe that will have the updated sensitivity values + the steps on the way
-    df_sensitivity = pd.DataFrame()
-
-    #one column with the original sensitivity values. Has an index that will be used to sort back to 
-    #this order (flattened 2D... back to 2D with updated sensitivity values in last step)
-    df_sensitivity['sensitivity']=input_footprint.flatten()
+    Args:
+        input_footprint (numpy.ndarray): The sensitivity values of the footprint.
+        fp_lat (numpy.ndarray): Latitude values of the footprint grid.
+        fp_lon (numpy.ndarray): Longitude values of the footprint grid.
+        threshold (float): The threshold to calculate the area of interest within the footprint.
+        
+    Returns:
+        float: The total area within the specified sensitivity threshold.
+    """
     
-    #sensitivity values sorterd from largest to smallest
-    df_sensitivity_sorted=df_sensitivity.sort_values(by=['sensitivity'], ascending=False)
-    
-    #another column that has the cumilated sum of the values in the sensitivity column.
-    #used to determine when the footprint threshold is met. 
-    df_sensitivity_sorted['cumsum_sens']=df_sensitivity_sorted.cumsum()
-    
-    #mask threshold: when the cumulative sum is over the threshold - these values are assigned 0.
-    #to be multiplied with the original sensitivity values (disregard the ones with value 0)
-    df_sensitivity_sorted['mask_threshold']=df_sensitivity_sorted['cumsum_sens']
+    # Flatten the input footprint for easier manipulation
+    flattened_fp = input_footprint.flatten()
+    sum_sensitivity_values = flattened_fp.sum()
+    threshold_sensitivity = sum_sensitivity_values * threshold
 
-    if threshold==1:
+    # Create a DataFrame for manipulation
+    df_sensitivity = pd.DataFrame({'sensitivity': flattened_fp})
+    df_sensitivity_sorted = df_sensitivity.sort_values(by='sensitivity', ascending=False)
+    df_sensitivity_sorted['cumsum_sens'] = df_sensitivity_sorted['sensitivity'].cumsum()
 
+    # Apply threshold mask
+    if threshold == 1:
         df_sensitivity_sorted['mask_threshold']= np.where(df_sensitivity_sorted['sensitivity']==0, 0, 1)
     else:
         df_sensitivity_sorted['mask_threshold']= np.where(df_sensitivity_sorted['cumsum_sens']>=threshold_sensitivity, 0, 1)
-        
-    #sort it back (so in correct lat/lon order for "packing back up" to 2D)
-    df_sensitivity_upd=df_sensitivity_sorted.sort_index()
-    #want a footprint with 0/1 for see or not see also 
-    list_mask_threshold=df_sensitivity_upd['mask_threshold'].tolist()
+
+    # not sorted according to cell size anymore: back to position in original shapefile
+    df_sensitivity_mask=df_sensitivity_sorted.sort_index()
     
-    upd_footprint_see_not_see=np.array(list_mask_threshold).reshape((len(fp_lat), len(fp_lon)))
+    # Use mask to filter values and reshape back to original footprint shape
+    fp_sensitivity_mask = np.array(list(df_sensitivity_mask['mask_threshold'])).reshape((len(fp_lat), len(fp_lon)))
     
     #a NetCDF file with the grid size calues in m2
     f_gridarea = cdf.Dataset(stcDataPath + 'gridareaSTILT.nc')
-    #area stored in "cell_area". Convert to km2
-    gridarea = f_gridarea.variables['cell_area'][:]/1000000
-    
-    area_within_threshold = sum((upd_footprint_see_not_see * gridarea).flatten())
 
+    gridarea_km2 = f_gridarea.variables['cell_area'][:] / 1e6  # Convert m2 to km2
+    area_within_threshold = (fp_sensitivity_mask * gridarea_km2).sum()
+    
     return area_within_threshold
 
 def import_landcover_HILDA(year='2018'):
@@ -261,46 +215,43 @@ def import_population_data():
     return fp_pop
 
 def import_point_source_data():
+    """
+    Calculates point source CO2 emissions per square meter per second from annual data.
 
-    point_source_data= Dataset(stcDataPath+ 'E_PRTR_pointsource_2017.nc')
+    Args:
+        stcDataPath (str): Path to the directory containing the relevant NetCDF files.
 
-    #emissions in kg/year in the variable "Sum_Tota_1"
-    fp_point_source=point_source_data.variables['Sum_Tota_1'][:,:]
+    Returns:
+        numpy.ndarray: The emissions in micro-moles per square meter per second.
+    """
+    # Load point source data and grid area from NetCDF files
+    with Dataset(os.path.join(stcDataPath, 'E_PRTR_pointsource_2017.nc')) as point_source_data, \
+         Dataset(os.path.join(stcDataPath, 'gridareaSTILT.nc')) as grid_area_data:
+        
+        # Emissions in kg/year from the variable "Sum_Tota_1"
+        emissions_kg_year = point_source_data.variables['Sum_Tota_1'][:,:]
 
-    # different from population data: can translate the emissions within each stilt cell
-    # to the effect it will have to the final CO2 concentrations at the stations.
-    # just need to get it in the right unit (micromole/m2s) and multiply by the individual or aggregated footprints
+        # Grid cell area in m2 from the variable "cell_area"
+        grid_area_m2 = grid_area_data.variables['cell_area'][:]
 
-    # divide by the molar weight in kg. 12 (C)+16(O)+16(O) =44 0.044 in kg.
-    # get number of moles of C this way. Want it in micromole though: 1 mole= 1000000 micromole
-    fp_point_source_moles_C=fp_point_source/0.044
+    # Convert emissions from kg/year to micro-moles per m2 per second
+    molar_mass_C = 44  # g/mol for CO2, or 0.044 kg/mol
+    seconds_per_year = 31536000
+    emissions_micromoles_m2_s = (emissions_kg_year / molar_mass_C * 1e6) / grid_area_m2 / seconds_per_year
 
-    #how many micro-mole is that? multiply by 1000000
-    fp_point_source_micromoles_C=fp_point_source_moles_C*1000000
-
-    #a NetCDF file with the grid size calues in m2
-    f_gridarea = cdf.Dataset(stcDataPath + 'gridareaSTILT.nc')
-
-    #area stored in "cell_area"
-    gridarea = f_gridarea.variables['cell_area'][:]
-
-    fp_point_source_m2= fp_point_source_micromoles_C/gridarea
-
-    #how many micro moles let out per second (have yearly data)
-    fp_point_source_m2_s= fp_point_source_m2/31536000
-    
-    return fp_point_source_m2_s
+    return emissions_micromoles_m2_s
 
 def date_and_time_string_for_title(date_range, timeselect_list):
-    
-    date_index_number=len(date_range) - 1
-    
-    timeselect_string=[str(value) for value in timeselect_list]
-    timeselect_string =':00, '.join(timeselect_string) + ':00'
+    # Use datetime formatting to simplify date string construction
+    start_date = date_range[0].strftime('%Y-%m-%d')
+    end_date = date_range[-1].strftime('%Y-%m-%d')
 
-    date_and_time_string=('\n' + str(date_range[0].year) + '-' + str(date_range[0].month) + '-' + str(date_range[0].day)\
-                + ' to ' + str(date_range[date_index_number].year) + '-' + str(date_range[date_index_number].month) + '-' \
-                + str(date_range[date_index_number].day)+ ', Hour(s): ' + timeselect_string+ '\n')
+    # Build time selection string with list comprehension and string join
+    timeselect_string = ', '.join(f"{hour}:00" for hour in timeselect_list)
+
+    # Combine the formatted strings into the final date and time string
+    date_and_time_string = f"\n{start_date} to {end_date}, Hour(s): {timeselect_string}\n"
+    
     return date_and_time_string
 
 #function to generate maps with cells binned by defined intervals and direction
@@ -358,40 +309,30 @@ def compass_bearing(pointA, pointB):
 
     return compass_bearing
 
+
 def define_bins_maprose(km_intervals, bin_size):
-        
-    #the number of bins
-    number_bins=round((5000/km_intervals),0)
+    # Calculate the number of bins based on a maximum distance of 5000 km
+    number_bins = round(5000 / km_intervals)
     
-    #start at 0 km of the station. Then append to this list
-    interval_bins=[0]
+    # Generate interval bins using numpy, extending to infinity for the last bin
+    interval_bins = np.arange(0, km_intervals * number_bins, km_intervals, dtype=float)
+    interval_bins = np.append(interval_bins, np.inf)
     
-    #ex 100, 200, 300 if km_intervals=100
-    for number in range(1, int(number_bins)):
-        interval_bins.append(km_intervals*number)
-    
-    #the last number is infinity - however far the domain stretches marks the end of the last bin.
-    interval_bins.append(np.inf)
-    
-    #labels: not used in map - but used in the grouping
+    # Generate labels for non-directional bins
     interval_labels = nondirection_labels(interval_bins, units='km')
-
-    #direction: using the input (degree_bin) to set the bins so that the first bin has "north (0 degrees) in the middle"
-    #"from_degree" becomes a negative value (half of the degree value "to the left" of 0)
-    from_degree=-(bin_size/2)
-
-    #"to_degree" is a vale to indicate the last bins ending. Must check values all the way to 360 which means the last bin 
-    #will go past 360 and later be joined with the "0" bin (replace function in next cell)
-    to_degree= 360 + (bin_size/2) 
-
-    #the bin_size is the "step". generate an array with all the direction bins
-    dir_bins = np.arange(from_degree, (to_degree+1), bin_size)
-
-    #the direction bin is the first bin + the next bin divided by two:
+    
+    # Calculate the starting and ending degrees for direction bins
+    from_degree = -(bin_size / 2)
+    to_degree = 360 + (bin_size / 2)
+    
+    # Generate directional bins using numpy
+    dir_bins = np.arange(from_degree, to_degree + bin_size, bin_size)
+    
+    # Calculate midpoints of directional bins for labels
     dir_labels = (dir_bins[:-1] + dir_bins[1:]) / 2
     
-    #return these values to use in the function map_representation_polar_graph
     return interval_bins, interval_labels, dir_bins, dir_labels
+
 
 # function to convert station longitude and latitude (slat, slon) to indices of STILT model grid (ix,jy)
 def lonlat_2_ixjy(slon,slat,mlon,mlat):
@@ -401,90 +342,62 @@ def lonlat_2_ixjy(slon,slat,mlon,mlat):
     jy = (np.abs(mlat-slat)).argmin()
     return ix,jy
 
-def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='', 
-              vmin=0.0001, vmax=None, colors='GnBu'): 
 
-    station=myStation.stationId
-    lon=myStation.lon
-    lat=myStation.lat
-    unit=myStation.settings['unit']
-    if unit=='percent':
-        unit='(%)'
-    else:
-        if label=='point source contribution':
-            unit='(ppm)'
-        if label=='population sensitivity':
-            unit='(population * sensitivity)'
-        if label=='sensitivity':
-            unit='(ppm given a uniform flux of 1 μmol / (m²s))'
-
-    fp_lon=myStation.fpLon
-    fp_lat=myStation.fpLat
+def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='', vmin=0.0001, vmax=None, colors='GnBu'):
+    # Initialize figure and axis with Cartopy projection
+    fig, ax = plt.subplots(figsize=(18, 10), subplot_kw={'projection': ccrs.PlateCarree()})
     
+    matplotlib.rcParams.update({'font.size': 14})
     
-    mcolor='m'
+    ax.set_extent([myStation.fpLon.min(), myStation.fpLon.max(), myStation.fpLat.min(), myStation.fpLat.max()], crs=ccrs.PlateCarree())
+
+    # Add Natural Earth features
+    ax.add_feature(cfeature.NaturalEarthFeature('cultural', 'admin_0_countries', '50m', edgecolor='grey', facecolor='none'), linewidth=0.5)
     
-    # Set scale for features from Natural Earth
-    NEscale = '50m'
+    # Handle special label cases for unit determination
+    unit_setting = myStation.settings['unit']
+    if unit_setting == 'percent':
+        unit = '(%)'
+    elif label == 'point source contribution':
+        unit = '(ppm)'
+    elif label == 'population sensitivity':
+        unit = '(population * sensitivity)'
+    elif label == 'sensitivity':
+        unit = '(ppm given a uniform flux of 1 μmol / (m²s))'
 
-    # Create a feature for Countries at 1:50m from Natural Earth
-    countries = cfeature.NaturalEarthFeature(
-        category='cultural',
-        name='admin_0_countries',
-        scale=NEscale,
-        facecolor='none')
-
-    fig = plt.figure(figsize=(18,10))
-
-    # set up a map
-    ax = plt.subplot(1, 2, 1, projection=ccrs.PlateCarree())
-    img_extent = (fp_lon.min(), fp_lon.max(), fp_lat.min(), fp_lat.max())
-    ax.set_extent([fp_lon.min(), fp_lon.max(), fp_lat.min(), fp_lat.max()],crs=ccrs.PlateCarree())
-    
-    ax.add_feature(countries, edgecolor='grey', linewidth=0.5)
-   
-    reader = shpreader.Reader('/data/project/cartopy/shapefiles/natural_earth/cultural/ne_10m_admin_0_countries.shp')
-    
-    # Color countries that miss data for population and point source respectively
-    if label == 'point source contribution':   
-        list_countries_to_add = ['Russian Federation', 'Belarus', 'Ukraine', 'Moldova', 'Turkey', 'Tunisia', 'Algeria', 'Morocco','Bosnia and Herzegovina', 'Serbia', 'Montenegro', 'Kosovo', 'Albania', 'Macedonia']
-        legend_title= 'Countries with no point source data'
-
-        for country_to_add in list_countries_to_add:
-
-            country_information = [country for country in reader.records() if country.attributes["NAME_LONG"] == country_to_add][0]
-            country_shape = ShapelyFeature([country_information.geometry], ccrs.PlateCarree(), facecolor="white", hatch="/", edgecolor='lightgrey', lw=0.3)                     
-            ax.add_feature(country_shape)
-        
-        # add a legend 
+    # Color missing data countries for specific labels
+    # Colors countries that are missing data based on the label.
+    if label == 'point source contribution':
+        list_countries_to_add = ['Russian Federation', 'Belarus', 'Ukraine', 'Moldova', 'Turkey', 'Tunisia', 'Algeria', 'Morocco', 'Bosnia and Herzegovina', 'Serbia', 'Montenegro', 'Kosovo', 'Albania', 'Macedonia']
+        for country_name in list_countries_to_add:
+            """Adds a shape of a country to the axis based on its name."""
+            reader = shpreader.Reader('/data/project/cartopy/shapefiles/natural_earth/cultural/ne_10m_admin_0_countries.shp')
+            country_geom = [country.geometry for country in reader.records() if country.attributes["NAME_LONG"] == country_name][0]
+            ax.add_geometries([country_geom], ccrs.PlateCarree(), facecolor="white", hatch="/", edgecolor='lightgrey', lw=0.3)
+        # Add legend for missing data
         proxy_artist = mpatches.Rectangle((0, 0), 1, 0.1, facecolor="white", hatch="/", edgecolor='lightgrey', lw=0.5)
-        ax.legend([proxy_artist], [legend_title], loc='upper left', fancybox=True)
-            
+        ax.legend([proxy_artist], ['Countries with no point source data'], loc='upper left', fancybox=True)
+
+    # Plot the field with linear or logarithmic color scale
+    #plot_field(ax, field, myStation.fpLon, myStation.fpLat, colors, vmin, vmax, linlog, label, unit)
     cmap = plt.get_cmap(colors)
-    cmap.set_under(color='white')  
-    
-    if linlog == 'linear':
-        
-        im = ax.imshow(field[:,:],interpolation=None,origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
-        cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='neither')
-        cbar.set_label(label+' '+unit)
+    cmap.set_under(color='white')
+    img_extent = (myStation.fpLon.min(), myStation.fpLon.max(), myStation.fpLat.min(), myStation.fpLat.max())
 
-    else:
-        
-        im = ax.imshow(np.log10(field)[:,:],interpolation='none',origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
-        cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='neither')
-        cbar.set_label(label+' log$_{10}$ '+unit)
-    
-    ax.text(0.01, -0.25, 'min: %.2f' % np.min(field[:,:]), horizontalalignment='left',transform=ax.transAxes)
-    ax.text(0.99, -0.25, 'max: %.2f' % np.max(field[:,:]), horizontalalignment='right',transform=ax.transAxes)
-    
-    #show station location if station is provided
-    if station != '':
+    im = ax.imshow(field, interpolation='none', origin='lower', extent=img_extent, cmap=cmap, vmin=vmin, vmax=vmax)
+    cbar = plt.colorbar(im, orientation='horizontal', pad=0.03, fraction=0.055, extend='neither')
+    cbar.set_label(f'{label} {unit}')
 
-        ax.plot(lon,lat,'+',color=mcolor,ms=10,markeredgewidth=1,transform=ccrs.PlateCarree())
+    # Display min and max values
+    ax.text(0.01, -0.25, f'min: {np.min(field):.2f}', horizontalalignment='left', transform=ax.transAxes)
+    ax.text(0.99, -0.25, f'max: {np.max(field):.2f}', horizontalalignment='right', transform=ax.transAxes)
 
-        
-    return fig 
+    # Highlight station location
+    if myStation.stationId:
+        ax.plot(myStation.lon, myStation.lat, '+', color='magenta', ms=10, markeredgewidth=1, transform=ccrs.PlateCarree())
+
+    return fig
+
     
 #or min_lat, max_lat, step (in degrees)    
 def distances_from_point_to_grid_cells(station_lat, station_lon, grid_lat, grid_lon):
