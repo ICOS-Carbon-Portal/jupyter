@@ -625,7 +625,7 @@ def render_mpl_seasonal_table(myStation, data, station, col_width=2, row_height=
         fig, ax = plt.subplots(figsize=size)
         ax.axis('off')
 
-    mpl_table = ax.table(cellText=data.values, cellLoc='center', bbox=bbox, colLabels=data.columns, colWidths=[2.5,1.5,2.5,2,2,2,3.5])
+    mpl_table = ax.table(cellText=data.values, cellLoc='center', bbox=bbox, colLabels=data.columns, colWidths=[2.5,1.5,2,1.5,1.5,1.5,4.5])
 
     mpl_table.auto_set_font_size(True)
     mpl_table.set_fontsize(font_size)
@@ -649,46 +649,26 @@ def seasonal_table(myStation):
     months= available_STILT[str(year)]['months']
     var_load=pd.read_csv(stcDataPath + 'seasonal_table_values_2024_02_07.csv')
 
-    station_year= station +'_' + str(year)
+    station_year = f'{station}_{year}'
 
     if station_year in set(var_load.station_year):
-        
-        sens_whole= var_load.loc[var_load['station_year'] == station_year, 'sens_whole'].iloc[0]
-        sens_diff_winter = var_load.loc[var_load['station_year'] == station_year, 'sens_diff_winter'].iloc[0]
-        sens_diff_spring = var_load.loc[var_load['station_year'] == station_year, 'sens_diff_spring'].iloc[0]
-        sens_diff_summer = var_load.loc[var_load['station_year'] == station_year, 'sens_diff_summer'].iloc[0]
-        sens_diff_fall = var_load.loc[var_load['station_year'] == station_year, 'sens_diff_fall'].iloc[0]
+      
+        # Initialize a dictionary to hold your data
+        data = {}
 
-        point_whole = var_load.loc[var_load['station_year'] == station_year, 'point_whole'].iloc[0]
-        point_diff_winter = var_load.loc[var_load['station_year'] == station_year, 'point_diff_winter'].iloc[0]
-        point_diff_spring = var_load.loc[var_load['station_year'] == station_year, 'point_diff_spring'].iloc[0]
-        point_diff_summer = var_load.loc[var_load['station_year'] == station_year, 'point_diff_summer'].iloc[0] 
-        point_diff_fall = var_load.loc[var_load['station_year'] == station_year, 'point_diff_fall'].iloc[0]
+        if station_year in set(var_load['station_year']):
+            # Fetch the values for each variable directly into the data dictionary
+            variables = ['sens_whole', 'sens_diff_winter', 'sens_diff_spring', 'sens_diff_summer', 'sens_diff_fall', 
+                         'point_whole', 'point_diff_winter', 'point_diff_spring', 'point_diff_summer', 'point_diff_fall', 
+                         'pop_whole', 'pop_diff_winter', 'pop_diff_spring', 'pop_diff_summer', 'pop_diff_fall', 
+                         'gee_whole', 'gee_diff_winter', 'gee_diff_spring', 'gee_diff_summer', 'gee_diff_fall', 
+                         'resp_whole', 'resp_diff_winter', 'resp_diff_spring', 'resp_diff_summer', 'resp_diff_fall', 
+                         'anthro_whole', 'anthro_diff_winter', 'anthro_diff_spring', 'anthro_diff_summer', 'anthro_diff_fall']
 
-        pop_whole = var_load.loc[var_load['station_year'] == station_year, 'pop_whole'].iloc[0]
-        pop_diff_winter = var_load.loc[var_load['station_year'] == station_year, 'pop_diff_winter'].iloc[0]
-        pop_diff_spring = var_load.loc[var_load['station_year'] == station_year, 'pop_diff_spring'].iloc[0] 
-        pop_diff_summer = var_load.loc[var_load['station_year'] == station_year, 'pop_diff_summer'].iloc[0] 
-        pop_diff_fall = var_load.loc[var_load['station_year'] == station_year, 'pop_diff_fall'].iloc[0]
+            for var in variables:
+                data[var] = var_load.loc[var_load['station_year'] == station_year, var].iloc[0]
 
-        gee_whole = var_load.loc[var_load['station_year'] == station_year, 'gee_whole'].iloc[0] 
-        gee_diff_winter = var_load.loc[var_load['station_year'] == station_year, 'gee_diff_winter'].iloc[0]
-        gee_diff_spring = var_load.loc[var_load['station_year'] == station_year, 'gee_diff_spring'].iloc[0]
-        gee_diff_summer = var_load.loc[var_load['station_year'] == station_year, 'gee_diff_summer'].iloc[0]
-        gee_diff_fall = var_load.loc[var_load['station_year'] == station_year, 'gee_diff_fall'].iloc[0]
-
-        resp_whole = var_load.loc[var_load['station_year'] == station_year, 'resp_whole'].iloc[0]
-        resp_diff_winter = var_load.loc[var_load['station_year'] == station_year, 'resp_diff_winter'].iloc[0]
-        resp_diff_spring = var_load.loc[var_load['station_year'] == station_year, 'resp_diff_spring'].iloc[0]
-        resp_diff_summer = var_load.loc[var_load['station_year'] == station_year, 'resp_diff_summer'].iloc[0]
-        resp_diff_fall = var_load.loc[var_load['station_year'] == station_year, 'resp_diff_fall'].iloc[0]
-
-        anthro_whole = var_load.loc[var_load['station_year'] == station_year, 'anthro_whole'].iloc[0]
-        anthro_diff_winter = var_load.loc[var_load['station_year'] == station_year, 'anthro_diff_winter'].iloc[0]
-        anthro_diff_spring = var_load.loc[var_load['station_year'] == station_year, 'anthro_diff_spring'].iloc[0]
-        anthro_diff_summer = var_load.loc[var_load['station_year'] == station_year, 'anthro_diff_summer'].iloc[0]
-        anthro_diff_fall = var_load.loc[var_load['station_year'] == station_year, 'anthro_diff_fall'].iloc[0]
-
+    # in case of no pre-computed values (new STILT footprints since 2024-02-08)
     else:
     
         fp_pop= import_population_data()
@@ -789,37 +769,35 @@ def seasonal_table(myStation):
             seasonal_table = None
             caption = 'No seasonal table, footprints are not available for the whole (start-)year'
             return seasonal_table, caption 
+        
     #here have values either from loaded file or calculated
     year_var=str(year) 
     df_seasonal_table = pd.DataFrame(columns=['Variable', year_var, 'Jan + Feb + Dec', 'Mar-May', 'Jun-Aug','Sep-Nov', 'Unit'], index=['Sensitivity', 'Population','Point source', 'GEE', 'Respiration', 'Anthropogenic'])
 
-    df_seasonal_table.loc['Sensitivity'] = pd.Series({'Variable': 'Sensitivity', year_var:("%.2f" % sens_whole), 'Jan + Feb + Dec':("%+.2f" % sens_diff_winter+ '%'), 'Mar-May':("%+.2f" % sens_diff_spring+ '%'), 
-                                                          'Jun-Aug':("%+.2f" % sens_diff_summer + '%'), 'Sep-Nov':("%+.2f" % sens_diff_fall+ '%'), 'Unit': 'ppm / ($\mu$mol / (m$^{2}$s))'})
+    df_seasonal_table.loc['Sensitivity'] = pd.Series({'Variable': 'Sensitivity', year_var:("%.2f" % data['sens_whole']), 'Jan + Feb + Dec':("%+.2f" % data['sens_diff_winter']+ '%'), 'Mar-May':("%+.2f" % data['sens_diff_spring']+ '%'), 'Jun-Aug':("%+.2f" % data['sens_diff_summer'] + '%'), 'Sep-Nov':("%+.2f" % data['sens_diff_fall']+ '%'), 'Unit': 'ppm given a uniform flux (1 μmol / (m²s))'})
 
-    df_seasonal_table.loc['Population'] = pd.Series({'Variable': 'Population', year_var:("%.0f" % pop_whole), 'Jan + Feb + Dec':("%+.2f" % pop_diff_winter+ '%'), 'Mar-May':("%+.2f" % pop_diff_spring+ '%'), 
-                                                          'Jun-Aug':("%+.2f" % pop_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % pop_diff_fall+ '%'), 'Unit': 'pop*(ppm / ($\mu$mol / (m$^{2}$s)))'})
+    df_seasonal_table.loc['Population'] = pd.Series({'Variable': 'Population', year_var:("%.0f" % data['pop_whole']), 'Jan + Feb + Dec':("%+.2f" % data['pop_diff_winter']+ '%'), 'Mar-May':("%+.2f" % data['pop_diff_spring']+ '%'), 'Jun-Aug':("%+.2f" % data['pop_diff_summer']+ '%'), 'Sep-Nov':("%+.2f" % data['pop_diff_fall']+ '%'), 'Unit': 'pop*sensitivity'})
 
 
-    df_seasonal_table.loc['Point source'] = pd.Series({'Variable': 'Point source', year_var:("%.2f" % point_whole), 'Jan + Feb + Dec':("%+.2f" % point_diff_winter+ '%'), 'Mar-May':("%+.2f" % point_diff_spring+ '%'), 
-                                                          'Jun-Aug':("%+.2f" % point_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % point_diff_fall+ '%'), 'Unit': 'ppm'})
+    df_seasonal_table.loc['Point source'] = pd.Series({'Variable': 'Point source', year_var:("%.2f" % data['point_whole']), 'Jan + Feb + Dec':("%+.2f" % data['point_diff_winter']+ '%'), 'Mar-May':("%+.2f" % data['point_diff_spring']+ '%'),  'Jun-Aug':("%+.2f" % data['point_diff_summer']+ '%'), 'Sep-Nov':("%+.2f" % data['point_diff_fall']+ '%'), 'Unit': 'ppm'})
 
 
-    df_seasonal_table.loc['GEE'] = pd.Series({'Variable': 'GEE','Unit': 'ppm (uptake)', year_var:("%.2f" % gee_whole), 'Jan + Feb + Dec':("%+.2f" % gee_diff_winter+ '%'), 'Mar-May':("%+.2f" % gee_diff_spring+ '%'), 
-                                                          'Jun-Aug':("%+.2f" % gee_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % gee_diff_fall+ '%'), 'Unit': 'ppm (uptake)'})
+    df_seasonal_table.loc['GEE'] = pd.Series({'Variable': 'GEE','Unit': 'ppm (uptake)', year_var:("%.2f" % data['gee_whole']), 'Jan + Feb + Dec':("%+.2f" % data['gee_diff_winter']+ '%'), 'Mar-May':("%+.2f" % data['gee_diff_spring']+ '%'), 'Jun-Aug':("%+.2f" % data['gee_diff_summer']+ '%'), 'Sep-Nov':("%+.2f" % data['gee_diff_fall']+ '%'), 'Unit': 'ppm (uptake)'})
 
-    df_seasonal_table.loc['Respiration'] = pd.Series({'Variable': 'Respiration', year_var:("%.2f" % resp_whole), 'Jan + Feb + Dec':("%+.2f" % resp_diff_winter+ '%'), 'Mar-May':("%+.2f" % resp_diff_spring+ '%'), 
-                                                          'Jun-Aug':("%+.2f" % resp_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % resp_diff_fall+ '%'), 'Unit': 'ppm'})
+    df_seasonal_table.loc['Respiration'] = pd.Series({'Variable': 'Respiration', year_var:("%.2f" % data['resp_whole']), 'Jan + Feb + Dec':("%+.2f" % data['resp_diff_winter']+ '%'), 'Mar-May':("%+.2f" % data['resp_diff_spring']+ '%'), 'Jun-Aug':("%+.2f" % data['resp_diff_summer']+ '%'), 'Sep-Nov':("%+.2f" % data['resp_diff_fall']+ '%'), 'Unit': 'ppm'})
 
 
-    df_seasonal_table.loc['Anthropogenic'] = pd.Series({'Variable': 'Anthropogenic', year_var:("%.2f" % anthro_whole), 'Jan + Feb + Dec':("%+.2f" % anthro_diff_winter+ '%'), 'Mar-May':("%+.2f" % anthro_diff_spring+ '%'), 
-                                                          'Jun-Aug':("%+.2f" % anthro_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % anthro_diff_fall+ '%'), 'Unit': 'ppm'})
+    df_seasonal_table.loc['Anthropogenic'] = pd.Series({'Variable': 'Anthropogenic', year_var:("%.2f" % data['anthro_whole']), 'Jan + Feb + Dec':("%+.2f" % data['anthro_diff_winter']+ '%'), 'Mar-May':("%+.2f" % data['anthro_diff_spring']+ '%'), 'Jun-Aug':("%+.2f" % data['anthro_diff_summer']+ '%'), 'Sep-Nov':("%+.2f" % data['anthro_diff_fall']+ '%'), 'Unit': 'ppm'})
 
     caption = 'Seasonal variation year ' + str(year) 
 
     seasonal_table=render_mpl_seasonal_table(myStation, df_seasonal_table, station, header_columns=0, col_width=2.5)
 
     return seasonal_table, caption
-  
+
+
+
+
 #land cover polar graph:
 
 def land_cover_polar_graph(myStation):
