@@ -499,7 +499,6 @@ def polar_graph(myStation, rose_type, colorbar='gist_heat_r', zoom=''):
                    linlog='linear', zoom='', vmin=0.0001, vmax=None, colors=colorbar)
         
     return polar_map, caption
-    
 
 def land_cover_bar_graph(myStation):    
     
@@ -508,83 +507,29 @@ def land_cover_bar_graph(myStation):
     degrees=myStation.degrees
     fp=myStation.fp
 
-    #get all the land cover data from netcdfs 
-    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018')
+    # Import all the land cover data
+    landcover_types = import_landcover_HILDA(year='2018')
     
-    #land cover classes (imported in the land cover section):
-    broad_leaf_forest=fp*broad_leaf_forest
-    coniferous_forest=fp*coniferous_forest
-    mixed_forest=fp*mixed_forest
-    ocean=fp*ocean
-    other=fp*other
-    grass_shrub=fp*grass_shrub
-    cropland=fp*cropland
-    pasture=fp*pasture
-    urban=fp*urban
-    unknown=fp*unknown
-                
-    #lists of these values
-    broad_leaf_forest_values = [item for sublist in broad_leaf_forest[0] for item in sublist]
-    coniferous_forest_values = [item for sublist in coniferous_forest[0] for item in sublist]
-    mixed_forest_values = [item for sublist in mixed_forest[0] for item in sublist]
-    ocean_values = [item for sublist in ocean[0] for item in sublist]
-    other_values = [item for sublist in other[0] for item in sublist]
-    grass_shrub_values = [item for sublist in grass_shrub[0] for item in sublist]
-    cropland_values = [item for sublist in cropland[0] for item in sublist]
-    pasture_values = [item for sublist in pasture[0] for item in sublist]
-    urban_values = [item for sublist in urban[0] for item in sublist]
-    unknown_values = [item for sublist in unknown[0] for item in sublist]
+        # Initialize a DataFrame to store aggregated land cover values
+    df_all = pd.DataFrame()
+
+    # List of land cover names for columns
+    landcover_names = [
+        "Broad leaf forest", "Coniferous forest", "Mixed forest", "Ocean", 
+        "Other", "Grass/shrubland", "Cropland", "Pasture", "Urban", "Unknown"
+    ]
+    
+    # Aggregate land cover values multiplied by footprint
+    for i, landcover in enumerate(landcover_types):
+        landcover_values = (fp * landcover).flatten()
+        df_temp = pd.DataFrame({
+            'landcover_vals': landcover_values,
+            'degrees': degrees,
+            'landcover_type': landcover_names[i]
+        })
+        df_all = df_all.append(df_temp, ignore_index=True)
         
         
-    #putting it into a dataframe: initially 192000 values (one per cell) for each of the aggregated land cover classes
-    #into same dataframe - have the same coulmn heading. "landcover_type" will be used in "groupby" together with the "slice" (in degrees)
-    df_broad_leaf_forest = pd.DataFrame({'landcover_vals': broad_leaf_forest_values,
-                               'degrees': degrees,
-                               'landcover_type':'Broad leaf forest'})
-    
-    df_coniferous_forest = pd.DataFrame({'landcover_vals': coniferous_forest_values,
-                           'degrees': degrees,
-                           'landcover_type':'Coniferous forest'})
-    
-    df_mixed_forest = pd.DataFrame({'landcover_vals': mixed_forest_values,
-                           'degrees': degrees,
-                           'landcover_type':'Mixed forest'})
-    
-    df_ocean = pd.DataFrame({'landcover_vals': ocean_values,
-                           'degrees': degrees,
-                           'landcover_type':'Ocean'})
-    
-    df_other = pd.DataFrame({'landcover_vals': other_values,
-                           'degrees': degrees,
-                           'landcover_type':'Other'})
-    
-    df_grass_shrub = pd.DataFrame({'landcover_vals':  grass_shrub_values,
-                           'degrees': degrees,
-                           'landcover_type':'Grass/shrubland'})
-    
-    df_cropland = pd.DataFrame({'landcover_vals':  cropland_values,
-                           'degrees': degrees,
-                           'landcover_type':'Cropland'})
-    
-    df_pasture = pd.DataFrame({'landcover_vals': pasture_values,
-                           'degrees': degrees,
-                           'landcover_type':'Pasture'})
-    
-    df_urban = pd.DataFrame({'landcover_vals':  urban_values,
-                           'degrees': degrees,
-                           'landcover_type':'Urban'})
-    
-    df_unknown = pd.DataFrame({'landcover_vals':  unknown_values,
-                           'degrees': degrees,
-                           'landcover_type':'Unknown'})
-    
-
-    #into one dataframe
-    df_all = df_cropland.append([df_broad_leaf_forest, df_coniferous_forest, df_mixed_forest, df_ocean, df_other, df_grass_shrub, df_pasture, df_urban, df_unknown])
-    
-
-    #not change with user input
-    dir_bins = np.arange(22.5, 383.5, 45)
     dir_bins= np.asarray([0, 22.5,67.5,112.5,157.5,202.5,247.5,292.5,337.5,383.5])
     dir_labels= np.asarray([0, 22.5,67.5,112.5,157.5,202.5,247.5,292.5,337.5])
 
@@ -611,16 +556,17 @@ def land_cover_bar_graph(myStation):
 
     rosedata= rosedata.applymap(lambda x: x / total_all * 100)
 
-    list_land_cover_values=[]
-    for land_cover_type in list_land_cover_names_sorted:
-        list_land_cover_values.append(rosedata[land_cover_type].values)
+    list_land_cover_values = [rosedata[land_cover_type].values for land_cover_type in list_land_cover_names_sorted]
      
     matplotlib.rcParams.update({'font.size': 20})
+    
     fig = plt.figure(figsize=(11,13)) 
     ax = fig.add_subplot(1,1,1)
-    N = 8
-    ind = np.arange(N)  
+    
+    # number directions 
+    ind = np.arange(8)  
     width = 0.35       
+    
 
     p1 = ax.bar(ind, list_land_cover_values[0], width, color=dictionary_color[list_land_cover_names_sorted[0]]['color'])
     p2 = ax.bar(ind, list_land_cover_values[1], width, color=dictionary_color[list_land_cover_names_sorted[1]]['color'],
@@ -651,18 +597,14 @@ def land_cover_bar_graph(myStation):
     #want to reverese the order (ex if oceans at the "bottom" in the graph - ocean label should be furthest down)
     handles=(p1[0], p2[0], p3[0], p4[0], p5[0], p6[0], p7[0], p8[0], p9[0], p10[0])
 
-    index=0
-    list_labels=[]
-    for land_cover_name in list_land_cover_names_sorted:
-
-        for_lable= (land_cover_name + ' (' + str("%.1f" % sum(list_land_cover_values[index])) + '%)')
-        list_labels.append(for_lable)
-        index=index+1
+    list_labels = [
+        f"{land_cover_name} ({sum(values):.1f}%)"
+        for land_cover_name, values in zip(list_land_cover_names_sorted, list_land_cover_values)
+    ]
 
     labels=[textwrap.fill(text,20) for text in list_labels]
 
     plt.legend(handles[::-1], labels[::-1],bbox_to_anchor=(1, 0.52))
- 
     plt.ylabel('Percent')
     
     #first one is not north (in rosedata - rather 22.5 to 67.5 (NE). 
@@ -671,12 +613,9 @@ def land_cover_bar_graph(myStation):
     ax.yaxis.grid(True)
     
     caption='Land cover within average footprint aggregated by direction'
-    fig.set_size_inches(11, 13)
 
     return fig, caption
 
-
-#14 font before
 def render_mpl_seasonal_table(myStation, data, station, col_width=2, row_height=0.625, font_size=16,
              header_color='#40466e', row_colors=['#f1f1f2', 'w'], edge_color='w',
              bbox=[0, 0, 1, 1], header_columns=0, 
