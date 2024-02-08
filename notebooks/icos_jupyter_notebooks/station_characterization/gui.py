@@ -524,14 +524,19 @@ def update_func(button_c):
             # create a html string for the download. Only links to files and documents that exist (for instance, if there is not footprints for the full year, the seasonal table will not be created.
             file_folder = stc.settings['output_folder'].split('/')[-1]
 
-            pdf_file_name = stc.settings[
-                                'date/time generated'] + stc.stationId + '.pdf'
-            pdf_file_path = os.path.join('../output/station_characterisation',
-                                         file_folder, pdf_file_name)
-
+            pdf_file_name = stc.settings['date/time generated'] + stc.stationId + '.pdf'
+            
+            #os.path.join(stc.settings['output_folder'], (stc.settings['date/time generated']+stc.stationId+'.tex'))
+            #pdf_file_path = os.path.join(stc.settings['output_folder'], (stc.settings['date/time generated']+stc.stationId+'.pdf'))
+            pdf_file_path = f'{output_stc_path}/{file_folder}/{pdf_file_name}'
+            
+            pdf_file_path_relative = f'{relative_stc_path}/{file_folder}/{pdf_file_name}'
+            
+            print(pdf_file_path)
+            
             if os.path.exists(pdf_file_path):
 
-                html_string_pdf = '<h2>Download</h2><br>Full station characterization document:<br><a href=' + pdf_file_path + ' target="_blank">' + pdf_file_name + '</a><br><br>Individual figures:<br>'
+                html_string_pdf = '<h2>Download</h2><br>Full station characterization document:<br><a href=' + pdf_file_path_relative + ' target="_blank">' + pdf_file_name + '</a><br><br>Individual figures:<br>'
 
             else:
 
