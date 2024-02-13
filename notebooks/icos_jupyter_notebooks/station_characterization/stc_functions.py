@@ -803,7 +803,6 @@ def seasonal_table(myStation):
     return seasonal_table, caption
 
 #land cover polar graph:
-
 def land_cover_polar_graph(myStation):
     
     station=myStation.stationId
@@ -818,84 +817,25 @@ def land_cover_polar_graph(myStation):
     bin_size=myStation.settings['binSize']
     degrees=myStation.degrees
     polargraph_label= myStation.settings['labelPolar']
+    
+    dir_bins, dir_labels = define_bins_landcover_polar_graph(bin_size=bin_size)
 
-    #get all the land cover data from netcdfs 
-    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018')
-    
-    dir_bins, dir_labels=define_bins_landcover_polar_graph(bin_size=bin_size)
-    
-    #land cover classes (imported in the land cover section):
-    broad_leaf_forest=fp*broad_leaf_forest
-    coniferous_forest=fp*coniferous_forest
-    mixed_forest=fp*mixed_forest
-    ocean=fp*ocean
-    other=fp*other
-    grass_shrub=fp*grass_shrub
-    cropland=fp*cropland
-    pasture=fp*pasture
-    urban=fp*urban
-    unknown=fp*unknown
-    
-            
-    #lists of these values
-    broad_leaf_forest_values = [item for sublist in broad_leaf_forest[0] for item in sublist]
-    coniferous_forest_values = [item for sublist in coniferous_forest[0] for item in sublist]
-    mixed_forest_values = [item for sublist in mixed_forest[0] for item in sublist]
-    ocean_values = [item for sublist in ocean[0] for item in sublist]
-    other_values = [item for sublist in other[0] for item in sublist]
-    grass_shrub_values = [item for sublist in grass_shrub[0] for item in sublist]
-    cropland_values = [item for sublist in cropland[0] for item in sublist]
-    pasture_values = [item for sublist in pasture[0] for item in sublist]
-    urban_values = [item for sublist in urban[0] for item in sublist]
-    unknown_values = [item for sublist in unknown[0] for item in sublist]
+     # Import land cover data
+    land_cover_data = import_landcover_HILDA(year='2018')
+    land_cover_types = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Ocean', 'Other', 
+                        'Grass/shrubland', 'Cropland', 'Pasture', 'Urban', 'Unknown']
+    # Process and aggregate land cover data
+    df_all = pd.DataFrame()
+    for lc_type, lc_data in zip(land_cover_types, land_cover_data):
+        lc_values = [item for sublist in (fp * lc_data)[0] for item in sublist]
+        df_temp = pd.DataFrame({
+            'landcover_vals': lc_values,
+            'degrees': degrees,
+            'landcover_type': lc_type
+        })
+        df_all = df_all.append(df_temp, ignore_index=True)
         
-        
-    #putting it into a dataframe: initially 192000 values (one per cell) for each of the aggregated land cover classes
-    #into same dataframe - have the same coulmn heading. "landcover_type" will be used in "groupby" together with the "slice" (in degrees)
-    df_broad_leaf_forest = pd.DataFrame({'landcover_vals': broad_leaf_forest_values,
-                               'degrees': degrees,
-                               'landcover_type':'Broad leaf forest'})
-    
-    df_coniferous_forest = pd.DataFrame({'landcover_vals': coniferous_forest_values,
-                           'degrees': degrees,
-                           'landcover_type':'Coniferous forest'})
-    
-    df_mixed_forest = pd.DataFrame({'landcover_vals': mixed_forest_values,
-                           'degrees': degrees,
-                           'landcover_type':'Mixed forest'})
-    
-    df_ocean = pd.DataFrame({'landcover_vals': ocean_values,
-                           'degrees': degrees,
-                           'landcover_type':'Ocean'})
-    
-    df_other = pd.DataFrame({'landcover_vals': other_values,
-                           'degrees': degrees,
-                           'landcover_type':'Other'})
-    
-    df_grass_shrub = pd.DataFrame({'landcover_vals':  grass_shrub_values,
-                           'degrees': degrees,
-                           'landcover_type':'Grass/shrubland'})
-    
-    df_cropland = pd.DataFrame({'landcover_vals':  cropland_values,
-                           'degrees': degrees,
-                           'landcover_type':'Cropland'})
-    
-    df_pasture = pd.DataFrame({'landcover_vals': pasture_values,
-                           'degrees': degrees,
-                           'landcover_type':'Pasture'})
-    
-    df_urban = pd.DataFrame({'landcover_vals':  urban_values,
-                           'degrees': degrees,
-                           'landcover_type':'Urban'})
-    
-    df_unknown = pd.DataFrame({'landcover_vals':  unknown_values,
-                           'degrees': degrees,
-                           'landcover_type':'Unknown'})
   
-
-    #into one dataframe
-    df_all = df_cropland.append([df_broad_leaf_forest, df_coniferous_forest, df_mixed_forest, df_ocean, df_other, df_grass_shrub, df_pasture, df_urban, df_unknown])
-
     #already have the different land cover classes in one cell (no need to use "pandas.cut" to generate new column with information for groupby)
     #still need a column with the different direction bins - defined in last cell - to use for the groupby (slice)
     rosedata=df_all.assign(Degree_bins=lambda df: pd.cut(df['degrees'], bins=dir_bins, labels=dir_labels, right=False))
@@ -1019,7 +959,6 @@ def land_cover_polar_graph(myStation):
     caption = "Land cover within average footprint aggregated by direction (polar)"
     
     return fig, caption
-
     
 #given the directions (and number of them), get the direction of the bars and their width
 #function used in the final step of generating a graph
