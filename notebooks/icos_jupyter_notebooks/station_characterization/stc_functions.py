@@ -1207,86 +1207,69 @@ def values_multiple_variable_graph(myStation, station):
         
         return None, None, None, None, None, None, None
 
-
+    
 def save(stc, fmt='pdf'):
     """
-    provide a station characterisation object, with all the figures.
-    all figures will be saved
-    
+    Saves all figures from the station characterization object to specified format,
+    along with captions and settings in JSON format.
 
     Parameters
     ----------
-    stc : station characterisation object format. Instance of class(stationchar)
-    fmt : STR, image filename ending, used to infer format ('pdf' | 'png')
-
-    Returns
-    -------
-    None.
-
+    stc : Instance of class(stationchar)
+        Station characterization object with figures.
+    fmt : str, optional
+        Image filename extension used to infer format ('pdf' or 'png'). Defaults to 'pdf'.
     """
-    # stc.figures is a dictionary...like  {1: [fig, caption, shortname]}
     captions = {}
     
-    for f in stc.figures:
-        fig, cap, name = stc.figures[f]  
+    for f, (fig, cap, name) in stc.figures.items():
+        if not fig:
+            continue
         
-        if not fig: continue
+        filename = f"{name}.{fmt}"
+        filepath = os.path.join(stc.settings['output_folder'], filename)
         
-        stc.figures[f][2] = name + '.' + fmt
-        filename = os.path.join(stc.settings['output_folder'], (name + '.' + fmt))
-        
-        # keep the captions for json output
+        # Update figure's filename with format and keep the captions for JSON output
+        stc.figures[f][2] = filename
         captions[name] = cap
         
-        # special settings for individual figures
-        if f==4:  #'landcover_rose'
+        # Special settings for individual figures
+        if f == 4:  # 'landcover_rose'
             ax = fig.gca()
             ax.legend(bbox_to_anchor=(1.9, 0.25), ncol=2)
-            
-        if f==7: #'landcover_bar'
-            fig.set_size_inches(12, 11)        
-            
-        #common for all figures
-        fig.savefig(filename,dpi=100,bbox_inches='tight')
-        captions[name] = cap
+        elif f == 7:  # 'landcover_bar'
+            fig.set_size_inches(12, 11)
+        
+        # Save figure with common settings for all
+        fig.savefig(filepath, dpi=100, bbox_inches='tight')
     
-    # save captions as json file    
-    file = os.path.join(stc.settings['output_folder'],'captions.json')
-    with open(file, 'w') as f:
+    # Save captions as JSON file
+    captions_file = os.path.join(stc.settings['output_folder'], 'captions.json')
+    with open(captions_file, 'w') as f:
         json.dump(captions, f, indent=4)
     
-    # save settings as json file
-    file = os.path.join(stc.settings['output_folder'],'settings.json')
+    # Save settings excluding specific keys as JSON file
+    settings_file = os.path.join(stc.settings['output_folder'], 'settings.json')
+    settings_to_exclude = ['stilt', 'icos', 'areaFifty', 'date/time generated', 'output_folder', 'Sensitivity', 'Population', 'Point source']
+    filtered_settings = {k: v for k, v in stc.settings.items() if k not in settings_to_exclude}
     
-    settings_copy = stc.settings.copy()
-
-    delete = ['stilt', 'icos', 'areaFifty', 'date/time generated', 'output_folder', 'Sensitivity', 'Population', 'Point source']
-
-    for item in delete: 
-        if item in settings_copy.keys():
-            del settings_copy[item]
-
-    with open(file, 'w') as f:
-        
-        json.dump(settings_copy, f, indent=4)
-        
-    # save PDF
-    tex_string=tex.generate_full(stc)
+    with open(settings_file, 'w') as f:
+        json.dump(filtered_settings, f, indent=4)
     
-    tex_file=os.path.join(stc.settings['output_folder'], (stc.settings['date/time generated']+stc.stationId+'.tex'))
-               
-    with open(tex_file,"w") as file:
-        file.write(tex_string) 
-        
-    output_folder = stc.settings['output_folder']
-
-    a = os.system(('pdflatex -output-directory=' + output_folder + ' ' + tex_file))
-
-    if a!=0:
-        print('problem generating the output PDF')
-
+    # Generate and save PDF
+    tex_string = tex.generate_full(stc)
+    tex_filename = f"{stc.settings['date/time generated']}{stc.stationId}.tex"
+    tex_filepath = os.path.join(stc.settings['output_folder'], tex_filename)
+    
+    with open(tex_filepath, "w") as file:
+        file.write(tex_string)
+    
+    # Compile LaTeX file to PDF
+    compile_status = os.system(f'pdflatex -output-directory={stc.settings["output_folder"]} {tex_filepath}')
+    
+    if compile_status != 0:
+        print('Problem generating the output PDF')
     else:
-        files_to_remove = ['.aux', '.log', '.out']
-        for file_ext in files_to_remove:
-            remove = stc.settings['date/time generated']+stc.stationId+ file_ext
-            os.remove(output_folder + '/' + remove)
+        # Clean up auxiliary files generated by LaTeX
+        for ext in ['.aux', '.log', '.out']:
+            os.remove(os.path.join(stc.settings['output_folder'], f"{stc.settings['date/time generated']}{stc.stationId}{ext}"))
