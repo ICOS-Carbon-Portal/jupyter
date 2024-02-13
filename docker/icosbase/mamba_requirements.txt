@@ -26,6 +26,7 @@ pscript=0.7.7
 pygmt=0.7.0
 pypdf2=2.10.8
 python-cdo=1.5.6
+requests=2.26.0
 s3fs=2022.10.0
 shapely=1.8.4
 xarray=2022.9.0
