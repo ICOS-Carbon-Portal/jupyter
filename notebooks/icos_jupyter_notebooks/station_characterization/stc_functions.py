@@ -647,7 +647,7 @@ def seasonal_table(myStation):
     year=myStation.settings['startYear']
     available_STILT= myStation.settings['stilt']
     months= available_STILT[str(year)]['months']
-    var_load=pd.read_csv(stcDataPath + 'seasonal_table_values_2024_02_07.csv')
+    var_load=pd.read_csv(stcDataPath + 'seasonal_table_values_2024_02_19.csv')
 
     station_year = f'{station}_{year}'
 
@@ -998,7 +998,7 @@ def multiple_variables_graph(myStation):
     end_date_year=max(date_range).year
     
     # pre-computed annual averages
-    var_load=pd.read_csv(stcDataPath + 'seasonal_table_values_2024_02_07.csv')
+    var_load=pd.read_csv(stcDataPath + 'seasonal_table_values_2024_02_19.csv')
     
     # the final data frame: put in the normalized values
     df_save = pd.DataFrame(columns=['Station','Sensitivity','Area 50% sensitivity', 'GEE','Respiration','Anthro','Point source','Population'])
