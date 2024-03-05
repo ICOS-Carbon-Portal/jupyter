@@ -1,11 +1,12 @@
 import stationchar
 import stc_functions
-import stiltStations
+
 from datetime import datetime
 import os
 from icoscp.station import station as cpstation
-stiltstations = stiltStations.getStilt()
-
+from icoscp.stilt import stiltstation
+import datetime as dt
+stiltstations= stiltstation.find()
 def generate_PDFs(list_stations):
 
     for station in list_stations:
@@ -16,10 +17,10 @@ def generate_PDFs(list_stations):
         if stiltstations[station]['icos']:
             settings['icos'] = cpstation.get(station[0:3].upper()).info()
         settings['stilt'] = stiltstations[station]
-        settings['startYear'] = 2018
+        settings['startYear'] = 2020
         settings['startMonth'] = 1
         settings['startDay'] = 1
-        settings['endYear'] = 2018
+        settings['endYear'] = 2020
         settings['endMonth'] = 12
         settings['endDay'] = 31
         settings['timeOfDay'] = [0,3,6,9,12,15,18,21]
@@ -58,9 +59,7 @@ def generate_PDFs(list_stations):
         fig, caption=stc_functions.seasonal_table(stc)
         stc.add_figure(5, fig, caption)
 
-        fig, caption=stc_functions.seasonal_table(stc)
-
-        fig, caption=stc_functions.landcover_polar_graph(stc)
+        fig, caption=stc_functions.land_cover_polar_graph(stc)
         stc.add_figure(6, fig, caption)
 
         fig, caption= stc_functions.multiple_variables_graph(stc)

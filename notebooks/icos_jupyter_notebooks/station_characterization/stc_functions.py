@@ -89,7 +89,6 @@ def read_aggreg_footprints(station, date_range):
         return 0, None, None, None, None
 
 # function to read STILT concentration time series (new format of STILT results)
-# function to read STILT concentration time series (new format of STILT results)
 def read_stilt_timeseries(station,date_range,timeselect_list):
     url = 'https://stilt.icos-cp.eu/viewer/stiltresult'
     headers = {'Content-Type': 'application/json', 'Accept-Charset': 'UTF-8'}
@@ -134,93 +133,48 @@ def read_stilt_timeseries(station,date_range,timeselect_list):
 
     return df
 
-#given the input - create an updated pandas date range with only hours in timeselect_list
-def date_range_hour_filtered(date_range, timeselect_list):
-    
-    #depending on how many input (max 8 for 0 3 6 9 12 15 18 21), filter to include hours.
-    for time_value in timeselect_list:
-        if len(timeselect_list)==1:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)]
-            #df_nine = df.loc[(timeselect_list[count_timeselect] == df.index.hour)]
-        if len(timeselect_list)==2:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]
-        if len(timeselect_list)==3:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)]
-
-        if len(timeselect_list)==4:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]
-
-        if len(timeselect_list)==5:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
-            | date_range[(timeselect_list[4] == date_range.hour)]
-
-        if len(timeselect_list)==6:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
-            | date_range[(timeselect_list[4] == date_range.hour)] | date_range[(timeselect_list[5] == date_range.hour)]
-
-        if len(timeselect_list)==7:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
-            | date_range[(timeselect_list[4] == date_range.hour)] | date_range[(timeselect_list[5] == date_range.hour)]\
-            | date_range[(timeselect_list[6] == date_range.hour)]
-        
-        if len(timeselect_list)==8:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
-            | date_range[(timeselect_list[4] == date_range.hour)] | date_range[(timeselect_list[5] == date_range.hour)]\
-            | date_range[(timeselect_list[6] == date_range.hour)] | date_range[(timeselect_list[7] == date_range.hour)]
-          
-    return date_range
-
 def area_footprint_based_on_threshold(input_footprint, fp_lat, fp_lon, threshold):
+    """
+    Calculates the area of the footprint based on a given sensitivity threshold.
 
-    #total sensitivity - use this value to calculate what the sensitivity of the ex 50% footprint it (threshold)
-    sum_sensitivity_values=sum(input_footprint.flatten())
-
-    threshold_sensitivity=sum_sensitivity_values*threshold
-
-    #create a dataframe that will have the updated sensitivity values + the steps on the way
-    df_sensitivity = pd.DataFrame()
-
-    #one column with the original sensitivity values. Has an index that will be used to sort back to 
-    #this order (flattened 2D... back to 2D with updated sensitivity values in last step)
-    df_sensitivity['sensitivity']=input_footprint.flatten()
+    Args:
+        input_footprint (numpy.ndarray): The sensitivity values of the footprint.
+        fp_lat (numpy.ndarray): Latitude values of the footprint grid.
+        fp_lon (numpy.ndarray): Longitude values of the footprint grid.
+        threshold (float): The threshold to calculate the area of interest within the footprint.
+        
+    Returns:
+        float: The total area within the specified sensitivity threshold.
+    """
     
-    #sensitivity values sorterd from largest to smallest
-    df_sensitivity_sorted=df_sensitivity.sort_values(by=['sensitivity'], ascending=False)
-    
-    #another column that has the cumilated sum of the values in the sensitivity column.
-    #used to determine when the footprint threshold is met. 
-    df_sensitivity_sorted['cumsum_sens']=df_sensitivity_sorted.cumsum()
-    
-    #mask threshold: when the cumulative sum is over the threshold - these values are assigned 0.
-    #to be multiplied with the original sensitivity values (disregard the ones with value 0)
-    df_sensitivity_sorted['mask_threshold']=df_sensitivity_sorted['cumsum_sens']
+    # Flatten the input footprint for easier manipulation
+    flattened_fp = input_footprint.flatten()
+    sum_sensitivity_values = flattened_fp.sum()
+    threshold_sensitivity = sum_sensitivity_values * threshold
 
-    if threshold==1:
+    # Create a DataFrame for manipulation
+    df_sensitivity = pd.DataFrame({'sensitivity': flattened_fp})
+    df_sensitivity_sorted = df_sensitivity.sort_values(by='sensitivity', ascending=False)
+    df_sensitivity_sorted['cumsum_sens'] = df_sensitivity_sorted['sensitivity'].cumsum()
 
+    # Apply threshold mask
+    if threshold == 1:
         df_sensitivity_sorted['mask_threshold']= np.where(df_sensitivity_sorted['sensitivity']==0, 0, 1)
     else:
         df_sensitivity_sorted['mask_threshold']= np.where(df_sensitivity_sorted['cumsum_sens']>=threshold_sensitivity, 0, 1)
-        
-    #sort it back (so in correct lat/lon order for "packing back up" to 2D)
-    df_sensitivity_upd=df_sensitivity_sorted.sort_index()
-    #want a footprint with 0/1 for see or not see also 
-    list_mask_threshold=df_sensitivity_upd['mask_threshold'].tolist()
+
+    # not sorted according to cell size anymore: back to position in original shapefile
+    df_sensitivity_mask=df_sensitivity_sorted.sort_index()
     
-    upd_footprint_see_not_see=np.array(list_mask_threshold).reshape((len(fp_lat), len(fp_lon)))
+    # Use mask to filter values and reshape back to original footprint shape
+    fp_sensitivity_mask = np.array(list(df_sensitivity_mask['mask_threshold'])).reshape((len(fp_lat), len(fp_lon)))
     
     #a NetCDF file with the grid size calues in m2
     f_gridarea = cdf.Dataset(stcDataPath + 'gridareaSTILT.nc')
-    #area stored in "cell_area". Convert to km2
-    gridarea = f_gridarea.variables['cell_area'][:]/1000000
-    
-    area_within_threshold = sum((upd_footprint_see_not_see * gridarea).flatten())
 
+    gridarea_km2 = f_gridarea.variables['cell_area'][:] / 1e6  # Convert m2 to km2
+    area_within_threshold = (fp_sensitivity_mask * gridarea_km2).sum()
+    
     return area_within_threshold
 
 def import_landcover_HILDA(year='2018'):
@@ -261,46 +215,43 @@ def import_population_data():
     return fp_pop
 
 def import_point_source_data():
+    """
+    Calculates point source CO2 emissions per square meter per second from annual data.
 
-    point_source_data= Dataset(stcDataPath+ 'E_PRTR_pointsource_2017.nc')
+    Args:
+        stcDataPath (str): Path to the directory containing the relevant NetCDF files.
 
-    #emissions in kg/year in the variable "Sum_Tota_1"
-    fp_point_source=point_source_data.variables['Sum_Tota_1'][:,:]
+    Returns:
+        numpy.ndarray: The emissions in micro-moles per square meter per second.
+    """
+    # Load point source data and grid area from NetCDF files
+    with Dataset(os.path.join(stcDataPath, 'E_PRTR_pointsource_2017.nc')) as point_source_data, \
+         Dataset(os.path.join(stcDataPath, 'gridareaSTILT.nc')) as grid_area_data:
+        
+        # Emissions in kg/year from the variable "Sum_Tota_1"
+        emissions_kg_year = point_source_data.variables['Sum_Tota_1'][:,:]
 
-    # different from population data: can translate the emissions within each stilt cell
-    # to the effect it will have to the final CO2 concentrations at the stations.
-    # just need to get it in the right unit (micromole/m2s) and multiply by the individual or aggregated footprints
+        # Grid cell area in m2 from the variable "cell_area"
+        grid_area_m2 = grid_area_data.variables['cell_area'][:]
 
-    # divide by the molar weight in kg. 12 (C)+16(O)+16(O) =44 0.044 in kg.
-    # get number of moles of C this way. Want it in micromole though: 1 mole= 1000000 micromole
-    fp_point_source_moles_C=fp_point_source/0.044
+    # Convert emissions from kg/year to micro-moles per m2 per second
+    molar_mass_C = 44  # g/mol for CO2, or 0.044 kg/mol
+    seconds_per_year = 31536000
+    emissions_micromoles_m2_s = (emissions_kg_year / molar_mass_C * 1e6) / grid_area_m2 / seconds_per_year
 
-    #how many micro-mole is that? multiply by 1000000
-    fp_point_source_micromoles_C=fp_point_source_moles_C*1000000
-
-    #a NetCDF file with the grid size calues in m2
-    f_gridarea = cdf.Dataset(stcDataPath + 'gridareaSTILT.nc')
-
-    #area stored in "cell_area"
-    gridarea = f_gridarea.variables['cell_area'][:]
-
-    fp_point_source_m2= fp_point_source_micromoles_C/gridarea
-
-    #how many micro moles let out per second (have yearly data)
-    fp_point_source_m2_s= fp_point_source_m2/31536000
-    
-    return fp_point_source_m2_s
+    return emissions_micromoles_m2_s
 
 def date_and_time_string_for_title(date_range, timeselect_list):
-    
-    date_index_number=len(date_range) - 1
-    
-    timeselect_string=[str(value) for value in timeselect_list]
-    timeselect_string =':00, '.join(timeselect_string) + ':00'
+    # Use datetime formatting to simplify date string construction
+    start_date = date_range[0].strftime('%Y-%m-%d')
+    end_date = date_range[-1].strftime('%Y-%m-%d')
 
-    date_and_time_string=('\n' + str(date_range[0].year) + '-' + str(date_range[0].month) + '-' + str(date_range[0].day)\
-                + ' to ' + str(date_range[date_index_number].year) + '-' + str(date_range[date_index_number].month) + '-' \
-                + str(date_range[date_index_number].day)+ ', Hour(s): ' + timeselect_string+ '\n')
+    # Build time selection string with list comprehension and string join
+    timeselect_string = ', '.join(f"{hour}:00" for hour in timeselect_list)
+
+    # Combine the formatted strings into the final date and time string
+    date_and_time_string = f"\n{start_date} to {end_date}, Hour(s): {timeselect_string}\n"
+    
     return date_and_time_string
 
 #function to generate maps with cells binned by defined intervals and direction
@@ -358,40 +309,30 @@ def compass_bearing(pointA, pointB):
 
     return compass_bearing
 
+
 def define_bins_maprose(km_intervals, bin_size):
-        
-    #the number of bins
-    number_bins=round((5000/km_intervals),0)
+    # Calculate the number of bins based on a maximum distance of 5000 km
+    number_bins = round(5000 / km_intervals)
     
-    #start at 0 km of the station. Then append to this list
-    interval_bins=[0]
+    # Generate interval bins using numpy, extending to infinity for the last bin
+    interval_bins = np.arange(0, km_intervals * number_bins, km_intervals, dtype=float)
+    interval_bins = np.append(interval_bins, np.inf)
     
-    #ex 100, 200, 300 if km_intervals=100
-    for number in range(1, int(number_bins)):
-        interval_bins.append(km_intervals*number)
-    
-    #the last number is infinity - however far the domain stretches marks the end of the last bin.
-    interval_bins.append(np.inf)
-    
-    #labels: not used in map - but used in the grouping
+    # Generate labels for non-directional bins
     interval_labels = nondirection_labels(interval_bins, units='km')
-
-    #direction: using the input (degree_bin) to set the bins so that the first bin has "north (0 degrees) in the middle"
-    #"from_degree" becomes a negative value (half of the degree value "to the left" of 0)
-    from_degree=-(bin_size/2)
-
-    #"to_degree" is a vale to indicate the last bins ending. Must check values all the way to 360 which means the last bin 
-    #will go past 360 and later be joined with the "0" bin (replace function in next cell)
-    to_degree= 360 + (bin_size/2) 
-
-    #the bin_size is the "step". generate an array with all the direction bins
-    dir_bins = np.arange(from_degree, (to_degree+1), bin_size)
-
-    #the direction bin is the first bin + the next bin divided by two:
+    
+    # Calculate the starting and ending degrees for direction bins
+    from_degree = -(bin_size / 2)
+    to_degree = 360 + (bin_size / 2)
+    
+    # Generate directional bins using numpy
+    dir_bins = np.arange(from_degree, to_degree + bin_size, bin_size)
+    
+    # Calculate midpoints of directional bins for labels
     dir_labels = (dir_bins[:-1] + dir_bins[1:]) / 2
     
-    #return these values to use in the function map_representation_polar_graph
     return interval_bins, interval_labels, dir_bins, dir_labels
+
 
 # function to convert station longitude and latitude (slat, slon) to indices of STILT model grid (ix,jy)
 def lonlat_2_ixjy(slon,slat,mlon,mlat):
@@ -401,90 +342,62 @@ def lonlat_2_ixjy(slon,slat,mlon,mlat):
     jy = (np.abs(mlat-slat)).argmin()
     return ix,jy
 
-def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='', 
-              vmin=0.0001, vmax=None, colors='GnBu'): 
 
-    station=myStation.stationId
-    lon=myStation.lon
-    lat=myStation.lat
-    unit=myStation.settings['unit']
-    if unit=='percent':
-        unit='%'
-    else:
-        if label=='point source contribution':
-            unit='(ppm)'
-        if label=='population sensitivity':
-            unit='(population * (ppm /(μmol / (m²s))))'
-        if label=='sensitivity':
-            unit='(ppm /(μmol / (m²s)))'
-
-    fp_lon=myStation.fpLon
-    fp_lat=myStation.fpLat
+def plot_maps(myStation, field, title='', label='', linlog='linear', zoom='', vmin=0.0001, vmax=None, colors='GnBu'):
+    # Initialize figure and axis with Cartopy projection
+    fig, ax = plt.subplots(figsize=(18, 10), subplot_kw={'projection': ccrs.PlateCarree()})
     
+    matplotlib.rcParams.update({'font.size': 14})
     
-    mcolor='m'
+    ax.set_extent([myStation.fpLon.min(), myStation.fpLon.max(), myStation.fpLat.min(), myStation.fpLat.max()], crs=ccrs.PlateCarree())
+
+    # Add Natural Earth features
+    ax.add_feature(cfeature.NaturalEarthFeature('cultural', 'admin_0_countries', '50m', edgecolor='grey', facecolor='none'), linewidth=0.5)
     
-    # Set scale for features from Natural Earth
-    NEscale = '50m'
+    # Handle special label cases for unit determination
+    unit_setting = myStation.settings['unit']
+    if unit_setting == 'percent':
+        unit = '(%)'
+    elif label == 'point source contribution':
+        unit = '(ppm)'
+    elif label == 'population sensitivity':
+        unit = '(population * sensitivity)'
+    elif label == 'sensitivity':
+        unit = '(ppm given a uniform flux of 1 μmol / (m²s))'
 
-    # Create a feature for Countries at 1:50m from Natural Earth
-    countries = cfeature.NaturalEarthFeature(
-        category='cultural',
-        name='admin_0_countries',
-        scale=NEscale,
-        facecolor='none')
-
-    fig = plt.figure(figsize=(18,10))
-
-    # set up a map
-    ax = plt.subplot(1, 2, 1, projection=ccrs.PlateCarree())
-    img_extent = (fp_lon.min(), fp_lon.max(), fp_lat.min(), fp_lat.max())
-    ax.set_extent([fp_lon.min(), fp_lon.max(), fp_lat.min(), fp_lat.max()],crs=ccrs.PlateCarree())
-    
-    ax.add_feature(countries, edgecolor='grey', linewidth=0.5)
-   
-    reader = shpreader.Reader('/data/project/cartopy/shapefiles/natural_earth/cultural/ne_10m_admin_0_countries.shp')
-    
-    # Color countries that miss data for population and point source respectively
-    if label == 'point source contribution':   
-        list_countries_to_add = ['Russian Federation', 'Belarus', 'Ukraine', 'Moldova', 'Turkey', 'Tunisia', 'Algeria', 'Morocco','Bosnia and Herzegovina', 'Serbia', 'Montenegro', 'Kosovo', 'Albania', 'Macedonia']
-        legend_title= 'Countries with no point source data'
-
-        for country_to_add in list_countries_to_add:
-
-            country_information = [country for country in reader.records() if country.attributes["NAME_LONG"] == country_to_add][0]
-            country_shape = ShapelyFeature([country_information.geometry], ccrs.PlateCarree(), facecolor="white", hatch="/", edgecolor='lightgrey', lw=0.3)                     
-            ax.add_feature(country_shape)
-        
-        # add a legend 
+    # Color missing data countries for specific labels
+    # Colors countries that are missing data based on the label.
+    if label == 'point source contribution':
+        list_countries_to_add = ['Russian Federation', 'Belarus', 'Ukraine', 'Moldova', 'Turkey', 'Tunisia', 'Algeria', 'Morocco', 'Bosnia and Herzegovina', 'Serbia', 'Montenegro', 'Kosovo', 'Albania', 'Macedonia']
+        for country_name in list_countries_to_add:
+            """Adds a shape of a country to the axis based on its name."""
+            reader = shpreader.Reader('/data/project/cartopy/shapefiles/natural_earth/cultural/ne_10m_admin_0_countries.shp')
+            country_geom = [country.geometry for country in reader.records() if country.attributes["NAME_LONG"] == country_name][0]
+            ax.add_geometries([country_geom], ccrs.PlateCarree(), facecolor="white", hatch="/", edgecolor='lightgrey', lw=0.3)
+        # Add legend for missing data
         proxy_artist = mpatches.Rectangle((0, 0), 1, 0.1, facecolor="white", hatch="/", edgecolor='lightgrey', lw=0.5)
-        ax.legend([proxy_artist], [legend_title], loc='upper left', fancybox=True)
-            
+        ax.legend([proxy_artist], ['Countries with no point source data'], loc='upper left', fancybox=True)
+
+    # Plot the field with linear or logarithmic color scale
+    #plot_field(ax, field, myStation.fpLon, myStation.fpLat, colors, vmin, vmax, linlog, label, unit)
     cmap = plt.get_cmap(colors)
-    cmap.set_under(color='white')  
-    
-    if linlog == 'linear':
-        
-        im = ax.imshow(field[:,:],interpolation=None,origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
-        cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='neither')
-        cbar.set_label(label+'  '+unit)
+    cmap.set_under(color='white')
+    img_extent = (myStation.fpLon.min(), myStation.fpLon.max(), myStation.fpLat.min(), myStation.fpLat.max())
 
-    else:
-        
-        im = ax.imshow(np.log10(field)[:,:],interpolation='none',origin='lower', extent=img_extent,cmap=cmap,vmin=vmin,vmax=vmax)
-        cbar=plt.colorbar(im,orientation='horizontal',pad=0.03,fraction=0.055,extend='neither')
-        cbar.set_label(label+'  log$_{10}$ '+unit)
-    
-    ax.text(0.01, -0.25, 'min: %.2f' % np.min(field[:,:]), horizontalalignment='left',transform=ax.transAxes)
-    ax.text(0.99, -0.25, 'max: %.2f' % np.max(field[:,:]), horizontalalignment='right',transform=ax.transAxes)
-    
-    #show station location if station is provided
-    if station != '':
+    im = ax.imshow(field, interpolation='none', origin='lower', extent=img_extent, cmap=cmap, vmin=vmin, vmax=vmax)
+    cbar = plt.colorbar(im, orientation='horizontal', pad=0.03, fraction=0.055, extend='neither')
+    cbar.set_label(f'{label} {unit}')
 
-        ax.plot(lon,lat,'+',color=mcolor,ms=10,markeredgewidth=1,transform=ccrs.PlateCarree())
+    # Display min and max values
+    ax.text(0.01, -0.25, f'min: {np.min(field):.2f}', horizontalalignment='left', transform=ax.transAxes)
+    ax.text(0.99, -0.25, f'max: {np.max(field):.2f}', horizontalalignment='right', transform=ax.transAxes)
 
-        
-    return fig 
+    # Highlight station location
+    if myStation.stationId:
+        ax.plot(myStation.lon, myStation.lat, '+', color='magenta', ms=10, markeredgewidth=1, transform=ccrs.PlateCarree())
+
+    return fig
+
     
 #or min_lat, max_lat, step (in degrees)    
 def distances_from_point_to_grid_cells(station_lat, station_lon, grid_lat, grid_lon):
@@ -507,20 +420,13 @@ def degrees_from_point_to_grid_cells(station_lat, station_lon, grid_lat, grid_lo
 
 
 def polar_graph(myStation, rose_type, colorbar='gist_heat_r', zoom=''):   
-    
-    """
-    function contained - can make shorter. not global. 
-    """
-    
+
     interval_bins=myStation.intervalBins
     interval_labels=myStation.intervalLabels
     dir_bins=myStation.dirBins
     dir_labels=myStation.dirLabels
     fp=myStation.fp
     unit=myStation.settings['unit']
-    
-    fp_pop= import_population_data()
-    fp_point= import_point_source_data()
     
     #same function used to all three types of map
     if rose_type=='sensitivity':
@@ -530,78 +436,62 @@ def polar_graph(myStation, rose_type, colorbar='gist_heat_r', zoom=''):
         
     elif rose_type=='point source contribution':
         
+        fp_point= import_point_source_data()
+        
         grid_to_display=fp*fp_point
         
     elif rose_type=='population sensitivity':
         
+        fp_pop= import_population_data()
         grid_to_display=fp*fp_pop
         
-    sens_value = []
-    for sublist in grid_to_display[0].tolist():
-        sens_value.extend(sublist)
-
-
-    #putting it into a dataframe - to perform groupby etc
+    # Initialize an empty DataFrame to hold sensitivity mapping data.
     df_sensitivity_map = pd.DataFrame()
-    df_sensitivity_map['distance'] = myStation.distances
-    df_sensitivity_map['sensitivity'] = sens_value
-    df_sensitivity_map['degrees'] = myStation.degrees
 
-    #for % later - sensitivity within certain bin (distance and direction)
-    total_sensitivity= df_sensitivity_map['sensitivity'].sum()
+    # Populate the DataFrame with sensitivity data and associated spatial metrics.
+    df_sensitivity_map['sensitivity'] = grid_to_display.flatten()  # Convert 2D grid data to a 1D array.
+    df_sensitivity_map['distance'] = myStation.distances  # Distance from the station for each grid cell.
+    df_sensitivity_map['degrees'] = myStation.degrees  # Degree direction for each grid cell.
+
+    # Binning data by distance and degree intervals to summarize information.
+    # Define bins for distance intervals.
+    rosedata = df_sensitivity_map.assign(
+        Interval_bins=lambda df: pd.cut(df['distance'], bins=interval_bins, labels=interval_labels, right=True)
+    )
+
+    # Define bins for directional degrees, treating the circular nature of direction (0 and 360 degrees are the same).
+    rosedata = rosedata.assign(
+        Degree_bins=lambda df: pd.cut(df['degrees'], bins=dir_bins, labels=dir_labels, right=False)
+    ).replace({'Degree_bins': {360: 0}})  # Correcting for circular direction representation.
+
+    # Create a unique identifier for each combination of distance and direction.
+    rosedata['key'] = rosedata['Interval_bins'].astype(str) + ' ' + rosedata['Degree_bins'].astype(str)
+
+    # Aggregate sensitivity data by the unique combination of distance and direction.
+    # This summarization helps in understanding the sensitivity distribution across different spatial bins.
+    rosedata_groupby = rosedata.groupby('key', as_index=False)['sensitivity'].sum().reset_index()
+
+    # Merge the aggregated sensitivity data back to the original DataFrame.
+    # This step assigns the summed sensitivity values to each cell based on their distance and direction bin.
+    # The merge operation is performed without sorting to maintain the original order.
+    rosedata = rosedata.reset_index().merge(rosedata_groupby[['key', 'sensitivity']], on='key', suffixes=('', '_summed'), sort=False)
+
+    # Sort the DataFrame by the original grid cell index to maintain spatial consistency.
+    # This sorting is crucial for visualizing the sensitivity data correctly on the map.
+    rosedata = rosedata.sort_values(by=['index'])
+
+    # Note: The final DataFrame 'rosedata' now contains both individual cell sensitivities
+    # and the aggregated sensitivity sums for each spatial bin, ready for visualization or further analysis.
     
-    #binning - by the distace intervals and degree intervals. Summarize these. 
-    rosedata=df_sensitivity_map.assign(Interval_bins=lambda df: pd.cut(df['distance'], bins=interval_bins, labels=interval_labels, right=True))
+    rosedata_list=rosedata['sensitivity_summed'].tolist()
 
-    rosedata=rosedata.assign(Degree_bins=lambda df: pd.cut(df['degrees'], bins=dir_bins, labels=dir_labels, right=False))
-   
-    #the 360 degree are the same as 0:
-    rosedata=rosedata.replace({'Degree_bins': {360: 0}})
-
-    #the combination of the distance and direction columns is used to create a unique column value for all cells
-    #with certain direction/distance combination.
-    #make it to string to be able to combine.
-    rosedata['key']=rosedata['Interval_bins'].astype(str) + ' ' + rosedata['Degree_bins'].astype(str) 
-
-    #group by the unique combination of direction and distance
-    rosedata_groupby=rosedata.groupby(by=['key'], as_index=False)['sensitivity'].sum().reset_index()
-
-    #merge between the 192000 cells and the "groupedby" values: each cell in a specific direction and distance will
-    #get the sum of the cells in that same specific bin. Same color on the map corresponing to % or absolute sensitivity.
-    #reset_index() creates a column with the original index of the dataframes that are joined. Needed to sort the dataframe
-    #in the next spted because default is to sort by the key used. 
-    rosedata=rosedata.reset_index().merge(rosedata_groupby, left_on='key', right_on='key', sort=False)
-
-    #sort by the original index of the 192000 cells: 
-    rosedata=rosedata.sort_values(by=['index_x'])
-
-    #x is the "fist" (rosedata.merge) dataframe that was merged (the 192000 individual cells) 
-    #y is the dataframe that is merged to the first. Both columns name "sensitivity". 
-    #sensitivity_y is the merged data - the summarized sensitivity value for the whole bin (direction and distance bin)
-    rosedata_list=rosedata['sensitivity_y'].tolist()
-
-    #now starts the process of "packing it back up" so that it can be displayed as a map (same format as the netCDF files with 480
-    #lists of lists - the first list is all tha values that has "the first" latitude value and all 400 different longitude values)
-    #calculate the % sensitivity - can be changed to absolute sensitivity
     if unit=='percent':
+
+        total_sensitivity= df_sensitivity_map['sensitivity'].sum() 
         rosedata_list=[(sensitivity_value/total_sensitivity)*100 for sensitivity_value in rosedata_list]
 
-    #the "netcdf simulation" (see text above)
-    rosedata_list_of_lists=[]
-
-    index=0
-    while index<192000:
-        index_to=index+400
-
-        #for each list: need to grab the 400 values that are the combination of the same latitude value
-        #but different longitude values
-        rosedata_list_of_lists.append(rosedata_list[index:index_to])
-
-        #start at the next 400 in the list in the next turn of the loop:
-        index=index+400
-
-    #numpy array works to display in map
-    rosedata_array=np.array(rosedata_list_of_lists) 
+    # footprint shape for display in map according to STILT grid
+    rosedata_array = np.array(np.array(rosedata_list).reshape(len(myStation.fpLat), len(myStation.fpLon)))
         
     caption=(unit.capitalize() + ' ' + rose_type + ' given direction and distance')
           
@@ -609,7 +499,6 @@ def polar_graph(myStation, rose_type, colorbar='gist_heat_r', zoom=''):
                    linlog='linear', zoom='', vmin=0.0001, vmax=None, colors=colorbar)
         
     return polar_map, caption
-    
 
 def land_cover_bar_graph(myStation):    
     
@@ -618,83 +507,29 @@ def land_cover_bar_graph(myStation):
     degrees=myStation.degrees
     fp=myStation.fp
 
-    #get all the land cover data from netcdfs 
-    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018')
+    # Import all the land cover data
+    landcover_types = import_landcover_HILDA(year='2018')
     
-    #land cover classes (imported in the land cover section):
-    broad_leaf_forest=fp*broad_leaf_forest
-    coniferous_forest=fp*coniferous_forest
-    mixed_forest=fp*mixed_forest
-    ocean=fp*ocean
-    other=fp*other
-    grass_shrub=fp*grass_shrub
-    cropland=fp*cropland
-    pasture=fp*pasture
-    urban=fp*urban
-    unknown=fp*unknown
-                
-    #lists of these values
-    broad_leaf_forest_values = [item for sublist in broad_leaf_forest[0] for item in sublist]
-    coniferous_forest_values = [item for sublist in coniferous_forest[0] for item in sublist]
-    mixed_forest_values = [item for sublist in mixed_forest[0] for item in sublist]
-    ocean_values = [item for sublist in ocean[0] for item in sublist]
-    other_values = [item for sublist in other[0] for item in sublist]
-    grass_shrub_values = [item for sublist in grass_shrub[0] for item in sublist]
-    cropland_values = [item for sublist in cropland[0] for item in sublist]
-    pasture_values = [item for sublist in pasture[0] for item in sublist]
-    urban_values = [item for sublist in urban[0] for item in sublist]
-    unknown_values = [item for sublist in unknown[0] for item in sublist]
+        # Initialize a DataFrame to store aggregated land cover values
+    df_all = pd.DataFrame()
+
+    # List of land cover names for columns
+    landcover_names = [
+        "Broad leaf forest", "Coniferous forest", "Mixed forest", "Ocean", 
+        "Other", "Grass/shrubland", "Cropland", "Pasture", "Urban", "Unknown"
+    ]
+    
+    # Aggregate land cover values multiplied by footprint
+    for i, landcover in enumerate(landcover_types):
+        landcover_values = (fp * landcover).flatten()
+        df_temp = pd.DataFrame({
+            'landcover_vals': landcover_values,
+            'degrees': degrees,
+            'landcover_type': landcover_names[i]
+        })
+        df_all = df_all.append(df_temp, ignore_index=True)
         
         
-    #putting it into a dataframe: initially 192000 values (one per cell) for each of the aggregated land cover classes
-    #into same dataframe - have the same coulmn heading. "landcover_type" will be used in "groupby" together with the "slice" (in degrees)
-    df_broad_leaf_forest = pd.DataFrame({'landcover_vals': broad_leaf_forest_values,
-                               'degrees': degrees,
-                               'landcover_type':'Broad leaf forest'})
-    
-    df_coniferous_forest = pd.DataFrame({'landcover_vals': coniferous_forest_values,
-                           'degrees': degrees,
-                           'landcover_type':'Coniferous forest'})
-    
-    df_mixed_forest = pd.DataFrame({'landcover_vals': mixed_forest_values,
-                           'degrees': degrees,
-                           'landcover_type':'Mixed forest'})
-    
-    df_ocean = pd.DataFrame({'landcover_vals': ocean_values,
-                           'degrees': degrees,
-                           'landcover_type':'Ocean'})
-    
-    df_other = pd.DataFrame({'landcover_vals': other_values,
-                           'degrees': degrees,
-                           'landcover_type':'Other'})
-    
-    df_grass_shrub = pd.DataFrame({'landcover_vals':  grass_shrub_values,
-                           'degrees': degrees,
-                           'landcover_type':'Grass/shrubland'})
-    
-    df_cropland = pd.DataFrame({'landcover_vals':  cropland_values,
-                           'degrees': degrees,
-                           'landcover_type':'Cropland'})
-    
-    df_pasture = pd.DataFrame({'landcover_vals': pasture_values,
-                           'degrees': degrees,
-                           'landcover_type':'Pasture'})
-    
-    df_urban = pd.DataFrame({'landcover_vals':  urban_values,
-                           'degrees': degrees,
-                           'landcover_type':'Urban'})
-    
-    df_unknown = pd.DataFrame({'landcover_vals':  unknown_values,
-                           'degrees': degrees,
-                           'landcover_type':'Unknown'})
-    
-
-    #into one dataframe
-    df_all = df_cropland.append([df_broad_leaf_forest, df_coniferous_forest, df_mixed_forest, df_ocean, df_other, df_grass_shrub, df_pasture, df_urban, df_unknown])
-    
-
-    #not change with user input
-    dir_bins = np.arange(22.5, 383.5, 45)
     dir_bins= np.asarray([0, 22.5,67.5,112.5,157.5,202.5,247.5,292.5,337.5,383.5])
     dir_labels= np.asarray([0, 22.5,67.5,112.5,157.5,202.5,247.5,292.5,337.5])
 
@@ -721,16 +556,17 @@ def land_cover_bar_graph(myStation):
 
     rosedata= rosedata.applymap(lambda x: x / total_all * 100)
 
-    list_land_cover_values=[]
-    for land_cover_type in list_land_cover_names_sorted:
-        list_land_cover_values.append(rosedata[land_cover_type].values)
+    list_land_cover_values = [rosedata[land_cover_type].values for land_cover_type in list_land_cover_names_sorted]
      
     matplotlib.rcParams.update({'font.size': 20})
+    
     fig = plt.figure(figsize=(11,13)) 
     ax = fig.add_subplot(1,1,1)
-    N = 8
-    ind = np.arange(N)  
+    
+    # number directions 
+    ind = np.arange(8)  
     width = 0.35       
+    
 
     p1 = ax.bar(ind, list_land_cover_values[0], width, color=dictionary_color[list_land_cover_names_sorted[0]]['color'])
     p2 = ax.bar(ind, list_land_cover_values[1], width, color=dictionary_color[list_land_cover_names_sorted[1]]['color'],
@@ -761,18 +597,14 @@ def land_cover_bar_graph(myStation):
     #want to reverese the order (ex if oceans at the "bottom" in the graph - ocean label should be furthest down)
     handles=(p1[0], p2[0], p3[0], p4[0], p5[0], p6[0], p7[0], p8[0], p9[0], p10[0])
 
-    index=0
-    list_labels=[]
-    for land_cover_name in list_land_cover_names_sorted:
-
-        for_lable= (land_cover_name + ' (' + str("%.1f" % sum(list_land_cover_values[index])) + '%)')
-        list_labels.append(for_lable)
-        index=index+1
+    list_labels = [
+        f"{land_cover_name} ({sum(values):.1f}%)"
+        for land_cover_name, values in zip(list_land_cover_names_sorted, list_land_cover_values)
+    ]
 
     labels=[textwrap.fill(text,20) for text in list_labels]
 
     plt.legend(handles[::-1], labels[::-1],bbox_to_anchor=(1, 0.52))
- 
     plt.ylabel('Percent')
     
     #first one is not north (in rosedata - rather 22.5 to 67.5 (NE). 
@@ -781,12 +613,9 @@ def land_cover_bar_graph(myStation):
     ax.yaxis.grid(True)
     
     caption='Land cover within average footprint aggregated by direction'
-    fig.set_size_inches(11, 13)
 
     return fig, caption
 
-
-#14 font before
 def render_mpl_seasonal_table(myStation, data, station, col_width=2, row_height=0.625, font_size=16,
              header_color='#40466e', row_colors=['#f1f1f2', 'w'], edge_color='w',
              bbox=[0, 0, 1, 1], header_columns=0, 
@@ -796,7 +625,7 @@ def render_mpl_seasonal_table(myStation, data, station, col_width=2, row_height=
         fig, ax = plt.subplots(figsize=size)
         ax.axis('off')
 
-    mpl_table = ax.table(cellText=data.values, cellLoc='center', bbox=bbox, colLabels=data.columns, colWidths=[2.5,1.5,2.5,2,2,2,3.5])
+    mpl_table = ax.table(cellText=data.values, cellLoc='center', bbox=bbox, colLabels=data.columns, colWidths=[2.5,1.5,2,1.5,1.5,1.5,4.5])
 
     mpl_table.auto_set_font_size(True)
     mpl_table.set_fontsize(font_size)
@@ -818,48 +647,28 @@ def seasonal_table(myStation):
     year=myStation.settings['startYear']
     available_STILT= myStation.settings['stilt']
     months= available_STILT[str(year)]['months']
-    
-    var_load=pd.read_csv(stcDataPath + 'seasonal_table_values_GPW_pop.csv') 
-    station_year= station +'_' + str(year)
+    var_load=pd.read_csv(stcDataPath + 'seasonal_table_values_2024_02_19.csv')
+
+    station_year = f'{station}_{year}'
 
     if station_year in set(var_load.station_year):
-        
-        sens_whole= var_load.loc[var_load['station_year'] == station_year, 'sens_whole'].iloc[0]
-        sens_diff_winter = var_load.loc[var_load['station_year'] == station_year, 'sens_diff_winter'].iloc[0]
-        sens_diff_spring = var_load.loc[var_load['station_year'] == station_year, 'sens_diff_spring'].iloc[0]
-        sens_diff_summer = var_load.loc[var_load['station_year'] == station_year, 'sens_diff_summer'].iloc[0]
-        sens_diff_fall = var_load.loc[var_load['station_year'] == station_year, 'sens_diff_fall'].iloc[0]
+      
+        # Initialize a dictionary to hold your data
+        data = {}
 
-        point_whole = var_load.loc[var_load['station_year'] == station_year, 'point_whole'].iloc[0]
-        point_diff_winter = var_load.loc[var_load['station_year'] == station_year, 'point_diff_winter'].iloc[0]
-        point_diff_spring = var_load.loc[var_load['station_year'] == station_year, 'point_diff_spring'].iloc[0]
-        point_diff_summer = var_load.loc[var_load['station_year'] == station_year, 'point_diff_summer'].iloc[0] 
-        point_diff_fall = var_load.loc[var_load['station_year'] == station_year, 'point_diff_fall'].iloc[0]
+        if station_year in set(var_load['station_year']):
+            # Fetch the values for each variable directly into the data dictionary
+            variables = ['sens_whole', 'sens_diff_winter', 'sens_diff_spring', 'sens_diff_summer', 'sens_diff_fall', 
+                         'point_whole', 'point_diff_winter', 'point_diff_spring', 'point_diff_summer', 'point_diff_fall', 
+                         'pop_whole', 'pop_diff_winter', 'pop_diff_spring', 'pop_diff_summer', 'pop_diff_fall', 
+                         'gee_whole', 'gee_diff_winter', 'gee_diff_spring', 'gee_diff_summer', 'gee_diff_fall', 
+                         'resp_whole', 'resp_diff_winter', 'resp_diff_spring', 'resp_diff_summer', 'resp_diff_fall', 
+                         'anthro_whole', 'anthro_diff_winter', 'anthro_diff_spring', 'anthro_diff_summer', 'anthro_diff_fall']
 
-        pop_whole = var_load.loc[var_load['station_year'] == station_year, 'pop_whole'].iloc[0]
-        pop_diff_winter = var_load.loc[var_load['station_year'] == station_year, 'pop_diff_winter'].iloc[0]
-        pop_diff_spring = var_load.loc[var_load['station_year'] == station_year, 'pop_diff_spring'].iloc[0] 
-        pop_diff_summer = var_load.loc[var_load['station_year'] == station_year, 'pop_diff_summer'].iloc[0] 
-        pop_diff_fall = var_load.loc[var_load['station_year'] == station_year, 'pop_diff_fall'].iloc[0]
+            for var in variables:
+                data[var] = var_load.loc[var_load['station_year'] == station_year, var].iloc[0]
 
-        gee_whole = var_load.loc[var_load['station_year'] == station_year, 'gee_whole'].iloc[0] 
-        gee_diff_winter = var_load.loc[var_load['station_year'] == station_year, 'gee_diff_winter'].iloc[0]
-        gee_diff_spring = var_load.loc[var_load['station_year'] == station_year, 'gee_diff_spring'].iloc[0]
-        gee_diff_summer = var_load.loc[var_load['station_year'] == station_year, 'gee_diff_summer'].iloc[0]
-        gee_diff_fall = var_load.loc[var_load['station_year'] == station_year, 'gee_diff_fall'].iloc[0]
-
-        resp_whole = var_load.loc[var_load['station_year'] == station_year, 'resp_whole'].iloc[0]
-        resp_diff_winter = var_load.loc[var_load['station_year'] == station_year, 'resp_diff_winter'].iloc[0]
-        resp_diff_spring = var_load.loc[var_load['station_year'] == station_year, 'resp_diff_spring'].iloc[0]
-        resp_diff_summer = var_load.loc[var_load['station_year'] == station_year, 'resp_diff_summer'].iloc[0]
-        resp_diff_fall = var_load.loc[var_load['station_year'] == station_year, 'resp_diff_fall'].iloc[0]
-
-        anthro_whole = var_load.loc[var_load['station_year'] == station_year, 'anthro_whole'].iloc[0]
-        anthro_diff_winter = var_load.loc[var_load['station_year'] == station_year, 'anthro_diff_winter'].iloc[0]
-        anthro_diff_spring = var_load.loc[var_load['station_year'] == station_year, 'anthro_diff_spring'].iloc[0]
-        anthro_diff_summer = var_load.loc[var_load['station_year'] == station_year, 'anthro_diff_summer'].iloc[0]
-        anthro_diff_fall = var_load.loc[var_load['station_year'] == station_year, 'anthro_diff_fall'].iloc[0]
-
+    # in case of no pre-computed values (new STILT footprints since 2024-02-08)
     else:
     
         fp_pop= import_population_data()
@@ -886,113 +695,114 @@ def seasonal_table(myStation):
 
             #want also the whole year - get from the footprints of the seasons.
             nfp_total = nfp_winter + nfp_spring + nfp_summer + nfp_fall
+            
+            if nfp_total > 2920*0.9:
 
-            part_winter = nfp_winter/nfp_total
-            part_spring = nfp_spring/nfp_total
-            part_summer = nfp_summer/nfp_total
-            part_fall = nfp_fall/nfp_total
+                part_winter = nfp_winter/nfp_total
+                part_spring = nfp_spring/nfp_total
+                part_summer = nfp_summer/nfp_total
+                part_fall = nfp_fall/nfp_total
 
-            fp_whole=(fp_winter*part_winter)+ (fp_spring*part_spring)+(fp_summer*part_summer)+(fp_fall*part_fall)
-            sens_whole = fp_whole[0].sum()
+                fp_whole=(fp_winter*part_winter)+ (fp_spring*part_spring)+(fp_summer*part_summer)+(fp_fall*part_fall)
+                sens_whole = fp_whole[0].sum()
 
-            sens_diff_winter=((fp_winter[0].sum()/sens_whole)*100)-100
-            sens_diff_spring=((fp_spring[0].sum()/sens_whole)*100)-100
-            sens_diff_summer=((fp_summer[0].sum()/sens_whole)*100)-100
-            sens_diff_fall=((fp_fall[0].sum()/sens_whole)*100)-100
+                sens_diff_winter=((fp_winter[0].sum()/sens_whole)*100)-100
+                sens_diff_spring=((fp_spring[0].sum()/sens_whole)*100)-100
+                sens_diff_summer=((fp_summer[0].sum()/sens_whole)*100)-100
+                sens_diff_fall=((fp_fall[0].sum()/sens_whole)*100)-100
 
-            #point source 
-            point_whole=(fp_whole*fp_point)[0].sum()
+                #point source 
+                point_whole=(fp_whole*fp_point)[0].sum()
 
-            point_diff_winter=(((fp_winter*fp_point)[0].sum()/point_whole)*100)-100
-            point_diff_spring=(((fp_spring*fp_point)[0].sum()/point_whole)*100)-100
-            point_diff_summer=(((fp_summer*fp_point)[0].sum()/point_whole)*100)-100
-            point_diff_fall=(((fp_fall*fp_point)[0].sum()/point_whole)*100)-100
+                point_diff_winter=(((fp_winter*fp_point)[0].sum()/point_whole)*100)-100
+                point_diff_spring=(((fp_spring*fp_point)[0].sum()/point_whole)*100)-100
+                point_diff_summer=(((fp_summer*fp_point)[0].sum()/point_whole)*100)-100
+                point_diff_fall=(((fp_fall*fp_point)[0].sum()/point_whole)*100)-100
 
-            #population 
-            pop_whole=(fp_whole*fp_pop)[0].sum()
-            pop_diff_winter=(((fp_winter*fp_pop)[0].sum()/pop_whole)*100)-100
-            pop_diff_spring=(((fp_spring*fp_pop)[0].sum()/pop_whole)*100)-100
-            pop_diff_summer=(((fp_summer*fp_pop)[0].sum()/pop_whole)*100)-100
-            pop_diff_fall=(((fp_fall*fp_pop)[0].sum()/pop_whole)*100)-100
+                #population 
+                pop_whole=(fp_whole*fp_pop)[0].sum()
+                pop_diff_winter=(((fp_winter*fp_pop)[0].sum()/pop_whole)*100)-100
+                pop_diff_spring=(((fp_spring*fp_pop)[0].sum()/pop_whole)*100)-100
+                pop_diff_summer=(((fp_summer*fp_pop)[0].sum()/pop_whole)*100)-100
+                pop_diff_fall=(((fp_fall*fp_pop)[0].sum()/pop_whole)*100)-100
 
-            #get the modelled concentration values
-            timeselect_list=[0, 3, 6, 9, 12, 15, 18, 21]
-            df_winter1 = read_stilt_timeseries(station, winter_date_range1, timeselect_list)
-            df_winter2 = read_stilt_timeseries(station, winter_date_range2, timeselect_list)
-            df_winter = df_winter1.append(df_winter2)
-            df_spring = read_stilt_timeseries(station, spring_date_range, timeselect_list)
-            df_summer = read_stilt_timeseries(station, summer_date_range, timeselect_list)
-            df_fall = read_stilt_timeseries(station, fall_date_range, timeselect_list)
+                #get the modelled concentration values
+                timeselect_list=[0, 3, 6, 9, 12, 15, 18, 21]
+                df_winter1 = read_stilt_timeseries(station, winter_date_range1, timeselect_list)
+                df_winter2 = read_stilt_timeseries(station, winter_date_range2, timeselect_list)
+                df_winter = df_winter1.append(df_winter2)
+                df_spring = read_stilt_timeseries(station, spring_date_range, timeselect_list)
+                df_summer = read_stilt_timeseries(station, summer_date_range, timeselect_list)
+                df_fall = read_stilt_timeseries(station, fall_date_range, timeselect_list)
 
-            #averages of the modelled concentration values.
-            df_winter_mean=df_winter.mean()
-            df_spring_mean=df_spring.mean()
-            df_summer_mean=df_summer.mean()
-            df_fall_mean=df_fall.mean()
+                #averages of the modelled concentration values.
+                df_winter_mean=df_winter.mean()
+                df_spring_mean=df_spring.mean()
+                df_summer_mean=df_summer.mean()
+                df_fall_mean=df_fall.mean()
 
-            df_whole_mean=(df_winter_mean*part_winter)+(df_spring_mean*part_spring)+(df_summer_mean*part_summer)+(df_fall_mean*part_fall)
+                df_whole_mean=(df_winter_mean*part_winter)+(df_spring_mean*part_spring)+(df_summer_mean*part_summer)+(df_fall_mean*part_fall)
 
-            gee_whole=df_whole_mean['co2.bio.gee']
+                gee_whole=df_whole_mean['co2.bio.gee']
 
-            gee_diff_winter=((df_winter_mean['co2.bio.gee']/gee_whole)*100)-100
-            gee_diff_spring=((df_spring_mean['co2.bio.gee']/gee_whole)*100)-100
-            gee_diff_summer=((df_summer_mean['co2.bio.gee']/gee_whole)*100)-100
-            gee_diff_fall=((df_fall_mean['co2.bio.gee']/gee_whole)*100)-100
+                gee_diff_winter=((df_winter_mean['co2.bio.gee']/gee_whole)*100)-100
+                gee_diff_spring=((df_spring_mean['co2.bio.gee']/gee_whole)*100)-100
+                gee_diff_summer=((df_summer_mean['co2.bio.gee']/gee_whole)*100)-100
+                gee_diff_fall=((df_fall_mean['co2.bio.gee']/gee_whole)*100)-100
 
-            #respiration
-            resp_whole=df_whole_mean['co2.bio.resp']
+                #respiration
+                resp_whole=df_whole_mean['co2.bio.resp']
 
-            resp_diff_winter=((df_winter_mean['co2.bio.resp']/resp_whole)*100)-100
-            resp_diff_spring=((df_spring_mean['co2.bio.resp']/resp_whole)*100)-100
-            resp_diff_summer=((df_summer_mean['co2.bio.resp']/resp_whole)*100)-100
-            resp_diff_fall=((df_fall_mean['co2.bio.resp']/resp_whole)*100)-100
+                resp_diff_winter=((df_winter_mean['co2.bio.resp']/resp_whole)*100)-100
+                resp_diff_spring=((df_spring_mean['co2.bio.resp']/resp_whole)*100)-100
+                resp_diff_summer=((df_summer_mean['co2.bio.resp']/resp_whole)*100)-100
+                resp_diff_fall=((df_fall_mean['co2.bio.resp']/resp_whole)*100)-100
 
-            #anthropogenic  
-            anthro_whole=df_whole_mean['co2.industry']+df_whole_mean['co2.energy']+ df_whole_mean['co2.transport']+ df_winter_mean['co2.residential'] + df_winter_mean['co2.other_categories']
+                #anthropogenic  
+                anthro_whole=df_whole_mean['co2.industry']+df_whole_mean['co2.energy']+ df_whole_mean['co2.transport']+ df_whole_mean['co2.residential'] + df_whole_mean['co2.other_categories']
+                anthro_diff_winter=(((df_winter_mean['co2.industry']+df_winter_mean['co2.energy']+ df_winter_mean['co2.transport']+ df_winter_mean['co2.residential'] + df_winter_mean['co2.other_categories'])/anthro_whole)*100)-100
+                anthro_diff_spring=(((df_spring_mean['co2.industry']+df_spring_mean['co2.energy']+ df_spring_mean['co2.transport']+ df_spring_mean['co2.residential'] + df_spring_mean['co2.other_categories'])/anthro_whole)*100)-100
+                anthro_diff_summer=(((df_summer_mean['co2.industry']+df_summer_mean['co2.energy']+ df_summer_mean['co2.transport']+ df_summer_mean['co2.residential'] + df_summer_mean['co2.other_categories'])/anthro_whole)*100)-100
+                anthro_diff_fall=(((df_fall_mean['co2.industry']+df_fall_mean['co2.energy']+ df_fall_mean['co2.transport']+ df_fall_mean['co2.residential'] + df_fall_mean['co2.other_categories'])/anthro_whole)*100)-100
 
-            anthro_diff_winter=(((df_winter_mean['co2.industry']+df_winter_mean['co2.energy']+ df_winter_mean['co2.transport']+ df_winter_mean['co2.residential'] + df_winter_mean['co2.other_categories'])/anthro_whole)*100)-100
-            anthro_diff_spring=(((df_spring_mean['co2.industry']+df_spring_mean['co2.energy']+ df_spring_mean['co2.transport']+ df_winter_mean['co2.residential'] + df_winter_mean['co2.other_categories'])/anthro_whole)*100)-100
-            anthro_diff_summer=(((df_summer_mean['co2.industry']+df_summer_mean['co2.energy']+ df_summer_mean['co2.transport']+ df_winter_mean['co2.residential'] + df_winter_mean['co2.other_categories'])/anthro_whole)*100)-100
-            anthro_diff_fall=(((df_fall_mean['co2.industry']+df_fall_mean['co2.energy']+ df_fall_mean['co2.transport']+ df_winter_mean['co2.residential'] + df_winter_mean['co2.other_categories'])/anthro_whole)*100)-100
+            
+            else:
+                seasonal_table = None
+                caption = 'No seasonal table, footprints are not available for the whole (start-)year'
+                return seasonal_table, caption 
 
         #where there is no information in loaded file, and not all footpritns 
         else:
             seasonal_table = None
             caption = 'No seasonal table, footprints are not available for the whole (start-)year'
             return seasonal_table, caption 
+        
     #here have values either from loaded file or calculated
     year_var=str(year) 
     df_seasonal_table = pd.DataFrame(columns=['Variable', year_var, 'Jan + Feb + Dec', 'Mar-May', 'Jun-Aug','Sep-Nov', 'Unit'], index=['Sensitivity', 'Population','Point source', 'GEE', 'Respiration', 'Anthropogenic'])
 
-    df_seasonal_table.loc['Sensitivity'] = pd.Series({'Variable': 'Sensitivity', year_var:("%.2f" % sens_whole), 'Jan + Feb + Dec':("%+.2f" % sens_diff_winter+ '%'), 'Mar-May':("%+.2f" % sens_diff_spring+ '%'), 
-                                                          'Jun-Aug':("%+.2f" % sens_diff_summer + '%'), 'Sep-Nov':("%+.2f" % sens_diff_fall+ '%'), 'Unit': 'ppm / ($\mu$mol / (m$^{2}$s))'})
+    df_seasonal_table.loc['Sensitivity'] = pd.Series({'Variable': 'Sensitivity', year_var:("%.2f" % data['sens_whole']), 'Jan + Feb + Dec':("%+.2f" % data['sens_diff_winter']+ '%'), 'Mar-May':("%+.2f" % data['sens_diff_spring']+ '%'), 'Jun-Aug':("%+.2f" % data['sens_diff_summer'] + '%'), 'Sep-Nov':("%+.2f" % data['sens_diff_fall']+ '%'), 'Unit': 'ppm given a uniform flux (1 μmol / (m²s))'})
 
-    df_seasonal_table.loc['Population'] = pd.Series({'Variable': 'Population', year_var:("%.0f" % pop_whole), 'Jan + Feb + Dec':("%+.2f" % pop_diff_winter+ '%'), 'Mar-May':("%+.2f" % pop_diff_spring+ '%'), 
-                                                          'Jun-Aug':("%+.2f" % pop_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % pop_diff_fall+ '%'), 'Unit': 'pop*(ppm / ($\mu$mol / (m$^{2}$s)))'})
+    df_seasonal_table.loc['Population'] = pd.Series({'Variable': 'Population', year_var:("%.0f" % data['pop_whole']), 'Jan + Feb + Dec':("%+.2f" % data['pop_diff_winter']+ '%'), 'Mar-May':("%+.2f" % data['pop_diff_spring']+ '%'), 'Jun-Aug':("%+.2f" % data['pop_diff_summer']+ '%'), 'Sep-Nov':("%+.2f" % data['pop_diff_fall']+ '%'), 'Unit': 'pop*sensitivity'})
 
 
-    df_seasonal_table.loc['Point source'] = pd.Series({'Variable': 'Point source', year_var:("%.2f" % point_whole), 'Jan + Feb + Dec':("%+.2f" % point_diff_winter+ '%'), 'Mar-May':("%+.2f" % point_diff_spring+ '%'), 
-                                                          'Jun-Aug':("%+.2f" % point_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % point_diff_fall+ '%'), 'Unit': 'ppm'})
+    df_seasonal_table.loc['Point source'] = pd.Series({'Variable': 'Point source', year_var:("%.2f" % data['point_whole']), 'Jan + Feb + Dec':("%+.2f" % data['point_diff_winter']+ '%'), 'Mar-May':("%+.2f" % data['point_diff_spring']+ '%'),  'Jun-Aug':("%+.2f" % data['point_diff_summer']+ '%'), 'Sep-Nov':("%+.2f" % data['point_diff_fall']+ '%'), 'Unit': 'ppm'})
 
 
-    df_seasonal_table.loc['GEE'] = pd.Series({'Variable': 'GEE','Unit': 'ppm (uptake)', year_var:("%.2f" % gee_whole), 'Jan + Feb + Dec':("%+.2f" % gee_diff_winter+ '%'), 'Mar-May':("%+.2f" % gee_diff_spring+ '%'), 
-                                                          'Jun-Aug':("%+.2f" % gee_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % gee_diff_fall+ '%'), 'Unit': 'ppm (uptake)'})
+    df_seasonal_table.loc['GEE'] = pd.Series({'Variable': 'GEE','Unit': 'ppm (uptake)', year_var:("%.2f" % data['gee_whole']), 'Jan + Feb + Dec':("%+.2f" % data['gee_diff_winter']+ '%'), 'Mar-May':("%+.2f" % data['gee_diff_spring']+ '%'), 'Jun-Aug':("%+.2f" % data['gee_diff_summer']+ '%'), 'Sep-Nov':("%+.2f" % data['gee_diff_fall']+ '%'), 'Unit': 'ppm (uptake)'})
 
-    df_seasonal_table.loc['Respiration'] = pd.Series({'Variable': 'Respiration', year_var:("%.2f" % resp_whole), 'Jan + Feb + Dec':("%+.2f" % resp_diff_winter+ '%'), 'Mar-May':("%+.2f" % resp_diff_spring+ '%'), 
-                                                          'Jun-Aug':("%+.2f" % resp_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % resp_diff_fall+ '%'), 'Unit': 'ppm'})
+    df_seasonal_table.loc['Respiration'] = pd.Series({'Variable': 'Respiration', year_var:("%.2f" % data['resp_whole']), 'Jan + Feb + Dec':("%+.2f" % data['resp_diff_winter']+ '%'), 'Mar-May':("%+.2f" % data['resp_diff_spring']+ '%'), 'Jun-Aug':("%+.2f" % data['resp_diff_summer']+ '%'), 'Sep-Nov':("%+.2f" % data['resp_diff_fall']+ '%'), 'Unit': 'ppm'})
 
 
-    df_seasonal_table.loc['Anthropogenic'] = pd.Series({'Variable': 'Anthropogenic', year_var:("%.2f" % anthro_whole), 'Jan + Feb + Dec':("%+.2f" % anthro_diff_winter+ '%'), 'Mar-May':("%+.2f" % anthro_diff_spring+ '%'), 
-                                                          'Jun-Aug':("%+.2f" % anthro_diff_summer+ '%'), 'Sep-Nov':("%+.2f" % anthro_diff_fall+ '%'), 'Unit': 'ppm'})
+    df_seasonal_table.loc['Anthropogenic'] = pd.Series({'Variable': 'Anthropogenic', year_var:("%.2f" % data['anthro_whole']), 'Jan + Feb + Dec':("%+.2f" % data['anthro_diff_winter']+ '%'), 'Mar-May':("%+.2f" % data['anthro_diff_spring']+ '%'), 'Jun-Aug':("%+.2f" % data['anthro_diff_summer']+ '%'), 'Sep-Nov':("%+.2f" % data['anthro_diff_fall']+ '%'), 'Unit': 'ppm'})
 
     caption = 'Seasonal variation year ' + str(year) 
 
     seasonal_table=render_mpl_seasonal_table(myStation, df_seasonal_table, station, header_columns=0, col_width=2.5)
 
     return seasonal_table, caption
-  
-#land cover polar graph:
 
+#land cover polar graph:
 def land_cover_polar_graph(myStation):
     
     station=myStation.stationId
@@ -1007,84 +817,25 @@ def land_cover_polar_graph(myStation):
     bin_size=myStation.settings['binSize']
     degrees=myStation.degrees
     polargraph_label= myStation.settings['labelPolar']
+    
+    dir_bins, dir_labels = define_bins_landcover_polar_graph(bin_size=bin_size)
 
-    #get all the land cover data from netcdfs 
-    broad_leaf_forest, coniferous_forest, mixed_forest, ocean, other, grass_shrub, cropland, pasture, urban, unknown = import_landcover_HILDA(year='2018')
-    
-    dir_bins, dir_labels=define_bins_landcover_polar_graph(bin_size=bin_size)
-    
-    #land cover classes (imported in the land cover section):
-    broad_leaf_forest=fp*broad_leaf_forest
-    coniferous_forest=fp*coniferous_forest
-    mixed_forest=fp*mixed_forest
-    ocean=fp*ocean
-    other=fp*other
-    grass_shrub=fp*grass_shrub
-    cropland=fp*cropland
-    pasture=fp*pasture
-    urban=fp*urban
-    unknown=fp*unknown
-    
-            
-    #lists of these values
-    broad_leaf_forest_values = [item for sublist in broad_leaf_forest[0] for item in sublist]
-    coniferous_forest_values = [item for sublist in coniferous_forest[0] for item in sublist]
-    mixed_forest_values = [item for sublist in mixed_forest[0] for item in sublist]
-    ocean_values = [item for sublist in ocean[0] for item in sublist]
-    other_values = [item for sublist in other[0] for item in sublist]
-    grass_shrub_values = [item for sublist in grass_shrub[0] for item in sublist]
-    cropland_values = [item for sublist in cropland[0] for item in sublist]
-    pasture_values = [item for sublist in pasture[0] for item in sublist]
-    urban_values = [item for sublist in urban[0] for item in sublist]
-    unknown_values = [item for sublist in unknown[0] for item in sublist]
+     # Import land cover data
+    land_cover_data = import_landcover_HILDA(year='2018')
+    land_cover_types = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Ocean', 'Other', 
+                        'Grass/shrubland', 'Cropland', 'Pasture', 'Urban', 'Unknown']
+    # Process and aggregate land cover data
+    df_all = pd.DataFrame()
+    for lc_type, lc_data in zip(land_cover_types, land_cover_data):
+        lc_values = [item for sublist in (fp * lc_data)[0] for item in sublist]
+        df_temp = pd.DataFrame({
+            'landcover_vals': lc_values,
+            'degrees': degrees,
+            'landcover_type': lc_type
+        })
+        df_all = df_all.append(df_temp, ignore_index=True)
         
-        
-    #putting it into a dataframe: initially 192000 values (one per cell) for each of the aggregated land cover classes
-    #into same dataframe - have the same coulmn heading. "landcover_type" will be used in "groupby" together with the "slice" (in degrees)
-    df_broad_leaf_forest = pd.DataFrame({'landcover_vals': broad_leaf_forest_values,
-                               'degrees': degrees,
-                               'landcover_type':'Broad leaf forest'})
-    
-    df_coniferous_forest = pd.DataFrame({'landcover_vals': coniferous_forest_values,
-                           'degrees': degrees,
-                           'landcover_type':'Coniferous forest'})
-    
-    df_mixed_forest = pd.DataFrame({'landcover_vals': mixed_forest_values,
-                           'degrees': degrees,
-                           'landcover_type':'Mixed forest'})
-    
-    df_ocean = pd.DataFrame({'landcover_vals': ocean_values,
-                           'degrees': degrees,
-                           'landcover_type':'Ocean'})
-    
-    df_other = pd.DataFrame({'landcover_vals': other_values,
-                           'degrees': degrees,
-                           'landcover_type':'Other'})
-    
-    df_grass_shrub = pd.DataFrame({'landcover_vals':  grass_shrub_values,
-                           'degrees': degrees,
-                           'landcover_type':'Grass/shrubland'})
-    
-    df_cropland = pd.DataFrame({'landcover_vals':  cropland_values,
-                           'degrees': degrees,
-                           'landcover_type':'Cropland'})
-    
-    df_pasture = pd.DataFrame({'landcover_vals': pasture_values,
-                           'degrees': degrees,
-                           'landcover_type':'Pasture'})
-    
-    df_urban = pd.DataFrame({'landcover_vals':  urban_values,
-                           'degrees': degrees,
-                           'landcover_type':'Urban'})
-    
-    df_unknown = pd.DataFrame({'landcover_vals':  unknown_values,
-                           'degrees': degrees,
-                           'landcover_type':'Unknown'})
   
-
-    #into one dataframe
-    df_all = df_cropland.append([df_broad_leaf_forest, df_coniferous_forest, df_mixed_forest, df_ocean, df_other, df_grass_shrub, df_pasture, df_urban, df_unknown])
-
     #already have the different land cover classes in one cell (no need to use "pandas.cut" to generate new column with information for groupby)
     #still need a column with the different direction bins - defined in last cell - to use for the groupby (slice)
     rosedata=df_all.assign(Degree_bins=lambda df: pd.cut(df['degrees'], bins=dir_bins, labels=dir_labels, right=False))
@@ -1208,7 +959,6 @@ def land_cover_polar_graph(myStation):
     caption = "Land cover within average footprint aggregated by direction (polar)"
     
     return fig, caption
-
     
 #given the directions (and number of them), get the direction of the bars and their width
 #function used in the final step of generating a graph
@@ -1236,7 +986,7 @@ def define_bins_landcover_polar_graph(bin_size):
     dir_labels = (dir_bins[:-1] + dir_bins[1:]) / 2
     
     return dir_bins, dir_labels
-   
+
 #multiple variables graph    
 def multiple_variables_graph(myStation):
     
@@ -1244,98 +994,95 @@ def multiple_variables_graph(myStation):
     station_name=[myStation.stationName]
     timeselect_list=myStation.settings['timeOfDay']    
     date_range=myStation.dateRange
-    
-    df_save = pd.DataFrame(columns=['Station','Sensitivity','Area 50% sensitivity', 'GEE','Respiration','Anthro','Point source','Population'])
-
-    all_stations=['TRN180', 'SVB150', 'TOH147', 'SMR125', 'LUT', 'KRE250', 'IPR100', 'JFJ', 'KIT200', 'GAT344']
-    
-    if selected_station not in all_stations:
-        all_stations.append(selected_station)
-        
     start_date_year=min(date_range).year
     end_date_year=max(date_range).year
     
-    if start_date_year == end_date_year and len(timeselect_list)==8:
-        full_year = True
-   
-    else:
-        full_year = False
+    # pre-computed annual averages
+    var_load=pd.read_csv(stcDataPath + 'seasonal_table_values_2024_02_19.csv')
+    
+    # the final data frame: put in the normalized values
+    df_save = pd.DataFrame(columns=['Station','Sensitivity','Area 50% sensitivity', 'GEE','Respiration','Anthro','Point source','Population'])
 
-    var_load=pd.read_csv(stcDataPath + 'seasonal_table_values_GPW_pop.csv') 
+    # the stations to compare to
+    all_stations = ['TRN180', 'SVB150', 'TOH147', 'SMR125', 'LUT', 'KRE250', 'IPR100', 'JFJ', 'KIT200', 'GAT344']
+    
+    # make sure to include the selected station (selected in the tool)
+    if selected_station not in all_stations:
+        all_stations.append(selected_station)
+        
+    # check if using a full year - then may be able to get pre-computed values
+    full_year = (len(date_range) == 2920) or (len(date_range) == 2928)
 
     index = 0 
     stations_missing_footprints=[]
-    for station in all_stations:
-        
-        station_year = station + '_' + str(start_date_year)
+    
+    if full_year:
+        for station in all_stations:
+            # Construct the station_year identifier
+            station_year = f'{station}_{start_date_year}'
 
-        if full_year and station_year in set(var_load.station_year):
-            
-            sens_whole= var_load.loc[var_load['station_year'] == station_year, 'sens_whole'].iloc[0]
-            sens_area_50= var_load.loc[var_load['station_year'] == station_year, 'sens_area_50_percent'].iloc[0] 
-            gee_whole= var_load.loc[var_load['station_year'] == station_year, 'gee_whole'].iloc[0]
-            resp_whole= var_load.loc[var_load['station_year'] == station_year, 'resp_whole'].iloc[0]
-            anthro_whole= var_load.loc[var_load['station_year'] == station_year, 'anthro_whole'].iloc[0]
-            point_whole= var_load.loc[var_load['station_year'] == station_year, 'point_whole'].iloc[0]
-            pop_whole= var_load.loc[var_load['station_year'] == station_year, 'pop_whole'].iloc[0]
-            
-        else:
-            sens_whole,sens_area_50, gee_whole,resp_whole, anthro_whole,point_whole,pop_whole = values_multiple_variable_graph(myStation, station)
-            
-        if sens_whole is not None:
+            # Check if precomputed values exist
+            if station_year in var_load['station_year'].values:
+                station_data = var_load.loc[var_load['station_year'] == station_year].iloc[0]
+                sens_whole = station_data['sens_whole']
+                sens_area_50 = station_data['sens_area_50_percent']
+                gee_whole = station_data['gee_whole']
+                resp_whole = station_data['resp_whole']
+                anthro_whole = station_data['anthro_whole']
+                point_whole = station_data['point_whole']
+                pop_whole = station_data['pop_whole']
+            else:
+                # Calculate values if not precomputed
+                sens_whole, sens_area_50, gee_whole, resp_whole, anthro_whole, point_whole, pop_whole = values_multiple_variable_graph(myStation, station)
 
-            df_save.loc[len(df_save.index)] = [station, sens_whole,sens_area_50,gee_whole,resp_whole, anthro_whole,point_whole,pop_whole]
-            index=index+1
-        
-        
-        else:
-            stations_missing_footprints.append(station)
+            # Check if values are valid and append to df_save or list missing footprints
+            if sens_whole is not None:
+                df_save = df_save.append({
+                    'Station': station, 'Sensitivity': sens_whole, 'Area 50% sensitivity': sens_area_50,
+                    'GEE': gee_whole, 'Respiration': resp_whole, 'Anthro': anthro_whole,
+                    'Point source': point_whole, 'Population': pop_whole
+                }, ignore_index=True)
+            else:
+                stations_missing_footprints.append(station)
+    else:
+        # Handle case where it's not a full year, assuming you need to call values_multiple_variable_graph for each station
+        for station in all_stations:
+            sens_whole, sens_area_50, gee_whole, resp_whole, anthro_whole, point_whole, pop_whole = values_multiple_variable_graph(myStation, station)
+
+            if sens_whole is not None:
+                df_save = df_save.append({
+                    'Station': station, 'Sensitivity': sens_whole, 'Area 50% sensitivity': sens_area_50,
+                    'GEE': gee_whole, 'Respiration': resp_whole, 'Anthro': anthro_whole,
+                    'Point source': point_whole, 'Population': pop_whole
+                }, ignore_index=True)
+            else:
+                stations_missing_footprints.append(station)
             
     if len(stations_missing_footprints)>0:
         
         string_stations_missing_footprints = ", ".join(stations_missing_footprints)
-        
-        string_stations_missing_footprints = string_stations_missing_footprints[:-1]
         display(HTML('<p style="font-size:16px;">Reference station(s) missing footprints for specified date range: ' + string_stations_missing_footprints + '</p>'))  
-        
-
-    #sensitivity is the first attribut (list_item[0]) in the each of the lists (one list per station)
-    min_sens=min(df_save['Sensitivity'])
-    range_sens=max(df_save['Sensitivity'])-min_sens
     
-    min_sens_50=min(df_save['Area 50% sensitivity'])
-    range_sens_50=max(df_save['Area 50% sensitivity'])-min_sens_50
+    # normalize values in dataframe: min-max scaled (0-100% of maximum)
+    norm_params = {
+        'Sensitivity': (df_save['Sensitivity'].min(), df_save['Sensitivity'].max() - df_save['Sensitivity'].min()),
+        'Area 50% sensitivity': (df_save['Area 50% sensitivity'].min(), df_save['Area 50% sensitivity'].max() - df_save['Area 50% sensitivity'].min()),
+        # reverse for GEE (uptake) -- the maximum value is the least negative = minimum GEE uptake. 
+        'GEE': (df_save['GEE'].max(), abs(df_save['GEE'].max() - df_save['GEE'].min())),
+        'Respiration': (df_save['Respiration'].min(), df_save['Respiration'].max() - df_save['Respiration'].min()),
+        'Anthro': (df_save['Anthro'].min(), df_save['Anthro'].max() - df_save['Anthro'].min()),
+        'Point source': (df_save['Point source'].min(), df_save['Point source'].max() - df_save['Point source'].min()),
+        'Population': (df_save['Population'].min(), df_save['Population'].max() - df_save['Population'].min()),
+    }
 
-    #these lists (list_sensitivity, list_population, list_point_source) will be used to generate texts 
-    #for the station characterization PDFs (if choose to create a PDF)
-    #--> hence into list here, and not for GEE, respiration and anthropogenic contribution
-    min_gee=max(df_save['GEE'])
-    range_gee=abs(min_gee-min(df_save['GEE']))
-
-    min_resp=min(df_save['Respiration'])
-    range_resp=max(df_save['Respiration'])-min_resp
-        
-    min_anthro=min(df_save['Anthro'])
-    range_anthro=max(df_save['Anthro'])-min_anthro
-    
-    min_pointsource=min(df_save['Point source'])
-    range_pointsource=max(df_save['Point source'])-min_pointsource
-    
-    min_population=min(df_save['Population'])
-    range_population=max(df_save['Population'])-min_population
-
-    df_saved_for_normalized=df_save.copy()
-
-    for station in df_saved_for_normalized['Station']:
-        
-        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Sensitivity', min_sens, range_sens)
-        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Area 50% sensitivity', min_sens_50, range_sens_50)
-        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'GEE', min_gee, range_gee)
-        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Respiration', min_resp, range_resp)
-
-        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Anthro', min_anthro, range_anthro)
-        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Point source', min_pointsource, range_pointsource)
-        df_saved_for_normalized=compute_normalized(df_saved_for_normalized, station, 'Population', min_population, range_population)
+    # Apply normalization across relevant columns
+    for column, (min_val, range_val) in norm_params.items():
+        if column == 'GEE':
+            # update the whole column at once. 
+            # GEE column: take the absolute uptake value (reverse - higher is better
+            df_save[column] = ((df_save[column].abs() - abs(min_val)) / range_val) * 100
+        else:
+            df_save[column] = ((df_save[column] - min_val) / range_val) * 100
 
     #create the figure
     matplotlib.rcParams.update({'font.size': 14})
@@ -1358,10 +1105,10 @@ def multiple_variables_graph(myStation):
 
     #incremented for each station.. 0, 10, 20... etc. Where station name and "line" should start along the y-axis. 
     place_on_axis=0
-    for station in df_saved_for_normalized['Station']:
+    for station in df_save['Station']:
         
         #get all the values for station (row in dataframe)
-        station_values=df_saved_for_normalized.loc[df_saved_for_normalized['Station'] == station]
+        station_values=df_save.loc[df_save['Station'] == station]
 
         #place them in the order we want them in the graph. List that will be used for the line. (one per station)
         station_values_list =[place_on_axis, place_on_axis, station_values['Sensitivity'].values[0], station_values['Area 50% sensitivity'], 
@@ -1389,53 +1136,46 @@ def multiple_variables_graph(myStation):
     ax.tick_params(axis='y')
 
     #vertical labels except "station" which also has different font
-    list_attributes_upd=list_attributes
-    list_attributes_upd[0]=''
-    ax.set_xticklabels(list_attributes_upd, rotation='vertical')
+    list_attributes[0]=''
+    ax.set_xticklabels(list_attributes, rotation='vertical')
 
     #label for station (furthest to the left in graph
     ax.text(0, -10, 'Station', fontsize=15,weight = 'bold')
 
     ax.yaxis.grid(True)
         
+    # save information on the quartiles based on this:
     columns_need_quartiles=['Sensitivity','Population','Point source']
     
     for column in columns_need_quartiles:
-        
-        #df saved - the original values. 
-        quartile_df=df_save[column].quantile([0.25,0.5,0.75])
+    
+        # Calculate quartiles for the column
+        quartiles = pd.qcut(df_save[column], 4, labels=False) + 1  # +1 to match quartile numbering starting from 1
 
-        q1=quartile_df[0.25]
-        q2=quartile_df[0.5]
-        q3=quartile_df[0.75]
-        
-        value_selected_station = df_save.loc[df_save['Station'] == selected_station, column]
-        value_selected_station= value_selected_station.values[0]
-        
-        if value_selected_station<q1:
-            pdf_text='first quartile'
-        elif value_selected_station>=q1 and value_selected_station<q2:
-            pdf_text='second quartile'
-        elif value_selected_station>=q2 and value_selected_station<q3:
-            pdf_text='third quartile'
-        else:
-            pdf_text='fourth quartile'
+        # Get the quartile for the selected station
+        selected_station_quartile = quartiles[df_save['Station'] == selected_station].iloc[0]
 
+        # Map quartile number to text
+        quartile_text = {1: 'first quartile', 2: 'second quartile', 3: 'third quartile', 4: 'fourth quartile'}
+        pdf_text = quartile_text[selected_station_quartile]
+        
         myStation.settings[column] = pdf_text
         
     caption=('Selected station relative to reference atmospheric stations')
 
     return fig, caption
+    
 
 def values_multiple_variable_graph(myStation, station):
 
     date_range = myStation.dateRange
     timeselect_list = myStation.settings['timeOfDay']  
-    fp_pop= import_population_data()
-    fp_point= import_point_source_data()
     nfp, fp_station, lon, lat, title = read_aggreg_footprints(station, date_range)
    
     if nfp > 0:
+        
+        fp_pop= import_population_data()
+        fp_point= import_point_source_data()
 
         percent_footprints=(nfp/len(date_range))*100
 
@@ -1456,19 +1196,10 @@ def values_multiple_variable_graph(myStation, station):
         df_mean=df_modelled_concentrations.mean()
 
         gee_whole=df_mean['co2.bio.gee']
-
         resp_whole=df_mean['co2.bio.resp']
-
-        #anthro:
         anthro_whole=(df_mean['co2.industry']+df_mean['co2.energy']+ df_mean['co2.transport']+ df_mean['co2.residential'] + df_mean['co2.other_categories'])
-
-        #point source for specific station 
-        fp_pointsource_multiplied=fp_station*fp_point
-        point_whole=fp_pointsource_multiplied.sum()
-
-        #population for specific station
-        fp_pop_multiplied=fp_station*fp_pop
-        pop_whole=fp_pop_multiplied.sum()
+        point_whole=(fp_station * fp_point).sum()
+        pop_whole=(fp_station*fp_pop).sum()
 
         return sens_whole, sens_area_50, gee_whole, resp_whole, anthro_whole, point_whole, pop_whole
     
@@ -1476,111 +1207,69 @@ def values_multiple_variable_graph(myStation, station):
         
         return None, None, None, None, None, None, None
 
-      
-def compute_normalized(df_saved_for_normalized, station, column, min_value, range_value):
-
-    value=df_saved_for_normalized.loc[df_saved_for_normalized['Station'] == station, column]
-
-    value=value.values[0]
-
-    if value==min_value:
-        value_normalized=0
-        df_saved_for_normalized.loc[df_saved_for_normalized['Station'] == station, column]=0
-    else:
-        #min and range in dictionary to column? 
-        #min GEE is the value with the highest contirubtion to co2. 
-        if column=='GEE':
-            
-            value_normalized = ((abs(value)-abs(min_value))/range_value)*100
-           
-        else:
-            
-            value_normalized=((value-min_value)/range_value)*100
-        df_saved_for_normalized.loc[df_saved_for_normalized['Station'] == station, column]=value_normalized
-
-        
-    return df_saved_for_normalized
-
-
+    
 def save(stc, fmt='pdf'):
     """
-    provide a station characterisation object, with all the figures.
-    all figures will be saved
-    
+    Saves all figures from the station characterization object to specified format,
+    along with captions and settings in JSON format.
 
     Parameters
     ----------
-    stc : station characterisation object format. Instance of class(stationchar)
-    fmt : STR, image filename ending, used to infer format ('pdf' | 'png')
-
-    Returns
-    -------
-    None.
-
+    stc : Instance of class(stationchar)
+        Station characterization object with figures.
+    fmt : str, optional
+        Image filename extension used to infer format ('pdf' or 'png'). Defaults to 'pdf'.
     """
-    # stc.figures is a dictionary...like  {1: [fig, caption, shortname]}
     captions = {}
     
-    for f in stc.figures:
-        fig, cap, name = stc.figures[f]  
+    for f, (fig, cap, name) in stc.figures.items():
+        if not fig:
+            continue
         
-        if not fig: continue
+        filename = f"{name}.{fmt}"
+        filepath = os.path.join(stc.settings['output_folder'], filename)
         
-        stc.figures[f][2] = name + '.' + fmt
-        filename = os.path.join(stc.settings['output_folder'], (name + '.' + fmt))
-        
-        # keep the captions for json output
+        # Update figure's filename with format and keep the captions for JSON output
+        stc.figures[f][2] = filename
         captions[name] = cap
         
-        # special settings for individual figures
-        if f==4:  #'landcover_rose'
+        # Special settings for individual figures
+        if f == 4:  # 'landcover_rose'
             ax = fig.gca()
             ax.legend(bbox_to_anchor=(1.9, 0.25), ncol=2)
-            
-        if f==7: #'landcover_bar'
-            fig.set_size_inches(12, 11)        
-            
-        #common for all figures
-        fig.savefig(filename,dpi=100,bbox_inches='tight')
-        captions[name] = cap
+        elif f == 7:  # 'landcover_bar'
+            fig.set_size_inches(12, 11)
+        
+        # Save figure with common settings for all
+        fig.savefig(filepath, dpi=100, bbox_inches='tight')
     
-    # save captions as json file    
-    file = os.path.join(stc.settings['output_folder'],'captions.json')
-    with open(file, 'w') as f:
+    # Save captions as JSON file
+    captions_file = os.path.join(stc.settings['output_folder'], 'captions.json')
+    with open(captions_file, 'w') as f:
         json.dump(captions, f, indent=4)
     
-    # save settings as json file
-    file = os.path.join(stc.settings['output_folder'],'settings.json')
+    # Save settings excluding specific keys as JSON file
+    settings_file = os.path.join(stc.settings['output_folder'], 'settings.json')
+    settings_to_exclude = ['stilt', 'icos', 'areaFifty', 'date/time generated', 'output_folder', 'Sensitivity', 'Population', 'Point source']
+    filtered_settings = {k: v for k, v in stc.settings.items() if k not in settings_to_exclude}
     
-    settings_copy = stc.settings.copy()
-
-    delete = ['stilt', 'icos', 'areaFifty', 'date/time generated', 'output_folder', 'Sensitivity', 'Population', 'Point source']
-
-    for item in delete: 
-        if item in settings_copy.keys():
-            del settings_copy[item]
-
-    with open(file, 'w') as f:
-        
-        json.dump(settings_copy, f, indent=4)
-        
-    # save PDF
-    tex_string=tex.generate_full(stc)
+    with open(settings_file, 'w') as f:
+        json.dump(filtered_settings, f, indent=4)
     
-    tex_file=os.path.join(stc.settings['output_folder'], (stc.settings['date/time generated']+stc.stationId+'.tex'))
-               
-    with open(tex_file,"w") as file:
-        file.write(tex_string) 
-        
-    output_folder = stc.settings['output_folder']
-
-    a = os.system(('pdflatex -output-directory=' + output_folder + ' ' + tex_file))
-
-    if a!=0:
-        print('problem generating the output PDF')
-
+    # Generate and save PDF
+    tex_string = tex.generate_full(stc)
+    tex_filename = f"{stc.settings['date/time generated']}{stc.stationId}.tex"
+    tex_filepath = os.path.join(stc.settings['output_folder'], tex_filename)
+    
+    with open(tex_filepath, "w") as file:
+        file.write(tex_string)
+    
+    # Compile LaTeX file to PDF
+    compile_status = os.system(f'pdflatex -output-directory={stc.settings["output_folder"]} {tex_filepath}')
+    
+    if compile_status != 0:
+        print('Problem generating the output PDF')
     else:
-        files_to_remove = ['.aux', '.log', '.out']
-        for file_ext in files_to_remove:
-            remove = stc.settings['date/time generated']+stc.stationId+ file_ext
-            os.remove(output_folder + '/' + remove)
+        # Clean up auxiliary files generated by LaTeX
+        for ext in ['.aux', '.log', '.out']:
+            os.remove(os.path.join(stc.settings['output_folder'], f"{stc.settings['date/time generated']}{stc.stationId}{ext}"))

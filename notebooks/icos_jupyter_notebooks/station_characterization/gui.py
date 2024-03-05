@@ -351,7 +351,7 @@ def update_func(button_c):
 
         with header_no_footprints:
             display(HTML(
-                '<p style="font-size:16px">No footprints for selected date range.</p>'))
+                '<p style="font-size:18px">No footprints for selected date range.</p>'))
             f.value = 10
     else:
 
@@ -425,7 +425,7 @@ def update_func(button_c):
 
                 display(HTML(
                     '<p style="font-size:35px;font-weight:bold;"><br>' + station_name + \
-                    ' station characterisation</p><p style="font-size:16px;">' + station_name + ' (' + station_code + \
+                    ' station characterisation</p><p style="font-size:18px;">' + station_name + ' (' + station_code + \
                     ') is located in ' + station_country + ' (latitude: ' + str(
                         "%.2f" % station_lat) + \
                     degree_sign + 'N, ' + 'longitude: ' + str(
@@ -439,11 +439,13 @@ def update_func(button_c):
                          str(maps_bin_interval) + ' km increments</p>'))
 
         updateProgress(f, 'calculate sensitivity')
+        
+
         with result_sensitivity:
             fig, caption = stc_functions.polar_graph(stc, 'sensitivity')
             stc.add_figure(1, fig, caption)
             display(HTML(
-                '<p style="font-size:16px;text-align:left;text-indent: 20px">' + caption + ' </p>'))
+                 '<p style="font-size:18px;text-align:left;text-indent: 20px">' + caption + ' </p>'))
             display(fig)
             plt.close(fig)
 
@@ -454,7 +456,7 @@ def update_func(button_c):
                                                      colorbar='Purples')
             stc.add_figure(2, fig, caption)
             display(HTML(
-                '<p style="font-size:16px;text-align:left;text-indent: 20px">' + caption + ' </p>'))
+                '<p style="font-size:18px;text-align:left;text-indent: 20px">' + caption + ' </p>'))
             display(fig)
             plt.close(fig)
 
@@ -465,7 +467,7 @@ def update_func(button_c):
                                                      colorbar='Greens')
             stc.add_figure(3, fig, caption)
             display(HTML(
-                '<p style="font-size:16px;text-align:left;text-indent: 20px">' + caption + ' </p>'))
+                '<p style="font-size:18px;text-align:left;text-indent: 20px">' + caption + ' </p>'))
             display(fig)
             plt.close(fig)
 
@@ -474,7 +476,7 @@ def update_func(button_c):
             fig, caption = stc_functions.land_cover_bar_graph(stc)
             stc.add_figure(4, fig, caption)
             display(HTML(
-                '<p style="font-size:16px;text-align:left;text-indent: 20px">' + caption + ' </p>'))
+                '<p style="font-size:18px;text-align:left;text-indent: 20px">' + caption + ' </p>'))
             display(fig)
             plt.close(fig)
 
@@ -483,7 +485,7 @@ def update_func(button_c):
             fig, caption = stc_functions.seasonal_table(stc)
             stc.add_figure(5, fig, caption)
             display(HTML(
-                '<p style="font-size:16px;text-align:left;text-indent: 20px">' + caption + ' </p>'))
+                '<p style="font-size:18px;text-align:left;text-indent: 20px">' + caption + ' </p>'))
 
             # a seasonal table is not always created (requires the full year of footprints)
             try:
@@ -493,7 +495,7 @@ def update_func(button_c):
                 pass
 
         with header_advanced:
-            display(HTML('<h2>Advanced figures</h2><br><p style="font-size:16px">\
+            display(HTML('<h2>Advanced figures</h2><br><p style="font-size:18px">\
                 Please read the <a href="./station_characterization/specifications.pdf" target="_blank">\
                     specifications document</a> before attempting to interpret the following figures.</p>'))
 
@@ -502,7 +504,7 @@ def update_func(button_c):
             fig, caption = stc_functions.land_cover_polar_graph(stc)
             stc.add_figure(6, fig, caption)
             display(HTML(
-                '<p style="font-size:16px;text-align:left;text-indent: 20px">' + caption + ' </p>'))
+                '<p style="font-size:18px;text-align:left;text-indent: 20px">' + caption + ' </p>'))
             display(fig)
             plt.close(fig)
 
@@ -511,7 +513,7 @@ def update_func(button_c):
             fig, caption = stc_functions.multiple_variables_graph(stc)
             stc.add_figure(7, fig, caption)
             display(HTML(
-                '<p style="font-size:16px;text-align:left;text-indent: 20px">' + caption + ' </p>'))
+                '<p style="font-size:18px;text-align:left;text-indent: 20px">' + caption + ' </p>'))
             display(fig)
             plt.close(fig)
 
@@ -524,14 +526,19 @@ def update_func(button_c):
             # create a html string for the download. Only links to files and documents that exist (for instance, if there is not footprints for the full year, the seasonal table will not be created.
             file_folder = stc.settings['output_folder'].split('/')[-1]
 
-            pdf_file_name = stc.settings[
-                                'date/time generated'] + stc.stationId + '.pdf'
-            pdf_file_path = os.path.join('../output/station_characterisation',
-                                         file_folder, pdf_file_name)
-
+            pdf_file_name = stc.settings['date/time generated'] + stc.stationId + '.pdf'
+            
+            #os.path.join(stc.settings['output_folder'], (stc.settings['date/time generated']+stc.stationId+'.tex'))
+            #pdf_file_path = os.path.join(stc.settings['output_folder'], (stc.settings['date/time generated']+stc.stationId+'.pdf'))
+            pdf_file_path = f'{output_stc_path}/{file_folder}/{pdf_file_name}'
+            
+            pdf_file_path_relative = f'{relative_stc_path}/{file_folder}/{pdf_file_name}'
+            
+            print(pdf_file_path)
+            
             if os.path.exists(pdf_file_path):
 
-                html_string_pdf = '<h2>Download</h2><br>Full station characterization document:<br><a href=' + pdf_file_path + ' target="_blank">' + pdf_file_name + '</a><br><br>Individual figures:<br>'
+                html_string_pdf = '<h2>Download</h2><br>Full station characterization document:<br><a href=' + pdf_file_path_relative + ' target="_blank">' + pdf_file_name + '</a><br><br>Individual figures:<br>'
 
             else:
 
