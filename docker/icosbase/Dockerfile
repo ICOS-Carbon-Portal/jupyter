@@ -78,8 +78,11 @@ RUN pip install git+https://github.com/ZogopZ/icos-splash.git
 # Keep this in a separate line. It's the only library that changes
 # frequently and the new docker image will build faster.
 # Update version number according to latest release.
-RUN pip install --quiet icoscp==0.1.20
-RUN pip install --quiet icoscp_core==0.3.0
+# RUN pip install --quiet icoscp==0.1.20
+# Install from branch
+ADD https://api.github.com/repos/ICOS-Carbon-Portal/pylib/git/refs/heads/master /tmp/cache-bust
+RUN pip install git+https://github.com/ICOS-Carbon-Portal/pylib.git@master
+RUN pip install --quiet icoscp_core==0.3.1
 ENV PORTAL_DATA_PATH_ICOS="/data/dataAppStorage/"
 ENV PORTAL_DATA_PATH_SITES="/data/dataAppStorage/"
 ENV PORTAL_DATA_PATH_ICOSCITIES=""
