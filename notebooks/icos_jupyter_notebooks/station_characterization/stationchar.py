@@ -68,7 +68,7 @@ class StationChar():
         self.country = None             # string with the station's country name
         self.stationClass = None        # string with station class (1 or 2 or none)
         self.siteType = None            # string with station type (mountain etc. or none) 
-        self.dateRange = None           # date range for average footprint specified by users
+        self.dateRange = None           # date range for average footprint specified by usersdate_range
         self.fp = None                  # numpy array 400 columns 480 rows (192000 cells) STILT footprint grid given daterange
         self.fpLat = None               # numpy array with STILT grid lat-values (480)
         self.fpLon = None               # # numpy array with STILT grid lon-values (400)
@@ -97,7 +97,10 @@ class StationChar():
     def _setStationData(self):
         
         self.stationId = self.settings['stationCode']
-        self.country = self.settings['stilt']['geoinfo']['name']['common']
+        try:
+            self.country = self.settings['stilt']['geoinfo']['name']['common']
+        except:
+            self.country = "in the water"
         
         if 'icos' in self.settings.keys():
             # ICOS station 
