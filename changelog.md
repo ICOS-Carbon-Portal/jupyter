@@ -1,24 +1,48 @@
 # Changelog
 
- - **Note**: The python package of the ICOS Carbon Portal, `icoscp`, is always the latest version. For details we refer the user to [ICOS Carbon Portal pylib - Changelog](https://icos-carbon-portal.github.io/pylib/changelog/).
+ - **Note**: The python package of the ICOS Carbon Portal, `icoscp`, is always
+the latest version. This means that we deploy on the ICOS JupyterHub, either 
+the latest release found [here](https://pypi.org/project/icoscp/) or the latest
+master branch found [here](https://github.com/ICOS-Carbon-Portal/pylib).
 
-## 2.1.0 <p>(07/03/2023)</p>
-- Add [icos-splash](https://github.com/ZogopZ/icos-splash) to the docker
-  image installation.
-- Fork and patch [nersc-announcements-extension](
-https://github.com/ZogopZ/nersc-refresh-announcements) to resolve `TypeScript`
-issues.
-- Add [jupyter-resource-usage](
-https://github.com/jupyter-server/jupyter-resource-usage) to pip 
-requirements.
-- Add [paramiko](https://github.com/paramiko/paramiko) to pip requirements.
+## 2.1.0 <p>(07/03/2023 - 05/04/2024)</p>
+- Bump [icoscp](
+https://github.com/ICOS-Carbon-Portal/pylib/tree/c68ad7afa1c27efb69f3350ad7723827517ad004)
+to master branch (05/04/2024).
+- Bump [icoscp\_core](https://pypi.org/project/icoscp_core/) to version 0.3.3
+(05/04/2024).
 - Other notebook fixes mentioned [here](
-https://github.com/ICOS-Carbon-Portal/jupyter/issues/262).
+https://github.com/ICOS-Carbon-Portal/jupyter/issues/367) (05/04/2023).
+- Bump [icoscp](https://pypi.org/project/icoscp/0.1.20/) to version 0.1.20
+(12/01/2024).
+- Add [jupyter-splitview](https://pypi.org/project/jupyter-splitview/0.1.2/)
+version 0.1.2, [jupyterlab\_mathjax2](
+https://pypi.org/project/jupyterlab-mathjax2/4.0.0/) version 4.0.0, and
+[icoscp\_core](https://pypi.org/project/icoscp_core/0.3.0/) version 0.3.0 to
+pip requirements (12/01/2024).
+- Bump [icoscp](https://pypi.org/project/icoscp/0.1.19/) to version 0.1.19
+(25/07/2023).
+- Add [h5netcdf](https://pypi.org/project/h5netcdf/) version 1.1.0 to mamba
+requirements (10/05/2023).
+- Add [kaleido](https://pypi.org/project/kaleido/0.2.1/) version 0.2.1 and
+[`cyclebars`](https://github.com/klavere/cyclebars) to the docker image
+installation (28/04/2023).
+- Update [ipywidgets](https://pypi.org/project/ipywidgets/8.0.4/) to version
+8.0.4 and [plotly](https://pypi.org/project/plotly/5.14.1/) to version 5.14.1
+(13/04/2023).
 - Add `zip` library to the docker image installation (20/03/2023).
-- Update `ipywidgets` to version 8.0.4 and `plotly` to version 5.14.1 (13/04/2023).
-- Add `kaleido` version 0.2.1 and [`cyclebars`](https://github.com/klavere/cyclebars) to the docker image installation (28/04/2023).
-- Add [h5netcdf](https://pypi.org/project/h5netcdf/) version 1.1.0 to mamba requirements (10/05/2023).
-- Bump [icoscp](https://pypi.org/project/icoscp/0.1.19/) to version 0.1.19 (25/07/2023).
+- Add [icos-splash](https://github.com/ZogopZ/icos-splash) to the docker image
+installation (07/03/2023).
+- Fork and patch [nersc-announcements-extension](
+https://github.com/ZogopZ/nersc-refresh-announcements) to resolve TypeScript
+issues (07/03/2023).
+- Add [jupyter-resource-usage](
+https://github.com/jupyter-server/jupyter-resource-usage) to pip requirements
+(07/03/2023).
+- Add [paramiko](https://github.com/paramiko/paramiko) to pip requirements
+(07/03/2023).
+- Other notebook fixes mentioned [here](
+https://github.com/ICOS-Carbon-Portal/jupyter/issues/262) (07/03/2023).
 
 ## 2.0.1 <p>(15/11/2022)</p>
 - Add PyGeodesy version 22.11.3 library to the docker image installation.
@@ -27,10 +51,16 @@ https://github.com/ICOS-Carbon-Portal/jupyter/issues/262).
 
 ## 2.0.0 <p>(04/11/2022)</p>
 - #### Jupyter Classic vs JupyterLab
-    - Earlier versions of the Jupyter solutions provided by the ICOS Carbon Portal used the Jupyter Classic view. 
-    - One major advantage of JupyterLab compared to Jupyter Classic is the possibility to work with several notebooks using tabs.
-    - The default view of ICOS Carbon Portal has changed to JupyterLab. For users who wish to use the Jupyter Classic view can do so by choosing Launch Classic view in the Help menu.
-	  For further reading on JupyterLab we refer to [the JupyterLab documentation](https://jupyterlab.readthedocs.io/en/stable/).
+    - Earlier versions of the Jupyter solutions provided by the ICOS Carbon
+      Portal used the Jupyter Classic view. 
+    - One major advantage of JupyterLab compared to Jupyter Classic is the
+      possibility to work with several notebooks using tabs.
+    - The default view of ICOS Carbon Portal has changed to JupyterLab. For
+      users who wish to use the Jupyter Classic view can do so by choosing
+      Launch Classic view in the Help menu.
+	  For further reading on JupyterLab we refer to 
+      [the JupyterLab documentation](
+      https://jupyterlab.readthedocs.io/en/stable/).
 
 		 	 
 	 
