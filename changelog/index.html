@@ -63,7 +63,7 @@
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href="./">Changelog</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#210-07032023">2.1.0 (07/03/2023)</a>
+    <li class="toctree-l2"><a class="reference internal" href="#210-07032023-05042024">2.1.0 (07/03/2023 - 05/04/2024)</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#201-15112022">2.0.1 (15/11/2022)</a>
     </li>
@@ -110,28 +110,43 @@
               
                 <h1 id="changelog">Changelog</h1>
 <ul>
-<li><strong>Note</strong>: The python package of the ICOS Carbon Portal, <code>icoscp</code>, is always the latest version. For details we refer the user to <a href="https://icos-carbon-portal.github.io/pylib/changelog/">ICOS Carbon Portal pylib - Changelog</a>.</li>
+<li><strong>Note</strong>: The python package of the ICOS Carbon Portal, <code>icoscp</code>, is always
+the latest version. This means that we deploy on the ICOS JupyterHub, either 
+the latest release found <a href="https://pypi.org/project/icoscp/">here</a> or the latest
+master branch found <a href="https://github.com/ICOS-Carbon-Portal/pylib">here</a>.</li>
 </ul>
-<h2 id="210-07032023">2.1.0 <p>(07/03/2023)</p></h2>
+<h2 id="210-07032023-05042024">2.1.0 <p>(07/03/2023 - 05/04/2024)</p></h2>
 <ul>
-<li>Bump <a href="https://pypi.org/project/icoscp/0.1.20/">icoscp</a> to version 0.1.20 (12/01/2024).</li>
-<li>Add <a href="https://pypi.org/project/jupyter-splitview/0.1.2/">jupyter-splitview</a> version 0.1.2,
-<a href="https://pypi.org/project/jupyterlab-mathjax2/4.0.0/">jupyterlab_mathjax2</a> version 4.0.0, and 
-<a href="https://pypi.org/project/icoscp_core/0.3.0/">icoscp_core</a> version 0.3.0 to pip requirements 
+<li>Bump <a href="https://github.com/ICOS-Carbon-Portal/pylib/tree/c68ad7afa1c27efb69f3350ad7723827517ad004">icoscp</a>
+to master branch (05/04/2024).</li>
+<li>Bump <a href="https://pypi.org/project/icoscp_core/">icoscp_core</a> to version 0.3.3
+(05/04/2024).</li>
+<li>Other notebook fixes mentioned <a href="https://github.com/ICOS-Carbon-Portal/jupyter/issues/367">here</a> (05/04/2023).</li>
+<li>Bump <a href="https://pypi.org/project/icoscp/0.1.20/">icoscp</a> to version 0.1.20
 (12/01/2024).</li>
-<li>Bump <a href="https://pypi.org/project/icoscp/0.1.19/">icoscp</a> to version 0.1.19 (25/07/2023).</li>
-<li>Add <a href="https://pypi.org/project/h5netcdf/">h5netcdf</a> version 1.1.0 to mamba requirements (10/05/2023).</li>
-<li>Add <a href="https://pypi.org/project/kaleido/0.2.1/">kaleido</a> version 0.2.1 and 
-<a href="https://github.com/klavere/cyclebars"><code>cyclebars</code></a> to the docker image installation (28/04/2023).</li>
-<li>Update <a href="https://pypi.org/project/ipywidgets/8.0.4/">ipywidgets</a> to version 8.0.4 and 
-<a href="https://pypi.org/project/plotly/5.14.1/">plotly</a> to version 5.14.1 (13/04/2023).</li>
+<li>Add <a href="https://pypi.org/project/jupyter-splitview/0.1.2/">jupyter-splitview</a>
+version 0.1.2, <a href="https://pypi.org/project/jupyterlab-mathjax2/4.0.0/">jupyterlab_mathjax2</a> version 4.0.0, and
+<a href="https://pypi.org/project/icoscp_core/0.3.0/">icoscp_core</a> version 0.3.0 to
+pip requirements (12/01/2024).</li>
+<li>Bump <a href="https://pypi.org/project/icoscp/0.1.19/">icoscp</a> to version 0.1.19
+(25/07/2023).</li>
+<li>Add <a href="https://pypi.org/project/h5netcdf/">h5netcdf</a> version 1.1.0 to mamba
+requirements (10/05/2023).</li>
+<li>Add <a href="https://pypi.org/project/kaleido/0.2.1/">kaleido</a> version 0.2.1 and
+<a href="https://github.com/klavere/cyclebars"><code>cyclebars</code></a> to the docker image
+installation (28/04/2023).</li>
+<li>Update <a href="https://pypi.org/project/ipywidgets/8.0.4/">ipywidgets</a> to version
+8.0.4 and <a href="https://pypi.org/project/plotly/5.14.1/">plotly</a> to version 5.14.1
+(13/04/2023).</li>
 <li>Add <code>zip</code> library to the docker image installation (20/03/2023).</li>
-<li>Add <a href="https://github.com/ZogopZ/icos-splash">icos-splash</a> to the docker
-  image installation (07/03/2023).</li>
-<li>Fork and patch <a href="https://github.com/ZogopZ/nersc-refresh-announcements">nersc-announcements-extension</a> to resolve TypeScript issues (07/03/2023).</li>
-<li>Add <a href="https://github.com/jupyter-server/jupyter-resource-usage">jupyter-resource-usage</a> to pip 
-requirements (07/03/2023).</li>
-<li>Add <a href="https://github.com/paramiko/paramiko">paramiko</a> to pip requirements (07/03/2023).</li>
+<li>Add <a href="https://github.com/ZogopZ/icos-splash">icos-splash</a> to the docker image
+installation (07/03/2023).</li>
+<li>Fork and patch <a href="https://github.com/ZogopZ/nersc-refresh-announcements">nersc-announcements-extension</a> to resolve TypeScript
+issues (07/03/2023).</li>
+<li>Add <a href="https://github.com/jupyter-server/jupyter-resource-usage">jupyter-resource-usage</a> to pip requirements
+(07/03/2023).</li>
+<li>Add <a href="https://github.com/paramiko/paramiko">paramiko</a> to pip requirements
+(07/03/2023).</li>
 <li>Other notebook fixes mentioned <a href="https://github.com/ICOS-Carbon-Portal/jupyter/issues/262">here</a> (07/03/2023).</li>
 </ul>
 <h2 id="201-15112022">2.0.1 <p>(15/11/2022)</p></h2>
@@ -145,10 +160,15 @@ requirements (07/03/2023).</li>
 <li>
 <h4 id="jupyter-classic-vs-jupyterlab">Jupyter Classic vs JupyterLab</h4>
 <ul>
-<li>Earlier versions of the Jupyter solutions provided by the ICOS Carbon Portal used the Jupyter Classic view. </li>
-<li>One major advantage of JupyterLab compared to Jupyter Classic is the possibility to work with several notebooks using tabs.</li>
-<li>The default view of ICOS Carbon Portal has changed to JupyterLab. For users who wish to use the Jupyter Classic view can do so by choosing Launch Classic view in the Help menu.
-  For further reading on JupyterLab we refer to <a href="https://jupyterlab.readthedocs.io/en/stable/">the JupyterLab documentation</a>.</li>
+<li>Earlier versions of the Jupyter solutions provided by the ICOS Carbon
+  Portal used the Jupyter Classic view. </li>
+<li>One major advantage of JupyterLab compared to Jupyter Classic is the
+  possibility to work with several notebooks using tabs.</li>
+<li>The default view of ICOS Carbon Portal has changed to JupyterLab. For
+  users who wish to use the Jupyter Classic view can do so by choosing
+  Launch Classic view in the Help menu.
+  For further reading on JupyterLab we refer to 
+  <a href="https://jupyterlab.readthedocs.io/en/stable/">the JupyterLab documentation</a>.</li>
 </ul>
 </li>
 <li>
