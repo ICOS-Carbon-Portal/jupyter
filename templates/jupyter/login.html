@@ -1,4 +1,19 @@
 {% extends "page.html" %}
+
+{% set announcement_login =
+'<p style="font-size: 16px">
+    Help us make our Jupyter service even better. Share your thoughts in a
+    quick feedback
+    <a href="https://www.icos-cp.eu/form/jupyter-solutions-user-survey">
+        survey.
+    </a></br>
+    Thanks for your help!
+</p>'
+%}
+{% if announcement_login is string %}
+  {% set announcement = announcement_login %}
+{% endif %}
+
 {% block login_widget %}
 {% endblock %}
 
@@ -32,7 +47,7 @@
         position: absolute;
         height: 72px;
         left: 100px;
-        top: 100px;
+        top: 200px;
         border: 0px solid black;
         z-index: 1;
     }
