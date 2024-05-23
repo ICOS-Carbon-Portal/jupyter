@@ -85,4 +85,4 @@ RUN pip install git+https://github.com/ICOS-Carbon-Portal/pylib.git@master
 RUN pip install --quiet icoscp_core==0.3.3
 ENV PORTAL_DATA_PATH_ICOS="/data/dataAppStorage/"
 ENV PORTAL_DATA_PATH_SITES="/data/dataAppStorage/"
-ENV PORTAL_DATA_PATH_ICOSCITIES=""
+ENV PORTAL_DATA_PATH_ICOSCITIES="/data/cities/dataAppStorage"
