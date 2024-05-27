@@ -82,7 +82,7 @@ RUN pip install git+https://github.com/ZogopZ/icos-splash.git
 # Install from branch
 ADD https://api.github.com/repos/ICOS-Carbon-Portal/pylib/git/refs/heads/master /tmp/cache-bust
 RUN pip install git+https://github.com/ICOS-Carbon-Portal/pylib.git@master
-RUN pip install --quiet icoscp_core==0.3.3
+RUN pip install --quiet icoscp_core==0.3.4
 ENV PORTAL_DATA_PATH_ICOS="/data/dataAppStorage/"
 ENV PORTAL_DATA_PATH_SITES="/data/dataAppStorage/"
 ENV PORTAL_DATA_PATH_ICOSCITIES="/data/cities/dataAppStorage"
