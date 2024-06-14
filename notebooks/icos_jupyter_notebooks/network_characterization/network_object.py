@@ -3,8 +3,7 @@ from icoscp.station import station
 import requests
 import datetime as dt
 import pandas as pd
-from icoscp.station import station as station_data
-from icoscp.cpb.dobj import Dobj
+from icoscp.dobj import Dobj
 from numpy import loadtxt
 import numpy as np
 import os

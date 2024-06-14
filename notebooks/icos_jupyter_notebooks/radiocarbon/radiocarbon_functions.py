@@ -18,7 +18,7 @@ import datetime as dt
 import math
 #added (Dobj):
 from icoscp.sparql import sparqls
-from icoscp.cpb.dobj import Dobj
+from icoscp.dobj import Dobj
 from datetime import timedelta
 #radiocarbon data from CP
 from icoscp.sparql.runsparql import RunSparql

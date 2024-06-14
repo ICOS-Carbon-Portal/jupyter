@@ -16,7 +16,7 @@ import pandas as pd
 import network_characterization_functions as functions
 import json
 import network_object
-from icoscp.stilt import stiltstation
+from icoscp_stilt import stiltstation
 import ipywidgets as widgets
 from bokeh.io import show, output_notebook, reset_output
 import matplotlib.pyplot as plt
