@@ -89,9 +89,9 @@ class NetworkObj():
         start_date=dt.datetime(self.settings['startYear'],self.settings['startMonth'],self.settings['startDay'],min(hours))
         end_date=dt.datetime(self.settings['endYear'],self.settings['endMonth'],self.settings['endDay'],max(hours))
         date_range=pd.date_range(start_date,end_date,freq='3H')
-
-        self.dateRange = functions.date_range_hour_filtered(date_range, self.settings['timeOfDay'])
-
+        
+        self.dateRange=date_range[date_range.hour.isin(self.settings['timeOfDay'])]
+        
 if __name__ == "__main__":
     """
     execute only if run as a script
