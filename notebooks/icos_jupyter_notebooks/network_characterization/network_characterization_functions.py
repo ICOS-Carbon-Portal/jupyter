@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Dec 28 09:47:58 2020
+Created Dec 28 2020
+Latest update June 17 2024
 
 @author: Ida Storm
 """
@@ -22,7 +23,6 @@ from netCDF4 import Dataset
 import math
 from ipywidgets import Output, HBox
 from IPython.core.display import HTML 
-from datetime import date
 from bokeh.transform import factor_cmap
 
 #for bokeh
@@ -34,6 +34,8 @@ from datetime import datetime
 from matplotlib.colors import LogNorm
 import json
 
+from icoscp_stilt import stiltstation
+
 reset_output()
 output_notebook()
 
@@ -44,49 +46,6 @@ dictionary_area_choice = {'ALB':'Albania', 'Andorra':'Andorra', 'AUT':'Austria',
 
 country_masks = Dataset(os.path.join(folder_data,'europe_STILT_masks.nc'))
 country_masks_eez_included = Dataset(os.path.join(folder_data,'europe_STILT_masks_eez_included.nc'))
-
-#function to read and aggregate footprints for given date range
-def read_aggreg_footprints(station, date_range):
-    
-    # path to footprint files in new stiltweb directory structure
-    pathFP='/data/stiltweb/stations/'
-
-    fp=[]
-    nfp=0
-    first = True
-    for date in date_range:
-
-        filename=(pathFP+station+'/'+str(date.year)+'/'+str(date.month).zfill(2)+'/'
-             +str(date.year)+'x'+str(date.month).zfill(2)+'x'+str(date.day).zfill(2)+'x'+str(date.hour).zfill(2)+'/foot')
- 
-        if os.path.isfile(filename):    
-            
-            f_fp = cdf.Dataset(filename)
-    
-            if (first):
-            
-                fp=f_fp.variables['foot'][:,:,:]
-
-                lon=f_fp.variables['lon'][:]
-                lat=f_fp.variables['lat'][:]
-                first=False
-    
-            else: 
-                fp=fp+f_fp.variables['foot'][:,:,:]
-
-            f_fp.close()
-            nfp+=1
-
-    if nfp > 0:
-        fp=fp/nfp
-
-        title = 'not used'
-        
-        return nfp, fp, lon, lat, title
-    
-    else:
-        
-        return 0, None, None, None, None
     
 def save_settings(settings, directory):
 
@@ -286,6 +245,7 @@ def update_footprint_based_on_threshold(input_footprint, threshold):
     #convert the updated sensitivity values back to the original shape
     upd_footprint_sens = df_sensitivity_upd['mask_sensitivity'].values.reshape(input_footprint.shape)
 
+    print(upd_footprint_sens)
     return upd_footprint_sens
 
 def load_and_update_footprint(station, date_range, unique_hours, threshold):
@@ -294,7 +254,7 @@ def load_and_update_footprint(station, date_range, unique_hours, threshold):
     is_2018_full_year = (
         pd.Timestamp(min(date_range)) == pd.Timestamp(2018, 1, 1, 0) and
         pd.Timestamp(max(date_range)) == pd.Timestamp(2018, 12, 31, 21) and
-        unique_hours == 8
+        len(unique_hours) == 8
     )
 
     if is_2018_full_year:
@@ -302,20 +262,28 @@ def load_and_update_footprint(station, date_range, unique_hours, threshold):
         filepath = os.path.join(folder_tool_fps, name_load_footprint_csv)
 
         if os.path.isfile(filepath):
-            loaded_fp = np.loadtxt(filepath, delimiter=',')
+            aggregated_footprint = np.loadtxt(filepath, delimiter=',')
         else:
-            loaded_fp = None
+            aggregated_footprint = None
     else:
-        _, loaded_fp, _, _, _ = read_aggreg_footprints(station, date_range)
+        try:
+            st = stiltstation.get(id=station)
+            footprints =  st.get_fp(date_range.min(), date_range.max())
+            footprints_filtered = footprints.where(footprints.time.dt.hour.isin(unique_hours), drop=True)
+            # fp values for the cells are stored in the variable "foot"
+            aggregated_footprint = footprints_filtered.mean(dim="time").foot.values
 
-    if loaded_fp is None:
+        except:
+            aggregated_footprint = None
+        
+    if aggregated_footprint is None:
         return None
 
-    return update_footprint_based_on_threshold(loaded_fp, threshold)
+    return update_footprint_based_on_threshold(aggregated_footprint, threshold)
 
 def process_network(stations, date_range, threshold, load_lat, load_lon, df_footprints_network, index, list_non_footprints):
     
-    unique_hours = len(date_range.hour.unique())
+    unique_hours = list(date_range.hour.unique())
     
     for station in stations:
         updated_fp = load_and_update_footprint(station, date_range, unique_hours, threshold)
