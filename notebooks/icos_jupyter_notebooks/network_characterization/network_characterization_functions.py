@@ -88,50 +88,6 @@ def read_aggreg_footprints(station, date_range):
         
         return 0, None, None, None, None
     
-#given the input - create an updated pandas date range with only hours in timeselect_list
-def date_range_hour_filtered(date_range, timeselect_list):
-   
-
-    #depending on how many input (max 8 for 0 3 6 9 12 15 18 21), filter to include hours.
-    for time_value in timeselect_list:
-        if len(timeselect_list)==1:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)]
-            #df_nine = df.loc[(timeselect_list[count_timeselect] == df.index.hour)]
-        if len(timeselect_list)==2:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]
-        if len(timeselect_list)==3:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)]
-
-        if len(timeselect_list)==4:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]
-
-        if len(timeselect_list)==5:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
-            | date_range[(timeselect_list[4] == date_range.hour)]
-
-        if len(timeselect_list)==6:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
-            | date_range[(timeselect_list[4] == date_range.hour)] | date_range[(timeselect_list[5] == date_range.hour)]
-
-        if len(timeselect_list)==7:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
-            | date_range[(timeselect_list[4] == date_range.hour)] | date_range[(timeselect_list[5] == date_range.hour)]\
-            | date_range[(timeselect_list[6] == date_range.hour)]
-        
-        if len(timeselect_list)==8:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
-            | date_range[(timeselect_list[4] == date_range.hour)] | date_range[(timeselect_list[5] == date_range.hour)]\
-            | date_range[(timeselect_list[6] == date_range.hour)] | date_range[(timeselect_list[7] == date_range.hour)]
-          
-    #consider return timeselect
-    return date_range
-
 def save_settings(settings, directory):
 
     output = os.path.join(os.path.expanduser('~'), 'output', directory, date_time)
