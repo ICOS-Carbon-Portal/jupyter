@@ -245,7 +245,6 @@ def update_footprint_based_on_threshold(input_footprint, threshold):
     #convert the updated sensitivity values back to the original shape
     upd_footprint_sens = df_sensitivity_upd['mask_sensitivity'].values.reshape(input_footprint.shape)
 
-    print(upd_footprint_sens)
     return upd_footprint_sens
 
 def load_and_update_footprint(station, date_range, unique_hours, threshold):
