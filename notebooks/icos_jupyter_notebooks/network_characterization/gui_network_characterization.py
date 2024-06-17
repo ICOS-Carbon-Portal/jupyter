@@ -418,7 +418,7 @@ def update_func(button_c):
         
         with output_no_footprints:
         
-            display(HTML('<p style="font-size:16px">No footprints available for ' + no_footprints_string + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints.</p>'))
+            display(HTML('<p style="font-size:16px">No footprints available for the selected date range for ' + no_footprints_string + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to generate these footprints.</p>'))
         
         all_stations = networkObj.settings['baseNetwork'] + networkObj.settings['compareNetwork']
 

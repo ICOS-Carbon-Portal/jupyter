@@ -258,170 +258,117 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
         return plt
 
 def update_footprint_based_on_threshold(input_footprint, threshold):
-
-    threshold_sensitivity=input_footprint.sum()*threshold
-
-    #create a dataframe that will have the updated sensitivity values + the steps on the way
-    df_sensitivity = pd.DataFrame()
-
-    #one column with the original sensitivity values. Has an index that will be used to sort back to 
-    #this order (flattened 2D... back to 2D with updated sensitivity values in last step)
-    df_sensitivity['sensitivity']=input_footprint.flatten()
     
-    #sensitivity values sorterd from largest to smallest
-    df_sensitivity_sorted=df_sensitivity.sort_values(by=['sensitivity'], ascending=False)
-    
-    #another column that has the cumilated sum of the values in the sensitivity column.
-    #used to determine when the footprint threshold is met. 
-    df_sensitivity_sorted['cumsum_sens']=df_sensitivity_sorted.cumsum()
+    threshold_sensitivity = input_footprint.sum() * threshold
 
-    if threshold==1:
+    df_sensitivity = pd.DataFrame({
+        'sensitivity': input_footprint.flatten()
+    })
 
-        df_sensitivity_sorted['mask_threshold']= np.where(df_sensitivity_sorted['sensitivity']==0, 0, 1)
+    #sort the DataFrame by sensitivity values in descending order
+    df_sensitivity_sorted = df_sensitivity.sort_values(by='sensitivity', ascending=False)
+
+    #calculate the cumulative sum of the sorted sensitivity values
+    df_sensitivity_sorted['cumsum_sens'] = df_sensitivity_sorted['sensitivity'].cumsum()
+
+    #apply the threshold condition
+    if threshold == 1:
+        df_sensitivity_sorted['mask_threshold'] = np.where(df_sensitivity_sorted['sensitivity'] == 0, 0, 1)
     else:
-        df_sensitivity_sorted['mask_threshold']= np.where(df_sensitivity_sorted['cumsum_sens']>=threshold_sensitivity, 0, 1)
-    
-    #mask*sensitivity = for "new" footprint that only has sensitivity values in the cells that have the value 1.
-    df_sensitivity_sorted['mask_sensitivity']=df_sensitivity_sorted['mask_threshold']*df_sensitivity_sorted['sensitivity']
+        df_sensitivity_sorted['mask_threshold'] = np.where(df_sensitivity_sorted['cumsum_sens'] >= threshold_sensitivity, 0, 1)
 
-    #sort it back (so in correct lat/lon order for "packing back up" to 2D)
-    df_sensitivity_upd=df_sensitivity_sorted.sort_index()
+    #compute the updated sensitivity values where the footprint has the value 0 in case of below the threshold
+    df_sensitivity_sorted['mask_sensitivity'] = df_sensitivity_sorted['mask_threshold'] * df_sensitivity_sorted['sensitivity']
 
-    list_updated_sensitivity=df_sensitivity_upd['mask_sensitivity'].tolist()
-    
-    upd_footprint_sens=np.array(list_updated_sensitivity).reshape(480, 400)
+    #restore the original order
+    df_sensitivity_upd = df_sensitivity_sorted.sort_index()
+
+    #convert the updated sensitivity values back to the original shape
+    upd_footprint_sens = df_sensitivity_upd['mask_sensitivity'].values.reshape(input_footprint.shape)
 
     return upd_footprint_sens
 
-def load_fp(station):
+def load_and_update_footprint(station, date_range, unique_hours, threshold):
     
-    name_load_footprint_csv='fp_' + station + '.csv'
-    
-    if os.path.isfile(os.path.join(folder_tool_fps, name_load_footprint_csv)):
-        loaded_fp=loadtxt(os.path.join(folder_tool_fps, name_load_footprint_csv), delimiter=',')
+    # check if there is a pre-computed footprint.
+    is_2018_full_year = (
+        pd.Timestamp(min(date_range)) == pd.Timestamp(2018, 1, 1, 0) and
+        pd.Timestamp(max(date_range)) == pd.Timestamp(2018, 12, 31, 21) and
+        unique_hours == 8
+    )
+
+    if is_2018_full_year:
+        name_load_footprint_csv = f'fp_{station}.csv'
+        filepath = os.path.join(folder_tool_fps, name_load_footprint_csv)
+
+        if os.path.isfile(filepath):
+            loaded_fp = np.loadtxt(filepath, delimiter=',')
+        else:
+            loaded_fp = None
     else:
+        _, loaded_fp, _, _, _ = read_aggreg_footprints(station, date_range)
 
-        loaded_fp = None
+    if loaded_fp is None:
+        return None
 
-    return loaded_fp
+    return update_footprint_based_on_threshold(loaded_fp, threshold)
+
+def process_network(stations, date_range, threshold, load_lat, load_lon, df_footprints_network, index, list_non_footprints):
+    
+    unique_hours = len(date_range.hour.unique())
+    
+    for station in stations:
+        updated_fp = load_and_update_footprint(station, date_range, unique_hours, threshold)
+        if updated_fp is None:
+            list_non_footprints.append(station)
+            continue
+        df_footprints_network[f'fp_{index}'] = updated_fp.flatten()
+        index += 1
+
+    if not df_footprints_network.empty:
+        df_max_network = df_footprints_network.max(axis=1)
+        return np.array(df_max_network.tolist()).reshape((len(load_lat), len(load_lon))), df_footprints_network, index
+    
+    return None, df_footprints_network, index
 
 def return_networks(networkObj):
     now = datetime.now()
     global date_time
     date_time = now.strftime("%Y%m%d_%H%M%S")
     
-    sites_base_network = networkObj.settings['baseNetwork']
-    sites_compare_network = networkObj.settings['compareNetwork']
+    stations_base_network = networkObj.settings['baseNetwork']
+    stations_compare_network = networkObj.settings['compareNetwork']
     threshold_value = int(networkObj.settings['percent'])
-    threshold = threshold_value/100
+    threshold = threshold_value / 100
     date_range = networkObj.dateRange
-    hours = networkObj.settings['timeOfDay']
-    load_lat=networkObj.loadLat
-    load_lon=networkObj.loadLon
+    load_lat = networkObj.loadLat
+    load_lon = networkObj.loadLon
     
     df_footprints_network = pd.DataFrame()
-
-    index=1
-
-    list_none_footprints = []
+    list_non_footprints = []
+    index = 1
     
-    for station in sites_base_network:
+    fp_max_base_network, df_footprints_network, index,  = process_network(
+        stations_base_network, date_range, threshold,
+        load_lat, load_lon, df_footprints_network, index, list_non_footprints
+    )
 
-        #if use 2018 aggregated footprint
-        if pd.Timestamp(min(date_range))==pd.Timestamp(2018, 1, 1, 0) and pd.Timestamp(max(date_range))==pd.Timestamp(2018,12,31,21) and len(hours)==8:
+    if fp_max_base_network is None:
+        return None, None, list_non_footprints, date_time
 
-            loaded_fp=load_fp(station)
-            
-            #might just not be pre-computed 2018 footprint
-            if loaded_fp is None:
+    if not stations_compare_network:
+        return fp_max_base_network, None, list_non_footprints, date_time
 
-                nfp_not_used, loaded_fp, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range)
-                #if still None, then add to list of sites with no footprints and continue
-                if loaded_fp is None:
+    # continues on df_footprints_network (compare network is an extension of the base network. 
+    fp_max_compare_network, _, _ = process_network(
+        stations_compare_network, date_range, threshold,
+        load_lat, load_lon, df_footprints_network, index, list_non_footprints
+    )
 
-                    list_none_footprints.append(station)
-                    
-        else:
+    if fp_max_compare_network is not None and fp_max_compare_network.sum() == fp_max_base_network.sum():
+        fp_max_compare_network = None
 
-            nfp_not_used, loaded_fp, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range)
-
-            if loaded_fp is None:
-
-                list_none_footprints.append(station)
-
-                continue
-
-        upd_fp_sens=update_footprint_based_on_threshold(loaded_fp, threshold)
-        
-        df_footprints_network[('fp_' + str(index))]=upd_fp_sens.flatten()
-        
-        #for new column values
-        index=index+1
-    
-    # make a footprint based on all max values of the combined footprints. 
-    df_max_base_network = df_footprints_network[df_footprints_network.columns].max(axis=1)
-
-    #in case of no available footprints for any of the selections. 
-    if len(df_max_base_network.tolist()) == 0:
-        
-        fp_max_base_network= None  
-        fp_max_compare_network= None 
-        
-        return fp_max_base_network, fp_max_compare_network, list_none_footprints
-    
-    else:
-        
-        # will only happen in case of available footprints for >0 sites
-        fp_max_base_network=np.array(df_max_base_network.tolist()).reshape((len(load_lat), len(load_lon)))
-    
-        # if no base network to add to, there will be no compare network either 
-        if len(sites_compare_network) == 0:
-
-            return fp_max_base_network, None, list_none_footprints, date_time
-
-        for station in sites_compare_network:
-
-            #if use 2018 aggregated footprint
-            if pd.Timestamp(min(date_range))==pd.Timestamp(2018, 1, 1, 0) and pd.Timestamp(max(date_range))==pd.Timestamp(2018,12,31,0) and len(hours)==8:
-
-                loaded_fp=load_fp(station)
-
-                #might just not be pre-computed 2018 footprint
-                if loaded_fp is None:
-
-                    nfp_not_used, loaded_fp, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range)
-                    
-                    #if still None, then add to list of sites with no footprints and continue
-                    if loaded_fp is None:
-
-                        list_none_footprints.append(station)
-
-            else:
-
-                nfp_not_used, loaded_fp, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range)
-                
-                if loaded_fp is None:
-
-                    list_none_footprints.append(station)
-
-                    continue
-
-            upd_fp_sens=update_footprint_based_on_threshold(loaded_fp, threshold)
-
-            df_footprints_network[('fp_' + str(index))]= upd_fp_sens.flatten()
-
-            #for new column values
-            index=index+1
-
-        # make a footprint based on all max values of the combined footprints. 
-        df_max_compare_network = df_footprints_network[df_footprints_network.columns].max(axis=1)
-
-        fp_max_compare_network=np.array(df_max_compare_network.tolist()).reshape((len(load_lat), len(load_lon)))
-
-        if fp_max_compare_network.sum() == fp_max_base_network.sum():
-            fp_max_compare_network = None
-
-        return fp_max_base_network, fp_max_compare_network, list_none_footprints, date_time
+    return fp_max_base_network, fp_max_compare_network, list_non_footprints, date_time
     
 
 def country_dict_landcover(networkObj):
