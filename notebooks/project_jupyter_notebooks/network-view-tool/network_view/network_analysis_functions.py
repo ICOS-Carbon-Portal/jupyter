@@ -36,7 +36,7 @@ from matplotlib.colors import ListedColormap,LinearSegmentedColormap
 import copy
 from ipywidgets import IntProgress
 import math
-from icoscp.stilt import stiltstation
+from icoscp_stilt import stiltstation
 from matplotlib.legend import Legend
 import textwrap
 import statistics

@@ -4,7 +4,7 @@ import stc_functions
 from datetime import datetime
 import os
 from icoscp.station import station as cpstation
-from icoscp.stilt import stiltstation
+from icoscp_stilt import stiltstation
 import datetime as dt
 stiltstations= stiltstation.find()
 def generate_PDFs(list_stations):

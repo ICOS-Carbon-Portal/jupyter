@@ -33,7 +33,7 @@ style_scroll = """
     </style>
     """
 
-from icoscp.stilt import stiltstation
+from icoscp_stilt import stiltstation
 
 stiltstations= stiltstation.find()
 

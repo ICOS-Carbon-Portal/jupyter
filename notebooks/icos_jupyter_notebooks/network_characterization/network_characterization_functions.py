@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Dec 28 09:47:58 2020
+Created Dec 28 2020
+Latest update June 17 2024
 
 @author: Ida Storm
 """
@@ -22,7 +23,6 @@ from netCDF4 import Dataset
 import math
 from ipywidgets import Output, HBox
 from IPython.core.display import HTML 
-from datetime import date
 from bokeh.transform import factor_cmap
 
 #for bokeh
@@ -34,6 +34,8 @@ from datetime import datetime
 from matplotlib.colors import LogNorm
 import json
 
+from icoscp_stilt import stiltstation
+
 reset_output()
 output_notebook()
 
@@ -44,94 +46,7 @@ dictionary_area_choice = {'ALB':'Albania', 'Andorra':'Andorra', 'AUT':'Austria',
 
 country_masks = Dataset(os.path.join(folder_data,'europe_STILT_masks.nc'))
 country_masks_eez_included = Dataset(os.path.join(folder_data,'europe_STILT_masks_eez_included.nc'))
-
-#function to read and aggregate footprints for given date range
-def read_aggreg_footprints(station, date_range):
     
-    # path to footprint files in new stiltweb directory structure
-    pathFP='/data/stiltweb/stations/'
-
-    fp=[]
-    nfp=0
-    first = True
-    for date in date_range:
-
-        filename=(pathFP+station+'/'+str(date.year)+'/'+str(date.month).zfill(2)+'/'
-             +str(date.year)+'x'+str(date.month).zfill(2)+'x'+str(date.day).zfill(2)+'x'+str(date.hour).zfill(2)+'/foot')
- 
-        if os.path.isfile(filename):    
-            
-            f_fp = cdf.Dataset(filename)
-    
-            if (first):
-            
-                fp=f_fp.variables['foot'][:,:,:]
-
-                lon=f_fp.variables['lon'][:]
-                lat=f_fp.variables['lat'][:]
-                first=False
-    
-            else: 
-                fp=fp+f_fp.variables['foot'][:,:,:]
-
-            f_fp.close()
-            nfp+=1
-
-    if nfp > 0:
-        fp=fp/nfp
-
-        title = 'not used'
-        
-        return nfp, fp, lon, lat, title
-    
-    else:
-        
-        return 0, None, None, None, None
-    
-#given the input - create an updated pandas date range with only hours in timeselect_list
-def date_range_hour_filtered(date_range, timeselect_list):
-   
-
-    #depending on how many input (max 8 for 0 3 6 9 12 15 18 21), filter to include hours.
-    for time_value in timeselect_list:
-        if len(timeselect_list)==1:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)]
-            #df_nine = df.loc[(timeselect_list[count_timeselect] == df.index.hour)]
-        if len(timeselect_list)==2:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]
-        if len(timeselect_list)==3:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)]
-
-        if len(timeselect_list)==4:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]
-
-        if len(timeselect_list)==5:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
-            | date_range[(timeselect_list[4] == date_range.hour)]
-
-        if len(timeselect_list)==6:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
-            | date_range[(timeselect_list[4] == date_range.hour)] | date_range[(timeselect_list[5] == date_range.hour)]
-
-        if len(timeselect_list)==7:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
-            | date_range[(timeselect_list[4] == date_range.hour)] | date_range[(timeselect_list[5] == date_range.hour)]\
-            | date_range[(timeselect_list[6] == date_range.hour)]
-        
-        if len(timeselect_list)==8:
-            date_range = date_range[(timeselect_list[0] == date_range.hour)] | date_range[(timeselect_list[1] == date_range.hour)]  \
-            | date_range[(timeselect_list[2] == date_range.hour)] | date_range[(timeselect_list[3] == date_range.hour)]\
-            | date_range[(timeselect_list[4] == date_range.hour)] | date_range[(timeselect_list[5] == date_range.hour)]\
-            | date_range[(timeselect_list[6] == date_range.hour)] | date_range[(timeselect_list[7] == date_range.hour)]
-          
-    #consider return timeselect
-    return date_range
-
 def save_settings(settings, directory):
 
     output = os.path.join(os.path.expanduser('~'), 'output', directory, date_time)
@@ -302,170 +217,125 @@ def plot_maps(field, lon, lat, title='', label='', unit='', linlog='linear', sta
         return plt
 
 def update_footprint_based_on_threshold(input_footprint, threshold):
-
-    threshold_sensitivity=input_footprint.sum()*threshold
-
-    #create a dataframe that will have the updated sensitivity values + the steps on the way
-    df_sensitivity = pd.DataFrame()
-
-    #one column with the original sensitivity values. Has an index that will be used to sort back to 
-    #this order (flattened 2D... back to 2D with updated sensitivity values in last step)
-    df_sensitivity['sensitivity']=input_footprint.flatten()
     
-    #sensitivity values sorterd from largest to smallest
-    df_sensitivity_sorted=df_sensitivity.sort_values(by=['sensitivity'], ascending=False)
-    
-    #another column that has the cumilated sum of the values in the sensitivity column.
-    #used to determine when the footprint threshold is met. 
-    df_sensitivity_sorted['cumsum_sens']=df_sensitivity_sorted.cumsum()
+    threshold_sensitivity = input_footprint.sum() * threshold
 
-    if threshold==1:
+    df_sensitivity = pd.DataFrame({
+        'sensitivity': input_footprint.flatten()
+    })
 
-        df_sensitivity_sorted['mask_threshold']= np.where(df_sensitivity_sorted['sensitivity']==0, 0, 1)
+    #sort the DataFrame by sensitivity values in descending order
+    df_sensitivity_sorted = df_sensitivity.sort_values(by='sensitivity', ascending=False)
+
+    #calculate the cumulative sum of the sorted sensitivity values
+    df_sensitivity_sorted['cumsum_sens'] = df_sensitivity_sorted['sensitivity'].cumsum()
+
+    #apply the threshold condition
+    if threshold == 1:
+        df_sensitivity_sorted['mask_threshold'] = np.where(df_sensitivity_sorted['sensitivity'] == 0, 0, 1)
     else:
-        df_sensitivity_sorted['mask_threshold']= np.where(df_sensitivity_sorted['cumsum_sens']>=threshold_sensitivity, 0, 1)
-    
-    #mask*sensitivity = for "new" footprint that only has sensitivity values in the cells that have the value 1.
-    df_sensitivity_sorted['mask_sensitivity']=df_sensitivity_sorted['mask_threshold']*df_sensitivity_sorted['sensitivity']
+        df_sensitivity_sorted['mask_threshold'] = np.where(df_sensitivity_sorted['cumsum_sens'] >= threshold_sensitivity, 0, 1)
 
-    #sort it back (so in correct lat/lon order for "packing back up" to 2D)
-    df_sensitivity_upd=df_sensitivity_sorted.sort_index()
+    #compute the updated sensitivity values where the footprint has the value 0 in case of below the threshold
+    df_sensitivity_sorted['mask_sensitivity'] = df_sensitivity_sorted['mask_threshold'] * df_sensitivity_sorted['sensitivity']
 
-    list_updated_sensitivity=df_sensitivity_upd['mask_sensitivity'].tolist()
-    
-    upd_footprint_sens=np.array(list_updated_sensitivity).reshape(480, 400)
+    #restore the original order
+    df_sensitivity_upd = df_sensitivity_sorted.sort_index()
+
+    #convert the updated sensitivity values back to the original shape
+    upd_footprint_sens = df_sensitivity_upd['mask_sensitivity'].values.reshape(input_footprint.shape)
 
     return upd_footprint_sens
 
-def load_fp(station):
+def load_and_update_footprint(station, date_range, unique_hours, threshold):
     
-    name_load_footprint_csv='fp_' + station + '.csv'
-    
-    if os.path.isfile(os.path.join(folder_tool_fps, name_load_footprint_csv)):
-        loaded_fp=loadtxt(os.path.join(folder_tool_fps, name_load_footprint_csv), delimiter=',')
+    # check if there is a pre-computed footprint.
+    is_2018_full_year = (
+        pd.Timestamp(min(date_range)) == pd.Timestamp(2018, 1, 1, 0) and
+        pd.Timestamp(max(date_range)) == pd.Timestamp(2018, 12, 31, 21) and
+        len(unique_hours) == 8
+    )
+
+    if is_2018_full_year:
+        name_load_footprint_csv = f'fp_{station}.csv'
+        filepath = os.path.join(folder_tool_fps, name_load_footprint_csv)
+
+        if os.path.isfile(filepath):
+            aggregated_footprint = np.loadtxt(filepath, delimiter=',')
+        else:
+            aggregated_footprint = None
     else:
+        try:
+            st = stiltstation.get(id=station)
+            footprints =  st.get_fp(date_range.min(), date_range.max())
+            footprints_filtered = footprints.where(footprints.time.dt.hour.isin(unique_hours), drop=True)
+            # fp values for the cells are stored in the variable "foot"
+            aggregated_footprint = footprints_filtered.mean(dim="time").foot.values
 
-        loaded_fp = None
+        except:
+            aggregated_footprint = None
+        
+    if aggregated_footprint is None:
+        return None
 
-    return loaded_fp
+    return update_footprint_based_on_threshold(aggregated_footprint, threshold)
+
+def process_network(stations, date_range, threshold, load_lat, load_lon, df_footprints_network, index, list_non_footprints):
+    
+    unique_hours = list(date_range.hour.unique())
+    
+    for station in stations:
+        updated_fp = load_and_update_footprint(station, date_range, unique_hours, threshold)
+        if updated_fp is None:
+            list_non_footprints.append(station)
+            continue
+        df_footprints_network[f'fp_{index}'] = updated_fp.flatten()
+        index += 1
+
+    if not df_footprints_network.empty:
+        df_max_network = df_footprints_network.max(axis=1)
+        return np.array(df_max_network.tolist()).reshape((len(load_lat), len(load_lon))), df_footprints_network, index
+    
+    return None, df_footprints_network, index
 
 def return_networks(networkObj):
     now = datetime.now()
     global date_time
     date_time = now.strftime("%Y%m%d_%H%M%S")
     
-    sites_base_network = networkObj.settings['baseNetwork']
-    sites_compare_network = networkObj.settings['compareNetwork']
+    stations_base_network = networkObj.settings['baseNetwork']
+    stations_compare_network = networkObj.settings['compareNetwork']
     threshold_value = int(networkObj.settings['percent'])
-    threshold = threshold_value/100
+    threshold = threshold_value / 100
     date_range = networkObj.dateRange
-    hours = networkObj.settings['timeOfDay']
-    load_lat=networkObj.loadLat
-    load_lon=networkObj.loadLon
+    load_lat = networkObj.loadLat
+    load_lon = networkObj.loadLon
     
     df_footprints_network = pd.DataFrame()
-
-    index=1
-
-    list_none_footprints = []
+    list_non_footprints = []
+    index = 1
     
-    for station in sites_base_network:
+    fp_max_base_network, df_footprints_network, index,  = process_network(
+        stations_base_network, date_range, threshold,
+        load_lat, load_lon, df_footprints_network, index, list_non_footprints
+    )
 
-        #if use 2018 aggregated footprint
-        if pd.Timestamp(min(date_range))==pd.Timestamp(2018, 1, 1, 0) and pd.Timestamp(max(date_range))==pd.Timestamp(2018,12,31,21) and len(hours)==8:
+    if fp_max_base_network is None:
+        return None, None, list_non_footprints, date_time
 
-            loaded_fp=load_fp(station)
-            
-            #might just not be pre-computed 2018 footprint
-            if loaded_fp is None:
+    if not stations_compare_network:
+        return fp_max_base_network, None, list_non_footprints, date_time
 
-                nfp_not_used, loaded_fp, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range)
-                #if still None, then add to list of sites with no footprints and continue
-                if loaded_fp is None:
+    # continues on df_footprints_network (compare network is an extension of the base network. 
+    fp_max_compare_network, _, _ = process_network(
+        stations_compare_network, date_range, threshold,
+        load_lat, load_lon, df_footprints_network, index, list_non_footprints
+    )
 
-                    list_none_footprints.append(station)
-                    
-        else:
+    if fp_max_compare_network is not None and fp_max_compare_network.sum() == fp_max_base_network.sum():
+        fp_max_compare_network = None
 
-            nfp_not_used, loaded_fp, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range)
-
-            if loaded_fp is None:
-
-                list_none_footprints.append(station)
-
-                continue
-
-        upd_fp_sens=update_footprint_based_on_threshold(loaded_fp, threshold)
-        
-        df_footprints_network[('fp_' + str(index))]=upd_fp_sens.flatten()
-        
-        #for new column values
-        index=index+1
-    
-    # make a footprint based on all max values of the combined footprints. 
-    df_max_base_network = df_footprints_network[df_footprints_network.columns].max(axis=1)
-
-    #in case of no available footprints for any of the selections. 
-    if len(df_max_base_network.tolist()) == 0:
-        
-        fp_max_base_network= None  
-        fp_max_compare_network= None 
-        
-        return fp_max_base_network, fp_max_compare_network, list_none_footprints
-    
-    else:
-        
-        # will only happen in case of available footprints for >0 sites
-        fp_max_base_network=np.array(df_max_base_network.tolist()).reshape((len(load_lat), len(load_lon)))
-    
-        # if no base network to add to, there will be no compare network either 
-        if len(sites_compare_network) == 0:
-
-            return fp_max_base_network, None, list_none_footprints, date_time
-
-        for station in sites_compare_network:
-
-            #if use 2018 aggregated footprint
-            if pd.Timestamp(min(date_range))==pd.Timestamp(2018, 1, 1, 0) and pd.Timestamp(max(date_range))==pd.Timestamp(2018,12,31,0) and len(hours)==8:
-
-                loaded_fp=load_fp(station)
-
-                #might just not be pre-computed 2018 footprint
-                if loaded_fp is None:
-
-                    nfp_not_used, loaded_fp, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range)
-                    
-                    #if still None, then add to list of sites with no footprints and continue
-                    if loaded_fp is None:
-
-                        list_none_footprints.append(station)
-
-            else:
-
-                nfp_not_used, loaded_fp, lon_not_used, lat_not_used, title_not_used = read_aggreg_footprints(station, date_range)
-                
-                if loaded_fp is None:
-
-                    list_none_footprints.append(station)
-
-                    continue
-
-            upd_fp_sens=update_footprint_based_on_threshold(loaded_fp, threshold)
-
-            df_footprints_network[('fp_' + str(index))]= upd_fp_sens.flatten()
-
-            #for new column values
-            index=index+1
-
-        # make a footprint based on all max values of the combined footprints. 
-        df_max_compare_network = df_footprints_network[df_footprints_network.columns].max(axis=1)
-
-        fp_max_compare_network=np.array(df_max_compare_network.tolist()).reshape((len(load_lat), len(load_lon)))
-
-        if fp_max_compare_network.sum() == fp_max_base_network.sum():
-            fp_max_compare_network = None
-
-        return fp_max_base_network, fp_max_compare_network, list_none_footprints, date_time
+    return fp_max_base_network, fp_max_compare_network, list_non_footprints, date_time
     
 
 def country_dict_landcover(networkObj):
@@ -757,13 +627,14 @@ def population_bar_graph_compare(networkObj):
     return p, styled_df_diff_base_compare
 
 def land_cover_bar_graphs_base(networkObj):
-    
+
     base_network = networkObj.baseNetwork    
     countries = networkObj.settings['countries']
     dictionary = networkObj.countryDict
-  
-    # for the graph with all countries 
+ 
     land_cover_values = ['Broad leaf forest', 'Coniferous forest', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrubland', 'Other', 'Unknown']
+    
+    land_cover_values_graph = ['Broad leaf', 'Coniferous', 'Mixed forest', 'Cropland', 'Pasture', 'Urban', 'Ocean', 'Grass/shrub', 'Other', 'Unknown']
     
     colors = ['#4c9c5e','#CAE0AB','#90C987', '#521A13', '#F7F056', '#DC050C', '#1964B0', '#F1932D', '#882E72','#777777']
     
@@ -782,8 +653,7 @@ def land_cover_bar_graphs_base(networkObj):
     
     for country in countries:
         
-        if dictionary[country]['base_network_breakdown']['total sens']>0:
-        
+        if dictionary[country]['base_network_breakdown']['total sens'] > 0:
             country_name = dictionary_area_choice[country]
 
             country_names.append(country_name)
@@ -811,14 +681,41 @@ def land_cover_bar_graphs_base(networkObj):
             other_list.append(other)
             unknown_list.append(unknown)
             
-    dictionary_landcover_by_country = {'Countries': country_names,'Broad leaf forest': broad_leaf_forest_list, 'Coniferous forest': coniferous_forest_list, 'Mixed forest': mixed_forest_list,'Cropland' : cropland_list,'Pasture': pasture_list,'Urban': urban_list, 'Ocean': ocean_list, 'Grass/shrubland': grass_shrub_list, 'Other': other_list, 'Unknown': unknown_list}
+    dictionary_landcover_by_country = {
+        'Countries': country_names,
+        'Broad leaf forest': broad_leaf_forest_list,
+        'Coniferous forest': coniferous_forest_list,
+        'Mixed forest': mixed_forest_list,
+        'Cropland': cropland_list,
+        'Pasture': pasture_list,
+        'Urban': urban_list,
+        'Ocean': ocean_list,
+        'Grass/shrubland': grass_shrub_list,
+        'Other': other_list,
+        'Unknown': unknown_list
+    }
     
-    p_aggreg = figure(x_range=country_names, title='Sensitivity of network to countries split by land cover', toolbar_location="right", tooltips="$name @Countries: @$name{0f}", height=550, width=800)
+    source = ColumnDataSource(data=dictionary_landcover_by_country)
+    
+    p_aggreg = figure(
+        x_range=country_names,
+        title='Sensitivity of network to countries split by land cover',
+        toolbar_location="right",
+        tooltips="$name @Countries: @$name{0f}",
+        height=550,
+        width=900
+    )
 
-    graph_items = p_aggreg.vbar_stack(land_cover_values, x='Countries', width=0.5, color=colors, source=dictionary_landcover_by_country)
+    graph_items = p_aggreg.vbar_stack(
+        land_cover_values,
+        x='Countries',
+        width=0.5,
+        color=colors,
+        source=source
+    )
     
-    # to make the legend appear to the right of the graph 
-    legend_items = [(land_cover, [graph]) for  land_cover, graph in zip(land_cover_values, graph_items)]
+    # Add legend to the right of the graph 
+    legend_items = [(land_cover, [graph]) for land_cover, graph in zip(land_cover_values, graph_items)]
     legend = Legend(items=legend_items)
     p_aggreg.add_layout(legend, 'right')
     
@@ -832,22 +729,19 @@ def land_cover_bar_graphs_base(networkObj):
     p_aggreg.xaxis.major_label_orientation = "vertical"
     p_aggreg.yaxis.axis_label = 'area (km²) * (ppm /(μmol / (m²s)))'
      
-    if len(country_names)>1:
-    
+    if len(country_names) > 1:
         show(p_aggreg)
-        
+
+    # Code for individual country graphs
     colors_individual = ['#82ba8f','#4c9c5f','#dae9c4','#CAE0AB','#b1d9ab','#90C987', '#865f5a', '#521A13', '#f8f167',  '#ded74d', '#ee8286', '#DC050C', '#5e93c8', '#1964B0', '#f7be81','#F1932D', '#c497b8', '#882E72','#a0a0a0','#777777']
     
     categories = ['Country', 'Network']
     
-    
     for country in countries:
         
-        output_landcover_individual = Output()
-   
-        if dictionary[country]['base_network_breakdown']['total sens']>0:
+        if dictionary[country]['base_network_breakdown']['total sens'] > 0:
         
-            country_name = dictionary_area_choice[country]
+            country_name = dictionary_area_choice[country]#dictionary[country]['country_name']
            
             broad_leaf_forest = dictionary[country]['base_network_breakdown']['Broad leaf forest total']   
             coniferous_forest = dictionary[country]['base_network_breakdown']['Coniferous forest total']
@@ -860,7 +754,6 @@ def land_cover_bar_graphs_base(networkObj):
             other = dictionary[country]['base_network_breakdown']['Other total']   
             unknown = dictionary[country]['base_network_breakdown']['Unknown total']
    
-            # one graph for each country showing landcover breakdown of the country as well as the breakdown within the footprint   
             total = broad_leaf_forest + coniferous_forest + mixed_forest + cropland + pasture + urban + ocean + grass_shrub + other + unknown 
             
             broad_leaf_forest_percent = (broad_leaf_forest / total) * 100
@@ -885,25 +778,36 @@ def land_cover_bar_graphs_base(networkObj):
             other_country_percent = dictionary[country]['country_breakdown']['Other'] 
             unknown_country_percent = dictionary[country]['country_breakdown']['Unknown'] 
                 
-            dictionary_landcover = {'Sensitivity country': [broad_leaf_forest_country_percent, coniferous_forest_country_percent,mixed_forest_country_percent,cropland_country_percent, pasture_country_percent, urban_country_percent, ocean_country_percent, grass_shrub_country_percent, other_country_percent, unknown_country_percent],
-                                    
-                                    'Sensitivity network': [broad_leaf_forest_percent,  coniferous_forest_percent,mixed_forest_percent, cropland_percent, pasture_percent,urban_percent, ocean_percent,grass_shrub_percent, other_percent, unknown_percent]}
+            dictionary_landcover = {
+                'Sensitivity country': [
+                    broad_leaf_forest_country_percent, coniferous_forest_country_percent, mixed_forest_country_percent,
+                    cropland_country_percent, pasture_country_percent, urban_country_percent, ocean_country_percent,
+                    grass_shrub_country_percent, other_country_percent, unknown_country_percent
+                ],
+                'Sensitivity network': [
+                    broad_leaf_forest_percent, coniferous_forest_percent, mixed_forest_percent, cropland_percent, 
+                    pasture_percent, urban_percent, ocean_percent, grass_shrub_percent, other_percent, unknown_percent
+                ]
+            }
             
-            x = [ (land_cover, category) for land_cover in land_cover_values for category in categories ]
-            
+            x = [(land_cover, category) for land_cover in land_cover_values_graph for category in categories]
             counts = sum(zip(dictionary_landcover['Sensitivity country'], dictionary_landcover['Sensitivity network']), ()) 
             
             source = ColumnDataSource(data=dict(x=x, counts=counts, colors=colors_individual))
 
             label_yaxis = '%'
-            
-            title = 'Land cover within ' + country_name + ' vs. sensitivity of network split by land cover within ' + country_name
+            title = f'Land cover within {country_name} vs. sensitivity of network split by land cover within {country_name}'
 
-            #p_individual = figure(x_range=land_cover_values_individual, title=title, toolbar_location="below")
-            p_individual = figure(x_range=FactorRange(*x), title=title, width = 800, height = 350, toolbar_location="right", tooltips="@x : @counts{0f} %")
+            p_individual = figure(
+                x_range=FactorRange(*x),
+                title=title,
+                width=900,
+                height=350,
+                toolbar_location="right",
+                tooltips="@x : @counts{0f} %"
+            )
 
-            #p_individual.vbar(x='Land cover values', top = 'Sensitivity', width=0.5, color='color', source=dictionary_landcover)
-            p_individual.vbar(x='x', top = 'counts', width=0.5, color = 'colors', source=source)
+            p_individual.vbar(x='x', top='counts', width=0.5, color='colors', source=source)
 
             p_individual.yaxis.axis_label = label_yaxis
 

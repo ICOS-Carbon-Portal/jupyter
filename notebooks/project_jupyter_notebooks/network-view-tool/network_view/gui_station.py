@@ -13,7 +13,7 @@ import os
 import re
 from datetime import datetime
 import json
-from icoscp.stilt import stiltstation
+from icoscp_stilt import stiltstation
 import ipywidgets as widgets
 from matplotlib import pyplot as plt
 import network_analysis_functions
