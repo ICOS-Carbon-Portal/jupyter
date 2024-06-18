@@ -83,8 +83,10 @@ RUN pip install git+https://github.com/ZogopZ/icos-splash.git
 # Install specific version.
 # RUN pip install --quiet icoscp==0.1.20
 RUN pip install --quiet icoscp_core==0.3.4
-RUN pip install --extra-index-url https://pypi.org/simple --quiet -i https://test.pypi.org/simple/ icoscp==0.2.0a2
-RUN pip install --extra-index-url https://pypi.org/simple --quiet -i https://test.pypi.org/simple/ icoscp_stilt==0.1.0a5
+RUN pip install --quiet icoscp==0.2.0
+RUN pip install --quiet icoscp_stilt==0.1.0
+# RUN pip install --extra-index-url https://pypi.org/simple --quiet -i https://test.pypi.org/simple/ icoscp==0.2.0a2
+# RUN pip install --extra-index-url https://pypi.org/simple --quiet -i https://test.pypi.org/simple/ icoscp_stilt==0.1.0a5
 
 # Install from branch.
 # This next line helps docker understand that there are changes in a
