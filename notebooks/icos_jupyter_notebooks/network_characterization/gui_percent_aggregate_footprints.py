@@ -28,7 +28,7 @@ style_scroll = """
     </style>
     """
 
-from icoscp.stilt import stiltstation
+from icoscp_stilt import stiltstation
 stiltstations= stiltstation.find()
 
 list_all_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if v['geoinfo']])

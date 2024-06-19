@@ -19,7 +19,7 @@ button_color_able='#4169E1'
 import pandas as pd
 import datetime as dt
 import numpy as np
-from icoscp.stilt import stiltstation
+from icoscp_stilt import stiltstation
 import network_analysis_functions
 stilt_stations = stiltstation.find()
 

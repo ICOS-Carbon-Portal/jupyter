@@ -18,7 +18,7 @@ import json
 import requests
 
 #Import ICOS tools:
-from icoscp.cpb.dobj import Dobj
+from icoscp.dobj import Dobj
 
 
 # paths --- changed for new JupyterHub instance

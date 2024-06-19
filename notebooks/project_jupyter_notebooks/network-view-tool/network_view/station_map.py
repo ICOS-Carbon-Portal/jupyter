@@ -1,4 +1,4 @@
-from icoscp.stilt import stiltstation
+from icoscp_stilt import stiltstation
 stilt_stations = stiltstation.find()
 import pandas as pd
 import folium
