@@ -1,14 +1,32 @@
 {% extends "page.html" %}
 
 {% set announcement_login =
-'<p style="font-size: 16px">
+'<div style="font-size: 16px; text-align: left; padding-left: 20px;">
+    <p>
+        We are excited to announce updates to our Python libraries. The
+        <a href=\"https://pypi.org/project/icoscp/\"target=\"_blank\">icoscp</a> and
+        <a href=\"https://pypi.org/project/icoscp_core/\"target=\"_blank\">icoscp_core</a> libraries
+        have been updated to new versions,<br>and
+        <a href=\"https://pypi.org/project/icoscp_stilt/\"target=\"_blank\">icoscp_stilt</a> has
+        been separated into its own standalone library.
+    <ul>
+        <li>
+            For detailed documentation, please visit:
+            <a href=\"https://icos-carbon-portal.github.io/pylib/\"target=\"_blank\">https://icos-carbon-portal.github.io/pylib/</a>.
+        </li>
+        <li>
+            For specific information on the updates,  please visit:
+            <a href = \"https://icos-carbon-portal.github.io/pylib/icoscp/install/#upgrade-guide\"target=\"_blank\">https://icos-carbon-portal.github.io/pylib/icoscp/install/#upgrade-guide</a>.
+        </li>
+    </ul>
+
     Help us make our Jupyter service even better. Share your thoughts in a
     quick feedback
     <a href="https://www.icos-cp.eu/form/jupyter-solutions-user-survey">
         survey.
-    </a></br>
+    </a>
     Thanks for your help!
-</p>'
+</p></div>'
 %}
 {% if announcement_login is string %}
   {% set announcement = announcement_login %}
@@ -47,7 +65,7 @@
         position: absolute;
         height: 72px;
         left: 100px;
-        top: 200px;
+        top: 302px;
         border: 0px solid black;
         z-index: 1;
     }
