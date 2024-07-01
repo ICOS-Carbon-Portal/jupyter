@@ -26,7 +26,7 @@ RUN ln -s /home/jovyan/education/hyytiala-practicals/EXERCISES -t /home/jovyan/e
 RUN ln -s /home/jovyan/education/hyytiala-practicals/MEASUREMENTS -t /home/jovyan/education/Summer-school-2024/.
 RUN echo "cd /home/jovyan/education/hyytiala-practicals && git fetch origin && git pull" > ~/.bash_profile
 RUN mkdir -p /home/jovyan/.ipython/profile_default/startup
-COPY 00_summer_school_2023.py /home/jovyan/.ipython/profile_default/startup/00_summer_school_2024.py
+COPY 00_summer_school_2024.py /home/jovyan/.ipython/profile_default/startup/00_summer_school_2024.py
 WORKDIR /home/jovyan/education/Summer-school-2024/build/MODEL_ext
 RUN ./MOGUNTIA < basefunct_gl
 RUN ./MOGUNTIA < basefunct_nh
