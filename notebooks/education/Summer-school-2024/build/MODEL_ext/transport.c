@@ -35,7 +35,7 @@
 #include <errno.h>
 #include "globals.h"
 /* #include "/usr/include/hdf/hdf.h"   */
-#include "/home/jovyan/education/Summer-school-2023/build/include/hdf.h"
+#include "/home/jovyan/education/Summer-school-2024/build/include/hdf.h"
 /* #include "/sw/arch/Debian10/EB_production/2019/software/HDF/4.2.14-GCCcore-8.3.0/include/hdf/hdf.h" */
 /* #include "/storage/imau/HDFvers/HDF4.1r2/include/hdf.h" */
 
@@ -146,7 +146,7 @@ void init_transport_(){
   /*  openfile(&coefdata, "transcoef.dat", "r"); */
   /* to adapt */
   itransport = SDstart(
-  "/home/jovyan/education/Summer-school-2023/DATA/transport.hdf",
+  "/home/jovyan/education/Summer-school-2024/DATA/transport.hdf",
   DFACC_READ);
   printf("itransport %d\n", itransport);
   setfluxptr();
