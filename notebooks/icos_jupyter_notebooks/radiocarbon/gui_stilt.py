@@ -33,18 +33,9 @@ style_scroll = """
     </style>
     """
 
-from icoscp_stilt import stiltstation
-
-stiltstations= stiltstation.find()
-
-list_all_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if v['geoinfo']])
-list_all_not_located = [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if not v['geoinfo']]
-list_all = list_all_not_located + list_all_located
-
-list_all_icos_located = sorted([((v['geoinfo']['name']['common'] + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if v['geoinfo'] if v['icos']])
-list_all_icos_not_located = [(('In water' + ': ' + v['name'] + ' ('+ k + ')'),k) for k, v in stiltstations.items() if not v['geoinfo'] if v['icos']]
-list_all_icos = list_all_icos_not_located + list_all_icos_located
-
+from icoscp_stilt import stilt
+list_all = sorted([(f'{item.countryCode}: {item.name} ({item.id})',item.id) for item in stilt.list_stations()])
+list_all_icos = sorted([(f'{item.countryCode}: {item.name} ({item.id})',item.id) for item in stilt.list_stations() if item.icosId != None])
 
 #---------------------------------------------------------
 
