@@ -13,15 +13,18 @@ SINK EXTRA_LAND_NH 1.0
 SINK EXTRA_LAND_TR 0.0
 SINK EXTRA_LAND_SH 0.0
   8 years of total emitted amounts in ktonnes per year follow:
-EMISSION DISTRIBUTION emission_dist_co2.dat 8    
-  2000      6765e3
-  2001      6927e3
-  2002      6996e3
-  2003      7416e3
-  2004      7807e3
-  2005      8093e3
-  2006      8370e3
-  2007      8370e3
+EMISSION DISTRIBUTION emission_dist_co2.dat 11 
+   2000      6.954896e+06
+   2001      7.002254e+06
+   2002      7.158624e+06
+   2003      7.540541e+06
+   2004      7.805507e+06
+   2005      8.070574e+06
+   2006      8.347027e+06
+   2007      8.590837e+06
+   2008      8.738701e+06
+   2009      8.589072e+06
+   2010      9.083545e+06
         the values are given in kt / yr
 STATION_OUTPUT MONTHLY
 STATION Mauna_Loa      19N 156W
