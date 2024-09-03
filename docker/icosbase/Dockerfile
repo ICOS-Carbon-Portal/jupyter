@@ -56,7 +56,7 @@ RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build
 # Install qgrid extension.
 RUN jupyter labextension install @j123npm/qgrid2@1.1.4 --no-build
 # Rebuild jupyter lab.
-#RUN jupyter lab build
+RUN jupyter lab build
 
 # Additional python modules, not available using mamba.
 COPY pip_requirements.txt  pip_requirements.txt
@@ -74,7 +74,6 @@ COPY overrides.json /opt/conda/share/jupyter/lab/settings/.
 # Install jupyter-lab extension icos-splash, to modify the splash
 # animation using the ICOS Carbon Portal logo.
 RUN pip install git+https://github.com/ZogopZ/icos-splash.git
-RUN jupyter lab build
 
 
 # ---
