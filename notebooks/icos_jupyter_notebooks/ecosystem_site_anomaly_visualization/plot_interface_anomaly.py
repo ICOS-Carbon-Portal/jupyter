@@ -546,7 +546,7 @@ def map_of_sites(df_shortterm=pd.DataFrame, df_longterm=pd.DataFrame):
         folium.CircleMarker(
             [site.lat, site.lon],
             tooltip = site.id,
-            popup = site['name'] + ', (' + site.country_code + '), 2010-2020, <a href="' + site.uri + '" target="_blank">Data Landing Page</a>',
+            popup = site['name'] + ', (' + site.country_code + '), 2010-2020, <a href="' + site.uri + '" target="_blank">Site Landing Page</a>',
             fill_color = 'orange', fill_opacity=0.8, weight=1, color='#fff', radius=8
         ).add_to(short_term_sites)
     long_term_sites = folium.FeatureGroup('sites 2000-2020')
@@ -554,7 +554,7 @@ def map_of_sites(df_shortterm=pd.DataFrame, df_longterm=pd.DataFrame):
         folium.CircleMarker(
             [site.lat, site.lon],
             tooltip = site.id,
-            popup = site['name'] + ', (' + site.country_code + '), 2000-2020, <a href="' + site.uri + '" target="_blank">Data Landing Page</a>',
+            popup = site['name'] + ', (' + site.country_code + '), 2000-2020, <a href="' + site.uri + '" target="_blank">Site Landing Page</a>',
             fill_color = 'magenta', fill_opacity=0.6, weight=1, color='#fff', radius=8
         ).add_to(long_term_sites)
     short_term_sites.add_to(m)
