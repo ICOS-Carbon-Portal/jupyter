@@ -111,6 +111,7 @@ query = '''
 prefix cpmeta: <http://meta.icos-cp.eu/ontologies/cpmeta/>
 prefix prov: <http://www.w3.org/ns/prov#>
 prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
 select ?dobj ?hasNextVersion ?spec ?fileName ?size ?submTime ?timeStart ?timeEnd
 where {
 VALUES ?spec {<http://meta.icos-cp.eu/resources/cpmeta/miscFluxnetArchiveProduct>}
@@ -121,8 +122,7 @@ BIND(EXISTS{[] cpmeta:isNextVersionOf ?dobj} AS ?hasNextVersion)
 ?dobj cpmeta:wasSubmittedBy/prov:endedAtTime ?submTime .
 ?dobj cpmeta:hasStartTime | (cpmeta:wasAcquiredBy / prov:startedAtTime) ?timeStart .
 ?dobj cpmeta:hasEndTime | (cpmeta:wasAcquiredBy / prov:endedAtTime) ?timeEnd .
-FILTER NOT EXISTS {[] cpmeta:isNextVersionOf ?dobj}
-FILTER( '2010-01-01T00:00:00.000Z'^^xsd:dateTime >= ?timeStart ) 
+FILTER( '2010-01-01T00:00:00.000Z'^^xsd:dateTime >= ?timeStart )
 VALUES ?keyword {"Warm Winter 2020"^^xsd:string}
 ?dobj cpmeta:hasKeyword ?keyword
 }
