@@ -57,11 +57,11 @@
       {
         "pid": "",
         "description": "This notebook contains a short introduction of basic principles of coding in Python. It is aimed for people who have no prior knowledge in programming but also for people who wish to brush up their memory in programmng with Python or are already familiar with programming in another programming language and want to become acquainted with Python. The notebook is organized in a series of chapters where the main principles of programming are introduced. There is an emphasis on providing brief descriptions of the coding principles in conjuction with simple and self-explanatory coding examples. People who are new to programming are advised to follow this manual step by step. For people that are already familiar with Python or programming in general, it is possible to use the links to navigate to specific chapters.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/01_introduction/for_loops.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/introduction/QuickstartToPythonENG.png",
         "relative_path": "./introduction/QuickstartToPythonENG.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/introduction",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "Introduction"
@@ -73,11 +73,11 @@
       {
         "pid": "",
         "description": "This Jupyter notebook provides examples on how to access ICOS observations and extract data and metadata information using the ICOS Carbon Portal Python library. Full documentation for the library is available on the <a href='https://icos-carbon-portal.github.io/pylib/' target='_blank'>project page</a>, how to install and wheel on <a href='https://pypi.org/project/icoscp/' target='_blank'>pypi.org</a>, source available on <a href='https://github.com/ICOS-Carbon-Portal/pylib' target='_blank'>GitHub</a>",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/02_pylib_ex/ex1.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/pylib-examples/ex1_data.png",
         "relative_path": "./pylib_examples/ex1_data.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/pylib_examples",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "claudio.donofrio@nateko.lu.se"
         ],
         "categories": [
@@ -87,12 +87,57 @@
       },
       {
         "pid": "",
+        "description": "This Jupyter notebook provides examples on how to access atmospheric ICOS observations and extract data and metadata information using the ICOS Carbon Portal Python library.<br>Full documentation for the library is available on the <a href='https://icos-carbon-portal.github.io/pylib/' target='_blank' style='color: blue;'>project page</a>, how to install and wheel on <a href='https://pypi.org/project/icoscp/' target='_blank' style='color: blue;'>pypi.org</a>, source available on <a href='https://github.com/ICOS-Carbon-Portal/pylib' target='_blank' style='color: blue;'>GitHub</a>.",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/pylib-examples/ex1a_atmo_data.png",
+        "relative_path": "./pylib_examples/ex1a_atmo_data.ipynb",
+        "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/pylib_examples",
+        "contact": [
+          "jupyter-info@icos-ri.eu",
+          "ida.storm@nateko.lu.se"
+        ],
+        "categories": [
+          "Pylib examples"
+        ],
+        "title": "ICOS Carbon Portal Python Library - Access and work with atmospheric data"
+      },
+      {
+        "pid": "",
+        "description": "This Jupyter notebook provides examples on how to access ecosystem ICOS observations and extract data and metadata information using the ICOS Carbon Portal Python library.<br>Full documentation for the library is available on the <a href='https://icos-carbon-portal.github.io/pylib/' target='_blank' style='color: blue;'>project page</a>, how to install and wheel on <a href='https://pypi.org/project/icoscp/' target='_blank' style='color: blue;'>pypi.org</a>, source available on <a href='https://github.com/ICOS-Carbon-Portal/pylib' target='_blank' style='color: blue;'>GitHub</a>.",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/pylib-examples/ex1b_eco_data.png",
+        "relative_path": "./pylib_examples/ex1b_eco_data.ipynb",
+        "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/pylib_examples",
+        "contact": [
+          "jupyter-info@icos-ri.eu",
+          "ida.storm@nateko.lu.se"
+        ],
+        "categories": [
+          "Pylib examples"
+        ],
+        "title": "ICOS Carbon Portal Python Library - Access and work with ecosystem data"
+      },
+      {
+        "pid": "",
+        "description": "This Jupyter notebook provides examples on how to access oceanic ICOS observations and extract data and metadata information using the ICOS Carbon Portal Python library.<br>Full documentation for the library is available on the <a href='https://icos-carbon-portal.github.io/pylib/' target='_blank' style='color: blue;'>project page</a>, how to install and wheel on <a href='https://pypi.org/project/icoscp/' target='_blank' style='color: blue;'>pypi.org</a>, source available on <a href='https://github.com/ICOS-Carbon-Portal/pylib' target='_blank' style='color: blue;'>GitHub</a>.",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/pylib-examples/ex1c_ocean_data.png",
+        "relative_path": "./pylib_examples/ex1c_ocean_data.ipynb",
+        "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/pylib_examples",
+        "contact": [
+          "jupyter-info@icos-ri.eu",
+          "ida.storm@nateko.lu.se"
+        ],
+        "categories": [
+          "Pylib examples"
+        ],
+        "title": "ICOS Carbon Portal Python Library - Access and work with ocean data"
+      },
+      {
+        "pid": "",
         "description": "This Jupyter notebook provides examples on how to access, extract and process data and metadata information for the ICOS stations using the ICOS Carbon Portal Python library. Full documentation for the library is available on the <a href='https://icos-carbon-portal.github.io/pylib/' target='_blank'>project page</a>, how to install and wheel on <a href='https://pypi.org/project/icoscp/' target='_blank'>pypi.org</a>, source available on <a href='https://github.com/ICOS-Carbon-Portal/pylib' target='_blank'>GitHub</a>",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/02_pylib_ex/ex2.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/pylib-examples/ex2_station.png",
         "relative_path": "./pylib_examples/ex2_station.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/pylib_examples",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "claudio.donofrio@nateko.lu.se"
         ],
         "categories": [
@@ -103,11 +148,11 @@
       {
         "pid": "",
         "description": "This Jupyter notebook provides an example on how to combine information from two independent data sets using Python libraries. One data set is loaded from the ICOS Carbon Portal, ocean domain and contains data from a boat traveling from Europe to Brazil. The second data set is accessed using the PANGAEA Python library and contains similar data, collected from another boat travelling from Europe to South America. Full documentation for the ICOS library on the <a href='https://icos-carbon-portal.github.io/pylib/' target='_blank'>project page</a>, how to install and wheel on <a href='https://pypi.org/project/icoscp/' target='_blank'>pypi.org</a>, source available on <a href='https://github.com/ICOS-Carbon-Portal/pylib' target='_blank'>GitHub</a>. The Pangaea library is available on <a href='https://pypi.org/project/pangaeapy/' target='_blank'>pypi.org</a>, source and documentation <a href='https://github.com/pangaea-data-publisher/pangaeapy' target='_blank'>GitHub</a>.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/02_pylib_ex/ex3.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/pylib-examples/ex3_multisource.png",
         "relative_path": "./pylib_examples/ex3_multisource.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/pylib_examples",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "claudio.donofrio@nateko.lu.se"
         ],
         "categories": [
@@ -118,11 +163,11 @@
       {
         "pid": "",
         "description": "This Jupyter notebook provides examples on how to access data and metadata of collections using ICOS Carbon Portal Python library. Full documentation for the ICOS library on the <a href='https://icos-carbon-portal.github.io/pylib/' target='_blank'>project page</a>, how to install and wheel on <a href='https://pypi.org/project/icoscp/' target='_blank'>pypi.org</a>, source available on <a href='https://github.com/ICOS-Carbon-Portal/pylib' target='_blank'>GitHub</a>.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/02_pylib_ex/ex4.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/pylib-examples/ex4_collection.png",
         "relative_path": "./pylib_examples/ex4_collection.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/pylib_examples",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "claudio.donofrio@nateko.lu.se"
         ],
         "categories": [
@@ -133,11 +178,11 @@
       {
         "pid": "",
         "description": "This Jupyter notebook provides examples on how to access data and metadata for ICOS stations and observations with the help of <a href='https://meta.icos-cp.eu/sparqlclient/' target='_blank'>SPARQL queries</a> using ICOS Carbon Portal Python library. Full documentation for the ICOS library on the <a href='https://icos-carbon-portal.github.io/pylib/' target='_blank'>project page</a>, how to install and wheel on <a href='https://pypi.org/project/icoscp/' target='_blank'>pypi.org</a>, source available on <a href='https://github.com/ICOS-Carbon-Portal/pylib' target='_blank'>GitHub</a>.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/02_pylib_ex/ex5.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/pylib-examples/ex5_sparql.png",
         "relative_path": "./pylib_examples/ex5_sparql.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/pylib_examples",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "claudio.donofrio@nateko.lu.se"
         ],
         "categories": [
@@ -148,11 +193,11 @@
       {
         "pid": "",
         "description": "This Jupyter notebook is showcasing how to search for stations (for which <a href='http://stilt-model.org/index.php/Main/HomePage' target='_blank'>STILT</a> model results are available for) using the ICOS Carbon Portal Python library. Full documentation for the ICOS library is available on the <a href='https://icos-carbon-portal.github.io/pylib/' target='_blank'>project page</a>, how to install and wheel on <a href='https://pypi.org/project/icoscp/' target='_blank'>pypi.org</a>, source available on <a href='https://github.com/ICOS-Carbon-Portal/pylib' target='_blank'>GitHub</a>.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/02_pylib_ex/ex6a.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/pylib-examples/ex6a_STILT_find.png",
         "relative_path": "./pylib_examples/ex6a_STILT_find.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/pylib_examples",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "claudio.donofrio@nateko.lu.se"
         ],
         "categories": [
@@ -163,11 +208,11 @@
       {
         "pid": "",
         "description": "This Jupyter notebook presents examples on how to search for <a href='http://stilt-model.org/index.php/Main/HomePage' target='_blank'>STILT</a> stations, load the modelled data, and create some simple visualisations and animations, all using the ICOS Carbon Portal Python library. Full documentation for the ICOS library is available on the <a href='https://icos-carbon-portal.github.io/pylib/' target='_blank'>project page</a>, how to install and wheel on <a href='https://pypi.org/project/icoscp/' target='_blank'>pypi.org</a>, source available on <a href='https://github.com/ICOS-Carbon-Portal/pylib' target='_blank'>GitHub</a>.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/02_pylib_ex/ex6b.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/pylib-examples/ex6b_STILT_footprint_animation.png",
         "relative_path": "./pylib_examples/ex6b_STILT_footprint_animation.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/pylib_examples",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "claudio.donofrio@nateko.lu.se"
         ],
         "categories": [
@@ -178,11 +223,11 @@
       {
         "pid": "",
         "description": "This Jupyter notebook presents examples on how to load <a href='http://stilt-model.org/index.php/Main/HomePage' target='_blank'>STILT</a> timeseries data and footprints using the ICOS Carbon Portal Python library. The notebook also showcases how to make plots using Holoviews and maps using Geoviews. Full documentation on the ICOS library is available through the <a href='https://icos-carbon-portal.github.io/pylib/' target='_blank'>project page</a>, how to install and wheel on <a href='https://pypi.org/project/icoscp/' target='_blank'> pypi.org</a>, source available on <a href='https://github.com/ICOS-Carbon-Portal/pylib' target='_blank'>GitHub</a>.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/02_pylib_ex/ex6c.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/pylib-examples/ex6c_STILT_timeseries.png",
         "relative_path": "./pylib_examples/ex6c_STILT_timeseries.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/pylib_examples",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "claudio.donofrio@nateko.lu.se"
         ],
         "categories": [
@@ -193,29 +238,43 @@
       {
         "pid": "",
         "description": "This Jupyter notebook presents an examples on how to read the European Obspack compilation. Check out <a href='https://www.icos-cp.eu/data-products' target='_blank' style='text-decoration:underline;color:blue'>ICOS Data Products</a>, search for 'Historic Observational Time Series for ICOS and Non-ICOS Stations'. You could for example combine this, with our example for curve fitting, based on the ccgcrv method used by NOAA. Have a look at 'ICOS Jupyter Notebooks / Curve fitting methods for CO2 time series'",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/02_pylib_ex/ex7.png",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/pylib-examples/ex7_ObsPackData.png",
         "relative_path": "./pylib_examples/ex7_ObsPackData.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/pylib_examples",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "claudio.donofrio@nateko.lu.se"
         ],
         "categories": [
           "Pylib examples"
         ],
         "title": "ICOS Carbon Portal Python Library - European Obspack Compilation"
+      },
+      {
+        "pid": "",
+        "description": "This Jupyter notebook demonstrates how to authenticate on the <a href='https://data.icos-cp.eu' target='_blank' style='text-decoration:underline;color:blue'>ICOS</a>, <a href='https://citydata.icos-cp.eu/portal/' target='_blank' style='text-decoration:underline;color:blue'>ICOS Cities</a>, and <a href='https://data.fieldsites.se/portal/' target='_blank' style='text-decoration:underline;color:blue'>SITES</a>, portals, and how to accept the required licenses.",
+        "thumbnail": "",
+        "relative_path": "./pylib_examples/how_to_authenticate.ipynb",
+        "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/pylib_examples",
+        "contact": [
+          "jupyter-info@icos-ri.eu",
+          "ida.storm@nateko.lu.se"
+        ],
+        "categories": [
+          "Pylib examples"
+        ],
+        "title": "ICOS Carbon Portal Python Library - How to Authenticate"
       }
-
     ],
     "ICOS Jupyter notebooks": [
       {
         "pid": "",
         "description": "This notebook allows users to apply NOAA curve fitting method to ObsPack CO2 time series (daily, daily daytime, and daily nighttime). The notebook illustrates the filtering, fitting, and growth rate calculation steps, aiding users in understanding and repeating the curve fitting method.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/03_icos_JNBs/curve-fitting-obspack/curve_fitting_daily.png",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/icos-jupyter-notebooks/curve_fitting_obspack.png",
         "relative_path": "./icos_jupyter_notebooks/curve_fitting_obspack.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/icos_jupyter_notebooks",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "ICOS Jupyter notebooks"
@@ -225,11 +284,11 @@
       {
         "pid": "",
         "description": "This notebook allows users to visualize anomalies in ecosystem variables. Daily averages for a selected year are compared to daily averages for a reference period of either 11 or 21 years. The results are aggregated to either months of the year, or kept as days of the year in which case all data for a selected month is plotted. The data can appear anomalous for different reasons, including anomalous weather, crop rotation, or other land use changes.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/03_icos_JNBs/site_anomaly/anomaly.png",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/icos-jupyter-notebooks/ecosystem_site_anomaly_visualization.png",
         "relative_path": "./icos_jupyter_notebooks/ecosystem_site_anomaly_visualization.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/icos_jupyter_notebooks",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "ICOS Jupyter notebooks"
@@ -239,11 +298,11 @@
       {
         "pid": "",
         "description": "This notebook allows users to visualize and analyse predefined near real time variables from the ICOS EcoSystem network. A selection of variables from different source files, as well a comparison between different research sites is possible. Groups of different plots and stations can be saved for fast access to provide a daily quick overview and sanity check for the PI. ",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/03_icos_JNBs/eco_nrt/econrt.png",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/icos-jupyter-notebooks/icos_eco_nrt_tool.png",
         "relative_path": "./icos_jupyter_notebooks/icos_eco_nrt_tool.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/icos_jupyter_notebooks",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "ICOS Jupyter notebooks"
@@ -253,11 +312,11 @@
       {
         "pid": "",
         "description": "This notebook includes examples of curve fitting methods for time series. For more detailed information regarding the implemented methods visit NOAA. The curve fitting methods are applied over CO2 measurements from ICOS stations as well as a selection of non-ICOS stations. Data from all stations are included in the Drought 2018 Atmospheric Product (part of the Drought 2018 Project) which is stored and can be downloaded from the ICOS Carbon Portal.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/03_icos_JNBs/ccgcrv/curve_fitting_method.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/icos-jupyter-notebooks/ccgcrv.png",
         "relative_path": "./icos_jupyter_notebooks/ccgcrv.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/icos_jupyter_notebooks",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "ICOS Jupyter notebooks"
@@ -267,11 +326,11 @@
       {
         "pid": "",
         "description": "This notebook is dedicated on exploring ICOS atmosphere observations.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/03_icos_JNBs/explore_icos_ao/ap_GAT.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/icos-jupyter-notebooks/explore_icos_atmObs.png",
         "relative_path": "./icos_jupyter_notebooks/explore_icos_atmObs.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/icos_jupyter_notebooks",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "ICOS Jupyter notebooks"
@@ -281,11 +340,11 @@
       {
         "pid": "",
         "description": "This notebook is dedicated on providing interactive visualizations of ICOS atmopsheric observations in combination with <a href=\"http://stilt-model.org/index.php/Main/HomePage\" target=\"_blank\">STILT model</a> results for the same station. The visualizations may be used for the purpose of comparison between modelled and observed measurements. The notebook also includes an interactive table presenting the availability of <a href=\"http://stilt-model.org/index.php/Main/HomePage\" target=\"_blank\">STILT model</a> results per station. The selection of stations and other parameters relevant to each visualization are handled by interactive elements called widgets (i.e. dropdown lists, checkboxes, etc.)",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/03_icos_JNBs/icos_ao_vs_stilt/TOR147_STILT_vs_ICOS.png",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/icos-jupyter-notebooks/icos_atmObs_STILT.png",
         "relative_path": "./icos_jupyter_notebooks/icos_atmObs_STILT.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/icos_jupyter_notebooks",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "ICOS Jupyter notebooks"
@@ -295,11 +354,11 @@
       {
         "pid": "",
         "description": "This notebook is dedicated on producing summary stastics for ICOS atmosphere observations. The notebook also includes advanced interactive visualizations of maps, plots and tables that compare observations and/or statistic results from different ICOS atmosphere stations. The selection of stations and other parameters relevant to each visualization are handled by interactive elements called widgets (i.e. dropdown lists, checkboxes, etc.)",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/03_icos_JNBs/icos_ao_stats/gat_co_co2.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/icos-jupyter-notebooks/icos_atmObs_statistics.png",
         "relative_path": "./icos_jupyter_notebooks/icos_atmObs_statistics.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/icos_jupyter_notebooks",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "ICOS Jupyter notebooks"
@@ -309,11 +368,11 @@
       {
         "pid": "",
         "description": "This notebook contains an interactive table showcasing the availability of ICOS data products per station and domain (i.e. atmosphere, ecosystem and ocean).",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/03_icos_JNBs/icos_avail_table/at_co2_meteo.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/icos-jupyter-notebooks/icos_data_availability_table.png",
         "relative_path": "./icos_jupyter_notebooks/icos_data_availability_table.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/icos_jupyter_notebooks",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "ICOS Jupyter notebooks"
@@ -322,12 +381,12 @@
       },
       {
         "pid": "",
-        "description": "To assist the national networks in evaluating the current and possible atmospheric network configurations, the ICOS Carbon Portal has extended its <a href=\"https://www.icos-cp.eu/data-services/tools/stilt-footprint\" target=\"_blank\">STILT footprint service</a> with a Jupyter notebook based tool. The tool allows the user to test any potential network configuration on its capability to capture the influence of sources and sinks. It does so by exploring the characteristics of combined influence (footprint) areas. The resulting combined footprint of the user\u2019s selection is displayed in three different types of maps including one that simply shows the combined footprint and two maps that are based on the absolute coverage of the footprints (referred to as \u201cfootprint masks\u201d). In a next step, the footprint mask coverage is examined in terms of the extent to which it covers individual countries. The results are summarized in a table.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/03_icos_JNBs/st_network_characterization/GER_station_network.PNG",
+        "description": "To assist the national networks in evaluating the current and possible atmospheric network configurations, the ICOS Carbon Portal has extended its <a href=\"https://www.icos-cp.eu/data-services/tools/stilt-footprint\" target=\"_blank\">STILT footprint service</a> with a Jupyter notebook based tool. The tool allows the user to test any potential network configuration on its capability to capture the influence of sources and sinks. It does so by exploring the characteristics of combined influence (footprint) areas. The resulting combined footprint of the user’s selection is displayed in three different types of maps including one that simply shows the combined footprint and two maps that are based on the absolute coverage of the footprints (referred to as “footprint masks”). In a next step, the footprint mask coverage is examined in terms of the extent to which it covers individual countries. The results are summarized in a table.",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/icos-jupyter-notebooks/network_characterization.png",
         "relative_path": "./icos_jupyter_notebooks/network_characterization.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/icos_jupyter_notebooks",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "ICOS Jupyter notebooks"
@@ -336,12 +395,12 @@
       },
       {
         "pid": "",
-        "description": "This notebook is dedicated to estimating radiocarbon measurements and providing interactive visualizations of relevant maps and plots. More in particular, With the combination of a station\u2019s footprint (<a href='http://stilt-model.org/index.php/Main/HomePage' target='_blank'>STILT</a>) for a given point in time and a spatially and temporally resolved emissions database where emissions are separated by sector <a href='https://doi.org/10.5194/essd-11-959-2019' target='_blank'>(EDGAR v4.3.2)</a> it is possible to estimate what the fossil fuel component at the station could be according to the model. Accounting for the biogenic component through a combination of the footprint with a biogenic model <a href='https://doi.org/10.1029/2006GB002735' target='_blank'>(VPRM)</a> allows for an estimate of the CO2 concentration at the station when combined with the anthropogenic emissions plus a background (model edge) concentration. Given the modelled fossil fuel component and the modelled CO2 concentration, the estimated nuclear contamination, and the (measured) background \u220614C, an estimate can be made of what the \u220614C at a station would be according to the model -estimates. How this can be done is described in <a href='https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2003GL018477' target='_blank'>Levin et al.,2003</a> (equation 3). The nuclear contamination is not accounted for here. \u220614C measurements can hence be compared to model deduced values. Uncertainties in the modelled ratio stem from many different sources: the transport model footprints, the anthropogenic and biogenic emission databases and the nuclear emissions values used to estimate the nuclear contamination.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/03_icos_JNBs/radiocarbon/example_bokeh.PNG",
+        "description": "This notebook is dedicated to estimating radiocarbon measurements and providing interactive visualizations of relevant maps and plots. More in particular, With the combination of a station’s footprint (<a href='http://stilt-model.org/index.php/Main/HomePage' target='_blank'>STILT</a>) for a given point in time and a spatially and temporally resolved emissions database where emissions are separated by sector <a href='https://doi.org/10.5194/essd-11-959-2019' target='_blank'>(EDGAR v4.3.2)</a> it is possible to estimate what the fossil fuel component at the station could be according to the model. Accounting for the biogenic component through a combination of the footprint with a biogenic model <a href='https://doi.org/10.1029/2006GB002735' target='_blank'>(VPRM)</a> allows for an estimate of the CO2 concentration at the station when combined with the anthropogenic emissions plus a background (model edge) concentration. Given the modelled fossil fuel component and the modelled CO2 concentration, the estimated nuclear contamination, and the (measured) background ∆14C, an estimate can be made of what the ∆14C at a station would be according to the model -estimates. How this can be done is described in <a href='https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2003GL018477' target='_blank'>Levin et al.,2003</a> (equation 3). The nuclear contamination is not accounted for here. ∆14C measurements can hence be compared to model deduced values. Uncertainties in the modelled ratio stem from many different sources: the transport model footprints, the anthropogenic and biogenic emission databases and the nuclear emissions values used to estimate the nuclear contamination.",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/icos-jupyter-notebooks/radiocarbon.png",
         "relative_path": "./icos_jupyter_notebooks/radiocarbon.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/icos_jupyter_notebooks",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "ICOS Jupyter notebooks"
@@ -351,11 +410,11 @@
       {
         "pid": "",
         "description": "This notebook makes it possible to generate characterisations of atmospheric stations based on their influence areas. The influence area of a station is determined by the <a href=\"http://stilt-model.org/index.php/Main/HomePage\" target=\"_blank\">transport model STILT</a> and the result is called a footprint. To generate the characterisation visualizations the average footprint for the user-defined date rage is combined with an anthropogenic emissions database, a biogenic flux model and ancillary data layers. Any point in the <a href=\"http://stilt-model.org/index.php/Main/HomePage\" target=\"_blank\">STILT</a> domain with footprints (not necessarily existing stations) will appear in the STILT stations dropdown and can be analyzed.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/03_icos_JNBs/st_characterization/gui.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/icos-jupyter-notebooks/station_characterization.png",
         "relative_path": "./icos_jupyter_notebooks/station_characterization.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/icos_jupyter_notebooks",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "ida.storm@nateko.lu.se"
         ],
         "categories": [
@@ -366,11 +425,11 @@
       {
         "pid": "",
         "description": "Description missing...",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/03_icos_JNBs/avg_fp_viz/gui.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/icos-jupyter-notebooks/visualization_average_footprints.png",
         "relative_path": "./icos_jupyter_notebooks/visualization_average_footprints.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/icos_jupyter_notebooks",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "ida.storm@nateko.lu.se"
         ],
         "categories": [
@@ -383,11 +442,11 @@
       {
         "pid": "",
         "description": "This Jupyter notebook is dedicated on providing examples of how to produce an interactive map with pinpoints. Based on a javascript library, <a href='https://leafletjs.com/' target='_blank'>leaflet</a>, a python interface is available, called <a href='https://python-visualization.github.io/folium/' target='_blank'>folium</a>. We will use this library to setup an interactive map, where you can zoom in and out, add markers, customize the markers and download the maps as a static website (.html).",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/04_proj_JNBs/envrifair_ws/maps/ex1.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/project-jupyter-notebooks/exercise1_map.png",
         "relative_path": "./project_jupyter_notebooks/envrifair_winterschool/map/exercise1_map.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/project_jupyter_notebooks/envrifair_winterschool/map",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "Project Jupyter notebooks",
@@ -399,11 +458,11 @@
       {
         "pid": "",
         "description": "This Jupyter notebook is dedicated on providing examples of how to produce an interactive map with incorporated information. In this demo, we will take all the members' location to plot on a map. Could we please ask you to fill in your details. If you don't feel comfortable giving us this information, you can create a 'fake' one (with sensible values).",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/04_proj_JNBs/envrifair_ws/maps/ex2.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/project-jupyter-notebooks/exercise2_participant.png",
         "relative_path": "./project_jupyter_notebooks/envrifair_winterschool/map/exercise2_participant.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/project_jupyter_notebooks/envrifair_winterschool/map",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "Project Jupyter notebooks",
@@ -415,11 +474,11 @@
       {
         "pid": "",
         "description": "In this Jupyter notebook, we will plot all ICOS Research Stations on an interactive map.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/04_proj_JNBs/envrifair_ws/maps/ex3.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/project-jupyter-notebooks/exercise3_station.png",
         "relative_path": "./project_jupyter_notebooks/envrifair_winterschool/map/exercise3_station.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/project_jupyter_notebooks/envrifair_winterschool/map",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "Project Jupyter notebooks",
@@ -431,11 +490,11 @@
       {
         "pid": "",
         "description": "Based on a javascript library, <a href='https://leafletjs.com/' target='_blank'>leaflet</a>, a python interface is available, called <a href='https://python-visualization.github.io/folium/' target='_blank'>folium</a>. We will use this library to set up an interactive map with different basemaps and plugin-ins like measurement tools or full-screen view. We will also write a function to 'prettify' the html-content in the popup message",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/04_proj_JNBs/envrifair_ws/maps/ex4.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/project-jupyter-notebooks/exercise4_advanced.png",
         "relative_path": "./project_jupyter_notebooks/envrifair_winterschool/map/exercise4_advanced.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/project_jupyter_notebooks/envrifair_winterschool/map",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "Project Jupyter notebooks",
@@ -449,11 +508,11 @@
       {
         "pid": "",
         "description": "This Jupyter notebook is dedicated to accessing ICOS data and metadata for CO2-concentrations measured at ICOS atmosphere stations as well as accessing simulated CO2-concentrations from <a href='http://stilt-model.org/index.php/Main/HomePage' target='_blank'>STILT model</a> outputs (elaborated data product). Data and metadata will be accessed using the icoscp Python library. You will get a chance to compare simulated CO2-concentrations to observed CO2-concentrations and assess how well the simulated values fit the real observations. Throughout the different steps included in this notebook, you will get an impression of how ICOS deals with data provenance and get some ideas on how to utilize metadata information in data analysis processes as well as in data visualizations.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/04_proj_JNBs/envrifair_ws/timeseries/stilt_vs_icos_obs.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/project-jupyter-notebooks/icos_obs_vs_stilt_timeseries.png",
         "relative_path": "./project_jupyter_notebooks/envrifair_winterschool/timeseries/icos_obs_vs_stilt_timeseries.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/project_jupyter_notebooks/envrifair_winterschool/timeseries",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "Project Jupyter notebooks",
@@ -467,11 +526,11 @@
       {
         "pid": "",
         "description": "This Jupyter notebook allows users to analyze the spatial coverage of networks of atmospheric measurement stations based on STILT footprints. Land cover and associated fluxes within the network are considered. The current network of ICOS atmospheric measurement stations (as of 2022-08-01) and an extended network with stations expected to join the network in the coming years can be analyzed directly and there is an option to create new networks based on hypothetical and/or existing stations.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/04_proj_JNBs/network-view-tool/network_view.png",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/project-jupyter-notebooks/network_view.png",
         "relative_path": "./project_jupyter_notebooks/network-view-tool/network_view.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/project_jupyter_notebooks/network-view-tool",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "ida.storm@nateko.lu.se"
         ],
         "categories": [
@@ -484,67 +543,67 @@
     "Project Jupyter notebooks, OTC Data Reduction Workshop": [
       {
         "pid": "",
-        "description": "This notebook contains exercises for the <b>OTC Data Reduction Workshop</b>. The first exercise is dealing with the calibration of the xCO\u2082-data as they are coming from the instrument. The data are from a General Oceanics instrument, but the idea is the same for data from any instrument.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/04_proj_JNBs/otc_drw/ex1.PNG",
+        "description": "This notebook contains exercises for the <b>OTC Data Reduction Workshop</b>. The first exercise is dealing with the calibration of the xCO₂-data as they are coming from the instrument. The data are from a General Oceanics instrument, but the idea is the same for data from any instrument.",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/project-jupyter-notebooks/Data_reduction_part_1_-_Gas_Calibration.png",
         "relative_path": "./project_jupyter_notebooks/OTC%20Data%20Reduction%20Workshop/Data%20reduction%20part%201%20-%20Gas%20Calibration.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/project_jupyter_notebooks/OTC Data Reduction Workshop",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "Steve.Jones@uib.no"
         ],
         "categories": [
           "Project Jupyter notebooks",
           "OTC Data Reduction Workshop"
         ],
-        "title": "pCO\u2082 data reduction part 1 - Gas calibration"
+        "title": "pCO₂ data reduction part 1 - Gas calibration"
       },
       {
         "pid": "",
-        "description": "This notebook contains exercises for the <b>OTC Data Reduction Workshop</b>. The first exercise in <i>pCO\u2082 data reduction part 1 - Gas calibration</i> was dealing with the calibration of the xCO\u2082-data as they were coming from the instrument. The data were produced by a <i>General Oceanics</i> instrument, but the idea would be the same for data from any instrument. In this notebook, we will use the same data set as in <i>pCO\u2082 data reduction part 1 - Gas calibration</i> but with all recorded variables. ",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/04_proj_JNBs/otc_drw/ex2.PNG",
+        "description": "This notebook contains exercises for the <b>OTC Data Reduction Workshop</b>. The first exercise in <i>pCO₂ data reduction part 1 - Gas calibration</i> was dealing with the calibration of the xCO₂-data as they were coming from the instrument. The data were produced by a <i>General Oceanics</i> instrument, but the idea would be the same for data from any instrument. In this notebook, we will use the same data set as in <i>pCO₂ data reduction part 1 - Gas calibration</i> but with all recorded variables. ",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/project-jupyter-notebooks/Data_Reduction_part_2_-_UWpCO2.png",
         "relative_path": "./project_jupyter_notebooks/OTC%20Data%20Reduction%20Workshop/Data%20Reduction%20part%202%20-%20UWpCO2.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/project_jupyter_notebooks/OTC Data Reduction Workshop",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "Steve.Jones@uib.no"
         ],
         "categories": [
           "Project Jupyter notebooks",
           "OTC Data Reduction Workshop"
         ],
-        "title": "pCO\u2082 Data Reduction part 2 - UWpCO2"
+        "title": "pCO₂ Data Reduction part 2 - UWpCO2"
       },
       {
         "pid": "",
         "description": "This notebook contains exercises for the <b>OTC Data Reduction Workshop</b> using a data set from a real sensor.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/04_proj_JNBs/otc_drw/ex3.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/project-jupyter-notebooks/Data_Reduction_part_3_-__pCO2_sensor.png",
         "relative_path": "./project_jupyter_notebooks/OTC%20Data%20Reduction%20Workshop/Data%20Reduction%20part%203%20-%20%20pCO2%20sensor.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/project_jupyter_notebooks/OTC Data Reduction Workshop",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "Steve.Jones@uib.no"
         ],
         "categories": [
           "Project Jupyter notebooks",
           "OTC Data Reduction Workshop"
         ],
-        "title": "pCO\u2082 Data Reduction part 3 - sensor data"
+        "title": "pCO₂ Data Reduction part 3 - sensor data"
       },
       {
         "pid": "",
-        "description": "This notebook contains exercises for the <b>OTC Data Reduction Workshop</b>. The first exercise in <i>pCO\u2082 data reduction part 1 - Gas calibration</i> was dealing with the calibration of the xCO\u2082-data as they were coming from the instrument. The data were produced by a <i>General Oceanics</i> instrument, but the idea would be the same for data from any instrument. In this notebook, we will use the same data set as in <i>pCO\u2082 data reduction part 1 - Gas calibration</i> but with all recorded variables.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/04_proj_JNBs/otc_drw/ex4.PNG",
+        "description": "This notebook contains exercises for the <b>OTC Data Reduction Workshop</b>. The first exercise in <i>pCO₂ data reduction part 1 - Gas calibration</i> was dealing with the calibration of the xCO₂-data as they were coming from the instrument. The data were produced by a <i>General Oceanics</i> instrument, but the idea would be the same for data from any instrument. In this notebook, we will use the same data set as in <i>pCO₂ data reduction part 1 - Gas calibration</i> but with all recorded variables.",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/project-jupyter-notebooks/Data_Reduction_part_4_-_UWpCO2_cruise.png",
         "relative_path": "./project_jupyter_notebooks/OTC%20Data%20Reduction%20Workshop/Data%20Reduction%20part%204%20-%20UWpCO2%20cruise.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/project_jupyter_notebooks/OTC Data Reduction Workshop",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "Steve.Jones@uib.no"
         ],
         "categories": [
           "Project Jupyter notebooks",
           "OTC Data Reduction Workshop"
         ],
-        "title": "pCO\u2082 Data Reduction part 4 - UW pCO\u2082 cruise"
+        "title": "pCO₂ Data Reduction part 4 - UW pCO₂ cruise"
       },
       {
         "pid": "",
@@ -553,7 +612,7 @@
         "relative_path": "./project_jupyter_notebooks/OTC%20Data%20Reduction%20Workshop/modules/data_reduction_modules.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/project_jupyter_notebooks/OTC Data Reduction Workshop/modules",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "Steve.Jones@uib.no"
         ],
         "categories": [
@@ -567,11 +626,11 @@
       {
         "pid": "",
         "description": "This Jupyter notebook supports the selection of an appropriate CO-offset threshold to identify events with potentially high fossil fuel CO2 contribution based on:<br><br>i. <a href='https://www.icos-cp.eu/data-products' target='_blank'>ICOS measurement time series</a> (ICOS release and NRT) for all ICOS atmospheric stations and <br>ii. <a href='https://www.icos-cp.eu/data-services/tools/stilt-footprint' target='_blank'>STILT footprints</a> and concentration time series (for selected stations only)",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/04_proj_JNBs/ringo_t1_3/fossilfuel_gui.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/project-jupyter-notebooks/ICOS_flasksampling_fossilfuel.png",
         "relative_path": "./project_jupyter_notebooks/RINGO_T1.3/ICOS_flasksampling_fossilfuel.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/project_jupyter_notebooks/RINGO_T1.3",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "ute.karstens@nateko.lu.se"
         ],
         "categories": [
@@ -583,11 +642,11 @@
       {
         "pid": "",
         "description": "This Jupyter notebook provides analyses of <a href='http://stilt-model.org/index.php/Main/HomePage' target='_blank'>STILT model</a> results and <a href='https://www.icos-cp.eu/data-products' target='_blank'>ICOS measurement time series</a> to develop and test a dedicated strategy for flask sampling with an automated sampler.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/04_proj_JNBs/ringo_t1_3/flasksampling_v5_gui.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/project-jupyter-notebooks/RINGO_T1.png",
         "relative_path": "./project_jupyter_notebooks/RINGO_T1.3/RINGO_T1.3_flasksampling_v5.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/project_jupyter_notebooks/RINGO_T1.3",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "ute.karstens@nateko.lu.se"
         ],
         "categories": [
@@ -601,11 +660,11 @@
       {
         "pid": "",
         "description": "This educational Jupyter notebook is dedicated to explaining the carbon cycle and focuses on topics regarding daily and yearly fluctuations in the concentration and uptake of carbon dioxide. It contains definitions, short descriptions, figures and animations that describe the following terms: <b>carbon dioxide</b>, <b>carbon cycle</b>, <b>carbon sinks</b>, <b>carbon sources</b>, <b>photosynthesis</b> and <b>Gross Primary Production</b> (GPP). You will be able to test your knowledge on carbon by taking the <i>Carbon Challenge Quiz</i>. In order to better comprehend the carbon cycle with real-life examples, the notebook also includes exercises using ICOS data from Hyltemossa research station in Sweden.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img//05_education/general/01_ccd/carbon_cycle_eng.png",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/education/carbon_cycle_drought.png",
         "relative_path": "./education/General/carbon_cycle_drought.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/education/General",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "Education",
@@ -616,11 +675,11 @@
       {
         "pid": "",
         "description": "This Jupyter Notebook is dedicated to explaining the carbon cycle and focuses on topics regarding daily and yearly fluctuations in the concentration of carbon dioxide. It contains definitions, short descriptions, figures and animations that describe the following terms: <b>carbon dioxide</b>, <b>carbon cycle</b>, <b>carbon sinks</b> and <b>carbon sources</b>. You will be able to test your knowledge on carbon by taking the <i>Carbon Challenge Quiz</i>. In order to better comprehend the carbon cycle, the notebook also includes exercises using ICOS data from Hyltemossa station in Sweden. The exercises are based on topics related to the uptake and release of carbon dioxide amongst different parts of an ecosystem.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img//05_education/general/02_cc_htm/htm_station_photo_mashup.png",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/education/carboncycle_htm.png",
         "relative_path": "./education/General/carboncycle_htm.ipynb#Carbon-Cycle",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/education/General",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "Education",
@@ -631,11 +690,11 @@
       {
         "pid": "",
         "description": "This Jupyter Notebook is dedicated to explaining the carbon cycle and focuses on topics regarding daily and yearly fluctuations in the concentration of carbon dioxide. It contains definitions, short descriptions, figures and animations that describe the following terms: <b>carbon dioxide</b>, <b>carbon cycle</b>, <b>carbon sinks</b> and <b>carbon sources</b>. You will be able to test your knowledge on carbon by taking the <i>Carbon Challenge Quiz</i>. In order to better comprehend the carbon cycle, the notebook also includes exercises using ICOS data from Svartberget research station in Sweden. The exercises are based on topics related to the uptake and release of carbon dioxide amongst different parts of an ecosystem.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img//05_education/general/03_cc_svb/svb_mashup.png",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/education/carboncycle_svb.png",
         "relative_path": "./education/General/carboncycle_svb.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/education/General",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "Education",
@@ -648,11 +707,11 @@
       {
         "pid": "",
         "description": "This notebook is dedicated to using ICOS Ecosystem Data from Hyltemossa Research Station in Southern Sweden, to study how the drought during the summer of 2018 affected the vegetation and the carbon balance in the surrounding area. The temporal resolution of the data extends from January 1st 2015 to December 31st 2018. Another objective of this notebook is to introduce basic principles of Python Programming.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/05_education/msc_bsc/drought2018/bokeh_plot_explained.png",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/education/htm_icos_eco_data_drought_2018_anonymous_v2.png",
         "relative_path": "./education/MSc_BSc/drought_2018/htm_icos_eco_data_drought_2018_anonymous_v2.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/education/MSc_BSc/drought_2018",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "Education",
@@ -664,11 +723,11 @@
       {
         "pid": "",
         "description": "This notebook is dedicated to using ICOS Ecosystem Data from Hyltemossa Research Station in Southern Sweden, to study how the drought during the summer of 2018 affected the vegetation and the carbon balance in the surrounding area. The temporal resolution of the data extends from January 1st 2015 to December 31st 2018. Another objective of this notebook is to introduce basic principles of Python Programming.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/05_education/msc_bsc/drought2018/bokeh_plot_widgets.png",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/education/htm_icos_eco_data_drought_2018_anonymous_v2_all_code_visible.png",
         "relative_path": "./education/MSc_BSc/drought_2018/htm_icos_eco_data_drought_2018_anonymous_v2_all_code_visible.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/education/MSc_BSc/drought_2018",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "Education",
@@ -681,12 +740,12 @@
     "Education, MSc_BSc, Soil exercise NGEN16": [
       {
         "pid": "",
-        "description": "This is a test version of a Jupyter notebook to present some principles of diffusion of \ud835\udc36\ud835\udc422 in the soil. The exercise also introduces Jupyter Notebook as an working environment. This notebook combines (explaining) text with coding cells that contain the simulation model.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/05_education/msc_bsc/soil/co2_surface_flux.PNG",
+        "description": "This is a test version of a Jupyter notebook to present some principles of diffusion of 𝐶𝑂2 in the soil. The exercise also introduces Jupyter Notebook as an working environment. This notebook combines (explaining) text with coding cells that contain the simulation model.",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/education/TestSoilT.png",
         "relative_path": "./education/MSc_BSc/soil_exercise_ngen16/TestSoilT.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/education/MSc_BSc/drought_2018",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "Education",
@@ -700,11 +759,11 @@
       {
         "pid": "",
         "description": "In this exercise you will learn how to read data from csv-files to Pandas DataFrames (i.e. two-dimensional arrays) using Python. You will also learn how to process data in your Pandas DataFrame and create static plots with Matplotlib. You will then be able to use the these tools to statisitcally compare measurements from different stations in northern Europe. Follow the link to get a quick overview over how NPP, GPP and Respiration are defined and related.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/05_education/phd/ucf/ex1/plot2stations.png",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/education/exercise1.png",
         "relative_path": "./education/PhD/upscaling_carbon_fluxes/notebooks/exercise1.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/education/PhD/upscaling_carbon_fluxes/notebooks",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "Maj-Lena.Linderson@nateko.lu.se"
         ],
         "categories": [
@@ -717,11 +776,11 @@
       {
         "pid": "",
         "description": "In this exercise you will analyse carbon flux estimates from different types of models and compare them with the observed fluxes in the FLUXNET datasetYou will complete tasks based on: <br><br>i. Vegetation model results from an LPJ-GUESS run for the FLUXNET stations, <br>ii. Vegetation model results from an LPJ-GUESS run on a grid for Europe, <br>iii. Atmospheric inversion results for Europe from the LUMIA inversion system.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/05_education/phd/ucf/ex2/htm_nee.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/education/exercise2.png",
         "relative_path": "./education/PhD/upscaling_carbon_fluxes/notebooks/exercise2.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/education/PhD/upscaling_carbon_fluxes/notebooks",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "ute.karstens@nateko.lu.se",
           "marko.scholze@nateko.lu.se",
           "paul.miller@nateko.lu.se",
@@ -737,11 +796,11 @@
       {
         "pid": "",
         "description": "This exercise package is focusing on how to use remote sensing (RS) observations from satellite for upscaling eddy covariance measurements, based on the light use efficiency (LUE) model GPP = PAR * fAPAR * LUE. PAR is the photosynthetically active radiation, fAPAR is the fractional absorbed PAR by vegetation, LUE is the efficiency of vegetation to convert the light energy into biomaterials. The aim of the exercise is to provide an insight into how remote sensing can be used to upscale GPP and to stimulate a discussion on strengths and weaknesses of this approach.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/05_education/phd/ucf/ex3/gpp_par_fapar_prod.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/education/exercise3.png",
         "relative_path": "./education/PhD/upscaling_carbon_fluxes/notebooks/exercise3.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/education/PhD/upscaling_carbon_fluxes/notebooks",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "lars.eklundh@nateko.lu.se",
           "Maj-Lena.Linderson@nateko.lu.se"
         ],
@@ -755,11 +814,11 @@
       {
         "pid": "",
         "description": "This exercise package is focusing on how to use country masks on modelling results (i.e. vegetation modelling, inverse modelling) to estimate national budgets. You will use modelling results with different spatial resolutions together with country masks of different resolution and/or country coverage (i.e. incl. Exclusive Economic Zones - EEZ or not incl. EEZ).",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/05_education/phd/ucf/ex4/edgar_ff.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/education/exercise4.png",
         "relative_path": "./education/PhD/upscaling_carbon_fluxes/notebooks/exercise4.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/education/PhD/upscaling_carbon_fluxes/notebooks",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "lars.harrie@nateko.lu.se",
           "Maj-Lena.Linderson@nateko.lu.se"
         ],
@@ -773,11 +832,11 @@
       {
         "pid": "",
         "description": "This notebook is dedicated to using ICOS Ecosystem Data from Hyltemossa Research Station in Southern Sweden, to study how the drought during the summer of 2018 affected the vegetation and the carbon balance in the surrounding area. The temporal resolution of the data extends from January 1st 2015 to December 31st 2018. Another objective of this notebook is to introduce basic principles of Python Programming.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/05_education/phd/ucf/drought2018/htm_drought2018.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/education/htm_eco_drought_2018.png",
         "relative_path": "./education/PhD/upscaling_carbon_fluxes/notebooks/htm_eco_drought_2018.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/education/PhD/upscaling_carbon_fluxes/notebooks",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "Education",
@@ -789,11 +848,11 @@
       {
         "pid": "",
         "description": "This is an ancillary notebook aimed for letting students explore the registered measurements from the ecosystem stations. The purpose of this notebook is for students to get an idea/overview of the value-range of the measurements registered at a certain station.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/05_education/phd/ucf/inspect_fluxnet/plot.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/education/inspect_fluxnet_files.png",
         "relative_path": "./education/PhD/upscaling_carbon_fluxes/notebooks/inspect_fluxnet_files.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/education/PhD/upscaling_carbon_fluxes/notebooks",
         "contact": [
-          "jupyter-info@icos-cp.eu",
+          "jupyter-info@icos-ri.eu",
           "Maj-Lena.Linderson@nateko.lu.se"
         ],
         "categories": [
@@ -806,11 +865,11 @@
       {
         "pid": "",
         "description": "This is an ancillary notebook aimed for letting students explore the modelled values produced by <a href=\"https://doi.org/10.1046/j.1466-822X.2001.t01-1-00256.x\" target=\"_blank\">LPJ-GUESS</a> and corresponding to the same ecosystem stations real measurements are available for. The purpose of this notebook is for students to get an idea/overview of the value-range of the modelled values corresponding to a certain station.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/05_education/phd/ucf/inspect_lpjguess/plot.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/education/inspect_lpjguess.png",
         "relative_path": "./education/PhD/upscaling_carbon_fluxes/notebooks/inspect_lpjguess.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/education/PhD/upscaling_carbon_fluxes/notebooks",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "Education",
@@ -822,11 +881,11 @@
       {
         "pid": "",
         "description": "This is an ancillary notebook aimed for providing students with an example of what the Station Python class includes, how it is structured, and how they can use it to extract the information they are interested in.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/05_education/phd/ucf/station_ex/station_class.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/education/Station_example.png",
         "relative_path": "./education/PhD/upscaling_carbon_fluxes/notebooks/Station_example.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/education/PhD/upscaling_carbon_fluxes/notebooks",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "Education",
@@ -838,11 +897,11 @@
       {
         "pid": "",
         "description": "This is an ancillary notebook including all Python functions that were developed to produce all the content of the exercise notebooks. Students are presented with short descriptions of what the functions do so that they can use them if they so wish. They are not meant to necessarily understand the commands step by step but rather what is the concept of each function and how they can use it to produce results or plots.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/05_education/phd/ucf/tools/tools_sh.PNG",
+        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/education/tools.png",
         "relative_path": "./education/PhD/upscaling_carbon_fluxes/notebooks/tools.ipynb",
         "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/education/PhD/upscaling_carbon_fluxes/notebooks",
         "contact": [
-          "jupyter-info@icos-cp.eu"
+          "jupyter-info@icos-ri.eu"
         ],
         "categories": [
           "Education",

@@ -75,6 +75,7 @@ COPY overrides.json /opt/conda/share/jupyter/lab/settings/.
 # animation using the ICOS Carbon Portal logo.
 RUN pip install git+https://github.com/ZogopZ/icos-splash.git
 
+
 # ---
 # Keep this in a separate line. It's the only library that changes
 # frequently and the new docker image will build faster.
