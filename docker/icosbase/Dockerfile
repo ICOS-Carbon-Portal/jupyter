@@ -74,6 +74,10 @@ COPY overrides.json /opt/conda/share/jupyter/lab/settings/.
 # Install jupyter-lab extension icos-splash, to modify the splash
 # animation using the ICOS Carbon Portal logo.
 RUN pip install git+https://github.com/ZogopZ/icos-splash.git
+# Since icos-splash is just a repo, we retrieve a json objects that
+# describes the "trunk" branch (SHA of the branch among other things),
+# to force docker to re-build this step.
+ADD https://api.github.com/repos/ZogopZ/icos-splash/git/refs/heads/trunk cache-bust
 
 
 # ---
