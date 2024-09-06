@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Dec  7 08:38:51 2020
+Created on Mon Dec 7 08:38:51 2020
 
 @author: Claudio and Ida 
 """
@@ -8,6 +8,8 @@ Created on Mon Dec  7 08:38:51 2020
 from ipywidgets import Dropdown, SelectMultiple, HBox, VBox, Button, Output, RadioButtons,IntProgress,IntSlider, GridspecLayout, Text, BoundedFloatText, FileUpload, Checkbox, BoundedIntText
 from IPython.core.display import display, HTML 
 from icoscp.station import station as cpstation
+from icoscp_stilt import stilt
+from icoscp_stilt import stiltstation
 import radiocarbon_functions
 import radiocarbon_object
 import os
@@ -32,12 +34,9 @@ style_scroll = """
         }
     </style>
     """
-
-from icoscp_stilt import stilt
+stiltstations= stiltstation.find()
 list_all = sorted([(f'{item.countryCode}: {item.name} ({item.id})',item.id) for item in stilt.list_stations()])
 list_all_icos = sorted([(f'{item.countryCode}: {item.name} ({item.id})',item.id) for item in stilt.list_stations() if item.icosId != None])
-
-#---------------------------------------------------------
 
 # read or set the parameters
 
@@ -321,58 +320,54 @@ def update_func(button_c):
 
     #possible to access in the notebook with the GUI using "global". 
     global radiocarbonObject
-    
-
 
     with output_per_station:
 
         radiocarbonObject=radiocarbon_object.RadiocarbonObject(settings) 
-
-
-        if radiocarbonObject.fp is None:
+        
+        if radiocarbonObject.dfDelta14CStation is None:
 
             with header_no_footprints:
                 display(HTML('<p style="font-size:16px">No footprints for selected date range.</p>'))
                 f.value = 6
+                return
 
-        else:
+        radiocarbon_functions.display_info_html_table(radiocarbonObject, meas_data=False)
 
-            radiocarbon_functions.display_info_html_table(radiocarbonObject, meas_data=False)
+        updateProgress(f, 'nuclear contamination')
 
-            updateProgress(f, 'nuclear contamination')
+        radiocarbon_functions.plot_radiocarbon_bokhe(radiocarbonObject)
 
-            radiocarbon_functions.plot_radiocarbon_bokhe(radiocarbonObject)
+        if radiocarbonObject.settings['facilityInclusion']:
 
-            if radiocarbonObject.settings['facilityInclusion']:
+            #radiocarbonObject updated with dataframe "dfFacilitiesOverThreshold".
+            #contains name of facilities contamining over "threshold", latitude of facility, longitude of facility
+            #and the average contamination from it for the user specified parameters ("dateRange" and "timeOfDay" etc)
+            updateProgress(f, 'nuclear by facility')
+            radiocarbonObject = radiocarbon_functions.plot_nuclear_contamination_by_facility_bokhe(radiocarbonObject)
 
-                #radiocarbonObject updated with dataframe "dfFacilitiesOverThreshold".
-                #contains name of facilities contamining over "threshold", latitude of facility, longitude of facility
-                #and the average contamination from it for the user specified parameters ("dateRange" and "timeOfDay" etc)
-                updateProgress(f, 'nuclear by facility')
-                radiocarbonObject = radiocarbon_functions.plot_nuclear_contamination_by_facility_bokhe(radiocarbonObject)
+            #if there are facilities with average contribution over the user-defined threshold    
+            if radiocarbonObject.dfFacilitiesOverThreshold is not None:
 
-                #if there are facilities with average contribution over the user-defined threshold    
-                if radiocarbonObject.dfFacilitiesOverThreshold is not None:
-
-                    updateProgress(f, 'nuclear by facility map')
-                    radiocarbon_functions.nuclear_contamination_by_facility_map(radiocarbonObject)
-                else:
-                    display(HTML('<p style="font-size:15px;">No nuclear facilities contributing > ' + str(radiocarbonObject.settings['threshold']) +' permil</p>'))
-
-
-            #move this to radiocarbon_object.py
-            if radiocarbonObject.settings['downloadOption'] == 'yes':
-                now = datetime.now()
-                radiocarbonObject.settings['date/time generated'] =  now.strftime("%Y%m%d_%H%M%S_")
-                
-                output = os.path.join(os.path.expanduser('~'), 'output/radiocarbon_model_result', radiocarbonObject.settings['date/time generated']+radiocarbonObject.stationId) 
-                if not os.path.exists(output):
-                    os.makedirs(output)
-                
-                radiocarbonObject.settings['output_folder'] = output
+                updateProgress(f, 'nuclear by facility map')
+                radiocarbon_functions.nuclear_contamination_by_facility_map(radiocarbonObject)
+            else:
+                display(HTML('<p style="font-size:15px;">No nuclear facilities contributing > ' + str(radiocarbonObject.settings['threshold']) +' permil</p>'))
 
 
-                radiocarbon_functions.save_data(radiocarbonObject)
+        #move this to radiocarbon_object.py
+        if radiocarbonObject.settings['downloadOption'] == 'yes':
+            now = datetime.now()
+            radiocarbonObject.settings['date/time generated'] =  now.strftime("%Y%m%d_%H%M%S_")
+
+            output = os.path.join(os.path.expanduser('~'), 'output/radiocarbon_model_result', radiocarbonObject.settings['date/time generated']+radiocarbonObject.stationId) 
+            if not os.path.exists(output):
+                os.makedirs(output)
+
+            radiocarbonObject.settings['output_folder'] = output
+
+
+            radiocarbon_functions.save_data(radiocarbonObject)
 
     updateProgress(f, 'finished')
     
@@ -483,7 +478,7 @@ with header_resample:
     display(HTML('<p style="font-size:15px;font-weight:bold;"><br>Number of days to resample:</p><p style="font-size:14px;">0 means that the values will be displayed for the individual footprints (0:00, 3:00, 6:00, 9:00, 12:00, 15:00, 18:00, and 21:00 UTC). <br>Any other number than 0 specifies the number of days over which the results will be averaged. <br>If the box "Monthly" is checked the results will be averaged on the monthly timescale. It will disable the option to specify the number of days to resample.<br></p>'))
     
 resample = BoundedIntText(
-    value=7,
+    value=0,
     min=0,
     step=1,
     description='Days:',

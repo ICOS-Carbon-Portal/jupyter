@@ -52,15 +52,6 @@ def overview_map(selected_year):
     df['size'] = df[selected_year] / max_size_val
     df['size'] = df['size'].apply(lambda x: max(min_size, x * size_scale) if x <= 1 else size_scale)
 
-    """
-    # Define size scaling
-    max_size_val = 6000
-    size_scale = 70  # Adjust for folium (smaller scale compared to Plotly)
-
-    # Calculate sizes for the markers
-    df['size'] = df[selected_year] / max_size_val
-    df['size'] = df['size'].apply(lambda x: 1 if x > 1 else x) * size_scale
-    """
     # Determine color based on reactor type
     def determine_color(facility_type):
         if "/" in facility_type:
@@ -95,7 +86,7 @@ def overview_map(selected_year):
     for i, row in atmo_class1.iterrows():
         folium.Marker(
             location=(row['lat'], row['lon']),
-            icon=folium.Icon(color='blue', icon='cloud', prefix='fa'),#<i class="fa-solid fa-star"></i>
+            icon=folium.Icon(color='blue', icon='cloud'),#prefix='fa'
             popup=f'<a href="{row["uri"]}" target="_blank">{row["name"]}</a>', max_width=300
         ).add_to(map)
         
