@@ -749,39 +749,42 @@ def get_nuclear_contamination(radiocarbonObject, STILT_co2_and_background):
             
         
         try:
-
-            # access only one footprint if use the same start- and end date. 
-            # use isel (index select) to get the array of that first (and only) footprint.
-            fp = st.get_fp(date, date).isel(time=0)
-
-            # Vectorized calculation for the entire grid at once
+            
             modelled_concentration = modelled_concentration_series.loc[date]
-            nuclear_contribution_grid = (((fp_bq_s_m2 * fp.foot.values) / 
-                                          (modelled_concentration * Mc * Aabs))) * 1000#.values
+            
+            if not np.isnan(modelled_concentration):
+            
+                # access only one footprint if use the same start- and end date. 
+                # use isel (index select) to get the array of that first (and only) footprint.
+                fp = st.get_fp(date, date).isel(time=0)
 
-            # Sum the contributions for this date and store in the array
-            nuclear_contributions[i] = nuclear_contribution_grid.sum()
+                # Vectorized calculation for the entire grid at once
+                nuclear_contribution_grid = (((fp_bq_s_m2 * fp.foot.values) / 
+                                              (modelled_concentration * Mc * Aabs))) * 1000#.values
 
-            # Extract contributions for each facility
-            if radiocarbonObject.settings['facilityInclusion']:
+                # Sum the contributions for this date and store in the array
+                nuclear_contributions[i] = nuclear_contribution_grid.sum()
 
-                for facility, lat_idx, lon_idx in facility_info:
-                    # Get the value for this facility's grid cell on this date
-                    value = nuclear_contribution_grid[int(lat_idx), int(lon_idx)]
-
-                    # Add the value to the DataFrame
-                    if facility not in df_nuclear_facilities.columns:
-                        df_nuclear_facilities[facility] = np.nan  # Initialize column with NaN
-
-                    df_nuclear_facilities.at[i, facility] = value
-                    
-            else:
-                
+                # Extract contributions for each facility
                 if radiocarbonObject.settings['facilityInclusion']:
-                        
+
                     for facility, lat_idx, lon_idx in facility_info:
-                        
+                        # Get the value for this facility's grid cell on this date
+                        value = nuclear_contribution_grid[int(lat_idx), int(lon_idx)]
+
+                        # Add the value to the DataFrame
+                        if facility not in df_nuclear_facilities.columns:
+                            df_nuclear_facilities[facility] = np.nan  # Initialize column with NaN
+
                         df_nuclear_facilities.at[i, facility] = value
+
+                else:
+
+                    if radiocarbonObject.settings['facilityInclusion']:
+
+                        for facility, lat_idx, lon_idx in facility_info:
+
+                            df_nuclear_facilities.at[i, facility] = value
                         
         except:
             # df_nuclear_facilites and nuclear_totals already pre-filled with NaN values. If no footprint is available, it will stay that way. 
@@ -883,14 +886,9 @@ def delta_radiocarbon_dataframes(radiocarbonObject):
     # FOSSIL DELTA 14C here already - cannot calculate without knowing the nuclear though? 
     STILT_co2_and_background['delta_14c_fossil'] =STILT_co2_and_background['delta_14c_not_nuclear_corrected'] - STILT_co2_and_background['delta_14C_background']
 
-    ##################################################
-    
-    # calculate the nuclear contamination
-    #stilt_footprints = get_stilt_footprints(radiocarbonObject)
-    
     #df_nuclear_facilities empty in case of 
     df_nuclear_total, df_nuclear_facilities = get_nuclear_contamination(radiocarbonObject, STILT_co2_and_background)
-    
+
     # Ensure the 'date' column in df_nuclear_total is in datetime format
     df_nuclear_total['date'] = pd.to_datetime(df_nuclear_total['date'])
 
@@ -1309,7 +1307,7 @@ def display_info_html_table(radiocarbonObject, meas_data=False, cp_private=False
             string_start_end_date =  '<br><b>Date range measurements</b>: ' + str(start_date_start.year) + '-' + str(start_date_start.month) + '-' + str(start_date_start.day) + ' to ' + str(end_date_end.year) + '-' + str(end_date_end.month) + '-' + str(end_date_end.day)  + '<br>If the date range in the graph is different, "Pick start date" and "Pick end date" is the restricting factor or footprints are missing. Compute footprints <a href="https://stilt.icos-cp.eu/worker/" target="_blank">here</a>.'
           
 
-    display(HTML('<p style="font-size:15px;"><b>Information relevant for analysis (also included in csv-file if chosen to download)</b><br><br> '\
+    display(HTML('<p style="font-size:15px;"><b>Information relevant for analysis (also included in the README-file if the data is downloaded)</b><br><br> '\
     'Yearly average radiocarbon emissions data from <a href="https://europa.eu/radd/" target="_blank">RADD</a> for countries in the European Union are complemented with reports for UK and Swiss facilities. For Ukraine and Russia, the estimates are based on energy production statistics from the IAEA. We used the same approach as Zazzeri et al. 2018, where emission factors for the release of 14C for different reactor types are listed. Furthermore, for all facilities with pressurized water reactors, an estimated 28% of the 14C is released as CO2 (Zazzeri et al., 2018).<br><br>' + \
     '<b>STILT transport model used to generate footprints:</b><br><ul><li>10 days backward simulation</li><li>1/8° longitude x 1/12° latitude resolution</li><li>Meteorological data from ECMWF: 3 hourly operational analysis/forecasts on 0.25 x 0.25 degree</li></ul>' +\
     '<b>STILT footprints code:</b> ' + stilt_station + '<br><b>STILT altitude above ground:</b> ' + str(stilt_station_alt) + 'm<br>' + \
