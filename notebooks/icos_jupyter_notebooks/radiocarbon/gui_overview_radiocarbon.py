@@ -44,9 +44,9 @@ def overview_map(selected_year):
     }
     
     # Define size scaling
-    max_size_val = 6000
-    size_scale = 70  # Adjust for folium (smaller scale compared to Plotly)
-    min_size = 3     # Minimum size for the smallest point
+    max_size_val = 5000
+    size_scale = 40  # Adjust for folium (smaller scale compared to Plotly)
+    min_size = 5     # Minimum size for the smallest point
 
     # Calculate sizes for the markers
     df['size'] = df[selected_year] / max_size_val
@@ -91,7 +91,7 @@ def overview_map(selected_year):
         ).add_to(map)
         
         # Adding the bubble size legend
-        bubble_lat = [43, 47, 50]  # Adjust latitudes for each bubble
+        bubble_lat = [43, 46, 48]  # Adjust latitudes for each bubble
         bubble_lon = -12
         bubble_lons = [bubble_lon, bubble_lon, bubble_lon]  # Same longitude for the legend
         bubble_sizes = [size_scale, size_scale/2, size_scale/10]
