@@ -153,7 +153,7 @@ def update_func(button_c):
 
         if not radiocarbonObject.df_for_export.empty:
 
-            radiocarbon_functions.plot_radiocarbon_bokhe(radiocarbonObject, include_meas=True)
+            radiocarbon_functions.plot_radiocarbon_bokhe_model_meas(radiocarbonObject)
 
             if radiocarbonObject.settings['downloadOption'] == 'yes':
 
@@ -168,7 +168,7 @@ def update_func(button_c):
                 radiocarbonObject.settings['output_folder'] = output
 
                 #possibly add format also (input to function save_model)
-                radiocarbon_functions.save_data_cp(radiocarbonObject)
+                radiocarbon_functions.save_data(radiocarbonObject, meas_cp=True)
 
         
         else:

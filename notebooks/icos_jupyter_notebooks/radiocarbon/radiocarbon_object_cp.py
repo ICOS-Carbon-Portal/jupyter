@@ -32,7 +32,6 @@ class RadiocarbonObjectMeasCp():
         self.country = None             # string with the station's country name
         self.stationClass = None        # string with station class (1 or 2 or none)
         self.siteType = None            # string with station type (mountain etc. or none) 
-        
         self.measuredData = None
 
         # fucntions to generate the object attributes
