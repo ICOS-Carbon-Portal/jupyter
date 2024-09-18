@@ -41,6 +41,7 @@ from icoscp.sparql.runsparql import RunSparql
 from icoscp.station import station as station_data
 
 # STILT footprint
+from icoscp_stilt import stilt
 from icoscp_stilt import stiltstation
 
 # NetCDF for working with scientific data
@@ -646,7 +647,6 @@ def nuclear_contamination_by_facility_map(radiocarbonObject):
             icon=folium.Icon(color='red', icon='map-marker')  # Customize marker icon and color
         ).add_to(m)
 
-    from icoscp_stilt import stiltstation
 
     STILT_station = stiltstation.get(id=radiocarbonObject.stationId )
 
@@ -680,8 +680,6 @@ def nuclear_contamination_by_facility_map(radiocarbonObject):
 
 
 def get_modelled_ts(radiocarbonObject):
-    
-    from icoscp_stilt import stiltstation
 
     STILT_station = stiltstation.get(id=radiocarbonObject.stationId)
 
@@ -720,12 +718,14 @@ def get_nuclear_contamination(radiocarbonObject, STILT_co2_and_background):
     })
 
     # Initialize an empty array for total nuclear contribution  
-    #nuclear_contributions = np.zeros(len(dates))
     nuclear_contributions = np.full(len(dates), np.nan)
 
     i = 0
     
     st = stiltstation.get(id=radiocarbonObject.stationId)
+    
+    date_range = radiocarbonObject.dateRange
+
 
     # Iterate through the dates
     first = True
