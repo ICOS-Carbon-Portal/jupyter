@@ -88,7 +88,7 @@ RUN rm cache-bust
 # Update version number according to latest release.
 
 # Install specific version.
-RUN pip install --quiet icoscp_core==0.3.6
+RUN pip install --quiet icoscp_core==0.3.7
 RUN pip install --quiet icoscp==0.2.1
 RUN pip install --quiet icoscp_stilt==0.1.2
 # RUN pip install --extra-index-url https://pypi.org/simple --quiet -i https://test.pypi.org/simple/ icoscp==0.2.0a2
