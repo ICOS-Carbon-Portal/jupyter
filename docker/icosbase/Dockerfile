@@ -89,8 +89,8 @@ RUN rm cache-bust
 
 # Install specific version.
 RUN pip install --quiet icoscp_core==0.3.7
-RUN pip install --quiet icoscp==0.2.1
-RUN pip install --quiet icoscp_stilt==0.1.2
+RUN pip install --quiet icoscp==0.2.2
+RUN pip install --quiet icoscp_stilt==0.1.3
 # RUN pip install --extra-index-url https://pypi.org/simple --quiet -i https://test.pypi.org/simple/ icoscp==0.2.0a2
 # RUN pip install --extra-index-url https://pypi.org/simple --quiet -i https://test.pypi.org/simple/ icoscp_stilt==0.1.0a5
 
