@@ -2,31 +2,14 @@
 
 {% set announcement_login =
 '<div style="font-size: 16px; text-align: left; padding-left: 20px;">
-    <p>
-        We are excited to announce updates to our Python libraries. The
-        <a href=\"https://pypi.org/project/icoscp/\"target=\"_blank\">icoscp</a> and
-        <a href=\"https://pypi.org/project/icoscp_stilt/\"target=\"_blank\">icoscp_stilt</a> libraries
-        have been updated to new versions.<br>
-        Please restart your Jupyter instances using the instructions
-        <a href=\"https://icos-carbon-portal.github.io/jupyter/how_to/#restart-your-jupyter-instance\"target=\"_blank\">here.</a>
+    We are excited to announce updates to our Python libraries:
     <ul>
-        <li>
-            For detailed documentation, please visit:
-            <a href=\"https://icos-carbon-portal.github.io/pylib/\"target=\"_blank\">https://icos-carbon-portal.github.io/pylib/</a>.
-        </li>
-        <li>
-            For specific information on the updates,  please visit:
-            <a href = \"https://icos-carbon-portal.github.io/pylib/icoscp/install/#upgrade-guide\"target=\"_blank\">https://icos-carbon-portal.github.io/pylib/icoscp/install/#upgrade-guide</a>.
-        </li>
+        <li>The <a href="https://pypi.org/project/icoscp/" target="_blank">icoscp</a> library has been updated to version 0.2.2 <a href="https://icos-carbon-portal.github.io/pylib/icoscp/changelog/" target="_blank">(changelog)</a>.</li>
+        <li>The <a href="https://pypi.org/project/icoscp_stilt/" target="_blank">icoscp_stilt</a> library has been updated to version 0.1.3 <a href="https://icos-carbon-portal.github.io/pylib/icoscp_stilt/changelog/" target="_blank">(changelog)</a>.</li>
     </ul>
-
-    Help us make our Jupyter service even better. Share your thoughts in a
-    quick feedback
-    <a href="https://www.icos-cp.eu/form/jupyter-solutions-user-survey">
-        survey.
-    </a>
-    Thanks for your help!
-</p></div>'
+    Please restart your Jupyter instances using the instructions <a href=\"https://icos-carbon-portal.github.io/jupyter/how_to/#restart-your-jupyter-instance\"target=\"_blank\">here.</a><br>
+    Help us make our Jupyter service even better. Share your thoughts in a quick feedback <a href="https://www.icos-cp.eu/form/jupyter-solutions-user-survey"> survey.</a> Thanks for your help!
+</div>'
 %}
 {% if announcement_login is string %}
   {% set announcement = announcement_login %}
