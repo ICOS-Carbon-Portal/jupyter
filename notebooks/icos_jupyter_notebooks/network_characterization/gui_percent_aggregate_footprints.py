@@ -208,7 +208,7 @@ def update_func(button_c):
         timeselect_string=[str(value) for value in timeselect_list]
         timeselect_string =':00, '.join(timeselect_string) + ':00'
         
-    date_range = functions.date_range_hour_filtered(date_range, timeselect_list)
+    date_range=date_range[date_range.hour.isin(timeselect_list)]
     
     colorbar=colorbar_choice.value
     
@@ -234,10 +234,12 @@ def update_func(button_c):
         
     else:
 
-        nfp, fp, lon, lat, title = functions.read_aggreg_footprints(station, date_range)
+        st = stiltstation.get(id=station)
+        footprints =  st.get_fp(date_range.min(), date_range.max())
+        footprints_filtered = footprints.where(footprints.time.dt.hour.isin(timeselect_list), drop=True)
+        # fp values for the cells are stored in the variable "foot"
+        fp = footprints_filtered.mean(dim="time").foot.values
         
-        fp = fp[0]
-
     if fp is None:
         display(HTML('<p style="font-size:15px;">Not all footprints for ' + station + '. Use the <a href="https://stilt.icos-cp.eu/worker/" target="blank">STILT on demand calculator</a> to compute footprints for year 2018.</p>'))
 
