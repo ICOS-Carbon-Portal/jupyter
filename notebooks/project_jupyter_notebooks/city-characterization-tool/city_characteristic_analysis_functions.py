@@ -959,7 +959,11 @@ def create_dendrogram(similarity_matrix, callback):
         plt.close(fig)  # Close the figure to prevent extra output
 
     # Button to create the dendrogram
-    create_button = widgets.Button(description='Generate Dendrogram')
+    create_button = widgets.Button(
+        description='Generate Dendrogram', 
+        button_style='primary',
+        layout=widgets.Layout(width='200px')  # Added width style
+    )
     create_button.on_click(run_dendrogram)
 
     # Display the widgets
