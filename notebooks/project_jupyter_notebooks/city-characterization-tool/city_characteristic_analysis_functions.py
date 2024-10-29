@@ -756,6 +756,9 @@ def create_similarity_matrix(subset_df_scaled_inverted_weighted, callback):
 
     # Sort city names and exclude initial selection
     initial_cities = ['Paris', 'Munich', 'Zurich']
+    
+    initial_cities = [city for city in initial_cities if city in subset_df_scaled_inverted_weighted['city_name'].values]  # Ensure initial cities are present in the dataframe
+
     city_names = sorted([city for city in subset_df_scaled_inverted_weighted['city_name'] if city not in initial_cities])
 
     # Distance calculation dropdown
