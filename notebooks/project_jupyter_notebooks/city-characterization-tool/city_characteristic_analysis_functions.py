@@ -529,7 +529,7 @@ def scale_df(subset_df_filtered, callback):
         
 
     # Filter out only the scaled columns and keep 'city_name'
-    scaled_cols = ['city_name'] + [col for col in subset_df_scaled.columns if "_scaled" in col]
+    scaled_cols = ['city_name', 'Country'] + [col for col in subset_df_scaled.columns if "_scaled" in col]
     subset_df_scaled = subset_df_scaled[scaled_cols].copy()
 
     display(subset_df_scaled)
@@ -583,8 +583,8 @@ def invert_values(subset_df_scaled, callback):
 
 
 def weigh_variables_df(subset_df_scaled, callback):
-    # Extract the column names, except the first one
-    columns = subset_df_scaled.columns[1:]
+    # Extract the column names, except the first two (city and country columns)
+    columns = subset_df_scaled.columns[2:]
 
     # Number of columns
     num_columns = len(columns)
@@ -723,7 +723,7 @@ def calculate_challenge_score(subset_df_scaled_inverted_weighted):
             challenge_score[name_challenge_score] = challenge_score.select_dtypes(include='number').sum(axis=1) * 100
             
             # Keep only the city names and the final challenge score
-            challenge_score = challenge_score[['city_name', name_challenge_score]]
+            challenge_score = challenge_score[['city_name','Country', name_challenge_score]]
             
             # Add ranking and quartile columns
             challenge_score['challenge_rank'] = challenge_score[name_challenge_score].rank(method='min', ascending=True)
