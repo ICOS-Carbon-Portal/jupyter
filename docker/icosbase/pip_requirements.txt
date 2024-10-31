@@ -4,6 +4,7 @@ cyclebars @ git+https://github.com/klavere/cyclebars.git#egg=cyclebars
 jupyter-module-loader==0.0.1
 jupyter-resource-usage==0.7.2
 jupyterlab_mathjax2==4.0.0
+itables==2.2.2
 kaleido==0.2.1
 pangaeapy==1.0.6
 paramiko==3.0.0
