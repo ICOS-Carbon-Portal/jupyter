@@ -426,111 +426,117 @@ def update_func(button_c):
     
     else:
         list_used_stations = networkObj.settings['baseNetwork'] + networkObj.settings['compareNetwork']
-        
-    # lats' and lons' of stations:
-    min_lat = min([v['lat'] for k, v in stiltstations.items() if k in list_used_stations]) 
-    max_lat = max([v['lat'] for k, v in stiltstations.items() if k in list_used_stations]) 
-    min_lon = min([v['lon'] for k, v in stiltstations.items() if k in list_used_stations]) 
-    max_lon = max([v['lon'] for k, v in stiltstations.items() if k in list_used_stations]) 
-    
-    settings['domain'] = (min_lon, max_lon, min_lat, max_lat)
 
-    if networkObj.baseNetwork is not None:
-        
-        histogram_base, percentile_excluded, max_original, number_cells_above = functions.histogram_fp_distribution(networkObj, fp_type= 'base')
-        
-        with output_base_footprint_information:
-            
-            display(HTML('<p style="font-size:16px;text-align:center">Base network footprint (' + threshold_percent  + '%)<br>' + str("%0.1f" % percentile_excluded) + 'th percentile of non-zero fp cells as maximum <br> Network maximum: ' + str("%0.3f" % max_original) + ' (' + str(number_cells_above) + ' cells excluded)' + '</p>'))
-
-        with output_histogram_base:
-            
-            plt.show(histogram_base)
-        
-        with output_base_network_fp_linear:
-            
-            if download_output:
-                pngfile = 'base_footprint_linear'
-
-            else:
-                pngfile = ''
-            
-            functions.plot_maps(networkObj.baseNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
-
-    else:
+    if len(list_used_stations) == 0:
         
         update_button.disabled = False
         return
-
-    if networkObj.compareNetwork is not None:
-        
-        histogram_compare, percentile_excluded, max_original, number_cells_above = functions.histogram_fp_distribution(networkObj, fp_type='compare')
-        
-        with output_compare_footprint_information:
-            
-            display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint (' + threshold_percent  + '%)<br>' + str("%0.1f" % percentile_excluded) + 'th percentile of non-zero fp cells as maximum <br> Network maximum: ' + str("%0.3f" % max_original) + ' (' + str(number_cells_above) + ' cells excluded)' + '</p>'))
-        
-        with output_histogram_compare:
-            
-            plt.show(histogram_compare)
-        
-        with output_compare_network_fp_linear: 
-            
-            if download_output:
-                pngfile = 'compare_footprint_linear'
-
-            else:
-                pngfile = ''
-
-            functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
     
-        with output_base_minus_compare:
-            display(HTML('<p style="font-size:16px;text-align:center">Compare network - base network</p>'))
-       
-            if download_output:
-                pngfile = 'compare_minus_base_footprint_linear'
-
-            else:
-                pngfile = ''
-
-            functions.plot_maps(networkObj.compareMinusBase, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens)
-           
-    df_leader_chart_sens, original_df_leader_chart_sens = functions.leader_chart_sensitivity(networkObj)
-
-    with output_leader_chart:
-        
-        display(HTML('<p style="font-size:16px;text-align:center">Sensitivity/km2 of network by country</p>'))
-        
-        display(df_leader_chart_sens)
-        
-        if networkObj.compareNetwork is not None:
-            display(HTML('<p style="font-size:12px;text-align:left"><b>*"inf" means there is nothing to compare to.</p></b>'))
-        
-        if download_output:
-            
-            path_output= os.path.join(os.path.expanduser('~'), 'output/network_characterization/network_characterization/' + str(networkObj.dateTime))
- 
-            original_df_leader_chart_sens.to_csv(path_output + '/leader_chart.csv')
-  
-    if networkObj.compareNetwork is not None:
-
-        with output_landcover_bargraph_countries:
-            if len(networkObj.settings['countries'])>0:
-                functions.land_cover_bar_graphs_compare(networkObj)
-
     else:
-        
-        with output_landcover_bargraph_countries:
-            if len(networkObj.settings['countries'])>0:
-                functions.land_cover_bar_graphs_base(networkObj)
-                
-        with output_population_bargraph_countries:
-            if len(networkObj.settings['countries'])>0:
-                functions.population_bar_graph_base(networkObj)
-    
-    #only if choose to donwload:
-    if download_output:
-        functions.save_settings(settings, directory='network_characterization/network_characterization')
+        # lats' and lons' of stations:
+        min_lat = min([v['lat'] for k, v in stiltstations.items() if k in list_used_stations]) 
+        max_lat = max([v['lat'] for k, v in stiltstations.items() if k in list_used_stations]) 
+        min_lon = min([v['lon'] for k, v in stiltstations.items() if k in list_used_stations]) 
+        max_lon = max([v['lon'] for k, v in stiltstations.items() if k in list_used_stations]) 
+
+        settings['domain'] = (min_lon, max_lon, min_lat, max_lat)
+
+        if networkObj.baseNetwork is not None:
+
+            histogram_base, percentile_excluded, max_original, number_cells_above = functions.histogram_fp_distribution(networkObj, fp_type= 'base')
+
+            with output_base_footprint_information:
+
+                display(HTML('<p style="font-size:16px;text-align:center">Base network footprint (' + threshold_percent  + '%)<br>' + str("%0.1f" % percentile_excluded) + 'th percentile of non-zero fp cells as maximum <br> Network maximum: ' + str("%0.3f" % max_original) + ' (' + str(number_cells_above) + ' cells excluded)' + '</p>'))
+
+            with output_histogram_base:
+
+                plt.show(histogram_base)
+
+            with output_base_network_fp_linear:
+
+                if download_output:
+                    pngfile = 'base_footprint_linear'
+
+                else:
+                    pngfile = ''
+
+                functions.plot_maps(networkObj.baseNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
+
+        else:
+
+            update_button.disabled = False
+            return
+
+        if networkObj.compareNetwork is not None:
+
+            histogram_compare, percentile_excluded, max_original, number_cells_above = functions.histogram_fp_distribution(networkObj, fp_type='compare')
+
+            with output_compare_footprint_information:
+
+                display(HTML('<p style="font-size:16px;text-align:center">Compare network footprint (' + threshold_percent  + '%)<br>' + str("%0.1f" % percentile_excluded) + 'th percentile of non-zero fp cells as maximum <br> Network maximum: ' + str("%0.3f" % max_original) + ' (' + str(number_cells_above) + ' cells excluded)' + '</p>'))
+
+            with output_histogram_compare:
+
+                plt.show(histogram_compare)
+
+            with output_compare_network_fp_linear: 
+
+                if download_output:
+                    pngfile = 'compare_footprint_linear'
+
+                else:
+                    pngfile = ''
+
+                functions.plot_maps(networkObj.compareNetwork, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens) 
+
+            with output_base_minus_compare:
+                display(HTML('<p style="font-size:16px;text-align:center">Compare network - base network</p>'))
+
+                if download_output:
+                    pngfile = 'compare_minus_base_footprint_linear'
+
+                else:
+                    pngfile = ''
+
+                functions.plot_maps(networkObj.compareMinusBase, networkObj.loadLon, networkObj.loadLat, linlog='linear', colors=lin_color, pngfile=pngfile, directory='network_characterization/network_characterization', unit = 'ppm /(μmol / (m²s))', vmax=networkObj.vmaxSens)
+
+        df_leader_chart_sens, original_df_leader_chart_sens = functions.leader_chart_sensitivity(networkObj)
+
+        with output_leader_chart:
+
+            display(HTML('<p style="font-size:16px;text-align:center">Sensitivity/km2 of network by country</p>'))
+
+            display(df_leader_chart_sens)
+
+            if networkObj.compareNetwork is not None:
+                display(HTML('<p style="font-size:12px;text-align:left"><b>*"inf" means there is nothing to compare to.</p></b>'))
+
+            if download_output:
+
+                path_output= os.path.join(os.path.expanduser('~'), 'output/network_characterization/network_characterization/' + str(networkObj.dateTime))
+
+                original_df_leader_chart_sens.to_csv(path_output + '/leader_chart.csv')
+
+        if networkObj.compareNetwork is not None:
+
+            with output_landcover_bargraph_countries:
+                if len(networkObj.settings['countries'])>0:
+                    functions.land_cover_bar_graphs_compare(networkObj)
+
+        else:
+
+            with output_landcover_bargraph_countries:
+                if len(networkObj.settings['countries'])>0:
+                    functions.land_cover_bar_graphs_base(networkObj)
+
+            with output_population_bargraph_countries:
+                if len(networkObj.settings['countries'])>0:
+                    functions.population_bar_graph_base(networkObj)
+
+        #only if choose to donwload:
+        if download_output:
+            functions.save_settings(settings, directory='network_characterization/network_characterization')
 
     update_button.disabled = False
 #-----------widgets definition ----------------
