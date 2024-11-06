@@ -6,7 +6,7 @@ the latest release found [here](https://pypi.org/project/icoscp/) or the latest
 master branch found [here](https://github.com/ICOS-Carbon-Portal/pylib).
 
 ## 2.1.0 <p>(07/03/2023 - 06/11/2024)</p>
-- Add [rsync] utility to docker image installation (06/11/2024).
+- Add `rsync` utility to docker image installation (06/11/2024).
 - Bump [icoscp](
 https://github.com/ICOS-Carbon-Portal/pylib/tree/c68ad7afa1c27efb69f3350ad7723827517ad004)
 to master branch (05/04/2024).
