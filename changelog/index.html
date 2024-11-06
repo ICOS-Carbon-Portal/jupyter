@@ -8,7 +8,7 @@
     <title>Changelog - ICOS Carbon Portal<br>Jupyter Solutions</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
@@ -17,12 +17,11 @@
         var mkdocs_page_url = "/jupyter/changelog/";
       </script>
     
-    <script src="../js/jquery-3.6.0.min.js" defer></script>
     <!--[if lt IE 9]>
       <script src="../js/html5shiv.min.js"></script>
     <![endif]-->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-      <script>hljs.initHighlightingOnLoad();</script> 
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
 </head>
 
 <body class="wy-body-for-nav" role="document">
@@ -61,9 +60,9 @@
                 </li>
               </ul>
               <ul class="current">
-                <li class="toctree-l1 current"><a class="reference internal current" href="./">Changelog</a>
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Changelog</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#210-07032023-05042024">2.1.0 (07/03/2023 - 05/04/2024)</a>
+    <li class="toctree-l2"><a class="reference internal" href="#210-07032023-06112024">2.1.0 (07/03/2023 - 06/11/2024)</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#201-15112022">2.0.1 (15/11/2022)</a>
     </li>
@@ -97,8 +96,8 @@
       <div class="wy-nav-content">
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href=".." class="icon icon-home" aria-label="Docs"></a> &raquo;</li>
-      <li>Changelog</li>
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Changelog</li>
     <li class="wy-breadcrumbs-aside">
           <a href="https://github.com/ICOS-Carbon-Portal/jupyter/edit/master/docs/changelog.md" class="icon icon-github"> Edit on GitHub</a>
     </li>
@@ -115,8 +114,16 @@ the latest version. This means that we deploy on the ICOS JupyterHub, either
 the latest release found <a href="https://pypi.org/project/icoscp/">here</a> or the latest
 master branch found <a href="https://github.com/ICOS-Carbon-Portal/pylib">here</a>.</li>
 </ul>
-<h2 id="210-07032023-05042024">2.1.0 <p>(07/03/2023 - 05/04/2024)</p></h2>
+<h2 id="210-07032023-06112024">2.1.0 <p>(07/03/2023 - 06/11/2024)</p></h2>
 <ul>
+<li>Add <code>rsync</code> utility to docker image installation (06/11/2024).</li>
+<li>Add <a href="">itables</a> version 2.2.2 to pip requirements (28/10/2024).</li>
+<li>Bump <a href="https://pypi.org/project/icoscp/">icoscp</a> to version 0.2.2 
+(18/10/2024).</li>
+<li>Bump <a href="https://pypi.org/project/icoscp_stilt/">icoscp_stilt</a> to version 0.1.3 
+(18/10/2024).</li>
+<li>Bump <a href="https://pypi.org/project/icoscp_core/">icoscp_core</a> to version 0.3.7
+(17/10/2024).</li>
 <li>Bump <a href="https://github.com/ICOS-Carbon-Portal/pylib/tree/c68ad7afa1c27efb69f3350ad7723827517ad004">icoscp</a>
 to master branch (05/04/2024).</li>
 <li>Bump <a href="https://pypi.org/project/icoscp_core/">icoscp_core</a> to version 0.3.3
@@ -235,14 +242,15 @@ issues (07/03/2023).</li>
     
   </span>
 </div>
-    <script>var base_url = '..';</script>
-    <script src="../js/theme_extra.js" defer></script>
-    <script src="../js/theme.js" defer></script>
-      <script src="../search/main.js" defer></script>
-    <script defer>
-        window.onload = function () {
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);
-        };
+        });
     </script>
 
 </body>
