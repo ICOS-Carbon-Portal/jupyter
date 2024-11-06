@@ -26,9 +26,8 @@ RUN /tmp/install-tl --profile=/tmp/texlive.profile
 # Export path to texlive2021.
 ENV PATH="/usr/local/texlive/2021/bin/x86_64-linux:${PATH}"
 
-# Add zip to the system.
 RUN apt-get update
-RUN apt-get install zip
+RUN apt-get install zip rsync
 
 # Switch back to normal user.
 USER jovyan
