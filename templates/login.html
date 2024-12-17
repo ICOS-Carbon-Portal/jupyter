@@ -1,0 +1,168 @@
+{% extends "page.html" %}
+
+{% block login_widget %}
+{% endblock %}
+
+{% block main %}
+    <div class="container">
+        <div class="jumbotron text-center">
+            <h1>Welcome to ICOS JupyterHub</h1>
+            <p>Launching notebooks to Jupyter since 2020 &#128640; &#x1F680;</p>
+            <hr>
+            <div>
+                <p>Please, select your environment from the list below:</p>
+                <br>
+                <div>
+                    <ul style="text-align: left; margin: 0; padding-left: 20px;">
+                        <li>
+                            <a href="#" onclick="loginAndRedirect('explore-icos-atmobs')">explore_icos_atmObs.ipynb</a>
+                        </li>
+                        <li>
+                            <a href="#" onclick="loginAndRedirect('curve-fitting-obspack')">curve_fitting_obspack.ipynb</a>
+                        </li>
+                    </ul>
+                </div>
+
+{#                <!-- Licence checkbox -->#}
+{#                <div style="margin-top: 3%">#}
+{#                    <input type="checkbox" name="licence" id="checkbox-license" onchange="enableSignInButton()" tabindex="3"/>#}
+{#                    <label for="checkbox-license">#}
+{#                        &nbsp; I accept that ICOS data is under#}
+{#                        <a href="https://data.icos-cp.eu/licence" target="_blank">CC BY 4.0 licence</a>#}
+{#                        &nbsp;<img src="https://www.icos-cp.eu/sites/default/files/inline-images/creativecommons.png" style="height: 20px;">#}
+{#                    </label>#}
+{#                </div>#}
+{#                <!-- Terms checkbox -->#}
+{#                <div style="margin-top: 1%">#}
+{#                    <input type="checkbox" name="terms" id="checkbox-terms" onchange="enableSignInButton()" tabindex="3"/>#}
+{#                    <label for="checkbox-terms">#}
+{#                        &nbsp; I accept the ICOS#}
+{#                        <a href="https://www.icos-cp.eu/terms-of-use" target="_blank">Terms of Use</a>#}
+{#                    </label>#}
+{#                </div>#}
+{##}
+{#                <!-- Dropdown for Educational notebooks -->#}
+{#                <div class="dropdown d-inline-block">#}
+{#                    <button class="btn btn-primary btn-lg dropdown-toggle" style="width: 184px" type="button" id="educational2Dropdown" aria-haspopup="true" aria-expanded="false" onclick="toggleDropdown('educationalDropdownMenu')" disabled>#}
+{#                        Educational#}
+{#                    </button>#}
+{#                    <div class="dropdown-menu" id="educationalDropdownMenu" style="display: none;">#}
+{#                        <a class="dropdown-item" href="#" onclick="loginAndRedirect('general')">General</a>#}
+{#                        <a class="dropdown-item" href="#" onclick="loginAndRedirect('msc-bsc')">MSc & BSc</a>#}
+{#                        <a class="dropdown-item" href="#" onclick="loginAndRedirect('phd')">PhD</a>#}
+{#                        <a class="dropdown-item" href="#" onclick="loginAndRedirect('icos-summer-school')">ICOS Summer School</a>#}
+{#                        <a class="dropdown-item" href="#" onclick="loginAndRedirect('icos-summer-school')">ICOS Summer School</a>#}
+{#                    </div>#}
+{#                </div>#}
+{##}
+{#                <!-- Direct Button for Example Notebooks -->#}
+{#                <a class="btn btn-primary btn-lg" style="width: 237px; pointer-events:none; opacity: 0.6;" href="#" onclick="loginAndRedirect('pylib-examples')" id="exampleButton">#}
+{#                    Example Notebooks#}
+{#                </a>#}
+{##}
+{#                <!-- Direct Button for New Notebook -->#}
+{#                <a class="btn btn-primary btn-lg" style="width: 184px; pointer-events:none; opacity: 0.6;" href="#" onclick="loginAndRedirect('new-notebook')" id="newNotebookButton">#}
+{#                    New Notebook#}
+{#                </a>#}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+    <script type="text/javascript">
+        function getCookie(name) {
+            /*
+              Find and return the cookie named "name" if it exists
+              in the cookie string. If not, return null.
+             */
+            const cookieArr = document.cookie.split("; ");
+            for (let i = 0; i < cookieArr.length; i++) {
+                const cookiePair = cookieArr[i].split("=");
+                if (name === cookiePair[0]) {
+                    return decodeURIComponent(cookiePair[1]);
+                }
+            }
+            return null;
+        }
+
+        function loginAndRedirect(profile) {
+            const username = profile + "-" + Date.now()
+            const password = 'test';  // Your password
+            const xsrfToken = getCookie('_xsrf');  // Retrieve the _xsrf token from the cookie
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/hub/login';
+
+            const inputCsrf = document.createElement('input');
+            inputCsrf.type = 'hidden';
+            inputCsrf.name = '_xsrf';
+            inputCsrf.value = xsrfToken;
+            form.appendChild(inputCsrf);
+
+            const inputUsername = document.createElement('input');
+            inputUsername.type = 'hidden';
+            inputUsername.name = 'username';
+            inputUsername.value = username;
+            form.appendChild(inputUsername);
+
+            const inputPassword = document.createElement('input');
+            inputPassword.type = 'hidden';
+            inputPassword.name = 'password';
+            inputPassword.value = password;
+            form.appendChild(inputPassword);
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        function toggleDropdown(menuId) {
+            const menu = document.getElementById(menuId);
+            if (menu.style.display === "none") {
+                menu.style.display = "block";
+            } else {
+                menu.style.display = "none";
+            }
+        }
+
+        // Function to enable or disable the buttons
+        function enableSignInButton() {
+            const licenseChecked = document.getElementById("checkbox-license").checked;
+            const termsChecked = document.getElementById("checkbox-terms").checked;
+
+            const eduDropdown = document.getElementById("educational2Dropdown");
+            const exampleButton = document.getElementById("exampleButton");
+            const newButton = document.getElementById("newNotebookButton");
+
+            if (licenseChecked && termsChecked) {
+                eduDropdown.removeAttribute('disabled');
+                exampleButton.style.pointerEvents = 'auto';
+                exampleButton.style.opacity = '1';
+                exampleButton.style.cursor = 'pointer';
+                newButton.style.pointerEvents = 'auto';
+                newButton.style.opacity = '1';
+                newButton.style.cursor = 'pointer';
+            } else {
+                eduDropdown.setAttribute('disabled', 'true');
+                exampleButton.style.pointerEvents = 'none';
+                exampleButton.style.opacity = '0.6'; // Change this value as desired
+                exampleButton.style.cursor = 'not-allowed';
+                newButton.style.pointerEvents = 'none';
+                newButton.style.opacity = '0.6';
+                newButton.style.cursor = 'not-allowed';
+            }
+        }
+
+        // Close dropdowns when clicking outside
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropdown-toggle')) {
+                const dropdowns = document.getElementsByClassName("dropdown-menu");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    dropdowns[i].style.display = "none";
+                }
+            }
+        }
+    </script>
+{% endblock %}

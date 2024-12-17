@@ -1,0 +1,52 @@
+networks:
+  jupyter:
+    name: jupyter
+    driver: bridge
+
+services:
+
+  hub:
+    build:
+      context: ./hub
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    container_name: hub
+    ports:
+      - "8000:8000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./hub/jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py
+      - ./templates:/srv/jupyterhub/templates
+    environment:
+      JUPYTERHUB_CRYPT_KEY: "mycryptkey"
+    command: jupyterhub -f /srv/jupyterhub/jupyterhub_config.py
+    networks:
+      - jupyter
+
+  icosbase:
+    build:
+      context: ./docker/icosbase
+      dockerfile: Dockerfile
+    image: icosbase:latest
+    networks:
+      - jupyter
+
+  explore-icos-atmobs:
+    image: explore-icos-atmobs:latest
+    build:
+      context: .
+      dockerfile: ./docker/explore-icos-atmobs/Dockerfile
+    deploy:
+      replicas: 0
+    networks:
+      - jupyter
+
+  curve-fitting-obspack:
+    image: curve-fitting-obspack:latest
+    build:
+      context: .
+      dockerfile: ./docker/curve-fitting-obspack/Dockerfile
+    deploy:
+      replicas: 0
+    networks:
+      - jupyter
