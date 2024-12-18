@@ -729,7 +729,7 @@ def get_nuclear_contamination(radiocarbonObject, STILT_co2_and_background):
 
     # Iterate through the dates
     first = True
-    data_year = 0
+
     for date in radiocarbonObject.dateRange:
         
         if first or date.year != data_year:
@@ -737,8 +737,10 @@ def get_nuclear_contamination(radiocarbonObject, STILT_co2_and_background):
             data_year = date.year
             
             if data_year > max_year:
-                break
-            
+
+                use_latest_available_emission = True
+                data_year = max_year
+                
             fp_Gbq = fp_nuclear_emissions.sel(year=data_year).emissions
             
             fp_bq_s = (fp_Gbq*1000000000)/31536000
@@ -792,7 +794,8 @@ def get_nuclear_contamination(radiocarbonObject, STILT_co2_and_background):
 
         i = i + 1
 
-
+    if use_latest_available_emission:
+        print(f'Using nuclear emissions from{max_year}')
     # The resulting DataFrame `df_nuclear_facilities` will have one row per date and one column per facility, along with the 'date' column.
 
     # Dataframe with the total nuclear contribution
