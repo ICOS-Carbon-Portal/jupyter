@@ -1,12 +1,12 @@
-# texlive.profile rewritten on 18.01.2022
+# texlive.profile rewritten on 19.12.2024
 selected_scheme scheme-full
-TEXDIR /usr/local/texlive/2021
-TEXMFCONFIG ~/.texlive2021/texmf-config
+TEXDIR /usr/local/texlive/2024
+TEXMFCONFIG ~/.texlive2024/texmf-config
 TEXMFHOME ~/texmf
 TEXMFLOCAL /usr/local/texlive/texmf-local
-TEXMFSYSCONFIG /usr/local/texlive/2021/texmf-config
-TEXMFSYSVAR /usr/local/texlive/2021/texmf-var
-TEXMFVAR ~/.texlive2021/texmf-var
+TEXMFSYSCONFIG /usr/local/texlive/2024/texmf-config
+TEXMFSYSVAR /usr/local/texlive/2024/texmf-var
+TEXMFVAR ~/.texlive2024/texmf-var
 binary_x86_64-linux 1
 instopt_adjustpath 1
 instopt_adjustrepo 1
