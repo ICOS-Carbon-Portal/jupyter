@@ -936,9 +936,10 @@ def create_dendrogram(similarity_matrix, callback):
 
             # Create clusters DataFrame
             clusters_df = pd.DataFrame({
-                'city': final_dendrogram['ivl'],
-                'cluster_dendrogram': flat_clusters # Use the flat clusters here
+                'city': similarity_matrix.index,  # Use the original row (or column) labels
+                'cluster_dendrogram': flat_clusters
             })
+
 
             # Pass the clusters_df to the callback function
             callback(clusters_df)
