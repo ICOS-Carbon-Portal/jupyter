@@ -19,6 +19,8 @@ from IPython.display import display, HTML
 import matplotlib.pyplot as plt
 import geopandas as gpd
 import folium
+import os
+import re
 
 # make pandas tables interactive.
 pd.set_option('display.max_rows', 1000)
@@ -29,9 +31,21 @@ opt.lengthMenu = [15, 50, 100]
 opt.maxRows = 1000
 opt.maxBytes=0
 
+# where to save:
+output_path = os.path.join(os.path.expanduser('~'), 'output')
+output_path_city_char = os.path.join(
+    output_path,
+    'city-characterization'
+)
 
+os.makedirs(output_path_city_char, exist_ok=True)
+
+# relative path to show the user where it is saved with a direct link
+output_path_city_char_relative = f'../../{re.search("output.*", output_path_city_char)[0]}'
+
+# NOT USED IN TOOL - used to re-create "all_variables".
+# Cannot be run in "common" on the JupyterHub.
 def create_merged_attribute_file():
- 
 
     # Directory where your CSV files are located
     csv_files_path = 'variable_files/*.csv'
@@ -653,12 +667,16 @@ def weigh_variables_df(subset_df_scaled, callback):
     # Function to save weights to a JSON file
     def save_weights(b):
         weights = {column: weight for column, weight in weight_values.items()}
-        filename = f'weights_{datetime.now().strftime("%Y_%m_%d_%H%M")}.json'
-        with open(filename, 'w') as f:
+        
+        file_path = f'{output_path_city_char}/weights_{datetime.now().strftime("%Y_%m_%d_%H%M")}.json'
+        relative_file_path = f'{output_path_city_char_relative}/weights_{datetime.now().strftime("%Y_%m_%d_%H%M")}.json'
+        
+        with open(file_path, 'w') as f:
             json.dump(weights, f)
         with output:
             clear_output()
-            print(f"Weights saved to {filename}")
+            html_string = '<br>Access saved weights-file <a href=' + relative_file_path + ' target="_blank">here</a>.<br>'
+            display(HTML('<p style="font-size:16px">' + html_string)) 
 
     # Attach the function to the save button
     save_button.on_click(save_weights)
@@ -732,8 +750,11 @@ def calculate_challenge_score(subset_df_scaled_inverted_weighted):
             
             # Save as CSV if checkbox is checked
             if save_csv_checkbox.value:
-                challenge_score.to_csv('challenge_score.csv', encoding='utf-8-sig', index=False)
-                print("DataFrame saved as 'challenge_score.csv'")
+                file_path = f'{output_path_city_char}/challenge_score.csv'
+                relative_file_path = f'{output_path_city_char_relative}/challenge_score.csv'
+                challenge_score.to_csv(file_path, encoding='utf-8-sig', index=False)
+                html_string = '<br>Access saved CSV-file <a href=' + relative_file_path + ' target="_blank">here</a>.<br>'
+                display(HTML('<p style="font-size:16px">' + html_string))     
 
     # Link the button click event to the function
     run_button.on_click(on_button_click)
@@ -926,8 +947,13 @@ def create_dendrogram(similarity_matrix, callback):
 
             # Save the dendrogram if the checkbox is selected
             if save_dendrogram:
-                fig.savefig("dendrogram.png", bbox_inches='tight')
-                print("Dendrogram saved as dendrogram.png")
+                
+                file_path = f'{output_path_city_char}/dendrogram.png'
+                relative_file_path = f'{output_path_city_char_relative}/dendrogram.png'
+                fig.savefig(file_path, bbox_inches='tight')
+                html_string = '<br>Access dendrogram <a href=' + relative_file_path + ' target="_blank">here</a>.<br>'
+                display(HTML('<p style="font-size:16px">' + html_string))
+                
 
             # If there is a mismatch, display the message
             if actual_num_clusters != target_clusters:
