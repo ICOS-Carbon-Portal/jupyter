@@ -10,72 +10,33 @@
 {% block main %}
 
 <link rel="stylesheet" href="https://static.icos-cp.eu/constant/fontawesome/5.15.3/css/all.min.css">
+<link rel="stylesheet" href="https://static.icos-cp.eu/css/bootstrap/5.3.3/icos-bootstrap.css">
 
 <style>
+    html {
+        font-size: unset;
+    }
+        
+    body {
+        font-size: 0.875rem;
+    }
+
     .navbar {
         margin-bottom: 0;
-    }
-
-    h2, h3, p, main, input, button, a, ul,
-    .announcement {
-        font-family: "Open Sans", system-ui, -apple-system, sans-serif;
-    }
-
-    h3 {
-        font-size: 20px;
-        font-weight: bold;
-    }
-
-    p, main, input, button, ul {
-        font-size: 14px;
-        line-height: 21px;
+        flex-wrap: nowrap;
     }
 
     p, ul {
         max-width: 100ch;
     }
-    
-    .announcement {
-        margin-top: 20px;
-        margin-bottom: 0;
-        line-height: 21px;
-        font-size: 14px;
-        max-width: 100ch;
-
-        ul {
-            margin-top: 1em;
-        }
-    }
-
-    .btn { 
-        background-color: #00abc9;
-        border: none;
-        border-radius: 5.6px;
-        color: #fff;
-    }
-
-    .btn:disabled {
-        background-color: #00333c;
-    }
-
-    .btn:hover {
-        color: #fff;
-    }
-
-    .btn:not(:disabled):hover {
-        background-color: #0091ab;
-    }
 
     .header-container {
         background-size: cover;
-        line-height: 0;
         background-image: url(https://static.icos-cp.eu/images/icos-header.jpg);
 
         div {
             max-width: 1200px;
             margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
         }
 
         img {
@@ -91,51 +52,68 @@
         margin-left: auto;
         margin-right: auto;
     }
-
-    .text-input {
-        display: flex;
-        flex-wrap: wrap;
+    
+    .announcement {
         margin-top: 1em;
-        margin-bottom: 1em;
-        align-items: center;
-        
-        label {
-            display: block;
-            width: 10ch;
-        }
+        margin-bottom: 0;
+        max-width: 100ch;
 
-        input {
-            min-width: min(30ch, 100%);
-            max-width: 400px;
-            width: 60%;
+        ul {
+            margin-top: 1em;
         }
     }
 
-    .checkbox-input {
+    label {
+        width: 10ch;
+    }
+
+    .text-input, .checkbox-input {
         display: flex;
         flex-wrap: wrap;
         margin-top: 1em;
         margin-bottom: 1em;
         align-items: center;
+    }
 
-        input {
-            margin: 0 2ch 0 2ch;
-            width: 2ch;
-            display: block;
-            height: 2ch;
-        }
+    .text-input input {
+        min-width: min(30ch, 100%);
+        max-width: 400px;
+        width: 60%;
+    }
 
-        label {
-            display: block;
-            margin: 0;
-            min-width: min(30ch, 60%);
-            width: 60%;
-        }
+    .checkbox-input input {
+        margin: 0 2ch 0 2ch;
+        width: 2ch;
+        height: 2ch;
+    }
+
+    .checkbox-input label {
+        margin: 0;
+        min-width: min(30ch, 80%);
+        width: 80%;
     }
 
     .submit-form {
         margin-left: 10ch;
     }
+    
+    .button { 
+        background-color: #00abc9;
+        border: none;
+        border-radius: 5.6px;
+        color: #fff;
+        padding: 0.5em 1em;
+    }
+
+    .button:disabled {
+        background-color: #00333c;
+        opacity: 0.65;
+    }
+
+    .button:not(:disabled):hover {
+        background-color: #0091ab;
+    }
+
 
     footer {
         background-color: #636466;
@@ -148,24 +126,31 @@
         padding: 4rem 1rem;
         word-wrap: break-word;
         box-sizing: border-box;
-        font-size: 14px;
+        font-size: 0.875rem;
         color: #ffffff;
 
         a {
             color: white;
-            font-size: 15px;
+            font-size: 0.9375rem;
+            text-decoration: none;
         }
 
         h3 {
             margin-top: 30px;
+            font-size: 1.25rem;
+            font-weight: 700;
             a {
-                font-size: 20px;
+                font-size: 1.25rem;
             }
         }
 
         .social-media-icon {
-            font-size: 28px;
+            font-size: 1.75rem;
             margin: 14px 2.8px;
+        }
+        
+        p {
+            margin-bottom: 0.5rem;
         }
     }
 
@@ -175,7 +160,7 @@
         justify-content: space-between;
         .region {
             width: 30%;
-            min-width: 300px;
+            min-width: 280px;
         }
     }
 
@@ -193,7 +178,6 @@
         font-weight: 900;
         margin: 0 0.3rem;
     }
-
 </style>
 
 <script>
@@ -224,7 +208,7 @@
     <div class="container announcement alert alert-warning">
         {{ announcement_login | safe }}
     </div>
-    {% endif %} 
+    {% endif %}
     
     <main>
         {% block login %}
@@ -267,14 +251,14 @@
             </div>
             <div class="checkbox-input">
                 <input type="checkbox" name="licence" id="checkbox-license" onchange="enableSignInButton()" tabindex="3"/>
-                <label for='licence'>
+                <label for='checkbox-license'>
                     I understand that ICOS data is licensed under a 
                     <a href="https://data.icos-cp.eu/licence" target="_blank">CC BY 4.0 licence</a>
                     <img src="https://www.icos-cp.eu/sites/default/files/inline-images/creativecommons.png">
                 </label>
             </div>
             <div class="checkbox-input">
-                <input type="checkbox" name="licence" id="checkbox-terms" onchange="enableSignInButton()" tabindex="4"/>
+                <input type="checkbox" name="terms" id="checkbox-terms" onchange="enableSignInButton()" tabindex="4"/>
                 <label for='checkbox-terms'>
                     I accept the ICOS
                     <a href="https://www.icos-cp.eu/terms-of-use" target="_blank">
@@ -323,6 +307,7 @@
                     <p class="marked-link"><a
                             href="https://www.icos-cp.eu/data-services/about-data-portal/data-license">DATA LICENSE</a></p>
                     <p class="marked-link"><a href="https://www.icos-cp.eu/terms-of-use">TERMS OF USE</a></p>
+                    <p class="marked-link"><a href="https://uptime.icos-cp.eu/status/core">SERVICES STATUS</a></p>
                 </div>
             </div>
 
@@ -345,11 +330,13 @@
             <div class="region region-footer-third">
                 <div class="footer-box">
                     <h3>ICOS on social media</h3>
-                    <p><a class="social-media-icon fab fa-twitter-square" href="https://twitter.com/icos_ri">&nbsp;</a> <a
-                            class="social-media-icon fab fa-instagram" href="https://www.instagram.com/icosri/">&nbsp;</a>
-                        <a class="social-media-icon fab fa-youtube-square"
-                            href="https://www.youtube.com/c/ICOSRI">&nbsp;</a> <a class="social-media-icon fab fa-linkedin"
-                            href="https://www.linkedin.com/company/integrated-carbon-observation-system">&nbsp;</a></p>
+                    <p>
+                        <a class="social-media-icon fab fa-twitter-square" href="https://twitter.com/icos_ri">&nbsp;</a> 
+                        <a class="social-media-icon fab fa-instagram" href="https://www.instagram.com/icosri/">&nbsp;</a>
+                        <a class="social-media-icon fab fa-youtube-square" href="https://www.youtube.com/c/ICOSRI">&nbsp;</a> 
+                        <a class="social-media-icon fab fa-linkedin" href="https://www.linkedin.com/company/integrated-carbon-observation-system">&nbsp;</a>
+                        <a class="social-media-icon fa-brands fa-square-bluesky" href="https://bsky.app/profile/icos-ri.eu">&nbsp;</a>
+                    </p>
                     <h3 class="marked-link"><a href="https://www.icos-cp.eu/news-and-events/newsletter">ICOS Newsletter</a>
                     </h3>
                     <h3 class="marked-link"><a href="https://fileshare.icos-cp.eu/">Nextcloud – ICOS Fileshare</a></h3>
@@ -358,7 +345,6 @@
         </div>
     </div>
 </footer>
-
 
 {% endblock %}
 
