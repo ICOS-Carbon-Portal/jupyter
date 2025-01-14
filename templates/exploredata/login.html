@@ -1,4 +1,5 @@
 {% extends 'page.html' %}
+{% set service = 'Exploredata' %}
 
 {# to disable announcement, use: set announcement_login = None #}
 
@@ -162,7 +163,8 @@ Help us make our Jupyter service even better. Share your thoughts in a quick fee
     
     <main class="container main">
         {% block login %}
-        <h2>Sign in to Exploredata</h2>
+        <div class="my-4">
+        <h2>Sign in to {{ service }}</h2>
         <div class="auth-form-body">
             <p id="insecure-login-warning" class="hidden">
                 Warning: JupyterHub seems to be served over an unsecured HTTP connection.
@@ -217,14 +219,17 @@ Help us make our Jupyter service even better. Share your thoughts in a quick fee
                 </label>
             </div>
             <div class="mb-3">
-                <input id="login-submit" type="submit" class="btn" value="Sign In" tabindex="5" disabled="true"/>
+                <input id="login-submit" type="submit" class="btn btn-primary" value="Sign In" tabindex="5" disabled="true"/>
                 <div class="feedback-widget hidden">
                     <i class="fa fa-spinner"></i>
                 </div>
             </div>
         </form>
+        </div>
         {% endblock login %}
-        {% include 'about.html' %}
+        <div class="my-5">
+            {% include 'about.html' %}
+        </div>
     </main>
 </div>
 
