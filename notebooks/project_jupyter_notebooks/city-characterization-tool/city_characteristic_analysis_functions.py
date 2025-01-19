@@ -314,9 +314,13 @@ def column_selection(callback):
             if hourly_emission_checkboxes[hour].value:
                 selections.append(f'tCO2_rel_emission_per_hour_{hour}')
 
-        filename = f'selection_{datetime.now().strftime("%Y_%m_%d_%H%M")}.json'
-        with open(filename, 'w') as f:
+            
+        file_path = f'{output_path_city_char}/selection_{datetime.now().strftime("%Y_%m_%d_%H%M")}.json'
+        relative_file_path = f'{output_path_city_char_relative}/selection_{datetime.now().strftime("%Y_%m_%d_%H%M")}.json'
+        
+        with open(file_path, 'w') as f:
             json.dump(selections, f)
+
 
     # Create file upload widget
     upload_widget = widgets.FileUpload(
@@ -675,7 +679,7 @@ def weigh_variables_df(subset_df_scaled, callback):
             json.dump(weights, f)
         with output:
             clear_output()
-            html_string = '<br>Access saved weights-file <a href=' + relative_file_path + ' target="_blank">here</a>.<br>'
+            html_string = '<br>Access saved weights-file: <a href=' + relative_file_path + ' target="_blank">' + file_path + '</a>.<br>'
             display(HTML('<p style="font-size:16px">' + html_string)) 
 
     # Attach the function to the save button
@@ -753,7 +757,7 @@ def calculate_challenge_score(subset_df_scaled_inverted_weighted):
                 file_path = f'{output_path_city_char}/challenge_score.csv'
                 relative_file_path = f'{output_path_city_char_relative}/challenge_score.csv'
                 challenge_score.to_csv(file_path, encoding='utf-8-sig', index=False)
-                html_string = '<br>Access saved CSV-file <a href=' + relative_file_path + ' target="_blank">here</a>.<br>'
+                html_string = '<br>Access saved CSV-file: <a href=' + relative_file_path + ' target="_blank">' + file_path + '</a>.<br>'
                 display(HTML('<p style="font-size:16px">' + html_string))     
 
     # Link the button click event to the function
@@ -951,7 +955,7 @@ def create_dendrogram(similarity_matrix, callback):
                 file_path = f'{output_path_city_char}/dendrogram.png'
                 relative_file_path = f'{output_path_city_char_relative}/dendrogram.png'
                 fig.savefig(file_path, bbox_inches='tight')
-                html_string = '<br>Access dendrogram <a href=' + relative_file_path + ' target="_blank">here</a>.<br>'
+                html_string = '<br>Access dendrogram: <a href=' + relative_file_path + ' target="_blank">' + file_path + '</a>.<br>'
                 display(HTML('<p style="font-size:16px">' + html_string))
                 
 
