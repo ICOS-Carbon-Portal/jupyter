@@ -17,15 +17,15 @@ USER root
 # Remove old texlive installation.
 # RUN rm -rf /usr/share/texlive
 RUN rm -rf /usr/share/texlive /opt/texlive /var/cache/texlive /tmp/texlive
-# Add texlive2021 installer and unpack.
+# Add texlive2024 installer and unpack.
 # http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
 RUN wget -O /tmp/install-tl-unx.tar.gz http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
 RUN tar -xf /tmp/install-tl-unx.tar.gz --strip-components=1 -C /tmp/
 # Add profile and start intallation.
-COPY Texlive2021/texlive.profile /tmp/.
+COPY Texlive2024/texlive.profile /tmp/.
 RUN /tmp/install-tl --profile=/tmp/texlive.profile
-# Export path to texlive2021.
-ENV PATH="/usr/local/texlive/2021/bin/x86_64-linux:${PATH}"
+# Export path to texlive2024.
+ENV PATH="/usr/local/texlive/2024/bin/x86_64-linux:${PATH}"
 
 RUN apt-get update
 RUN apt-get install -y zip rsync
@@ -105,3 +105,10 @@ RUN pip install --quiet icoscp_stilt==0.1.3
 ENV PORTAL_DATA_PATH_ICOS="/data/dataAppStorage/"
 ENV PORTAL_DATA_PATH_SITES="/data/dataAppStorage/"
 ENV PORTAL_DATA_PATH_ICOSCITIES="/data/cities/dataAppStorage"
+
+# todo: These need to be moved to their respective "correct" locations
+# todo: within this file. I only put them here in order to not have to
+# todo: rebuild this image over and over again.
+COPY --chown=jovyan:users log_execution.py .ipython/profile_default/startup/
+USER root
+RUN apt-get install -y curl

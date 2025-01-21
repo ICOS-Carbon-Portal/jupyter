@@ -1,3 +1,7 @@
+# Standard library imports
+import os
+
+# Related third party imports
 from dockerspawner import DockerSpawner
 
 
@@ -24,12 +28,8 @@ class CustomSpawner(DockerSpawner):
     def start(self):
         if 'explore-icos-atmobs' in self.user.name:
             self.image = 'explore-icos-atmobs:latest'
-            notebook_name = 'explore-icos-atmobs'.replace('-', '_')
-            self.environment['NOTEBOOK_NAME'] = notebook_name
         elif 'curve-fitting-obspack' in self.user.name:
             self.image = 'curve-fitting-obspack:latest'
-            notebook_name = 'curve-fitting-obspack'.replace('-', '_')
-            self.environment['NOTEBOOK_NAME'] = notebook_name
         else:
             exit(1)
         return super().start()
