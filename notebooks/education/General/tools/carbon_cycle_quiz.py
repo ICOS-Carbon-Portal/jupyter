@@ -49,7 +49,7 @@ q4_feedback = ['\033[1;96m'+'Correct! Forest fires release CO\u2082 into the atm
 q5_feedback = ['\033[1;96m'+'Correct!\nCO\u2082 is accumulated during winter.\nTherefore, the highest concentration of CO\u2082 is observed in early spring.'+'\033[1;96m',
                '\033[1;93m'+'Photosynthetic activity increases over summer, increasing the uptake of atmospheric CO\u2082.\nAs a result, the total concentration of CO\u2082 in the atmosphere drops.'+'\033[1;93m',
                '\033[1;93m'+'Photosynthetic activity declines during autumn & the uptake of CO\u2082 from plants drops.\nAs a result, CO\u2082 begins to accumulate in the atmosphere.'+'\033[1;93m',
-               '\033[1;93m'+'Photosynthetic activity is very low during winter & the uptake of CO\u2082 from plants is low.\nTherefore, the total concentration of CO\u2082 in the atmosphere increases.'+'\033[1;93m']
+               '\033[1;93m'+'Photosynthetic activity is very low during winter & the uptake of CO\u2082 from plants is low.\nTherefore, the total concentration of CO\u2082 in the atmosphere is increasing, but is not at its highest.'+'\033[1;93m']
 
 q6_feedback = ['\033[1;93m'+'Livestock farming is responsible for larger emissions of greenhouse gases.'+'\033[1;93m',
                '\033[1;93m'+'The burning of fossil fuels releases larger quantities of CO\u2082.'+'\033[1;93m',

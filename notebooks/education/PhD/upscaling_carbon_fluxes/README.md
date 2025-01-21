@@ -23,7 +23,7 @@ All developed material includes references to the people involved and the datase
 <br>
 
 ## Structure
-The educational material is divided into folders baced on courses.
+The educational material is divided into folders:
 
 * **ancillary data:** includes folders with images, logos and supporting documents.
 * **notebooks:** includes all the notebooks that were used in the course.
@@ -31,7 +31,7 @@ The educational material is divided into folders baced on courses.
 <br>
 
 ## Contact
-For more information about the course, pleace contact: <br>
+For more information about the course, please contact: <br>
 Maj-Lena.Linderson@nateko.lu.se 
 
 <br>
