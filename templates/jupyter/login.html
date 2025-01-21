@@ -1,197 +1,277 @@
-{% extends "page.html" %}
+{% extends 'page.html' %}
+
+{# to disable announcement, use: set announcement_login = None #}
 
 {% set announcement_login =
-'<div style="font-size: 16px; text-align: left; padding-left: 20px;">
-    We are excited to announce updates to our Python libraries.
-    Please restart your Jupyter instances using the instructions <a href="https://icos-carbon-portal.github.io/jupyter/how_to/#restart-your-jupyter-instance"target="_blank">here.</a>
-    <ul>
-        <li>The <a href="https://pypi.org/project/icoscp/" target="_blank">icoscp</a> library has been updated to version 0.2.2 <a href="https://icos-carbon-portal.github.io/pylib/icoscp/changelog/" target="_blank">(changelog)</a>.</li>
-        <li>The <a href="https://pypi.org/project/icoscp_stilt/" target="_blank">icoscp_stilt</a> library has been updated to version 0.1.3 <a href="https://icos-carbon-portal.github.io/pylib/icoscp_stilt/changelog/" target="_blank">(changelog)</a>.</li>
-        <li>For detailed documentation, please visit: <a href="https://icos-carbon-portal.github.io/pylib/"target="_blank">https://icos-carbon-portal.github.io/pylib/</a>.</li>
-    </ul>
-    <br>
-    Help us make our Jupyter service even better. Share your thoughts in a quick feedback <a href="https://www.icos-cp.eu/form/jupyter-solutions-user-survey"> survey.</a> Thanks for your help!
-</div>'
+'We are excited to announce updates to our Python libraries.
+Please restart your Jupyter instances using the instructions <a href="https://icos-carbon-portal.github.io/jupyter/how_to/#restart-your-jupyter-instance"target="_blank">here.</a>
+<ul>
+    <li>The <a href="https://pypi.org/project/icoscp/" target="_blank">icoscp</a> library has been updated to version 0.2.2 <a href="https://icos-carbon-portal.github.io/pylib/icoscp/changelog/" target="_blank">(changelog)</a>.</li>
+    <li>The <a href="https://pypi.org/project/icoscp_stilt/" target="_blank">icoscp_stilt</a> library has been updated to version 0.1.3 <a href="https://icos-carbon-portal.github.io/pylib/icoscp_stilt/changelog/" target="_blank">(changelog)</a>.</li>
+    <li>For detailed documentation, please visit: <a href="https://icos-carbon-portal.github.io/pylib/" target="_blank">https://icos-carbon-portal.github.io/pylib/</a>.</li>
+</ul>
+<br>
+Help us make our Jupyter service even better. Share your thoughts in a quick feedback <a href="https://www.icos-cp.eu/form/jupyter-solutions-user-survey">survey.</a> Thanks for your help!'
 %}
-{% if announcement_login is string %}
-  {% set announcement = announcement_login %}
-{% endif %}
 
 {% block login_widget %}
 {% endblock %}
 
 {% block main %}
 
+<link rel="stylesheet" href="https://static.icos-cp.eu/constant/fontawesome/5.15.3/css/all.min.css">
+<link rel="stylesheet" href="https://static.icos-cp.eu/css/bootstrap/5.3.3/icos-bootstrap.css">
+
 <style>
-    table, th, td {
-        border: 0px solid black;
-        border-collapse: collapse;
+    html {
+        font-size: unset;
     }
-    th, td {
-        padding: 10px 30px;
-        vertical-align: top;
-    }
-    .btn-jupyter, .btn-jupyter:active, .btn-jupyter:active:hover, .btn-jupyter:active:focus,
-    .btn-jupyter:focus { background-color: #00abc9; border-color: rgba(0,171,201,0.85); }
-    .btn-jupyter:hover { background: rgba(0,171,201,0.85); border-color: rgba(0,171,201,0.85); }
-    .btn-jupyter:active { filter: brightness(85%); }
-
-    .info-txt{
-        font-size: 14px;
-        font-family: “Open Sans”,sans-serif;
-        max-width: 800px;
+        
+    body {
+        font-size: 0.875rem;
     }
 
-    .header{
-        height: 150px;
+    .navbar {
+        margin-bottom: 0;
+        flex-wrap: nowrap;
+    }
+
+    .header-container {
+        background-size: cover;
+        background-image: url(https://static.icos-cp.eu/images/icos-header.jpg);
+
+        div {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        img {
+            margin: 42px 15px 38px;
+            height: 70px;
+        }
+    }
+    
+    .announcement {
+        margin: 1em auto;
+        max-width: 100ch;
+
+        ul {
+            margin-top: 1em;
+        }
+    }
+
+    .main {
+        max-width: 100ch;
+    }
+
+    .form {
+        font-size: 1rem;
+    }
+
+    footer {
+        background-color: #636466;
         width: 100%;
     }
-    .header-top {
-        position: absolute;
-        height: 72px;
-        left: 100px;
-        top: 302px;
-        border: 0px solid black;
-        z-index: 1;
+
+    .footer-container {
+        max-width: 1200px;
+        padding: 4rem 1rem;
+        word-wrap: break-word;
+        color: #ffffff;
+
+        a {
+            color: white;
+            font-size: 0.9375rem;
+            text-decoration: none;
+        }
+
+        h3 {
+            margin-top: 30px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            a {
+                font-size: 1.25rem;
+            }
+        }
+
+        .social-media-icon {
+            font-size: 1.75rem;
+            margin: 14px 2.8px;
+        }
+
+        p {
+            margin-bottom: 0.5rem;
+        }
     }
-    .announcement-container {
-        /*Warning colors*/
-        /*background-color: #FFD700;*/
-        /*color: #000;*/
 
-        /*No warning colors*/
-        background-color: #8FBC8F;
-        color: #FFF;
+    .footer-flex {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        .region {
+            width: 30%;
+            min-width: 280px;
+        }
+    }
 
-        /*Jupyter standard colors*/
-        /*color: #8a6d3b;*/
-        /*background-color: #fcf8e3;*/
-        /*border-color: #faebcc;*/
-        width: 50vw;
-        overflow: hidden;
-        margin-top: 6%;
-        margin-left: -10%;
-        margin-bottom: 11%;
-        border-color: #faebcc;
-        padding: 15px;
-        border-radius: 2px;
+    .marked-link::before {
+        font-family: "Font Awesome 6 Free";
+        content: "\f105";
+        font-weight: 900;
+        margin: 0 0.3rem;
+        color: white;
+    }
+
+    .external-link::after {
+        font-family: "Font Awesome 6 Free";
+        content: "\f35d";
+        font-weight: 900;
+        margin: 0 0.3rem;
     }
 </style>
 
 <script>
     function enableSignInButton() {
         // Get references to the checkboxes and sign-in button.
-        const checkboxLicense = document.getElementById("checkbox-license");
-        const checkboxTerms = document.getElementById("checkbox-terms");
+        const checkboxLicense = document.getElementById("licence");
+        const checkboxTerms = document.getElementById("terms");
         const signInButton = document.getElementById("login-submit");
 
         // Check if both checkboxes are checked.
         signInButton.disabled = !(checkboxLicense.checked && checkboxTerms.checked);
     }
+
+    // Run function immediately, to account for page navigation/returning with saved values
+    enableSignInButton();
 </script>
 
 <div>
-    <div>
-        <img class='header'src='https://www.icos-cp.eu/themes/cp_theme_d8/images/icos-header.jpg'>
-        <a href="https://www.icos-cp.eu/" >
-            <img class='header-top' src='https://www.icos-cp.eu/sites/default/files/ICOS-logo.svg'
-                 alt='Home'>
-        </a>
-    </div>
-    <div style="margin-left: 1.2%;margin-top: 1.2%;display: inline-block">
-        {% block login %}
-        <div style="display: flex;flex-direction: row">
-            <div style="display: flex;flex-direction: column;">
-                <div>
-                    <form action="{{login_url}}?next={{next}}" method="post" role="form">
-                        <div class='info-txt' style="white-space: nowrap">
-                            <h2>Sign in to Collaboration Server</h2>
-                        </div>
-                        <div class='auth-form-body'>
-                            <p id='insecure-login-warning' class='hidden'>
-                                Warning: JupyterHub seems to be served over an unsecured HTTP connection.
-                                We strongly recommend enabling HTTPS for JupyterHub.
-                            </p>
-                        </div>
-                </div>
-                <div style="width: 13vw;margin-top: 5%;float: left">
-                    {% if login_error %}
-                    <p class="login_error">
-                        {{login_error}}
-                    </p>
-                    {% endif %}
-                    <label for="username_input">Username:</label>
-                    <input
-                            id="username_input"
-                            type="text"
-                            autocapitalize="off"
-                            autocorrect="off"
-                            class="form-control"
-                            name="username"
-                            val="{{username}}"
-                            tabindex="1"
-                            autofocus="autofocus"
-                    />
-                    <label for='password_input'>Password:</label>
-                    <input
-                            type="password"
-                            class="form-control"
-                            name="password"
-                            id="password_input"
-                            tabindex="2"
-                    />
-                </div>
-                <div style="margin-top: 6%">
-                    <input style="vertical-align: 7px" type="checkbox" name="licence" id="checkbox-license" onchange="enableSignInButton()" tabindex="3"/>
-                    <label for='licence'>
-                        &nbsp; I accept that ICOS data is under a<br>
-                        <a href="https://data.icos-cp.eu/licence" target="_blank">
-                            &nbsp CC BY 4.0 licence
-                        </a>&nbsp;
-                        <img src="https://www.icos-cp.eu/sites/default/files/inline-images/creativecommons.png">
-                    </label>
-                </div>
-                <div style="margin-top: 6%">
-                    <input type="checkbox" name="licence" id="checkbox-terms" onchange="enableSignInButton()" tabindex="3"/>
-                    <label for='checkbox-terms'>
-                        &nbsp; I accept the ICOS
-                        <a href="https://www.icos-cp.eu/terms-of-use" target="_blank">
-                            Terms of Use
-                        </a>
-                    </label>
-                </div>
-                <div class="feedback-container" style="margin-top: -1%;margin-left: 55%">
-                    <input id="login-submit" type="submit" class="btn btn-jupyter" value="Sign In" tabindex="4" disabled="true"/>
-                    <div class="feedback-widget hidden">
-                        <i class="fa fa-spinner"></i>
-                    </div>
-                </div>
-            </div>
+    <div class="header-container">
+        <div>
+            <a href="https://www.icos-cp.eu/" title="Home">
+                <img src='https://static.icos-cp.eu/images/ICOS-logo.svg' alt='Home'>
+            </a>
         </div>
-        {% endblock login %}
-        <div style="display: flex;flex-direction: column">
-            <div class='info-txt' style="clear: both;margin-top: 1%">
-                <p>
-                    Our collaborative Jupyter Hub service is for <b>registered users</b> and offers advanced
-                    options like<br></p>
-                <ul>
-                    <li>sharing notebooks and data</li>
-                    <li>uploading ancillary data for analysis together with ICOS data</li>
-                    <li>permanent storage of notebooks and data</li>
+    </div>
 
-                </ul>
-                <p>This service is continuously expanded in close consultation with
-                    our users and the ICOS community to support their scientific analysis and
-                    interpretation of ICOS data and products. All data and notebooks are "private", hence
-                    you can use this as a safe space to do research with unpublished data.</p>
-                <p>If you are interested in using our Jupyter Notebook Service to do research with ICOS
-                    data and elaborated products, but you don't have an account yet, please send your
-                    request to jupyter-info (at) icos-ri.eu .
-                </p>
+    {% if announcement_login %}
+    <div class="container announcement alert alert-warning">
+        {{ announcement_login | safe }}
+    </div>
+    {% endif %}    
+    
+    <main class="container main">
+        {% block login %}
+        <h2>Sign in to Exploredata</h2>
+        <div class="auth-form-body">
+            <p id="insecure-login-warning" class="hidden">
+                Warning: JupyterHub seems to be served over an unsecured HTTP connection.
+                We strongly recommend enabling HTTPS for JupyterHub.
+            </p>
+        </div>
+        <form action="{{login_url}}?next={{next}}" method="post" role="form" class="form">
+            {% if login_error %}
+            <p class="login_error">
+                {{login_error}}
+            </p>
+            {% endif %}
+            <div class="mb-3">
+                <label for="username_input" class="form-label">Username:</label>
+                <input
+                        id="username_input"
+                        type="text"
+                        autocapitalize="off"
+                        autocorrect="off"
+                        class="form-control"
+                        name="username"
+                        val="{{username}}"
+                        tabindex="1"
+                        autofocus="autofocus"
+                />
+            </div>
+            <div class="mb-3">
+                <label for="password_input" class="form-label">Password:</label>
+                <input
+                        type="password"
+                        class="form-control"
+                        name="password"
+                        id="password_input"
+                        tabindex="2"
+                />
+            </div>
+            <div class="mb-3">
+                <input type="checkbox" name="licence" id="licence" class="form-check-input" onchange="enableSignInButton()" tabindex="3"/>
+                <label for="licence" class="form-label ms-2">
+                    I understand that ICOS data is licensed under a 
+                    <a href="https://data.icos-cp.eu/licence" target="_blank">CC BY 4.0 licence</a>
+                    <img src="https://www.icos-cp.eu/sites/default/files/inline-images/creativecommons.png">
+                </label>
+            </div>
+            <div class="mb-3">
+                <input type="checkbox" name="terms" id="terms" class="form-check-input" onchange="enableSignInButton()" tabindex="4"/>
+                <label for="terms" class="form-label ms-2">
+                    I accept the ICOS
+                    <a href="https://www.icos-cp.eu/terms-of-use" target="_blank">
+                        Terms of Use
+                    </a>
+                </label>
+            </div>
+            <div class="mb-3">
+                <input id="login-submit" type="submit" class="btn" value="Sign In" tabindex="5" disabled="true"/>
+                <div class="feedback-widget hidden">
+                    <i class="fa fa-spinner"></i>
+                </div>
+            </div>
+        </form>
+        {% endblock login %}
+        {% include 'about.html' %}
+    </main>
+</div>
+
+<footer>
+    <div class="footer-container container">
+        <img alt="ICOS Logo" src="https://static.icos-cp.eu/images/ICOS-logo.svg" style="height: 70px">
+  
+        <div class="footer-flex">
+            <div class="region">
+                <div class="footer-box">
+                    <h3>Resources</h3>
+                    <p class="marked-link"><a href="https://www.icos-cp.eu/contact-us">CONTACT</a></p>
+                    <p class="marked-link"><a href="https://www.icos-cp.eu/privacy">PRIVACY POLICY</a></p>
+                    <p class="marked-link"><a href="https://www.icos-cp.eu/data-services/about-data-portal/data-license">DATA LICENSE</a></p>
+                    <p class="marked-link"><a href="https://www.icos-cp.eu/terms-of-use">TERMS OF USE</a></p>
+                    <p class="marked-link"><a href="https://uptime.icos-cp.eu/status/core">SERVICES STATUS</a></p>
+                </div>
+            </div>
+  
+            <div class="region">
+                <div class="footer-box">
+                    <h3>Central Facility websites</h3>
+                    <p class="marked-link external-link"><a href="https://icos-atc.lsce.ipsl.fr/">Atmosphere Thematic Centre (ATC)</a></p>
+                    <p class="marked-link external-link"><a href="http://www.icos-etc.eu/">Ecosystem Thematic Centre (ETC)</a></p>
+                    <p class="marked-link external-link"><a href="https://otc.icos-cp.eu/">Ocean Thematic Centre (OTC)</a></p>
+                    <p class="marked-link external-link"><a href="https://www.icos-cal.eu/">Central Analytical Laboratories (CAL)</a></p>
+                    <h3 class="marked-link"><a href="https://www.icos-cp.eu/observations/national-networks">National networks</a></h3>
+                </div>
+            </div>
+  
+            <div class="region">
+                <div class="footer-box">
+                    <h3>ICOS on social media</h3>
+                    <p>
+                        <a class="social-media-icon fab fa-twitter-square" href="https://twitter.com/icos_ri">&nbsp;</a> 
+                        <a class="social-media-icon fab fa-instagram" href="https://www.instagram.com/icosri/">&nbsp;</a>
+                        <a class="social-media-icon fab fa-youtube-square" href="https://www.youtube.com/c/ICOSRI">&nbsp;</a> 
+                        <a class="social-media-icon fab fa-linkedin" href="https://www.linkedin.com/company/integrated-carbon-observation-system">&nbsp;</a>
+                        <a class="social-media-icon fa-brands fa-square-bluesky" href="https://bsky.app/profile/icos-ri.eu">&nbsp;</a>
+                    </p>
+                    <h3 class="marked-link"><a href="https://www.icos-cp.eu/news-and-events/newsletter">ICOS Newsletter</a></h3>
+                    <h3 class="marked-link"><a href="https://fileshare.icos-cp.eu/">Nextcloud &mdash; ICOS Fileshare</a></h3>
+                </div>
             </div>
         </div>
     </div>
-</div>
+  </footer>
 
 {% endblock %}
 
@@ -206,8 +286,8 @@
     // setup onSubmit feedback
     $('form').submit((e) => {
         var form = $(e.target);
-        form.find('.feedback-container>input').attr('disabled', true);
-        form.find('.feedback-container>*').toggleClass('hidden');
+        form.find('.submit-form>input').attr('disabled', true);
+        form.find('.submit-form>*').toggleClass('hidden');
         form.find('.feedback-widget>*').toggleClass('fa-pulse');
     });
 </script>
