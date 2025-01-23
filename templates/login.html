@@ -95,6 +95,7 @@
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = '/hub/login';
+            form.target = '_blank';
 
             const inputCsrf = document.createElement('input');
             inputCsrf.type = 'hidden';
