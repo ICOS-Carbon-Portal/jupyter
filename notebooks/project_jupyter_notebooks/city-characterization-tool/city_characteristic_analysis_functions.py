@@ -598,6 +598,33 @@ def invert_values(subset_df_scaled, callback):
     update_df()  # Call update_df initially to show the DataFrame right away
 
 
+def display_save_button(df):
+    
+    output = widgets.Output()
+    
+    def save_df_fig3(df):
+        file_name = f"data_for_figure3_creation_{datetime.now().strftime('%Y_%m_%d_%H%M')}.csv"
+        file_path = os.path.join(output_path_city_char, file_name)
+        relative_file_path = f"{output_path_city_char_relative}/{file_name}"
+
+        df.to_csv(file_path, encoding='utf-8-sig')
+
+        # Update the output widget with the new message
+        with output:
+            clear_output()
+            html_string = '<br>Access saved CSV-file: <a href=' + relative_file_path + ' target="_blank">' + file_path + '</a>.<br>'
+            display(HTML('<p style="font-size:16px">' + html_string)) 
+            
+    save_button = widgets.Button(description="Save data as CSV", button_style='success')
+
+    # Define a callback function to trigger save_df_fig3(df)
+    def on_button_click(b):
+        save_df_fig3(df)  # Call the function when button is clicked
+
+    save_button.on_click(on_button_click)  # Attach the callback
+    display(save_button)
+    display(output)  # Ensure output widget is displayed so updates appear
+    
 def weigh_variables_df(subset_df_scaled, callback):
     # Extract the column names, except the first two (city and country columns)
     columns = subset_df_scaled.columns[2:]
