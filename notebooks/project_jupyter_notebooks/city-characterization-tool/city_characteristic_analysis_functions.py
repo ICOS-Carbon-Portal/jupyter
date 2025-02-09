@@ -314,9 +314,13 @@ def column_selection(callback):
             if hourly_emission_checkboxes[hour].value:
                 selections.append(f'tCO2_rel_emission_per_hour_{hour}')
 
-        filename = f'selection_{datetime.now().strftime("%Y_%m_%d_%H%M")}.json'
-        with open(filename, 'w') as f:
+            
+        file_path = f'{output_path_city_char}/selection_{datetime.now().strftime("%Y_%m_%d_%H%M")}.json'
+        relative_file_path = f'{output_path_city_char_relative}/selection_{datetime.now().strftime("%Y_%m_%d_%H%M")}.json'
+        
+        with open(file_path, 'w') as f:
             json.dump(selections, f)
+
 
     # Create file upload widget
     upload_widget = widgets.FileUpload(
@@ -594,6 +598,33 @@ def invert_values(subset_df_scaled, callback):
     update_df()  # Call update_df initially to show the DataFrame right away
 
 
+def display_save_button(df):
+    
+    output = widgets.Output()
+    
+    def save_df_fig3(df):
+        file_name = f"data_for_figure3_creation_{datetime.now().strftime('%Y_%m_%d_%H%M')}.csv"
+        file_path = os.path.join(output_path_city_char, file_name)
+        relative_file_path = f"{output_path_city_char_relative}/{file_name}"
+
+        df.to_csv(file_path, encoding='utf-8-sig')
+
+        # Update the output widget with the new message
+        with output:
+            clear_output()
+            html_string = '<br>Access saved CSV-file: <a href=' + relative_file_path + ' target="_blank">' + file_path + '</a>.<br>'
+            display(HTML('<p style="font-size:16px">' + html_string)) 
+            
+    save_button = widgets.Button(description="Save data as CSV", button_style='success')
+
+    # Define a callback function to trigger save_df_fig3(df)
+    def on_button_click(b):
+        save_df_fig3(df)  # Call the function when button is clicked
+
+    save_button.on_click(on_button_click)  # Attach the callback
+    display(save_button)
+    display(output)  # Ensure output widget is displayed so updates appear
+    
 def weigh_variables_df(subset_df_scaled, callback):
     # Extract the column names, except the first two (city and country columns)
     columns = subset_df_scaled.columns[2:]
@@ -675,7 +706,7 @@ def weigh_variables_df(subset_df_scaled, callback):
             json.dump(weights, f)
         with output:
             clear_output()
-            html_string = '<br>Access saved weights-file <a href=' + relative_file_path + ' target="_blank">here</a>.<br>'
+            html_string = '<br>Access saved weights-file: <a href=' + relative_file_path + ' target="_blank">' + file_path + '</a>.<br>'
             display(HTML('<p style="font-size:16px">' + html_string)) 
 
     # Attach the function to the save button
@@ -753,7 +784,7 @@ def calculate_challenge_score(subset_df_scaled_inverted_weighted):
                 file_path = f'{output_path_city_char}/challenge_score.csv'
                 relative_file_path = f'{output_path_city_char_relative}/challenge_score.csv'
                 challenge_score.to_csv(file_path, encoding='utf-8-sig', index=False)
-                html_string = '<br>Access saved CSV-file <a href=' + relative_file_path + ' target="_blank">here</a>.<br>'
+                html_string = '<br>Access saved CSV-file: <a href=' + relative_file_path + ' target="_blank">' + file_path + '</a>.<br>'
                 display(HTML('<p style="font-size:16px">' + html_string))     
 
     # Link the button click event to the function
@@ -951,7 +982,7 @@ def create_dendrogram(similarity_matrix, callback):
                 file_path = f'{output_path_city_char}/dendrogram.png'
                 relative_file_path = f'{output_path_city_char_relative}/dendrogram.png'
                 fig.savefig(file_path, bbox_inches='tight')
-                html_string = '<br>Access dendrogram <a href=' + relative_file_path + ' target="_blank">here</a>.<br>'
+                html_string = '<br>Access dendrogram: <a href=' + relative_file_path + ' target="_blank">' + file_path + '</a>.<br>'
                 display(HTML('<p style="font-size:16px">' + html_string))
                 
 

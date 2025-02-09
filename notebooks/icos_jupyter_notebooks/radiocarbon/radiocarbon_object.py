@@ -121,39 +121,34 @@ class RadiocarbonObject():
         
         full_range = pd.date_range(start=start_date, end=end_date, freq='3H')
 
-        self.dateRange = full_range[full_range.hour.isin(self.settings['timeOfDay'])]
-        
+        self.dateRange = full_range[full_range.hour.isin(self.settings['timeOfDay'])] 
 
     def _setDfs(self):
-        
 
-        #no need to return, but makes more clear that assigns to the radiocarbon object
+        # Determine facility inclusion and create radiocarbon dataframes
         if self.settings['facilityInclusion']:
             self.dfDelta14CStation, self.dfDelta14CFacility = radiocarbon_functions.delta_radiocarbon_dataframes(self)
         else:
             self.dfDelta14CStation = radiocarbon_functions.delta_radiocarbon_dataframes(self)
-            
+
+        # Exit if no station data
         if self.dfDelta14CStation is None:
-            
             return
-            
-        
 
-        if self.settings['resample'][0]!= 'M':
+        # Parse resample settings: 'MS' (monthly) or '14D' (14 days)
+        resample_value = self.settings['resample']
+        is_monthly = resample_value.startswith('M')  # e.g., 'MS'
+        days_resample = int(resample_value[:-1]) if not is_monthly else -1
 
-            days_resample = int(self.settings['resample'][0])
+        # Perform resampling for station data
+        if days_resample > 0 or is_monthly:
+            self.dfDelta14CStationResample, self.dfDelta14CStationResampleDisplay = \
+                radiocarbon_functions.resampled_modelled_radiocarbon(self.dfDelta14CStation, days_resample)
 
-        else:
-            days_resample = -1
-
-        if days_resample > 0 or self.settings['resample'][0]== 'M':
-
-
-            self.dfDelta14CStationResample, self.dfDelta14CStationResampleDisplay = radiocarbon_functions.resampled_modelled_radiocarbon(self.dfDelta14CStation, self.settings['resample'][0])
-            
+            # Perform resampling for facility data, if applicable
             if self.settings['facilityInclusion']:
-                
-                self.dfDelta14CFacilityResample, self.dfDelta14CFacilityResampleDisplay = radiocarbon_functions.resampled_modelled_radiocarbon(self.dfDelta14CFacility, self.settings['resample'][0])
+                self.dfDelta14CFacilityResample, self.dfDelta14CFacilityResampleDisplay = \
+                    radiocarbon_functions.resampled_modelled_radiocarbon(self.dfDelta14CFacility, days_resample)
 
             
 if __name__ == "__main__":
