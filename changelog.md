@@ -5,57 +5,61 @@ the latest version. This means that we deploy on the ICOS JupyterHub, either
 the latest release found [here](https://pypi.org/project/icoscp/) or the latest
 master branch found [here](https://github.com/ICOS-Carbon-Portal/pylib).
 
-## 2.1.0 <p>(07/03/2023 - 06/11/2024)</p>
-- Add `rsync` utility to docker image installation (06/11/2024).
-- Add [itables]() version 2.2.2 to pip requirements (28/10/2024).
+## 2.1.0 <p>(07/03/2023 - 11/02/2025)</p>
+- Add [fluxengine](https://pypi.org/project/fluxengine/) version 4.0.9.1 to pip
+  requirements, [pyco2sys](https://pypi.org/project/PyCO2SYS/) version 1.8.3.4
+  to mamba requirements, and [`uv`](https://pypi.org/project/uv/) utility to
+  docker image installation (11/02/2025)
+- Add `rsync` utility to docker image installation (06/11/2024)
+- Add [itables]() version 2.2.2 to pip requirements (28/10/2024)
 - Bump [icoscp](https://pypi.org/project/icoscp/) to version 0.2.2 
-(18/10/2024).
+(18/10/2024)
 - Bump [icoscp_stilt](https://pypi.org/project/icoscp_stilt/) to version 0.1.3 
-(18/10/2024).
+(18/10/2024)
 - Bump [icoscp\_core](https://pypi.org/project/icoscp_core/) to version 0.3.7
-(17/10/2024).
+(17/10/2024)
 - Bump [icoscp](
 https://github.com/ICOS-Carbon-Portal/pylib/tree/c68ad7afa1c27efb69f3350ad7723827517ad004)
-to master branch (05/04/2024).
+to master branch (05/04/2024)
 - Bump [icoscp\_core](https://pypi.org/project/icoscp_core/) to version 0.3.3
-(05/04/2024).
+(05/04/2024)
 - Other notebook fixes mentioned [here](
-https://github.com/ICOS-Carbon-Portal/jupyter/issues/367) (05/04/2023).
+https://github.com/ICOS-Carbon-Portal/jupyter/issues/367) (05/04/2023)
 - Bump [icoscp](https://pypi.org/project/icoscp/0.1.20/) to version 0.1.20
-(12/01/2024).
+(12/01/2024)
 - Add [jupyter-splitview](https://pypi.org/project/jupyter-splitview/0.1.2/)
 version 0.1.2, [jupyterlab\_mathjax2](
 https://pypi.org/project/jupyterlab-mathjax2/4.0.0/) version 4.0.0, and
 [icoscp\_core](https://pypi.org/project/icoscp_core/0.3.0/) version 0.3.0 to
-pip requirements (12/01/2024).
+pip requirements (12/01/2024)
 - Bump [icoscp](https://pypi.org/project/icoscp/0.1.19/) to version 0.1.19
-(25/07/2023).
+(25/07/2023)
 - Add [h5netcdf](https://pypi.org/project/h5netcdf/) version 1.1.0 to mamba
-requirements (10/05/2023).
+requirements (10/05/2023)
 - Add [kaleido](https://pypi.org/project/kaleido/0.2.1/) version 0.2.1 and
 [`cyclebars`](https://github.com/klavere/cyclebars) to the docker image
-installation (28/04/2023).
+installation (28/04/2023)
 - Update [ipywidgets](https://pypi.org/project/ipywidgets/8.0.4/) to version
 8.0.4 and [plotly](https://pypi.org/project/plotly/5.14.1/) to version 5.14.1
-(13/04/2023).
-- Add `zip` library to the docker image installation (20/03/2023).
+(13/04/2023)
+- Add `zip` library to the docker image installation (20/03/2023)
 - Add [icos-splash](https://github.com/ZogopZ/icos-splash) to the docker image
-installation (07/03/2023).
+installation (07/03/2023)
 - Fork and patch [nersc-announcements-extension](
 https://github.com/ZogopZ/nersc-refresh-announcements) to resolve TypeScript
-issues (07/03/2023).
+issues (07/03/2023)
 - Add [jupyter-resource-usage](
 https://github.com/jupyter-server/jupyter-resource-usage) to pip requirements
-(07/03/2023).
+(07/03/2023)
 - Add [paramiko](https://github.com/paramiko/paramiko) to pip requirements
-(07/03/2023).
+(07/03/2023)
 - Other notebook fixes mentioned [here](
-https://github.com/ICOS-Carbon-Portal/jupyter/issues/262) (07/03/2023).
-
+https://github.com/ICOS-Carbon-Portal/jupyter/issues/262) (07/03/2023)
+  
 ## 2.0.1 <p>(15/11/2022)</p>
-- Add PyGeodesy version 22.11.3 library to the docker image installation.
-- Add utm version 0.7.0 library to the docker image installation.
-- Fix errors caused by cartopy library.
+- Add PyGeodesy version 22.11.3 library to the docker image installation
+- Add utm version 0.7.0 library to the docker image installation
+- Fix errors caused by cartopy library
 
 ## 2.0.0 <p>(04/11/2022)</p>
 - #### Jupyter Classic vs JupyterLab
