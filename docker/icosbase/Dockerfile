@@ -65,7 +65,7 @@ RUN uv pip install --quiet --requirement pip_requirements.txt --system
 RUN rm pip_requirements.txt
 
 # Add env variable for PROJ (library used by cartopy and shapely).
-ENV PROJ_LIB=/opt/conda/share/proj
+cat /ENV PROJ_LIB=/opt/conda/share/proj
 
 # Override configuration for jupyter lab settings.
 COPY overrides.json /opt/conda/share/jupyter/lab/settings/.
@@ -76,7 +76,7 @@ COPY overrides.json /opt/conda/share/jupyter/lab/settings/.
 ADD https://api.github.com/repos/ZogopZ/icos-splash/git/refs/heads/trunk cache-bust
 # Install jupyter-lab extension icos-splash, to modify the splash
 # animation using the ICOS Carbon Portal logo.
-RUN pip install git+https://github.com/ZogopZ/icos-splash.git
+RUN uv pip install git+https://github.com/ZogopZ/icos-splash.git
 RUN rm cache-bust
 
 
@@ -86,9 +86,9 @@ RUN rm cache-bust
 # Update version number according to latest release.
 
 # Install specific version.
-RUN pip install --quiet icoscp_core==0.3.7
-RUN pip install --quiet icoscp==0.2.2
-RUN pip install --quiet icoscp_stilt==0.1.3
+RUN uv pip install --quiet icoscp_core==0.3.7
+RUN uv pip install --quiet icoscp==0.2.2
+RUN uv pip install --quiet icoscp_stilt==0.1.3
 # RUN pip install --extra-index-url https://pypi.org/simple --quiet -i https://test.pypi.org/simple/ icoscp==0.2.0a2
 # RUN pip install --extra-index-url https://pypi.org/simple --quiet -i https://test.pypi.org/simple/ icoscp_stilt==0.1.0a5
 
