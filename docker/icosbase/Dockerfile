@@ -65,7 +65,7 @@ RUN uv pip install --quiet --requirement pip_requirements.txt --system
 RUN rm pip_requirements.txt
 
 # Add env variable for PROJ (library used by cartopy and shapely).
-cat /ENV PROJ_LIB=/opt/conda/share/proj
+ENV PROJ_LIB=/opt/conda/share/proj
 
 # Override configuration for jupyter lab settings.
 COPY overrides.json /opt/conda/share/jupyter/lab/settings/.
