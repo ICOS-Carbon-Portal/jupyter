@@ -1,11 +1,12 @@
-import radiocarbon_functions
-from ipywidgets import Dropdown, Button, Output, VBox, RadioButtons
-from IPython.display import clear_output
-from icoscp.station import station as station_data
-from IPython.core.display import display, HTML 
-import warnings
-warnings.filterwarnings('ignore')
+import pandas as pd
 import ipywidgets as widgets
+from ipywidgets import Output, VBox
+from IPython.core.display import display, HTML 
+from IPython.display import clear_output
+import folium
+from icoscp_core.icos import meta, ATMO_STATION
+from icoscp_core.icos import station_class_lookup
+import pandas as pd
 style_scroll = """
     <style>
        .jupyter-widgets-output-area .output_scroll {
@@ -20,140 +21,154 @@ style_scroll = """
     </style>
     """
 
-#want to have a dropdown with the names of the nuclear facilities ranked by their emissions year 2018
-list_facility_names=[]   
-list_emissions_2018=[]
-
-dictionary_radiocarbon_emissions=radiocarbon_functions.dictionary_radiocarbon_emissions
-for key in dictionary_radiocarbon_emissions:
-
-    list_facility_names.append(dictionary_radiocarbon_emissions[key]['name']) 
-
-    list_emissions_2018.append(dictionary_radiocarbon_emissions[key]['2018']) 
-
-list_facility_names_sorted=[x for _,x in sorted(zip(list_emissions_2018,list_facility_names), reverse=True)]
-
-#Create dropdown list for emission facilities:
-
-header_interactive_map = Output()
-with header_interactive_map:
-    display(HTML('<p style="font-size:16px;font-weight:bold;">Interactive map showing nuclear facilities and ICOS stations</p>'))
-
-header_select_facility = Output()
-
-with header_select_facility:
-    display(HTML('<p style="font-size:15px;"><ul><li>All European nuclear facilities will be shown on the map</li>\
-    <li>This dropdown lists all the facilities sorted by emissions in 2018 with the highest emitters listed first</li>\
-    <li>The selected facility will be highlighted on the map with a yellow marker whereas the other facilities are represented with red markers. Blue markers represent the ICOS stations.</li>\
-    <li>Hoover over the markers to show the names of the facilities and stations</li>\
-    <li>Click on the markers to see information on emissions and information about the stations respectively</li></ul></p>'))
-
-select_facility = Dropdown(options = list_facility_names_sorted,
-
-                         description='')
-
-#Create dropdown list basemap options:
-header_select_basemap = Output()
-
-with header_select_basemap:
+def overview_map(selected_year):
     
-    display(HTML('<p style="font-size:15px;">Select basemap:</p>'))
+    clear_output()
     
-select_basemap = Dropdown(options = ['Imagery', 'OpenStreetMap'], description='')
+    # Read CarbonPortal dataset extended with Reactor Types
+    df = pd.read_csv("radiocarbon/facilities_GBq_year_2006_2022_upd_2024_09_04.csv", decimal=".")
 
-header_year_data= Output()
-with header_year_data:
-    display(HTML('<p style="font-size:15px;">Choose year:</p>'))
+    # Fetch and filter ICOS stations of interest
+    atmo_class1 = [
+        s for s in meta.list_stations(ATMO_STATION)
+        if station_class_lookup().get(s.uri) == '1'
+    ]
+    atmo_class1 = pd.DataFrame(atmo_class1)
+
+    # Color palette for reactor types
+    color_palette = {
+        "PWR": "#d62728",  # Red
+        "BWR": "#ff7f0e",   # Orange
+        "Mixed": "#2ca02c", # Green
+        "Other":  "#1f77b4",   # Blue
+    }
     
-header_static_map = Output()
-with header_static_map:
+    # Define size scaling
+    max_size_val = 5000
+    size_scale = 40  # Adjust for folium (smaller scale compared to Plotly)
+    min_size = 5     # Minimum size for the smallest point
+
+    # Calculate sizes for the markers
+    df['size'] = df[selected_year] / max_size_val
+    df['size'] = df['size'].apply(lambda x: max(min_size, x * size_scale) if x <= 1 else size_scale)
+
+    # Determine color based on reactor type
+    def determine_color(facility_type):
+        if "/" in facility_type:
+            return color_palette["Mixed"]
+        elif "PWR" in facility_type:
+            return color_palette["PWR"]
+        elif "BWR" in facility_type:
+            return color_palette["BWR"]
+        else:
+            return color_palette["Other"]
+
+    # Assign colors to facilities
+    df['color'] = df['facility_type'].apply(determine_color)
+
+    # Initialize the map
+    map_center = [53, 11]
+    map = folium.Map(location=map_center, zoom_start=5, tiles='CartoDB positron')
+
+    # Add facility markers
+    for i, row in df.iterrows():
+        folium.CircleMarker(
+            location=(row['lat'], row['lon']),
+            radius=row['size'],
+            color=row['color'],
+            fill=True,
+            fill_color=row['color'],
+            fill_opacity=0.6,
+            popup=f"{row['facility']} ({row['facility_type']}): {row[selected_year]:.2f} GBq {selected_year}",
+        ).add_to(map)
+
+    # Add ICOS stations as stars
+    for i, row in atmo_class1.iterrows():
+        folium.Marker(
+            location=(row['lat'], row['lon']),
+            icon=folium.Icon(color='blue', icon='cloud'),#prefix='fa'
+            popup=f'<a href="{row["uri"]}" target="_blank">{row["name"]}</a>', max_width=300
+        ).add_to(map)
+        
+        # Adding the bubble size legend
+        bubble_lat = [43, 46, 48]  # Adjust latitudes for each bubble
+        bubble_lon = -12
+        bubble_lons = [bubble_lon, bubble_lon, bubble_lon]  # Same longitude for the legend
+        bubble_sizes = [size_scale, size_scale/2, size_scale/10]
+        bubble_names = [f"> {max_size_val} GBq/yr", f"{max_size_val/2:.0f} GBq/yr", f"{max_size_val/10:.0f} GBq/yr"]
+
+        # Add bubble sizes as legend
+        for lat, size, name in zip(bubble_lat, bubble_sizes, bubble_names):
+            folium.CircleMarker(
+                location=(lat, bubble_lon),
+                radius=size,  # Size of the bubble
+                color='#000000',
+                fill=True,
+                fill_color='#FFFFFF',
+                fill_opacity=0.6,
+            ).add_to(map)
+
+            folium.Marker(
+                location=(lat, bubble_lon-2),  
+                icon=folium.DivIcon(
+                    html=f'<div style="font-size: 12pt; width: 1000px; white-space: nowrap;">{name}</div>'
+                )
+            ).add_to(map)
+
+    # Add a legend manually (since Folium doesn't support legends directly)
+    legend_html = '''
+         <div style="position: fixed; 
+         bottom: 50px; left: 50px; width: 190px; height: 140px; 
+         background-color: white; border:2px solid grey; z-index:9999; font-size:14px;
+         ">&nbsp; <b>Legend</b><br>
+         &nbsp; <i style="background:{PWR};opacity:0.6;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</i>&nbsp; PWR <br>
+         &nbsp; <i style="background:{BWR};opacity:0.6;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</i>&nbsp; BWR <br>
+         &nbsp; <i style="background:{Mixed};opacity:0.6;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</i>&nbsp; >1 reactor type <br>
+         &nbsp; <i style="background:{Other};opacity:0.6;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</i>&nbsp; Other <br>
+         &nbsp; <i class="fa fa-cloud" style="color:blue;"></i>&nbsp; ICOS Class 1 Stations
+         </div>
+         '''.format(**color_palette)
+
+    map.get_root().html.add_child(folium.Element(legend_html))
     
-    display(HTML('<p style="font-size:16px;"><br><b>Static map showing nuclear facilities\' emissions and ICOS atmospheric stations</b><br><br>2022 data is priliminary (2022-10-27)</p>'))
+    return map
 
-year_data=RadioButtons(
-    options=['2006','2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022'],
-    value='2021',
-    description=' ',
-    disabled=False)
+# Load the data
+nuclear_emissions = pd.read_csv('radiocarbon/facilities_GBq_year_2006_2022_upd_2024_09_04.csv')
 
-#Create button widget (execution):
+# Find columns that can be converted to integers (i.e., years)
+years = [col for col in nuclear_emissions.columns if col.isdigit()]
 
-button_exe = Button(description='Update maps',
+# Create a dropdown widget for selecting the year
+year_dropdown = widgets.Dropdown(
+    options=years,
+    description='Select Year:',
+    style={'description_width': 'initial'},
+    layout = {'width': '200px', 'height': 'initial'}#layout=widgets.Layout(width='200px')
+)
 
-                    disabled=False,
+# Create an update button
+update_button = widgets.Button(
+    description='Update',
+    button_style='primary',
+    layout = {'width': '200px', 'height': 'initial'}#layout=widgets.Layout(width='100px')
+)
 
-                    button_style='danger', # 'success', 'info', 'warning', 'danger' or ''
-
-                    tooltip='Press the button to update map',
-
-                    icon='check')
-
-#Format widgets:
-
-select_facility.layout.width = '379px'
-
-select_facility.style.description_width = 'initial'
-
-select_facility.layout.margin = '2px 2px 2px 10px'
-
-select_basemap.layout.width = '200px'
-
-select_basemap.style.description_width = 'initial'
-
-select_basemap.layout.margin = '2px 2px 2px 10px'
-
-button_exe.style.button_color = '#3973ac'
-
-button_exe.layout.width = '150px'
-
-button_exe.layout.margin = '10px 50px 40px 30px'
-
-#Create form object:
-
-form_out = Output()
-#Create output object:
-
+# for output in Jupyter Notebook
 plot_out = Output() 
 
-#Function that executes on button_click (calculate score):
-
-def on_exe_bttn_clicked(button_c):
-
-    #Open output object:
-
+# Define the function to call when the button is clicked
+def on_update_button_clicked(b):
+    
+    selected_year = year_dropdown.value
+    
     with plot_out:
+        display(overview_map(selected_year))
 
-        #Delete previous output:
+# Link the button click event to the function
+update_button.on_click(on_update_button_clicked)
 
-        clear_output()
+# Display the dropdown and button
+form_out = widgets.VBox([year_dropdown, update_button, plot_out])
 
-        all_stations=station_data.getIdList()
-
-        atm_stations=all_stations[all_stations['theme']== 'AS']
-
-        #list of atmospheric stations, selected station, basemap choice
-        radiocarbon_functions.plotmap(atm_stations, select_facility.value, select_basemap.value, d_icon='cloud', icon_col='orange')
-        
-        #here static map
-        
-        radiocarbon_functions.plotmap_static(atm_stations, year_data.value)
-
-
-#Call function on button_click-event (calculate score):
-
-button_exe.on_click(on_exe_bttn_clicked)
-
-#Open output obj:a
-
-with form_out:
-
-    #Clean previous values:
-
-    clear_output()
-
-    #Show plot:
-
-    display(VBox([header_interactive_map, header_select_facility, select_facility, header_select_basemap, select_basemap, header_static_map, header_year_data, year_data, button_exe, plot_out]))
-
-#Display form:
 display(widgets.HTML(style_scroll),form_out)  

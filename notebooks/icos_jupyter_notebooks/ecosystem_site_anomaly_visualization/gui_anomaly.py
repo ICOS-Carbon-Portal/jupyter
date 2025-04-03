@@ -10,8 +10,8 @@ import urllib.request
 
 # Related third party imports.
 from IPython.core.display import display, HTML
-from icoscp.sparql.runsparql import RunSparql
-from icoscp.station import station
+from icoscp_core.icos import meta, ECO_STATION
+
 from ipywidgets import Dropdown, ColorPicker, HBox, Button, Output, RadioButtons, GridspecLayout
 from matplotlib import pyplot as plt
 import ipywidgets as widgets
@@ -58,6 +58,11 @@ output_path = os.path.join(os.path.expanduser('~'), 'output')
 output_anomalies_path = os.path.join(output_path, 'ecosystem-site-anomaly')
 if not os.path.exists(output_anomalies_path):
     os.makedirs(output_anomalies_path)
+    
+# the overview map will show from start, but the user can change this. 
+global map_showing
+map_showing = True
+
 ##############################################################################
 button_color_able='#4169E1'
 colors_negative_anomalies = {'GPP_DT_VUT_REF':'#115C0A',
@@ -69,91 +74,52 @@ colors_positive_anomalies = {'GPP_DT_VUT_REF':'#4ABF40',
                              'VPD_F':'#06BBE0',
                              'RECO_DT_VUT_REF': '#fc4e2a'}
 
-# site information for dropdowns and for the overview map. 
-sites_dataframe = station.getIdList('ES')
-
+# Paths to data directories
 path_ten = os.path.join(data_path, 'FULLSET_DD', 'ten_year')
 path_twenty = os.path.join(data_path, 'FULLSET_DD', 'twenty_year')
 path_icos = os.path.join(data_path, 'FULLSET_DD', 'ICOS')
 
-# use data from one variable to list all the available sites:
+# Site information for dropdowns and overview map
+sites_dataframe = pd.DataFrame(meta.list_stations(ECO_STATION))
+
+# Load datasets for the reference periods
 data_2010_2020 = pd.read_csv(os.path.join(data_path, 'all_sites_2010_2020_GPP_DT_VUT_REF_v2.csv'))
-
-# make a tuple for use in the dropdowns
-list_all_2010_2020 = list(data_2010_2020.columns)[5:]
-list_all_2010_2020 = sorted(list_all_2010_2020)
-dropdown_tuple_2010_2020 = [(list(sites_dataframe.loc[sites_dataframe['id'] == (site_string.split('_')[0])]['name'])[0] + ' (' + site_string.split('_')[0] + ')', site_string) for site_string in list_all_2010_2020 if not 'std' in site_string]
-
-# same as above but for the full reference period
 data_2000_2020 = pd.read_csv(os.path.join(data_path, 'all_sites_2000_2020_GPP_DT_VUT_REF_v2.csv'))
 
-list_all_2000_2020 = list(data_2000_2020.columns)[5:]
-list_all_2000_2020 = sorted(list_all_2000_2020)
-dropdown_tuple_2000_2020 = [(list(sites_dataframe.loc[sites_dataframe['id'] == (site_string.split('_')[0])]['name'])[0] + ' (' + site_string.split('_')[0] + ')', site_string) for site_string in list_all_2000_2020 if not 'std' in site_string]
+# Function to create dropdown tuples
+def create_dropdown_tuples(data, sites_dataframe):
+    site_columns = list(data.columns)[5:]
+    sorted_columns = sorted(site_columns)
+    return [
+        (
+            f"{sites_dataframe.loc[sites_dataframe['id'] == site_id]['name'].values[0]} ({site_id})",
+            column
+        )
+        for column in sorted_columns
+        if 'std' not in column and (site_id := column.split('_')[0])
+    ]
 
-# information (lat/lon) for the map
-list_site_ids_2010_2020 = [column.split('_')[0] for column in data_2010_2020.columns[4:]]
-list_site_ids_2000_2020 = [column.split('_')[0] for column in data_2000_2020.columns[4:]]
+# Create dropdown tuples for each dataset
+dropdown_tuple_2010_2020 = create_dropdown_tuples(data_2010_2020, sites_dataframe)
+dropdown_tuple_2000_2020 = create_dropdown_tuples(data_2000_2020, sites_dataframe)
 
-# filtered pandas dataframes. Contains lat and lon columns.
-filtered_2010_2020 = sites_dataframe.loc[sites_dataframe['id'].isin(list_site_ids_2010_2020)]
-filtered_2000_2020 = sites_dataframe.loc[sites_dataframe['id'].isin(list_site_ids_2000_2020)]
+# Extract site IDs for mapping
+site_ids_2010_2020 = [column.split('_')[0] for column in data_2010_2020.columns[4:]]
+site_ids_2000_2020 = [column.split('_')[0] for column in data_2000_2020.columns[4:]]
 
-sites_w_ICOS_data = ['DE-Kli','FR-Aur','CZ-wet','BE-Lon','DE-Gri','DE-Hai','SE-Deg','IT-Tor','FI-Let','FR-Fon','FI-Hyy']
+# Filter sites dataframe for mapping
+filtered_2010_2020 = sites_dataframe[sites_dataframe['id'].isin(site_ids_2010_2020)]
+filtered_2000_2020 = sites_dataframe[sites_dataframe['id'].isin(site_ids_2000_2020)]
+
+# Sites with ICOS data
+sites_w_ICOS_data = ['DE-Kli', 'FR-Aur', 'CZ-wet', 'BE-Lon', 'DE-Gri', 'DE-Hai', 'SE-Deg', 'IT-Tor', 'FI-Let', 'FR-Fon', 'FI-Hyy']
+
+# Load comparison table
 comparison_table = pd.read_csv(os.path.join(path_icos, 'corr_bias_table_GPP_DT_VUT_REF_2020.csv'))
 
-# the overview map will show from start, but the user can change this. 
-global map_showing
-map_showing = True
-
-# get pandas dataframe with links to the different sites specific landing pages for the warm winter product (and in turn citation strings):
-query = '''
-prefix cpmeta: <http://meta.icos-cp.eu/ontologies/cpmeta/>
-prefix prov: <http://www.w3.org/ns/prov#>
-prefix xsd: <http://www.w3.org/2001/XMLSchema#>
-select ?dobj ?hasNextVersion ?spec ?fileName ?size ?submTime ?timeStart ?timeEnd
-where {
-VALUES ?spec {<http://meta.icos-cp.eu/resources/cpmeta/miscFluxnetArchiveProduct>}
-?dobj cpmeta:hasObjectSpec ?spec .
-BIND(EXISTS{[] cpmeta:isNextVersionOf ?dobj} AS ?hasNextVersion)
-?dobj cpmeta:hasSizeInBytes ?size .
-?dobj cpmeta:hasName ?fileName .
-?dobj cpmeta:wasSubmittedBy/prov:endedAtTime ?submTime .
-?dobj cpmeta:hasStartTime | (cpmeta:wasAcquiredBy / prov:startedAtTime) ?timeStart .
-?dobj cpmeta:hasEndTime | (cpmeta:wasAcquiredBy / prov:endedAtTime) ?timeEnd .
-FILTER NOT EXISTS {[] cpmeta:isNextVersionOf ?dobj}
-FILTER( '2010-01-01T00:00:00.000Z'^^xsd:dateTime >= ?timeStart ) 
-VALUES ?keyword {"Warm Winter 2020"^^xsd:string}
-?dobj cpmeta:hasKeyword ?keyword
-}
-order by desc(?submTime)
-'''
-result = RunSparql(query, 'pandas')   # look at the documentation for different outputformats...
-result.run()
-df_warm_winter = result.data()
-
-# get pandas dataframe with links to the different sites specific landing pages for the level 2 product (and in turn citation strings):
-query_level2 = '''
-prefix cpmeta: <http://meta.icos-cp.eu/ontologies/cpmeta/>
-prefix prov: <http://www.w3.org/ns/prov#>
-prefix xsd: <http://www.w3.org/2001/XMLSchema#>
-select ?dobj ?hasNextVersion ?spec ?fileName ?size ?submTime ?timeStart ?timeEnd
-where {
-VALUES ?spec {<http://meta.icos-cp.eu/resources/cpmeta/etcArchiveProduct>}
-?dobj cpmeta:hasObjectSpec ?spec .
-BIND(EXISTS{[] cpmeta:isNextVersionOf ?dobj} AS ?hasNextVersion)
-?dobj cpmeta:hasSizeInBytes ?size .
-?dobj cpmeta:hasName ?fileName .
-?dobj cpmeta:wasSubmittedBy/prov:endedAtTime ?submTime .
-?dobj cpmeta:hasStartTime | (cpmeta:wasAcquiredBy / prov:startedAtTime) ?timeStart .
-?dobj cpmeta:hasEndTime | (cpmeta:wasAcquiredBy / prov:endedAtTime) ?timeEnd .
-FILTER NOT EXISTS {[] cpmeta:isNextVersionOf ?dobj}
-}
-order by desc(?submTime)
-'''
-result_icos = RunSparql(query_level2, 'pandas')   # look at the documentation for different outputformats...
-result_icos.run()
-df_icos = result_icos.data()
+# links to data landing pages. 
+df_warm_winter = pd.read_csv(os.path.join(data_path, 'warm_winter_objects.csv'))
+df_icos = pd.read_csv(os.path.join(data_path, 'ICOS_L2_objects.csv'))
 
 #--------definition of general functions--------------
 
@@ -630,8 +596,8 @@ def update_func(button_c):
     f.write('Reference period columns (columns without years in title): Averages and standard deviations of daily average values ("DD" in flux product) over the years '  + reference_string + ' for selected site(s)' + semi_colons + '\n')
     f.write('Analysed year(s) column(s) (column titel(s) contains the analysed year of selected site(s)): Daily average values ("DD" in flux product).;\n')
     f.write('Variable definitions (found in column titles: one or two of these variables):;\n')
-    f.write('Gross Primary Production in micromol/m2/s using the daytime partitioning method (GPP_DT_VUT_REF);\n')
-    f.write('Respiration in micromol/m2/s using the daytime partitioning method (RECO_DT_VUT_REF);\n')
+    f.write('Gross Primary Production in gC/m²/d using the daytime partitioning method (GPP_DT_VUT_REF);\n')
+    f.write('Respiration in gC/m²/d using the daytime partitioning method (RECO_DT_VUT_REF);\n')
     f.write('Shortwave incoming radiation in W/m2 (SW_IN_F);\n')
     f.write('Vapor pressure deficit in hPa (VPD_F);\n')
     f.write('Quality control (_QC) flags associated with the individual variables have been applied. The values represent a percentage of measured or good quality gap-filled records aggregated from finer temporal resolutions. A threshold of 0.7 was used when creating this data set.;\n')
@@ -687,7 +653,7 @@ def update_func(button_c):
         
         if year_a > 2020:
             
-            display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' (' + selected_site_a + '), ' + variable_a_value + ':<br>Daily averages for year ' + str(year_a) + ' from the "<a href="' + landingpage_site_a_icos +'" target="_blank">ICOS Level 2</a>" release' + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_a +'" target="_blank">Warm Winter 2020</a>" release. In the year 2020, both releases contain data for this site, and they exhibit a strong correlation in the variable GPP_DT_VUT_REF, with a correlation coefficient (R) exceeding 0.95. The RMSE is ' + rmse_site_a + ' and bias (Warm Winter minus ICOS Level 2) ' + bias_site_a + ' µmol/m²/s.'))
+            display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' (' + selected_site_a + '), ' + variable_a_value + ':<br>Daily averages for year ' + str(year_a) + ' from the "<a href="' + landingpage_site_a_icos +'" target="_blank">ICOS Level 2</a>" release' + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_a +'" target="_blank">Warm Winter 2020</a>" release. In the year 2020, both releases contain data for this site, and they exhibit a strong correlation in the variable GPP_DT_VUT_REF, with a correlation coefficient (R) exceeding 0.95. The RMSE is ' + rmse_site_a + ' and bias (Warm Winter minus ICOS Level 2) ' + bias_site_a + ' gC/m²/d.'))
         else: 
             display(HTML('<p style="font-size:16px">' + selected_site_a_name + ' (' + selected_site_a + '), ' + variable_a_value + ':<br>Daily averages for year ' + str(year_a) + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_a +'" target="_blank">Warm Winter 2020</a>" release.'))
             
@@ -699,7 +665,7 @@ def update_func(button_c):
         if site_b is not None:
             
             if year_b > 2020:
-                display(HTML('<p style="font-size:16px">' + selected_site_b_name + ' (' + selected_site_b + '), ' + variable_b_value + ':<br>Daily averages for year ' + str(year_b) + ' from the "<a href="' + landingpage_site_b_icos +'" target="_blank">ICOS Level 2</a>" release' + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_b +'" target="_blank">Warm Winter 2020</a>" release. In the year 2020, both releases contain data for this site, and they exhibit a strong correlation in the variable GPP_DT_VUT_REF, with a correlation coefficient (R) exceeding 0.95. The RMSE is ' + rmse_site_b + ' and bias (Warm Winter minus ICOS Level 2) ' + bias_site_b + ' µmol/m²/s.'))
+                display(HTML('<p style="font-size:16px">' + selected_site_b_name + ' (' + selected_site_b + '), ' + variable_b_value + ':<br>Daily averages for year ' + str(year_b) + ' from the "<a href="' + landingpage_site_b_icos +'" target="_blank">ICOS Level 2</a>" release' + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_b +'" target="_blank">Warm Winter 2020</a>" release. In the year 2020, both releases contain data for this site, and they exhibit a strong correlation in the variable GPP_DT_VUT_REF, with a correlation coefficient (R) exceeding 0.95. The RMSE is ' + rmse_site_b + ' and bias (Warm Winter minus ICOS Level 2) ' + bias_site_b + ' gC/m²/d.'))
             else: 
                 display(HTML('<p style="font-size:16px">' + selected_site_b_name + ' (' + selected_site_b + '), ' + variable_b_value + ':<br>Daily averages for year ' + str(year_b) + ' are compared to daily averages during ' + reference + ' from the "<a href="' + landingpage_site_b +'" target="_blank">Warm Winter 2020</a>" release.'))
                 

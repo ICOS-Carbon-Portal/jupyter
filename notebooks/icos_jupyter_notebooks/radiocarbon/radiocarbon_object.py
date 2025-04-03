@@ -58,9 +58,6 @@ class RadiocarbonObject():
         self.stationClass = None        # string with station class (1 or 2 or none)
         self.siteType = None            # string with station type (mountain etc. or none) 
         self.dateRange = None           # date range for average footprint specified by users
-        self.fp = None                  # numpy array 400 columns 480 rows (192000 cells) STILT footprint grid given daterange
-        self.fpLat = None               # numpy array with STILT grid lat-values (480)
-        self.fpLon = None               # numpy array with STILT grid lon-values (400)
         self.threshold = None           # threshold for footprint 
         self.resample = None            # mumber of days to resample (int)
         
@@ -68,19 +65,18 @@ class RadiocarbonObject():
         self.dfDelta14CFacility = None  # dataframe with delta radiocarbon from nuclear contamination by indicidual facilities 
         
         self.dfDelta14CStationResample = None
-        self.dfDelta14CStationResampleBokeh = None
+        self.dfDelta14CStationResampleDisplay = None
         
         #specified in function plot_nuclear_contamination_by_facility_bokhe (radiocarbon_functions)
-        self.dfFacilitiesOverThreshold= None
+        self.dfFacilitiesOverThreshold= 0
         
         self.dfDelta14CFacilityResample= None
-        self.dfDelta14CFacilityResampleBokeh=None
+        self.dfDelta14CFacilityResampleDisplay=None
         
 
         # fucntions to generate the object attributes
         self._setStationData()
         self._setDateRange()
-        self._setFootprint()
         self._setDfs()
     
     #possibly add to stilt and cpstation - full country name. Only code from cplibrary,
@@ -122,45 +118,42 @@ class RadiocarbonObject():
         
         start_date=dt.datetime(self.settings['startYear'],self.settings['startMonth'],self.settings['startDay'],0)
         end_date=dt.datetime(self.settings['endYear'],self.settings['endMonth'],self.settings['endDay'],0)
+        
+        full_range = pd.date_range(start=start_date, end=end_date, freq='3H')
 
-        self.dateRange = radiocarbon_functions.date_range_hour_filtered(start_date, end_date, self.settings['timeOfDay'])
-    def _setFootprint(self):
-        """
-        Generate an average footprint (fp) given the user date range.
-        Only footprints that the users are interested in is used (timeselect). 
-        fpLat and fpLon corresponding to the average footprint are also set here. 
-        """
- 
-        nfp, self.fp, self.fpLon, self.fpLat, title= radiocarbon_functions.read_aggreg_footprints(self.stationId, self.dateRange)
-    
+        self.dateRange = full_range[full_range.hour.isin(self.settings['timeOfDay'])]
+        
+
     def _setDfs(self):
         
-        if self.fp is not None:
-            #no need to return, but makes more clear that assigns to the radiocarbon object
+
+        #no need to return, but makes more clear that assigns to the radiocarbon object
+        if self.settings['facilityInclusion']:
+            self.dfDelta14CStation, self.dfDelta14CFacility = radiocarbon_functions.delta_radiocarbon_dataframes(self)
+        else:
+            self.dfDelta14CStation = radiocarbon_functions.delta_radiocarbon_dataframes(self)
+            
+        if self.dfDelta14CStation is None:
+            
+            return
+            
+        
+
+        if self.settings['resample'][0]!= 'M':
+
+            days_resample = int(self.settings['resample'][0])
+
+        else:
+            days_resample = -1
+
+        if days_resample > 0 or self.settings['resample'][0]== 'M':
+
+
+            self.dfDelta14CStationResample, self.dfDelta14CStationResampleDisplay = radiocarbon_functions.resampled_modelled_radiocarbon(self.dfDelta14CStation, self.settings['resample'][0])
+            
             if self.settings['facilityInclusion']:
-                self.dfDelta14CStation, self.dfDelta14CFacility = radiocarbon_functions.delta_radiocarbon_dataframes(self)
-            else:
-                self.dfDelta14CStation = radiocarbon_functions.delta_radiocarbon_dataframes(self)
-
-            if self.settings['resample'][0]!= 'M':
-
-                days_resample = int(self.settings['resample'][0])
-
-            else:
-                days_resample = -1
-
-            if days_resample > 0 or self.settings['resample'][0]== 'M':
-
-
-                self.dfDelta14CStationResample, self.dfDelta14CStationResampleBokeh = radiocarbon_functions.resampled_modelled_radiocarbon(self)
-
-            #resample only if set to resample, and facilities over the specified threshold (by facility)
-            if self.settings['resample'][0]== 'M'or (days_resample>0 and self.dfDelta14CFacility is not None):
-
-                if self.settings['facilityInclusion']: 
-
-                    self.dfDelta14CFacilityResample, self.dfDelta14CFacilityResampleBokeh = radiocarbon_functions.resampled_modelled_radiocarbon_facility(self)
-
+                
+                self.dfDelta14CFacilityResample, self.dfDelta14CFacilityResampleDisplay = radiocarbon_functions.resampled_modelled_radiocarbon(self.dfDelta14CFacility, self.settings['resample'][0])
 
             
 if __name__ == "__main__":

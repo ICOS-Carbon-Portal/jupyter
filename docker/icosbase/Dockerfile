@@ -15,20 +15,20 @@ FROM jupyter/datascience-notebook@sha256:731da3b2844e168d677e622d6ce127e790117e2
 # Switch to root for texlive installation.
 USER root
 # Remove old texlive installation.
-RUN rm -rf /usr/share/texlive
-# Add texlive2021 installer and unpack.
+# RUN rm -rf /usr/share/texlive
+RUN rm -rf /usr/share/texlive /opt/texlive /var/cache/texlive /tmp/texlive
+# Add texlive2024 installer and unpack.
 # http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
 RUN wget -O /tmp/install-tl-unx.tar.gz http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
 RUN tar -xf /tmp/install-tl-unx.tar.gz --strip-components=1 -C /tmp/
 # Add profile and start intallation.
-COPY Texlive2021/texlive.profile /tmp/.
+COPY Texlive2024/texlive.profile /tmp/.
 RUN /tmp/install-tl --profile=/tmp/texlive.profile
-# Export path to texlive2021.
-ENV PATH="/usr/local/texlive/2021/bin/x86_64-linux:${PATH}"
+# Export path to texlive2024.
+ENV PATH="/usr/local/texlive/2024/bin/x86_64-linux:${PATH}"
 
-# Add zip to the system.
 RUN apt-get update
-RUN apt-get install zip
+RUN apt-get install -y zip rsync
 
 # Switch back to normal user.
 USER jovyan
@@ -59,21 +59,26 @@ RUN jupyter labextension install @j123npm/qgrid2@1.1.4 --no-build
 RUN jupyter lab build
 
 # Additional python modules, not available using mamba.
+RUN pip install uv==0.5.29
 COPY pip_requirements.txt  pip_requirements.txt
-RUN pip install --quiet --requirement pip_requirements.txt
+RUN uv pip install --quiet --requirement pip_requirements.txt --system
 RUN rm pip_requirements.txt
-# Version of nersc-refresh-announcements is 0.1.0.
-RUN pip install --quiet git+https://github.com/NERSC/nersc-refresh-announcements.git
-# RUN pip install git+https://github.com/ZogopZ/nersc-refresh-announcements.git@patch-1
 
 # Add env variable for PROJ (library used by cartopy and shapely).
 ENV PROJ_LIB=/opt/conda/share/proj
 
 # Override configuration for jupyter lab settings.
 COPY overrides.json /opt/conda/share/jupyter/lab/settings/.
+
+# Since icos-splash is just a repo, we retrieve a json objects that
+# describes the "trunk" branch (SHA of the branch among other things),
+# to force docker to re-build this step.
+ADD https://api.github.com/repos/ZogopZ/icos-splash/git/refs/heads/trunk cache-bust
 # Install jupyter-lab extension icos-splash, to modify the splash
 # animation using the ICOS Carbon Portal logo.
-RUN pip install git+https://github.com/ZogopZ/icos-splash.git
+RUN uv pip install git+https://github.com/ZogopZ/icos-splash.git --system
+RUN rm cache-bust
+
 
 # ---
 # Keep this in a separate line. It's the only library that changes
@@ -81,10 +86,9 @@ RUN pip install git+https://github.com/ZogopZ/icos-splash.git
 # Update version number according to latest release.
 
 # Install specific version.
-# RUN pip install --quiet icoscp==0.1.20
-RUN pip install --quiet icoscp_core==0.3.4
-RUN pip install --quiet icoscp==0.2.0
-RUN pip install --quiet icoscp_stilt==0.1.0
+RUN uv pip install --quiet icoscp_core==0.3.7 --system
+RUN uv pip install --quiet icoscp==0.2.2 --system
+RUN uv pip install --quiet icoscp_stilt==0.1.3 --system
 # RUN pip install --extra-index-url https://pypi.org/simple --quiet -i https://test.pypi.org/simple/ icoscp==0.2.0a2
 # RUN pip install --extra-index-url https://pypi.org/simple --quiet -i https://test.pypi.org/simple/ icoscp_stilt==0.1.0a5
 

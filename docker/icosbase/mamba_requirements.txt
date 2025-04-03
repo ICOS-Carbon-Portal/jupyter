@@ -23,6 +23,7 @@ papermill=2.3.4
 param=1.12.2
 plotly=5.14.1
 pscript=0.7.7
+pyco2sys=1.8.3.4
 pygmt=0.7.0
 pypdf2=2.10.8
 python-cdo=1.5.6
