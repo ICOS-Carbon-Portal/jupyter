@@ -22,17 +22,17 @@ RUN jupyter trust project_jupyter_notebooks/RINGO_T1.3/RINGO_T1.3_flasksampling_
 USER jovyan
 WORKDIR /home/jovyan/education/
 RUN git clone https://git.wur.nl/peter050/hyytiala-practicals.git
-RUN ln -s /home/jovyan/education/hyytiala-practicals/EXERCISES -t /home/jovyan/education/Summer-school-2025/.
-RUN ln -s /home/jovyan/education/hyytiala-practicals/MEASUREMENTS -t /home/jovyan/education/Summer-school-2025/.
+RUN ln -s /home/jovyan/education/hyytiala-practicals/EXERCISES -t /home/jovyan/education/Summer-school/.
+RUN ln -s /home/jovyan/education/hyytiala-practicals/MEASUREMENTS -t /home/jovyan/education/Summer-school/.
 RUN echo "cd /home/jovyan/education/hyytiala-practicals && git fetch origin && git pull" > ~/.bash_profile
 RUN mkdir -p /home/jovyan/.ipython/profile_default/startup
 COPY 00_summer_school.py /home/jovyan/.ipython/profile_default/startup/00_summer_school.py
-WORKDIR /home/jovyan/education/Summer-school-2025/build/MODEL_ext
+WORKDIR /home/jovyan/education/Summer-school/build/MODEL_ext
 RUN ./MOGUNTIA < basefunct_gl
 RUN ./MOGUNTIA < basefunct_nh
 RUN ./MOGUNTIA < basefunct_tr
 RUN ./MOGUNTIA < basefunct_sh
 RUN ./MOGUNTIA < basefunct_base
 RUN chmod g+w OUTPUT/*
-WORKDIR /home/jovyan/education/Summer-school-2025/
+WORKDIR /home/jovyan/education/Summer-school/
 
