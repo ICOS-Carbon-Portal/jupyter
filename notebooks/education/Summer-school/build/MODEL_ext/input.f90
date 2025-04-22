@@ -138,7 +138,7 @@ do
                 case('DISTRIBUTION')
                   call get_word(line,word,iend)
                   emission_distribution = .true.
-                  open(unit_dummy,file=path//word, form='formatted', status='old')
+                  open(unit_dummy,file=trim(path)//trim(word), form='formatted', status='old')
                   read(unit_dummy,*) emission_dist
                   suma=sum(emission_dist)
                   if(abs(suma-1.).gt.0.1) call stopit('Sum of the emission distribution differs from 1')
@@ -180,9 +180,9 @@ do
                 case('FILE')
                   call get_word(line,word,iend)
                   sink_flag = .true.
-                  open(unit_sink,file = path//word, form = 'formatted', status = 'old')
+                  open(unit_sink,file = trim(path)//trim(word), form = 'formatted', status = 'old')
                   write(7,*) 'SINK FILE '//path//word
-                  open(unit_sinke,file = path//'co2_sink_bio1Pg.dat', form = 'formatted', status = 'old')
+                  open(unit_sinke,file = trim(path)//'co2_sink_bio1Pg.dat', form = 'formatted', status = 'old')
                   exit sinkloop
                 case('EXTRA_LAND')
                   call get_word(line,word,iend)
@@ -192,7 +192,7 @@ do
                   write(7,*) 'SINK STRENGTH GLOBAL ',co2_land_sink(1)
                 case('EXTRA_LAND_SH')
                   call get_word(line,word,iend)
-                  open(unit_sinke,file = path//'co2_sink_bio1Pg.dat', form = 'formatted', status = 'old')
+                  open(unit_sinke,file = trim(path)//trim('co2_sink_bio1Pg.dat'), form = 'formatted', status = 'old')
                   read(word,*) co2_land_sink(3)
                   write(7,*) 'SINK STRENGTH SH ',co2_land_sink(3)
                 case('EXTRA_LAND_NH')
@@ -564,4 +564,3 @@ close(5)
 read(*,*,end=999)
 999 stop
 end
-
