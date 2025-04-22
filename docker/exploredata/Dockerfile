@@ -28,6 +28,7 @@ RUN echo "cd /home/jovyan/education/hyytiala-practicals && git fetch origin && g
 RUN mkdir -p /home/jovyan/.ipython/profile_default/startup
 COPY 00_summer_school.py /home/jovyan/.ipython/profile_default/startup/00_summer_school.py
 WORKDIR /home/jovyan/education/Summer-school/build/MODEL_ext
+RUN make clean && make
 RUN ./MOGUNTIA < basefunct_gl
 RUN ./MOGUNTIA < basefunct_nh
 RUN ./MOGUNTIA < basefunct_tr
