@@ -21,7 +21,10 @@ RUN jupyter trust project_jupyter_notebooks/RINGO_T1.3/RINGO_T1.3_flasksampling_
 # Summer-school
 USER jovyan
 WORKDIR /home/jovyan/education/
+# Force a cache bust by echoing the current date
+RUN echo $(date +%s) > /tmp/cache-bust-file
 RUN git clone https://git.wur.nl/peter050/hyytiala-practicals.git
+RUN rm /tmp/cache-bust-file
 RUN ln -s /home/jovyan/education/hyytiala-practicals/EXERCISES -t /home/jovyan/education/Summer-school/.
 RUN ln -s /home/jovyan/education/hyytiala-practicals/MEASUREMENTS -t /home/jovyan/education/Summer-school/.
 RUN echo "cd /home/jovyan/education/hyytiala-practicals && git fetch origin && git pull" > ~/.bash_profile
@@ -36,3 +39,6 @@ RUN ./MOGUNTIA < basefunct_sh
 RUN ./MOGUNTIA < basefunct_base
 RUN chmod g+w OUTPUT/*
 WORKDIR /home/jovyan/education/Summer-school/
+USER root
+RUN apt update
+RUN apt install -y vim
