@@ -18,7 +18,8 @@ ADD --chown=1000:100 *.ipynb ./
 RUN jupyter trust index_notebook.ipynb
 RUN jupyter trust project_jupyter_notebooks/RINGO_T1.3/ICOS_flasksampling_fossilfuel.ipynb
 RUN jupyter trust project_jupyter_notebooks/RINGO_T1.3/RINGO_T1.3_flasksampling_v5.ipynb
-RUN sudo apt-get install -y vim
+USER root
+RUN apt-get install -y vim
 # Summer-school
 USER jovyan
 WORKDIR /home/jovyan/education/
