@@ -28,7 +28,7 @@ RUN /tmp/install-tl --profile=/tmp/texlive.profile
 ENV PATH="/usr/local/texlive/2024/bin/x86_64-linux:${PATH}"
 
 RUN apt-get update
-RUN apt-get install -y zip rsync
+RUN apt-get install -y zip rsync vim
 
 # Switch back to normal user.
 USER jovyan
@@ -86,7 +86,7 @@ RUN rm cache-bust
 # Update version number according to latest release.
 
 # Install specific version.
-RUN uv pip install --quiet icoscp_core==0.3.7 --system
+RUN uv pip install --quiet icoscp_core==0.3.10 --system
 RUN uv pip install --quiet icoscp==0.2.2 --system
 RUN uv pip install --quiet icoscp_stilt==0.1.3 --system
 # RUN pip install --extra-index-url https://pypi.org/simple --quiet -i https://test.pypi.org/simple/ icoscp==0.2.0a2
