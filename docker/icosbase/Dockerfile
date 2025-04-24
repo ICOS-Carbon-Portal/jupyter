@@ -28,7 +28,7 @@ RUN /tmp/install-tl --profile=/tmp/texlive.profile
 ENV PATH="/usr/local/texlive/2024/bin/x86_64-linux:${PATH}"
 
 RUN apt-get update
-RUN apt-get install -y zip rsync vim
+RUN apt-get install -y zip rsync
 
 # Switch back to normal user.
 USER jovyan
