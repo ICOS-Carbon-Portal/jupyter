@@ -1,3 +1,4 @@
+ARG BASE=icosbase
 FROM $BASE
 
 # 1000:100 is jovyan:users
@@ -22,6 +23,6 @@ USER root
 RUN apt update
 RUN apt install -y vim
 COPY summer_school.sh /usr/local/bin/summer_school.sh
-RUN chmod +x /usr/local/bin/summer_school.shsh
+RUN chmod +x /usr/local/bin/summer_school.sh
 ENTRYPOINT ["tini", "-g", "--"]
 CMD ["summer_school.sh", "--collaborative"]
