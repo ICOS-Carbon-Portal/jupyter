@@ -6,13 +6,13 @@ mkdir /home/jovyan/education/hyytiala-practicals
 git clone https://git.wur.nl/peter050/hyytiala-practicals.git /home/jovyan/education/hyytiala-practicals/.
 ln -s /home/jovyan/education/hyytiala-practicals/EXERCISES -t /home/jovyan/education/Summer-school/.
 ln -s /home/jovyan/education/hyytiala-practicals/MEASUREMENTS -t /home/jovyan/education/Summer-school/.
-rsync -auvn /home/jovyan/education/hyytiala-practicals/MODEL/ /home/jovyan/education/Summer-school/build/MODEL/
-rsync -auvn /home/jovyan/education/hyytiala-practicals/MODEL_ext/ /home/jovyan/education/Summer-school/build/MODEL_ext/
+rsync -auv /home/jovyan/education/hyytiala-practicals/MODEL/ /home/jovyan/education/Summer-school/build/MODEL/
+rsync -auv /home/jovyan/education/hyytiala-practicals/MODEL_ext/ /home/jovyan/education/Summer-school/build/MODEL_ext/
 
 cd /home/jovyan/education/Summer-school/build/MODEL && make clean && make
 cd /home/jovyan/education/Summer-school/build/MODEL_ext && make clean && make
 
-cd /home/jovyan/education/Summer-school-2024/build/MODEL_ext
+cd /home/jovyan/education/Summer-school/build/MODEL_ext
 ./MOGUNTIA < basefunct_gl
 ./MOGUNTIA < basefunct_nh
 ./MOGUNTIA < basefunct_tr
