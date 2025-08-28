@@ -26,29 +26,44 @@ services:
 
   icosbase:
     build:
-      context: ./docker/icosbase
+      context: ./icosbase
       dockerfile: Dockerfile
     container_name: icosbase
+    deploy:
+      replicas: 0
     image: icosbase:latest
     networks:
       - jupyter
 
   explore-icos-atmobs:
     build:
-      context: .
-      dockerfile: ./docker/explore-icos-atmobs/Dockerfile
+      context: nb-content/explore-icos-atmobs
+      dockerfile: ../Dockerfile
     deploy:
       replicas: 0
     image: explore-icos-atmobs:latest
     networks:
       - jupyter
+    restart: on-failure
 
   curve-fitting-obspack:
     build:
-      context: .
-      dockerfile: ./docker/curve-fitting-obspack/Dockerfile
+      context: nb-content/curve-fitting-obspack
+      dockerfile: ../Dockerfile
     deploy:
       replicas: 0
     image: curve-fitting-obspack:latest
     networks:
       - jupyter
+    restart: on-failure
+
+  radiocarbon:
+    build:
+      context: nb-content/radiocarbon
+      dockerfile: ../Dockerfile
+    deploy:
+      replicas: 0
+    image: radiocarbon:latest
+    networks:
+      - jupyter
+    restart: on-failure

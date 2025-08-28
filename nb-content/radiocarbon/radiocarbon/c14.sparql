@@ -1,0 +1,36 @@
+prefix cpmeta: <http://meta.icos-cp.eu/ontologies/cpmeta/>
+prefix prov: <http://www.w3.org/ns/prov#>
+select distinct *
+where{
+	{	select ?dobj (min(?station0) as ?stationName)
+		(sample(?stationId0) as ?stationId) 
+		(sample(?stationLongitude) as ?longitude)
+		(sample(?stationLatitude) as ?latitude)
+		(sample(?stationElevation) as ?elevation)
+		(sample(?samplingHeight0) as ?samplingHeight)
+		where{
+			#VALUES ?dobj { <https://meta.icos-cp.eu/objects/BQcCIf259C3uc53NXMxOUINe> }
+			VALUES ?spec {<http://meta.icos-cp.eu/resources/cpmeta/atcC14L2DataObject>}
+			?dobj cpmeta:hasObjectSpec ?spec .
+			
+			OPTIONAL{
+				?dobj cpmeta:wasAcquiredBy ?acq.
+				?acq prov:wasAssociatedWith ?stationUri .
+				OPTIONAL{ ?stationUri cpmeta:hasName ?station0 }
+				OPTIONAL{ ?stationUri cpmeta:hasStationId ?stationId0 }
+				OPTIONAL{ ?stationUri cpmeta:hasLongitude ?stationLongitude }
+				OPTIONAL{ ?stationUri cpmeta:hasLatitude ?stationLatitude }
+				OPTIONAL{ ?stationUri cpmeta:hasElevation ?stationElevation }
+				OPTIONAL{ ?acq cpmeta:hasSamplingHeight ?samplingHeight0 }
+			}
+		}		
+		group by ?dobj
+	}
+	?dobj cpmeta:hasObjectSpec ?specUri .
+	?dobj cpmeta:wasSubmittedBy/prov:endedAtTime ?submTime .
+	?dobj cpmeta:hasStartTime | (cpmeta:wasAcquiredBy / prov:startedAtTime) ?timeStart .
+	?dobj cpmeta:hasEndTime | (cpmeta:wasAcquiredBy / prov:endedAtTime) ?timeEnd .
+	FILTER NOT EXISTS {[] cpmeta:isNextVersionOf ?dobj}
+	OPTIONAL{?dobj cpmeta:hasActualColumnNames ?columnNames }
+	
+	}

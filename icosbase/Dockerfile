@@ -8,7 +8,7 @@ FROM jupyter/datascience-notebook@sha256:731da3b2844e168d677e622d6ce127e790117e2
 # install the full latest LaTeX version. It takes about 45 minutes to
 # install it, so be patient.
 # Check links below to find which engine is used by default in jupyter
-# notebooks to process TeX documents. Remember, minimal-notebook is
+# nb-content to process TeX documents. Remember, minimal-notebook is
 # included in datascience-notebook.
 # https://github.com/jupyter/docker-stacks/blob/main/minimal-notebook/Dockerfile
 # https://jupyter-docker-stacks.readthedocs.io/en/latest/using/selecting.html#jupyter-datascience-notebook
@@ -17,15 +17,15 @@ USER root
 # Remove old texlive installation.
 # RUN rm -rf /usr/share/texlive
 RUN rm -rf /usr/share/texlive /opt/texlive /var/cache/texlive /tmp/texlive
-# Add texlive2024 installer and unpack.
+# Add texlive2025 installer and unpack.
 # http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
 RUN wget -O /tmp/install-tl-unx.tar.gz http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
 RUN tar -xf /tmp/install-tl-unx.tar.gz --strip-components=1 -C /tmp/
 # Add profile and start intallation.
-COPY Texlive2024/texlive.profile /tmp/.
-RUN /tmp/install-tl --profile=/tmp/texlive.profile
-# Export path to texlive2024.
-ENV PATH="/usr/local/texlive/2024/bin/x86_64-linux:${PATH}"
+COPY Texlive/texlive.profile /tmp/.
+#RUN /tmp/install-tl --profile=/tmp/texlive.profile
+# Export path to texlive2025.
+ENV PATH="/usr/local/texlive/2025/bin/x86_64-linux:${PATH}"
 
 RUN apt-get update
 RUN apt-get install -y zip rsync
