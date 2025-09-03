@@ -168,11 +168,12 @@ def access_nuclear_emission_data():
 #returns dataframes (to radiocarbon_object) with the resampled data that is added to the object that is being created. 
 
 def resampled_modelled_radiocarbon(df, resample):
+
     # Store original column names
     original_columns = {col: col for col in df.columns if col != 'date'}
 
     # Set the resample format string
-    format_string = resample if resample == 'M' else f'{resample}D'
+    format_string = 'M' if resample == -1 else f'{resample}D'
     
     # Determine the column to check for NaN count
     check_nan_column = 'delta_14c_nuclear' if 'delta_14c_nuclear' in df.columns else df.columns[1]
@@ -729,6 +730,8 @@ def get_nuclear_contamination(radiocarbonObject, STILT_co2_and_background):
 
     # Iterate through the dates
     first = True
+    
+    use_latest_available_emission = False
 
     for date in radiocarbonObject.dateRange:
         
@@ -795,7 +798,7 @@ def get_nuclear_contamination(radiocarbonObject, STILT_co2_and_background):
         i = i + 1
 
     if use_latest_available_emission:
-        print(f'Using nuclear emissions from{max_year}')
+        print(f'Using nuclear emissions from {max_year}')
     # The resulting DataFrame `df_nuclear_facilities` will have one row per date and one column per facility, along with the 'date' column.
 
     # Dataframe with the total nuclear contribution
