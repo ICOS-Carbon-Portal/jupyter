@@ -109,6 +109,6 @@ ENV PORTAL_DATA_PATH_ICOSCITIES="/data/cities/dataAppStorage"
 # todo: These need to be moved to their respective "correct" locations
 # todo: within this file. I only put them here in order to not have to
 # todo: rebuild this image over and over again.
-COPY --chown=jovyan:users log_execution.py .ipython/profile_default/startup/
+COPY --chown=jovyan:users log_exec.py .ipython/profile_default/startup/
 USER root
 RUN apt-get install -y curl
