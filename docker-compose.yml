@@ -35,35 +35,24 @@ services:
     networks:
       - jupyter
 
-  explore-icos-atmobs:
+  pylib-examples:
     build:
-      context: nb-content/explore-icos-atmobs
+      context: nb-content/pylib-examples
       dockerfile: ../Dockerfile
     deploy:
       replicas: 0
-    image: explore-icos-atmobs:latest
+    image: pylib-examples:latest
     networks:
       - jupyter
     restart: on-failure
 
-  curve-fitting-obspack:
+  core-notebooks:
     build:
-      context: nb-content/curve-fitting-obspack
+      context: nb-content/core-notebooks
       dockerfile: ../Dockerfile
     deploy:
       replicas: 0
-    image: curve-fitting-obspack:latest
-    networks:
-      - jupyter
-    restart: on-failure
-
-  radiocarbon:
-    build:
-      context: nb-content/radiocarbon
-      dockerfile: ../Dockerfile
-    deploy:
-      replicas: 0
-    image: radiocarbon:latest
+    image: core-notebooks:latest
     networks:
       - jupyter
     restart: on-failure
