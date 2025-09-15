@@ -1,123 +1,289 @@
-{% extends "page.html" %}
+{% extends 'page.html' %}
+{% set service = 'Exploredata' %}
+
+{# to disable announcement, use: set announcement_login = None #}
+
+{% set announcement_login = None %}
 
 {% block login_widget %}
 {% endblock %}
 
 {% block main %}
-    <div class="container">
-        <div class="jumbotron text-center">
-            <h1>Welcome to ICOS JupyterHub</h1>
-            <p>Launching notebooks to Jupyter since 2020 🚀</p>
-            <hr>
 
-            <p>Please, select your environment from the list below:</p>
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
+<link rel="stylesheet" href="https://static.icos-cp.eu/css/bootstrap/5.3.3/icos-bootstrap.css">
 
-            <!-- Notebook Groups -->
-            <div class="row justify-content-center">
+<style>
+    html {
+        font-size: unset;
+    }
 
-                <!-- Main Notebooks -->
-                <div class="col-md-6">
-                    <div class="card mb-4 shadow-sm">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">Notebooks</h5>
-                        </div>
-                        <div class="card-body text-start">
-                            <ul class="list-unstyled mb-0">
-                                <li><a href="#" onclick="loginAndRedirect('explore-icos-atmobs')">explore_icos_atmObs.ipynb</a></li>
-                                <li><a href="#" onclick="loginAndRedirect('curve-fitting-obspack')">curve_fitting_obspack.ipynb</a></li>
-                                <li><a href="#" onclick="loginAndRedirect('radiocarbon')">radiocarbon.ipynb</a></li>
-                            </ul>
-                        </div>
-                    </div>
+    body {
+        font-size: 0.875rem;
+    }
+
+    .navbar {
+        margin-bottom: 0;
+        flex-wrap: nowrap;
+    }
+
+    .header-container {
+        background-size: cover;
+        background-image: url(https://static.icos-cp.eu/images/icos-header.jpg);
+
+        div {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        img {
+            margin: 42px 15px 38px;
+            height: 70px;
+        }
+    }
+
+    .announcement {
+        margin: 1em auto;
+        max-width: 100ch;
+
+        ul {
+            margin-top: 1em;
+        }
+    }
+
+    .main {
+        max-width: 100ch;
+    }
+
+    .form {
+        font-size: 1rem;
+    }
+
+    footer {
+        background-color: #636466;
+        width: 100%;
+    }
+
+    .footer-container {
+        max-width: 1200px;
+        padding: 4rem 1rem;
+        word-wrap: break-word;
+        color: #ffffff;
+
+        a {
+            color: white;
+            font-size: 0.9375rem;
+            text-decoration: none;
+        }
+
+        h3 {
+            margin-top: 30px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            a {
+                font-size: 1.25rem;
+            }
+        }
+
+        .social-media-icon {
+            font-size: 1.75rem;
+            margin: 14px 2.8px;
+        }
+
+        p {
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    .footer-flex {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        .region {
+            width: 30%;
+            min-width: 280px;
+        }
+    }
+
+    .marked-link::before {
+        font-family: "Font Awesome 6 Free";
+        content: "\f105";
+        font-weight: 900;
+        margin: 0 0.3rem;
+        color: white;
+    }
+
+    .external-link::after {
+        font-family: "Font Awesome 6 Free";
+        content: "\f35d";
+        font-weight: 900;
+        margin: 0 0.3rem;
+    }
+</style>
+
+<script>
+    function enableSignInButton() {
+        // Get references to the checkboxes and sign-in button.
+        const checkboxLicense = document.getElementById("licence");
+        const checkboxTerms = document.getElementById("terms");
+        const signInButton = document.getElementById("login-submit");
+
+        // Check if both checkboxes are checked.
+        signInButton.disabled = !(checkboxLicense.checked && checkboxTerms.checked);
+    }
+
+    // Run function immediately, to account for page navigation/returning with saved values
+    enableSignInButton();
+</script>
+
+<div>
+    <div class="header-container">
+        <div>
+            <a href="https://www.icos-cp.eu/" title="Home">
+                <img src='https://static.icos-cp.eu/images/ICOS-logo.svg' alt='Home'>
+            </a>
+        </div>
+    </div>
+
+    {% if announcement_login %}
+    <div class="container announcement alert alert-warning">
+        {{ announcement_login | safe }}
+    </div>
+    {% endif %}
+
+    <main class="container main">
+        {% block login %}
+        <div class="my-4">
+        <h2>Sign in to {{ service }}</h2>
+        <div class="auth-form-body">
+            <p id="insecure-login-warning" class="hidden">
+                Warning: JupyterHub seems to be served over an unsecured HTTP connection.
+                We strongly recommend enabling HTTPS for JupyterHub.
+            </p>
+        </div>
+        <form action="{{login_url}}?next={{next}}" method="post" role="form" class="form">
+            {% if login_error %}
+            <p class="login_error">
+                {{login_error}}
+            </p>
+            {% endif %}
+            <div class="mb-3">
+                <label for="username_input" class="form-label">Username:</label>
+                <input
+                        id="username_input"
+                        type="text"
+                        autocapitalize="off"
+                        autocorrect="off"
+                        class="form-control"
+                        name="username"
+                        val="{{username}}"
+                        tabindex="1"
+                        autofocus="autofocus"
+                />
+            </div>
+            <div class="mb-3">
+                <label for="password_input" class="form-label">Password:</label>
+                <input
+                        type="password"
+                        class="form-control"
+                        name="password"
+                        id="password_input"
+                        tabindex="2"
+                />
+            </div>
+            <div class="mb-3">
+                <input type="checkbox" name="licence" id="licence" class="form-check-input" onchange="enableSignInButton()" tabindex="3"/>
+                <label for="licence" class="form-label ms-2">
+                    I understand that ICOS data is licensed under a
+                    <a href="https://data.icos-cp.eu/licence" target="_blank">CC BY 4.0 licence</a>
+                    <img src="https://www.icos-cp.eu/sites/default/files/inline-images/creativecommons.png">
+                </label>
+            </div>
+            <div class="mb-3">
+                <input type="checkbox" name="terms" id="terms" class="form-check-input" onchange="enableSignInButton()" tabindex="4"/>
+                <label for="terms" class="form-label ms-2">
+                    I accept the ICOS
+                    <a href="https://www.icos-cp.eu/terms-of-use" target="_blank">
+                        Terms of Use
+                    </a>
+                </label>
+            </div>
+            <div class="mb-3">
+                <input id="login-submit" type="submit" class="btn btn-primary" value="Sign In" tabindex="5" disabled="true"/>
+                <div class="feedback-widget hidden">
+                    <i class="fa fa-spinner"></i>
                 </div>
+            </div>
+        </form>
+        </div>
+        {% endblock login %}
+        <div class="my-5">
+            {% include 'about.html' %}
+        </div>
+    </main>
+</div>
 
-                <!-- Pylib Examples -->
-                <div class="col-md-6">
-                    <div class="card mb-4 shadow-sm">
-                        <div class="card-header bg-success text-white">
-                            <h5 class="mb-0">Pylib Examples</h5>
-                        </div>
-                        <div class="card-body text-start">
-                            <ul class="list-unstyled mb-0">
-                                <li><a href="#" onclick="loginAndRedirect('ex1-data.ipynb')">ex1_data.ipynb</a></li>
-                                <li><a href="#" onclick="loginAndRedirect('ex1a-atmo-data.ipynb')">ex1a_atmo_data.ipynb</a></li>
-                                <li><a href="#" onclick="loginAndRedirect('ex1b-eco-data.ipynb')">ex1b_eco_data.ipynb</a></li>
-                                <li><a href="#" onclick="loginAndRedirect('ex1c-ocean-data.ipynb')">ex1c_ocean_data.ipynb</a></li>
-                                <li><a href="#" onclick="loginAndRedirect('ex2-station.ipynb')">ex2_station.ipynb</a></li>
-                                <li><a href="#" onclick="loginAndRedirect('ex3-multisource.ipynb')">ex3_multisource.ipynb</a></li>
-                                <li><a href="#" onclick="loginAndRedirect('ex4-collection.ipynb')">ex4_collection.ipynb</a></li>
-                                <li><a href="#" onclick="loginAndRedirect('ex5-sparql.ipynb')">ex5_sparql.ipynb</a></li>
-                                <li><a href="#" onclick="loginAndRedirect('ex6a-STILT-find.ipynb')">ex6a_STILT_find.ipynb</a></li>
-                                <li><a href="#" onclick="loginAndRedirect('ex6b-STILT-footprint-animation.ipynb')">ex6b_STILT_footprint_animation.ipynb</a></li>
-                                <li><a href="#" onclick="loginAndRedirect('ex6c-STILT-timeseries.ipynb')">ex6c_STILT_timeseries.ipynb</a></li>
-                                <li><a href="#" onclick="loginAndRedirect('ex7-ObsPackData.ipynb')">ex7_ObsPackData.ipynb</a></li>
-                                <li><a href="#" onclick="loginAndRedirect('how-to-authenticate.ipynb')">how_to_authenticate.ipynb</a></li>
-                            </ul>
-                        </div>
-                    </div>
+<footer>
+    <div class="footer-container container">
+        <img alt="ICOS Logo" src="https://static.icos-cp.eu/images/ICOS-logo.svg" style="height: 70px">
+
+        <div class="footer-flex">
+            <div class="region">
+                <div class="footer-box">
+                    <h3>Resources</h3>
+                    <p class="marked-link"><a href="https://www.icos-cp.eu/contact-us">CONTACT</a></p>
+                    <p class="marked-link"><a href="https://www.icos-cp.eu/privacy">PRIVACY POLICY</a></p>
+                    <p class="marked-link"><a href="https://www.icos-cp.eu/data-services/about-data-portal/data-license">DATA LICENSE</a></p>
+                    <p class="marked-link"><a href="https://www.icos-cp.eu/terms-of-use">TERMS OF USE</a></p>
+                    <p class="marked-link"><a href="https://uptime.icos-cp.eu/status/core">SERVICES STATUS</a></p>
                 </div>
+            </div>
 
+            <div class="region">
+                <div class="footer-box">
+                    <h3>Central Facility websites</h3>
+                    <p class="marked-link external-link"><a href="https://icos-atc.lsce.ipsl.fr/">Atmosphere Thematic Centre (ATC)</a></p>
+                    <p class="marked-link external-link"><a href="http://www.icos-etc.eu/">Ecosystem Thematic Centre (ETC)</a></p>
+                    <p class="marked-link external-link"><a href="https://otc.icos-cp.eu/">Ocean Thematic Centre (OTC)</a></p>
+                    <p class="marked-link external-link"><a href="https://www.icos-cal.eu/">Central Analytical Laboratories (CAL)</a></p>
+                    <h3 class="marked-link"><a href="https://www.icos-cp.eu/observations/national-networks">National networks</a></h3>
+                </div>
+            </div>
+
+            <div class="region">
+                <div class="footer-box">
+                    <h3>ICOS on social media</h3>
+                    <p>
+                        <a class="social-media-icon fab fa-twitter-square" href="https://twitter.com/icos_ri">&nbsp;</a>
+                        <a class="social-media-icon fab fa-instagram" href="https://www.instagram.com/icosri/">&nbsp;</a>
+                        <a class="social-media-icon fab fa-youtube-square" href="https://www.youtube.com/c/ICOSRI">&nbsp;</a>
+                        <a class="social-media-icon fab fa-linkedin" href="https://www.linkedin.com/company/integrated-carbon-observation-system">&nbsp;</a>
+                        <a class="social-media-icon fa-brands fa-square-bluesky" href="https://bsky.app/profile/icos-ri.eu">&nbsp;</a>
+                    </p>
+                    <h3 class="marked-link"><a href="https://www.icos-cp.eu/news-and-events/newsletter">ICOS Newsletter</a></h3>
+                    <h3 class="marked-link"><a href="https://fileshare.icos-cp.eu/">Nextcloud &mdash; ICOS Fileshare</a></h3>
+                </div>
             </div>
         </div>
     </div>
+  </footer>
 
 {% endblock %}
 
 {% block script %}
-    {{ super() }}
-    <script type="text/javascript">
-        function getCookie(name) {
-            const cookieArr = document.cookie.split("; ");
-            for (let i = 0; i < cookieArr.length; i++) {
-                const cookiePair = cookieArr[i].split("=");
-                if (name === cookiePair[0]) {
-                    return decodeURIComponent(cookiePair[1]);
-                }
-            }
-            return null;
-        }
-
-        function loginAndRedirect(profile) {
-            const notebookName = profile;
-            const sessionId = crypto.randomUUID();  // generate a unique ID
-            const username = notebookName + "&id=" + sessionId;  // unique username per session
-            const password = 'test';
-            const xsrfToken = getCookie('_xsrf');
-
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '/hub/login';
-            form.target = '_blank';
-
-            const inputCsrf = document.createElement('input');
-            inputCsrf.type = 'hidden';
-            inputCsrf.name = '_xsrf';
-            inputCsrf.value = xsrfToken;
-            form.appendChild(inputCsrf);
-
-            const inputUsername = document.createElement('input');
-            inputUsername.type = 'hidden';
-            inputUsername.name = 'username';
-            inputUsername.value = username;
-            form.appendChild(inputUsername);
-
-            const inputPassword = document.createElement('input');
-            inputPassword.type = 'hidden';
-            inputPassword.name = 'password';
-            inputPassword.value = password;
-            form.appendChild(inputPassword);
-
-            document.body.appendChild(form);
-            form.submit();
-        }
-
-        function toggleDropdown(menuId) {
-            const menu = document.getElementById(menuId);
-            if (menu.style.display === "none") {
-                menu.style.display = "block";
-            } else {
-                menu.style.display = "none";
-            }
-        }
-    </script>
+{{ super() }}
+<script>
+    if (window.location.protocol === "http:") {
+        // unhide http warning
+        var warning = document.getElementById('insecure-login-warning');
+        warning.className = warning.className.replace(/\bhidden\b/, '');
+    }
+    // setup onSubmit feedback
+    $('form').submit((e) => {
+        var form = $(e.target);
+        form.find('.submit-form>input').attr('disabled', true);
+        form.find('.submit-form>*').toggleClass('hidden');
+        form.find('.feedback-widget>*').toggleClass('fa-pulse');
+    });
+</script>
 {% endblock %}
