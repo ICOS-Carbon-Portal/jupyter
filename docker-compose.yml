@@ -46,13 +46,13 @@ services:
       - jupyter
     restart: on-failure
 
-  core-notebooks:
+  icos-notebooks:
     build:
-      context: nb-content/core-notebooks
+      context: nb-content/icos-notebooks
       dockerfile: ../Dockerfile
     deploy:
       replicas: 0
-    image: core-notebooks:latest
+    image: icos-notebooks:latest
     networks:
       - jupyter
     restart: on-failure
