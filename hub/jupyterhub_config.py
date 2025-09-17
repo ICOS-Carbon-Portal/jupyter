@@ -8,7 +8,7 @@ from dockerspawner import DockerSpawner
 c = get_config()
 
 c.JupyterHub.authenticator_class = "dummy"
-c.DummyAuthenticator.password = "test"
+c.DummyAuthenticator.password = "carboncloud"
 c.DockerSpawner.network_name = "jupyter"
 c.DockerSpawner.use_internal_ip = True
 c.DockerSpawner.host_ip = "0.0.0.0"
@@ -23,24 +23,28 @@ c.JupyterHub.shutdown_on_logout = True
 c.DockerSpawner.remove = True
 c.DockerSpawner.notebook_dir = "/home/jovyan"
 
-nb_map = {
-    "explore-icos-atmobs": "/lab/tree/explore_icos_atmObs.ipynb",
-    "curve-fitting-obspack": "/lab/tree/curve_fitting_obspack.ipynb",
-    "radiocarbon": "/lab/tree/radiocarbon.ipynb",
-}
+
+class CustomDockerSpawner(DockerSpawner):
+    def options_form(self, spawner):
+        template_path = "/srv/jupyterhub/templates/custom_options_form.html"
+        with open(template_path, "r") as f:
+            return f.read()
+
+    def options_from_form(self, formdata):
+        # No defaults: require explicit choice
+        options = {}
+        env_choice = formdata.get("env")
+        if env_choice:
+            options["env"] = env_choice[0]
+        return options
+
+    async def start(self):
+        if "env" not in self.user_options:
+            raise ValueError(
+                "You must select an environment before starting the server."
+            )
+        self.image = self.user_options["env"]
+        return await super().start()
 
 
-class CustomSpawner(DockerSpawner):
-    def start(self):
-        # Extract notebook name from username
-        notebook = self.user.name.split("&id=")[0]
-        if notebook not in nb_map:
-            raise ValueError(f"Unknown notebook: {notebook}")
-
-        self.image = notebook  # use the notebook's Docker image
-        self.default_url = nb_map[notebook]
-
-        return super().start()
-
-
-c.JupyterHub.spawner_class = CustomSpawner
+c.JupyterHub.spawner_class = CustomDockerSpawner

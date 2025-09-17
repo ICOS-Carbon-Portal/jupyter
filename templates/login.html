@@ -154,67 +154,67 @@
     <main class="container main">
         {% block login %}
         <div class="my-4">
-        <h2>Sign in to {{ service }}</h2>
-        <div class="auth-form-body">
-            <p id="insecure-login-warning" class="hidden">
-                Warning: JupyterHub seems to be served over an unsecured HTTP connection.
-                We strongly recommend enabling HTTPS for JupyterHub.
-            </p>
-        </div>
-        <form action="{{login_url}}?next={{next}}" method="post" role="form" class="form">
-            {% if login_error %}
-            <p class="login_error">
-                {{login_error}}
-            </p>
-            {% endif %}
-            <div class="mb-3">
-                <label for="username_input" class="form-label">Username:</label>
-                <input
-                        id="username_input"
-                        type="text"
-                        autocapitalize="off"
-                        autocorrect="off"
-                        class="form-control"
-                        name="username"
-                        val="{{username}}"
-                        tabindex="1"
-                        autofocus="autofocus"
-                />
+            <h2>Sign in to {{ service }}</h2>
+            <div class="auth-form-body">
+                <p id="insecure-login-warning" class="hidden">
+                    Warning: JupyterHub seems to be served over an unsecured HTTP connection.
+                    We strongly recommend enabling HTTPS for JupyterHub.
+                </p>
             </div>
-            <div class="mb-3">
-                <label for="password_input" class="form-label">Password:</label>
-                <input
-                        type="password"
-                        class="form-control"
-                        name="password"
-                        id="password_input"
-                        tabindex="2"
-                />
-            </div>
-            <div class="mb-3">
-                <input type="checkbox" name="licence" id="licence" class="form-check-input" onchange="enableSignInButton()" tabindex="3"/>
-                <label for="licence" class="form-label ms-2">
-                    I understand that ICOS data is licensed under a
-                    <a href="https://data.icos-cp.eu/licence" target="_blank">CC BY 4.0 licence</a>
-                    <img src="https://www.icos-cp.eu/sites/default/files/inline-images/creativecommons.png">
-                </label>
-            </div>
-            <div class="mb-3">
-                <input type="checkbox" name="terms" id="terms" class="form-check-input" onchange="enableSignInButton()" tabindex="4"/>
-                <label for="terms" class="form-label ms-2">
-                    I accept the ICOS
-                    <a href="https://www.icos-cp.eu/terms-of-use" target="_blank">
-                        Terms of Use
-                    </a>
-                </label>
-            </div>
-            <div class="mb-3">
-                <input id="login-submit" type="submit" class="btn btn-primary" value="Sign In" tabindex="5" disabled="true"/>
-                <div class="feedback-widget hidden">
-                    <i class="fa fa-spinner"></i>
+            <form action="{{login_url}}?next={{next}}" method="post" role="form" class="form">
+                {% if login_error %}
+                <p class="login_error">
+                    {{login_error}}
+                </p>
+                {% endif %}
+                <div class="mb-3">
+                    <label for="username_input" class="form-label">Username:</label>
+                    <input
+                            id="username_input"
+                            type="text"
+                            autocapitalize="off"
+                            autocorrect="off"
+                            class="form-control"
+                            name="username"
+                            val="{{username}}"
+                            tabindex="1"
+                            autofocus="autofocus"
+                    />
                 </div>
-            </div>
-        </form>
+                <div class="mb-3">
+                    <label for="password_input" class="form-label">Password:</label>
+                    <input
+                            type="password"
+                            class="form-control"
+                            name="password"
+                            id="password_input"
+                            tabindex="2"
+                    />
+                </div>
+                <div class="mb-3">
+                    <input type="checkbox" name="licence" id="licence" class="form-check-input" onchange="enableSignInButton()" tabindex="3"/>
+                    <label for="licence" class="form-label ms-2">
+                        I understand that ICOS data is licensed under a
+                        <a href="https://data.icos-cp.eu/licence" target="_blank">CC BY 4.0 licence</a>
+                        <img src="https://www.icos-cp.eu/sites/default/files/inline-images/creativecommons.png">
+                    </label>
+                </div>
+                <div class="mb-3">
+                    <input type="checkbox" name="terms" id="terms" class="form-check-input" onchange="enableSignInButton()" tabindex="4"/>
+                    <label for="terms" class="form-label ms-2">
+                        I accept the ICOS
+                        <a href="https://www.icos-cp.eu/terms-of-use" target="_blank">
+                            Terms of Use
+                        </a>
+                    </label>
+                </div>
+                <div class="mb-3">
+                    <input id="login-submit" type="submit" class="btn btn-primary" value="Sign In" tabindex="5" disabled="true"/>
+                    <div class="feedback-widget hidden">
+                        <i class="fa fa-spinner"></i>
+                    </div>
+                </div>
+            </form>
         </div>
         {% endblock login %}
         <div class="my-5">
@@ -266,24 +266,67 @@
             </div>
         </div>
     </div>
-  </footer>
+</footer>
 
 {% endblock %}
 
 {% block script %}
 {{ super() }}
 <script>
-    if (window.location.protocol === "http:") {
-        // unhide http warning
-        var warning = document.getElementById('insecure-login-warning');
-        warning.className = warning.className.replace(/\bhidden\b/, '');
+function getCookie(name) {
+    const cookieArr = document.cookie ? document.cookie.split('; ') : [];
+    for (let i = 0; i < cookieArr.length; i++) {
+        const parts = cookieArr[i].split('=');
+        const k = parts.shift();
+        const v = parts.join('=');
+        if (k === name) return decodeURIComponent(v);
     }
-    // setup onSubmit feedback
-    $('form').submit((e) => {
-        var form = $(e.target);
-        form.find('.submit-form>input').attr('disabled', true);
-        form.find('.submit-form>*').toggleClass('hidden');
-        form.find('.feedback-widget>*').toggleClass('fa-pulse');
-    });
+    return null;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form[method="post"]');
+    if (!form) {
+        console.warn('Login script: no POST form found on page.');
+        return;
+    }
+
+    const token = getCookie('_xsrf') || getCookie('XSRF-TOKEN') || null;
+    console.log('Login script: _xsrf cookie value =', token);
+
+    let hidden = form.querySelector('input[name="_xsrf"]');
+    if (!hidden) {
+        hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = '_xsrf';
+        form.insertBefore(hidden, form.firstChild);
+    }
+    hidden.value = token || '';
+
+    form.addEventListener('submit', function(ev) {
+        try {
+            const fd = new FormData(form);
+            const obj = {};
+            for (let pair of fd.entries()) obj[pair[0]] = pair[1];
+            console.log('Login form submitting, FormData=', obj);
+        } catch (e) {
+            console.warn('Login script: error logging form data', e);
+        }
+    }, { once: true });
+
+    if (window.jQuery) {
+        try {
+            // preserve the original behavior but avoid exceptions if selectors don't exist
+            $('form').on('submit', (e) => {
+                var form = $(e.target);
+                try { form.find('.submit-form>input').attr('disabled', true); } catch(e){/*ignore*/ }
+                try { form.find('.submit-form>*').toggleClass('hidden'); } catch(e){/*ignore*/ }
+                try { form.find('.feedback-widget>*').toggleClass('fa-pulse'); } catch(e){/*ignore*/ }
+            });
+        } catch (e) {
+            console.warn('Login script: jQuery handler setup failed', e);
+        }
+    }
+});
 </script>
 {% endblock %}
