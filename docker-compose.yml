@@ -56,3 +56,14 @@ services:
     networks:
       - jupyter
     restart: on-failure
+
+  summer-school:
+    build:
+      context: nb-content/summer-school/content
+      dockerfile: ../build.summer-school/Dockerfile
+    deploy:
+      replicas: 0
+    image: summer-school:latest
+    networks:
+      - jupyter
+    restart: on-failure

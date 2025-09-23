@@ -14,139 +14,225 @@
 
         <!-- Pylib Examples Section -->
         <div class="col-auto">
-            <h4 class="fw-bold text-success" style="position: relative; display: inline-block;">
+            <h4 class="fw-bold text-success d-flex align-items-center" style="cursor: pointer;"
+                data-bs-toggle="collapse" data-bs-target="#pylibExamplesList" aria-expanded="false" aria-controls="pylibExamplesList">
+                <i class="bi bi-caret-right-fill me-2 rotate-icon" style="transition: transform 0.2s;"></i>
                 Pylib Examples
-                <span class="custom-tooltip" data-bs-toggle="tooltip" data-bs-placement="top"
-                      title="Notebooks under this category include examples on how to use the ICOS Carbon Portal Python library (i.e. library that provides access to ICOS data products)."
-                      style="font-size: 0.5em; position: relative; top: -10px; cursor: pointer; margin-left: -0.2rem;">
-                    <i class="bi bi-question-circle" style="cursor: pointer;"></i>
+                <span class="custom-tooltip ms-2" data-bs-toggle="tooltip" data-bs-placement="top"
+                      title="This is a good place to start exploring ICOS data. Notebooks under this category showcase
+                      how to use the ICOS Carbon Portal Python libraries which give you access to data products provided by ICOS."
+                      style="font-size: 0.5em; position: relative; top: -10px; cursor: pointer;">
+                    <i class="bi bi-question-circle"></i>
                 </span>
             </h4>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="env" id="ex1_data" value="pylib-examples:latest&nb=ex1_data.ipynb">
-                <label class="form-check-label" for="ex1_data">ex1_data.ipynb</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="env" id="ex1a_atmo_data" value="pylib-examples:latest&nb=ex1a_atmo_data.ipynb">
-                <label class="form-check-label" for="ex1a_atmo_data">ex1a_atmo_data.ipynb</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="env" id="ex1b_eco_data" value="pylib-examples:latest&nb=ex1b_eco_data.ipynb">
-                <label class="form-check-label" for="ex1b_eco_data">ex1b_eco_data.ipynb</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="env" id="ex1c_ocean_data" value="pylib-examples:latest&nb=ex1c_ocean_data.ipynb">
-                <label class="form-check-label" for="ex1c_ocean_data">ex1c_ocean_data.ipynb</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="env" id="ex2_station" value="pylib-examples:latest&nb=ex2_station.ipynb">
-                <label class="form-check-label" for="ex2_station">ex2_station.ipynb</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="env" id="ex3_multisource" value="pylib-examples:latest&nb=ex3_multisource.ipynb">
-                <label class="form-check-label" for="ex3_multisource">ex3_multisource.ipynb</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="env" id="ex4_collection" value="pylib-examples:latest&nb=ex4_collection.ipynb">
-                <label class="form-check-label" for="ex4_collection">ex4_collection.ipynb</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="env" id="ex5_sparql" value="pylib-examples:latest&nb=ex5_sparql.ipynb">
-                <label class="form-check-label" for="ex5_sparql">ex5_sparql.ipynb</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="env" id="ex6a_STILT_find" value="pylib-examples:latest&nb=ex6a_STILT_find.ipynb">
-                <label class="form-check-label" for="ex6a_STILT_find">ex6a_STILT_find.ipynb</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="env" id="ex6b_STILT_footprint_animation" value="pylib-examples:latest&nb=ex6b_STILT_footprint_animation.ipynb">
-                <label class="form-check-label" for="ex6b_STILT_footprint_animation">ex6b_STILT_footprint_animation.ipynb</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="env" id="ex7_ObsPackData" value="pylib-examples:latest&nb=ex7_ObsPackData.ipynb">
-                <label class="form-check-label" for="ex7_ObsPackData">ex7_ObsPackData.ipynb</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="env" id="how_to_authenticate" value="pylib-examples:latest&nb=how_to_authenticate.ipynb">
-                <label class="form-check-label" for="how_to_authenticate">how_to_authenticate.ipynb</label>
+            <div class="collapse mt-2 ps-2" id="pylibExamplesList">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="ex1_data" value="pylib-examples:latest&nb=ex1_data.ipynb">
+                    <label class="form-check-label" for="ex1_data">ex1_data.ipynb</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="ex1a_atmo_data" value="pylib-examples:latest&nb=ex1a_atmo_data.ipynb">
+                    <label class="form-check-label" for="ex1a_atmo_data">ex1a_atmo_data.ipynb</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="ex1b_eco_data" value="pylib-examples:latest&nb=ex1b_eco_data.ipynb">
+                    <label class="form-check-label" for="ex1b_eco_data">ex1b_eco_data.ipynb</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="ex1c_ocean_data" value="pylib-examples:latest&nb=ex1c_ocean_data.ipynb">
+                    <label class="form-check-label" for="ex1c_ocean_data">ex1c_ocean_data.ipynb</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="ex2_station" value="pylib-examples:latest&nb=ex2_station.ipynb">
+                    <label class="form-check-label" for="ex2_station">ex2_station.ipynb</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="ex3_multisource" value="pylib-examples:latest&nb=ex3_multisource.ipynb">
+                    <label class="form-check-label" for="ex3_multisource">ex3_multisource.ipynb</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="ex4_collection" value="pylib-examples:latest&nb=ex4_collection.ipynb">
+                    <label class="form-check-label" for="ex4_collection">ex4_collection.ipynb</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="ex5_sparql" value="pylib-examples:latest&nb=ex5_sparql.ipynb">
+                    <label class="form-check-label" for="ex5_sparql">ex5_sparql.ipynb</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="ex6a_STILT_find" value="pylib-examples:latest&nb=ex6a_STILT_find.ipynb">
+                    <label class="form-check-label" for="ex6a_STILT_find">ex6a_STILT_find.ipynb</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="ex6b_STILT_footprint_animation" value="pylib-examples:latest&nb=ex6b_STILT_footprint_animation.ipynb">
+                    <label class="form-check-label" for="ex6b_STILT_footprint_animation">ex6b_STILT_footprint_animation.ipynb</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="ex7_ObsPackData" value="pylib-examples:latest&nb=ex7_ObsPackData.ipynb">
+                    <label class="form-check-label" for="ex7_ObsPackData">ex7_ObsPackData.ipynb</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="how_to_authenticate" value="pylib-examples:latest&nb=how_to_authenticate.ipynb">
+                    <label class="form-check-label" for="how_to_authenticate">how_to_authenticate.ipynb</label>
+                </div>
             </div>
         </div>
 
         <!-- ICOS Notebooks Section -->
         <div class="col-auto">
-            <h4 class="fw-bold text-success" style="position: relative; display: inline-block;">
+            <h4 class="fw-bold text-success d-flex align-items-center" style="cursor: pointer;"
+                data-bs-toggle="collapse" data-bs-target="#icosNotebooksList" aria-expanded="false" aria-controls="icosNotebooksList">
+                <i class="bi bi-caret-right-fill me-2 rotate-icon" style="transition: transform 0.2s;"></i>
                 ICOS Notebooks
-                <span class="custom-tooltip" data-bs-toggle="tooltip" data-bs-placement="top"
-                      title="Notebooks that process ICOS data, compute statistics, generate interactive visualizations (plots, maps, tables), and showcase scientific outputs from ICOS projects and educational workshops."
-                      style="font-size: 0.5em; position: relative; top: -10px; cursor: pointer; margin-left: -0.2rem;">
-                    <i class="bi bi-question-circle" style="cursor: pointer;"></i>
+                <span class="custom-tooltip ms-2" data-bs-toggle="tooltip" data-bs-placement="top"
+                      title="Notebooks that process ICOS data, compute statistics, generate interactive visualizations
+                          (plots, maps, tables), and showcase scientific outputs from ICOS projects and educational workshops."
+                      style="font-size: 0.5em; position: relative; top: -10px; cursor: pointer;">
+                    <i class="bi bi-question-circle"></i>
                 </span>
             </h4>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="env" id="curve_fitting_obspack" value="icos-notebooks:latest&nb=curve_fitting_obspack.ipynb">
-                <label class="form-check-label" for="curve_fitting_obspack">curve_fitting_obspack.ipynb</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="env" id="radiocarbon" value="icos-notebooks:latest&nb=radiocarbon.ipynb">
-                <label class="form-check-label" for="radiocarbon">radiocarbon.ipynb</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="env" id="awesome_knoughtbuk" value="awesome&nb=awesome">
-                <label class="form-check-label" for="awesome_knoughtbuk">awesome_knoughtbuk.ipynb</label>
+            <div class="collapse mt-2 ps-2" id="icosNotebooksList">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="curve_fitting_obspack" value="icos-notebooks:latest&nb=curve_fitting_obspack.ipynb">
+                    <label class="form-check-label" for="curve_fitting_obspack">curve_fitting_obspack.ipynb</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="icos_atmobs_statistics" value="icos-notebooks:latest&nb=icos_atmObs_statistics.ipynb">
+                    <label class="form-check-label" for="icos_atmobs_statistics">icos_atmObs_statistics.ipynb</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="station_characterization" value="icos-notebooks:latest&nb=station_characterization.ipynb">
+                    <label class="form-check-label" for="station_characterization">station_characterization.ipynb</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="ICOS_flasksampling_fossilfuel" value="icos-notebooks:latest&nb=ICOS_flasksampling_fossilfuel.ipynb">
+                    <label class="form-check-label" for="ICOS_flasksampling_fossilfuel">ICOS_flasksampling_fossilfuel.ipynb</label>
+                </div>
             </div>
         </div>
 
         <!-- Education Notebooks Section -->
         <div class="col-auto">
-            <h4 class="fw-bold text-success" style="position: relative; display: inline-block;">
+            <h4 class="fw-bold text-success d-flex align-items-center" style="cursor: pointer;"
+                data-bs-toggle="collapse" data-bs-target="#educationList" aria-expanded="false" aria-controls="educationList">
+                <i class="bi bi-caret-right-fill me-2 rotate-icon" style="transition: transform 0.2s;"></i>
                 Education
-                <span class="custom-tooltip" data-bs-toggle="tooltip" data-bs-placement="top"
-                      title="todo"
-                      style="font-size: 0.5em; position: relative; top: -10px; cursor: pointer; margin-left: -0.2rem;">
-                    <i class="bi bi-question-circle" style="cursor: pointer;"></i>
+                <span class="custom-tooltip ms-2" data-bs-toggle="tooltip" data-bs-placement="top"
+                      title="Here we provide specific collections of notebooks for workshops or university courses."
+                      style="font-size: 0.5em; position: relative; top: -10px; cursor: pointer;">
+                    <i class="bi bi-question-circle"></i>
                 </span>
             </h4>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="env" id="NGEN18" value="awesome&nb=awesome">
-                <label class="form-check-label" for="NGEN18">NGEN18</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="env" id="summer_school" value="awesome&nb=awesome">
-                <label class="form-check-label" for="summer_school">Summer School 2025</label>
+            <div class="collapse mt-2 ps-2" id="educationList">
+                 <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="summer_school" value="summer-school:latest&nb=summer_school">
+                    <label class="form-check-label" for="summer_school">Summer School 2025</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="envrifair_winterschool" value="icos-notebooks:latest&nb=envrifair_winterschool">
+                    <label class="form-check-label" for="envrifair_winterschool">Envrifair Winterschool</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="otc_data_reduction_workshop" value="icos-notebooks:latest&nb=otc_data_reduction_workshop">
+                    <label class="form-check-label" for="otc_data_reduction_workshop">OTC Data Reduction Workshop</label>
+                </div>
             </div>
         </div>
 
-        <!-- DOI/PID Awesome Notebooks Section -->
+        <!-- DOI/PID Notebooks Section -->
         <div class="col-auto">
-            <h4 class="fw-bold text-success" style="position: relative; display: inline-block;">
+            <h4 class="fw-bold text-success d-flex align-items-center" style="cursor: pointer;"
+                data-bs-toggle="collapse" data-bs-target="#doiPIDList" aria-expanded="false" aria-controls="doiPIDList">
+                <i class="bi bi-caret-right-fill me-2 rotate-icon" style="transition: transform 0.2s;"></i>
                 DOI/PID
-                <span class="custom-tooltip" data-bs-toggle="tooltip" data-bs-placement="top"
-                      title="todo"
-                      style="font-size: 0.5em; position: relative; top: -10px; cursor: pointer; margin-left: -0.2rem;">
-                    <i class="bi bi-question-circle" style="cursor: pointer;"></i>
+                <span class="custom-tooltip ms-2" data-bs-toggle="tooltip" data-bs-placement="top"
+                      title="The notebooks here are connected to scientific publications or persistent identified
+                      datasets and provide software, scripts, interactive tools, showcasing how to compute and analyze
+                      the data, and create the figures published in the manuscript."
+                      style="font-size: 0.5em; position: relative; top: -10px; cursor: pointer;">
+                    <i class="bi bi-question-circle"></i>
                 </span>
             </h4>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="env" id="nowtbouk" value="awesome&nb=awesome">
-                <label class="form-check-label" for="nowtbouk">nowtbouk.ipynb (10.18160/KZ63-2NDJ)</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="env" id="gnoutbuk" value="awesome&nb=awesome">
-                <label class="form-check-label" for="gnoutbuk">gnoutbuk.ipynb (10.18160/20Z1-AYJ2)</label>
+
+            <div class="collapse mt-2 ps-2" id="doiPIDList">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="city-characterization-tool" value="icos-notebooks:latest&nb=city-characterization-tool">
+                    <label class="form-check-label" for="city-characterization-tool">
+                        city-characterization-tool
+                        (<a href="https://doi.org/10.18160/P8SV-B99F" target="_blank">10.18160/P8SV-B99F</a>)
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="ecosystem_site_anomaly_visualization" value="icos-notebooks:latest&nb=ecosystem_site_anomaly_visualization.ipynb">
+                    <label class="form-check-label" for="ecosystem_site_anomaly_visualization">
+                        ecosystem_site_anomaly_visualization.ipynb
+                        (<a href="https://doi.org/10.18160/4QPK-2N7W" target="_blank">10.18160/4QPK-2N7W</a>)
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="network-view-tool" value="icos-notebooks:latest&nb=network-view-tool">
+                    <label class="form-check-label" for="network-view-tool">
+                        network-view-tool
+                        (<a href="https://doi.org/10.18160/AMET-9KWT" target="_blank">10.18160/AMET-9KWT</a>)
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="radiocarbon" value="icos-notebooks:latest&nb=radiocarbon.ipynb">
+                    <label class="form-check-label" for="radiocarbon">
+                        radiocarbon.ipynb
+                        (<a href="https://doi.org/10.18160/GATA-SGZ5" target="_blank">10.18160/GATA-SGZ5</a>)
+                    </label>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
     document.addEventListener('DOMContentLoaded', function () {
+        // Initialize all tooltips
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        tooltipTriggerList.forEach(function (el) {
-            new bootstrap.Tooltip(el);
+        tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+
+        // Handle collapse arrow rotation for all categories
+        const collapsibleHeaders = document.querySelectorAll('[data-bs-toggle="collapse"]');
+
+        collapsibleHeaders.forEach(header => {
+            const targetSelector = header.getAttribute('data-bs-target');
+            const collapseEl = document.querySelector(targetSelector);
+            const arrowIcon = header.querySelector('.rotate-icon');
+
+            // Rotate arrow on collapse show
+            collapseEl.addEventListener('shown.bs.collapse', () => {
+                arrowIcon.style.transform = 'rotate(90deg)';
+            });
+
+            // Rotate arrow back on collapse hide
+            collapseEl.addEventListener('hidden.bs.collapse', () => {
+                arrowIcon.style.transform = 'rotate(0deg)';
+            });
         });
     });
 </script>

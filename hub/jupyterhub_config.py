@@ -10,7 +10,7 @@ c = get_config()
 c.DockerSpawner.allowed_images = [
     "pylib-examples:latest",
     "icos-notebooks:latest",
-    "awesome",
+    "summer-school:latest",
 ]
 c.DockerSpawner.host_ip = "0.0.0.0"
 c.DockerSpawner.network_name = "jupyter"
@@ -24,6 +24,16 @@ c.JupyterHub.hub_connect_ip = "hub"
 c.JupyterHub.hub_ip = "0.0.0.0"
 c.JupyterHub.shutdown_on_logout = True
 c.JupyterHub.template_paths = ["/srv/jupyterhub/templates"]
+
+nbs = {
+    "icos_jupyter": [
+        "curve_fitting_obspack.ipynb",
+        "ecosystem_site_anomaly_visualization.ipynb",
+        "icos_atmObs_statistics.ipynb",
+        "radiocarbon.ipynb",
+        "station_characterization.ipynb",
+    ],
+}
 
 
 class CustomDockerSpawner(DockerSpawner):
@@ -39,14 +49,33 @@ class CustomDockerSpawner(DockerSpawner):
         if form_data:
             image, notebook = form_data.get("env")[0].split("&nb=")
             options["image"] = image
-            if notebook in ["curve_fitting_obspack.ipynb", " radiocarbon.ipynb"]:
+            if notebook in nbs["icos_jupyter"]:
                 options["notebook"] = f"/lab/tree/icos-jupyter-notebooks/{notebook}"
-            else:
-                options["notebook"] = f"/lab/tree/{notebook}"
-            if image == "awesome":
-                raise ValueError(
-                    "You have been served with an awesome image! Congratulations!!!"
+            elif notebook == "ICOS_flasksampling_fossilfuel.ipynb":
+                options["notebook"] = (
+                    f"/lab/tree/project-jupyter-notebooks/RINGO-T1.3/{notebook}"
                 )
+            elif notebook == "city-characterization-tool":
+                options["notebook"] = (
+                    f"/lab/tree/project-jupyter-notebooks/city-characterization-tool/city_characteristic_analysis.ipynb"
+                )
+            elif notebook == "network-view-tool":
+                options["notebook"] = (
+                    f"/lab/tree/project-jupyter-notebooks/network-view-tool/network_view.ipynb"
+                )
+            elif notebook == "envrifair_winterschool":
+                options["notebook"] = (
+                    f"/lab/tree/project-jupyter-notebooks/envrifair-winterschool/map"
+                )
+            elif notebook == "otc_data_reduction_workshop":
+                options["notebook"] = (
+                    f"/lab/tree/project-jupyter-notebooks/otc-data-reduction-workshop"
+                )
+            elif notebook == "summer_school":
+                pass
+            else:
+                raise ValueError("Wrong or no image selected")
+
         return options
 
     async def start(self):
@@ -55,7 +84,8 @@ class CustomDockerSpawner(DockerSpawner):
                 "You must select an environment before starting the server."
             )
         self.image = self.user_options["image"]
-        self.default_url = self.user_options["notebook"]
+        if "notebook" in self.user_options.keys():
+            self.default_url = self.user_options["notebook"]
         return await super().start()
 
 

@@ -5,6 +5,7 @@ from pprint import pprint
 
 # Related third party imports.
 import requests
+import pandas as pd
 
 # Globals
 raw_cell_content = None
@@ -20,11 +21,19 @@ def capture_response():
     try:
         headers = {"Authorization": f"token {token}"}
         resp = requests.get(f"{server_url}/api/sessions", headers=headers)
-        notebook = resp.json()[0]["name"]
+        notebook = pd.DataFrame(
+            [
+                {
+                    "Notebook": d["notebook"]["name"],
+                    "LastActivity": pd.to_datetime(d["kernel"]["last_activity"]),
+                }
+                for d in resp.json()
+            ]
+        ).loc[lambda df: df["LastActivity"].idxmax(), "Notebook"]
         payload = {
             "idsite": "10",  # Matomo site ID
             "rec": "1",  # Record the request
-            "action_name": "cell execution",
+            "action_name": f"{username}:{notebook}",
             "url": "https://ganymede.icos-cp.eu",
             "uid": f"{username}:{notebook}",
         }

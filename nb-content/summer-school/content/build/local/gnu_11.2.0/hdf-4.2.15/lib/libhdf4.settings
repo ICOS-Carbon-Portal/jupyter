@@ -1,0 +1,40 @@
+	    SUMMARY OF THE HDF4 CONFIGURATION
+	    =================================
+
+General Information:
+-------------------
+		   HDF4 Version: 4.2.15
+		  Configured on: Fri Apr 14 08:26:44 UTC 2023
+		  Configured by: wouter@c3b358e0b99b
+		 Configure mode: production
+		    Host system: x86_64-unknown-linux-gnu
+              Uname information: Linux c3b358e0b99b 5.15.0-52-generic #58-Ubuntu SMP Thu Oct 13 08:03:55 UTC 2022 x86_64 x86_64 x86_64 GNU/Linux
+		      Libraries: 
+	     Installation point: /home/wouter/local//gnu_11.2.0/hdf-4.2.15
+
+Compiling Options:
+------------------
+               Compilation Mode: production
+                     C compiler: /usr/bin/gcc
+                         CFLAGS:  -O3 -fomit-frame-pointer
+                       CPPFLAGS:  -I/home/wouter/local//gnu_11.2.0/zlib-1.2.7/include -I/home/wouter/local//gnu_11.2.0/jpegsrc.v6b/include -I/home/wouter/local//gnu_11.2.0/szip-2.1/include -I/usr/include/tirpc 
+               Shared Libraries: no
+               Static Libraries: yes
+  Statically Linked Executables: no
+                        LDFLAGS:  -L/home/wouter/local//gnu_11.2.0/zlib-1.2.7/lib -L/home/wouter/local//gnu_11.2.0/jpegsrc.v6b/lib -L/home/wouter/local//gnu_11.2.0/szip-2.1/lib
+ 	 	Extra libraries: -lsz -ljpeg -lz  -ltirpc
+ 		       Archiver: ar
+ 		 	 Ranlib: ranlib
+
+Languages:
+----------
+                        Fortran: yes
+               Fortran Compiler: /usr/bin/gfortran
+                         FFLAGS:  -fallow-argument-mismatch -O
+
+                           Java: no
+
+Features:
+---------
+               SZIP compression: enabled with encoder
+   Support for netCDF API 2.3.2: no
