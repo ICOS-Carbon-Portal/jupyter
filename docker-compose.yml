@@ -22,7 +22,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./hub/jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py
-      - ./templates:/srv/jupyterhub/templates
+      - ./hub/templates:/srv/jupyterhub/templates
 
   icosbase:
     build:
@@ -37,7 +37,7 @@ services:
 
   pylib-examples:
     build:
-      context: nb-content/pylib-examples
+      context: notebooks/pylib-examples
       dockerfile: ../Dockerfile
     deploy:
       replicas: 0
@@ -48,7 +48,7 @@ services:
 
   icos-notebooks:
     build:
-      context: nb-content/icos-notebooks
+      context: notebooks/icos-notebooks
       dockerfile: ../Dockerfile
     deploy:
       replicas: 0
@@ -59,7 +59,7 @@ services:
 
   summer-school:
     build:
-      context: nb-content/summer-school/content
+      context: notebooks/summer-school/content
       dockerfile: ../build.summer-school/Dockerfile
     deploy:
       replicas: 0

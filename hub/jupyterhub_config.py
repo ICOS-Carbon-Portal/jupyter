@@ -33,6 +33,20 @@ nbs = {
         "radiocarbon.ipynb",
         "station_characterization.ipynb",
     ],
+    "pylib_examples": [
+        "ex1_data.ipynb",
+        "ex1a_atmo_data.ipynb",
+        "ex1b_eco_data.ipynb",
+        "ex1c_ocean_data.ipynb",
+        "ex2_station.ipynb",
+        "ex3_multisource.ipynb",
+        "ex4_collection.ipynb",
+        "ex5_sparql.ipynb",
+        "ex6a_STILT_find.ipynb",
+        "ex6b_STILT_footprint_animation.ipynb",
+        "ex7_ObsPackData.ipynb",
+        "how_to_authenticate.ipynb",
+    ]
 }
 
 
@@ -51,6 +65,8 @@ class CustomDockerSpawner(DockerSpawner):
             options["image"] = image
             if notebook in nbs["icos_jupyter"]:
                 options["notebook"] = f"/lab/tree/icos-jupyter-notebooks/{notebook}"
+            elif notebook in nbs["pylib_examples"]:
+                options["notebook"] = f"/lab/tree/{notebook}"
             elif notebook == "ICOS_flasksampling_fossilfuel.ipynb":
                 options["notebook"] = (
                     f"/lab/tree/project-jupyter-notebooks/RINGO-T1.3/{notebook}"
