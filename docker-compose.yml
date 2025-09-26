@@ -26,7 +26,7 @@ services:
 
   icosbase:
     build:
-      context: ./icosbase
+      context: ./docker/icosbase
       dockerfile: Dockerfile
     container_name: icosbase
     deploy:
@@ -37,8 +37,8 @@ services:
 
   pylib-examples:
     build:
-      context: notebooks/pylib-examples
-      dockerfile: ../Dockerfile
+      context: ./docker/pylib-examples/content
+      dockerfile: ../build.pylib-examples/Dockerfile
     deploy:
       replicas: 0
     image: pylib-examples:latest
@@ -48,8 +48,8 @@ services:
 
   icos-notebooks:
     build:
-      context: notebooks/icos-notebooks
-      dockerfile: ../Dockerfile
+      context: ./docker/icos-notebooks/content
+      dockerfile: ../build.icos-notebooks/Dockerfile
     deploy:
       replicas: 0
     image: icos-notebooks:latest
@@ -59,7 +59,7 @@ services:
 
   summer-school:
     build:
-      context: notebooks/summer-school/content
+      context: ./docker/summer-school/content
       dockerfile: ../build.summer-school/Dockerfile
     deploy:
       replicas: 0

@@ -42,6 +42,7 @@ So to add a new notebook, we simply duplicate the `div` element and make these n
 - for="ex1_data" &#10132; for="awesome_knoughtbiuk"
 - ex1_data.ipynb</label> &#10132; awesome_knoughtbiuk.ipynb</label> 
 <hr>
+
 ## todo
 ### operations
 - connection to registry (docker images)
@@ -49,6 +50,7 @@ So to add a new notebook, we simply duplicate the `div` element and make these n
 - registry backup?
 - deploy manual version to explore-test
 - figure out how jbuild works and deploy from pid4notebooks to explore-data
+- Try to run the explore data role on a new virtual machine
 
 ### others
 - doi notebook start without login & update link on landing page 
