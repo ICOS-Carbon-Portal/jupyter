@@ -34,7 +34,7 @@ def capture_response():
             "idsite": "10",  # Matomo site ID
             "rec": "1",  # Record the request
             "action_name": f"{username}:{notebook}",
-            "url": "https://ganymede.icos-cp.eu",
+            "url": "https://exploredata.icos-cp.eu/",
             "uid": f"{username}:{notebook}",
         }
         requests.get(matomo_url, params=payload)
