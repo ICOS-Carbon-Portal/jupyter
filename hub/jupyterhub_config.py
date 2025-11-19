@@ -25,28 +25,42 @@ c.JupyterHub.hub_ip = '0.0.0.0'
 c.JupyterHub.shutdown_on_logout = True
 c.JupyterHub.template_paths = ['/srv/jupyterhub/templates']
 
-nbs = {
-    'icos_jupyter': [
-        'NOAA Curve Fitting for ObsPack CO2.ipynb',
-        'ecosystem_site_anomaly_visualization.ipynb',
-        'ICOS Atmospheric Observation Statistics.ipynb',
-        'radiocarbon.ipynb',
-        'Characterization of Atmospheric Measurement Stations.ipynb',
-    ],
-    'examples': [
-        'ex1 - Access a Single Dataset.ipynb',
-        'ex1a - Work with Atmospheric Data.ipynb',
-        'ex1b - Work with Ecosystem Data.ipynb',
-        'ex1c - Work with Ocean Data.ipynb',
-        'ex2 - Explore ICOS Stations.ipynb',
-        'ex3 - Combine ICOS & PANGAEA Data.ipynb',
-        'ex4 - Access Collection Data & Metadata.ipynb',
-        'ex5 - Query Metadata with SPARQL.ipynb',
-        'ex6a - Search STILT Stations.ipynb',
-        'ex6b - Animate STILT Footprints.ipynb',
-        'ex6c - Plot STILT Time Series & Footprints.ipynb',
-        'ex7 - Read ObsPack Collections.ipynb',
-        'ex8 - Authenticate for Remote Data Access.ipynb']
+notebook_map = {
+    # Explore ICOS Data Notebooks
+    'nocfibs' : '/lab/tree/icos-jupyter-notebooks/NOAA Curve Fitting for ObsPack CO2.ipynb',
+    'icatobs' : '/lab/tree/icos-jupyter-notebooks/ICOS Atmospheric Observation Statistics.ipynb',
+    'chatmes' : '/lab/tree/icos-jupyter-notebooks/Characterization of Atmospheric Measurement Stations.ipynb',
+    'hifoe'   : '/lab/tree/project-jupyter-notebooks/RINGO-T1.3/High Fossil CO2 Events at ICOS Stations.ipynb',
+    # Examples
+    'ex1'     : '/lab/tree/ex1 - Access a Single Dataset.ipynb',
+    'ex1a'    : '/lab/tree/ex1a - Work with Atmospheric Data.ipynb',
+    'ex1b'    : '/lab/tree/ex1b - Work with Ecosystem Data.ipynb',
+    'ex1c'    : '/lab/tree/ex1c - Work with Ocean Data.ipynb',
+    'ex2'     : '/lab/tree/ex2 - Explore ICOS Stations.ipynb',
+    'ex3'     : '/lab/tree/ex3 - Combine ICOS & PANGAEA Data.ipynb',
+    'ex4'     : '/lab/tree/ex4 - Access Collection Data & Metadata.ipynb',
+    'ex5'     : '/lab/tree/ex5 - Query Metadata with SPARQL.ipynb',
+    'ex6a'    : '/lab/tree/ex6a - Search STILT Stations.ipynb',
+    'ex6b'    : '/lab/tree/ex6b - Animate STILT Footprints.ipynb',
+    'ex6c'    : '/lab/tree/ex6c - Plot STILT Time Series & Footprints.ipynb',
+    'ex7'     : '/lab/tree/ex7 - Read ObsPack Collections.ipynb',
+    'ex8'     : '/lab/tree/ex8 - Authenticate for Remote Data Access.ipynb',
+    # Notebooks with DOI
+    'cichato' : '/lab/tree/project-jupyter-notebooks/city-characterization-tool/City Characterization Tool.ipynb',
+    'ecosav'  : '/lab/tree/icos-jupyter-notebooks/Ecosystem Site Anomaly Visualization.ipynb',
+    'nevito'  : '/lab/tree/project-jupyter-notebooks/network-view-tool/Network View Tool.ipynb',
+    'riflas'  : '/lab/tree/project-jupyter-notebooks/RINGO-T1.3/RINGO Flask-Sampling(Task 1.3).ipynb',
+    'raca'    : '/lab/tree/icos_jupyter_notebooks/Radiocarbon.ipynb',
+    # Education
+    'suschoo' : '',
+    'enwishc' : '/lab/tree/project-jupyter-notebooks/envrifair-winterschool/map',
+    'otcdrew' : '/lab/tree/project-jupyter-notebooks/otc-data-reduction-workshop',
+}
+
+image_map = {
+    'icos-notebooks:latest': os.environ['ICOS_NOTEBOOKS_IMAGE'],
+    'examples:latest': os.environ['EXAMPLES_IMAGE'],
+    'summer-school:latest': os.environ['SUMMER_SCHOOL_IMAGE'],
 }
 
 
@@ -62,36 +76,8 @@ class CustomDockerSpawner(DockerSpawner):
         options = {}
         if form_data:
             image, notebook = form_data.get('env')[0].split('&nb=')
-            options['image'] = image
-            if notebook in nbs['icos_jupyter']:
-                options['notebook'] = f'/lab/tree/icos-jupyter-notebooks/{notebook}'
-            elif notebook in nbs['examples']:
-                options['notebook'] = f'/lab/tree/{notebook}'
-            elif notebook == 'High Fossil CO2 Events at ICOS Stations.ipynb':
-                options['notebook'] = (
-                    f'/lab/tree/project-jupyter-notebooks/RINGO-T1.3/{notebook}'
-                )
-            elif notebook == 'city-characterization-tool':
-                options['notebook'] = (
-                    f'/lab/tree/project-jupyter-notebooks/city-characterization-tool/city_characteristic_analysis.ipynb'
-                )
-            elif notebook == 'network-view-tool':
-                options['notebook'] = (
-                    f'/lab/tree/project-jupyter-notebooks/network-view-tool/network_view.ipynb'
-                )
-            elif notebook == 'envrifair_winterschool':
-                options['notebook'] = (
-                    f'/lab/tree/project-jupyter-notebooks/envrifair-winterschool/map'
-                )
-            elif notebook == 'otc_data_reduction_workshop':
-                options['notebook'] = (
-                    f'/lab/tree/project-jupyter-notebooks/otc-data-reduction-workshop'
-                )
-            elif notebook == 'summer_school':
-                pass
-            else:
-                raise ValueError('Wrong or no image selected')
-
+            options['image'] = image_map[image]
+            options['notebook'] = notebook_map[notebook]
         return options
 
     async def start(self):
