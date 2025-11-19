@@ -50,7 +50,7 @@ notebook_map = {
     'ecosav'  : '/lab/tree/icos-jupyter-notebooks/Ecosystem Site Anomaly Visualization.ipynb',
     'nevito'  : '/lab/tree/project-jupyter-notebooks/network-view-tool/Network View Tool.ipynb',
     'riflas'  : '/lab/tree/project-jupyter-notebooks/RINGO-T1.3/RINGO Flask-Sampling(Task 1.3).ipynb',
-    'raca'    : '/lab/tree/icos_jupyter_notebooks/Radiocarbon.ipynb',
+    'raca'    : '/lab/tree/icos-jupyter-notebooks/Radiocarbon.ipynb',
     # Education
     'suschoo' : '',
     'enwishc' : '/lab/tree/project-jupyter-notebooks/envrifair-winterschool/map',
