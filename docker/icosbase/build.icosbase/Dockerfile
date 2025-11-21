@@ -61,7 +61,7 @@ RUN jupyter lab build
 
 # Additional python modules, not available using mamba.
 COPY pip_requirements.txt  pip_requirements.txt
-RUN pip install --quiet --requirement pip_requirements.txt --system
+RUN pip install --quiet --requirement pip_requirements.txt
 RUN rm pip_requirements.txt
 
 # Version of nersc-refresh-announcements is 0.1.0.
