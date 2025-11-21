@@ -29,6 +29,8 @@ ENV PATH="/usr/local/texlive/2025/bin/x86_64-linux:${PATH}"
 
 RUN apt-get update
 RUN apt-get install -y zip rsync
+RUN rmdir /home/jovyan/work
+
 
 # Switch back to normal user.
 USER jovyan
@@ -36,7 +38,6 @@ USER jovyan
 # This directory is added by jupyter/base-notebook, for backwards
 # compatibility, but we don't need it.
 WORKDIR /home/jovyan
-RUN rmdir work
 
 # Experimental, use mamba.
 # https://medium.com/@QuantStack/open-software-packaging-for-science-61cecee7fc23
