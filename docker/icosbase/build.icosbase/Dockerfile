@@ -35,9 +35,11 @@ RUN rmdir /home/jovyan/work
 # Switch back to normal user.
 USER jovyan
 
-# This directory is added by jupyter/base-notebook, for backwards
-# compatibility, but we don't need it.
-WORKDIR /home/jovyan
+USER root
+RUN mkdir -p /home/jovyan/.conda && \
+    chown -R jovyan:users /home/jovyan && \
+    chmod -R a+rwx /home/jovyan/.conda /opt/conda
+USER jovyan
 
 # Experimental, use mamba.
 # https://medium.com/@QuantStack/open-software-packaging-for-science-61cecee7fc23
@@ -61,12 +63,13 @@ RUN jupyter lab build
 
 
 # Additional python modules, not available using mamba.
+RUN pip install uv
 COPY pip_requirements.txt  pip_requirements.txt
-RUN pip install --quiet --requirement pip_requirements.txt
+RUN uv pip install --quiet --requirement pip_requirements.txt --system
 RUN rm pip_requirements.txt
 
 # Version of nersc-refresh-announcements is 0.1.0.
-RUN pip install --quiet git+https://github.com/NERSC/nersc-refresh-announcements.git
+RUN uv pip install --quiet git+https://github.com/NERSC/nersc-refresh-announcements.git --system
 # RUN pip install git+https://github.com/ZogopZ/nersc-refresh-announcements.git@patch-1
 
 # Add env variable for PROJ (library used by cartopy and shapely).
@@ -75,12 +78,12 @@ ENV PROJ_LIB=/opt/conda/share/proj
 # Override configuration for jupyter lab settings.
 COPY overrides.json /opt/conda/share/jupyter/lab/settings/.
 
-# Since icos-splash is just a repo, we retrieve a json objects that
-# describes the "trunk" branch (SHA of the branch among other things),
-# to force docker to re-build this step.
+# Since icos-splash is just a github repository, we retrieve a json
+# object that describes the repository branch, forcing docker to
+# re-build this step.
 ADD https://api.github.com/repos/ZogopZ/icos-splash/git/refs/heads/sidebar-button cache-bust
 # Install jupyter-lab extension icos-splash
-RUN pip install git+https://github.com/ZogopZ/icos-splash.git@sidebar-button
+RUN uv pip install git+https://github.com/ZogopZ/icos-splash.git@sidebar-button --system
 RUN rm cache-bust
 
 # ---
