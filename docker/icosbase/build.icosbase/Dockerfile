@@ -58,12 +58,15 @@ RUN jupyter labextension install @j123npm/qgrid2@1.1.4 --no-build
 # Rebuild jupyter lab.
 RUN jupyter lab build
 
+
 # Additional python modules, not available using mamba.
+RUN pip install uv==0.5.29
 COPY pip_requirements.txt  pip_requirements.txt
-RUN pip install --quiet --requirement pip_requirements.txt
+RUN uv pip install --quiet --requirement pip_requirements.txt --system
 RUN rm pip_requirements.txt
+
 # Version of nersc-refresh-announcements is 0.1.0.
-RUN pip install --quiet git+https://github.com/NERSC/nersc-refresh-announcements.git
+RUN uv pip install --quiet git+https://github.com/NERSC/nersc-refresh-announcements.git
 # RUN pip install git+https://github.com/ZogopZ/nersc-refresh-announcements.git@patch-1
 
 # Add env variable for PROJ (library used by cartopy and shapely).
@@ -75,10 +78,9 @@ COPY overrides.json /opt/conda/share/jupyter/lab/settings/.
 # Since icos-splash is just a repo, we retrieve a json objects that
 # describes the "trunk" branch (SHA of the branch among other things),
 # to force docker to re-build this step.
-ADD https://api.github.com/repos/ZogopZ/icos-splash/git/refs/heads/trunk cache-bust
-# Install jupyter-lab extension icos-splash, to modify the splash
-# animation using the ICOS Carbon Portal logo.
-RUN pip install git+https://github.com/ZogopZ/icos-splash.git
+ADD https://api.github.com/repos/ZogopZ/icos-splash/git/refs/heads/sidebar-button cache-bust
+# Install jupyter-lab extension icos-splash
+RUN uv pip install git+https://github.com/ZogopZ/icos-splash.git --system
 RUN rm cache-bust
 
 
