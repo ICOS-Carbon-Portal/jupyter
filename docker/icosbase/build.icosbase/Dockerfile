@@ -79,9 +79,8 @@ COPY overrides.json /opt/conda/share/jupyter/lab/settings/.
 # to force docker to re-build this step.
 ADD https://api.github.com/repos/ZogopZ/icos-splash/git/refs/heads/sidebar-button cache-bust
 # Install jupyter-lab extension icos-splash
-RUN pip install git+https://github.com/ZogopZ/icos-splash.git --system
+RUN pip install git+https://github.com/ZogopZ/icos-splash.git@sidebar-button
 RUN rm cache-bust
-
 
 # ---
 # Keep this in a separate line. It's the only library that changes
