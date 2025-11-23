@@ -81,11 +81,10 @@ COPY overrides.json /opt/conda/share/jupyter/lab/settings/.
 # Since icos-splash is just a github repository, we retrieve a json
 # object that describes the repository branch, forcing docker to
 # re-build this step.
-ADD https://api.github.com/repos/ZogopZ/icos-splash/git/refs/heads/sidebar-button cache-bust
+ADD https://api.github.com/repos/ZogopZ/icos-splash/git/refs/heads/trunk cache-bust
 # Install jupyter-lab extension icos-splash
-RUN uv pip install git+https://github.com/ZogopZ/icos-splash.git@sidebar-button --system
+RUN uv pip install git+https://github.com/ZogopZ/icos-splash.git --system
 RUN rm cache-bust
-
 # ---
 # Keep this in a separate line. It's the only library that changes
 # frequently and the new docker image will build faster.
