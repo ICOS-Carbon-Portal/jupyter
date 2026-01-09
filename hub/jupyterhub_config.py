@@ -1,4 +1,5 @@
 # Standard library imports
+import sys
 import os
 
 # Related third party imports
@@ -7,23 +8,50 @@ from dockerspawner import DockerSpawner
 
 c = get_config()
 
-c.DockerSpawner.allowed_images = [
-    'examples:latest',
-    'icos-notebooks:latest',
-    'summer-school:latest',
-]
-c.DockerSpawner.host_ip = '0.0.0.0'
-c.DockerSpawner.network_name = 'jupyter'
-c.DockerSpawner.notebook_dir = '/home/jovyan'
-c.DockerSpawner.read_only_volumes = {'/data': '/data'}
-c.DockerSpawner.remove = True
-c.DockerSpawner.use_internal_ip = True
-c.DummyAuthenticator.password = 'carboncloud'
+# JupyterHub configuration
+# Maximum number of concurrent servers that can be active at a time.
+c.JupyterHub.active_server_limit = 100
+# The dummy authenticator allows any username with a hardcoded password.
 c.JupyterHub.authenticator_class = 'dummy'
+c.DummyAuthenticator.password = os.environ['PASSWORD']
 c.JupyterHub.hub_connect_ip = 'hub'
 c.JupyterHub.hub_ip = '0.0.0.0'
+# Interval (in seconds) at which to update last-activity timestamps.
+# This is set much more aggressively than in the default configuration so that
+# we quickly can shut down idle servers.
+c.JupyterHub.last_activity_interval = 300
+# Maximum concurrent named servers that can be created by a user.
+c.JupyterHub.named_server_limit_per_user = 1
+# Shuts down all user servers on logout
 c.JupyterHub.shutdown_on_logout = True
+# https://jupyterhub.readthedocs.io/en/stable/reference/templates.html
 c.JupyterHub.template_paths = ['/srv/jupyterhub/templates']
+
+# DockerSpawner configuration
+c.DockerSpawner.allowed_images = [
+    os.environ['ICOSBASE_IMAGE'],
+    os.environ['ICOS_NOTEBOOKS_IMAGE'],
+    os.environ['EXAMPLES_IMAGE'],
+    os.environ['SUMMER_SCHOOL_IMAGE'],
+    os.environ['OCEAN_CARBON_COURSE_IMAGE'],
+    os.environ['CLASSIC_IMAGE'],
+]
+c.DockerSpawner.debug = True
+c.DockerSpawner.host_ip = '0.0.0.0'
+c.DockerSpawner.network_name = os.environ['NETWORK_NAME']
+c.DockerSpawner.notebook_dir = '/home/jovyan'
+c.DockerSpawner.read_only_volumes = {
+    '/data/stiltweb/stations' : '/data/stiltweb/stations',
+    '/data/stiltweb/slots'    : '/data/stiltweb/slots',
+    '/data'                   : '/data'
+}
+c.DockerSpawner.remove_containers = True
+c.DockerSpawner.use_internal_ip = True
+
+# Maximum number of bytes a single-user notebook server is allowed to use.
+c.Spawner.mem_limit = '2G'
+# Maximum number of cpu-cores a single-user notebook server is allowed to use.
+c.Spawner.cpu_limit = 1
 
 notebook_map = {
     # Explore ICOS Data Notebooks
@@ -55,12 +83,17 @@ notebook_map = {
     'suschoo' : '',
     'enwishc' : '/lab/tree/project-jupyter-notebooks/envrifair-winterschool/map',
     'otcdrew' : '/lab/tree/project-jupyter-notebooks/otc-data-reduction-workshop',
+    'ocecaco' : '',
+    'classic' : '',
 }
 
 image_map = {
-    'icos-notebooks:latest': os.environ['ICOS_NOTEBOOKS_IMAGE'],
-    'examples:latest': os.environ['EXAMPLES_IMAGE'],
-    'summer-school:latest': os.environ['SUMMER_SCHOOL_IMAGE'],
+    'icosbase:latest'             : os.environ['ICOSBASE_IMAGE'],
+    'icos-notebooks:latest'       : os.environ['ICOS_NOTEBOOKS_IMAGE'],
+    'examples:latest'             : os.environ['EXAMPLES_IMAGE'],
+    'summer-school:latest'        : os.environ['SUMMER_SCHOOL_IMAGE'],
+    'ocean-carbon-course:latest'  : os.environ['OCEAN_CARBON_COURSE_IMAGE'],
+    'classic:latest'              : os.environ['CLASSIC_IMAGE'],
 }
 
 
@@ -82,9 +115,7 @@ class CustomDockerSpawner(DockerSpawner):
 
     async def start(self):
         if 'image' not in self.user_options:
-            raise ValueError(
-                'You must select an environment before starting the server.'
-            )
+            raise ValueError('You must select an environment before starting the server.')
         self.image = self.user_options['image']
         if 'notebook' in self.user_options.keys():
             self.default_url = self.user_options['notebook']
