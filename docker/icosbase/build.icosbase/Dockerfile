@@ -47,7 +47,7 @@ RUN conda install --yes mamba --channel conda-forge \
     && conda clean --quiet --all --force-pkgs-dirs --yes
 
 # Install required packages.
-COPY mamba_requirements.txt  mamba_requirements.txt
+COPY content/mamba_requirements.txt  mamba_requirements.txt
 RUN mamba install --quiet --yes --file mamba_requirements.txt  \
     && mamba clean --quiet --all --force-pkgs-dirs --yes
 RUN rm mamba_requirements.txt
@@ -64,7 +64,7 @@ RUN jupyter lab build
 
 # Additional python modules, not available using mamba.
 RUN pip install uv
-COPY pip_requirements.txt  pip_requirements.txt
+COPY content/pip_requirements.txt  pip_requirements.txt
 RUN uv pip install --quiet --requirement pip_requirements.txt --system
 RUN rm pip_requirements.txt
 
