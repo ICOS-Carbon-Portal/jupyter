@@ -22,7 +22,7 @@ RUN rm -rf /usr/share/texlive /opt/texlive /var/cache/texlive /tmp/texlive
 RUN wget -O /tmp/install-tl-unx.tar.gz http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
 RUN tar -xf /tmp/install-tl-unx.tar.gz --strip-components=1 -C /tmp/
 # Add profile and start intallation.
-COPY Texlive/texlive.profile /tmp/.
+COPY content/Texlive/texlive.profile /tmp/.
 #RUN /tmp/install-tl --profile=/tmp/texlive.profile
 # Export path to texlive2025.
 ENV PATH="/usr/local/texlive/2025/bin/x86_64-linux:${PATH}"
@@ -76,7 +76,7 @@ RUN uv pip install --quiet git+https://github.com/NERSC/nersc-refresh-announceme
 ENV PROJ_LIB=/opt/conda/share/proj
 
 # Override configuration for jupyter lab settings.
-COPY overrides.json /opt/conda/share/jupyter/lab/settings/.
+COPY content/overrides.json /opt/conda/share/jupyter/lab/settings/.
 
 # Since icos-splash is just a github repository, we retrieve a json
 # object that describes the repository branch, forcing docker to
@@ -112,6 +112,6 @@ ENV PORTAL_DATA_PATH_ICOSCITIES="/data/cities/dataAppStorage"
 # todo: These need to be moved to their respective "correct" locations
 # todo: within this file. I only put them here in order to not have to
 # todo: rebuild this image over and over again.
-COPY --chown=jovyan:users log_exec.py .ipython/profile_default/startup/
+COPY --chown=jovyan:users content/log_exec.py .ipython/profile_default/startup/
 USER root
 RUN apt-get install -y curl
