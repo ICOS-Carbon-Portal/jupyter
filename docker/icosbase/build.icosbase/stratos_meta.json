@@ -1,0 +1,7 @@
+{
+  "title": "icosbase",
+  "description": "A stable image built on a pinned jupyter datascience notebook version. We kept it fixed so our notebooks would keep working and we wouldn't have to constantly tweak things, but it also means this image hasn't been updated much and is now behind on newer Python libraries.",
+  "licenses": [
+    "https://creativecommons.org/licenses/by/4.0/"
+  ]
+}
