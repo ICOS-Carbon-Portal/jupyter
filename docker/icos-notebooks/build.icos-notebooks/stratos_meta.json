@@ -1,0 +1,7 @@
+{
+  "title": "icos-notebooks",
+  "description": "Built on top of icosbase, adding the ICOS notebooks content (education, introduction, project-jupyter-noteoboks, and icos-jupyter-notebooks).",
+  "licenses": [
+    "https://creativecommons.org/licenses/by/4.0/"
+  ]
+}
