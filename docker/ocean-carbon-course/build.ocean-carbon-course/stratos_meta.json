@@ -1,0 +1,7 @@
+{
+  "title": "ocean-carbon-course",
+  "description": "Based on icosbase, extended with the fluxengine Python library and ocean carbon science teaching notebooks.",
+  "licenses": [
+    "https://creativecommons.org/licenses/by/4.0/"
+  ]
+}
