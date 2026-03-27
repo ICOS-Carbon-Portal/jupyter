@@ -12,10 +12,10 @@ USER jovyan
 RUN rmdir /home/jovyan/work
 
 # Install mamba packages.
-RUN --mount=type=bind,source=content/mamba_requirements.txt,target=mamba_requirements.txt \
-    --mount=type=cache,target=/opt/conda/pkgs \
-    mamba install --quiet --yes -c conda-forge --file mamba_requirements.txt \
-    && mamba clean --quiet --all --force-pkgs-dirs --yes
+COPY content/mamba_requirements.txt .
+RUN mamba install --quiet --yes -c conda-forge --file mamba_requirements.txt \
+    && mamba clean --quiet --all --force-pkgs-dirs --yes \
+    && rm mamba_requirements.txt
 
 # Install R packages not available on conda-forge.
 RUN Rscript -e 'install.packages("DAAG", repos="https://cloud.r-project.org")'
@@ -24,9 +24,9 @@ RUN Rscript -e 'install.packages("DAAG", repos="https://cloud.r-project.org")'
 COPY --from=ghcr.io/astral-sh/uv:0.6.6 /uv /uvx /usr/local/bin/
 
 # Install pip packages.
-RUN --mount=type=bind,source=content/pip_requirements.txt,target=pip_requirements.txt \
-    --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --quiet --requirement pip_requirements.txt --system
+COPY content/pip_requirements.txt .
+RUN uv pip install --quiet --requirement pip_requirements.txt --system \
+    && rm pip_requirements.txt
 
 # Install ICOS JupyterLab extensions.
 ARG EXT_SHA
