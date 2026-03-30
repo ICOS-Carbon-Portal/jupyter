@@ -1,6 +1,6 @@
 {
   "title": "examples",
-  "description": "Based on icosbase, extended with all example notebooks.",
+  "description": "Based on icosbase v0.1.1, extended with all example notebooks.",
   "licenses": [
     "https://creativecommons.org/licenses/by/4.0/"
   ]
