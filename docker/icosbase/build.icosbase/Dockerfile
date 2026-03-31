@@ -21,7 +21,7 @@ RUN mamba install --quiet --yes -c conda-forge --file mamba_requirements.txt \
 RUN Rscript -e 'install.packages("DAAG", repos="https://cloud.r-project.org")'
 
 # Install uv.
-COPY --from=ghcr.io/astral-sh/uv:0.6.6 /uv /uvx /usr/local/bin/
+COPY --from=ghcr.io/astral-sh/uv:0.11.2 /uv /uvx /usr/local/bin/
 
 # Install pip packages.
 COPY content/pip_requirements.txt .
@@ -33,7 +33,11 @@ ADD https://api.github.com/repos/ICOS-Carbon-Portal/jupyterlab-extensions/git/re
 RUN uv pip install --quiet git+https://github.com/ICOS-Carbon-Portal/jupyterlab-extensions.git@trunk --system
 
 # Install ICOS libraries.
-RUN uv pip install --quiet icoscp_core==0.3.7 icoscp==0.2.2 icoscp_stilt==0.1.3 --system
+RUN uv pip install --quiet icoscp_core==0.3.7 \
+    "git+https://github.com/ICOS-Carbon-Portal/pylib.git@bump-pandas-version#subdirectory=icoscp" \
+    "git+https://github.com/ICOS-Carbon-Portal/pylib.git@bump-pandas-version#subdirectory=icoscp_stilt" \
+    fluxie \
+    --system
 
 ENV PORTAL_DATA_PATH_ICOS="/data/dataAppStorage/" \
     PORTAL_DATA_PATH_SITES="/data/dataAppStorage/" \
