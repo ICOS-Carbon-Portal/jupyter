@@ -16,6 +16,4 @@ utm==0.7.0  # Bidirectional UTM-WGS84 converter for python.
 jupyter-splitview==0.1.2
 geopy
 jupyter_bokeh
-jupyter-ai==2.31.7
-langchain-anthropic==1.4.0
-langchain-openai==1.1.12
+jupyter-ai==3.0.0
