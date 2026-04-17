@@ -5,9 +5,6 @@ FROM quay.io/jupyter/datascience-notebook@sha256:8040395c8534cdf96388c20a85a2e89
 # Install system packages.
 USER root
 RUN apt-get update && apt-get install -y zip rsync curl && rm -rf /var/lib/apt/lists/*
-RUN mkdir -p /home/jovyan/.conda && \
-    chown -R jovyan:users /home/jovyan && \
-    chmod -R a+rwx /home/jovyan/.conda /opt/conda
 USER jovyan
 RUN rmdir /home/jovyan/work
 
