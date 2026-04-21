@@ -27,9 +27,10 @@ ADD https://api.github.com/repos/ICOS-Carbon-Portal/jupyterlab-extensions/git/re
 RUN uv pip install --quiet git+https://github.com/ICOS-Carbon-Portal/jupyterlab-extensions.git@trunk --system
 
 # Install ICOS libraries.
-RUN uv pip install --quiet icoscp_core \
-    "git+https://github.com/ICOS-Carbon-Portal/pylib.git@bump-pandas-version#subdirectory=icoscp" \
-    "git+https://github.com/ICOS-Carbon-Portal/pylib.git@bump-pandas-version#subdirectory=icoscp_stilt" \
+RUN uv pip install --quiet \
+    "icoscp_core @ git+https://github.com/ICOS-Carbon-Portal/data.git@update-icosbase#subdirectory=src/main/python/icoscp_core" \
+    "icoscp @ git+https://github.com/ICOS-Carbon-Portal/pylib.git@bump-pandas-version#subdirectory=icoscp" \
+    "icoscp_stilt @ git+https://github.com/ICOS-Carbon-Portal/pylib.git@bump-pandas-version#subdirectory=icoscp_stilt" \
     fluxie \
     --system \
     && uv cache clean
