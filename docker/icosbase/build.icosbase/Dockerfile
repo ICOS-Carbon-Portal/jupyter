@@ -27,7 +27,6 @@ ADD https://api.github.com/repos/ICOS-Carbon-Portal/jupyterlab-extensions/git/re
 RUN uv pip install --quiet git+https://github.com/ICOS-Carbon-Portal/jupyterlab-extensions.git@trunk --system
 
 # Install ICOS libraries.
-ADD https://api.github.com/repos/ICOS-Carbon-Portal/data/git/refs/heads/update-icosbase /tmp/icoscp_core_ref.json
 RUN uv pip install --quiet \
     icoscp_core==0.3.12 \
     icoscp==0.2.3 \
