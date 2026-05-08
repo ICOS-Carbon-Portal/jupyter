@@ -1,6 +1,6 @@
 {
   "title": "classic",
-  "description": "Based on icosbase, extended with all notebooks through November 2025 in a single environment.",
+  "description": "Based on icosbase v0.1.0, extended with all notebooks through November 2025 in a single environment.",
   "licenses": [
     "https://creativecommons.org/licenses/by/4.0/"
   ]
