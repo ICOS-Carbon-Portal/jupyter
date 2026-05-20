@@ -1,6 +1,6 @@
 {
   "title": "icosbase",
-  "description": "A stable image built on a pinned jupyter datascience notebook version. We kept it fixed so our notebooks would keep working and we wouldn't have to constantly tweak things, but it also means this image hasn't been updated much and is now behind on newer Python libraries.",
+  "description": "A stable image built on a 2026-pinned Jupyter datascience notebook. Compared to its predecessor, it drops TeX Live and an extensive list of mamba and pip requirements, but keeps the geospatial and visualization stack (cartopy, folium, geoviews, holoviews, xarray), pangaeapy, and the ICOS-specific libraries.",
   "licenses": [
     "https://creativecommons.org/licenses/by/4.0/"
   ]
