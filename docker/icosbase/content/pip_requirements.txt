@@ -1,1 +1,1 @@
-pangaeapy==1.1.0
+pangaeapy @ git+https://github.com/pangaea-data-publisher
