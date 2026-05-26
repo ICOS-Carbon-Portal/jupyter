@@ -1,1 +1,1 @@
-pangaeapy @ git+https://github.com/pangaea-data-publisher
+pangaeapy @ git+https://github.com/pangaea-data-publisher/pangaeapy/
