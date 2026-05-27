@@ -3,7 +3,7 @@ backend_url: http://pancake.nebula:5018
 emission_path: /data/avengers/fit_ic/input/emissions
 
 emissions:
-    glob_pattern: /data/avengers/fit_ic/emissions4inversion/fitic-*-emissions_*.nc
+    glob_pattern: /data/fit_ic/emissions4inversion*/fitic-*-emissions_*.nc
 
 observations:
   files: /data/avengers/fit_ic/observations/ch4_*.nc
