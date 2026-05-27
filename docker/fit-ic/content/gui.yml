@@ -27,7 +27,7 @@ experiments:
 
 maxnproc: 4
 #-- loguru compliant loglevel (internal default is set to 'critical')
-loglevel: debug
+#loglevel: debug
 drop_precomputed : True
 #
 #-- statistics and comparison vs. observations
