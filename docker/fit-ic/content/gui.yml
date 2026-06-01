@@ -1,0 +1,39 @@
+backend_url: http://pancake.nebula:5018
+
+emission_path: /data/avengers/fit_ic/input/emissions
+
+emissions:
+    glob_pattern: /data/fit_ic/emissions4inversion*/fitic-*-emissions_*.nc
+
+observations:
+  files: /data/avengers/fit_ic/observations/ch4_*.nc
+
+experiments:
+  list:
+    default: fitic-simu-default_oh-cams/output_2021-01-01--2022-01-01
+    edgarflat: fitic-simu-edgarflat_oh-cams/output_2021-01-01--2022-01-01
+    regional: fitic-simu-regional_oh-cams/output_2021-01-01--2022-01-01
+    regional_no-agri: fitic-simu-regional_anthro-no-agri_oh-cams/output_2021-01-01--2022-01-01
+    regional_no-fossil: fitic-simu-regional_anthro-no-fossil_oh-cams/output_2021-01-01--2022-01-01
+    regional_no-waste: fitic-simu-regional_anthro-no-waste_oh-cams/output_2021-01-01--2022-01-01
+    regional_no-anthro-france: fitic-simu-regional_anthro-no-france_oh-cams/output_2021-01-01--2022-01-01
+    regional_no-anthro-netherlands: fitic-simu-regional_anthro-no-netherlands_oh-cams/output_2021-01-01--2022-01-01
+    half-oh: fitic-simu-half-oh_oh-cams/output_2021-01-01--2022-01-01
+    no-germany: fitic-simu-no-germany_oh-cams/output_2021-01-01--2022-01-01
+    no-gns: fitic-simu-no-gns_oh-cams/output_2021-01-01--2022-01-01
+    no-northamerica: fitic-simu-no-northamerica_oh-cams/output_2021-01-01--2022-01-01
+  path:  /data/fit_ic_workshop/precomputed_output
+  cache: /home/jovyan/experiments_cache
+
+maxnproc: 4
+#-- loguru compliant loglevel (internal default is set to 'critical')
+#loglevel: debug
+drop_precomputed : True
+#
+#-- statistics and comparison vs. observations
+#
+statistics:
+  selected_hours : True #-- otherwise all obs will enter in statistics
+  high_altitude : 1000.
+  hours_high_alt : ['00:00','04:00']
+  hours_low_alt  : ['12:00','16:00']

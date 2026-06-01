@@ -1,0 +1,7 @@
+{
+  "title": "fit-ic",
+  "description": "Based on icosbase, extended with the TM5 atmospheric transport model (cloned and installed at startup) and interactive visualization libraries (Panel, HoloViews, hvPlot, GeoViews, Bokeh).",
+  "licenses": [
+    "https://creativecommons.org/licenses/by/4.0/"
+  ]
+}
