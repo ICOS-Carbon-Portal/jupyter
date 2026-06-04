@@ -15,3 +15,9 @@ COPY build.collaboration/link-examples.sh /usr/local/bin/before-notebook.d/
 
 # Drop back to the default non-root jovyan user for runtime.
 USER ${NB_UID}
+
+# Install mamba packages (jovyan owns the conda environment).
+COPY build.collaboration/mamba_requirements.txt .
+RUN mamba install --quiet --yes -c conda-forge --file mamba_requirements.txt \
+    && mamba clean --quiet --all --force-pkgs-dirs --yes \
+    && rm mamba_requirements.txt
