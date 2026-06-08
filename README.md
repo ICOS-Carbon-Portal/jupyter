@@ -1,58 +1,60 @@
 # pid4notebooks
-A repository for ICOS’s interactive Jupyter notebook service. Users can launch notebooks via pre-configured Docker 
-images using JupyterHub.
 
-The service includes:
-- **Pylib examples** – showcasing how to use ICOS Python libraries to access and analyze data.
-- **ICOS notebooks** – developed within the ICOS Carbon Portal, demonstrating scientific analyses and project outputs.
-- **Education notebooks & workshops** – material for teaching, training, and ICOS educational events.
-- **DOI/PID notebooks** – linked to persistent identifiers and scientific publications.
+This repository contains the build definitions for ICOS's interactive
+Jupyter notebook service Docker images.
 
+## Layout
 
-## 🗂 Project structure
-| Directory / File     | Purpose                                                                  |
-| -------------------- |--------------------------------------------------------------------------|
-| `hub/`               | JupyterHub configuration, templates, and build files.                    |
-| `notebooks/`         | Contains content and build directories for different notebook categories.|
-| `docker-compose.yml` | Orchestrates services (hub, proxy, login, notebook images, etc.).        |
+The `docker/` directory has one folder per image:
 
-
-## Best Practices & Tips
-
-### Adding new notebooks to the interface
-Currently, the pylib-examples, icos-notebooks, DOI/PID notebooks, and some education notebooks share the same Docker 
-image. The mapping between each notebook and its corresponding Docker image is defined in the file: 
-`hub/templates/custom_options_form.html`
-
-In the aforementioned file, each notebook is represented by a `div` element like this:
-```html
-<div class="form-check">
-    <input class="form-check-input" type="radio" name="env" id="ex1_data" value="pylib-examples:latest&nb=ex1_data.ipynb">
-    <label class="form-check-label" for="ex1_data">ex1_data.ipynb</label>
-</div>
+```text
+docker/
+└── <name>/
+    ├── content/             # notebooks + data, copied to /home/jovyan/ at build time
+    └── build.<name>/
+        ├── Dockerfile
+        └── stratos_meta.json  # image title, description, license
 ```
-The value attribute `pylib-examples:latest&nb=ex1_data.ipynb` is passed to the JupyterHub configuration.  
-In this example, JupyterHub launches a container with:
-- docker image: `pylib-examples:latest`. The docker image is already built by the `docker-compose.yml` file.
-- default url: `ex1_data.ipynb`. The notebook `ex1_data.ipynb` automatically opens when the container starts.
 
-So to add a new notebook, we simply duplicate the `div` element and make these next changes:
-- id="ex1_data" &#10132; id="awesome_knoughtbiuk"
-- value="pylib-examples:latest&nb=ex1_data.ipynb" &#10132; value="awesome-image:latest&nb=awesome_knoughtbiuk.ipynb"
-- for="ex1_data" &#10132; for="awesome_knoughtbiuk"
-- ex1_data.ipynb</label> &#10132; awesome_knoughtbiuk.ipynb</label> 
-<hr>
+Every image except `icosbase` derives from it with the same three
+lines:
 
-## todo
-### operations
-- connection to registry (docker images)
-- ansible
-- registry backup?
-- deploy manual version to explore-test
-- figure out how jbuild works and deploy from pid4notebooks to explore-data
-- Try to run the explore data role on a new virtual machine
+```dockerfile
+ARG BASE=registry.icos-cp.eu/stratos.icosbase:<version>
+FROM $BASE
+ADD --chown=1000:100 content/. /home/jovyan/
+```
 
-### others
-- doi notebook start without login & update link on landing page 
-- size of jupyter notebooks and related data (check education/General/data 229M)
-- What do we do with Jupyter repository?
+The build context is `content/`; the Dockerfile is referenced from
+`../build.<name>/Dockerfile`.
+
+To change what an image ships, edit its `content/` (notebooks and data)
+or its `Dockerfile` (packages). Packages shared across all images
+belong in `docker/icosbase/content/`.
+
+## The Base Image (icosbase)
+
+`docker/icosbase/` is the shared base that all other images build on.
+It is built `FROM quay.io/jupyter/datascience-notebook` pinned by
+digest (the `:latest` tag as of 2026-03-18) and published to the ICOS
+registry as `registry.icos-cp.eu/stratos.icosbase` (versions `0.1.0`
+and `0.1.1`). Its `content/` holds `mamba_requirements.txt` and
+`pip_requirements.txt`.
+
+From its metadata: a stable image that keeps the geospatial and
+visualization stack (cartopy, folium, geoviews, holoviews, xarray),
+pangaeapy, and the ICOS-specific libraries, while dropping TeX Live and
+a large set of mamba/pip requirements compared to its predecessor.
+
+## Images
+
+| Image | Folder | Base | Description |
+|---|---|---|---|
+| icosbase | `docker/icosbase` | `quay.io/jupyter/datascience-notebook` (digest-pinned) | Shared base image, published as `registry.icos-cp.eu/stratos.icosbase`. |
+| examples | `docker/examples` | icosbase 0.1.1 | ICOS Python library (pylib) usage examples, ex1 through ex8. |
+| collaboration | `docker/collaboration` | icosbase 0.1.1 | The example notebooks served read-only at `~/icos-examples`. Built for ICOS's separate collaboration service, which gives each user a persistent home directory. Ships a `link-examples.sh` startup hook; its `content/` is a hand-maintained duplicate of `examples`. |
+| icos-notebooks | `docker/icos-notebooks` | icosbase 0.1.0 | ICOS Carbon Portal science notebooks plus DOI/PID notebooks (education, introduction, project-jupyter-notebooks, icos-jupyter-notebooks). |
+| summer-school | `docker/summer-school` | icosbase 0.1.0 | Summer school teaching material, including content from the hyytiala practicals repository. |
+| ocean-carbon-course | `docker/ocean-carbon-course` | icosbase 0.1.0 | The fluxengine Python library plus ocean carbon science teaching notebooks. |
+| classic | `docker/classic` | icosbase 0.1.0 | All notebooks through November 2025 collected in a single environment. |
+| fit-ic | `docker/fit-ic` | icosbase 0.1.1 | The TM5 atmospheric transport model (cloned and installed at startup) plus interactive visualization libraries (Panel, HoloViews, hvPlot, GeoViews, Bokeh). Carries an extra `hooks/` directory. |

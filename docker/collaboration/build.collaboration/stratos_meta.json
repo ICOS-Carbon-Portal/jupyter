@@ -1,0 +1,7 @@
+{
+  "title": "collaboration",
+  "description": "Based on icosbase v0.1.1, extended with all example notebooks served read-only at ~/icos-examples. Intended for the collaboration service with a persistent user home.",
+  "licenses": [
+    "https://creativecommons.org/licenses/by/4.0/"
+  ]
+}
