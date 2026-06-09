@@ -1,33 +1,55 @@
-#
-## ICOS
+# ICOS Carbon Portal Jupyter Services
 
-The Integrated Carbon Observation System, ( ICOS,  [https://www.icos-cp.eu/](https://www.icos-cp.eu/) ), is a European research infrastructure responsible for measuring, storing and disseminating standardised, high quality, long timeseries of observations on greenhouse gas concentrations in the atmosphere, as well as on carbon fluxes between the atmosphere, the earth and oceans. The ICOS station network consists of about 150 stations all over Europe, subdivided into three separate domains; atmosphere, ecosystem and ocean.
+Welcome to the user documentation for the ICOS Carbon Portal Jupyter services.
 
-ICOS Carbon Portal is the data centre of ICOS and is responsible for storing and disseminating ICOS data. To promote the usage of its available data, ICOS Carbon Portal offers a range of services towards researchers/scientists, policy makers and the general public. Virtual Research Environments based on Jupyter ([https://jupyter.org/](https://jupyter.org/)) constitute one part of these services.
+## ICOS and the ICOS Carbon Portal
 
-<br>
-<br>
+The Integrated Carbon Observation System [ICOS](<https://www.icos-cp.eu/>) is a European research infrastructure that measures, stores, and disseminates standardised, high-quality, long-term observations of greenhouse gas concentrations in the atmosphere and carbon fluxes between the atmosphere, land, and oceans. The ICOS station network consists of approximately 180 stations across Europe, organised into three domains: Atmosphere, Ecosystem, and Ocean.
 
-## Jupyter
-<img style="float: right; padding: 5px" src="img/jupyter_logo.png" width="75" align="right"/>
-Jupyter is a Virtual Research Environment (VRE) incorporating a collection of tools for interactive computing and sharing of computational ideas. From within every user account, it is possible to: 
+The ICOS Carbon Portal is the data centre of ICOS. It is responsible for storing and disseminating ICOS data and for providing services that help researchers, policy makers, and the general public access and use those data.
 
-- create directories
-- upload data (e.g. csv, txt, netcdf, hdf, tiff, GeoTIFF, png, jpeg, etc.)
-- create code files and write code (plain python code files (.py) or IPython notebook files (.ipynb))
+Virtual Research Environments based on Jupyter are one part of these services.
 
-Our service is based on the official Jupyter Dockerfile  [jupyter/datascience-notebook](http://jupyter-docker-stacks.readthedocs.io/en/latest/using/selecting.html#jupyter-datascience-notebook) with kernels for Python, Julia and R available. Julia and R are 'out of the box', but for the time being the ICOS Carbon Portal only provides technical support for Python.
+## What is Jupyter?
 
-<br>
-<br>
+Jupyter is a Virtual Research Environment (VRE) for interactive computing and sharing computational work. In a Jupyter environment, users can:
 
-## IPython Notebooks
-An IPython Notebook is an open-source web application that allows users to create and share interactive documents that contain live code, equations, visualizations and narrative text. 
+- Create directories
+- Upload data, such as CSV, TXT, NetCDF, HDF, TIFF, GeoTIFF, PNG, and JPEG files
+- Create Python code files (`.py`)
+- Create and work with Jupyter Notebook files (`.ipynb`)
+- Combine code, output, visualisations, equations, links, and explanatory text in one document
 
-![Result](img/notebook_example.png)
+The ICOS Jupyter service is based on the official `quay.io/jupyter/datascience-notebook` Docker image. Python, Julia, and R kernels are available. Julia and R are provided as standard components of the environment, while the ICOS Carbon Portal currently provides technical support for Python.
 
-<br>
-<br>
+## Jupyter Notebooks
+
+Jupyter notebooks are interactive documents that combine code, text, equations, figures, and results in one place. They are commonly used for scientific analysis, data exploration, teaching, reproducible research and sharing scientific workflows.
+
+## ICOS Carbon Portal Jupyter Services
+
+The ICOS Carbon Portal provides two Jupyter-based services:
+
+- **ExploreData** – a public environment for exploring example notebooks and ICOS data.
+- **Collaborative Jupyter Hub** – a persistent workspace for users and project groups working with ICOS data.
+
+## Where should I start?
+
+If you are new to Jupyter notebooks, start with [Your First Notebook](first-notebook.md).
+
+If you want to explore public ICOS notebooks, see the [ExploreData user guide](exploredata.md).
+
+If you have a personal account on the collaborative platform, see the [Collaborative Jupyter Hub user guide](hub-user-guide.md).
+
+If you are working with other users in a shared project area or want to install additional Python packages, see the [How-to guides](how-to.md).
 
 ## Access to notebooks and documentation
-All openly available ICOS notebooks and supporting documentation can be found in the ICOS Carbon Portal Jupyter repository on [GitHub](https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks).
+
+Openly available ICOS notebooks and supporting documentation are available through the ICOS Carbon Portal Jupyter repository on [GitHub].
+
+## Support
+
+For technical questions, account issues, project administration requests, or notebook problems, contact:
+
+**jupyter-info@icos-ri.eu**
+
