@@ -35,4 +35,4 @@ jobs:
         run: pip install mkdocs==1.6.1   # readthedocs theme + admonition ship with it
 
       - name: Build and deploy to gh-pages
-        run: mkdocs gh-deploy --force --branch gh-pages
+        run: mkdocs gh-deploy --force --remote-branch gh-pages
