@@ -1,4 +1,4 @@
-# pid4notebooks
+# jupyter
 
 This repository contains the build definitions for ICOS's interactive
 Jupyter notebook service Docker images.
