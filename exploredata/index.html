@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://icos-carbon-portal.github.io/jupyter/exploredata/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>ExploreData - ICOS Carbon Portal <br> Jupyter Services</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "ExploreData";
+        var mkdocs_page_input_path = "exploredata.md";
+        var mkdocs_page_url = "/jupyter/exploredata/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> ICOS Carbon Portal <br> Jupyter Services
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../first-notebook/">Your First Notebook</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">ExploreData</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#log-in-to-exploredata">Log in to ExploreData</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting started</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#notebook-collections">Notebook collections</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#explore-icos-data">Explore ICOS Data</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#examples">Examples</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#notebooks-with-doi">Notebooks with DOI</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#education">Education</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#classic-environment">Classic Environment</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#return-to-the-notebook-selection-page">Return to the notebook selection page</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#log-out-of-exploredata">Log out of ExploreData</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#need-help">Need help?</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../hub-user-guide/">Collaborative Hub</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../how-to/">How-to Guides</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../faq/">FAQ</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../changelog/">Changelog</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">ICOS Carbon Portal <br> Jupyter Services</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">ExploreData</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/ICOS-Carbon-Portal/jupyter/edit/master/docs/exploredata.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="exploredata-user-guide">ExploreData User Guide</h1>
+<p>ExploreData is the public Jupyter Notebook service provided by the ICOS Carbon Portal. It allows you to explore interactive notebooks, discover ICOS data products, and learn how scientific analyses can be performed within the ICOS Jupyter environment.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>ExploreData is intended for exploration and demonstration purposes. Changes made during your session are not saved. Download your notebook before ending your session if you want to keep your work.</p>
+</div>
+<h2 id="log-in-to-exploredata">Log in to ExploreData</h2>
+<ol>
+<li>Open your web browser and go to:</li>
+</ol>
+<p><a href="https://exploredata.icos-cp.eu">https://exploredata.icos-cp.eu</a></p>
+<ol>
+<li>
+<p>Enter your login credentials:</p>
+</li>
+<li>
+<p><strong>Username:</strong> your email address, for example <code>kim.nilsson@icos.com</code></p>
+</li>
+<li><strong>Password:</strong> request a password using the <a href="https://www.icos-cp.eu/data-services/services/jupyter-notebook/exploredata-password">ExploreData password request form</a></li>
+</ol>
+<p>If you experience login problems, contact:</p>
+<p><strong>jupyter-info@icos-ri.eu</strong></p>
+<h2 id="getting-started">Getting started</h2>
+<p>After logging in, you will see the ExploreData landing page. The page lists several notebook collections.</p>
+<p>Expand a category and select a notebook to start exploring.
+<br></p>
+<center>
+<img src="../img/exploredata.png" width=600>
+</center>
+<p><br></p>
+<p>If you are new to Jupyter notebooks, start with <strong>Explore ICOS Data</strong>. These notebooks demonstrate typical scientific workflows and show what can be done in the ICOS Jupyter environment.</p>
+<p>If you are looking for specific functionality, start with <strong>Examples</strong>. These notebooks demonstrate how to use ICOS Python libraries and data access tools.</p>
+<h2 id="notebook-collections">Notebook collections</h2>
+<h3 id="explore-icos-data">Explore ICOS Data</h3>
+<p>These notebooks demonstrate how ICOS data can be explored, processed, and visualized. Examples include:</p>
+<ul>
+<li>Data exploration and analysis</li>
+<li>Statistical calculations</li>
+<li>Interactive maps and plots</li>
+<li>Scientific workflows and project results</li>
+</ul>
+<p>Many notebooks have been developed in collaboration with researchers from the ICOS scientific community.</p>
+<h3 id="examples">Examples</h3>
+<p>The Examples collection demonstrates how to use the ICOS Carbon Portal Python libraries to:</p>
+<ul>
+<li>Access ICOS data and products</li>
+<li>Retrieve metadata and observations</li>
+<li>Perform analyses of ICOS data and products</li>
+<li>Build your own workflows and applications</li>
+</ul>
+<p>This collection is a good starting point for users who want to develop their own analyses.</p>
+<h3 id="notebooks-with-doi">Notebooks with DOI</h3>
+<p>These notebooks are associated with scientific publications and persistent identified datasets.</p>
+<p>They may include:</p>
+<ul>
+<li>Published analysis workflows and code</li>
+<li>Reproducible research examples</li>
+<li>Interactive tools</li>
+<li>Figure-generation scripts</li>
+</ul>
+<p>Each notebook is linked to a persistent identifier, such as a PID or DOI, enabling citation and long-term access.</p>
+<h3 id="education">Education</h3>
+<p>The Education collection contains notebooks developed for:</p>
+<ul>
+<li>Workshops</li>
+<li>University courses</li>
+<li>Training events</li>
+<li>Self-study</li>
+</ul>
+<p>The material has been created by members of the ICOS scientific community and supports learners ranging from students to experienced researchers.</p>
+<h3 id="classic-environment">Classic Environment</h3>
+<p>The Classic Environment contains a snapshot of all public ExploreData notebooks as they were available in <strong>November 2025</strong>.</p>
+<p>These notebooks are preserved for reference and reproducibility. They are no longer updated, but newer versions of many notebooks are available in the other collections.</p>
+<h2 id="return-to-the-notebook-selection-page">Return to the notebook selection page</h2>
+<p>To return to the ExploreData landing page and select another notebook:</p>
+<p><img style="float: right; padding: 5px" src="../img/return.png" width="120" align="right"/></p>
+<ol>
+<li>Hover over <strong>ICOS HUB</strong> on the left side of the interface.</li>
+<li>Click <strong>ICOS HUB</strong> to open the Hub Control Panel.</li>
+<li>Click <strong>Stop My Server</strong>.</li>
+<li>Wait a few seconds.</li>
+<li>Click <strong>Start My Server</strong>.</li>
+</ol>
+<p>You will be redirected to the ExploreData landing page.</p>
+<center>
+<img src="../img/stop.png" width=300>
+</center>
+<p><br></p>
+<h2 id="log-out-of-exploredata">Log out of ExploreData</h2>
+<ol>
+<li>Click <strong>ICOS HUB</strong> on the left side of the interface.</li>
+<li>Open the <strong>Hub Control Panel</strong>.</li>
+<li>Click <strong>Logout</strong> in the upper-right corner.</li>
+</ol>
+<h2 id="need-help">Need help?</h2>
+<p>For questions, technical issues, or login problems, contact:</p>
+<p><strong>jupyter-info@icos-ri.eu</strong></p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../first-notebook/" class="btn btn-neutral float-left" title="Your First Notebook"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../hub-user-guide/" class="btn btn-neutral float-right" title="Collaborative Hub">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/ICOS-Carbon-Portal/jupyter" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../first-notebook/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../hub-user-guide/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

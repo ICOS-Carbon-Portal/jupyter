@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://icos-carbon-portal.github.io/jupyter/changelog/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Changelog - ICOS Carbon Portal <br> Jupyter Services</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Changelog";
+        var mkdocs_page_input_path = "changelog.md";
+        var mkdocs_page_url = "/jupyter/changelog/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> ICOS Carbon Portal <br> Jupyter Services
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../first-notebook/">Your First Notebook</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../exploredata/">ExploreData</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../hub-user-guide/">Collaborative Hub</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../how-to/">How-to Guides</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../faq/">FAQ</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Changelog</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#icosbase-011-08062026">icosbase 0.1.1 (08/06/2026)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#icosbase-010-26022026">icosbase 0.1.0 (26/02/2026)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#previous-images">Previous images</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#210-07032023-11022025">2.1.0 (07/03/2023 - 11/02/2025)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#201-15112022">2.0.1 (15/11/2022)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#200-04112022">2.0.0 (04/11/2022)</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#jupyter-classic-vs-jupyterlab">Jupyter Classic vs JupyterLab</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#docker-image-of-jupyterdatascience-notebook">Docker image of jupyter/datascience-notebook</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#100">1.0.0</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#docker-jupyterdatascience-notebook">Docker jupyter/datascience-notebook</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">ICOS Carbon Portal <br> Jupyter Services</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Changelog</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/ICOS-Carbon-Portal/jupyter/edit/master/docs/changelog.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="changelog">Changelog</h1>
+<p>ICOS Jupyter environments are a family of purpose-built images that share a common <code>icosbase</code> base image:</p>
+<ul>
+<li><a href="../exploredata/">ExploreData</a> uses <code>examples:0.1.1</code></li>
+<li>The <a href="../hub-user-guide/">Collaborative Jupyter Hub</a> uses <code>collaboration:0.1.0</code></li>
+</ul>
+<p>Both build on <code>icosbase:0.1.1</code>.</p>
+<h2 id="icosbase-011-08062026">icosbase <a href="https://github.com/ICOS-Carbon-Portal/pid4notebooks/tree/6c82fd64b176b2faef10c1e351871cc71cf003f5/docker/icosbase" target="_blank" rel="noopener">0.1.1</a> <p>(08/06/2026)</p></h2>
+<ul>
+<li>Move off the 2022 <code>jupyter/datascience-notebook</code> Docker Hub pin used by 0.1.0 onto a 2026 <code>quay.io</code> base</li>
+<li>Drop the full TeX Live install, the extra R packages, the qgrid2 extension, and the legacy kernel; ship a single Python kernel</li>
+<li>Trim requirements to only what ICOS notebooks need beyond the base image (12 mamba and 1 pip package, down from the previous full stack)</li>
+<li>Install <a href="https://pypi.org/project/uv/">uv</a> by copying it from the official <code>ghcr.io/astral-sh/uv</code> image instead of via pip</li>
+<li>Replace qgrid2, icos-splash, and the nersc-announcements fork with the ICOS JupyterLab extensions from <a href="https://github.com/ICOS-Carbon-Portal/jupyterlab-extensions">ICOS-Carbon-Portal/jupyterlab-extensions</a></li>
+<li>Pin the ICOS libraries <a href="https://pypi.org/project/icoscp/0.2.3/">icoscp</a> 0.2.3 and <a href="https://pypi.org/project/icoscp_stilt/0.1.4/">icoscp_stilt</a> 0.1.4, bump <a href="https://pypi.org/project/icoscp_core/0.3.12/">icoscp_core</a> to 0.3.12, and add <a href="https://pypi.org/project/fluxie/">fluxie</a></li>
+<li>Add <a href="https://pypi.org/project/zarr/2.18.7/">zarr</a> 2.18.7, <a href="https://pypi.org/project/plotly/6.8.0/">plotly</a> 6.8.0, <a href="https://pypi.org/project/pydap/3.5.9/">pydap</a> 3.5.9, and <a href="https://github.com/jupyter-server/jupyter-resource-usage">jupyter-resource-usage</a> 1.2.1 to mamba requirements; install <a href="https://github.com/pangaea-data-publisher/pangaeapy">pangaeapy</a> from upstream git</li>
+<li>Keep the geospatial and visualization stack (cartopy, folium, geoviews, holoviews, xarray) and pangaeapy</li>
+</ul>
+<h2 id="icosbase-010-26022026">icosbase <a href="https://github.com/ICOS-Carbon-Portal/pid4notebooks/tree/6a75ccbb1bb017c3ac61223420575096af47c0b0/docker/icosbase" target="_blank" rel="noopener">0.1.0</a> <p>(26/02/2026)</p></h2>
+<ul>
+<li>Essentially the same environment as 2.1.0 below (same 2022 base and package stack), published as the first <code>icosbase</code> image under <code>registry.icos-cp.eu/stratos.icosbase</code></li>
+<li>Carries the full TeX Live install, the qgrid2 extension, the R packages, and the conda permission fix from the 2.x line</li>
+<li>Kept deliberately frozen so existing notebooks keep working, which means it is behind on newer Python libraries</li>
+</ul>
+<h2 id="previous-images">Previous images</h2>
+<p>The entries below track the previous single monolithic image, before the move to the <code>icosbase</code> base plus variants model.</p>
+<h3 id="210-07032023-11022025">2.1.0 <p>(07/03/2023 - 11/02/2025)</p></h3>
+<ul>
+<li>Add <a href="https://pypi.org/project/fluxengine/">fluxengine</a> version 4.0.9.1 to pip
+  requirements, <a href="https://pypi.org/project/PyCO2SYS/">pyco2sys</a> version 1.8.3.4
+  to mamba requirements, and <a href="https://pypi.org/project/uv/"><code>uv</code></a> utility to
+  docker image installation (11/02/2025)</li>
+<li>Add <code>rsync</code> utility to docker image installation (06/11/2024)</li>
+<li>Add <a href="">itables</a> version 2.2.2 to pip requirements (28/10/2024)</li>
+<li>Bump <a href="https://pypi.org/project/icoscp/">icoscp</a> to version 0.2.2 
+(18/10/2024)</li>
+<li>Bump <a href="https://pypi.org/project/icoscp_stilt/">icoscp_stilt</a> to version 0.1.3 
+(18/10/2024)</li>
+<li>Bump <a href="https://pypi.org/project/icoscp_core/">icoscp_core</a> to version 0.3.7
+(17/10/2024)</li>
+<li>Bump <a href="https://github.com/ICOS-Carbon-Portal/pylib/tree/c68ad7afa1c27efb69f3350ad7723827517ad004">icoscp</a>
+to master branch (05/04/2024)</li>
+<li>Bump <a href="https://pypi.org/project/icoscp_core/">icoscp_core</a> to version 0.3.3
+(05/04/2024)</li>
+<li>Other notebook fixes mentioned <a href="https://github.com/ICOS-Carbon-Portal/jupyter/issues/367">here</a> (05/04/2023)</li>
+<li>Bump <a href="https://pypi.org/project/icoscp/0.1.20/">icoscp</a> to version 0.1.20
+(12/01/2024)</li>
+<li>Add <a href="https://pypi.org/project/jupyter-splitview/0.1.2/">jupyter-splitview</a>
+version 0.1.2, <a href="https://pypi.org/project/jupyterlab-mathjax2/4.0.0/">jupyterlab_mathjax2</a> version 4.0.0, and
+<a href="https://pypi.org/project/icoscp_core/0.3.0/">icoscp_core</a> version 0.3.0 to
+pip requirements (12/01/2024)</li>
+<li>Bump <a href="https://pypi.org/project/icoscp/0.1.19/">icoscp</a> to version 0.1.19
+(25/07/2023)</li>
+<li>Add <a href="https://pypi.org/project/h5netcdf/">h5netcdf</a> version 1.1.0 to mamba
+requirements (10/05/2023)</li>
+<li>Add <a href="https://pypi.org/project/kaleido/0.2.1/">kaleido</a> version 0.2.1 and
+<a href="https://github.com/klavere/cyclebars"><code>cyclebars</code></a> to the docker image
+installation (28/04/2023)</li>
+<li>Update <a href="https://pypi.org/project/ipywidgets/8.0.4/">ipywidgets</a> to version
+8.0.4 and <a href="https://pypi.org/project/plotly/5.14.1/">plotly</a> to version 5.14.1
+(13/04/2023)</li>
+<li>Add <code>zip</code> library to the docker image installation (20/03/2023)</li>
+<li>Add <a href="https://github.com/ZogopZ/icos-splash">icos-splash</a> to the docker image
+installation (07/03/2023)</li>
+<li>Fork and patch <a href="https://github.com/ZogopZ/nersc-refresh-announcements">nersc-announcements-extension</a> to resolve TypeScript
+issues (07/03/2023)</li>
+<li>Add <a href="https://github.com/jupyter-server/jupyter-resource-usage">jupyter-resource-usage</a> to pip requirements
+(07/03/2023)</li>
+<li>Add <a href="https://github.com/paramiko/paramiko">paramiko</a> to pip requirements
+(07/03/2023)</li>
+<li>Other notebook fixes mentioned <a href="https://github.com/ICOS-Carbon-Portal/jupyter/issues/262">here</a> (07/03/2023)</li>
+</ul>
+<h3 id="201-15112022">2.0.1 <p>(15/11/2022)</p></h3>
+<ul>
+<li>Add PyGeodesy version 22.11.3 library to the docker image installation</li>
+<li>Add utm version 0.7.0 library to the docker image installation</li>
+<li>Fix errors caused by cartopy library</li>
+</ul>
+<h3 id="200-04112022">2.0.0 <p>(04/11/2022)</p></h3>
+<ul>
+<li>
+<h5 id="jupyter-classic-vs-jupyterlab">Jupyter Classic vs JupyterLab</h5>
+<ul>
+<li>Earlier versions of the Jupyter solutions provided by the ICOS Carbon
+  Portal used the Jupyter Classic view. </li>
+<li>One major advantage of JupyterLab compared to Jupyter Classic is the
+  possibility to work with several notebooks using tabs.</li>
+<li>The default view of ICOS Carbon Portal has changed to JupyterLab. For
+  users who wish to use the Jupyter Classic view can do so by choosing
+  Launch Classic view in the Help menu.
+  For further reading on JupyterLab we refer to 
+  <a href="https://jupyterlab.readthedocs.io/en/stable/">the JupyterLab documentation</a>.</li>
+</ul>
+</li>
+<li>
+<h5 id="docker-image-of-jupyterdatascience-notebook">Docker image of <a href="https://jupyter-docker-stacks.readthedocs.io/en/latest/using/selecting.html#jupyter-datascience-notebook">jupyter/datascience-notebook</a></h5>
+<ul>
+<li>Image version: <a href="https://hub.docker.com/layers/jupyter/datascience-notebook/dc95493e13c4/images/sha256-731da3b2844e168d677e622d6ce127e790117e291c57933deefd93bc5f79217d?context=explore">jupyter/datascience-notebook:dc95493e13c4</a> on <code>linux/amd64</code>.<ul>
+<li>Python 3.10.6 - <a href="https://github.com/jupyter/docker-stacks/wiki/x86_64-datascience-notebook-dc95493e13c4#python-packages">link to packages</a>  </li>
+<li>JupyterLab 3.4.7</li>
+<li>R 4.1.3 - <a href="https://github.com/jupyter/docker-stacks/wiki/x86_64-datascience-notebook-dc95493e13c4#r-packages">link to packages</a></li>
+<li>Julia 1.8.2 - <a href="https://github.com/jupyter/docker-stacks/wiki/x86_64-datascience-notebook-dc95493e13c4#julia-packages">link to packages</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="100">1.0.0</h3>
+<ul>
+<li>
+<h5 id="docker-jupyterdatascience-notebook">Docker <a href="https://jupyter-docker-stacks.readthedocs.io/en/latest/using/selecting.html#jupyter-datascience-notebook">jupyter/datascience-notebook</a></h5>
+<ul>
+<li>Image version: <a href="https://hub.docker.com/layers/jupyter/datascience-notebook/5cb007f03275/images/sha256-e6d5c7d595d25f6ec7a894d8fcc7cb4b542c28f65fb71cdf0cb9b77f0ce0ddd0?context=explore">jupyter/datascience-notebook:5cb007f03275</a> on <code>linux/amd64</code>.<ul>
+<li>Python 3.8.6 - <a href="https://github.com/jupyter/docker-stacks/wiki/datascience-notebook-5cb007f03275#python-packages">link to packages</a>  </li>
+<li>R 4.0.3 - <a href="https://github.com/jupyter/docker-stacks/wiki/datascience-notebook-5cb007f03275#r-packages">link to packages</a></li>
+<li>Julia 1.5.3 - <a href="https://github.com/jupyter/docker-stacks/wiki/datascience-notebook-5cb007f03275#julia-packages">link to packages</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../faq/" class="btn btn-neutral float-left" title="FAQ"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/ICOS-Carbon-Portal/jupyter" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../faq/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

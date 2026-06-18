@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://icos-carbon-portal.github.io/jupyter/how-to/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>How-to Guides - ICOS Carbon Portal <br> Jupyter Services</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "How-to Guides";
+        var mkdocs_page_input_path = "how-to.md";
+        var mkdocs_page_url = "/jupyter/how-to/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> ICOS Carbon Portal <br> Jupyter Services
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../first-notebook/">Your First Notebook</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../exploredata/">ExploreData</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../hub-user-guide/">Collaborative Hub</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">How-to Guides</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#working-in-projects">Working in Projects</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#join-an-existing-project">Join an existing project</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#create-a-new-project">Create a new project</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#project-owner">Project owner</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#how-collaboration-works">How collaboration works</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#recommended-practices">Recommended practices</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#the-store-folder">The store folder</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#project-data-and-mounted-drives">Project data and mounted drives</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#python-packages">Python Packages</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#install-a-package-from-a-notebook">Install a package from a notebook</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#install-a-package-from-a-terminal">Install a package from a terminal</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#upgrade-a-package">Upgrade a package</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#list-installed-packages">List installed packages</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#show-details-for-a-package">Show details for a package</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#reset-your-personal-python-packages">Reset your personal Python packages</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#upgrade-all-user-installed-packages">Upgrade all user-installed packages</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#when-to-contact-support">When to contact support</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#virtual-environments">Virtual Environments</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#create-a-directory-for-the-environment">Create a directory for the environment</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#create-a-virtual-environment">Create a virtual environment</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#activate-the-environment">Activate the environment</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#install-jupyter-kernel-support">Install Jupyter kernel support</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#register-the-environment-as-a-jupyter-kernel">Register the environment as a Jupyter kernel</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#use-the-new-kernel">Use the new kernel</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#deactivate-the-environment">Deactivate the environment</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#remove-a-custom-kernel">Remove a custom kernel</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#working-with-github-repositories">Working with GitHub Repositories</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#create-a-folder-for-repositories">Create a folder for repositories</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#clone-a-repository">Clone a repository</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#use-standard-git-commands">Use standard Git commands</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#learn-more">Learn more</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../faq/">FAQ</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../changelog/">Changelog</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">ICOS Carbon Portal <br> Jupyter Services</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">How-to Guides</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/ICOS-Carbon-Portal/jupyter/edit/master/docs/how-to.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="how-to">How to...</h1>
+<p>In this guide you find more information on </p>
+<ul>
+<li>Working in Projects </li>
+<li>Installing Python packages</li>
+<li>Working in Virtual Environments</li>
+<li>Working with Github Repoitories</li>
+</ul>
+<h2 id="working-in-projects">Working in Projects</h2>
+<p>Project spaces on the ICOS Collaborative Jupyter Hub allow groups of users to work together in a shared environment.</p>
+<p>A project folder is only visible to members of that project.</p>
+<h3 id="join-an-existing-project">Join an existing project</h3>
+<p>To join an existing project:</p>
+<ol>
+<li>Make sure you have a personal ICOS Jupyter Hub account.</li>
+<li>Request <a href="https://www.icos-cp.eu/data-services/services/jupyter-notebook/project-membership-application">access to the project</a>.</li>
+<li>Once approved, restart your Jupyter server if the project folder does not appear.</li>
+</ol>
+<p>If you still cannot see the project folder, contact:</p>
+<p><strong>jupyter-info@icos-ri.eu</strong></p>
+<h3 id="create-a-new-project">Create a new project</h3>
+<p>If you have a research idea and want to collaborate with others using ICOS data or derived products, you can <a href="https://www.icos-cp.eu/data-services/services/jupyter-notebook/collaboration-space-application">request a dedicated project space</a>.</p>
+<p>When applying, provide a brief description of:</p>
+<ul>
+<li>The scientific objective</li>
+<li>The planned use of the Jupyter Hub environment</li>
+<li>The expected participants</li>
+</ul>
+<h3 id="project-owner">Project owner</h3>
+<p>The person who requested the project is the project owner.</p>
+<p>The project owner is responsible for:</p>
+<ul>
+<li>Inviting new members</li>
+<li>Managing project membership, i.e. coordinate with ICOS CP Jupyter Team to add or remove members</li>
+<li>Coordinating project activities</li>
+<li>Overseeing the project workspace</li>
+<li>Contacting the ICOS CP Jupyter Team for technical requests</li>
+<li>Requesting updates to the Store folder</li>
+</ul>
+<h3 id="how-collaboration-works">How collaboration works</h3>
+<p>Project collaboration follows the same principles as working in a Linux or Unix group environment.</p>
+<p>Files and folders stored directly in the project group folder are:</p>
+<ul>
+<li>Visible to all project members</li>
+<li>Editable by all project members</li>
+</ul>
+<p>This is a true collaborative space. If multiple users work on the same notebook at the same time, changes may conflict or be overwritten.</p>
+<h3 id="recommended-practices">Recommended practices</h3>
+<p>To avoid accidental interference with other project members:</p>
+<ul>
+<li>Create your own copy of notebooks or scripts before editing.</li>
+<li>Use a personal subfolder inside the project directory for development work.</li>
+<li>Alternatively, work in your home directory and link to input files in the project folder when needed.</li>
+<li>Keep stable versions separate from active development files.</li>
+<li>Coordinate with collaborators before editing shared notebooks.</li>
+</ul>
+<h3 id="the-store-folder">The store folder</h3>
+<p>Each project contains a <strong>store</strong> folder.</p>
+<p>The Store folder is intended for stable, approved versions of notebooks, scripts, and project material.</p>
+<ul>
+<li>All project members can view the contents.</li>
+<li>The folder is read-only for project members.</li>
+<li>Only the ICOS CP Jupyter Team can update the folder.</li>
+</ul>
+<p>If you want to archive scripts or notebooks in the Store folder, contact: </p>
+<p><strong>jupyter-info@icos-ri.eu</strong></p>
+<h3 id="project-data-and-mounted-drives">Project data and mounted drives</h3>
+<p>Some projects use data hosted on the ICOS fileshare or on an external research drive.</p>
+<p>These data sources may be mounted inside the project folder to provide read-only access to larger datasets or model results.</p>
+<p>Mounted data should not be modified by notebooks or scripts running on the Jupyter Hub.</p>
+<h2 id="python-packages">Python Packages</h2>
+<p>You can install additional Python packages in your personal Jupyter Hub account.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Packages installed in your personal account are only available to you. Other users and project members will not automatically have access to them.</p>
+</div>
+<h3 id="install-a-package-from-a-notebook">Install a package from a notebook</h3>
+<p>In a notebook cell, run:</p>
+<p><code>!pip install myPackage</code></p>
+<p>Replace <code>myPackage</code> with the name of the package you want to install.</p>
+<h3 id="install-a-package-from-a-terminal">Install a package from a terminal</h3>
+<p>Open a terminal and run:</p>
+<p><code>pip install myPackage</code></p>
+<h3 id="upgrade-a-package">Upgrade a package</h3>
+<p>To upgrade an existing package:</p>
+<p><code>pip install &lt;package-name&gt; -U</code></p>
+<h3 id="list-installed-packages">List installed packages</h3>
+<p>To list installed packages:</p>
+<p><code>pip list</code></p>
+<h3 id="show-details-for-a-package">Show details for a package</h3>
+<p>To show information about a specific package:</p>
+<p><code>pip show &lt;package-name&gt;</code></p>
+<h3 id="reset-your-personal-python-packages">Reset your personal Python packages</h3>
+<p>If package conflicts cause problems, you can remove all packages installed in your personal user environment.</p>
+<p>Open a terminal and run:</p>
+<p><code>rm -rf ~/.local/lib/python*/site-packages/</code></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This removes packages installed in your personal account. It does not remove system packages.</p>
+</div>
+<p>Afterwards, reinstall only the packages you need.</p>
+<p>Example:</p>
+<p><code>pip install halo</code></p>
+<h3 id="upgrade-all-user-installed-packages">Upgrade all user-installed packages</h3>
+<p>You can try upgrading all user-installed packages with:</p>
+<p><code>pip list --user --format=freeze | cut -d = -f 1 | xargs -n1 python -m pip install -U --user</code></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This command may fail if package dependencies conflict. If many packages need updating, it can be useful to try, but success cannot be guaranteed.</p>
+</div>
+<h3 id="when-to-contact-support">When to contact support</h3>
+<p>If your notebook still fails after upgrading or resetting packages, contact:</p>
+<p><strong>jupyter-info@icos-ri.eu</strong></p>
+<h2 id="virtual-environments">Virtual Environments</h2>
+<p>A virtual environment lets you install and manage Python packages separately from the default Jupyter Hub environment.</p>
+<p>This is useful when a notebook requires specific package versions or when you want to avoid conflicts with your personal Python environment.</p>
+<h3 id="create-a-directory-for-the-environment">Create a directory for the environment</h3>
+<p>Open a terminal and create a directory for your environment:</p>
+<p><code>mkdir supersoftware</code></p>
+<p><code>cd supersoftware</code></p>
+<h3 id="create-a-virtual-environment">Create a virtual environment</h3>
+<p>Create a virtual environment named <code>super-env</code>:</p>
+<p><code>python -m venv super-env</code></p>
+<h3 id="activate-the-environment">Activate the environment</h3>
+<p>Activate the environment:</p>
+<p><code>source super-env/bin/activate</code></p>
+<h3 id="install-jupyter-kernel-support">Install Jupyter kernel support</h3>
+<p>Install or upgrade <code>pip</code>, then install <code>ipykernel</code>:</p>
+<p><code>pip install --upgrade pip</code>
+<code>pip install ipykernel</code></p>
+<h3 id="register-the-environment-as-a-jupyter-kernel">Register the environment as a Jupyter kernel</h3>
+<p>Register the environment so that it appears as a selectable notebook kernel:</p>
+<p><code>python -m ipykernel install --user --name super-env --display-name "super-env"</code></p>
+<p>Reload the the current definitions</p>
+<p><code>deactivate</code></p>
+<p><code>source super-env/bin/activate</code></p>
+<h3 id="use-the-new-kernel">Use the new kernel</h3>
+<ol>
+<li>Open a new notebook.</li>
+<li>Select the <strong>super-env</strong> kernel.</li>
+<li>Run your notebook using the packages installed in that environment.</li>
+</ol>
+<h3 id="deactivate-the-environment">Deactivate the environment</h3>
+<p>To return to the default environment in the terminal, run:</p>
+<p><code>deactivate</code></p>
+<h3 id="remove-a-custom-kernel">Remove a custom kernel</h3>
+<p>If you no longer need the kernel, you can remove it with:</p>
+<p><code>jupyter kernelspec uninstall super-env</code></p>
+<h2 id="working-with-github-repositories">Working with GitHub Repositories</h2>
+<p>You can access files from GitHub repositories directly in the ICOS Collaborative Jupyter Hub.</p>
+<h3 id="create-a-folder-for-repositories">Create a folder for repositories</h3>
+<p>After logging in to the Jupyter Hub, open a terminal and create a folder for your GitHub repositories:</p>
+<pre><code class="language-bash">mkdir github
+cd github
+</code></pre>
+<h3 id="clone-a-repository">Clone a repository</h3>
+<p>Use <code>git clone</code> followed by the repository URL.</p>
+<p>Example:</p>
+<pre><code class="language-bash">git clone https://github.com/ICOS-Carbon-Portal/pylib.git
+</code></pre>
+<p>This creates a local copy of the repository in your workspace.</p>
+<h3 id="use-standard-git-commands">Use standard Git commands</h3>
+<p>Inside the repository folder, you can use standard Git commands, for example:</p>
+<pre><code class="language-bash">git status
+git pull
+git add .
+git commit -m &quot;Update notebook&quot;
+git push
+</code></pre>
+<h3 id="learn-more">Learn more</h3>
+<p>For a general introduction to Git, see:</p>
+<p><a href="https://git-scm.com/docs/gittutorial">https://git-scm.com/docs/gittutorial</a></p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../hub-user-guide/" class="btn btn-neutral float-left" title="Collaborative Hub"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../faq/" class="btn btn-neutral float-right" title="FAQ">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/ICOS-Carbon-Portal/jupyter" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../hub-user-guide/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../faq/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://icos-carbon-portal.github.io/jupyter/first-notebook/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Your First Notebook - ICOS Carbon Portal <br> Jupyter Services</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Your First Notebook";
+        var mkdocs_page_input_path = "first-notebook.md";
+        var mkdocs_page_url = "/jupyter/first-notebook/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> ICOS Carbon Portal <br> Jupyter Services
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Your First Notebook</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#create-a-notebook">Create a notebook</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#rename-a-notebook">Rename a notebook</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#run-all-cells-in-a-notebook">Run all cells in a notebook</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#run-a-single-code-cell">Run a single code cell</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#use-code-and-markdown-cells">Use code and Markdown cells</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#add-a-new-cell">Add a new cell</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#delete-a-cell">Delete a cell</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#stop-a-running-notebook">Stop a running notebook</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#save-your-notebook">Save your notebook</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#download-a-notebook">Download a notebook</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#upload-a-notebook">Upload a notebook</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#restart-your-jupyter-server">Restart your Jupyter server</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#log-out">Log out</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../exploredata/">ExploreData</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../hub-user-guide/">Collaborative Hub</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../how-to/">How-to Guides</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../faq/">FAQ</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../changelog/">Changelog</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">ICOS Carbon Portal <br> Jupyter Services</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Your First Notebook</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/ICOS-Carbon-Portal/jupyter/edit/master/docs/first-notebook.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="your-first-jupyter-notebook">Your First Jupyter Notebook</h1>
+<p>This guide is intended for users who are new to Jupyter notebooks in general. It explains the basic actions you need to work with Jupyter notebooks.</p>
+<h2 id="create-a-notebook">Create a notebook</h2>
+<p>To create a new notebook:</p>
+<ol>
+<li>Open the file browser in Jupyter.</li>
+<li>Select <strong>Python3</strong> in the Launcher window.
+<br></li>
+</ol>
+<center>
+<img src="../img/open.png" width=500>
+</center>
+<p><br></p>
+<p>A new browser tab opens with a notebook named <code>Untitled.ipynb</code>.</p>
+<h2 id="rename-a-notebook">Rename a notebook</h2>
+<p>To rename your notebook:</p>
+<ol>
+<li>Open the notebook.</li>
+<li>Go to <strong>File</strong>.</li>
+<li>Click <strong>Rename Notebook...</strong>.</li>
+<li>Enter the new name.
+<br></li>
+</ol>
+<center>
+<img src="../img/rename.png" width=500>
+</center>
+<p><br></p>
+<h2 id="run-all-cells-in-a-notebook">Run all cells in a notebook</h2>
+<p>To run the whole notebook from the beginning:</p>
+<ol>
+<li>Go to <strong>Kernel</strong>.</li>
+<li>Select <strong>Restart &amp; Run All</strong>.
+<br></li>
+</ol>
+<center>
+<img src="../img/runall.png" width=500>
+</center>
+<p><br>
+This restarts the kernel and executes all cells in order.</p>
+<h2 id="run-a-single-code-cell">Run a single code cell</h2>
+<p>A notebook consists of cells. To run one cell:</p>
+<ol>
+<li>Click inside the cell you want to run.</li>
+<li>Click <strong>Run</strong> in the toolbar, or press <strong>Shift + Enter</strong>.
+<br></li>
+</ol>
+<center>
+<img src="../img/run.png" width=500>
+</center>
+<p><br>
+Only the active cell is executed. The active cell is highlighted in the notebook interface.</p>
+<h2 id="use-code-and-markdown-cells">Use code and Markdown cells</h2>
+<p>Jupyter notebooks can contain both code and formatted text.</p>
+<p>Use a <strong>Code</strong> cell for Python code.</p>
+<p>Use a <strong>Markdown</strong> cell for text, headings, explanations, links, and simple formatting.</p>
+<p>The current cell type is shown in the dropdown menu in the notebook toolbar. If you are writing Python code, make sure the cell type is set to <strong>Code</strong>.</p>
+<h2 id="add-a-new-cell">Add a new cell</h2>
+<p>To add a new cell below the active cell, click the <strong>+</strong> button in the toolbar.</p>
+<h2 id="delete-a-cell">Delete a cell</h2>
+<p>To delete a cell:</p>
+<ol>
+<li>Select the cell.</li>
+<li>Click scissor button in the toolbar.
+<br></li>
+</ol>
+<center>
+<img src="../img/delete.png" width=500>
+</center>
+<p><br></p>
+<h2 id="stop-a-running-notebook">Stop a running notebook</h2>
+<p>If a cell or notebook is taking too long to run, interrupt the kernel.</p>
+<p>You can do this by clicking <strong>Interrupt kernel</strong> in the toolbar, or by going to:</p>
+<p><strong>Kernel → Interrupt</strong></p>
+<h2 id="save-your-notebook">Save your notebook</h2>
+<p>Go to <strong>File → Save Notebook</strong> to save your work.</p>
+<p>On the Collaborative Jupyter Hub, files in your home directory or project directory are saved persistently.</p>
+<p>On ExploreData, your work is not saved permanently. Download your notebook if you want to keep it.</p>
+<h2 id="download-a-notebook">Download a notebook</h2>
+<p>Go to <strong>File → Download</strong> to download a notebook to your local computer.</p>
+<h2 id="upload-a-notebook">Upload a notebook</h2>
+<p>To upload a notebook:</p>
+<ol>
+<li>Click the blue upload button on the left toolbar.</li>
+<li>Select the notebook file from your computer.</li>
+<li>Click <strong>Open</strong>.
+<br></li>
+</ol>
+<center>
+<img src="../img/upload.png" width=250>
+</center>
+<p><br></p>
+<h2 id="restart-your-jupyter-server">Restart your Jupyter server</h2>
+<p>Restarting your server can help refresh software updates, permissions, and project access.</p>
+<ol>
+<li>Go to <strong>File → Hub Control Panel</strong>.</li>
+<li>Click <strong>Stop My Server</strong>.</li>
+<li>Wait until the server has stopped.</li>
+<li>Click <strong>Start My Server</strong>.</li>
+</ol>
+<h2 id="log-out">Log out</h2>
+<p>To log out of Jupyter Hub:</p>
+<ol>
+<li>Go to <strong>File</strong>.</li>
+<li>Click <strong>Log Out</strong>.</li>
+</ol>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href=".." class="btn btn-neutral float-left" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../exploredata/" class="btn btn-neutral float-right" title="ExploreData">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/ICOS-Carbon-Portal/jupyter" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../exploredata/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
