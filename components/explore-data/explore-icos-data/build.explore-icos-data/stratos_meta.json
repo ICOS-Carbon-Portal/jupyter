@@ -1,5 +1,5 @@
 {
-  "title": "icos-notebooks",
+  "title": "explore-icos-data",
   "description": "Based on icosbase v0.1.0, extended with the ICOS notebooks content (education, introduction, project-jupyter-notebooks, and icos-jupyter-notebooks).",
   "licenses": [
     "https://creativecommons.org/licenses/by/4.0/"
