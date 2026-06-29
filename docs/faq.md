@@ -38,10 +38,9 @@ To make sure your session reflects the latest updates, restart your server.
 3. Wait until the server has stopped.
 4. Click **Start My Server**.
 
-
 We recommend doing this regularly.
 
-### I was added to a project, but I cannot see the project folder
+### I was added to a project, but I cannot see the project folder.
 
 Project permissions may not appear in an already running session.
 Restart your server.
@@ -57,7 +56,7 @@ If the project folder is still missing, contact:
 **jupyter-info@icos-ri.eu**
 
 
-### My notebook worked before a Jupyter Hub update, but now it fails
+### My notebook worked before a Jupyter Hub update, but now it fails.
 
 This can happen when:
 
@@ -82,6 +81,13 @@ If the problem remains, contact:
 **jupyter-info@icos-ri.eu**
 
 
+### I remember using an ICOS notebook previously, but I cannot find it anymore.
+
+If you are looking for a notebook that was previously available on ExploreData or in the former *common* folder on the Collaborative Jupyter Hub, the [Classic Environment on ExploreData](exploredata.md/#classic-environment) is the best place to start your search.
+
+The Classic Environment contains a snapshot of all public ICOS notebooks as they were available in November 2025. While these notebooks are no longer maintained, they remain available for reference and to support the reproducibility of previous analyses.
+
+
 ## Python packages
 
 ### Can I install a missing Python package?
@@ -103,6 +109,7 @@ Packages installed this way are only available to you.
 Yes. You can create a virtual environment and register it as a Jupyter kernel.
 
 See [Virtual Environments](how-to.md/#virtual-environments) in the How-to Guide.
+
 
 ## GitHub
 
