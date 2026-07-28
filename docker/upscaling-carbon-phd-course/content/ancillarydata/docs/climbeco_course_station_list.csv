@@ -1,0 +1,16 @@
+Country,Country Code,Station Name,Station Code,Type,Latitude,Longitude
+Denmark,DK,Soro,Sor,Deciduous Forest,55.49,11.64
+Finland,FI,Lettosuo,Let,Peatland,60.64,23.96
+Finland,FI,Siikaneva,Sii,Fen,61.83,24.19
+Germany,DE,Anklam,Akm,Wetland,53.87,13.68
+Germany,DE,Gebesee,Geb,Cropland,51.10,10.91
+Germany,DE,Grillenburg,Gri,Grassland,50.95,13.51
+Germany,DE,Hainich,Hai,Deciduous Forest,51.08,10.45
+Germany,DE,Hohes Holz,HoH,Deciduous Forest,52.09,11.22
+Germany,DE,Rollesbroich,RuR,Grassland,50.62,6.30
+Germany,DE,Selhausen Juelich,RuS,Cropland,50.87,6.45
+Sweden,SE,Degero,Deg,Wetland,64.18,19.56
+Sweden,SE,Hyltemossa,Htm,Coniferous Forest,56.10,13.42
+Sweden,SE,Norunda,Nor,Coniferous Forest,60.09,17.48
+Sweden,SE,Rosinedal,Ros,Coniferous Forest,64.17,19.74
+Sweden,SE,Svartberget,Svb,Coniferous Forest,64.26,19.77
