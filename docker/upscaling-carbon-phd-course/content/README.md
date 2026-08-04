@@ -25,5 +25,6 @@ This directory includes all the notebooks that are used in the course. The noteb
 This work is licensed under a Creative Commons Attribution 4.0 International License (CC BY 4.0). <br>
 Copyright © 2019-2020 ICOS ERIC <br>
 Copyright © 2020 Lund University dept. of Physical Geography and Ecosystem Science <br>
+Copyright © 2026 Lund University Department of Earth and Environmental Sciences <br>
 
 You are free to download, use and change any part of all included notebooks as long as you cite the initial source. Note that, in case you wish to use material from the notebooks, you need to cite all the teachers and developers from that notebook as well as from the accompanying tools.ipynb notebook. The tools.ipynb notebook includes all the functions and code that are used in the rest of the notebooks.
