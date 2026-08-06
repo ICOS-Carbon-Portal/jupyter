@@ -1,0 +1,7 @@
+{
+  "title": "notebooks-with-doi",
+  "description": "Based on icosbase v0.1.0, extended with selected DOI notebooks.",
+  "licenses": [
+    "https://creativecommons.org/licenses/by/4.0/"
+  ]
+}

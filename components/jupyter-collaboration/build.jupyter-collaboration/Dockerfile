@@ -11,7 +11,7 @@ ADD content/. /opt/icos-examples/
 RUN chmod -R a-w /opt/icos-examples
 
 # Startup hook (COPY works regardless of USER).
-COPY build.collaboration/link-examples.sh /usr/local/bin/before-notebook.d/
+COPY build.jupyter-collaboration/link-examples.sh /usr/local/bin/before-notebook.d/
 
 # Drop back to the default non-root jovyan user for runtime.
 USER ${NB_UID}
