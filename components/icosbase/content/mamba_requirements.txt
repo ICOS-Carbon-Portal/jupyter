@@ -1,12 +1,17 @@
 cartopy=0.25.0
+cdo=2.6.1
 folium=0.20.0
+gdal=3.13.2
 geoviews=1.15.1
 holoviews=1.22.1
 jupyter-resource-usage=1.2.1
 nodejs=25.8.2
 plotly=6.8.0
 pydap=3.5.9
+python-cdo=1.6.1
 requests=2.32.5
 tqdm=4.67.3
 xarray=2026.2.0
 zarr=2.18.7
+hdf5=1.14.6
+netcdf4=1.7.4
