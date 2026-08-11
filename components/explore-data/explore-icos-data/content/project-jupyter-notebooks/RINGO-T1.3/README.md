@@ -11,7 +11,7 @@ This folder includes notebooks and ancillary data files for presenting an evalua
 ## Structure
 The folder is divided into the following parts:
 
-* Jupyter Notebook for evaluation of flask sampling strategies for (1) quality control for in situ observations, (2) representative information on atmospheric components currently not monitored in situ at the stations, (3) samples for 14CO2 analysis that are significantly influenced by fossil fuel CO2 (ffCO2) emission areas. Evaluation of sampling strategies is based on STILT footprints (part 1) and ICOS measurement data (part 2). 
+* Jupyter notebook for selecting an appropriate CO-offset threshold to identify events with potentially high fossil fuel CO2 contribution for ICOS measurement time series (ICOS release and NRT) for all ICOS atmospheric stations.
 
 * modules folder (contains Python scripts to handle STILT footprints)
 
