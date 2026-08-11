@@ -1,7 +1,0 @@
-{
-  "title": "upscaling-carbon-phd-course",
-  "description": "Based on icosbase v0.1.2, extended with the skyborn-cdo bindings and the upscaling carbon PhD course teaching materials (exercise notebooks on ICOS data, model comparison, remote-sensing upscaling and national budgets, plus shared tools and inspection notebooks).",
-  "licenses": [
-    "https://creativecommons.org/licenses/by/4.0/"
-  ]
-}
