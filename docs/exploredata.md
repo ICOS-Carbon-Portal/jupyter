@@ -35,31 +35,32 @@ Expand a category and select a notebook to start exploring.
 
 If you are new to Jupyter notebooks, start with **Explore ICOS Data**. These notebooks demonstrate typical scientific workflows and show what can be done in the ICOS Jupyter environment.
 
-If you are looking for specific functionality, start with **Examples**. These notebooks demonstrate how to use ICOS Python libraries and data access tools.
+If you are looking for specific functionality, start with **Examples** in **Explore ICOS Data**. These notebooks demonstrate how to use ICOS Python libraries and data access tools.
 
 ## Notebook collections
 
 ### Explore ICOS Data
 
-These notebooks demonstrate how ICOS data can be explored, processed, and visualized. Examples include:
+These notebooks demonstrate how ICOS data can be explored, processed, and visualized. 
+In particular, the examples illustrating the use of the ICOS Python library provide a good starting point for users who want to develop their own analyses.
 
-- Data exploration and analysis
-- Statistical calculations
-- Interactive maps and plots
-- Scientific workflows and project results
+#### Examples for using ICOS Python library
 
-Many notebooks have been developed in collaboration with researchers from the ICOS scientific community.
-
-### Examples
-
-The Examples collection demonstrates how to use the ICOS Carbon Portal Python libraries to:
+The examples in this collection demonstrate how to use the ICOS Carbon Portal Python libraries to:
 
 - Access ICOS data and products
 - Retrieve metadata and observations
 - Perform analyses of ICOS data and products
 - Build your own workflows and applications
 
-This collection is a good starting point for users who want to develop their own analyses.
+The other notebooks in this collection provide examples of:
+
+- Data exploration and analysis
+- Statistical calculations
+- Interactive maps and plots
+- Scientific workflows and project results
+
+Many of these notebooks have been developed in collaboration with researchers from the ICOS scientific community.
 
 ### Notebooks with DOI
 
@@ -85,9 +86,9 @@ The Education collection contains notebooks developed for:
 
 The material has been created by members of the ICOS scientific community and supports learners ranging from students to experienced researchers.
 
-### Classic Environment
+### Timecapsule
 
-The Classic Environment contains a snapshot of all public ExploreData notebooks as they were available in **November 2025**.
+The Timecapsule contains a snapshot of all public ExploreData notebooks as they were available in **November 2025**.
 
 These notebooks are preserved for reference and reproducibility. They are no longer updated, but newer versions of many notebooks are available in the other collections.
 

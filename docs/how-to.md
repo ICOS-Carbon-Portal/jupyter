@@ -2,10 +2,30 @@
 
 In this guide you find more information on 
 
+- Restarting your Jupyter server 
 - Working in Projects 
 - Installing Python packages
 - Working in Virtual Environments
 - Working with Github Repoitories
+
+## Restart your Jupyter server
+
+Restarting your Jupyter server refreshes your session and ensures that it uses the latest environment and permissions.
+
+You should restart your server if:
+
+* You have been added to a new project and cannot see the project folder.
+* You have installed or updated Python packages that require a fresh session.
+* The Jupyter Hub has been updated and you want to use the latest software environment.
+* You experience unexpected behaviour that may be resolved by starting a new session.
+
+### Restart the server
+
+1. Got to **File → Hub Control Panel**.
+2. Click **Stop My Server**.
+3. Wait until the server has stopped.
+4. Click **Start My Server**.
+
 
 ## Working in Projects
 

@@ -8,7 +8,7 @@ Unlike the public ExploreData service, the Collaborative Jupyter Hub offers pers
 
 1. Open your web browser and go to:
 
-   <https://jupyter.icos-cp.eu>
+    <https://jupyter.icos-cp.eu>
 
 2. Enter your login credentials.
 
@@ -26,13 +26,11 @@ If you experience login or access problems, contact:
 ## Understand the workspace
 
 After logging in, you will see directories available to you.
-
 <br>
 <center>
 <img src="../img/dir_tree.png" width=300>
 </center>
 <br>
-
 The content visible in your workspace depends on your permissions and project memberships:
 
 - **examples** directory
