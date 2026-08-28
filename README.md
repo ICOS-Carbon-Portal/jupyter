@@ -1,60 +1,127 @@
-# jupyter
+# Jupyter
 
-This repository contains the build definitions for ICOS's interactive
-Jupyter notebook service Docker images.
+This repository contains the Docker image definitions used by ICOS's
+Jupyter notebook services.
+
+More information about the Jupyter services and how to access them is
+available on the [ICOS Carbon Portal website](https://www.icos-cp.eu/data-services/services/jupyter-notebook).
+
+The images are used by two services with different purposes:
+
+- **ExploreData** launches a temporary container for a selected
+  notebook. The container is discarded when the session ends, so
+  changes made during the session are not persisted.
+- **The collaboration hub** provides each user with a persistent home
+  directory, allowing notebooks, files, and other changes to be
+  retained between sessions.
 
 ## Layout
 
-The `docker/` directory has one folder per image:
-
 ```text
-docker/
-└── <name>/
-    ├── content/             # notebooks + data, copied to /home/jovyan/ at build time
-    └── build.<name>/
-        ├── Dockerfile
-        └── stratos_meta.json  # image title, description, license
+components/
+├── icosbase/               # shared base image
+├── jupyter-collaboration/  # collaboration hub image
+└── explore-data/           # explore data images
+    ├── explore-icos-data/
+    ├── notebooks-with-doi/
+    ├── timecapsule/
+    └── education/
+        ├── climbeco-course/
+        ├── ocean-carbon-course/
+        └── summer-school/
 ```
 
-Every image except `icosbase` derives from it with the same three
-lines:
+Each variant folder holds two directories:
 
-```dockerfile
-ARG BASE=registry.icos-cp.eu/stratos.icosbase:<version>
-FROM $BASE
-ADD --chown=1000:100 content/. /home/jovyan/
-```
-
-The build context is `content/`; the Dockerfile is referenced from
-`../build.<name>/Dockerfile`.
-
-To change what an image ships, edit its `content/` (notebooks and data)
-or its `Dockerfile` (packages). Packages shared across all images
-belong in `docker/icosbase/content/`.
-
-## The Base Image (icosbase)
-
-`docker/icosbase/` is the shared base that all other images build on.
-It is built `FROM quay.io/jupyter/datascience-notebook` pinned by
-digest (the `:latest` tag as of 2026-03-18) and published to the ICOS
-registry as `registry.icos-cp.eu/stratos.icosbase` (versions `0.1.0`
-and `0.1.1`). Its `content/` holds `mamba_requirements.txt` and
-`pip_requirements.txt`.
-
-From its metadata: a stable image that keeps the geospatial and
-visualization stack (cartopy, folium, geoviews, holoviews, xarray),
-pangaeapy, and the ICOS-specific libraries, while dropping TeX Live and
-a large set of mamba/pip requirements compared to its predecessor.
+- `content/` holds the notebooks and data copied to `/home/jovyan/` at
+  build time.
+- `build.<variant>/` holds the `Dockerfile` and a `stratos_meta.json`
+  giving the image title, description and licence.
 
 ## Images
 
-| Image | Folder | Base | Description |
-|---|---|---|---|
-| icosbase | `docker/icosbase` | `quay.io/jupyter/datascience-notebook` (digest-pinned) | Shared base image, published as `registry.icos-cp.eu/stratos.icosbase`. |
-| examples | `docker/examples` | icosbase 0.1.1 | ICOS Python library (pylib) usage examples, ex1 through ex8. |
-| collaboration | `docker/collaboration` | icosbase 0.1.1 | The example notebooks served read-only at `~/icos-examples`. Built for ICOS's separate collaboration service, which gives each user a persistent home directory. Ships a `link-examples.sh` startup hook; its `content/` is a hand-maintained duplicate of `examples`. |
-| icos-notebooks | `docker/icos-notebooks` | icosbase 0.1.0 | ICOS Carbon Portal science notebooks plus DOI/PID notebooks (education, introduction, project-jupyter-notebooks, icos-jupyter-notebooks). |
-| summer-school | `docker/summer-school` | icosbase 0.1.0 | Summer school teaching material, including content from the hyytiala practicals repository. |
-| ocean-carbon-course | `docker/ocean-carbon-course` | icosbase 0.1.0 | The fluxengine Python library plus ocean carbon science teaching notebooks. |
-| classic | `docker/classic` | icosbase 0.1.0 | All notebooks through November 2025 collected in a single environment. |
-| fit-ic | `docker/fit-ic` | icosbase 0.1.1 | The TM5 atmospheric transport model (cloned and installed at startup) plus interactive visualization libraries (Panel, HoloViews, hvPlot, GeoViews, Bokeh). Carries an extra `hooks/` directory. |
+Each name links to that image's folder in this repository.
+
+| Image | Used for |
+|---|---|
+| [icosbase](components/icosbase/) | The shared base every other image builds on. |
+| [jupyter-collaboration](components/jupyter-collaboration/) | The collaboration hub, where each user has a persistent home. Example notebooks are served read-only alongside it. |
+| [explore-icos-data](components/explore-data/explore-icos-data/) | The general Carbon Portal science notebooks. |
+| [notebooks-with-doi](components/explore-data/notebooks-with-doi/) | Notebooks published with a DOI, tied to a paper or a citable dataset. |
+| [timecapsule](components/explore-data/timecapsule/) | A frozen snapshot of every notebook as it stood in November 2025. |
+| [climbeco-course](components/explore-data/education/climbeco-course/) | The ClimBEco Graduate Research School course. |
+| [ocean-carbon-course](components/explore-data/education/ocean-carbon-course/) | The ocean carbon course. |
+| [summer-school](components/explore-data/education/summer-school/) | The ICOS summer school. |
+
+## Adding or updating an image
+
+Each image variant lives under `components/` and contains its own
+content and build configuration.
+
+*⚠️ **Warning:** Do not move or remove the `hdf5` and `netcdf4`
+entries at the end of `icosbase`'s `mamba_requirements.txt`. Their
+position is intentional: they are used as solver constraints rather
+than regular package requirements.*
+
+### Adding a new image
+
+1. Create a variant directory under `components/` with the following
+   structure:
+
+   ```
+   components/
+   └── <variant>/
+       ├── content/
+       └── build.<variant>/
+   ```
+
+2. Add the notebooks, data, and other files that should be available
+   to the user to `content/`.
+
+3. Create `build.<variant>/Dockerfile`. For most images, the
+   Dockerfile only needs:
+
+   ```
+   ARG BASE=registry.icos-cp.eu/stratos.icosbase:<version>
+   FROM $BASE
+   ADD --chown=1000:100 content/. /home/jovyan/
+   ```
+
+4. Create `build.<variant>/stratos_meta.json` and provide the image
+   title, description, and licence information.
+
+### Updating an existing image
+
+- To update notebooks, data, or other user files, modify the
+  variant's `content/` directory.
+- To add or update software packages, modify the variant's
+  `Dockerfile`.
+- Packages required by all image variants should be added to the base
+  `icosbase` image instead of individual variants.
+
+### Building and deployment
+
+Building and deploying the images is handled by
+[stratos](https://github.com/icos-carbon-portal/stratos), a separate
+Python CLI used to build, manage, and deploy ICOS container images. It
+handles the image lifecycle from building and inspecting images to
+pushing them to the ICOS registry and deploying them to target hosts.
+
+## Credits
+
+The ICOS Jupyter services and their container images have been
+developed and maintained by contributors within the
+ICOS / Carbon Portal ecosystem over many years.
+
+Thanks to everyone who has contributed to the services, notebooks,
+Docker images, infrastructure, and documentation. See the
+repository's Git history for individual contributions.
+
+Claude and Codex have been used as development and documentation tools.
+
+## Licence
+
+This work is licensed under a Creative Commons Attribution 4.0
+International License (CC BY 4.0).
+
+Copyright © 2019-2026 ICOS ERIC
