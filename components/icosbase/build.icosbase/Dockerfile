@@ -28,7 +28,7 @@ RUN uv pip install --quiet git+https://github.com/ICOS-Carbon-Portal/jupyterlab-
 
 # Install ICOS libraries.
 RUN uv pip install --quiet \
-    icoscp_core==0.3.12 \
+    icoscp_core==0.3.13 \
     icoscp==0.2.3 \
     icoscp_stilt==0.1.4 \
     fluxie \
