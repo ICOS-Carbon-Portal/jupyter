@@ -1,16 +1,24 @@
 # Changelog
 
-ICOS Jupyter environments are a family of purpose-built images that share a common `icosbase` base image:
+ICOS Jupyter environments are a family of purpose-built images that share a common `icosbase` base image.
 
-- [ExploreData](exploredata.md) uses `examples:0.1.1`
-- The [Collaborative Jupyter Hub](hub-user-guide.md) uses `collaboration:0.1.0`
+- [ExploreData](exploredata.md) offers several environments, each built from `icosbase` and shipped with its own notebook content.
+- The [Collaborative Jupyter Hub](hub-user-guide.md) uses the `jupyter-collaboration` image, which is always built on the latest `icosbase` release.
 
-Both build on `icosbase:0.1.1`.
+## icosbase <a href="https://github.com/ICOS-Carbon-Portal/jupyter/tree/f817d93cd8ce76036ca510975e7c69cebaa6d4d3/components/icosbase" target="_blank" rel="noopener">0.1.3</a> <p>(31/08/2026)</p>
+
+- Add [ipyleaflet](https://pypi.org/project/ipyleaflet/0.20.0/) 0.20.0 to mamba requirements
+- Bump [icoscp_core](https://pypi.org/project/icoscp_core/0.3.13/) to 0.3.13
+
+## icosbase <a href="https://github.com/ICOS-Carbon-Portal/jupyter/tree/c27c9b41967a479eacf8b759301542ee534c2132/components/icosbase" target="_blank" rel="noopener">0.1.2</a> <p>(11/08/2026)</p>
+
+- Add the [GDAL](https://gdal.org/) 3.13.2 and [CDO](https://code.mpimet.mpg.de/projects/cdo) 2.6.1 command-line tools, with the [python-cdo](https://pypi.org/project/cdo/) 1.6.1 bindings
+- Pin hdf5 1.14.6 and [netcdf4](https://pypi.org/project/netCDF4/1.7.4/) 1.7.4 to the versions carried by the base image, which prevents gdal and cdo from pulling in HDF5 2.x
 
 ## icosbase <a href="https://github.com/ICOS-Carbon-Portal/pid4notebooks/tree/6c82fd64b176b2faef10c1e351871cc71cf003f5/docker/icosbase" target="_blank" rel="noopener">0.1.1</a> <p>(08/06/2026)</p>
 
 - Move off the 2022 `jupyter/datascience-notebook` Docker Hub pin used by 0.1.0 onto a 2026 `quay.io` base
-- Drop the full TeX Live install, the extra R packages, the qgrid2 extension, and the legacy kernel; ship a single Python kernel
+- Drop the full TeX Live install, the extra R packages, the qgrid2 extension, and the legacy kernel
 - Trim requirements to only what ICOS notebooks need beyond the base image (12 mamba and 1 pip package, down from the previous full stack)
 - Install [uv](https://pypi.org/project/uv/) by copying it from the official `ghcr.io/astral-sh/uv` image instead of via pip
 - Replace qgrid2, icos-splash, and the nersc-announcements fork with the ICOS JupyterLab extensions from [ICOS-Carbon-Portal/jupyterlab-extensions](https://github.com/ICOS-Carbon-Portal/jupyterlab-extensions)
