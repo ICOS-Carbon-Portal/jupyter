@@ -1,0 +1,7 @@
+{
+  "title": "examples",
+  "description": "Based on icosbase, extended with pydap and the example notebooks for the ICOS Python libraries, covering data and collection access, station exploration, SPARQL metadata queries, PANGAEA data, ObsPack collections, and STILT footprints.",
+  "licenses": [
+    "https://creativecommons.org/licenses/by/4.0/"
+  ]
+}

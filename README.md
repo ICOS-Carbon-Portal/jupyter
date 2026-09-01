@@ -26,6 +26,8 @@ components/
 ├── jupyter-collaboration/  # collaboration hub image
 └── explore-data/           # explore data images
     ├── explore-icos-data/
+    │   ├── explore-icos-data/
+    │   └── examples/
     ├── notebooks-with-doi/
     ├── timecapsule/
     └── education/
@@ -49,7 +51,8 @@ Each name links to that image's folder in this repository.
 |---|---|
 | [icosbase](components/icosbase/) | The shared base every other image builds on. |
 | [jupyter-collaboration](components/jupyter-collaboration/) | The collaboration hub, where each user has a persistent home. Example notebooks are served read-only alongside it. |
-| [explore-icos-data](components/explore-data/explore-icos-data/) | The general Carbon Portal science notebooks. |
+| [explore-icos-data](components/explore-data/explore-icos-data/explore-icos-data/) | The general Carbon Portal science notebooks. |
+| [examples](components/explore-data/explore-icos-data/examples/) | The worked examples showing how to use the ICOS Python libraries. |
 | [notebooks-with-doi](components/explore-data/notebooks-with-doi/) | Notebooks published with a DOI, tied to a paper or a citable dataset. |
 | [timecapsule](components/explore-data/timecapsule/) | A frozen snapshot of every notebook as it stood in November 2025. |
 | [climbeco-course](components/explore-data/education/climbeco-course/) | The ClimBEco Graduate Research School course. |
