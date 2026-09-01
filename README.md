@@ -15,6 +15,9 @@ The images are used by two services with different purposes:
   directory, allowing notebooks, files, and other changes to be
   retained between sessions.
 
+Documentation about the ICOS Carbon Portal Jupyter services is available at
+https://icos-carbon-portal.github.io/jupyter/.
+
 ## Layout
 
 ```text
