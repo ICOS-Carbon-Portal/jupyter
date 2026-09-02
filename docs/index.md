@@ -45,7 +45,7 @@ If you are working with other users in a shared project area or want to install 
 
 ## Access to notebooks and documentation
 
-Openly available ICOS notebooks and supporting documentation are available through the ICOS Carbon Portal Jupyter repository on [GitHub].
+Openly available ICOS notebooks and supporting documentation are available through the ICOS Carbon Portal Jupyter repository on [GitHub](https://github.com/ICOS-Carbon-Portal/jupyter/).
 
 ## Support
 
