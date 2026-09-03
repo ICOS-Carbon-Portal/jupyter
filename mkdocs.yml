@@ -1,11 +1,15 @@
-site_name: ICOS Carbon Portal <br> Jupyter Services
+site_name: ICOS Carbon Portal Jupyter Services
 site_description: User documentation for ExploreData and the ICOS Collaborative Jupyter Hub
 site_url: https://icos-carbon-portal.github.io/jupyter/
 repo_url: https://github.com/ICOS-Carbon-Portal/jupyter
 
 theme:
   name: readthedocs
-  
+  custom_dir: docs/theme
+
+extra:
+  short_site_name: ICOS Carbon Portal
+
 markdown_extensions:
   - admonition
 
@@ -17,3 +21,6 @@ nav:
   - How-to Guides: how-to.md
   - FAQ: faq.md
   - Changelog: changelog.md
+
+exclude_docs: |
+  theme/

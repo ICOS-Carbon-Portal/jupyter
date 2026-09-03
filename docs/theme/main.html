@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{#
+  Keep the browser tab short. `site_name` is the full name and is what the
+  sidebar header shows; the tab uses `extra.short_site_name` instead.
+#}
+
+{% block htmltitle %}
+  <title>{% if page and page.title and not page.is_homepage %}{{ page.title }} - {% endif %}{{ config.extra.short_site_name }}</title>
+{% endblock %}
