@@ -737,24 +737,6 @@
         "title": "Drought 2018 - ICOS ecosystem data from Hyltemossa (all code visible)"
       }
     ],
-    "Education, MSc_BSc, Soil exercise NGEN16": [
-      {
-        "pid": "",
-        "description": "This is a test version of a Jupyter notebook to present some principles of diffusion of 𝐶𝑂2 in the soil. The exercise also introduces Jupyter Notebook as an working environment. This notebook combines (explaining) text with coding cells that contain the simulation model.",
-        "thumbnail": "./icos_jupyter_notebooks/index-tools/img/education/TestSoilT.png",
-        "relative_path": "./education/MSc_BSc/soil_exercise_ngen16/TestSoilT.ipynb",
-        "github_link": "https://github.com/ICOS-Carbon-Portal/jupyter/tree/master/notebooks/education/MSc_BSc/drought_2018",
-        "contact": [
-          "jupyter-info@icos-ri.eu"
-        ],
-        "categories": [
-          "Education",
-          "MSc_BSc",
-          "Soil exercise NGEN16"
-        ],
-        "title": "Soil exercise - NGEN16"
-      }
-    ],
     "Education, PhD, Upscaling carbon fluxes": [
       {
         "pid": "",
