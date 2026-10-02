@@ -33,6 +33,7 @@ components/
     └── education/
         ├── climbeco-course/
         ├── ocean-carbon-course/
+        ├── soil-exercise/
         └── summer-school/
 ```
 
@@ -57,6 +58,7 @@ Each name links to that image's folder in this repository.
 | [timecapsule](components/explore-data/timecapsule/) | A frozen snapshot of every notebook as it stood in November 2025. |
 | [climbeco-course](components/explore-data/education/climbeco-course/) | The ClimBEco Graduate Research School course. |
 | [ocean-carbon-course](components/explore-data/education/ocean-carbon-course/) | The ocean carbon course. |
+| [soil-exercise](components/explore-data/education/soil-exercise/) | The NGEN16 university soil exercise. |
 | [summer-school](components/explore-data/education/summer-school/) | The ICOS summer school. |
 
 ## Adding or updating an image
