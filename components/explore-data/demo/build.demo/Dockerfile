@@ -16,6 +16,11 @@ FROM registry.icos-cp.eu/stratos.examples:0.1.1
 # requirements.txt pins nothing, so nothing is installed on top of the base
 # image and the digest above reproduces this environment on its own.
 
+# The base image already puts its own copy of the example notebooks in
+# /home/jovyan. Remove it so the notebooks in /home/jovyan/work are the only
+# copy.
+RUN rm -rf /home/jovyan/ex*.ipynb /home/jovyan/data /home/jovyan/img
+
 WORKDIR /home/jovyan/work
 
 # The build context holds copies of the notebooks and their dependency files,
