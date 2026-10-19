@@ -10,5 +10,6 @@ RUN mamba install --quiet --yes -c conda-forge \
 
 USER root
 COPY --chmod=0755 hooks/tm5-clone.sh /usr/local/bin/start-notebook.d/tm5-clone.sh
+COPY --chmod=0444 build.fit-ic/gui.yml /opt/fitic/gui.yml
 USER ${NB_USER}
 ADD --chown=1000:100 content/. /home/jovyan/
