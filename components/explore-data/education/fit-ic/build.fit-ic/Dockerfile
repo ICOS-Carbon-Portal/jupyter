@@ -1,6 +1,8 @@
 ARG BASE=registry.icos-cp.eu/stratos.icosbase:0.1.3
 FROM $BASE
 
+ENV USER=${NB_USER}
+
 RUN mamba install --quiet --yes -c conda-forge \
     esmpy=8.9.1 \
     xesmf=0.9.2 \
