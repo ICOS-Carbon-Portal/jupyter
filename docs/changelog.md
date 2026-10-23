@@ -5,6 +5,11 @@ ICOS Jupyter environments are a family of purpose-built images that share a comm
 - [ExploreData](exploredata.md) offers several environments, each built from `icosbase` and shipped with its own notebook content.
 - The [Collaborative Jupyter Hub](hub-user-guide.md) uses the `jupyter-collaboration` image, which is always built on the latest `icosbase` release.
 
+## icosbase <a href="https://github.com/ICOS-Carbon-Portal/jupyter/tree/a9b5ec24059b80afa946a6ecf99cccf562670ab5/components/icosbase" target="_blank" rel="noopener">0.1.4</a> <p>(23/10/2026)</p>
+
+- Pin the ICOS JupyterLab extension [icos-ext](https://github.com/ICOS-Carbon-Portal/jupyterlab-extensions/releases/tag/v0.3.0) to the 0.3.0 release instead of installing it from the extension repository's trunk
+- Record the package baseline that the icos-ext freeze feature uses to tell packages shipped in the image apart from ones installed by the user
+
 ## icosbase <a href="https://github.com/ICOS-Carbon-Portal/jupyter/tree/f817d93cd8ce76036ca510975e7c69cebaa6d4d3/components/icosbase" target="_blank" rel="noopener">0.1.3</a> <p>(31/08/2026)</p>
 
 - Add [ipyleaflet](https://pypi.org/project/ipyleaflet/0.20.0/) 0.20.0 to mamba requirements

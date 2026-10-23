@@ -23,8 +23,8 @@ RUN uv pip install --quiet --requirement pip_requirements.txt --system \
     && rm pip_requirements.txt
 
 # Install ICOS JupyterLab extensions.
-ADD https://api.github.com/repos/ICOS-Carbon-Portal/jupyterlab-extensions/git/refs/heads/trunk /tmp/ext_ref.json
-RUN uv pip install --quiet git+https://github.com/ICOS-Carbon-Portal/jupyterlab-extensions.git@trunk --system
+RUN uv pip install --quiet --system \
+    https://github.com/ICOS-Carbon-Portal/jupyterlab-extensions/releases/download/v0.3.0/icos_ext-0.3.0-py3-none-any.whl
 
 # Install ICOS libraries.
 RUN uv pip install --quiet \
@@ -34,6 +34,10 @@ RUN uv pip install --quiet \
     fluxie \
     --system \
     && uv cache clean
+
+# Record the package baseline for icos-ext freeze. Must stay the last
+# package-installing step.
+RUN python -m icos_ext.baseline
 
 ENV PORTAL_DATA_PATH_ICOS="/data/dataAppStorage/" \
     PORTAL_DATA_PATH_SITES="/data/dataAppStorage/" \

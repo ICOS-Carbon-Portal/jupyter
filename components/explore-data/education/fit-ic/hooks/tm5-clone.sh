@@ -12,4 +12,4 @@ else
 fi
 
 echo "tm5-clone: installing $TARGET in editable mode..."
-uv pip install --system -e "$TARGET"
+uv pip install --system -e "$TARGET[fitic]"
