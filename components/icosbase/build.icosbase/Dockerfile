@@ -24,7 +24,7 @@ RUN uv pip install --quiet --requirement pip_requirements.txt --system \
 
 # Install ICOS JupyterLab extensions.
 RUN uv pip install --quiet --system \
-    https://github.com/ICOS-Carbon-Portal/jupyterlab-extensions/releases/download/v0.3.0-a3/icos_ext-0.3.0a3-py3-none-any.whl
+    https://github.com/ICOS-Carbon-Portal/jupyterlab-extensions/releases/download/v0.3.0/icos_ext-0.3.0-py3-none-any.whl
 
 # Install ICOS libraries.
 RUN uv pip install --quiet \
