@@ -11,6 +11,6 @@ RUN mamba install --quiet --yes -c conda-forge \
     && mamba clean --quiet --all --force-pkgs-dirs --yes
 
 RUN git clone --depth 1 --branch esa2026 https://github.com/gmonteil/tm5.git /home/jovyan/tm5 \
-    && uv pip install --system -e "/home/jovyan/tm5[fitic]"
+    && uv pip install --system -e "/home/jovyan/tm5[fitic]" "panel<1.10"
 
 ADD --chown=1000:100 content/. /home/jovyan/
