@@ -2,7 +2,7 @@
 
 TARGET="/home/jovyan/tm5"
 REPO="https://github.com/gmonteil/tm5.git"
-BRANCH="ilab"
+BRANCH="esa2026"
 
 if [[ -d "$TARGET" ]]; then
     echo "tm5-clone: $TARGET already present, skipping clone"
