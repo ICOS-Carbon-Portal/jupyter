@@ -1,0 +1,7 @@
+{
+  "title": "urban-atmospheric-observations-and-simulations",
+  "description": "Urban Atmospheric Observations and Simulations: three notebooks for the Metropolitan Area of Barcelona that explore ICOS Cities in-situ CO2 and CH4 observations, WRF-Chem model output in NetCDF, and the comparison of model and observations, with helper scripts and city boundary shapefiles.",
+  "licenses": [
+    "https://creativecommons.org/licenses/by/4.0/"
+  ]
+}
