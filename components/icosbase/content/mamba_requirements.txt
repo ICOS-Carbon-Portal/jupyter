@@ -1,5 +1,7 @@
 cartopy=0.25.0
 cdo=2.6.1
+certifi=2026.10.23
+conda=26.9.4
 folium=0.20.0
 gdal=3.13.2
 geoviews=1.15.1
@@ -7,6 +9,7 @@ holoviews=1.22.1
 ipyleaflet=0.20.0
 jupyter-resource-usage=1.2.1
 nodejs=25.8.2
+pip=26.2.2
 plotly=6.8.0
 pydap=3.5.9
 python-cdo=1.6.1

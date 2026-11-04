@@ -15,7 +15,7 @@ RUN mamba install --quiet --yes -c conda-forge --file mamba_requirements.txt \
     && rm mamba_requirements.txt
 
 # Install uv.
-COPY --from=ghcr.io/astral-sh/uv:0.11.7 /uv /uvx /usr/local/bin/
+COPY --from=ghcr.io/astral-sh/uv:0.13.7 /uv /uvx /usr/local/bin/
 
 # Install pip packages.
 COPY content/pip_requirements.txt .
